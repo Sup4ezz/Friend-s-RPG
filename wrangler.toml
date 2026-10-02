@@ -6,3 +6,7 @@ compatibility_date = "2026-10-01"
 directory = "."
 binding = "ASSETS"
 run_worker_first = ["/api/*"]
+
+[vars]
+SUPABASE_URL = "https://dxdxnttpznoekaiecrlv.supabase.co"
+SUPABASE_KEY = "sb_publishable_LlRg71tECimoRn2zuzxqlQ_OeCupPLe"
