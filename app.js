@@ -1686,7 +1686,7 @@ async function loadAdminPanel(
    ОТОБРАЖЕНИЕ ЗАЯВОК В АДМИНКЕ
    ========================================================= */
 
-function renderAdminApplications(
+async function renderAdminApplications(
     container,
     applications
 ) {
@@ -1717,6 +1717,52 @@ function renderAdminApplications(
                 application.status ===
                 "rejected"
         );
+
+
+    /*
+     * Получаем временные ссылки
+     * на фотографии заявок.
+     */
+
+    for (const application of applications) {
+
+        if (!application.photo_path) {
+            application.photo_url = null;
+            continue;
+        }
+
+
+        const {
+            data,
+            error
+        } =
+            await supabase.storage
+                .from(
+                    "character-applications"
+                )
+                .createSignedUrl(
+                    application.photo_path,
+                    60 * 60
+                );
+
+
+        if (error) {
+
+            console.error(
+                "Ошибка получения фотографии:",
+                error
+            );
+
+            application.photo_url = null;
+
+        } else {
+
+            application.photo_url =
+                data?.signedUrl || null;
+
+        }
+
+    }
 
 
     container.innerHTML = `
@@ -1895,11 +1941,21 @@ function renderAdminApplications(
 
                                         <span>
                                             <strong>Изображение персонажа:</strong>
+
                                             ${
-                                                application.photo_path
-                                                    ? "Изображение загружено."
+                                                application.photo_url
+                                                    ? `
+                                                        <img
+                                                            class="admin-application-photo"
+                                                            src="${escapeHtml(
+                                                                application.photo_url
+                                                            )}"
+                                                            alt="Изображение персонажа"
+                                                        >
+                                                    `
                                                     : "Не загружено."
                                             }
+
                                         </span>
 
                                     </div>
@@ -2107,7 +2163,6 @@ function renderAdminApplications(
         });
 
 }
-
 
 /* =========================================================
    ЗАЯВКА НА РАССМОТРЕНИИ
