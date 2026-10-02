@@ -1843,3 +1843,84 @@ button {
         animation: none !important;
     }
 }
+
+/* =========================================================
+   ЕДИНЫЙ ВИД ПОЛЕЙ ЗАЯВКИ
+   ========================================================= */
+
+.admin-application-info {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+
+    width: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border-top: 1px solid var(--gold-line) !important;
+
+    text-align: left !important;
+    white-space: normal !important;
+}
+
+
+.admin-application-info span {
+    display: block !important;
+
+    width: 100% !important;
+    box-sizing: border-box !important;
+
+    margin: 0 !important;
+    padding: 7px 8px !important;
+
+    border-bottom: 1px solid var(--gold-line) !important;
+
+    color: var(--text) !important;
+
+    font-family: var(--body-font) !important;
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+
+    text-align: left !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+}
+
+
+.admin-application-info strong {
+    display: inline !important;
+
+    margin: 0 5px 0 0 !important;
+    padding: 0 !important;
+
+    color: var(--gold-light) !important;
+
+    font-family: var(--title-font) !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+
+    text-align: left !important;
+    white-space: normal !important;
+}
+
+
+/* Убираем старую разметку полей, если её стили ещё остались */
+
+.admin-application-section {
+    display: none !important;
+}
+
+
+/* Чтобы сам блок заявки не центрировал содержимое */
+
+.admin-application-main {
+    text-align: left !important;
+}
+
+
+.admin-application-main h3 {
+    text-align: left !important;
+}
