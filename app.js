@@ -1428,10 +1428,6 @@ async function submitCharacterApplication(
         null;
 
 
-    /*
-     * Загрузка фотографии.
-     */
-
     if (
         photoInput &&
         photoInput.files &&
@@ -1529,6 +1525,96 @@ async function submitCharacterApplication(
 
     }
 
+
+    const {
+        error: applicationError
+    } =
+        await supabase
+            .from(
+                "character_applications"
+            )
+            .insert({
+
+                id:
+                    applicationId,
+
+                player_id:
+                    user.id,
+
+                name,
+
+                race,
+
+                age,
+
+                homeland,
+
+                personality,
+
+                backstory,
+
+                special_skills:
+                    specialSkills,
+
+                preferred_weapon:
+                    preferredWeapon ||
+                    null,
+
+                occupation,
+
+                photo_path:
+                    photoPath,
+
+                status:
+                    "pending",
+
+                character_id:
+                    null
+
+            });
+
+
+    if (applicationError) {
+
+        console.error(
+            applicationError
+        );
+
+
+        setCharacterMessage(
+            "Не удалось создать заявку: " +
+            applicationError.message,
+            "error"
+        );
+
+
+        if (submitButton) {
+
+            submitButton.disabled =
+                false;
+
+            submitButton.textContent =
+                "Отправить заявку";
+
+        }
+
+
+        return;
+
+    }
+
+
+    /*
+     * Заявка успешно создана.
+     * Не передаём пустой объект с id/status.
+     * Перезагружаем состояние игрока из базы.
+     */
+
+    await loadPlayerState({
+        user: user
+    });
+
+}
 
     /*
      * Создание заявки в базе.
@@ -2191,56 +2277,171 @@ function renderAdminApplications(
    ЗАЯВКА НА РАССМОТРЕНИИ
    ========================================================= */
 
-function renderPendingApplication(container, application) {
+function renderPendingApplication(
+    container,
+    application
+) {
+
+    container.className =
+        "admin-panel";
+
+
     container.innerHTML = `
-        <div class="admin-application">
-            <div class="admin-application-main">
-                <div class="admin-application-info">
-                    <div><strong>Раса:</strong> ${escapeHtml(application.race)}</div>
-                    <div><strong>Возраст:</strong> ${escapeHtml(application.age)} лет</div>
-                    <div><strong>Родина:</strong> ${escapeHtml(application.homeland)}</div>
-                    <div><strong>Род занятий:</strong> ${escapeHtml(application.occupation)}</div>
-                    <div><strong>Оружие:</strong> ${escapeHtml(application.preferred_weapon || "Не указано")}</div>
-                </div>
 
-                <div class="admin-application-section">
-                    <strong>Характер</strong>
-                    <p>${escapeHtml(application.personality)}</p>
-                </div>
+        <div class="character-header">
 
-                <div class="admin-application-section">
-                    <strong>Предыстория</strong>
-                    <p>${escapeHtml(application.backstory)}</p>
-                </div>
-
-                <div class="admin-application-section">
-                    <strong>Особые навыки</strong>
-                    <p>${escapeHtml(application.special_skills)}</p>
-                </div>
-
-                <div class="admin-application-section">
-                    <strong>Изображение персонажа</strong>
-                    <p>${application.photo_path ? "Изображение загружено." : "Не загружено."}</p>
-                </div>
+            <div class="welcome-symbol">
+                ✦
             </div>
+
+            <h1>
+                ${escapeHtml(
+                    application.name
+                )}
+            </h1>
+
+            <p>
+                Твоя заявка находится на рассмотрении.
+            </p>
+
+        </div>
+
+
+        <article class="admin-application">
+
+
+            <div class="admin-application-main">
+
+
+                <div class="admin-application-info">
+
+
+                    <span>
+                        <strong>Раса:</strong>
+                        ${escapeHtml(
+                            application.race
+                        )}
+                    </span>
+
+
+                    <span>
+                        <strong>Возраст:</strong>
+                        ${escapeHtml(
+                            application.age
+                        )}
+                        лет
+                    </span>
+
+
+                    <span>
+                        <strong>Родина:</strong>
+                        ${escapeHtml(
+                            application.homeland
+                        )}
+                    </span>
+
+
+                    <span>
+                        <strong>Род занятий:</strong>
+                        ${escapeHtml(
+                            application.occupation
+                        )}
+                    </span>
+
+
+                    <span>
+                        <strong>Оружие:</strong>
+                        ${
+                            application.preferred_weapon
+                                ? escapeHtml(
+                                    application.preferred_weapon
+                                )
+                                : "Не указано"
+                        }
+                    </span>
+
+
+                </div>
+
+
+                <div class="admin-application-section">
+
+                    <strong>
+                        Характер
+                    </strong>
+
+                    <p>
+                        ${escapeHtml(
+                            application.personality
+                        )}
+                    </p>
+
+                </div>
+
+
+                <div class="admin-application-section">
+
+                    <strong>
+                        Предыстория
+                    </strong>
+
+                    <p>
+                        ${escapeHtml(
+                            application.backstory
+                        )}
+                    </p>
+
+                </div>
+
+
+                <div class="admin-application-section">
+
+                    <strong>
+                        Особые навыки
+                    </strong>
+
+                    <p>
+                        ${escapeHtml(
+                            application.special_skills
+                        )}
+                    </p>
+
+                </div>
+
+
+                <div class="admin-application-section">
+
+                    <strong>
+                        Изображение персонажа
+                    </strong>
+
+                    <p>
+                        ${
+                            application.photo_path
+                                ? "Изображение загружено."
+                                : "Не загружено."
+                        }
+                    </p>
+
+                </div>
+
+
+            </div>
+
 
             <div class="admin-application-actions">
-                <button
-                    class="admin-approve-button"
-                    data-application-id="${application.id}"
-                >
-                    Одобрить
-                </button>
 
-                <button
-                    class="admin-reject-button"
-                    data-application-id="${application.id}"
-                >
-                    Отклонить
-                </button>
+                <span>
+                    Заявка ожидает решения администрации.
+                </span>
+
             </div>
-        </div>
+
+
+        </article>
+
     `;
+
 }
 
 /* =========================================================
