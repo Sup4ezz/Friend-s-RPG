@@ -1921,3 +1921,7 @@ button {
     white-space: normal !important;
     text-align: left !important;
 }
+
+.admin-application-section p {
+    white-space: normal !important;
+}
