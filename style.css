@@ -1,5 +1,5 @@
 /* =========================================================
-   ЛОРГУС
+   ЛОРГУС — ЕДИНЫЙ СТИЛЬ
    ========================================================= */
 
 :root {
@@ -12,14 +12,12 @@
     --gold-light: #e7cc8c;
     --gold-dark: #80612f;
 
-    --text: #e8dfce;
+    --text: #d8cfbd;
     --text-soft: #bdb19b;
     --text-muted: #766e60;
 
     --border: rgba(190, 150, 75, 0.38);
     --border-strong: rgba(210, 170, 90, 0.72);
-
-    --shadow: rgba(0, 0, 0, 0.7);
 
     --title-font: "Cormorant Garamond", serif;
     --body-font: "Lora", serif;
@@ -55,7 +53,7 @@ body {
             rgba(80, 55, 25, 0.08),
             transparent 50%
         ),
-        #090908;
+        var(--bg);
 
     color: var(--text);
 
@@ -82,7 +80,7 @@ button {
 
 
 /* =========================================================
-   ОБЩИЙ ЭКРАН ОШИБКИ
+   ОШИБКА
    ========================================================= */
 
 .error-screen {
@@ -94,7 +92,7 @@ button {
 
     padding: 24px;
 
-    background: #090908;
+    background: var(--bg);
 }
 
 .error-panel {
@@ -128,14 +126,16 @@ button {
 .error-panel h1 {
     margin: 0 0 15px;
 
-    font-family: var(--title-font);
-    font-size: 38px;
-
     color: var(--gold);
+
+    font-family: var(--title-font);
+
+    font-size: 38px;
 }
 
 .error-panel p {
     color: var(--text-soft);
+
     line-height: 1.6;
 }
 
@@ -150,8 +150,8 @@ button {
     min-height: 100vh;
 
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
 
     padding: 30px 20px;
 
@@ -163,7 +163,7 @@ button {
             rgba(120, 90, 40, 0.11),
             transparent 40%
         ),
-        #090908;
+        var(--bg);
 }
 
 .background-glow {
@@ -189,11 +189,6 @@ button {
     pointer-events: none;
 }
 
-
-/* =========================================================
-   AUTH CONTAINER
-   ========================================================= */
-
 .auth-container {
     position: relative;
     z-index: 1;
@@ -213,9 +208,9 @@ button {
 .brand {
     width: 100%;
 
-    text-align: center;
-
     margin-bottom: 30px;
+
+    text-align: center;
 }
 
 .brand-symbol {
@@ -232,6 +227,8 @@ button {
 .brand h1 {
     margin: 0;
 
+    color: var(--gold);
+
     font-family: var(--title-font);
 
     font-size: clamp(58px, 12vw, 82px);
@@ -242,8 +239,6 @@ button {
 
     letter-spacing: 0.1em;
 
-    color: var(--gold);
-
     text-shadow:
         0 3px 20px rgba(0, 0, 0, 0.8);
 }
@@ -251,6 +246,7 @@ button {
 .brand-line {
     display: flex;
     align-items: center;
+
     gap: 12px;
 
     margin-top: 19px;
@@ -281,6 +277,8 @@ button {
 .brand-line i {
     flex-shrink: 0;
 
+    color: var(--text-muted);
+
     font-family: var(--body-font);
 
     font-size: 9px;
@@ -288,8 +286,6 @@ button {
     font-style: normal;
 
     letter-spacing: 0.15em;
-
-    color: var(--text-muted);
 }
 
 
@@ -298,6 +294,8 @@ button {
    ========================================================= */
 
 .auth-panel {
+    position: relative;
+
     width: 100%;
 
     padding: 30px 34px 34px;
@@ -314,8 +312,6 @@ button {
     box-shadow:
         0 25px 90px rgba(0, 0, 0, 0.65),
         inset 0 0 45px rgba(0, 0, 0, 0.28);
-
-    position: relative;
 }
 
 .auth-panel::before,
@@ -353,6 +349,7 @@ button {
 
 .auth-tabs {
     display: grid;
+
     grid-template-columns: 1fr 1fr;
 
     margin-bottom: 28px;
@@ -371,7 +368,9 @@ button {
     color: var(--text-muted);
 
     font-family: var(--title-font);
+
     font-size: 19px;
+
     font-weight: 600;
 
     cursor: pointer;
@@ -393,7 +392,7 @@ button {
 
 
 /* =========================================================
-   AUTH FORM ANIMATION
+   AUTH FORM
    ========================================================= */
 
 .auth-form-container {
@@ -418,11 +417,6 @@ button {
     transform: translateX(15px);
 }
 
-
-/* =========================================================
-   FORM HEADING
-   ========================================================= */
-
 .form-heading {
     margin-bottom: 25px;
 
@@ -432,13 +426,13 @@ button {
 .form-heading h2 {
     margin: 0 0 7px;
 
+    color: var(--gold-light);
+
     font-family: var(--title-font);
 
     font-size: 30px;
 
     font-weight: 600;
-
-    color: var(--gold-light);
 }
 
 .form-heading p {
@@ -450,11 +444,6 @@ button {
 
     line-height: 1.5;
 }
-
-
-/* =========================================================
-   AUTH INPUTS
-   ========================================================= */
 
 .auth-form-container form {
     display: flex;
@@ -537,7 +526,7 @@ button {
 
 
 /* =========================================================
-   GOLD BUTTON
+   BUTTONS
    ========================================================= */
 
 .gold-button {
@@ -599,11 +588,6 @@ button {
     margin-top: 4px;
 }
 
-
-/* =========================================================
-   AUTH MESSAGE
-   ========================================================= */
-
 .auth-message {
     margin: 2px 0 15px;
 
@@ -636,11 +620,6 @@ button {
     color: var(--text-soft);
 }
 
-
-/* =========================================================
-   AUTH FOOTER
-   ========================================================= */
-
 .auth-footer {
     margin: 18px 0 0;
 
@@ -667,14 +646,14 @@ button {
             rgba(110, 80, 35, 0.09),
             transparent 40%
         ),
-        #090908;
+        var(--bg);
 
     color: var(--text);
 }
 
 
 /* =========================================================
-   TOPBAR — ЭТО ИМЕННО ТВОИ КЛАССЫ ИЗ APP.JS
+   TOPBAR
    ========================================================= */
 
 .topbar {
@@ -683,9 +662,7 @@ button {
     min-height: 74px;
 
     display: flex;
-
     align-items: center;
-
     justify-content: space-between;
 
     padding: 0 38px;
@@ -703,14 +680,8 @@ button {
         0 10px 35px rgba(0, 0, 0, 0.45);
 }
 
-
-/* =========================================================
-   TOPBAR BRAND
-   ========================================================= */
-
 .topbar-brand {
     display: flex;
-
     align-items: center;
 
     gap: 12px;
@@ -727,34 +698,27 @@ button {
 }
 
 .mini-symbol {
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
     width: 30px;
     height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     color: var(--gold);
 
     font-size: 21px;
 }
 
-
-/* =========================================================
-   PLAYER AREA
-   ========================================================= */
-
 .player-area {
     display: flex;
-
     align-items: center;
 
     gap: 18px;
 }
 
 .player-email {
-    color: rgba(220, 210, 190, 0.65);
+    color: var(--text-soft);
 
     font-family: var(--body-font);
 
@@ -764,13 +728,13 @@ button {
 .logout-button {
     padding: 8px 15px;
 
-    border: 1px solid rgba(190, 150, 75, 0.38);
+    border: 1px solid var(--border);
 
     border-radius: 2px;
 
     background: transparent;
 
-    color: #cdb476;
+    color: var(--gold-light);
 
     font-family: var(--title-font);
 
@@ -796,7 +760,7 @@ button {
 
 
 /* =========================================================
-   WELCOME PANEL
+   WELCOME
    ========================================================= */
 
 .welcome-panel {
@@ -833,13 +797,13 @@ button {
 .welcome-panel h1 {
     margin: 0 0 15px;
 
+    color: var(--gold);
+
     font-family: var(--title-font);
 
     font-size: clamp(38px, 6vw, 58px);
 
     font-weight: 600;
-
-    color: var(--gold);
 }
 
 .welcome-panel p {
@@ -859,7 +823,6 @@ button {
 
 .ornament {
     display: flex;
-
     align-items: center;
 
     gap: 14px;
@@ -934,7 +897,9 @@ button {
 }
 
 .character-application::before,
-.character-application::after {
+.character-application::after,
+.admin-panel::before,
+.admin-panel::after {
     content: "";
 
     position: absolute;
@@ -945,7 +910,8 @@ button {
     pointer-events: none;
 }
 
-.character-application::before {
+.character-application::before,
+.admin-panel::before {
     top: 12px;
     left: 12px;
 
@@ -953,7 +919,8 @@ button {
     border-left: 1px solid var(--border-strong);
 }
 
-.character-application::after {
+.character-application::after,
+.admin-panel::after {
     right: 12px;
     bottom: 12px;
 
@@ -967,9 +934,9 @@ button {
    ========================================================= */
 
 .character-header {
-    text-align: center;
-
     margin-bottom: 42px;
+
+    text-align: center;
 }
 
 .character-header .welcome-symbol {
@@ -978,6 +945,8 @@ button {
 
 .character-header h1 {
     margin: 0;
+
+    color: var(--gold);
 
     font-family: var(--title-font);
 
@@ -988,11 +957,6 @@ button {
     letter-spacing: 0.07em;
 
     text-transform: uppercase;
-
-    color: var(--gold);
-
-    text-shadow:
-        0 2px 12px rgba(0, 0, 0, 0.8);
 }
 
 .character-header p {
@@ -1028,21 +992,19 @@ button {
 
 
 /* =========================================================
-   CHARACTER GRID
+   CHARACTER FORM
    ========================================================= */
 
 .character-grid {
     display: grid;
 
-    grid-template-columns:
-        repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 
     gap: 24px 28px;
 }
 
 .character-field {
     display: flex;
-
     flex-direction: column;
 
     gap: 9px;
@@ -1054,13 +1016,8 @@ button {
     grid-column: 1 / -1;
 }
 
-
-/* =========================================================
-   CHARACTER LABEL
-   ========================================================= */
-
 .character-field label {
-    color: #d8c28e;
+    color: var(--gold-light);
 
     font-family: var(--title-font);
 
@@ -1071,11 +1028,6 @@ button {
     letter-spacing: 0.04em;
 }
 
-
-/* =========================================================
-   CHARACTER INPUT
-   ========================================================= */
-
 .character-field input,
 .character-field textarea,
 .character-field select {
@@ -1083,7 +1035,7 @@ button {
 
     padding: 14px 16px;
 
-    border: 1px solid rgba(170, 140, 85, 0.38);
+    border: 1px solid var(--border);
 
     border-radius: 2px;
 
@@ -1096,7 +1048,7 @@ button {
             rgba(21, 19, 15, 0.96)
         );
 
-    color: #e8dfcd;
+    color: var(--text);
 
     font-family: var(--body-font);
 
@@ -1104,8 +1056,7 @@ button {
 
     transition:
         border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
+        box-shadow 0.2s ease;
 }
 
 .character-field input::placeholder,
@@ -1137,17 +1088,12 @@ button {
     line-height: 1.65;
 }
 
-
-/* =========================================================
-   FILE INPUT
-   ========================================================= */
-
 .character-field input[type="file"] {
     padding: 12px;
 
     cursor: pointer;
 
-    color: rgba(220, 205, 175, 0.65);
+    color: var(--text-soft);
 }
 
 .character-field input[type="file"]::file-selector-button {
@@ -1155,13 +1101,13 @@ button {
 
     padding: 9px 15px;
 
-    border: 1px solid rgba(190, 150, 75, 0.5);
+    border: 1px solid var(--border);
 
     border-radius: 2px;
 
     background: rgba(130, 95, 40, 0.18);
 
-    color: #d8bd7c;
+    color: var(--gold-light);
 
     font-family: var(--title-font);
 
@@ -1172,11 +1118,6 @@ button {
     cursor: pointer;
 }
 
-
-/* =========================================================
-   CHARACTER HINT
-   ========================================================= */
-
 .character-hint {
     margin-top: -3px;
 
@@ -1186,17 +1127,12 @@ button {
 
     background: rgba(150, 110, 45, 0.05);
 
-    color: rgba(215, 202, 175, 0.5);
+    color: var(--text-muted);
 
     font-size: 12px;
 
     line-height: 1.5;
 }
-
-
-/* =========================================================
-   CHARACTER MESSAGE
-   ========================================================= */
 
 .character-message {
     min-height: 0;
@@ -1232,11 +1168,6 @@ button {
     color: #c7b27b;
 }
 
-
-/* =========================================================
-   CHARACTER SUBMIT
-   ========================================================= */
-
 .character-submit {
     width: 100%;
 
@@ -1245,18 +1176,19 @@ button {
     padding: 17px 25px;
 }
 
+
 /* =========================================================
    ADMIN PANEL
    ========================================================= */
 
 .admin-panel {
+    position: relative;
+
     width: min(1200px, calc(100% - 40px));
 
     margin: 55px auto 75px;
 
     padding: 45px;
-
-    position: relative;
 
     background:
         linear-gradient(
@@ -1272,34 +1204,6 @@ button {
         inset 0 0 55px rgba(0, 0, 0, 0.4);
 }
 
-.admin-panel::before,
-.admin-panel::after {
-    content: "";
-
-    position: absolute;
-
-    width: 35px;
-    height: 35px;
-
-    pointer-events: none;
-}
-
-.admin-panel::before {
-    top: 12px;
-    left: 12px;
-
-    border-top: 1px solid var(--border-strong);
-    border-left: 1px solid var(--border-strong);
-}
-
-.admin-panel::after {
-    right: 12px;
-    bottom: 12px;
-
-    border-right: 1px solid var(--border-strong);
-    border-bottom: 1px solid var(--border-strong);
-}
-
 
 /* =========================================================
    ADMIN STATS
@@ -1312,11 +1216,11 @@ button {
 
     gap: 18px;
 
-    margin-bottom: 42px;
+    margin-bottom: 35px;
 }
 
 .admin-stat {
-    padding: 22px 20px;
+    padding: 20px;
 
     text-align: center;
 
@@ -1336,13 +1240,13 @@ button {
 .admin-stat-value {
     display: block;
 
-    margin-bottom: 5px;
+    margin-bottom: 4px;
 
     color: var(--gold);
 
     font-family: var(--title-font);
 
-    font-size: 34px;
+    font-size: 32px;
 
     font-weight: 600;
 }
@@ -1364,10 +1268,9 @@ button {
 
 .admin-applications {
     display: flex;
-
     flex-direction: column;
 
-    gap: 20px;
+    gap: 14px;
 }
 
 .admin-application {
@@ -1375,9 +1278,9 @@ button {
 
     grid-template-columns: minmax(0, 1fr) auto;
 
-    gap: 25px;
+    gap: 20px;
 
-    padding: 24px;
+    padding: 20px;
 
     background:
         linear-gradient(
@@ -1409,54 +1312,139 @@ button {
 
 
 /* =========================================================
-   ADMIN APPLICATION INFO
+   APPLICATION MAIN
    ========================================================= */
 
 .admin-application-main {
     min-width: 0;
 }
 
-.admin-application-info {
-    display: grid;
 
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+/* =========================================================
+   APPLICATION TITLE
+   ========================================================= */
 
-    gap: 12px 24px;
-}
-
-.admin-application-info > div {
-    min-width: 0;
-
-    padding-bottom: 10px;
-
-    border-bottom: 1px solid rgba(190, 150, 75, 0.12);
-}
-
-.admin-application-info strong {
-    display: block;
-
-    margin-bottom: 4px;
+.admin-application-main h3 {
+    margin: 0 0 12px;
 
     color: var(--gold-light);
 
     font-family: var(--title-font);
 
-    font-size: 16px;
+    font-size: 25px;
+
+    font-weight: 600;
+
+    line-height: 1.1;
+}
+
+
+/* =========================================================
+   APPLICATION INFO
+   =========================================================
+
+   ВАЖНО:
+   Эти поля специально остаются компактными.
+   Цвет названий и значений единый.
+   */
+
+.admin-application-info {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    align-items: baseline;
+
+    gap: 5px 18px;
+
+    margin: 0;
+}
+
+.admin-application-info span {
+    display: inline;
+
+    margin: 0;
+
+    padding: 0;
+
+    color: var(--text);
+
+    font-family: var(--body-font);
+
+    font-size: 13px;
+
+    line-height: 1.5;
+
+    white-space: nowrap;
+}
+
+.admin-application-info strong {
+    display: inline;
+
+    margin: 0 4px 0 0;
+
+    padding: 0;
+
+    color: var(--gold-light);
+
+    font-family: var(--title-font);
+
+    font-size: 15px;
 
     font-weight: 600;
 }
 
-.admin-application-info span,
-.admin-application-info p {
+
+/* =========================================================
+   APPLICATION DESCRIPTION SECTIONS
+   =========================================================
+
+   Всё выглядит в том же стиле, что и основные поля.
+   Никаких pre-wrap и сохранения отступов HTML.
+   */
+
+.admin-application-section {
     display: block;
+
+    margin: 14px 0 0;
+
+    padding: 0;
+}
+
+.admin-application-section strong {
+    display: inline;
+
+    margin: 0 7px 0 0;
+
+    padding: 0;
+
+    color: var(--gold-light);
+
+    font-family: var(--title-font);
+
+    font-size: 15px;
+
+    font-weight: 600;
+}
+
+.admin-application-section p {
+    display: inline;
 
     margin: 0;
 
-    color: var(--text-soft);
+    padding: 0;
+
+    color: var(--text);
+
+    font-family: var(--body-font);
 
     font-size: 13px;
 
     line-height: 1.55;
+
+    white-space: normal;
+
+    text-align: left;
 
     overflow-wrap: anywhere;
 }
@@ -1473,18 +1461,18 @@ button {
 
     justify-content: center;
 
-    gap: 10px;
+    gap: 8px;
 
-    min-width: 145px;
+    min-width: 135px;
 }
 
 .admin-approve-button,
 .admin-reject-button {
     width: 100%;
 
-    padding: 11px 18px;
+    padding: 10px 16px;
 
-    font-size: 16px;
+    font-size: 15px;
 }
 
 .admin-reject-button {
@@ -1519,7 +1507,7 @@ button {
    ========================================================= */
 
 .admin-empty {
-    padding: 55px 25px;
+    padding: 45px 25px;
 
     text-align: center;
 
@@ -1559,11 +1547,16 @@ button {
 
 
 /* =========================================================
-   ADMIN MOBILE
+   МОБИЛЬНЫЕ
    ========================================================= */
 
 @media (max-width: 900px) {
 
+    .topbar {
+        padding: 0 24px;
+    }
+
+    .character-application,
     .admin-panel {
         width: min(900px, calc(100% - 32px));
 
@@ -1580,69 +1573,6 @@ button {
         grid-template-columns: 1fr 1fr;
 
         min-width: 0;
-    }
-}
-
-
-@media (max-width: 600px) {
-
-    .admin-panel {
-        width: calc(100% - 24px);
-
-        margin: 25px auto 40px;
-
-        padding: 30px 18px;
-    }
-
-    .admin-stats {
-        grid-template-columns: 1fr;
-
-        gap: 10px;
-
-        margin-bottom: 28px;
-    }
-
-    .admin-stat {
-        padding: 15px;
-    }
-
-    .admin-stat-value {
-        font-size: 28px;
-    }
-
-    .admin-application {
-        padding: 18px;
-
-        gap: 18px;
-    }
-
-    .admin-application-info {
-        grid-template-columns: 1fr;
-
-        gap: 10px;
-    }
-
-    .admin-application-actions {
-        grid-template-columns: 1fr;
-
-        gap: 8px;
-    }
-}
-
-/* =========================================================
-   МОБИЛЬНЫЕ
-   ========================================================= */
-
-@media (max-width: 900px) {
-
-    .topbar {
-        padding: 0 24px;
-    }
-
-    .character-application {
-        width: min(760px, calc(100% - 32px));
-
-        padding: 34px 28px;
     }
 }
 
@@ -1718,10 +1648,11 @@ button {
         padding: 38px 20px;
     }
 
-    .character-application {
+    .character-application,
+    .admin-panel {
         width: calc(100% - 24px);
 
-        margin: 20px auto 40px;
+        margin: 25px auto 40px;
 
         padding: 30px 18px;
     }
@@ -1771,6 +1702,51 @@ button {
 
         font-size: 18px;
     }
+
+    .admin-stats {
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+
+        margin-bottom: 25px;
+    }
+
+    .admin-stat {
+        padding: 15px;
+    }
+
+    .admin-stat-value {
+        font-size: 28px;
+    }
+
+    .admin-application {
+        padding: 18px;
+
+        gap: 16px;
+    }
+
+    .admin-application-info {
+        gap: 4px 12px;
+    }
+
+    .admin-application-info span {
+        white-space: normal;
+    }
+
+    .admin-application-section {
+        margin-top: 11px;
+    }
+
+    .admin-application-section strong,
+    .admin-application-section p {
+        font-size: 13px;
+    }
+
+    .admin-application-actions {
+        grid-template-columns: 1fr;
+
+        gap: 8px;
+    }
 }
 
 
@@ -1792,7 +1768,8 @@ button {
         display: none;
     }
 
-    .character-application {
+    .character-application,
+    .admin-panel {
         width: calc(100% - 16px);
 
         padding: 25px 14px;
@@ -1802,6 +1779,7 @@ button {
         font-size: 30px;
     }
 }
+
 
 /* =========================================================
    REDUCED MOTION
@@ -1815,113 +1793,4 @@ button {
         transition: none !important;
         animation: none !important;
     }
-}
-
-.admin-application-info {
-    display: grid;
-    gap: 0.6rem;
-}
-
-.admin-application-info span {
-    display: block;
-}
-
-.admin-application-section {
-    margin-top: 1.2rem;
-}
-
-.admin-application-section p {
-    white-space: pre-wrap;
-}
-
-.admin-application-info {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.admin-application-info div {
-    display: block;
-    margin: 0;
-    padding: 0;
-}
-
-.admin-application-info strong {
-    display: inline;
-    margin-right: 6px;
-}
-
-.admin-application-section {
-    display: block;
-    margin-top: 20px;
-    padding: 0;
-}
-
-.admin-application-section strong {
-    display: block;
-    margin-bottom: 8px;
-}
-
-.admin-application-section p {
-    display: block;
-    margin: 0;
-    padding: 0;
-    white-space: pre-wrap;
-    text-align: left;
-}
-
-.admin-application-info {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 8px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.admin-application-info span {
-    display: block !important;
-    position: static !important;
-    width: auto !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    left: auto !important;
-    right: auto !important;
-    top: auto !important;
-    bottom: auto !important;
-    transform: none !important;
-}
-
-.admin-application-info strong {
-    display: inline !important;
-    position: static !important;
-    margin: 0 6px 0 0 !important;
-    padding: 0 !important;
-}
-
-.admin-application-section {
-    display: block !important;
-    position: static !important;
-    margin: 20px 0 0 0 !important;
-    padding: 0 !important;
-}
-
-.admin-application-section strong {
-    display: block !important;
-    position: static !important;
-    margin: 0 0 8px 0 !important;
-    padding: 0 !important;
-}
-
-.admin-application-section p {
-    display: block !important;
-    position: static !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    white-space: normal !important;
-    text-align: left !important;
-}
-
-.admin-application-section p {
-    white-space: normal !important;
 }
