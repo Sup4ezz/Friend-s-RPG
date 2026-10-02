@@ -1405,50 +1405,32 @@ button {
 
 .admin-application-section {
     display: block;
-
     margin: 14px 0 0;
-
     padding: 0;
 }
 
 .admin-application-section strong {
-    display: inline;
-
-    margin: 0 7px 0 0;
-
+    display: block;
+    margin: 0 0 4px;
     padding: 0;
-
     color: var(--gold-light);
-
     font-family: var(--title-font);
-
     font-size: 15px;
-
     font-weight: 600;
 }
 
 .admin-application-section p {
-    display: inline;
-
+    display: block;
     margin: 0;
-
     padding: 0;
-
     color: var(--text);
-
     font-family: var(--body-font);
-
     font-size: 13px;
-
     line-height: 1.55;
-
     white-space: normal;
-
     text-align: left;
-
     overflow-wrap: anywhere;
 }
-
 
 /* =========================================================
    ADMIN ACTIONS
