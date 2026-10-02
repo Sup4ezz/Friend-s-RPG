@@ -1918,6 +1918,6 @@ button {
     position: static !important;
     margin: 0 !important;
     padding: 0 !important;
-    white-space: pre-wrap !important;
+    white-space: normal !important;
     text-align: left !important;
 }
