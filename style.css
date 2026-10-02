@@ -1803,7 +1803,6 @@ button {
     }
 }
 
-
 /* =========================================================
    REDUCED MOTION
    ========================================================= */
@@ -1816,4 +1815,21 @@ button {
         transition: none !important;
         animation: none !important;
     }
+}
+
+.admin-application-info {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.admin-application-info span {
+    display: block;
+}
+
+.admin-application-section {
+    margin-top: 1.2rem;
+}
+
+.admin-application-section p {
+    white-space: pre-wrap;
 }
