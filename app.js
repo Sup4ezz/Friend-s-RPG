@@ -294,21 +294,23 @@ function renderLoginForm() {
 
         <form onsubmit="login(event)">
 
-            <label for="login-email">
-                Email
+            <label for="login-username">
+                Логин
             </label>
 
             <div class="input-wrapper">
 
                 <span class="input-icon">
-                    ✉
+                    ✦
                 </span>
 
                 <input
-                    id="login-email"
-                    type="email"
-                    placeholder="Введите email"
-                    autocomplete="email"
+                    id="login-username"
+                    type="text"
+                    placeholder="Введите логин"
+                    autocomplete="username"
+                    minlength="3"
+                    maxlength="32"
                     required
                 >
 
@@ -350,7 +352,6 @@ function renderLoginForm() {
     `;
 }
 
-
 /* =========================================================
    ФОРМА РЕГИСТРАЦИИ
    ========================================================= */
@@ -380,21 +381,23 @@ function renderRegisterForm() {
 
         <form onsubmit="register(event)">
 
-            <label for="register-email">
-                Email
+            <label for="register-username">
+                Логин
             </label>
 
             <div class="input-wrapper">
 
                 <span class="input-icon">
-                    ✉
+                    ✦
                 </span>
 
                 <input
-                    id="register-email"
-                    type="email"
-                    placeholder="Введите email"
-                    autocomplete="email"
+                    id="register-username"
+                    type="text"
+                    placeholder="Придумай логин"
+                    autocomplete="username"
+                    minlength="3"
+                    maxlength="32"
                     required
                 >
 
@@ -483,6 +486,19 @@ function setActiveTab(tab) {
     );
 }
 
+function encodeUsername(username) {
+    return btoa(
+        encodeURIComponent(username)
+    )
+        .replaceAll("+", "-")
+        .replaceAll("/", "_")
+        .replaceAll("=", "");
+}
+
+
+function getAuthEmail(username) {
+    return `u_${encodeUsername(username)}@auth.lorgus.local`;
+}
 
 /* =========================================================
    ВХОД
@@ -492,9 +508,9 @@ async function login(event) {
 
     event.preventDefault();
 
-    const email =
+    const username =
         document.getElementById(
-            "login-email"
+            "login-username"
         ).value.trim();
 
     const password =
@@ -502,10 +518,27 @@ async function login(event) {
             "login-password"
         ).value;
 
+
+    if (!username) {
+
+        setMessage(
+            "Введи логин.",
+            "error"
+        );
+
+        return;
+    }
+
+
     setMessage(
         "Выполняется вход...",
         "info"
     );
+
+
+    const email =
+        getAuthEmail(username);
+
 
     const {
         error
@@ -514,18 +547,17 @@ async function login(event) {
         password
     });
 
+
     if (error) {
 
         setMessage(
-            error.message,
+            "Неверный логин или пароль.",
             "error"
         );
 
         return;
     }
-
 }
-
 
 /* =========================================================
    РЕГИСТРАЦИЯ
@@ -535,9 +567,9 @@ async function register(event) {
 
     event.preventDefault();
 
-    const email =
+    const username =
         document.getElementById(
-            "register-email"
+            "register-username"
         ).value.trim();
 
     const password =
@@ -549,6 +581,20 @@ async function register(event) {
         document.getElementById(
             "register-password-confirm"
         ).value;
+
+
+    if (
+        username.length < 3 ||
+        username.length > 32
+    ) {
+
+        setMessage(
+            "Логин должен содержать от 3 до 32 символов.",
+            "error"
+        );
+
+        return;
+    }
 
 
     if (password !== confirmation) {
@@ -568,21 +614,58 @@ async function register(event) {
     );
 
 
+    const email =
+        getAuthEmail(username);
+
+
     const {
         data,
         error
     } = await supabase.auth.signUp({
+
         email,
-        password
+
+        password,
+
+        options: {
+
+            data: {
+                username
+            }
+
+        }
+
     });
 
 
     if (error) {
 
-        setMessage(
-            error.message,
-            "error"
+        console.error(
+            error
         );
+
+        if (
+            error.message.includes(
+                "already registered"
+            ) ||
+            error.message.includes(
+                "already been registered"
+            )
+        ) {
+
+            setMessage(
+                "Этот логин уже занят.",
+                "error"
+            );
+
+        } else {
+
+            setMessage(
+                error.message,
+                "error"
+            );
+
+        }
 
         return;
     }
@@ -594,7 +677,7 @@ async function register(event) {
 
 
     setMessage(
-        "Аккаунт создан. Проверь email для подтверждения регистрации.",
+        "Аккаунт создан. Теперь можно войти.",
         "success"
     );
 }
@@ -606,8 +689,9 @@ async function register(event) {
 
 async function renderCabinet(session) {
 
-    const email =
-        session.user.email || "Игрок";
+    const username =
+        session.user.user_metadata?.username ||
+        "Игрок";
 
 
     document.getElementById("root").innerHTML = `
@@ -631,9 +715,9 @@ async function renderCabinet(session) {
 
                 <div class="player-area">
 
-                    <span class="player-email">
-                        ${escapeHtml(email)}
-                    </span>
+                  <span class="player-email">
+                    ${escapeHtml(email)}
+                </span>
 
                     <button
                         class="logout-button"
