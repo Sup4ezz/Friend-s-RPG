@@ -1881,3 +1881,42 @@ img {
         animation:none !important;
     }
 }
+.admin-application-main {
+    display:block !important;
+    visibility:visible !important;
+    opacity:1 !important;
+    width:100% !important;
+    min-width:0 !important;
+    height:auto !important;
+    max-height:none !important;
+    overflow:visible !important;
+    color:var(--text) !important;
+}
+
+.admin-application-info {
+    display:flex !important;
+    flex-direction:column !important;
+    width:100% !important;
+    height:auto !important;
+    max-height:none !important;
+    overflow:visible !important;
+    visibility:visible !important;
+    opacity:1 !important;
+}
+
+.admin-application-info span {
+    display:block !important;
+    width:100% !important;
+    height:auto !important;
+    min-height:0 !important;
+    color:var(--text) !important;
+    visibility:visible !important;
+    opacity:1 !important;
+}
+
+.admin-application-info strong {
+    display:inline !important;
+    color:var(--gold-light) !important;
+    visibility:visible !important;
+    opacity:1 !important;
+}
