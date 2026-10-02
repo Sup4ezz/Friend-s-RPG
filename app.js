@@ -7,25 +7,20 @@ async function loadSupabase() {
 
     const config = await response.json();
 
-    const script = document.createElement("script");
-    script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-    script.onload = () => {
-        window.supabaseClient = window.supabase.createClient(
-            config.supabaseUrl,
-            config.supabasePublishableKey
-        );
+    if (!config.supabaseUrl || !config.supabasePublishableKey) {
+        throw new Error("Cloudflare не вернул данные Supabase");
+    }
 
-        renderApp();
-    };
+    if (!window.supabase) {
+        throw new Error("Библиотека Supabase не загрузилась");
+    }
 
-    script.onerror = () => {
-        document.getElementById("root").innerHTML = `
-            <h1>Ошибка</h1>
-            <p>Не удалось загрузить Supabase.</p>
-        `;
-    };
+    window.supabaseClient = window.supabase.createClient(
+        config.supabaseUrl,
+        config.supabasePublishableKey
+    );
 
-    document.head.appendChild(script);
+    renderApp();
 }
 
 function renderApp() {
