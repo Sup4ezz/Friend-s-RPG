@@ -1779,3 +1779,13 @@ button {
         animation: none !important;
     }
 }
+
+.admin-application-photo {
+    display: block;
+    width: 220px;
+    max-width: 100%;
+    max-height: 320px;
+    object-fit: cover;
+    margin-top: 10px;
+    border: 1px solid var(--gold-line);
+}
