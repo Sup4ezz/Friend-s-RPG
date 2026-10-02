@@ -1086,3 +1086,144 @@ a {
         animation-duration: 0.01ms !important;
     }
 }
+
+/* =========================================================
+   ЛОРГУС — ШАПКА КАБИНЕТА
+   ========================================================= */
+
+.cabinet-topbar {
+    width: 100%;
+    min-height: 76px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 32px;
+
+    border-bottom: 1px solid rgba(190, 150, 75, 0.25);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(18, 17, 14, 0.98),
+            rgba(10, 10, 9, 0.96)
+        );
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.35);
+}
+
+
+/* Левая часть */
+
+.cabinet-brand {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    color: #d6b36a;
+
+    font-family: "Cormorant Garamond", serif;
+    font-size: 27px;
+    font-weight: 600;
+
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.cabinet-brand-symbol {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 32px;
+    height: 32px;
+
+    color: #d6b36a;
+
+    font-size: 22px;
+}
+
+
+/* Правая часть */
+
+.cabinet-user {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    color: rgba(220, 210, 190, 0.65);
+
+    font-family: "Lora", serif;
+    font-size: 13px;
+}
+
+.cabinet-logout {
+    padding: 8px 14px;
+
+    border: 1px solid rgba(190, 150, 75, 0.35);
+    border-radius: 2px;
+
+    background: transparent;
+
+    color: #cdb476;
+
+    font-family: "Cormorant Garamond", serif;
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        color 0.2s ease;
+}
+
+.cabinet-logout:hover {
+    border-color: rgba(210, 170, 90, 0.75);
+
+    background: rgba(150, 105, 35, 0.12);
+
+    color: #e4c983;
+}
+
+
+/* =========================================================
+   МОБИЛЬНАЯ ШАПКА
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    .cabinet-topbar {
+        min-height: 64px;
+
+        padding: 0 16px;
+    }
+
+    .cabinet-brand {
+        gap: 8px;
+
+        font-size: 22px;
+    }
+
+    .cabinet-brand-symbol {
+        width: 25px;
+        height: 25px;
+
+        font-size: 18px;
+    }
+
+    .cabinet-user {
+        gap: 9px;
+
+        font-size: 11px;
+    }
+
+    .cabinet-logout {
+        padding: 7px 9px;
+
+        font-size: 13px;
+    }
+}
