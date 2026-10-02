@@ -1099,9 +1099,7 @@ function renderCharacterApplicationForm(
             onsubmit="submitCharacterApplication(event)"
         >
 
-
             <div class="character-grid">
-
 
                 <div class="character-field">
 
@@ -1258,7 +1256,6 @@ function renderCharacterApplicationForm(
 
                 </div>
 
-
             </div>
 
 
@@ -1274,7 +1271,6 @@ function renderCharacterApplicationForm(
             >
                 Отправить заявку
             </button>
-
 
         </form>
 
@@ -1606,110 +1602,13 @@ async function submitCharacterApplication(
 
     /*
      * Заявка успешно создана.
-     * Не передаём пустой объект с id/status.
-     * Перезагружаем состояние игрока из базы.
+     * Перезагружаем состояние игрока из базы,
+     * чтобы получить полный объект заявки.
      */
 
     await loadPlayerState({
         user: user
     });
-
-}
-
-    /*
-     * Создание заявки в базе.
-     */
-
-    const {
-        error: applicationError
-    } =
-        await supabase
-            .from(
-                "character_applications"
-            )
-            .insert({
-
-                id:
-                    applicationId,
-
-                player_id:
-                    user.id,
-
-                name,
-
-                race,
-
-                age,
-
-                homeland,
-
-                personality,
-
-                backstory,
-
-                special_skills:
-                    specialSkills,
-
-                preferred_weapon:
-                    preferredWeapon ||
-                    null,
-
-                occupation,
-
-                photo_path:
-                    photoPath,
-
-                status:
-                    "pending",
-
-                character_id:
-                    null
-
-            });
-
-
-    if (applicationError) {
-
-        console.error(
-            applicationError
-        );
-
-
-        setCharacterMessage(
-            "Не удалось создать заявку: " +
-            applicationError.message,
-            "error"
-        );
-
-
-        if (submitButton) {
-
-            submitButton.disabled =
-                false;
-
-            submitButton.textContent =
-                "Отправить заявку";
-
-        }
-
-
-        return;
-
-    }
-
-
-    renderPendingApplication(
-        document.getElementById(
-            "cabinet-content"
-        ),
-        {
-            id:
-                applicationId,
-
-            status:
-                "pending"
-        }
-    );
 
 }
 
@@ -1841,7 +1740,6 @@ function renderAdminApplications(
 
         <div class="admin-stats">
 
-
             <div class="admin-stat">
 
                 <span class="admin-stat-value">
@@ -1880,12 +1778,10 @@ function renderAdminApplications(
 
             </div>
 
-
         </div>
 
 
         <div class="admin-applications">
-
 
             ${
                 pending.length === 0
@@ -1920,9 +1816,7 @@ function renderAdminApplications(
                                 data-application-id="${application.id}"
                             >
 
-
                                 <div class="admin-application-main">
-
 
                                     <h3>
                                         ${escapeHtml(
@@ -1933,12 +1827,8 @@ function renderAdminApplications(
 
                                     <div class="admin-application-info">
 
-
                                         <span>
-                                            <strong>
-                                                Раса:
-                                            </strong>
-
+                                            <strong>Раса:</strong>
                                             ${escapeHtml(
                                                 application.race
                                             )}
@@ -1946,20 +1836,13 @@ function renderAdminApplications(
 
 
                                         <span>
-                                            <strong>
-                                                Возраст:
-                                            </strong>
-
-                                            ${application.age}
-                                            лет
+                                            <strong>Возраст:</strong>
+                                            ${application.age} лет
                                         </span>
 
 
                                         <span>
-                                            <strong>
-                                                Родина:
-                                            </strong>
-
+                                            <strong>Родина:</strong>
                                             ${escapeHtml(
                                                 application.homeland
                                             )}
@@ -1967,10 +1850,7 @@ function renderAdminApplications(
 
 
                                         <span>
-                                            <strong>
-                                                Род занятий:
-                                            </strong>
-
+                                            <strong>Род занятий:</strong>
                                             ${escapeHtml(
                                                 application.occupation
                                             )}
@@ -1978,97 +1858,56 @@ function renderAdminApplications(
 
 
                                         <span>
-                                            <strong>
-                                                Оружие:
-                                            </strong>
-
+                                            <strong>Оружие:</strong>
                                             ${
                                                 application.preferred_weapon
-
                                                     ? escapeHtml(
                                                         application.preferred_weapon
                                                     )
-
                                                     : "Не указано"
                                             }
-
                                         </span>
 
 
-                                    </div>
-
-
-                                    <div class="admin-application-section">
-
-                                        <strong>
-                                            Характер
-                                        </strong>
-
-                                        <p>
+                                        <span>
+                                            <strong>Характер:</strong>
                                             ${escapeHtml(
                                                 application.personality
                                             )}
-                                        </p>
-
-                                    </div>
+                                        </span>
 
 
-                                    <div class="admin-application-section">
-
-                                        <strong>
-                                            Предыстория
-                                        </strong>
-
-                                        <p>
+                                        <span>
+                                            <strong>Предыстория:</strong>
                                             ${escapeHtml(
                                                 application.backstory
                                             )}
-                                        </p>
-
-                                    </div>
+                                        </span>
 
 
-                                    <div class="admin-application-section">
-
-                                        <strong>
-                                            Особые навыки
-                                        </strong>
-
-                                        <p>
+                                        <span>
+                                            <strong>Особые навыки:</strong>
                                             ${escapeHtml(
                                                 application.special_skills
                                             )}
-                                        </p>
-
-                                    </div>
+                                        </span>
 
 
-                                    <div class="admin-application-section">
-
-                                        <strong>
-                                            Изображение персонажа
-                                        </strong>
-
-                                        <p>
-
+                                        <span>
+                                            <strong>Изображение персонажа:</strong>
                                             ${
                                                 application.photo_path
-
                                                     ? "Изображение загружено."
-
                                                     : "Не загружено."
                                             }
-
-                                        </p>
+                                        </span>
 
                                     </div>
-
 
                                 </div>
 
 
                                 <div class="admin-application-actions">
-
 
                                     <button
                                         class="gold-button admin-approve-button"
@@ -2085,16 +1924,13 @@ function renderAdminApplications(
                                         Отклонить
                                     </button>
 
-
                                 </div>
-
 
                             </article>
 
                         `
                     ).join("")
             }
-
 
         </div>
 
@@ -2309,12 +2145,9 @@ function renderPendingApplication(
 
         <article class="admin-application">
 
-
             <div class="admin-application-main">
 
-
                 <div class="admin-application-info">
-
 
                     <span>
                         <strong>Раса:</strong>
@@ -2361,70 +2194,40 @@ function renderPendingApplication(
                     </span>
 
 
-                </div>
-
-
-                <div class="admin-application-section">
-
-                    <strong>
-                        Характер
-                    </strong>
-
-                    <p>
+                    <span>
+                        <strong>Характер:</strong>
                         ${escapeHtml(
                             application.personality
                         )}
-                    </p>
-
-                </div>
+                    </span>
 
 
-                <div class="admin-application-section">
-
-                    <strong>
-                        Предыстория
-                    </strong>
-
-                    <p>
+                    <span>
+                        <strong>Предыстория:</strong>
                         ${escapeHtml(
                             application.backstory
                         )}
-                    </p>
-
-                </div>
+                    </span>
 
 
-                <div class="admin-application-section">
-
-                    <strong>
-                        Особые навыки
-                    </strong>
-
-                    <p>
+                    <span>
+                        <strong>Особые навыки:</strong>
                         ${escapeHtml(
                             application.special_skills
                         )}
-                    </p>
-
-                </div>
+                    </span>
 
 
-                <div class="admin-application-section">
-
-                    <strong>
-                        Изображение персонажа
-                    </strong>
-
-                    <p>
+                    <span>
+                        <strong>Изображение персонажа:</strong>
                         ${
                             application.photo_path
                                 ? "Изображение загружено."
                                 : "Не загружено."
                         }
-                    </p>
+                    </span>
 
                 </div>
-
 
             </div>
 
@@ -2437,12 +2240,12 @@ function renderPendingApplication(
 
             </div>
 
-
         </article>
 
     `;
 
 }
+
 
 /* =========================================================
    ЗАГРУЗКА ПЕРСОНАЖА
