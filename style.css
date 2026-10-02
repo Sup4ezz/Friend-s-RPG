@@ -1920,3 +1920,14 @@ img {
     visibility:visible !important;
     opacity:1 !important;
 }
+.admin-approve-button {
+    border-color:rgba(90,150,85,.65);
+    background:rgba(55,110,50,.22);
+    color:#a9d39f;
+}
+
+.admin-approve-button:hover {
+    border-color:#9bc58f;
+    background:rgba(65,125,55,.35);
+    box-shadow:0 0 25px rgba(80,150,70,.12);
+}
