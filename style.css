@@ -17,7 +17,11 @@
     --text-muted: #766e60;
 
     --border: rgba(190, 150, 75, 0.38);
+    --border-soft: rgba(190, 150, 75, 0.24);
     --border-strong: rgba(210, 170, 90, 0.72);
+
+    --gold-line: rgba(190, 150, 75, 0.30);
+    --gold-line-strong: rgba(210, 170, 90, 0.48);
 
     --title-font: "Cormorant Garamond", serif;
     --body-font: "Lora", serif;
@@ -1325,7 +1329,7 @@ button {
    ========================================================= */
 
 .admin-application-main h3 {
-    margin: 0 0 12px;
+    margin: 0 0 16px;
 
     color: var(--gold-light);
 
@@ -1343,29 +1347,31 @@ button {
    APPLICATION INFO
    =========================================================
 
-   ВАЖНО:
-   Эти поля специально остаются компактными.
-   Цвет названий и значений единый.
+   Основные характеристики заявки.
+   Каждая строка — единый визуальный элемент:
+   тонкая золотая линия сверху и снизу.
    */
 
 .admin-application-info {
     display: flex;
 
-    flex-wrap: wrap;
-
-    align-items: baseline;
-
-    gap: 5px 18px;
-
-    margin: 0;
-}
-
-.admin-application-info span {
-    display: inline;
+    flex-direction: column;
 
     margin: 0;
 
     padding: 0;
+
+    border-top: 1px solid var(--gold-line);
+}
+
+.admin-application-info span {
+    display: block;
+
+    width: 100%;
+
+    margin: 0;
+
+    padding: 7px 8px;
 
     color: var(--text);
 
@@ -1375,13 +1381,13 @@ button {
 
     line-height: 1.5;
 
-    white-space: nowrap;
+    border-bottom: 1px solid var(--gold-line);
 }
 
 .admin-application-info strong {
     display: inline;
 
-    margin: 0 4px 0 0;
+    margin: 0 5px 0 0;
 
     padding: 0;
 
@@ -1399,38 +1405,98 @@ button {
    APPLICATION DESCRIPTION SECTIONS
    =========================================================
 
-   Всё выглядит в том же стиле, что и основные поля.
-   Никаких pre-wrap и сохранения отступов HTML.
+   Характер / Предыстория / Особые навыки /
+   Изображение персонажа.
+
+   ВАЖНО:
+   Эти блоки визуально продолжают тот же компонент,
+   что и верхние поля.
    */
 
 .admin-application-section {
     display: block;
-    margin: 14px 0 0;
-    padding: 0;
+
+    width: 100%;
+
+    margin: 0;
+
+    padding: 7px 8px;
+
+    border-bottom: 1px solid var(--gold-line);
+}
+
+.admin-application-section:first-of-type {
+    border-top: 1px solid var(--gold-line);
 }
 
 .admin-application-section strong {
-    display: block;
-    margin: 0 0 4px;
+    display: inline;
+
+    margin: 0 5px 0 0;
+
     padding: 0;
+
     color: var(--gold-light);
+
     font-family: var(--title-font);
+
     font-size: 15px;
+
     font-weight: 600;
 }
 
+.admin-application-section strong::after {
+    content: ":";
+}
+
 .admin-application-section p {
-    display: block;
+    display: inline;
+
     margin: 0;
+
     padding: 0;
+
     color: var(--text);
+
     font-family: var(--body-font);
+
     font-size: 13px;
+
     line-height: 1.55;
+
     white-space: normal;
+
     text-align: left;
+
     overflow-wrap: anywhere;
 }
+
+
+/* =========================================================
+   APPLICATION PHOTO
+   ========================================================= */
+
+.admin-application-section.photo-section {
+    display: block;
+}
+
+.admin-application-photo {
+    display: block;
+
+    width: min(280px, 100%);
+
+    max-height: 360px;
+
+    margin-top: 10px;
+
+    object-fit: cover;
+
+    border: 1px solid var(--gold-line-strong);
+
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.45);
+}
+
 
 /* =========================================================
    ADMIN ACTIONS
@@ -1707,21 +1773,22 @@ button {
         gap: 16px;
     }
 
-    .admin-application-info {
-        gap: 4px 12px;
-    }
-
     .admin-application-info span {
-        white-space: normal;
+        padding: 7px 6px;
     }
 
     .admin-application-section {
-        margin-top: 11px;
+        padding: 7px 6px;
     }
 
-    .admin-application-section strong,
+    .admin-application-info span,
     .admin-application-section p {
         font-size: 13px;
+    }
+
+    .admin-application-info strong,
+    .admin-application-section strong {
+        font-size: 14px;
     }
 
     .admin-application-actions {
