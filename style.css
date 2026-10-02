@@ -1,33 +1,32 @@
-/* =========================================
-   ОСНОВНЫЕ НАСТРОЙКИ
-   ========================================= */
+/* =========================================================
+   ЛОРГУС — ОСНОВНОЙ СТИЛЬ
+   Адаптивный интерфейс: ПК / ноутбук / планшет / телефон
+   ========================================================= */
+
+
+/* =========================================================
+   ПЕРЕМЕННЫЕ
+   ========================================================= */
 
 :root {
 
-    --bg-dark: #090807;
+    --bg-dark: #070605;
+    --bg-deep: #0d0b09;
 
-    --bg-deep: #0e0c0a;
-
-    --panel: rgba(20, 17, 14, 0.94);
-
+    --panel: rgba(20, 17, 14, 0.96);
     --panel-light: rgba(31, 26, 21, 0.96);
 
     --gold: #c6a15b;
-
     --gold-light: #e4c986;
-
     --gold-dark: #765c2e;
 
     --gold-glow: rgba(198, 161, 91, 0.18);
 
     --text: #eee5d5;
-
-    --text-soft: #a99f90;
-
-    --text-dark: #665e53;
+    --text-soft: #aaa093;
+    --text-dark: #655d53;
 
     --error: #b86b62;
-
     --success: #8da875;
 
     --font-display:
@@ -43,38 +42,42 @@
 }
 
 
-/* =========================================
-   СБРОС
-   ========================================= */
+/* =========================================================
+   БАЗОВЫЙ СБРОС
+   ========================================================= */
 
 * {
     box-sizing: border-box;
 }
 
 
-html,
-body {
-    margin: 0;
-    padding: 0;
-
+html {
+    width: 100%;
     min-height: 100%;
-
-    background:
-        radial-gradient(
-            circle at 50% 35%,
-            #211b14 0%,
-            #0e0c0a 42%,
-            #060504 100%
-        );
-
-    color: var(--text);
-
-    font-family: var(--font-body);
 }
 
 
 body {
+    width: 100%;
     min-height: 100vh;
+
+    margin: 0;
+    padding: 0;
+
+    overflow-x: hidden;
+
+    color: var(--text);
+
+    font-family: var(--font-body);
+
+    background:
+        radial-gradient(
+            circle at 50% 30%,
+            #241d15 0%,
+            #120f0c 32%,
+            #0a0807 62%,
+            #050403 100%
+        );
 }
 
 
@@ -84,64 +87,81 @@ input {
 }
 
 
-/* =========================================
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+input {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+
+/* =========================================================
    АВТОРИЗАЦИЯ
-   ========================================= */
+   ========================================================= */
 
 .auth-page {
 
+    width: 100%;
     min-height: 100vh;
+
+    min-height: 100dvh;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
     position: relative;
 
-    overflow: hidden;
+    padding:
+        48px
+        24px;
 
-    padding: 40px 20px;
+    overflow: hidden;
 
 }
 
+
+/* =========================================================
+   ФОНОВОЕ СИЯНИЕ
+   ========================================================= */
 
 .background-glow {
 
     position: absolute;
 
-    width: 800px;
-
-    height: 800px;
+    width: min(900px, 100vw);
+    height: min(900px, 100vw);
 
     left: 50%;
-
     top: 50%;
 
     transform:
         translate(-50%, -50%);
 
+    pointer-events: none;
+
     background:
         radial-gradient(
             circle,
-            rgba(198, 161, 91, 0.09),
-            transparent 65%
+            rgba(198, 161, 91, 0.105) 0%,
+            rgba(198, 161, 91, 0.035) 35%,
+            transparent 70%
         );
-
-    pointer-events: none;
 
 }
 
 
-/* =========================================
+/* =========================================================
    ОСНОВНОЙ КОНТЕЙНЕР
-   ========================================= */
+   ========================================================= */
 
 .auth-container {
 
     width: 100%;
-
     max-width: 500px;
 
     position: relative;
@@ -151,11 +171,13 @@ input {
 }
 
 
-/* =========================================
+/* =========================================================
    БРЕНД
-   ========================================= */
+   ========================================================= */
 
 .brand {
+
+    width: 100%;
 
     text-align: center;
 
@@ -168,13 +190,17 @@ input {
 
     color: var(--gold);
 
-    font-size: 26px;
+    font-family: var(--font-display);
 
-    margin-bottom: 10px;
+    font-size: 27px;
+
+    line-height: 1;
+
+    margin-bottom: 12px;
 
     text-shadow:
         0 0 18px
-        rgba(198, 161, 91, 0.35);
+        rgba(198, 161, 91, 0.4);
 
 }
 
@@ -183,26 +209,38 @@ input {
 
     margin: 0;
 
+    color: var(--gold-light);
+
     font-family: var(--font-display);
 
-    font-size: 68px;
+    font-size: clamp(
+        48px,
+        8vw,
+        68px
+    );
 
     font-weight: 600;
 
-    letter-spacing: 0.20em;
-
-    color: var(--gold-light);
-
     line-height: 0.95;
 
+    letter-spacing: 0.20em;
+
+    text-indent: 0.20em;
+
     text-shadow:
-        0 3px 20px
-        rgba(0, 0, 0, 0.6);
+        0 3px 25px
+        rgba(0, 0, 0, 0.7);
 
 }
 
 
+/* =========================================================
+   ЛИНИЯ ПОД ЛОГОТИПОМ
+   ========================================================= */
+
 .brand-line {
+
+    width: 100%;
 
     display: flex;
 
@@ -210,7 +248,7 @@ input {
 
     gap: 14px;
 
-    margin-top: 20px;
+    margin-top: 21px;
 
 }
 
@@ -218,6 +256,8 @@ input {
 .brand-line span {
 
     flex: 1;
+
+    min-width: 0;
 
     height: 1px;
 
@@ -245,6 +285,10 @@ input {
 
 .brand-line i {
 
+    flex: 0 1 auto;
+
+    color: var(--text-soft);
+
     font-family: var(--font-display);
 
     font-size: 14px;
@@ -253,47 +297,55 @@ input {
 
     font-weight: 500;
 
-    letter-spacing: 0.10em;
+    line-height: 1.3;
 
-    color: var(--text-soft);
+    letter-spacing: 0.075em;
 
-    white-space: nowrap;
+    text-align: center;
 
 }
 
 
-/* =========================================
-   ПАНЕЛЬ
-   ========================================= */
+/* =========================================================
+   ПАНЕЛЬ АВТОРИЗАЦИИ
+   ========================================================= */
 
 .auth-panel {
 
     position: relative;
 
-    padding: 0 38px 38px;
+    width: 100%;
+
+    padding:
+        0
+        38px
+        38px;
 
     background:
         linear-gradient(
             145deg,
-            rgba(35, 30, 25, 0.97),
-            rgba(15, 13, 11, 0.98)
+            rgba(36, 31, 26, 0.97),
+            rgba(14, 12, 10, 0.99)
         );
 
-    border: 1px solid
+    border:
+        1px solid
         rgba(198, 161, 91, 0.35);
 
     box-shadow:
 
         0 30px 80px
-        rgba(0, 0, 0, 0.55),
+        rgba(0, 0, 0, 0.58),
 
         inset 0 1px 0
-        rgba(255, 255, 255, 0.03);
+        rgba(255, 255, 255, 0.035);
 
 }
 
 
-/* декоративные углы */
+/* =========================================================
+   ДЕКОРАТИВНЫЕ УГЛЫ
+   ========================================================= */
 
 .auth-panel::before,
 .auth-panel::after {
@@ -303,12 +355,13 @@ input {
     position: absolute;
 
     width: 18px;
-
     height: 18px;
 
-    border-color: var(--gold);
+    border:
+        2px solid
+        var(--gold);
 
-    border-style: solid;
+    pointer-events: none;
 
 }
 
@@ -316,36 +369,41 @@ input {
 .auth-panel::before {
 
     top: -1px;
-
     left: -1px;
 
-    border-width: 2px 0 0 2px;
+    border-right: 0;
+    border-bottom: 0;
 
 }
 
 
 .auth-panel::after {
 
+    right: -1px;
     bottom: -1px;
 
-    right: -1px;
-
-    border-width: 0 2px 2px 0;
+    border-left: 0;
+    border-top: 0;
 
 }
 
 
-/* =========================================
+/* =========================================================
    ВКЛАДКИ
-   ========================================= */
+   ========================================================= */
 
 .auth-tabs {
 
     display: flex;
 
-    margin: 0 -38px 34px;
+    width: calc(100% + 76px);
 
-    border-bottom: 1px solid
+    margin-left: -38px;
+
+    margin-bottom: 34px;
+
+    border-bottom:
+        1px solid
         rgba(198, 161, 91, 0.16);
 
 }
@@ -357,13 +415,21 @@ input {
 
     flex: 1;
 
+    min-width: 0;
+
+    min-height: 58px;
+
+    padding:
+        14px
+        10px;
+
     border: 0;
+
+    outline: none;
 
     background: transparent;
 
     color: var(--text-soft);
-
-    padding: 21px 10px 17px;
 
     cursor: pointer;
 
@@ -392,6 +458,13 @@ input {
 }
 
 
+.auth-tab:focus-visible {
+
+    color: var(--gold-light);
+
+}
+
+
 .auth-tab.active {
 
     color: var(--gold-light);
@@ -406,7 +479,6 @@ input {
     position: absolute;
 
     left: 25%;
-
     right: 25%;
 
     bottom: -1px;
@@ -417,20 +489,20 @@ input {
 
     box-shadow:
         0 0 10px
-        rgba(198, 161, 91, 0.4);
+        rgba(198, 161, 91, 0.5);
 
 }
 
 
-/* =========================================
+/* =========================================================
    КОНТЕЙНЕР ФОРМЫ
-   ========================================= */
+   ========================================================= */
 
 .auth-form-container {
 
-    min-height: 350px;
-
     position: relative;
+
+    min-height: 350px;
 
     transition:
         opacity 0.18s ease,
@@ -439,6 +511,8 @@ input {
 
 }
 
+
+/* Старая форма */
 
 .auth-form-leaving {
 
@@ -453,6 +527,8 @@ input {
 }
 
 
+/* Новая форма */
+
 .auth-form-entering {
 
     opacity: 0;
@@ -466,24 +542,9 @@ input {
 }
 
 
-.auth-form-container:not(
-    .auth-form-entering
-) {
-
-    opacity: 1;
-
-    transform:
-        translateY(0);
-
-    filter:
-        blur(0);
-
-}
-
-
-/* =========================================
+/* =========================================================
    ЗАГОЛОВОК ФОРМЫ
-   ========================================= */
+   ========================================================= */
 
 .form-heading {
 
@@ -496,7 +557,12 @@ input {
 
 .form-heading h2 {
 
-    margin: 0 0 8px;
+    margin:
+        0
+        0
+        8px;
+
+    color: var(--gold-light);
 
     font-family: var(--font-display);
 
@@ -504,14 +570,16 @@ input {
 
     font-weight: 600;
 
-    color: var(--gold-light);
+    line-height: 1.1;
 
 }
 
 
 .form-heading p {
 
-    margin: 0;
+    max-width: 390px;
+
+    margin: 0 auto;
 
     color: var(--text-soft);
 
@@ -522,20 +590,17 @@ input {
 }
 
 
-/* =========================================
+/* =========================================================
    LABEL
-   ========================================= */
+   ========================================================= */
 
 label {
 
     display: block;
 
     margin:
-
         18px
-
         0
-
         8px;
 
     color: var(--text);
@@ -549,13 +614,15 @@ label {
 }
 
 
-/* =========================================
+/* =========================================================
    INPUT
-   ========================================= */
+   ========================================================= */
 
 .input-wrapper {
 
     position: relative;
+
+    width: 100%;
 
 }
 
@@ -565,7 +632,6 @@ label {
     position: absolute;
 
     left: 15px;
-
     top: 50%;
 
     transform:
@@ -575,6 +641,8 @@ label {
 
     font-size: 14px;
 
+    line-height: 1;
+
     pointer-events: none;
 
 }
@@ -582,27 +650,27 @@ label {
 
 .input-wrapper input {
 
+    display: block;
+
     width: 100%;
 
+    min-height: 47px;
+
     padding:
-
-        13px
-
+        12px
         15px
-
-        13px
-
+        12px
         43px;
 
     border:
-
         1px solid
         rgba(198, 161, 91, 0.18);
 
     outline: none;
 
-    background:
+    border-radius: 0;
 
+    background:
         rgba(5, 4, 3, 0.55);
 
     color: var(--text);
@@ -612,11 +680,8 @@ label {
     font-size: 14px;
 
     transition:
-
         border-color 0.25s ease,
-
         box-shadow 0.25s ease,
-
         background 0.25s ease;
 
 }
@@ -629,13 +694,21 @@ label {
 }
 
 
+.input-wrapper input:hover {
+
+    border-color:
+        rgba(198, 161, 91, 0.3);
+
+}
+
+
 .input-wrapper input:focus {
 
     border-color:
         rgba(198, 161, 91, 0.65);
 
     background:
-        rgba(10, 8, 6, 0.8);
+        rgba(10, 8, 6, 0.82);
 
     box-shadow:
         0 0 18px
@@ -644,17 +717,30 @@ label {
 }
 
 
-/* =========================================
+/* =========================================================
    КНОПКА
-   ========================================= */
+   ========================================================= */
 
 .gold-button {
 
-    border: 1px solid
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-height: 46px;
+
+    padding:
+        11px
+        24px;
+
+    border:
+        1px solid
         rgba(228, 201, 134, 0.55);
 
-    background:
+    border-radius: 0;
 
+    background:
         linear-gradient(
             135deg,
             #9b793e,
@@ -674,14 +760,9 @@ label {
 
     cursor: pointer;
 
-    padding: 12px 24px;
-
     transition:
-
         transform 0.25s ease,
-
         box-shadow 0.25s ease,
-
         filter 0.25s ease;
 
 }
@@ -710,26 +791,37 @@ label {
 }
 
 
+.gold-button:focus-visible {
+
+    outline:
+        2px solid
+        var(--gold-light);
+
+    outline-offset: 3px;
+
+}
+
+
 .main-button {
 
     width: 100%;
 
     margin-top: 26px;
 
-    padding: 14px;
-
 }
 
 
-/* =========================================
+/* =========================================================
    СООБЩЕНИЯ
-   ========================================= */
+   ========================================================= */
 
 .auth-message {
 
     min-height: 20px;
 
     margin-top: 14px;
+
+    color: var(--text-soft);
 
     font-size: 13px;
 
@@ -761,30 +853,38 @@ label {
 }
 
 
-/* =========================================
+/* =========================================================
    НИЖНИЙ ТЕКСТ
-   ========================================= */
+   ========================================================= */
 
 .auth-footer {
 
-    margin: 22px 0 0;
-
-    text-align: center;
+    margin:
+        22px
+        0
+        0;
 
     color: var(--text-dark);
 
     font-size: 12px;
 
+    line-height: 1.5;
+
+    text-align: center;
+
 }
 
 
-/* =========================================
+/* =========================================================
    КАБИНЕТ
-   ========================================= */
+   ========================================================= */
 
 .game-page {
 
+    width: 100%;
     min-height: 100vh;
+
+    min-height: 100dvh;
 
     background:
         radial-gradient(
@@ -798,7 +898,9 @@ label {
 
 .topbar {
 
-    height: 70px;
+    width: 100%;
+
+    min-height: 70px;
 
     display: flex;
 
@@ -806,14 +908,18 @@ label {
 
     justify-content: space-between;
 
-    padding: 0 35px;
+    gap: 20px;
+
+    padding:
+        0
+        35px;
 
     border-bottom:
         1px solid
         rgba(198, 161, 91, 0.18);
 
     background:
-        rgba(8, 7, 5, 0.75);
+        rgba(8, 7, 5, 0.78);
 
 }
 
@@ -826,6 +932,8 @@ label {
 
     gap: 12px;
 
+    color: var(--gold-light);
+
     font-family: var(--font-display);
 
     font-size: 24px;
@@ -833,8 +941,6 @@ label {
     font-weight: 600;
 
     letter-spacing: 0.12em;
-
-    color: var(--gold-light);
 
 }
 
@@ -854,10 +960,20 @@ label {
 
     gap: 18px;
 
+    min-width: 0;
+
 }
 
 
 .player-email {
+
+    max-width: 300px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
 
     color: var(--text-soft);
 
@@ -868,14 +984,21 @@ label {
 
 .logout-button {
 
-    border: 1px solid
+    min-height: 38px;
+
+    padding:
+        7px
+        14px;
+
+    border:
+        1px solid
         rgba(198, 161, 91, 0.25);
+
+    border-radius: 0;
 
     background: transparent;
 
     color: var(--text-soft);
-
-    padding: 7px 14px;
 
     cursor: pointer;
 
@@ -896,17 +1019,25 @@ label {
 }
 
 
-/* =========================================
+/* =========================================================
    ПРИВЕТСТВИЕ
-   ========================================= */
+   ========================================================= */
 
 .welcome-panel {
 
-    max-width: 800px;
+    width: min(
+        800px,
+        calc(100% - 40px)
+    );
 
-    margin: 120px auto;
+    margin:
+        120px
+        auto
+        0;
 
-    padding: 60px 40px;
+    padding:
+        60px
+        40px;
 
     text-align: center;
 
@@ -915,11 +1046,13 @@ label {
 
 .welcome-symbol {
 
+    margin-bottom: 20px;
+
     color: var(--gold);
 
-    font-size: 30px;
+    font-family: var(--font-display);
 
-    margin-bottom: 20px;
+    font-size: 30px;
 
 }
 
@@ -928,13 +1061,15 @@ label {
 
     margin: 0;
 
+    color: var(--gold-light);
+
     font-family: var(--font-display);
 
     font-size: 48px;
 
     font-weight: 600;
 
-    color: var(--gold-light);
+    line-height: 1.1;
 
 }
 
@@ -943,7 +1078,9 @@ label {
 
     max-width: 550px;
 
-    margin: 20px auto;
+    margin:
+        20px
+        auto;
 
     color: var(--text-soft);
 
@@ -960,9 +1097,15 @@ label {
 
     gap: 15px;
 
-    max-width: 350px;
+    width: min(
+        350px,
+        100%
+    );
 
-    margin: 35px auto 0;
+    margin:
+        35px
+        auto
+        0;
 
 }
 
@@ -981,47 +1124,53 @@ label {
 
 .ornament i {
 
+    color: var(--gold);
+
     font-family: var(--font-display);
 
     font-style: normal;
-
-    color: var(--gold);
 
     letter-spacing: 0.08em;
 
 }
 
 
-/* =========================================
-   ОШИБКА
-   ========================================= */
+/* =========================================================
+   ЭКРАН ОШИБКИ
+   ========================================================= */
 
 .error-screen {
 
+    width: 100%;
     min-height: 100vh;
+
+    min-height: 100dvh;
 
     display: flex;
 
     align-items: center;
-
     justify-content: center;
 
-    padding: 20px;
+    padding: 24px;
 
 }
 
 
 .error-panel {
 
+    width: 100%;
+
     max-width: 500px;
 
-    padding: 50px;
+    padding: 50px 40px;
 
     text-align: center;
 
-    background: var(--panel);
+    background:
+        var(--panel);
 
-    border: 1px solid
+    border:
+        1px solid
         rgba(198, 161, 91, 0.3);
 
 }
@@ -1029,55 +1178,156 @@ label {
 
 .error-symbol {
 
+    margin-bottom: 20px;
+
     color: var(--gold);
 
     font-size: 30px;
-
-    margin-bottom: 20px;
 
 }
 
 
 .error-panel h1 {
 
-    font-family: var(--font-display);
+    margin-top: 0;
 
     color: var(--gold-light);
+
+    font-family: var(--font-display);
 
 }
 
 
 .error-panel p {
 
+    margin-bottom: 25px;
+
     color: var(--text-soft);
 
     line-height: 1.6;
 
-    margin-bottom: 25px;
+}
+
+
+/* =========================================================
+   ПЛАНШЕТЫ
+   521px — 900px
+   ========================================================= */
+
+@media (min-width: 521px) and (max-width: 900px) {
+
+    .auth-page {
+
+        padding:
+            40px
+            24px;
+
+    }
+
+
+    .auth-container {
+
+        max-width: 520px;
+
+    }
+
+
+    .brand h1 {
+
+        font-size: 60px;
+
+    }
+
+
+    .auth-panel {
+
+        padding-left: 32px;
+        padding-right: 32px;
+
+    }
+
+
+    .auth-tabs {
+
+        width: calc(100% + 64px);
+
+        margin-left: -32px;
+
+    }
 
 }
 
 
-/* =========================================
-   МОБИЛЬНЫЕ УСТРОЙСТВА
-   ========================================= */
+/* =========================================================
+   ТЕЛЕФОНЫ
+   до 520px
+   ========================================================= */
 
-@media (max-width: 700px) {
+@media (max-width: 520px) {
+
+    .auth-page {
+
+        align-items: center;
+
+        padding:
+            28px
+            15px;
+
+        overflow-y: auto;
+
+    }
+
+
+    .auth-container {
+
+        max-width: 100%;
+
+    }
+
+
+    .brand {
+
+        margin-bottom: 24px;
+
+    }
+
+
+    .brand-symbol {
+
+        font-size: 22px;
+
+        margin-bottom: 8px;
+
+    }
+
 
     .brand h1 {
 
-        font-size: 52px;
+        font-size: 47px;
+
+        letter-spacing: 0.14em;
+
+        text-indent: 0.14em;
+
+    }
+
+
+    .brand-line {
+
+        gap: 8px;
+
+        margin-top: 15px;
 
     }
 
 
     .brand-line i {
 
-        white-space: normal;
-
-        text-align: center;
+        font-size: 10px;
 
         line-height: 1.4;
+
+        letter-spacing: 0.055em;
 
     }
 
@@ -1085,28 +1335,117 @@ label {
     .auth-panel {
 
         padding:
-
             0
-
-            24px
-
-            28px;
+            20px
+            25px;
 
     }
 
 
     .auth-tabs {
 
-        margin-left: -24px;
+        width: calc(100% + 40px);
 
-        margin-right: -24px;
+        margin-left: -20px;
+
+        margin-bottom: 27px;
+
+    }
+
+
+    .auth-tab {
+
+        min-height: 50px;
+
+        padding:
+            14px
+            5px;
+
+        font-size: 17px;
+
+    }
+
+
+    .auth-form-container {
+
+        min-height: 335px;
+
+    }
+
+
+    .form-heading {
+
+        margin-bottom: 22px;
+
+    }
+
+
+    .form-heading h2 {
+
+        font-size: 28px;
+
+    }
+
+
+    .form-heading p {
+
+        font-size: 13px;
+
+    }
+
+
+    label {
+
+        margin-top: 15px;
+
+        font-size: 15px;
+
+    }
+
+
+    .input-wrapper input {
+
+        min-height: 50px;
+
+        padding-left: 43px;
+
+        font-size: 16px;
+
+    }
+
+
+    .main-button {
+
+        min-height: 50px;
+
+        margin-top: 22px;
+
+        font-size: 17px;
+
+    }
+
+
+    .auth-footer {
+
+        font-size: 11px;
 
     }
 
 
     .topbar {
 
-        padding: 0 18px;
+        min-height: 62px;
+
+        padding:
+            0
+            16px;
+
+    }
+
+
+    .topbar-brand {
+
+        font-size: 20px;
 
     }
 
@@ -1118,9 +1457,34 @@ label {
     }
 
 
+    .player-area {
+
+        gap: 8px;
+
+    }
+
+
+    .logout-button {
+
+        min-height: 40px;
+
+        padding:
+            7px
+            12px;
+
+    }
+
+
     .welcome-panel {
 
+        width:
+            calc(100% - 28px);
+
         margin-top: 70px;
+
+        padding:
+            35px
+            14px;
 
     }
 
@@ -1128,6 +1492,266 @@ label {
     .welcome-panel h1 {
 
         font-size: 38px;
+
+    }
+
+
+    .welcome-panel p {
+
+        font-size: 14px;
+
+        line-height: 1.7;
+
+    }
+
+}
+
+
+/* =========================================================
+   МАЛЕНЬКИЕ ТЕЛЕФОНЫ
+   360px и меньше
+   ========================================================= */
+
+@media (max-width: 380px) {
+
+    .auth-page {
+
+        padding:
+            20px
+            10px;
+
+    }
+
+
+    .brand {
+
+        margin-bottom: 20px;
+
+    }
+
+
+    .brand-symbol {
+
+        font-size: 20px;
+
+    }
+
+
+    .brand h1 {
+
+        font-size: 40px;
+
+        letter-spacing: 0.11em;
+
+        text-indent: 0.11em;
+
+    }
+
+
+    .brand-line {
+
+        margin-top: 13px;
+
+    }
+
+
+    .brand-line span {
+
+        display: none;
+
+    }
+
+
+    .brand-line i {
+
+        width: 100%;
+
+        font-size: 9px;
+
+        letter-spacing: 0.04em;
+
+    }
+
+
+    .auth-panel {
+
+        padding:
+            0
+            17px
+            22px;
+
+    }
+
+
+    .auth-tabs {
+
+        width: calc(100% + 34px);
+
+        margin-left: -17px;
+
+    }
+
+
+    .auth-tab {
+
+        font-size: 16px;
+
+    }
+
+
+    .auth-form-container {
+
+        min-height: 325px;
+
+    }
+
+
+    .form-heading h2 {
+
+        font-size: 26px;
+
+    }
+
+
+    .form-heading p {
+
+        font-size: 12px;
+
+    }
+
+
+    .input-wrapper input {
+
+        min-height: 48px;
+
+    }
+
+
+    .auth-footer {
+
+        padding:
+            0
+            5px;
+
+    }
+
+}
+
+
+/* =========================================================
+   ТЕЛЕФОН В АЛЬБОМНОЙ ОРИЕНТАЦИИ
+   ========================================================= */
+
+@media (
+    max-height: 600px
+) and (
+    orientation: landscape
+) {
+
+    .auth-page {
+
+        align-items: flex-start;
+
+        padding:
+            20px
+            15px;
+
+        overflow-y: auto;
+
+    }
+
+
+    .brand {
+
+        margin-bottom: 18px;
+
+    }
+
+
+    .brand-symbol {
+
+        display: none;
+
+    }
+
+
+    .brand h1 {
+
+        font-size: 42px;
+
+    }
+
+
+    .brand-line {
+
+        margin-top: 9px;
+
+    }
+
+
+    .auth-panel {
+
+        padding-bottom: 20px;
+
+    }
+
+
+    .auth-form-container {
+
+        min-height: auto;
+
+    }
+
+}
+
+
+/* =========================================================
+   СЕНСОРНЫЕ ЭКРАНЫ
+   ========================================================= */
+
+@media (pointer: coarse) {
+
+    .auth-tab {
+
+        min-height: 50px;
+
+    }
+
+
+    .gold-button {
+
+        min-height: 50px;
+
+    }
+
+
+    .logout-button {
+
+        min-height: 42px;
+
+    }
+
+}
+
+
+/* =========================================================
+   УМЕНЬШЕННАЯ АНИМАЦИЯ
+   Для пользователей, которые её отключили
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    *,
+    *::before,
+    *::after {
+
+        scroll-behavior: auto !important;
+
+        transition-duration: 0.01ms !important;
+
+        animation-duration: 0.01ms !important;
+
+        animation-iteration-count: 1 !important;
 
     }
 
