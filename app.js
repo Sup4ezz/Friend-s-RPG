@@ -1972,6 +1972,11 @@ async function renderAdminApplications(
                                         Одобрить
                                     </button>
 
+                                    <div class="admin-application-actions">
+    <button class="gold-button admin-edit-button" data-application-id="${application.id}">
+        Редактировать
+    </button>
+
 
                                     <button
                                         class="admin-reject-button"
