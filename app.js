@@ -2,65 +2,103 @@ import {
     createClient
 } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
+
 let supabase;
 let authSwitching = false;
 
+
+/* =========================================================
+   ИНИЦИАЛИЗАЦИЯ
+   ========================================================= */
+
 async function initialize() {
+
     try {
-        const response = await fetch("/api/config");
+
+        const response =
+            await fetch("/api/config");
+
 
         if (!response.ok) {
+
             throw new Error(
                 "Не удалось получить конфигурацию Supabase."
             );
+
         }
 
-        const config = await response.json();
+
+        const config =
+            await response.json();
+
 
         if (
             !config.supabaseUrl ||
             !config.supabasePublishableKey
         ) {
+
             throw new Error(
                 "Конфигурация Supabase отсутствует."
             );
+
         }
+
 
         supabase = createClient(
             config.supabaseUrl,
             config.supabasePublishableKey
         );
 
-        window.supabaseClient = supabase;
+
+        window.supabaseClient =
+            supabase;
+
 
         const {
             data: {
                 session
             }
-        } = await supabase.auth.getSession();
+        } =
+            await supabase.auth.getSession();
+
 
         render(session);
 
+
         supabase.auth.onAuthStateChange(
             (_event, newSession) => {
+
                 render(newSession);
+
             }
         );
 
+
     } catch (error) {
+
         console.error(error);
 
-        document.getElementById("root").innerHTML = `
+
+        document.getElementById(
+            "root"
+        ).innerHTML = `
+
             <main class="error-screen">
+
                 <div class="error-panel">
-                    <div class="error-symbol">✦</div>
+
+                    <div class="error-symbol">
+                        ✦
+                    </div>
 
                     <h1>
                         Ошибка соединения
                     </h1>
 
                     <p>
-                        ${escapeHtml(error.message)}
+                        ${escapeHtml(
+                            error.message
+                        )}
                     </p>
 
                     <button
@@ -69,10 +107,15 @@ async function initialize() {
                     >
                         Повторить
                     </button>
+
                 </div>
+
             </main>
+
         `;
+
     }
+
 }
 
 
@@ -83,9 +126,13 @@ async function initialize() {
 function render(session) {
 
     if (session) {
+
         renderCabinet(session);
+
     } else {
+
         renderAuth();
+
     }
 
 }
@@ -97,7 +144,10 @@ function render(session) {
 
 function renderAuth() {
 
-    document.getElementById("root").innerHTML = `
+    document.getElementById(
+        "root"
+    ).innerHTML = `
+
         <main class="auth-page">
 
             <div class="background-glow"></div>
@@ -161,16 +211,21 @@ function renderAuth() {
 
 
                 <p class="auth-footer">
+
                     Вход в мир предназначен
                     только для участников игры.
+
                 </p>
 
             </section>
 
         </main>
+
     `;
 
+
     showLogin(true);
+
 }
 
 
@@ -180,6 +235,7 @@ function showLogin(initial = false) {
         return;
     }
 
+
     if (initial) {
 
         setActiveTab("login");
@@ -187,9 +243,12 @@ function showLogin(initial = false) {
         renderLoginForm();
 
         return;
+
     }
 
+
     switchAuthForm("login");
+
 }
 
 
@@ -199,49 +258,68 @@ function showRegister() {
         return;
     }
 
+
     switchAuthForm("register");
+
 }
 
 
 function switchAuthForm(type) {
 
     const form =
-        document.getElementById("auth-form");
+        document.getElementById(
+            "auth-form"
+        );
+
 
     if (!form) {
         return;
     }
 
+
     const currentType =
-        form.dataset.formType || "login";
+        form.dataset.formType ||
+        "login";
+
 
     if (currentType === type) {
         return;
     }
 
+
     authSwitching = true;
 
+
     setActiveTab(type);
+
 
     form.classList.add(
         "auth-form-leaving"
     );
 
+
     setTimeout(() => {
 
         if (type === "login") {
+
             renderLoginForm();
+
         } else {
+
             renderRegisterForm();
+
         }
+
 
         form.classList.remove(
             "auth-form-leaving"
         );
 
+
         form.classList.add(
             "auth-form-entering"
         );
+
 
         requestAnimationFrame(() => {
 
@@ -255,13 +333,16 @@ function switchAuthForm(type) {
 
         });
 
+
         setTimeout(() => {
 
             authSwitching = false;
 
         }, 300);
 
+
     }, 180);
+
 }
 
 
@@ -272,9 +353,14 @@ function switchAuthForm(type) {
 function renderLoginForm() {
 
     const form =
-        document.getElementById("auth-form");
+        document.getElementById(
+            "auth-form"
+        );
 
-    form.dataset.formType = "login";
+
+    form.dataset.formType =
+        "login";
+
 
     form.innerHTML = `
 
@@ -298,6 +384,7 @@ function renderLoginForm() {
                 Логин
             </label>
 
+
             <div class="input-wrapper">
 
                 <span class="input-icon">
@@ -320,6 +407,7 @@ function renderLoginForm() {
             <label for="login-password">
                 Пароль
             </label>
+
 
             <div class="input-wrapper">
 
@@ -349,8 +437,11 @@ function renderLoginForm() {
             </button>
 
         </form>
+
     `;
+
 }
+
 
 /* =========================================================
    ФОРМА РЕГИСТРАЦИИ
@@ -359,9 +450,14 @@ function renderLoginForm() {
 function renderRegisterForm() {
 
     const form =
-        document.getElementById("auth-form");
+        document.getElementById(
+            "auth-form"
+        );
 
-    form.dataset.formType = "register";
+
+    form.dataset.formType =
+        "register";
+
 
     form.innerHTML = `
 
@@ -384,6 +480,7 @@ function renderRegisterForm() {
             <label for="register-username">
                 Логин
             </label>
+
 
             <div class="input-wrapper">
 
@@ -408,6 +505,7 @@ function renderRegisterForm() {
                 Пароль
             </label>
 
+
             <div class="input-wrapper">
 
                 <span class="input-icon">
@@ -429,6 +527,7 @@ function renderRegisterForm() {
             <label for="register-password-confirm">
                 Повторите пароль
             </label>
+
 
             <div class="input-wrapper">
 
@@ -459,46 +558,87 @@ function renderRegisterForm() {
             </button>
 
         </form>
+
     `;
+
 }
 
+
+/* =========================================================
+   ВКЛАДКИ
+   ========================================================= */
 
 function setActiveTab(tab) {
 
     const loginTab =
-        document.getElementById("login-tab");
+        document.getElementById(
+            "login-tab"
+        );
+
 
     const registerTab =
-        document.getElementById("register-tab");
+        document.getElementById(
+            "register-tab"
+        );
 
-    if (!loginTab || !registerTab) {
+
+    if (
+        !loginTab ||
+        !registerTab
+    ) {
+
         return;
+
     }
+
 
     loginTab.classList.toggle(
         "active",
         tab === "login"
     );
 
+
     registerTab.classList.toggle(
         "active",
         tab === "register"
     );
+
 }
 
+
+/* =========================================================
+   ЛОГИН → ТЕХНИЧЕСКИЙ EMAIL
+   ========================================================= */
+
 function encodeUsername(username) {
+
     return btoa(
-        encodeURIComponent(username)
+        encodeURIComponent(
+            username
+        )
     )
-        .replaceAll("+", "-")
-        .replaceAll("/", "_")
-        .replaceAll("=", "");
+        .replaceAll(
+            "+",
+            "-"
+        )
+        .replaceAll(
+            "/",
+            "_"
+        )
+        .replaceAll(
+            "=",
+            ""
+        );
+
 }
 
 
 function getAuthEmail(username) {
+
     return `u_${encodeUsername(username)}@auth.lorgus.local`;
+
 }
+
 
 /* =========================================================
    ВХОД
@@ -508,10 +648,12 @@ async function login(event) {
 
     event.preventDefault();
 
+
     const username =
         document.getElementById(
             "login-username"
         ).value.trim();
+
 
     const password =
         document.getElementById(
@@ -527,6 +669,7 @@ async function login(event) {
         );
 
         return;
+
     }
 
 
@@ -542,10 +685,14 @@ async function login(event) {
 
     const {
         error
-    } = await supabase.auth.signInWithPassword({
-        email,
-        password
-    });
+    } =
+        await supabase.auth.signInWithPassword({
+
+            email,
+
+            password
+
+        });
 
 
     if (error) {
@@ -556,8 +703,11 @@ async function login(event) {
         );
 
         return;
+
     }
+
 }
+
 
 /* =========================================================
    РЕГИСТРАЦИЯ
@@ -567,15 +717,18 @@ async function register(event) {
 
     event.preventDefault();
 
+
     const username =
         document.getElementById(
             "register-username"
         ).value.trim();
 
+
     const password =
         document.getElementById(
             "register-password"
         ).value;
+
 
     const confirmation =
         document.getElementById(
@@ -594,6 +747,7 @@ async function register(event) {
         );
 
         return;
+
     }
 
 
@@ -605,6 +759,7 @@ async function register(event) {
         );
 
         return;
+
     }
 
 
@@ -621,28 +776,28 @@ async function register(event) {
     const {
         data,
         error
-    } = await supabase.auth.signUp({
+    } =
+        await supabase.auth.signUp({
 
-        email,
+            email,
 
-        password,
+            password,
 
-        options: {
+            options: {
 
-            data: {
-                username
+                data: {
+                    username
+                }
+
             }
 
-        }
-
-    });
+        });
 
 
     if (error) {
 
-        console.error(
-            error
-        );
+        console.error(error);
+
 
         if (
             error.message.includes(
@@ -668,6 +823,7 @@ async function register(event) {
         }
 
         return;
+
     }
 
 
@@ -680,6 +836,7 @@ async function register(event) {
         "Аккаунт создан. Теперь можно войти.",
         "success"
     );
+
 }
 
 
@@ -694,7 +851,9 @@ async function renderCabinet(session) {
         "Игрок";
 
 
-    document.getElementById("root").innerHTML = `
+    document.getElementById(
+        "root"
+    ).innerHTML = `
 
         <main class="game-page">
 
@@ -715,9 +874,12 @@ async function renderCabinet(session) {
 
                 <div class="player-area">
 
-                  <span class="player-email">
-    ${escapeHtml(username)}
-</span>
+                    <span class="player-email">
+                        ${escapeHtml(
+                            username
+                        )}
+                    </span>
+
 
                     <button
                         class="logout-button"
@@ -751,15 +913,17 @@ async function renderCabinet(session) {
             </section>
 
         </main>
+
     `;
 
 
     await loadPlayerState(session);
+
 }
 
 
 /* =========================================================
-   ЗАГРУЗКА СОСТОЯНИЯ ИГРОКА
+   СОСТОЯНИЕ ИГРОКА
    ========================================================= */
 
 async function loadPlayerState(session) {
@@ -769,24 +933,23 @@ async function loadPlayerState(session) {
             "cabinet-content"
         );
 
+
     if (!container) {
         return;
     }
 
 
     /*
-     * Сначала проверяем администратора.
-     *
-     * Только пользователь, которого мы добавили
-     * в таблицу admins, получит true.
+     * Проверяем администратора.
      */
 
     const {
         data: isAdmin,
         error: adminError
-    } = await supabase.rpc(
-        "is_admin"
-    );
+    } =
+        await supabase.rpc(
+            "is_admin"
+        );
 
 
     if (adminError) {
@@ -803,24 +966,33 @@ async function loadPlayerState(session) {
         );
 
         return;
+
     }
 
 
     /*
-     * Если пользователь не администратор,
-     * загружаем его обычный кабинет.
+     * Обычный игрок.
      */
 
     const {
         data: applications,
         error: applicationsError
-    } = await supabase
-        .from("character_applications")
-        .select("*")
-        .eq("player_id", session.user.id)
-        .order("id", {
-            ascending: false
-        });
+    } =
+        await supabase
+            .from(
+                "character_applications"
+            )
+            .select("*")
+            .eq(
+                "player_id",
+                session.user.id
+            )
+            .order(
+                "id",
+                {
+                    ascending: false
+                }
+            );
 
 
     if (applicationsError) {
@@ -829,19 +1001,23 @@ async function loadPlayerState(session) {
             applicationsError
         );
 
+
         showCharacterError(
             container,
             applicationsError.message
         );
 
+
         return;
+
     }
 
 
     const pendingApplication =
         applications.find(
             application =>
-                application.status === "pending"
+                application.status ===
+                "pending"
         );
 
 
@@ -852,14 +1028,17 @@ async function loadPlayerState(session) {
             pendingApplication
         );
 
+
         return;
+
     }
 
 
     const approvedApplication =
         applications.find(
             application =>
-                application.status === "approved" &&
+                application.status ===
+                    "approved" &&
                 application.character_id
         );
 
@@ -871,13 +1050,581 @@ async function loadPlayerState(session) {
             approvedApplication.character_id
         );
 
+
         return;
+
     }
 
 
     renderCharacterApplicationForm(
         container
     );
+
+}
+
+
+/* =========================================================
+   ФОРМА СОЗДАНИЯ ПЕРСОНАЖА
+   ========================================================= */
+
+function renderCharacterApplicationForm(
+    container
+) {
+
+    container.className =
+        "character-application";
+
+
+    container.innerHTML = `
+
+        <div class="character-header">
+
+            <div class="welcome-symbol">
+                ✦
+            </div>
+
+            <h1>
+                Создание персонажа
+            </h1>
+
+            <p>
+                Заполни анкету персонажа.
+            </p>
+
+        </div>
+
+
+        <form
+            id="character-application-form"
+            onsubmit="submitCharacterApplication(event)"
+        >
+
+
+            <div class="character-grid">
+
+
+                <div class="character-field">
+
+                    <label for="character-name">
+                        Имя персонажа
+                    </label>
+
+                    <input
+                        id="character-name"
+                        type="text"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="character-field">
+
+                    <label for="character-race">
+                        Раса
+                    </label>
+
+                    <input
+                        id="character-race"
+                        type="text"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="character-field">
+
+                    <label for="character-age">
+                        Возраст
+                    </label>
+
+                    <input
+                        id="character-age"
+                        type="number"
+                        min="1"
+                        max="1000"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="character-field">
+
+                    <label for="character-homeland">
+                        Родина
+                    </label>
+
+                    <input
+                        id="character-homeland"
+                        type="text"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="character-field full">
+
+                    <label for="character-personality">
+                        Характер
+                    </label>
+
+                    <textarea
+                        id="character-personality"
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <div class="character-field full">
+
+                    <label for="character-backstory">
+                        Предыстория
+                    </label>
+
+                    <textarea
+                        id="character-backstory"
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <div class="character-field full">
+
+                    <label for="character-skills">
+                        Особые навыки
+                    </label>
+
+                    <textarea
+                        id="character-skills"
+                        required
+                    ></textarea>
+
+                </div>
+
+
+                <div class="character-field">
+
+                    <label for="character-weapon">
+                        Предпочитаемое оружие
+                    </label>
+
+                    <input
+                        id="character-weapon"
+                        type="text"
+                    >
+
+                    <div class="character-hint">
+                        Поле необязательное.
+                    </div>
+
+                </div>
+
+
+                <div class="character-field">
+
+                    <label for="character-occupation">
+                        Род занятий
+                    </label>
+
+                    <input
+                        id="character-occupation"
+                        type="text"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="character-field full">
+
+                    <label for="character-photo">
+                        Изображение персонажа
+                    </label>
+
+                    <input
+                        id="character-photo"
+                        type="file"
+                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    >
+
+                    <div class="character-hint">
+                        JPG, PNG или WEBP. Максимальный размер — 5 МБ.
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <div
+                id="character-message"
+                class="character-message"
+            ></div>
+
+
+            <button
+                type="submit"
+                class="gold-button character-submit"
+            >
+                Отправить заявку
+            </button>
+
+
+        </form>
+
+    `;
+
+}
+
+
+/* =========================================================
+   ОТПРАВКА ЗАЯВКИ
+   ========================================================= */
+
+async function submitCharacterApplication(
+    event
+) {
+
+    event.preventDefault();
+
+
+    const {
+        data: {
+            user
+        }
+    } =
+        await supabase.auth.getUser();
+
+
+    if (!user) {
+
+        setCharacterMessage(
+            "Необходимо войти в аккаунт.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const name =
+        document.getElementById(
+            "character-name"
+        ).value.trim();
+
+
+    const race =
+        document.getElementById(
+            "character-race"
+        ).value.trim();
+
+
+    const age =
+        Number(
+            document.getElementById(
+                "character-age"
+            ).value
+        );
+
+
+    const homeland =
+        document.getElementById(
+            "character-homeland"
+        ).value.trim();
+
+
+    const personality =
+        document.getElementById(
+            "character-personality"
+        ).value.trim();
+
+
+    const backstory =
+        document.getElementById(
+            "character-backstory"
+        ).value.trim();
+
+
+    const specialSkills =
+        document.getElementById(
+            "character-skills"
+        ).value.trim();
+
+
+    const preferredWeapon =
+        document.getElementById(
+            "character-weapon"
+        ).value.trim();
+
+
+    const occupation =
+        document.getElementById(
+            "character-occupation"
+        ).value.trim();
+
+
+    const photoInput =
+        document.getElementById(
+            "character-photo"
+        );
+
+
+    if (
+        !name ||
+        !race ||
+        !age ||
+        !homeland ||
+        !personality ||
+        !backstory ||
+        !specialSkills ||
+        !occupation
+    ) {
+
+        setCharacterMessage(
+            "Заполни все обязательные поля.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    const submitButton =
+        document.querySelector(
+            ".character-submit"
+        );
+
+
+    if (submitButton) {
+
+        submitButton.disabled =
+            true;
+
+        submitButton.textContent =
+            "Отправка...";
+
+    }
+
+
+    setCharacterMessage(
+        "Создаём заявку...",
+        "info"
+    );
+
+
+    const applicationId =
+        crypto.randomUUID();
+
+
+    let photoPath =
+        null;
+
+
+    /*
+     * Загрузка фотографии.
+     */
+
+    if (
+        photoInput &&
+        photoInput.files &&
+        photoInput.files.length > 0
+    ) {
+
+        const photo =
+            photoInput.files[0];
+
+
+        if (
+            photo.size >
+            5 * 1024 * 1024
+        ) {
+
+            setCharacterMessage(
+                "Изображение не должно превышать 5 МБ.",
+                "error"
+            );
+
+
+            if (submitButton) {
+
+                submitButton.disabled =
+                    false;
+
+                submitButton.textContent =
+                    "Отправить заявку";
+
+            }
+
+
+            return;
+
+        }
+
+
+        const extension =
+            getFileExtension(
+                photo.name
+            );
+
+
+        photoPath =
+            `${user.id}/${applicationId}/photo.${extension}`;
+
+
+        const {
+            error: uploadError
+        } =
+            await supabase.storage
+                .from(
+                    "character-applications"
+                )
+                .upload(
+                    photoPath,
+                    photo,
+                    {
+                        contentType:
+                            photo.type,
+                        upsert:
+                            false
+                    }
+                );
+
+
+        if (uploadError) {
+
+            console.error(
+                uploadError
+            );
+
+
+            setCharacterMessage(
+                "Не удалось загрузить изображение: " +
+                uploadError.message,
+                "error"
+            );
+
+
+            if (submitButton) {
+
+                submitButton.disabled =
+                    false;
+
+                submitButton.textContent =
+                    "Отправить заявку";
+
+            }
+
+
+            return;
+
+        }
+
+    }
+
+
+    /*
+     * Создание заявки в базе.
+     */
+
+    const {
+        error: applicationError
+    } =
+        await supabase
+            .from(
+                "character_applications"
+            )
+            .insert({
+
+                id:
+                    applicationId,
+
+                player_id:
+                    user.id,
+
+                name,
+
+                race,
+
+                age,
+
+                homeland,
+
+                personality,
+
+                backstory,
+
+                special_skills:
+                    specialSkills,
+
+                preferred_weapon:
+                    preferredWeapon ||
+                    null,
+
+                occupation,
+
+                photo_path:
+                    photoPath,
+
+                status:
+                    "pending",
+
+                character_id:
+                    null
+
+            });
+
+
+    if (applicationError) {
+
+        console.error(
+            applicationError
+        );
+
+
+        setCharacterMessage(
+            "Не удалось создать заявку: " +
+            applicationError.message,
+            "error"
+        );
+
+
+        if (submitButton) {
+
+            submitButton.disabled =
+                false;
+
+            submitButton.textContent =
+                "Отправить заявку";
+
+        }
+
+
+        return;
+
+    }
+
+
+    renderPendingApplication(
+        document.getElementById(
+            "cabinet-content"
+        ),
+        {
+            id:
+                applicationId,
+
+            status:
+                "pending"
+        }
+    );
+
 }
 
 
@@ -885,17 +1632,25 @@ async function loadPlayerState(session) {
    АДМИНКА
    ========================================================= */
 
-async function loadAdminPanel(container) {
+async function loadAdminPanel(
+    container
+) {
 
     const {
         data: applications,
         error
-    } = await supabase
-        .from("character_applications")
-        .select("*")
-        .order("id", {
-            ascending: false
-        });
+    } =
+        await supabase
+            .from(
+                "character_applications"
+            )
+            .select("*")
+            .order(
+                "id",
+                {
+                    ascending: false
+                }
+            );
 
 
     if (error) {
@@ -904,6 +1659,7 @@ async function loadAdminPanel(container) {
             "Ошибка загрузки заявок:",
             error
         );
+
 
         container.className =
             "welcome-panel";
@@ -920,12 +1676,16 @@ async function loadAdminPanel(container) {
             </h1>
 
             <p>
-                ${escapeHtml(error.message)}
+                ${escapeHtml(
+                    error.message
+                )}
             </p>
 
         `;
 
+
         return;
+
     }
 
 
@@ -933,8 +1693,13 @@ async function loadAdminPanel(container) {
         container,
         applications || []
     );
+
 }
 
+
+/* =========================================================
+   ОТОБРАЖЕНИЕ ЗАЯВОК В АДМИНКЕ
+   ========================================================= */
 
 function renderAdminApplications(
     container,
@@ -948,21 +1713,24 @@ function renderAdminApplications(
     const pending =
         applications.filter(
             application =>
-                application.status === "pending"
+                application.status ===
+                "pending"
         );
 
 
     const approved =
         applications.filter(
             application =>
-                application.status === "approved"
+                application.status ===
+                "approved"
         );
 
 
     const rejected =
         applications.filter(
             application =>
-                application.status === "rejected"
+                application.status ===
+                "rejected"
         );
 
 
@@ -986,6 +1754,7 @@ function renderAdminApplications(
 
 
         <div class="admin-stats">
+
 
             <div class="admin-stat">
 
@@ -1025,13 +1794,16 @@ function renderAdminApplications(
 
             </div>
 
+
         </div>
 
 
         <div class="admin-applications">
 
+
             ${
                 pending.length === 0
+
                     ? `
 
                         <div class="admin-empty">
@@ -1051,7 +1823,9 @@ function renderAdminApplications(
                         </div>
 
                     `
+
                     :
+
                     pending.map(
                         application => `
 
@@ -1060,7 +1834,9 @@ function renderAdminApplications(
                                 data-application-id="${application.id}"
                             >
 
+
                                 <div class="admin-application-main">
+
 
                                     <h3>
                                         ${escapeHtml(
@@ -1071,39 +1847,142 @@ function renderAdminApplications(
 
                                     <div class="admin-application-info">
 
+
                                         <span>
-                                            <strong>Раса:</strong>
+                                            <strong>
+                                                Раса:
+                                            </strong>
+
                                             ${escapeHtml(
                                                 application.race
                                             )}
                                         </span>
 
-                                        <span>
-                                            <strong>Возраст:</strong>
-                                            ${application.age} лет
-                                        </span>
 
                                         <span>
-                                            <strong>Род занятий:</strong>
+                                            <strong>
+                                                Возраст:
+                                            </strong>
+
+                                            ${application.age}
+                                            лет
+                                        </span>
+
+
+                                        <span>
+                                            <strong>
+                                                Родина:
+                                            </strong>
+
+                                            ${escapeHtml(
+                                                application.homeland
+                                            )}
+                                        </span>
+
+
+                                        <span>
+                                            <strong>
+                                                Род занятий:
+                                            </strong>
+
                                             ${escapeHtml(
                                                 application.occupation
                                             )}
                                         </span>
 
+
+                                        <span>
+                                            <strong>
+                                                Оружие:
+                                            </strong>
+
+                                            ${
+                                                application.preferred_weapon
+
+                                                    ? escapeHtml(
+                                                        application.preferred_weapon
+                                                    )
+
+                                                    : "Не указано"
+                                            }
+
+                                        </span>
+
+
                                     </div>
 
 
-                                    <p>
-                                        <strong>Характер:</strong>
-                                        ${escapeHtml(
-                                            application.personality
-                                        )}
-                                    </p>
+                                    <div class="admin-application-section">
+
+                                        <strong>
+                                            Характер
+                                        </strong>
+
+                                        <p>
+                                            ${escapeHtml(
+                                                application.personality
+                                            )}
+                                        </p>
+
+                                    </div>
+
+
+                                    <div class="admin-application-section">
+
+                                        <strong>
+                                            Предыстория
+                                        </strong>
+
+                                        <p>
+                                            ${escapeHtml(
+                                                application.backstory
+                                            )}
+                                        </p>
+
+                                    </div>
+
+
+                                    <div class="admin-application-section">
+
+                                        <strong>
+                                            Особые навыки
+                                        </strong>
+
+                                        <p>
+                                            ${escapeHtml(
+                                                application.special_skills
+                                            )}
+                                        </p>
+
+                                    </div>
+
+
+                                    <div class="admin-application-section">
+
+                                        <strong>
+                                            Изображение персонажа
+                                        </strong>
+
+                                        <p>
+
+                                            ${
+                                                application.photo_path
+
+                                                    ? "Изображение загружено."
+
+                                                    : "Не загружено."
+                                            }
+
+                                        </p>
+
+                                    </div>
+
 
                                 </div>
 
 
                                 <div class="admin-application-actions">
+
 
                                     <button
                                         class="gold-button admin-approve-button"
@@ -1120,7 +1999,9 @@ function renderAdminApplications(
                                         Отклонить
                                     </button>
 
+
                                 </div>
+
 
                             </article>
 
@@ -1128,13 +2009,14 @@ function renderAdminApplications(
                     ).join("")
             }
 
+
         </div>
 
     `;
 
 
     /*
-     * КНОПКА «ОДОБРИТЬ»
+     * ОДОБРИТЬ
      */
 
     container
@@ -1162,7 +2044,9 @@ function renderAdminApplications(
                     }
 
 
-                    button.disabled = true;
+                    button.disabled =
+                        true;
+
 
                     button.textContent =
                         "Одобрение...";
@@ -1170,13 +2054,14 @@ function renderAdminApplications(
 
                     const {
                         error
-                    } = await supabase.rpc(
-                        "approve_character_application",
-                        {
-                            application_id:
-                                applicationId
-                        }
-                    );
+                    } =
+                        await supabase.rpc(
+                            "approve_character_application",
+                            {
+                                application_id:
+                                    applicationId
+                            }
+                        );
 
 
                     if (error) {
@@ -1185,17 +2070,23 @@ function renderAdminApplications(
                             error
                         );
 
+
                         alert(
                             "Не удалось одобрить заявку:\n\n" +
                             error.message
                         );
 
-                        button.disabled = false;
+
+                        button.disabled =
+                            false;
+
 
                         button.textContent =
                             "Одобрить";
 
+
                         return;
+
                     }
 
 
@@ -1210,7 +2101,7 @@ function renderAdminApplications(
 
 
     /*
-     * КНОПКА «ОТКЛОНИТЬ»
+     * ОТКЛОНИТЬ
      */
 
     container
@@ -1238,7 +2129,9 @@ function renderAdminApplications(
                     }
 
 
-                    button.disabled = true;
+                    button.disabled =
+                        true;
+
 
                     button.textContent =
                         "Отклонение...";
@@ -1246,13 +2139,14 @@ function renderAdminApplications(
 
                     const {
                         error
-                    } = await supabase.rpc(
-                        "reject_character_application",
-                        {
-                            application_id:
-                                applicationId
-                        }
-                    );
+                    } =
+                        await supabase.rpc(
+                            "reject_character_application",
+                            {
+                                application_id:
+                                    applicationId
+                            }
+                        );
 
 
                     if (error) {
@@ -1261,17 +2155,23 @@ function renderAdminApplications(
                             error
                         );
 
+
                         alert(
                             "Не удалось отклонить заявку:\n\n" +
                             error.message
                         );
 
-                        button.disabled = false;
+
+                        button.disabled =
+                            false;
+
 
                         button.textContent =
                             "Отклонить";
 
+
                         return;
+
                     }
 
 
@@ -1283,521 +2183,7 @@ function renderAdminApplications(
             );
 
         });
-}
 
-
-/* =========================================================
-   ЗАЯВКА НА ПЕРСОНАЖА
-   ========================================================= */
-
-function renderCharacterApplicationForm(
-    container
-) {
-
-    container.className =
-        "character-application";
-
-
-    container.innerHTML = `
-
-        <div class="character-header">
-
-            <div class="welcome-symbol">
-                ✦
-            </div>
-
-            <h1>
-                Создание персонажа
-            </h1>
-
-            <p>
-                Заполни заявку.
-                После отправки она будет
-                рассмотрена мастером.
-            </p>
-
-        </div>
-
-
-        <form
-            id="character-form"
-            onsubmit="submitCharacterApplication(event)"
-        >
-
-            <div class="character-grid">
-
-
-                <div class="character-field">
-
-                    <label for="character-name">
-                        Имя персонажа *
-                    </label>
-
-                    <input
-                        id="character-name"
-                        type="text"
-                        maxlength="100"
-                        required
-                        placeholder="Например: Эдвард"
-                    >
-
-                </div>
-
-
-                <div class="character-field">
-
-                    <label for="character-race">
-                        Раса *
-                    </label>
-
-                    <input
-                        id="character-race"
-                        type="text"
-                        maxlength="100"
-                        required
-                        placeholder="Например: Человек"
-                    >
-
-                </div>
-
-
-                <div class="character-field">
-
-                    <label for="character-age">
-                        Возраст *
-                    </label>
-
-                    <input
-                        id="character-age"
-                        type="number"
-                        min="1"
-                        max="1000"
-                        required
-                        placeholder="25"
-                    >
-
-                </div>
-
-
-                <div class="character-field">
-
-                    <label for="character-homeland">
-                        Родина *
-                    </label>
-
-                    <input
-                        id="character-homeland"
-                        type="text"
-                        maxlength="150"
-                        required
-                        placeholder="Город или королевство"
-                    >
-
-                </div>
-
-
-                <div class="character-field full">
-
-                    <label for="character-personality">
-                        Характер *
-                    </label>
-
-                    <textarea
-                        id="character-personality"
-                        maxlength="3000"
-                        required
-                        placeholder="Опиши характер персонажа..."
-                    ></textarea>
-
-                </div>
-
-
-                <div class="character-field full">
-
-                    <label for="character-backstory">
-                        Предыстория *
-                    </label>
-
-                    <textarea
-                        id="character-backstory"
-                        maxlength="10000"
-                        required
-                        placeholder="Расскажи историю персонажа..."
-                    ></textarea>
-
-                </div>
-
-
-                <div class="character-field full">
-
-                    <label for="character-skills">
-                        Особые навыки *
-                    </label>
-
-                    <textarea
-                        id="character-skills"
-                        maxlength="5000"
-                        required
-                        placeholder="Какими навыками владеет персонаж?"
-                    ></textarea>
-
-                </div>
-
-
-                <div class="character-field">
-
-                    <label for="character-weapon">
-                        Предпочитаемое оружие
-                    </label>
-
-                    <input
-                        id="character-weapon"
-                        type="text"
-                        maxlength="150"
-                        placeholder="Можно оставить пустым"
-                    >
-
-                </div>
-
-
-                <div class="character-field">
-
-                    <label for="character-occupation">
-                        Занятие *
-                    </label>
-
-                    <input
-                        id="character-occupation"
-                        type="text"
-                        maxlength="150"
-                        required
-                        placeholder="Например: Наёмник"
-                    >
-
-                </div>
-
-
-                <div class="character-field full">
-
-                    <label for="character-photo">
-                        Изображение персонажа
-                    </label>
-
-                    <input
-                        id="character-photo"
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp"
-                    >
-
-                    <small class="character-hint">
-                        JPG, PNG или WebP.
-                    </small>
-
-                </div>
-
-            </div>
-
-
-            <div
-                id="character-message"
-                class="character-message"
-            ></div>
-
-
-            <button
-                type="submit"
-                class="gold-button character-submit"
-            >
-                Отправить заявку
-            </button>
-
-        </form>
-    `;
-}
-
-
-/* =========================================================
-   ОТПРАВКА ЗАЯВКИ
-   ========================================================= */
-
-async function submitCharacterApplication(
-    event
-) {
-
-    event.preventDefault();
-
-
-    const user =
-        (await supabase.auth.getUser()).data.user;
-
-
-    if (!user) {
-
-        setCharacterMessage(
-            "Сессия закончилась. Войди снова.",
-            "error"
-        );
-
-        return;
-    }
-
-
-    const name =
-        document.getElementById(
-            "character-name"
-        ).value.trim();
-
-    const race =
-        document.getElementById(
-            "character-race"
-        ).value.trim();
-
-    const age =
-        Number(
-            document.getElementById(
-                "character-age"
-            ).value
-        );
-
-    const homeland =
-        document.getElementById(
-            "character-homeland"
-        ).value.trim();
-
-    const personality =
-        document.getElementById(
-            "character-personality"
-        ).value.trim();
-
-    const backstory =
-        document.getElementById(
-            "character-backstory"
-        ).value.trim();
-
-    const specialSkills =
-        document.getElementById(
-            "character-skills"
-        ).value.trim();
-
-    const preferredWeapon =
-        document.getElementById(
-            "character-weapon"
-        ).value.trim();
-
-    const occupation =
-        document.getElementById(
-            "character-occupation"
-        ).value.trim();
-
-    const photoInput =
-        document.getElementById(
-            "character-photo"
-        );
-
-
-    const photo =
-        photoInput.files[0] || null;
-
-
-    if (
-        !name ||
-        !race ||
-        !age ||
-        !homeland ||
-        !personality ||
-        !backstory ||
-        !specialSkills ||
-        !occupation
-    ) {
-
-        setCharacterMessage(
-            "Заполни все обязательные поля.",
-            "error"
-        );
-
-        return;
-    }
-
-
-    if (photo) {
-
-        const allowedTypes = [
-            "image/jpeg",
-            "image/png",
-            "image/webp"
-        ];
-
-
-        if (
-            !allowedTypes.includes(
-                photo.type
-            )
-        ) {
-
-            setCharacterMessage(
-                "Разрешены только JPG, PNG и WebP.",
-                "error"
-            );
-
-            return;
-        }
-
-
-        if (
-            photo.size >
-            5 * 1024 * 1024
-        ) {
-
-            setCharacterMessage(
-                "Размер изображения не должен превышать 5 МБ.",
-                "error"
-            );
-
-            return;
-        }
-
-    }
-
-
-    setCharacterMessage(
-        "Отправляем заявку...",
-        "info"
-    );
-
-
-    const applicationId =
-        crypto.randomUUID();
-
-
-    let photoPath = null;
-
-
-    /*
-       Сначала загружаем фотографию.
-       Путь привязан к ID игрока и ID заявки.
-    */
-
-    if (photo) {
-
-        const extension =
-            getFileExtension(
-                photo.name
-            );
-
-        photoPath =
-            `${user.id}/${applicationId}/photo.${extension}`;
-
-
-        const {
-            error: uploadError
-        } = await supabase
-            .storage
-            .from(
-                "character-applications"
-            )
-            .upload(
-                photoPath,
-                photo,
-                {
-                    contentType:
-                        photo.type,
-                    upsert: false
-                }
-            );
-
-
-        if (uploadError) {
-
-            console.error(
-                uploadError
-            );
-
-            setCharacterMessage(
-                "Не удалось загрузить изображение: " +
-                uploadError.message,
-                "error"
-            );
-
-            return;
-        }
-
-    }
-
-
-    /*
-       Теперь создаём саму заявку.
-    */
-
-    const {
-        error: applicationError
-    } = await supabase
-        .from("character_applications")
-        .insert({
-
-            id: applicationId,
-
-            player_id: user.id,
-
-            name,
-
-            race,
-
-            age,
-
-            homeland,
-
-            personality,
-
-            backstory,
-
-            special_skills:
-                specialSkills,
-
-            preferred_weapon:
-                preferredWeapon || null,
-
-            occupation,
-
-            photo_path:
-                photoPath,
-
-            status:
-                "pending",
-
-            character_id:
-                null
-
-        });
-
-
-    if (applicationError) {
-
-        console.error(
-            applicationError
-        );
-
-        setCharacterMessage(
-            "Не удалось создать заявку: " +
-            applicationError.message,
-            "error"
-        );
-
-        return;
-    }
-
-
-    renderPendingApplication(
-        document.getElementById(
-            "cabinet-content"
-        ),
-        {
-            id:
-                applicationId,
-
-            status:
-                "pending"
-        }
-    );
 }
 
 
@@ -1820,19 +2206,23 @@ function renderPendingApplication(
             ✦
         </div>
 
+
         <h1>
             Заявка отправлена
         </h1>
+
 
         <p>
             Твоя заявка на персонажа
             находится на рассмотрении.
         </p>
 
+
         <p>
             Когда мастер примет решение,
             персонаж появится в твоём кабинете.
         </p>
+
 
         <div class="ornament">
 
@@ -1847,6 +2237,7 @@ function renderPendingApplication(
         </div>
 
     `;
+
 }
 
 
@@ -1862,11 +2253,15 @@ async function loadCharacter(
     const {
         data: character,
         error
-    } = await supabase
-        .from("characters")
-        .select("*")
-        .eq("id", characterId)
-        .single();
+    } =
+        await supabase
+            .from("characters")
+            .select("*")
+            .eq(
+                "id",
+                characterId
+            )
+            .single();
 
 
     if (error) {
@@ -1875,12 +2270,15 @@ async function loadCharacter(
             error
         );
 
+
         showCharacterError(
             container,
             error.message
         );
 
+
         return;
+
     }
 
 
@@ -1888,6 +2286,7 @@ async function loadCharacter(
         container,
         character
     );
+
 }
 
 
@@ -1910,11 +2309,13 @@ function renderCharacter(
             ✦
         </div>
 
+
         <h1>
             ${escapeHtml(
                 character.name
             )}
         </h1>
+
 
         <p>
             Твой персонаж принят
@@ -1946,6 +2347,7 @@ function renderCharacter(
         </p>
 
     `;
+
 }
 
 
@@ -1968,9 +2370,11 @@ function showCharacterError(
             !
         </div>
 
+
         <h1>
             Не удалось загрузить персонажа
         </h1>
+
 
         <p>
             ${escapeHtml(
@@ -1979,11 +2383,12 @@ function showCharacterError(
         </p>
 
     `;
+
 }
 
 
 /* =========================================================
-   СООБЩЕНИЯ ФОРМЫ ПЕРСОНАЖА
+   СООБЩЕНИЯ ЗАЯВКИ
    ========================================================= */
 
 function setCharacterMessage(
@@ -1996,6 +2401,7 @@ function setCharacterMessage(
             "character-message"
         );
 
+
     if (!element) {
         return;
     }
@@ -2007,6 +2413,7 @@ function setCharacterMessage(
 
     element.textContent =
         text;
+
 }
 
 
@@ -2022,7 +2429,7 @@ async function logout() {
 
 
 /* =========================================================
-   ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+   СООБЩЕНИЯ АВТОРИЗАЦИИ
    ========================================================= */
 
 function setMessage(
@@ -2035,6 +2442,7 @@ function setMessage(
             "auth-message"
         );
 
+
     if (!element) {
         return;
     }
@@ -2046,8 +2454,13 @@ function setMessage(
 
     element.textContent =
         text;
+
 }
 
+
+/* =========================================================
+   РАСШИРЕНИЕ ФАЙЛА
+   ========================================================= */
 
 function getFileExtension(
     filename
@@ -2070,7 +2483,9 @@ function getFileExtension(
         extension === "jpeg" ||
         extension === "jpg"
     ) {
+
         return "jpg";
+
     }
 
 
@@ -2085,8 +2500,13 @@ function getFileExtension(
 
 
     return "jpg";
+
 }
 
+
+/* =========================================================
+   ЭКРАНИРОВАНИЕ HTML
+   ========================================================= */
 
 function escapeHtml(value) {
 
@@ -2116,6 +2536,7 @@ function escapeHtml(value) {
             "'",
             "&#039;"
         );
+
 }
 
 
@@ -2126,20 +2547,29 @@ function escapeHtml(value) {
 window.showLogin =
     showLogin;
 
+
 window.showRegister =
     showRegister;
+
 
 window.login =
     login;
 
+
 window.register =
     register;
+
 
 window.logout =
     logout;
 
+
 window.submitCharacterApplication =
     submitCharacterApplication;
 
+
+/* =========================================================
+   ЗАПУСК
+   ========================================================= */
 
 initialize();
