@@ -1,6 +1,7 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
 let supabase;
+let authSwitching = false;
 
 async function initialize() {
     try {
@@ -40,9 +41,15 @@ async function initialize() {
             <main class="error-screen">
                 <div class="error-panel">
                     <div class="error-symbol">✦</div>
+
                     <h1>Ошибка соединения</h1>
+
                     <p>${escapeHtml(error.message)}</p>
-                    <button onclick="location.reload()" class="gold-button">
+
+                    <button
+                        onclick="location.reload()"
+                        class="gold-button"
+                    >
                         Повторить
                     </button>
                 </div>
@@ -68,20 +75,23 @@ function renderAuth() {
             <section class="auth-container">
 
                 <div class="brand">
+
                     <div class="brand-symbol">✦</div>
 
-                    <h1>Friends RPG</h1>
+                    <h1>ЛОРГУС</h1>
 
                     <div class="brand-line">
                         <span></span>
-                        <i>Мир ждёт своих героев</i>
+                        <i>СМЕЛЫЕ ИДЕИ НАЧИНАЮТСЯ С ПЕРВОГО ШАГА</i>
                         <span></span>
                     </div>
+
                 </div>
 
                 <div class="auth-panel">
 
                     <div class="auth-tabs">
+
                         <button
                             id="login-tab"
                             class="auth-tab active"
@@ -97,9 +107,13 @@ function renderAuth() {
                         >
                             Регистрация
                         </button>
+
                     </div>
 
-                    <div id="auth-form"></div>
+                    <div
+                        id="auth-form"
+                        class="auth-form-container"
+                    ></div>
 
                 </div>
 
@@ -112,24 +126,105 @@ function renderAuth() {
         </main>
     `;
 
-    showLogin();
+    showLogin(true);
 }
 
-function showLogin() {
-    setActiveTab("login");
 
-    document.getElementById("auth-form").innerHTML = `
+function showLogin(initial = false) {
+    if (authSwitching) {
+        return;
+    }
+
+    if (initial) {
+        setActiveTab("login");
+        renderLoginForm();
+        return;
+    }
+
+    switchAuthForm("login");
+}
+
+
+function showRegister() {
+    if (authSwitching) {
+        return;
+    }
+
+    switchAuthForm("register");
+}
+
+
+function switchAuthForm(type) {
+    const form = document.getElementById("auth-form");
+
+    if (!form) {
+        return;
+    }
+
+    const currentType =
+        form.dataset.formType || "login";
+
+    if (currentType === type) {
+        return;
+    }
+
+    authSwitching = true;
+
+    setActiveTab(type);
+
+    form.classList.add("auth-form-leaving");
+
+    setTimeout(() => {
+
+        if (type === "login") {
+            renderLoginForm();
+        } else {
+            renderRegisterForm();
+        }
+
+        form.classList.remove("auth-form-leaving");
+        form.classList.add("auth-form-entering");
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                form.classList.remove("auth-form-entering");
+            });
+        });
+
+        setTimeout(() => {
+            authSwitching = false;
+        }, 280);
+
+    }, 180);
+}
+
+
+function renderLoginForm() {
+    const form = document.getElementById("auth-form");
+
+    form.dataset.formType = "login";
+
+    form.innerHTML = `
         <div class="form-heading">
+
             <h2>Добро пожаловать</h2>
-            <p>Войди, чтобы продолжить своё путешествие.</p>
+
+            <p>
+                Войди, чтобы продолжить своё путешествие.
+            </p>
+
         </div>
 
         <form onsubmit="login(event)">
 
-            <label for="login-email">Email</label>
+            <label for="login-email">
+                Email
+            </label>
 
             <div class="input-wrapper">
+
                 <span class="input-icon">✉</span>
+
                 <input
                     id="login-email"
                     type="email"
@@ -137,12 +232,17 @@ function showLogin() {
                     autocomplete="email"
                     required
                 >
+
             </div>
 
-            <label for="login-password">Пароль</label>
+            <label for="login-password">
+                Пароль
+            </label>
 
             <div class="input-wrapper">
+
                 <span class="input-icon">◆</span>
+
                 <input
                     id="login-password"
                     type="password"
@@ -150,11 +250,15 @@ function showLogin() {
                     autocomplete="current-password"
                     required
                 >
+
             </div>
 
             <div id="auth-message"></div>
 
-            <button type="submit" class="gold-button main-button">
+            <button
+                type="submit"
+                class="gold-button main-button"
+            >
                 Войти в мир
             </button>
 
@@ -162,21 +266,33 @@ function showLogin() {
     `;
 }
 
-function showRegister() {
-    setActiveTab("register");
 
-    document.getElementById("auth-form").innerHTML = `
+function renderRegisterForm() {
+    const form = document.getElementById("auth-form");
+
+    form.dataset.formType = "register";
+
+    form.innerHTML = `
         <div class="form-heading">
+
             <h2>Создать аккаунт</h2>
-            <p>Начни своё путешествие в мире Friends RPG.</p>
+
+            <p>
+                Начни своё путешествие в мире ЛОРГУС.
+            </p>
+
         </div>
 
         <form onsubmit="register(event)">
 
-            <label for="register-email">Email</label>
+            <label for="register-email">
+                Email
+            </label>
 
             <div class="input-wrapper">
+
                 <span class="input-icon">✉</span>
+
                 <input
                     id="register-email"
                     type="email"
@@ -184,12 +300,17 @@ function showRegister() {
                     autocomplete="email"
                     required
                 >
+
             </div>
 
-            <label for="register-password">Пароль</label>
+            <label for="register-password">
+                Пароль
+            </label>
 
             <div class="input-wrapper">
+
                 <span class="input-icon">◆</span>
+
                 <input
                     id="register-password"
                     type="password"
@@ -198,6 +319,7 @@ function showRegister() {
                     minlength="6"
                     required
                 >
+
             </div>
 
             <label for="register-password-confirm">
@@ -205,7 +327,9 @@ function showRegister() {
             </label>
 
             <div class="input-wrapper">
+
                 <span class="input-icon">◆</span>
+
                 <input
                     id="register-password-confirm"
                     type="password"
@@ -214,17 +338,22 @@ function showRegister() {
                     minlength="6"
                     required
                 >
+
             </div>
 
             <div id="auth-message"></div>
 
-            <button type="submit" class="gold-button main-button">
+            <button
+                type="submit"
+                class="gold-button main-button"
+            >
                 Создать аккаунт
             </button>
 
         </form>
     `;
 }
+
 
 function setActiveTab(tab) {
     const loginTab = document.getElementById("login-tab");
@@ -234,52 +363,81 @@ function setActiveTab(tab) {
         return;
     }
 
-    loginTab.classList.toggle("active", tab === "login");
-    registerTab.classList.toggle("active", tab === "register");
+    loginTab.classList.toggle(
+        "active",
+        tab === "login"
+    );
+
+    registerTab.classList.toggle(
+        "active",
+        tab === "register"
+    );
 }
+
 
 async function login(event) {
     event.preventDefault();
 
-    const email = document.getElementById("login-email").value.trim();
-    const password = document.getElementById("login-password").value;
+    const email =
+        document.getElementById("login-email").value.trim();
+
+    const password =
+        document.getElementById("login-password").value;
 
     setMessage("Выполняется вход...", "info");
 
-    const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-    });
+    const { error } =
+        await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
 
     if (error) {
         setMessage(error.message, "error");
-        return;
     }
 }
+
 
 async function register(event) {
     event.preventDefault();
 
-    const email = document.getElementById("register-email").value.trim();
-    const password = document.getElementById("register-password").value;
-    const confirmation = document.getElementById(
-        "register-password-confirm"
-    ).value;
+    const email =
+        document.getElementById("register-email").value.trim();
+
+    const password =
+        document.getElementById("register-password").value;
+
+    const confirmation =
+        document.getElementById(
+            "register-password-confirm"
+        ).value;
 
     if (password !== confirmation) {
-        setMessage("Пароли не совпадают.", "error");
+        setMessage(
+            "Пароли не совпадают.",
+            "error"
+        );
+
         return;
     }
 
-    setMessage("Создаём аккаунт...", "info");
+    setMessage(
+        "Создаём аккаунт...",
+        "info"
+    );
 
-    const { data, error } = await supabase.auth.signUp({
-        email,
-        password
-    });
+    const { data, error } =
+        await supabase.auth.signUp({
+            email,
+            password
+        });
 
     if (error) {
-        setMessage(error.message, "error");
+        setMessage(
+            error.message,
+            "error"
+        );
+
         return;
     }
 
@@ -293,12 +451,15 @@ async function register(event) {
     );
 }
 
+
 async function logout() {
     await supabase.auth.signOut();
 }
 
+
 function renderCabinet(session) {
-    const email = session.user.email || "Игрок";
+    const email =
+        session.user.email || "Игрок";
 
     document.getElementById("root").innerHTML = `
         <main class="game-page">
@@ -306,11 +467,19 @@ function renderCabinet(session) {
             <header class="topbar">
 
                 <div class="topbar-brand">
-                    <div class="mini-symbol">✦</div>
-                    <span>Friends RPG</span>
+
+                    <div class="mini-symbol">
+                        ✦
+                    </div>
+
+                    <span>
+                        ЛОРГУС
+                    </span>
+
                 </div>
 
                 <div class="player-area">
+
                     <span class="player-email">
                         ${escapeHtml(email)}
                     </span>
@@ -321,15 +490,20 @@ function renderCabinet(session) {
                     >
                         Выйти
                     </button>
+
                 </div>
 
             </header>
 
             <section class="welcome-panel">
 
-                <div class="welcome-symbol">✦</div>
+                <div class="welcome-symbol">
+                    ✦
+                </div>
 
-                <h1>Добро пожаловать в мир</h1>
+                <h1>
+                    Добро пожаловать в ЛОРГУС
+                </h1>
 
                 <p>
                     Твой аккаунт создан.
@@ -337,9 +511,15 @@ function renderCabinet(session) {
                 </p>
 
                 <div class="ornament">
+
                     <span></span>
-                    <i>Friends RPG</i>
+
+                    <i>
+                        ЛОРГУС
+                    </i>
+
                     <span></span>
+
                 </div>
 
             </section>
@@ -348,16 +528,21 @@ function renderCabinet(session) {
     `;
 }
 
+
 function setMessage(text, type) {
-    const element = document.getElementById("auth-message");
+    const element =
+        document.getElementById("auth-message");
 
     if (!element) {
         return;
     }
 
-    element.className = `auth-message ${type}`;
+    element.className =
+        `auth-message ${type}`;
+
     element.textContent = text;
 }
+
 
 function escapeHtml(value) {
     return String(value)
@@ -367,6 +552,7 @@ function escapeHtml(value) {
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
 }
+
 
 window.showLogin = showLogin;
 window.showRegister = showRegister;
