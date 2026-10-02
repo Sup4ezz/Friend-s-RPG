@@ -2,30 +2,50 @@ export default {
     async fetch(request, env) {
         const url = new URL(request.url);
 
+
+        /*
+            API CONFIG
+            Клиент получает только публичные данные Supabase.
+            Секреты здесь не используются.
+        */
         if (url.pathname === "/api/config") {
+
             return new Response(
                 JSON.stringify({
-                    supabaseUrl: "https://dxdxnttpznoekaiecrlv.supabase.co",
-                    supabasePublishableKey: "sb_publishable_LlRg71tECimoRn2zuzxqlQ_OeCupPLe"
+                    supabaseUrl: env.SUPABASE_URL,
+                    supabasePublishableKey: env.SUPABASE_KEY
                 }),
                 {
+                    status: 200,
                     headers: {
-                        "Content-Type": "application/json",
-                        "Cache-Control": "no-store"
+                        "Content-Type": "application/json; charset=UTF-8",
+                        "Cache-Control": "no-store",
+                        "X-Content-Type-Options": "nosniff"
                     }
                 }
             );
         }
 
+
+        /*
+            STATIC FILES
+        */
         const response = await env.ASSETS.fetch(request);
 
+        const headers = new Headers(response.headers);
+
+
+        /*
+            Не кешируем основу приложения.
+            Чтобы после обновления JS/CSS
+            пользователь всегда получал новую версию.
+        */
         if (
             url.pathname === "/" ||
-            url.pathname === "/index.html" ||
-            url.pathname === "/app.js" ||
-            url.pathname === "/style.css"
+            url.pathname.endsWith(".html") ||
+            url.pathname.endsWith(".js") ||
+            url.pathname.endsWith(".css")
         ) {
-            const headers = new Headers(response.headers);
 
             headers.set(
                 "Cache-Control",
@@ -41,17 +61,36 @@ export default {
                 "Expires",
                 "0"
             );
-
-            return new Response(
-                response.body,
-                {
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers
-                }
-            );
         }
 
-        return response;
+
+        /*
+            Защитные заголовки
+        */
+
+        headers.set(
+            "X-Content-Type-Options",
+            "nosniff"
+        );
+
+        headers.set(
+            "X-Frame-Options",
+            "DENY"
+        );
+
+        headers.set(
+            "Referrer-Policy",
+            "strict-origin-when-cross-origin"
+        );
+
+
+        return new Response(
+            response.body,
+            {
+                status: response.status,
+                statusText: response.statusText,
+                headers
+            }
+        );
     }
 };
