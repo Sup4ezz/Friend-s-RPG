@@ -1069,28 +1069,66 @@ function renderAdminApplications(
                                     </h3>
 
 
- <div class="admin-application-info">
+                                    <div class="admin-application-info">
 
-    <span>
-        <strong>Раса:</strong>
-        ${escapeHtml(
-            application.race
-        )}
-    </span>
+                                        <span>
+                                            <strong>Раса:</strong>
+                                            ${escapeHtml(
+                                                application.race
+                                            )}
+                                        </span>
 
-    <span>
-        <strong>Возраст:</strong>
-        ${application.age} лет
-    </span>
+                                        <span>
+                                            <strong>Возраст:</strong>
+                                            ${application.age} лет
+                                        </span>
 
-    <span>
-        <strong>Род занятий:</strong>
-        ${escapeHtml(
-            application.occupation
-        )}
-    </span>
+                                        <span>
+                                            <strong>Род занятий:</strong>
+                                            ${escapeHtml(
+                                                application.occupation
+                                            )}
+                                        </span>
 
-</div>
+                                    </div>
+
+
+                                    <p>
+                                        <strong>Характер:</strong>
+                                        ${escapeHtml(
+                                            application.personality
+                                        )}
+                                    </p>
+
+                                </div>
+
+
+                                <div class="admin-application-actions">
+
+                                    <button
+                                        class="gold-button admin-approve-button"
+                                        data-application-id="${application.id}"
+                                    >
+                                        Одобрить
+                                    </button>
+
+
+                                    <button
+                                        class="admin-reject-button"
+                                        data-application-id="${application.id}"
+                                    >
+                                        Отклонить
+                                    </button>
+
+                                </div>
+
+                            </article>
+
+                        `
+                    ).join("")
+            }
+
+        </div>
 
     `;
 
