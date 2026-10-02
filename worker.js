@@ -5,8 +5,8 @@ export default {
         if (url.pathname === "/api/config") {
             return new Response(
                 JSON.stringify({
-                    supabaseUrl: env.SUPABASE_URL,
-                    supabasePublishableKey: env.SUPABASE_PUBLISHABLE_KEY
+                    supabaseUrl: "https://dxdxnttpznoekaiecrlv.supabase.co",
+                    supabasePublishableKey: "sb_publishable_LlRg71tECimoRn2zuzxqlQ_OeCupPLe"
                 }),
                 {
                     headers: {
