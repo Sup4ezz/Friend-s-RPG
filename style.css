@@ -1321,6 +1321,8 @@ button {
 
 .admin-application-main {
     min-width: 0;
+
+    text-align: left;
 }
 
 
@@ -1340,6 +1342,8 @@ button {
     font-weight: 600;
 
     line-height: 1.1;
+
+    text-align: left;
 }
 
 
@@ -1347,21 +1351,40 @@ button {
    APPLICATION INFO
    =========================================================
 
-   Основные характеристики заявки.
-   Каждая строка — единый визуальный элемент:
-   тонкая золотая линия сверху и снизу.
-   */
+   ВСЕ поля заявки используют один и тот же компонент.
+
+   Каждый span:
+   - занимает всю ширину;
+   - является отдельной строкой;
+   - имеет одинаковые отступы;
+   - имеет нижнюю золотую линию.
+
+   app.js больше не использует старую
+   .admin-application-section.
+   ========================================================= */
 
 .admin-application-info {
     display: flex;
 
     flex-direction: column;
 
+    align-items: stretch;
+
+    justify-content: flex-start;
+
+    gap: 0;
+
+    width: 100%;
+
     margin: 0;
 
     padding: 0;
 
     border-top: 1px solid var(--gold-line);
+
+    text-align: left;
+
+    white-space: normal;
 }
 
 .admin-application-info span {
@@ -1369,92 +1392,13 @@ button {
 
     width: 100%;
 
+    min-width: 0;
+
     margin: 0;
 
-    padding: 7px 8px;
-
-    color: var(--text);
-
-    font-family: var(--body-font);
-
-    font-size: 13px;
-
-    line-height: 1.5;
+    padding: 8px 10px;
 
     border-bottom: 1px solid var(--gold-line);
-}
-
-.admin-application-info strong {
-    display: inline;
-
-    margin: 0 5px 0 0;
-
-    padding: 0;
-
-    color: var(--gold-light);
-
-    font-family: var(--title-font);
-
-    font-size: 15px;
-
-    font-weight: 600;
-}
-
-
-/* =========================================================
-   APPLICATION DESCRIPTION SECTIONS
-   =========================================================
-
-   Характер / Предыстория / Особые навыки /
-   Изображение персонажа.
-
-   ВАЖНО:
-   Эти блоки визуально продолжают тот же компонент,
-   что и верхние поля.
-   */
-
-.admin-application-section {
-    display: block;
-
-    width: 100%;
-
-    margin: 0;
-
-    padding: 7px 8px;
-
-    border-bottom: 1px solid var(--gold-line);
-}
-
-.admin-application-section:first-of-type {
-    border-top: 1px solid var(--gold-line);
-}
-
-.admin-application-section strong {
-    display: inline;
-
-    margin: 0 5px 0 0;
-
-    padding: 0;
-
-    color: var(--gold-light);
-
-    font-family: var(--title-font);
-
-    font-size: 15px;
-
-    font-weight: 600;
-}
-
-.admin-application-section strong::after {
-    content: ":";
-}
-
-.admin-application-section p {
-    display: inline;
-
-    margin: 0;
-
-    padding: 0;
 
     color: var(--text);
 
@@ -1464,42 +1408,34 @@ button {
 
     line-height: 1.55;
 
-    white-space: normal;
-
     text-align: left;
+
+    white-space: normal;
 
     overflow-wrap: anywhere;
 }
 
+.admin-application-info strong {
+    display: inline;
 
-/* =========================================================
-   APPLICATION PHOTO
-   ========================================================= */
+    margin: 0 6px 0 0;
 
-.admin-application-section.photo-section {
-    display: block;
-}
+    padding: 0;
 
-.admin-application-photo {
-    display: block;
+    color: var(--gold-light);
 
-    width: min(280px, 100%);
+    font-family: var(--title-font);
 
-    max-height: 360px;
+    font-size: 15px;
 
-    margin-top: 10px;
+    font-weight: 600;
 
-    object-fit: cover;
-
-    border: 1px solid var(--gold-line-strong);
-
-    box-shadow:
-        0 12px 35px rgba(0, 0, 0, 0.45);
+    white-space: normal;
 }
 
 
 /* =========================================================
-   ADMIN ACTIONS
+   APPLICATION ACTIONS
    ========================================================= */
 
 .admin-application-actions {
@@ -1512,6 +1448,16 @@ button {
     gap: 8px;
 
     min-width: 135px;
+}
+
+.admin-application-actions > span {
+    color: var(--text-muted);
+
+    font-size: 12px;
+
+    line-height: 1.5;
+
+    text-align: center;
 }
 
 .admin-approve-button,
@@ -1777,17 +1723,7 @@ button {
         padding: 7px 6px;
     }
 
-    .admin-application-section {
-        padding: 7px 6px;
-    }
-
-    .admin-application-info span,
-    .admin-application-section p {
-        font-size: 13px;
-    }
-
-    .admin-application-info strong,
-    .admin-application-section strong {
+    .admin-application-info strong {
         font-size: 14px;
     }
 
@@ -1842,85 +1778,4 @@ button {
         transition: none !important;
         animation: none !important;
     }
-}
-
-/* =========================================================
-   ЕДИНЫЙ ВИД ПОЛЕЙ ЗАЯВКИ
-   ========================================================= */
-
-.admin-application-info {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
-    gap: 0 !important;
-
-    width: 100% !important;
-
-    margin: 0 !important;
-    padding: 0 !important;
-
-    border-top: 1px solid var(--gold-line) !important;
-
-    text-align: left !important;
-    white-space: normal !important;
-}
-
-
-.admin-application-info span {
-    display: block !important;
-
-    width: 100% !important;
-    box-sizing: border-box !important;
-
-    margin: 0 !important;
-    padding: 7px 8px !important;
-
-    border-bottom: 1px solid var(--gold-line) !important;
-
-    color: var(--text) !important;
-
-    font-family: var(--body-font) !important;
-    font-size: 13px !important;
-    line-height: 1.5 !important;
-
-    text-align: left !important;
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-}
-
-
-.admin-application-info strong {
-    display: inline !important;
-
-    margin: 0 5px 0 0 !important;
-    padding: 0 !important;
-
-    color: var(--gold-light) !important;
-
-    font-family: var(--title-font) !important;
-    font-size: 15px !important;
-    font-weight: 600 !important;
-
-    text-align: left !important;
-    white-space: normal !important;
-}
-
-
-/* Убираем старую разметку полей, если её стили ещё остались */
-
-.admin-application-section {
-    display: none !important;
-}
-
-
-/* Чтобы сам блок заявки не центрировал содержимое */
-
-.admin-application-main {
-    text-align: left !important;
-}
-
-
-.admin-application-main h3 {
-    text-align: left !important;
 }
