@@ -20,21 +20,38 @@ async function loadSupabase() {
 
     window.supabaseClient = supabase;
 
-    renderApp();
+    await testSupabase(supabase);
 }
 
-function renderApp() {
+async function testSupabase(supabase) {
+    const { data, error } = await supabase.auth.getSession();
+
+    if (error) {
+        throw error;
+    }
+
+    console.log("Supabase Auth работает:", data);
+
+    renderApp(data.session);
+}
+
+function renderApp(session) {
     document.getElementById("root").innerHTML = `
         <h1>Friends RPG</h1>
         <p>Supabase подключён.</p>
+        <p>Auth работает.</p>
+        <p>
+            Сессия:
+            ${session ? "есть" : "нет"}
+        </p>
     `;
 }
 
 loadSupabase().catch(error => {
-    console.error(error);
+    console.error("Ошибка:", error);
 
     document.getElementById("root").innerHTML = `
-        <h1>Ошибка подключения</h1>
+        <h1>Ошибка</h1>
         <p>${error.message}</p>
     `;
 });
