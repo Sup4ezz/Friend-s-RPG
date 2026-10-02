@@ -716,8 +716,8 @@ async function renderCabinet(session) {
                 <div class="player-area">
 
                   <span class="player-email">
-                    ${escapeHtml(email)}
-                </span>
+    ${escapeHtml(username)}
+</span>
 
                     <button
                         class="logout-button"
