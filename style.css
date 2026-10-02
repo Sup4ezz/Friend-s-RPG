@@ -1833,3 +1833,39 @@ button {
 .admin-application-section p {
     white-space: pre-wrap;
 }
+
+.admin-application-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.admin-application-info div {
+    display: block;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-application-info strong {
+    display: inline;
+    margin-right: 6px;
+}
+
+.admin-application-section {
+    display: block;
+    margin-top: 20px;
+    padding: 0;
+}
+
+.admin-application-section strong {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.admin-application-section p {
+    display: block;
+    margin: 0;
+    padding: 0;
+    white-space: pre-wrap;
+    text-align: left;
+}
