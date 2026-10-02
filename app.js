@@ -1,50 +1,102 @@
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+import {
+    createClient
+} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
 
 let supabase;
 let authSwitching = false;
 
+
+/* =========================================
+   ЗАПУСК
+   ========================================= */
+
 async function initialize() {
+
     try {
-        const response = await fetch("/api/config");
+
+        const response =
+            await fetch("/api/config");
+
 
         if (!response.ok) {
-            throw new Error("Не удалось получить конфигурацию Supabase.");
+
+            throw new Error(
+                "Не удалось получить конфигурацию Supabase."
+            );
+
         }
 
-        const config = await response.json();
 
-        if (!config.supabaseUrl || !config.supabasePublishableKey) {
-            throw new Error("Конфигурация Supabase отсутствует.");
+        const config =
+            await response.json();
+
+
+        if (
+            !config.supabaseUrl ||
+            !config.supabasePublishableKey
+        ) {
+
+            throw new Error(
+                "Конфигурация Supabase отсутствует."
+            );
+
         }
+
 
         supabase = createClient(
             config.supabaseUrl,
             config.supabasePublishableKey
         );
 
-        window.supabaseClient = supabase;
+
+        window.supabaseClient =
+            supabase;
+
 
         const {
-            data: { session }
+            data: {
+                session
+            }
         } = await supabase.auth.getSession();
+
 
         render(session);
 
-        supabase.auth.onAuthStateChange((_event, newSession) => {
-            render(newSession);
-        });
+
+        supabase.auth.onAuthStateChange(
+            (_event, newSession) => {
+
+                render(newSession);
+
+            }
+        );
+
 
     } catch (error) {
+
         console.error(error);
 
-        document.getElementById("root").innerHTML = `
+
+        document.getElementById(
+            "root"
+        ).innerHTML = `
+
             <main class="error-screen">
+
                 <div class="error-panel">
-                    <div class="error-symbol">✦</div>
 
-                    <h1>Ошибка соединения</h1>
+                    <div class="error-symbol">
+                        ✦
+                    </div>
 
-                    <p>${escapeHtml(error.message)}</p>
+                    <h1>
+                        Ошибка соединения
+                    </h1>
+
+                    <p>
+                        ${escapeHtml(error.message)}
+                    </p>
 
                     <button
                         onclick="location.reload()"
@@ -52,43 +104,90 @@ async function initialize() {
                     >
                         Повторить
                     </button>
+
                 </div>
+
             </main>
+
         `;
+
     }
+
 }
+
+
+/* =========================================
+   ОПРЕДЕЛЕНИЕ ЭКРАНА
+   ========================================= */
 
 function render(session) {
+
     if (session) {
+
         renderCabinet(session);
+
     } else {
+
         renderAuth();
+
     }
+
 }
 
+
+/* =========================================
+   ЭКРАН АВТОРИЗАЦИИ
+   ========================================= */
+
 function renderAuth() {
-    document.getElementById("root").innerHTML = `
+
+    document.getElementById(
+        "root"
+    ).innerHTML = `
+
         <main class="auth-page">
 
             <div class="background-glow"></div>
 
+
             <section class="auth-container">
+
+
+                <!-- НАЗВАНИЕ -->
 
                 <div class="brand">
 
-                    <div class="brand-symbol">✦</div>
+                    <div class="brand-symbol">
+                        ✦
+                    </div>
 
-                    <h1>ЛОРГУС</h1>
+
+                    <h1>
+                        ЛОРГУС
+                    </h1>
+
 
                     <div class="brand-line">
+
                         <span></span>
-                        <i>СМЕЛЫЕ ИДЕИ НАЧИНАЮТСЯ С ПЕРВОГО ШАГА</i>
+
+                        <i>
+                            СМЕЛЫЕ ИДЕИ НАЧИНАЮТСЯ С ПЕРВОГО ШАГА
+                        </i>
+
                         <span></span>
+
                     </div>
 
                 </div>
 
+
+                <!-- ПАНЕЛЬ -->
+
                 <div class="auth-panel">
+
+
+                    <!-- ВКЛАДКИ -->
 
                     <div class="auth-tabs">
 
@@ -100,6 +199,7 @@ function renderAuth() {
                             Войти
                         </button>
 
+
                         <button
                             id="register-tab"
                             class="auth-tab"
@@ -110,120 +210,220 @@ function renderAuth() {
 
                     </div>
 
+
+                    <!-- ФОРМА -->
+
                     <div
                         id="auth-form"
                         class="auth-form-container"
                     ></div>
 
+
                 </div>
 
+
                 <p class="auth-footer">
-                    Вход в мир предназначен только для участников игры.
+
+                    Вход в мир предназначен
+                    только для участников игры.
+
                 </p>
+
 
             </section>
 
         </main>
+
     `;
 
+
     showLogin(true);
+
 }
 
+
+/* =========================================
+   ВХОД
+   ========================================= */
 
 function showLogin(initial = false) {
+
     if (authSwitching) {
         return;
     }
+
 
     if (initial) {
+
         setActiveTab("login");
+
         renderLoginForm();
+
         return;
+
     }
 
+
     switchAuthForm("login");
+
 }
 
 
+/* =========================================
+   РЕГИСТРАЦИЯ
+   ========================================= */
+
 function showRegister() {
+
     if (authSwitching) {
         return;
     }
 
+
     switchAuthForm("register");
+
 }
 
 
+/* =========================================
+   ПЛАВНОЕ ПЕРЕКЛЮЧЕНИЕ
+   ========================================= */
+
 function switchAuthForm(type) {
-    const form = document.getElementById("auth-form");
+
+    const form =
+        document.getElementById(
+            "auth-form"
+        );
+
 
     if (!form) {
         return;
     }
 
+
     const currentType =
-        form.dataset.formType || "login";
+        form.dataset.formType ||
+        "login";
+
 
     if (currentType === type) {
         return;
     }
 
+
     authSwitching = true;
+
 
     setActiveTab(type);
 
-    form.classList.add("auth-form-leaving");
+
+    /* Старая форма уходит */
+
+    form.classList.add(
+        "auth-form-leaving"
+    );
+
 
     setTimeout(() => {
 
+
+        /* Создаём новую */
+
         if (type === "login") {
+
             renderLoginForm();
+
         } else {
+
             renderRegisterForm();
+
         }
 
-        form.classList.remove("auth-form-leaving");
-        form.classList.add("auth-form-entering");
+
+        /* Новая форма появляется */
+
+        form.classList.remove(
+            "auth-form-leaving"
+        );
+
+
+        form.classList.add(
+            "auth-form-entering"
+        );
+
 
         requestAnimationFrame(() => {
+
             requestAnimationFrame(() => {
-                form.classList.remove("auth-form-entering");
+
+                form.classList.remove(
+                    "auth-form-entering"
+                );
+
             });
+
         });
 
+
         setTimeout(() => {
+
             authSwitching = false;
-        }, 280);
+
+        }, 300);
+
 
     }, 180);
+
 }
 
 
-function renderLoginForm() {
-    const form = document.getElementById("auth-form");
+/* =========================================
+   ФОРМА ВХОДА
+   ========================================= */
 
-    form.dataset.formType = "login";
+function renderLoginForm() {
+
+    const form =
+        document.getElementById(
+            "auth-form"
+        );
+
+
+    form.dataset.formType =
+        "login";
+
 
     form.innerHTML = `
+
         <div class="form-heading">
 
-            <h2>Добро пожаловать</h2>
+            <h2>
+                Добро пожаловать
+            </h2>
 
             <p>
-                Войди, чтобы продолжить своё путешествие.
+                Войди, чтобы продолжить
+                своё путешествие.
             </p>
 
         </div>
 
+
         <form onsubmit="login(event)">
+
 
             <label for="login-email">
                 Email
             </label>
 
+
             <div class="input-wrapper">
 
-                <span class="input-icon">✉</span>
+                <span class="input-icon">
+                    ✉
+                </span>
+
 
                 <input
                     id="login-email"
@@ -235,13 +435,18 @@ function renderLoginForm() {
 
             </div>
 
+
             <label for="login-password">
                 Пароль
             </label>
 
+
             <div class="input-wrapper">
 
-                <span class="input-icon">◆</span>
+                <span class="input-icon">
+                    ◆
+                </span>
+
 
                 <input
                     id="login-password"
@@ -253,7 +458,9 @@ function renderLoginForm() {
 
             </div>
 
+
             <div id="auth-message"></div>
+
 
             <button
                 type="submit"
@@ -262,36 +469,60 @@ function renderLoginForm() {
                 Войти в мир
             </button>
 
+
         </form>
+
     `;
+
 }
 
 
-function renderRegisterForm() {
-    const form = document.getElementById("auth-form");
+/* =========================================
+   ФОРМА РЕГИСТРАЦИИ
+   ========================================= */
 
-    form.dataset.formType = "register";
+function renderRegisterForm() {
+
+    const form =
+        document.getElementById(
+            "auth-form"
+        );
+
+
+    form.dataset.formType =
+        "register";
+
 
     form.innerHTML = `
+
         <div class="form-heading">
 
-            <h2>Создать аккаунт</h2>
+            <h2>
+                Создать аккаунт
+            </h2>
 
             <p>
-                Начни своё путешествие в мире ЛОРГУС.
+                Начни своё путешествие
+                в мире ЛОРГУС.
             </p>
 
         </div>
 
+
         <form onsubmit="register(event)">
+
 
             <label for="register-email">
                 Email
             </label>
 
+
             <div class="input-wrapper">
 
-                <span class="input-icon">✉</span>
+                <span class="input-icon">
+                    ✉
+                </span>
+
 
                 <input
                     id="register-email"
@@ -303,13 +534,18 @@ function renderRegisterForm() {
 
             </div>
 
+
             <label for="register-password">
                 Пароль
             </label>
 
+
             <div class="input-wrapper">
 
-                <span class="input-icon">◆</span>
+                <span class="input-icon">
+                    ◆
+                </span>
+
 
                 <input
                     id="register-password"
@@ -322,13 +558,18 @@ function renderRegisterForm() {
 
             </div>
 
+
             <label for="register-password-confirm">
                 Повторите пароль
             </label>
 
+
             <div class="input-wrapper">
 
-                <span class="input-icon">◆</span>
+                <span class="input-icon">
+                    ◆
+                </span>
+
 
                 <input
                     id="register-password-confirm"
@@ -341,7 +582,9 @@ function renderRegisterForm() {
 
             </div>
 
+
             <div id="auth-message"></div>
+
 
             <button
                 type="submit"
@@ -350,121 +593,216 @@ function renderRegisterForm() {
                 Создать аккаунт
             </button>
 
+
         </form>
+
     `;
+
 }
 
 
+/* =========================================
+   ВКЛАДКИ
+   ========================================= */
+
 function setActiveTab(tab) {
-    const loginTab = document.getElementById("login-tab");
-    const registerTab = document.getElementById("register-tab");
+
+    const loginTab =
+        document.getElementById(
+            "login-tab"
+        );
+
+
+    const registerTab =
+        document.getElementById(
+            "register-tab"
+        );
+
 
     if (!loginTab || !registerTab) {
         return;
     }
+
 
     loginTab.classList.toggle(
         "active",
         tab === "login"
     );
 
+
     registerTab.classList.toggle(
         "active",
         tab === "register"
     );
+
 }
 
+
+/* =========================================
+   ВХОД В SUPABASE
+   ========================================= */
 
 async function login(event) {
+
     event.preventDefault();
 
-    const email =
-        document.getElementById("login-email").value.trim();
-
-    const password =
-        document.getElementById("login-password").value;
-
-    setMessage("Выполняется вход...", "info");
-
-    const { error } =
-        await supabase.auth.signInWithPassword({
-            email,
-            password
-        });
-
-    if (error) {
-        setMessage(error.message, "error");
-    }
-}
-
-
-async function register(event) {
-    event.preventDefault();
 
     const email =
-        document.getElementById("register-email").value.trim();
-
-    const password =
-        document.getElementById("register-password").value;
-
-    const confirmation =
         document.getElementById(
-            "register-password-confirm"
+            "login-email"
+        ).value.trim();
+
+
+    const password =
+        document.getElementById(
+            "login-password"
         ).value;
 
-    if (password !== confirmation) {
-        setMessage(
-            "Пароли не совпадают.",
-            "error"
-        );
-
-        return;
-    }
 
     setMessage(
-        "Создаём аккаунт...",
+        "Выполняется вход...",
         "info"
     );
 
-    const { data, error } =
-        await supabase.auth.signUp({
-            email,
-            password
-        });
+
+    const {
+        error
+    } = await supabase.auth.signInWithPassword({
+
+        email,
+
+        password
+
+    });
+
 
     if (error) {
+
         setMessage(
             error.message,
             "error"
         );
 
         return;
+
     }
+
+}
+
+
+/* =========================================
+   РЕГИСТРАЦИЯ В SUPABASE
+   ========================================= */
+
+async function register(event) {
+
+    event.preventDefault();
+
+
+    const email =
+        document.getElementById(
+            "register-email"
+        ).value.trim();
+
+
+    const password =
+        document.getElementById(
+            "register-password"
+        ).value;
+
+
+    const confirmation =
+        document.getElementById(
+            "register-password-confirm"
+        ).value;
+
+
+    if (password !== confirmation) {
+
+        setMessage(
+            "Пароли не совпадают.",
+            "error"
+        );
+
+        return;
+
+    }
+
+
+    setMessage(
+        "Создаём аккаунт...",
+        "info"
+    );
+
+
+    const {
+        data,
+        error
+    } = await supabase.auth.signUp({
+
+        email,
+
+        password
+
+    });
+
+
+    if (error) {
+
+        setMessage(
+            error.message,
+            "error"
+        );
+
+        return;
+
+    }
+
 
     if (data.session) {
         return;
     }
 
+
     setMessage(
         "Аккаунт создан. Проверь email для подтверждения регистрации.",
         "success"
     );
+
 }
 
+
+/* =========================================
+   ВЫХОД
+   ========================================= */
 
 async function logout() {
+
     await supabase.auth.signOut();
+
 }
 
 
-function renderCabinet(session) {
-    const email =
-        session.user.email || "Игрок";
+/* =========================================
+   ЛИЧНЫЙ КАБИНЕТ
+   ========================================= */
 
-    document.getElementById("root").innerHTML = `
+function renderCabinet(session) {
+
+    const email =
+        session.user.email ||
+        "Игрок";
+
+
+    document.getElementById(
+        "root"
+    ).innerHTML = `
+
         <main class="game-page">
 
+
             <header class="topbar">
+
 
                 <div class="topbar-brand">
 
@@ -478,11 +816,15 @@ function renderCabinet(session) {
 
                 </div>
 
+
                 <div class="player-area">
 
                     <span class="player-email">
+
                         ${escapeHtml(email)}
+
                     </span>
+
 
                     <button
                         class="logout-button"
@@ -493,22 +835,29 @@ function renderCabinet(session) {
 
                 </div>
 
+
             </header>
 
+
             <section class="welcome-panel">
+
 
                 <div class="welcome-symbol">
                     ✦
                 </div>
 
+
                 <h1>
                     Добро пожаловать в ЛОРГУС
                 </h1>
 
+
                 <p>
                     Твой аккаунт создан.
-                    Следующим шагом станет создание персонажа.
+                    Следующим шагом станет
+                    создание персонажа.
                 </p>
+
 
                 <div class="ornament">
 
@@ -522,42 +871,102 @@ function renderCabinet(session) {
 
                 </div>
 
+
             </section>
 
+
         </main>
+
     `;
+
 }
 
 
+/* =========================================
+   СООБЩЕНИЯ
+   ========================================= */
+
 function setMessage(text, type) {
+
     const element =
-        document.getElementById("auth-message");
+        document.getElementById(
+            "auth-message"
+        );
+
 
     if (!element) {
         return;
     }
 
+
     element.className =
         `auth-message ${type}`;
 
-    element.textContent = text;
+
+    element.textContent =
+        text;
+
 }
 
+
+/* =========================================
+   БЕЗОПАСНЫЙ ВЫВОД ТЕКСТА
+   ========================================= */
 
 function escapeHtml(value) {
+
     return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
 }
 
 
-window.showLogin = showLogin;
-window.showRegister = showRegister;
-window.login = login;
-window.register = register;
-window.logout = logout;
+/* =========================================
+   ДЕЛАЕМ ФУНКЦИИ ДОСТУПНЫМИ ДЛЯ КНОПОК
+   ========================================= */
+
+window.showLogin =
+    showLogin;
+
+window.showRegister =
+    showRegister;
+
+window.login =
+    login;
+
+window.register =
+    register;
+
+window.logout =
+    logout;
+
+
+/* =========================================
+   СТАРТ
+   ========================================= */
 
 initialize();
