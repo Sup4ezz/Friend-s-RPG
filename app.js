@@ -690,6 +690,43 @@ async function loadPlayerState(session) {
     }
 
 
+    /*
+     * Сначала проверяем администратора.
+     *
+     * Только пользователь, которого мы добавили
+     * в таблицу admins, получит true.
+     */
+
+    const {
+        data: isAdmin,
+        error: adminError
+    } = await supabase.rpc(
+        "is_admin"
+    );
+
+
+    if (adminError) {
+
+        console.error(
+            "Ошибка проверки администратора:",
+            adminError
+        );
+
+    } else if (isAdmin) {
+
+        await loadAdminPanel(
+            container
+        );
+
+        return;
+    }
+
+
+    /*
+     * Если пользователь не администратор,
+     * загружаем его обычный кабинет.
+     */
+
     const {
         data: applications,
         error: applicationsError
@@ -757,6 +794,407 @@ async function loadPlayerState(session) {
     renderCharacterApplicationForm(
         container
     );
+}
+
+
+/* =========================================================
+   АДМИНКА
+   ========================================================= */
+
+async function loadAdminPanel(container) {
+
+    const {
+        data: applications,
+        error
+    } = await supabase
+        .from("character_applications")
+        .select("*")
+        .order("id", {
+            ascending: false
+        });
+
+
+    if (error) {
+
+        console.error(
+            "Ошибка загрузки заявок:",
+            error
+        );
+
+        container.className =
+            "welcome-panel";
+
+
+        container.innerHTML = `
+
+            <div class="welcome-symbol">
+                !
+            </div>
+
+            <h1>
+                Ошибка загрузки
+            </h1>
+
+            <p>
+                ${escapeHtml(error.message)}
+            </p>
+
+        `;
+
+        return;
+    }
+
+
+    renderAdminApplications(
+        container,
+        applications || []
+    );
+}
+
+
+function renderAdminApplications(
+    container,
+    applications
+) {
+
+    container.className =
+        "admin-panel";
+
+
+    const pending =
+        applications.filter(
+            application =>
+                application.status === "pending"
+        );
+
+
+    const approved =
+        applications.filter(
+            application =>
+                application.status === "approved"
+        );
+
+
+    const rejected =
+        applications.filter(
+            application =>
+                application.status === "rejected"
+        );
+
+
+    container.innerHTML = `
+
+        <div class="character-header">
+
+            <div class="welcome-symbol">
+                ✦
+            </div>
+
+            <h1>
+                Администрация ЛОРГУСА
+            </h1>
+
+            <p>
+                Управление заявками персонажей.
+            </p>
+
+        </div>
+
+
+        <div class="admin-stats">
+
+            <div class="admin-stat">
+
+                <span class="admin-stat-value">
+                    ${pending.length}
+                </span>
+
+                <span class="admin-stat-label">
+                    Ожидают решения
+                </span>
+
+            </div>
+
+
+            <div class="admin-stat">
+
+                <span class="admin-stat-value">
+                    ${approved.length}
+                </span>
+
+                <span class="admin-stat-label">
+                    Одобрено
+                </span>
+
+            </div>
+
+
+            <div class="admin-stat">
+
+                <span class="admin-stat-value">
+                    ${rejected.length}
+                </span>
+
+                <span class="admin-stat-label">
+                    Отклонено
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="admin-applications">
+
+            ${
+                pending.length === 0
+                    ? `
+
+                        <div class="admin-empty">
+
+                            <div class="welcome-symbol">
+                                ✓
+                            </div>
+
+                            <h2>
+                                Новых заявок нет
+                            </h2>
+
+                            <p>
+                                Все заявки обработаны.
+                            </p>
+
+                        </div>
+
+                    `
+                    :
+                    pending.map(
+                        application => `
+
+                            <article
+                                class="admin-application"
+                                data-application-id="${application.id}"
+                            >
+
+                                <div class="admin-application-main">
+
+                                    <h3>
+                                        ${escapeHtml(
+                                            application.name
+                                        )}
+                                    </h3>
+
+
+                                    <div class="admin-application-info">
+
+                                        <span>
+                                            ${escapeHtml(
+                                                application.race
+                                            )}
+                                        </span>
+
+                                        <span>
+                                            ${application.age} лет
+                                        </span>
+
+                                        <span>
+                                            ${escapeHtml(
+                                                application.occupation
+                                            )}
+                                        </span>
+
+                                    </div>
+
+
+                                    <p>
+                                        ${escapeHtml(
+                                            application.personality
+                                        )}
+                                    </p>
+
+                                </div>
+
+
+                                <div class="admin-application-actions">
+
+                                    <button
+                                        class="gold-button admin-approve-button"
+                                        data-application-id="${application.id}"
+                                    >
+                                        Одобрить
+                                    </button>
+
+
+                                    <button
+                                        class="admin-reject-button"
+                                        data-application-id="${application.id}"
+                                    >
+                                        Отклонить
+                                    </button>
+
+                                </div>
+
+                            </article>
+
+                        `
+                    ).join("")
+            }
+
+        </div>
+
+    `;
+
+
+    /*
+     * КНОПКА «ОДОБРИТЬ»
+     */
+
+    container
+        .querySelectorAll(
+            ".admin-approve-button"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    const applicationId =
+                        button.dataset.applicationId;
+
+
+                    const confirmed =
+                        confirm(
+                            "Одобрить эту заявку и создать персонажа?"
+                        );
+
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+
+                    button.disabled = true;
+
+                    button.textContent =
+                        "Одобрение...";
+
+
+                    const {
+                        error
+                    } = await supabase.rpc(
+                        "approve_character_application",
+                        {
+                            application_id:
+                                applicationId
+                        }
+                    );
+
+
+                    if (error) {
+
+                        console.error(
+                            error
+                        );
+
+                        alert(
+                            "Не удалось одобрить заявку:\n\n" +
+                            error.message
+                        );
+
+                        button.disabled = false;
+
+                        button.textContent =
+                            "Одобрить";
+
+                        return;
+                    }
+
+
+                    await loadAdminPanel(
+                        container
+                    );
+
+                }
+            );
+
+        });
+
+
+    /*
+     * КНОПКА «ОТКЛОНИТЬ»
+     */
+
+    container
+        .querySelectorAll(
+            ".admin-reject-button"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                async () => {
+
+                    const applicationId =
+                        button.dataset.applicationId;
+
+
+                    const confirmed =
+                        confirm(
+                            "Отклонить эту заявку?"
+                        );
+
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+
+                    button.disabled = true;
+
+                    button.textContent =
+                        "Отклонение...";
+
+
+                    const {
+                        error
+                    } = await supabase.rpc(
+                        "reject_character_application",
+                        {
+                            application_id:
+                                applicationId
+                        }
+                    );
+
+
+                    if (error) {
+
+                        console.error(
+                            error
+                        );
+
+                        alert(
+                            "Не удалось отклонить заявку:\n\n" +
+                            error.message
+                        );
+
+                        button.disabled = false;
+
+                        button.textContent =
+                            "Отклонить";
+
+                        return;
+                    }
+
+
+                    await loadAdminPanel(
+                        container
+                    );
+
+                }
+            );
+
+        });
 }
 
 
@@ -1073,7 +1511,8 @@ async function submitCharacterApplication(
         photoInput.files[0] || null;
 
 
-    if (!name ||
+    if (
+        !name ||
         !race ||
         !age ||
         !homeland ||
@@ -1101,9 +1540,11 @@ async function submitCharacterApplication(
         ];
 
 
-        if (!allowedTypes.includes(
-            photo.type
-        )) {
+        if (
+            !allowedTypes.includes(
+                photo.type
+            )
+        ) {
 
             setCharacterMessage(
                 "Разрешены только JPG, PNG и WebP.",
@@ -1114,7 +1555,10 @@ async function submitCharacterApplication(
         }
 
 
-        if (photo.size > 5 * 1024 * 1024) {
+        if (
+            photo.size >
+            5 * 1024 * 1024
+        ) {
 
             setCharacterMessage(
                 "Размер изображения не должен превышать 5 МБ.",
@@ -1148,7 +1592,9 @@ async function submitCharacterApplication(
     if (photo) {
 
         const extension =
-            getFileExtension(photo.name);
+            getFileExtension(
+                photo.name
+            );
 
         photoPath =
             `${user.id}/${applicationId}/photo.${extension}`;
@@ -1158,12 +1604,15 @@ async function submitCharacterApplication(
             error: uploadError
         } = await supabase
             .storage
-            .from("character-applications")
+            .from(
+                "character-applications"
+            )
             .upload(
                 photoPath,
                 photo,
                 {
-                    contentType: photo.type,
+                    contentType:
+                        photo.type,
                     upsert: false
                 }
             );
@@ -1213,7 +1662,8 @@ async function submitCharacterApplication(
 
             backstory,
 
-            special_skills: specialSkills,
+            special_skills:
+                specialSkills,
 
             preferred_weapon:
                 preferredWeapon || null,
@@ -1223,9 +1673,11 @@ async function submitCharacterApplication(
             photo_path:
                 photoPath,
 
-            status: "pending",
+            status:
+                "pending",
 
-            character_id: null
+            character_id:
+                null
 
         });
 
@@ -1251,8 +1703,11 @@ async function submitCharacterApplication(
             "cabinet-content"
         ),
         {
-            id: applicationId,
-            status: "pending"
+            id:
+                applicationId,
+
+            status:
+                "pending"
         }
     );
 }
@@ -1328,7 +1783,9 @@ async function loadCharacter(
 
     if (error) {
 
-        console.error(error);
+        console.error(
+            error
+        );
 
         showCharacterError(
             container,
@@ -1366,11 +1823,14 @@ function renderCharacter(
         </div>
 
         <h1>
-            ${escapeHtml(character.name)}
+            ${escapeHtml(
+                character.name
+            )}
         </h1>
 
         <p>
-            Твой персонаж принят в мир ЛОРГУС.
+            Твой персонаж принят
+            в мир ЛОРГУС.
         </p>
 
 
@@ -1379,7 +1839,10 @@ function renderCharacter(
             <span></span>
 
             <i>
-                ${escapeHtml(character.race || "Персонаж")}
+                ${escapeHtml(
+                    character.race ||
+                    "Персонаж"
+                )}
             </i>
 
             <span></span>
@@ -1389,7 +1852,8 @@ function renderCharacter(
 
         <p>
             ${escapeHtml(
-                character.occupation || ""
+                character.occupation ||
+                ""
             )}
         </p>
 
@@ -1421,7 +1885,9 @@ function showCharacterError(
         </h1>
 
         <p>
-            ${escapeHtml(message)}
+            ${escapeHtml(
+                message
+            )}
         </p>
 
     `;
