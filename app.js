@@ -2191,55 +2191,57 @@ function renderAdminApplications(
    ЗАЯВКА НА РАССМОТРЕНИИ
    ========================================================= */
 
-function renderPendingApplication(
-    container,
-    application
-) {
-
-    container.className =
-        "welcome-panel";
-
-
+function renderPendingApplication(container, application) {
     container.innerHTML = `
+        <div class="admin-application">
+            <div class="admin-application-main">
+                <div class="admin-application-info">
+                    <div><strong>Раса:</strong> ${escapeHtml(application.race)}</div>
+                    <div><strong>Возраст:</strong> ${escapeHtml(application.age)} лет</div>
+                    <div><strong>Родина:</strong> ${escapeHtml(application.homeland)}</div>
+                    <div><strong>Род занятий:</strong> ${escapeHtml(application.occupation)}</div>
+                    <div><strong>Оружие:</strong> ${escapeHtml(application.preferred_weapon || "Не указано")}</div>
+                </div>
 
-        <div class="welcome-symbol">
-            ✦
+                <div class="admin-application-section">
+                    <strong>Характер</strong>
+                    <p>${escapeHtml(application.personality)}</p>
+                </div>
+
+                <div class="admin-application-section">
+                    <strong>Предыстория</strong>
+                    <p>${escapeHtml(application.backstory)}</p>
+                </div>
+
+                <div class="admin-application-section">
+                    <strong>Особые навыки</strong>
+                    <p>${escapeHtml(application.special_skills)}</p>
+                </div>
+
+                <div class="admin-application-section">
+                    <strong>Изображение персонажа</strong>
+                    <p>${application.photo_path ? "Изображение загружено." : "Не загружено."}</p>
+                </div>
+            </div>
+
+            <div class="admin-application-actions">
+                <button
+                    class="admin-approve-button"
+                    data-application-id="${application.id}"
+                >
+                    Одобрить
+                </button>
+
+                <button
+                    class="admin-reject-button"
+                    data-application-id="${application.id}"
+                >
+                    Отклонить
+                </button>
+            </div>
         </div>
-
-
-        <h1>
-            Заявка отправлена
-        </h1>
-
-
-        <p>
-            Твоя заявка на персонажа
-            находится на рассмотрении.
-        </p>
-
-
-        <p>
-            Когда мастер примет решение,
-            персонаж появится в твоём кабинете.
-        </p>
-
-
-        <div class="ornament">
-
-            <span></span>
-
-            <i>
-                НА РАССМОТРЕНИИ
-            </i>
-
-            <span></span>
-
-        </div>
-
     `;
-
 }
-
 
 /* =========================================================
    ЗАГРУЗКА ПЕРСОНАЖА
