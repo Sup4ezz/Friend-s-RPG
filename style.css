@@ -1245,6 +1245,389 @@ button {
     padding: 17px 25px;
 }
 
+/* =========================================================
+   ADMIN PANEL
+   ========================================================= */
+
+.admin-panel {
+    width: min(1200px, calc(100% - 40px));
+
+    margin: 55px auto 75px;
+
+    padding: 45px;
+
+    position: relative;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(32, 28, 22, 0.99),
+            rgba(13, 12, 10, 0.99)
+        );
+
+    border: 1px solid rgba(190, 150, 75, 0.55);
+
+    box-shadow:
+        0 25px 85px rgba(0, 0, 0, 0.7),
+        inset 0 0 55px rgba(0, 0, 0, 0.4);
+}
+
+.admin-panel::before,
+.admin-panel::after {
+    content: "";
+
+    position: absolute;
+
+    width: 35px;
+    height: 35px;
+
+    pointer-events: none;
+}
+
+.admin-panel::before {
+    top: 12px;
+    left: 12px;
+
+    border-top: 1px solid var(--border-strong);
+    border-left: 1px solid var(--border-strong);
+}
+
+.admin-panel::after {
+    right: 12px;
+    bottom: 12px;
+
+    border-right: 1px solid var(--border-strong);
+    border-bottom: 1px solid var(--border-strong);
+}
+
+
+/* =========================================================
+   ADMIN STATS
+   ========================================================= */
+
+.admin-stats {
+    display: grid;
+
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+
+    gap: 18px;
+
+    margin-bottom: 42px;
+}
+
+.admin-stat {
+    padding: 22px 20px;
+
+    text-align: center;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(35, 31, 24, 0.9),
+            rgba(15, 14, 11, 0.95)
+        );
+
+    border: 1px solid rgba(190, 150, 75, 0.3);
+
+    box-shadow:
+        inset 0 0 25px rgba(0, 0, 0, 0.25);
+}
+
+.admin-stat-value {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: var(--gold);
+
+    font-family: var(--title-font);
+
+    font-size: 34px;
+
+    font-weight: 600;
+}
+
+.admin-stat-label {
+    display: block;
+
+    color: var(--text-muted);
+
+    font-size: 12px;
+
+    letter-spacing: 0.05em;
+}
+
+
+/* =========================================================
+   ADMIN APPLICATIONS
+   ========================================================= */
+
+.admin-applications {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 20px;
+}
+
+.admin-application {
+    display: grid;
+
+    grid-template-columns: minmax(0, 1fr) auto;
+
+    gap: 25px;
+
+    padding: 24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(28, 25, 20, 0.95),
+            rgba(12, 11, 9, 0.98)
+        );
+
+    border: 1px solid rgba(190, 150, 75, 0.28);
+
+    box-shadow:
+        inset 0 0 30px rgba(0, 0, 0, 0.25);
+
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+.admin-application:hover {
+    border-color: rgba(190, 150, 75, 0.5);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(34, 30, 23, 0.98),
+            rgba(14, 13, 10, 0.99)
+        );
+}
+
+
+/* =========================================================
+   ADMIN APPLICATION INFO
+   ========================================================= */
+
+.admin-application-main {
+    min-width: 0;
+}
+
+.admin-application-info {
+    display: grid;
+
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 12px 24px;
+}
+
+.admin-application-info > div {
+    min-width: 0;
+
+    padding-bottom: 10px;
+
+    border-bottom: 1px solid rgba(190, 150, 75, 0.12);
+}
+
+.admin-application-info strong {
+    display: block;
+
+    margin-bottom: 4px;
+
+    color: var(--gold-light);
+
+    font-family: var(--title-font);
+
+    font-size: 16px;
+
+    font-weight: 600;
+}
+
+.admin-application-info span,
+.admin-application-info p {
+    display: block;
+
+    margin: 0;
+
+    color: var(--text-soft);
+
+    font-size: 13px;
+
+    line-height: 1.55;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   ADMIN ACTIONS
+   ========================================================= */
+
+.admin-application-actions {
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    min-width: 145px;
+}
+
+.admin-approve-button,
+.admin-reject-button {
+    width: 100%;
+
+    padding: 11px 18px;
+
+    font-size: 16px;
+}
+
+.admin-reject-button {
+    border-color: rgba(145, 75, 65, 0.5);
+
+    color: #c99587;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(110, 45, 35, 0.12),
+            rgba(60, 25, 20, 0.2)
+        );
+}
+
+.admin-reject-button:hover {
+    border-color: rgba(180, 95, 80, 0.75);
+
+    color: #d9a49a;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(130, 55, 40, 0.2),
+            rgba(70, 30, 22, 0.25)
+        );
+}
+
+
+/* =========================================================
+   ADMIN EMPTY
+   ========================================================= */
+
+.admin-empty {
+    padding: 55px 25px;
+
+    text-align: center;
+
+    border: 1px solid rgba(190, 150, 75, 0.2);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(27, 24, 19, 0.8),
+            rgba(12, 11, 9, 0.9)
+        );
+}
+
+.admin-empty .welcome-symbol {
+    margin-bottom: 12px;
+}
+
+.admin-empty h2 {
+    margin: 0 0 8px;
+
+    color: var(--gold);
+
+    font-family: var(--title-font);
+
+    font-size: 30px;
+
+    font-weight: 600;
+}
+
+.admin-empty p {
+    margin: 0;
+
+    color: var(--text-muted);
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+   ADMIN MOBILE
+   ========================================================= */
+
+@media (max-width: 900px) {
+
+    .admin-panel {
+        width: min(900px, calc(100% - 32px));
+
+        padding: 34px 28px;
+    }
+
+    .admin-application {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-application-actions {
+        display: grid;
+
+        grid-template-columns: 1fr 1fr;
+
+        min-width: 0;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .admin-panel {
+        width: calc(100% - 24px);
+
+        margin: 25px auto 40px;
+
+        padding: 30px 18px;
+    }
+
+    .admin-stats {
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+
+        margin-bottom: 28px;
+    }
+
+    .admin-stat {
+        padding: 15px;
+    }
+
+    .admin-stat-value {
+        font-size: 28px;
+    }
+
+    .admin-application {
+        padding: 18px;
+
+        gap: 18px;
+    }
+
+    .admin-application-info {
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+    }
+
+    .admin-application-actions {
+        grid-template-columns: 1fr;
+
+        gap: 8px;
+    }
+}
 
 /* =========================================================
    МОБИЛЬНЫЕ
