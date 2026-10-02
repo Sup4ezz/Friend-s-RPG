@@ -1,57 +1,377 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 
-async function loadSupabase() {
-    const response = await fetch("/api/config");
+let supabase;
 
-    if (!response.ok) {
-        throw new Error("Не удалось получить конфигурацию Supabase");
+async function initialize() {
+    try {
+        const response = await fetch("/api/config");
+
+        if (!response.ok) {
+            throw new Error("Не удалось получить конфигурацию Supabase.");
+        }
+
+        const config = await response.json();
+
+        if (!config.supabaseUrl || !config.supabasePublishableKey) {
+            throw new Error("Конфигурация Supabase отсутствует.");
+        }
+
+        supabase = createClient(
+            config.supabaseUrl,
+            config.supabasePublishableKey
+        );
+
+        window.supabaseClient = supabase;
+
+        const {
+            data: { session }
+        } = await supabase.auth.getSession();
+
+        render(session);
+
+        supabase.auth.onAuthStateChange((_event, newSession) => {
+            render(newSession);
+        });
+
+    } catch (error) {
+        console.error(error);
+
+        document.getElementById("root").innerHTML = `
+            <main class="error-screen">
+                <div class="error-panel">
+                    <div class="error-symbol">✦</div>
+                    <h1>Ошибка соединения</h1>
+                    <p>${escapeHtml(error.message)}</p>
+                    <button onclick="location.reload()" class="gold-button">
+                        Повторить
+                    </button>
+                </div>
+            </main>
+        `;
     }
-
-    const config = await response.json();
-
-    if (!config.supabaseUrl || !config.supabasePublishableKey) {
-        throw new Error("Cloudflare не вернул данные Supabase");
-    }
-
-    const supabase = createClient(
-        config.supabaseUrl,
-        config.supabasePublishableKey
-    );
-
-    window.supabaseClient = supabase;
-
-    await testSupabase(supabase);
 }
 
-async function testSupabase(supabase) {
-    const { data, error } = await supabase.auth.getSession();
+function render(session) {
+    if (session) {
+        renderCabinet(session);
+    } else {
+        renderAuth();
+    }
+}
+
+function renderAuth() {
+    document.getElementById("root").innerHTML = `
+        <main class="auth-page">
+
+            <div class="background-glow"></div>
+
+            <section class="auth-container">
+
+                <div class="brand">
+                    <div class="brand-symbol">✦</div>
+
+                    <h1>Friends RPG</h1>
+
+                    <div class="brand-line">
+                        <span></span>
+                        <i>Мир ждёт своих героев</i>
+                        <span></span>
+                    </div>
+                </div>
+
+                <div class="auth-panel">
+
+                    <div class="auth-tabs">
+                        <button
+                            id="login-tab"
+                            class="auth-tab active"
+                            onclick="showLogin()"
+                        >
+                            Войти
+                        </button>
+
+                        <button
+                            id="register-tab"
+                            class="auth-tab"
+                            onclick="showRegister()"
+                        >
+                            Регистрация
+                        </button>
+                    </div>
+
+                    <div id="auth-form"></div>
+
+                </div>
+
+                <p class="auth-footer">
+                    Вход в мир предназначен только для участников игры.
+                </p>
+
+            </section>
+
+        </main>
+    `;
+
+    showLogin();
+}
+
+function showLogin() {
+    setActiveTab("login");
+
+    document.getElementById("auth-form").innerHTML = `
+        <div class="form-heading">
+            <h2>Добро пожаловать</h2>
+            <p>Войди, чтобы продолжить своё путешествие.</p>
+        </div>
+
+        <form onsubmit="login(event)">
+
+            <label for="login-email">Email</label>
+
+            <div class="input-wrapper">
+                <span class="input-icon">✉</span>
+                <input
+                    id="login-email"
+                    type="email"
+                    placeholder="Введите email"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <label for="login-password">Пароль</label>
+
+            <div class="input-wrapper">
+                <span class="input-icon">◆</span>
+                <input
+                    id="login-password"
+                    type="password"
+                    placeholder="Введите пароль"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <div id="auth-message"></div>
+
+            <button type="submit" class="gold-button main-button">
+                Войти в мир
+            </button>
+
+        </form>
+    `;
+}
+
+function showRegister() {
+    setActiveTab("register");
+
+    document.getElementById("auth-form").innerHTML = `
+        <div class="form-heading">
+            <h2>Создать аккаунт</h2>
+            <p>Начни своё путешествие в мире Friends RPG.</p>
+        </div>
+
+        <form onsubmit="register(event)">
+
+            <label for="register-email">Email</label>
+
+            <div class="input-wrapper">
+                <span class="input-icon">✉</span>
+                <input
+                    id="register-email"
+                    type="email"
+                    placeholder="Введите email"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <label for="register-password">Пароль</label>
+
+            <div class="input-wrapper">
+                <span class="input-icon">◆</span>
+                <input
+                    id="register-password"
+                    type="password"
+                    placeholder="Минимум 6 символов"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                >
+            </div>
+
+            <label for="register-password-confirm">
+                Повторите пароль
+            </label>
+
+            <div class="input-wrapper">
+                <span class="input-icon">◆</span>
+                <input
+                    id="register-password-confirm"
+                    type="password"
+                    placeholder="Введите пароль ещё раз"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                >
+            </div>
+
+            <div id="auth-message"></div>
+
+            <button type="submit" class="gold-button main-button">
+                Создать аккаунт
+            </button>
+
+        </form>
+    `;
+}
+
+function setActiveTab(tab) {
+    const loginTab = document.getElementById("login-tab");
+    const registerTab = document.getElementById("register-tab");
+
+    if (!loginTab || !registerTab) {
+        return;
+    }
+
+    loginTab.classList.toggle("active", tab === "login");
+    registerTab.classList.toggle("active", tab === "register");
+}
+
+async function login(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+
+    setMessage("Выполняется вход...", "info");
+
+    const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+    });
 
     if (error) {
-        throw error;
+        setMessage(error.message, "error");
+        return;
+    }
+}
+
+async function register(event) {
+    event.preventDefault();
+
+    const email = document.getElementById("register-email").value.trim();
+    const password = document.getElementById("register-password").value;
+    const confirmation = document.getElementById(
+        "register-password-confirm"
+    ).value;
+
+    if (password !== confirmation) {
+        setMessage("Пароли не совпадают.", "error");
+        return;
     }
 
-    console.log("Supabase Auth работает:", data);
+    setMessage("Создаём аккаунт...", "info");
 
-    renderApp(data.session);
+    const { data, error } = await supabase.auth.signUp({
+        email,
+        password
+    });
+
+    if (error) {
+        setMessage(error.message, "error");
+        return;
+    }
+
+    if (data.session) {
+        return;
+    }
+
+    setMessage(
+        "Аккаунт создан. Проверь email для подтверждения регистрации.",
+        "success"
+    );
 }
 
-function renderApp(session) {
+async function logout() {
+    await supabase.auth.signOut();
+}
+
+function renderCabinet(session) {
+    const email = session.user.email || "Игрок";
+
     document.getElementById("root").innerHTML = `
-        <h1>Friends RPG</h1>
-        <p>Supabase подключён.</p>
-        <p>Auth работает.</p>
-        <p>
-            Сессия:
-            ${session ? "есть" : "нет"}
-        </p>
+        <main class="game-page">
+
+            <header class="topbar">
+
+                <div class="topbar-brand">
+                    <div class="mini-symbol">✦</div>
+                    <span>Friends RPG</span>
+                </div>
+
+                <div class="player-area">
+                    <span class="player-email">
+                        ${escapeHtml(email)}
+                    </span>
+
+                    <button
+                        class="logout-button"
+                        onclick="logout()"
+                    >
+                        Выйти
+                    </button>
+                </div>
+
+            </header>
+
+            <section class="welcome-panel">
+
+                <div class="welcome-symbol">✦</div>
+
+                <h1>Добро пожаловать в мир</h1>
+
+                <p>
+                    Твой аккаунт создан.
+                    Следующим шагом станет создание персонажа.
+                </p>
+
+                <div class="ornament">
+                    <span></span>
+                    <i>Friends RPG</i>
+                    <span></span>
+                </div>
+
+            </section>
+
+        </main>
     `;
 }
 
-loadSupabase().catch(error => {
-    console.error("Ошибка:", error);
+function setMessage(text, type) {
+    const element = document.getElementById("auth-message");
 
-    document.getElementById("root").innerHTML = `
-        <h1>Ошибка</h1>
-        <p>${error.message}</p>
-    `;
-});
+    if (!element) {
+        return;
+    }
+
+    element.className = `auth-message ${type}`;
+    element.textContent = text;
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+window.showLogin = showLogin;
+window.showRegister = showRegister;
+window.login = login;
+window.register = register;
+window.logout = logout;
+
+initialize();
