@@ -120,7 +120,9 @@ jobs:
               )
 
               with urllib.request.urlopen(request, timeout=180) as response:
-                  data = json.loads(response.read().decode("utf-8"))
+                  data = json.loads(
+                      response.read().decode("utf-8")
+                  )
 
               return data["choices"][0]["message"]["content"]
 
@@ -150,7 +152,9 @@ jobs:
                       )
 
                   try:
-                      return json.loads(text[start:end + 1])
+                      return json.loads(
+                          text[start:end + 1]
+                      )
                   except json.JSONDecodeError as e:
                       raise RuntimeError(
                           "AI returned invalid JSON:\n\n"
@@ -167,7 +171,7 @@ jobs:
 
               if not isinstance(changes, list):
                   raise RuntimeError(
-                      f"{agent_name}: JSON must contain 'changes' array"
+                      f"{agent_name}: 'changes' must be an array"
                   )
 
               if len(changes) > 10:
@@ -184,23 +188,29 @@ jobs:
                       )
 
                   path = change.get("path")
-                  content = change.get("content")
+                  lines = change.get("content_lines")
 
                   if not isinstance(path, str):
                       raise RuntimeError(
                           f"{agent_name}: invalid file path"
                       )
 
-                  if not isinstance(content, str):
+                  if not isinstance(lines, list):
                       raise RuntimeError(
-                          f"{agent_name}: content must be a string"
+                          f"{agent_name}: content_lines must be an array"
                       )
 
-                  if (
-                      path.startswith("/")
-                      or ".." in path.split("/")
-                      or path not in EDITABLE_FILES
-                  ):
+                  if path.startswith("/"):
+                      raise RuntimeError(
+                          f"{agent_name}: absolute path forbidden: {path}"
+                      )
+
+                  if ".." in path.split("/"):
+                      raise RuntimeError(
+                          f"{agent_name}: parent path forbidden: {path}"
+                      )
+
+                  if path not in EDITABLE_FILES:
                       raise RuntimeError(
                           f"{agent_name}: file is not allowed: {path}"
                       )
@@ -212,12 +222,31 @@ jobs:
 
                   seen.add(path)
 
-                  os.makedirs(
-                      os.path.dirname(path) or ".",
-                      exist_ok=True
-                  )
+                  for line in lines:
+                      if not isinstance(line, str):
+                          raise RuntimeError(
+                              f"{agent_name}: every content_lines item must be a string"
+                          )
 
-                  with open(path, "w", encoding="utf-8") as f:
+                  content = "\n".join(lines)
+
+                  if lines:
+                      content += "\n"
+
+                  directory = os.path.dirname(path)
+
+                  if directory:
+                      os.makedirs(
+                          directory,
+                          exist_ok=True
+                      )
+
+                  with open(
+                      path,
+                      "w",
+                      encoding="utf-8",
+                      newline=""
+                  ) as f:
                       f.write(content)
 
                   print(
@@ -225,7 +254,9 @@ jobs:
                   )
 
               if not changes:
-                  print(f"{agent_name}: no changes")
+                  print(
+                      f"{agent_name}: no changes"
+                  )
 
           print("========================================")
           print("LORGUS AI WORKSPACE")
@@ -291,32 +322,46 @@ jobs:
 
           Перед изменением изучи реальный репозиторий.
 
-          ВАЖНО:
+          ВАЖНО.
 
           Ты НЕ должен создавать git diff.
 
           Ты НЕ должен создавать unified diff.
 
-          Ты НЕ должен использовать строки:
+          Ты НЕ должен использовать:
           @@
           +++
           ---
           diff --git
 
-          Вместо этого верни JSON со следующим форматом:
+          Вместо этого верни ТОЛЬКО JSON следующего формата:
 
           {
             "changes": [
               {
                 "path": "README.md",
-                "content": "ПОЛНОЕ НОВОЕ СОДЕРЖИМОЕ ФАЙЛА"
+                "content_lines": [
+                  "# Friend-s-RPG",
+                  "",
+                  "## LORGUS AI Workspace",
+                  "",
+                  "текст"
+                ]
               }
             ]
           }
 
-          content должен содержать ПОЛНОЕ содержимое изменяемого файла.
+          КРИТИЧЕСКИ ВАЖНО:
 
-          Не возвращай только изменённый фрагмент.
+          content_lines содержит ПОЛНОЕ содержимое файла.
+
+          Каждый элемент content_lines является ОДНОЙ строкой файла.
+
+          НЕ помещай переносы строк внутрь строк content_lines.
+
+          НЕ возвращай только изменённый фрагмент.
+
+          Если файл нужно изменить — верни его полностью.
 
           Если изменений не требуется:
 
@@ -324,9 +369,7 @@ jobs:
             "changes": []
           }
 
-          Можно изменять только необходимые файлы.
-
-          Доступные файлы:
+          Можно изменять только:
 
           README.md
           index.html
@@ -335,6 +378,8 @@ jobs:
           worker.js
           wrangler.toml
           docs/PROJECT.md
+
+          НЕ изменяй другие файлы.
 
           Верни ТОЛЬКО JSON.
           Без Markdown.
@@ -358,21 +403,37 @@ jobs:
 
           coder = clean_json(coder_raw)
 
-          print(json.dumps(coder, ensure_ascii=False, indent=2))
+          print(
+              json.dumps(
+                  coder,
+                  ensure_ascii=False,
+                  indent=2
+              )
+          )
 
-          apply_changes(coder, "CODER")
+          apply_changes(
+              coder,
+              "CODER"
+          )
 
           print()
           print("========================================")
           print("ACTUAL GIT DIFF")
           print("========================================")
 
-          diff = run("git diff -- README.md index.html app.js style.css worker.js wrangler.toml docs/PROJECT.md")
+          diff = run(
+              "git diff -- README.md index.html app.js style.css worker.js wrangler.toml docs/PROJECT.md"
+          )
 
           if not diff.strip():
               print("NO CHANGES")
           else:
               print(diff)
+
+          def current_diff():
+              return run(
+                  "git diff -- README.md index.html app.js style.css worker.js wrangler.toml docs/PROJECT.md"
+              )
 
           def run_qa():
               print()
@@ -397,7 +458,7 @@ jobs:
 
           Используй реальное содержимое файлов и реальный git diff.
 
-          В конце обязательно напиши одну строку:
+          В конце обязательно напиши ровно одну из строк:
 
           RESULT: PASS
 
@@ -422,7 +483,7 @@ jobs:
 
           GIT DIFF:
 
-          {run("git diff -- README.md index.html app.js style.css worker.js wrangler.toml docs/PROJECT.md")}
+          {current_diff()}
           """
               )
 
@@ -463,7 +524,7 @@ jobs:
           - неправильные права;
           - ошибки API.
 
-          В конце обязательно напиши:
+          В конце обязательно напиши ровно одну из строк:
 
           RESULT: APPROVE
 
@@ -488,7 +549,7 @@ jobs:
 
           GIT DIFF:
 
-          {run("git diff -- README.md index.html app.js style.css worker.js wrangler.toml docs/PROJECT.md")}
+          {current_diff()}
           """
               )
 
@@ -503,10 +564,13 @@ jobs:
 
               print()
               print("========================================")
-              print(f"VALIDATION PASS {attempt + 1}")
+              print(
+                  f"VALIDATION PASS {attempt + 1}"
+              )
               print("========================================")
 
               qa_ok, qa_result = run_qa()
+
               reviewer_ok, reviewer_result = run_reviewer()
 
               if qa_ok and reviewer_ok:
@@ -517,11 +581,8 @@ jobs:
 
                   print()
                   print("FINAL DIFF:")
-                  print(
-                      run(
-                          "git diff -- README.md index.html app.js style.css worker.js wrangler.toml docs/PROJECT.md"
-                      )
-                  )
+
+                  print(current_diff())
 
                   sys.exit(0)
 
@@ -554,12 +615,20 @@ jobs:
             "changes": [
               {
                 "path": "README.md",
-                "content": "ПОЛНОЕ НОВОЕ СОДЕРЖИМОЕ ФАЙЛА"
+                "content_lines": [
+                  "# Friend-s-RPG",
+                  "",
+                  "исправленное содержимое"
+                ]
               }
             ]
           }
 
-          content должен быть полным содержимым файла.
+          content_lines содержит ПОЛНОЕ содержимое файла.
+
+          Каждый элемент content_lines — ОДНА строка файла.
+
+          НЕ помещай переносы строк внутрь элементов content_lines.
 
           Если изменений не требуется:
 
@@ -576,6 +645,8 @@ jobs:
           worker.js
           wrangler.toml
           docs/PROJECT.md
+
+          НЕ изменяй другие файлы.
 
           Без Markdown.
           Без ```json.
@@ -604,18 +675,25 @@ jobs:
 
           ТЕКУЩИЙ GIT DIFF:
 
-          {run("git diff -- README.md index.html app.js style.css worker.js wrangler.toml docs/PROJECT.md")}
+          {current_diff()}
           """
               )
 
-              fixer = clean_json(fixer_raw)
+              fixer = clean_json(
+                  fixer_raw
+              )
 
-              print(json.dumps(
+              print(
+                  json.dumps(
+                      fixer,
+                      ensure_ascii=False,
+                      indent=2
+                  )
+              )
+
+              apply_changes(
                   fixer,
-                  ensure_ascii=False,
-                  indent=2
-              ))
-
-              apply_changes(fixer, "FIXER")
+                  "FIXER"
+              )
 
           PY
