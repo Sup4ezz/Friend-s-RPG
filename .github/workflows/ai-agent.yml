@@ -28,13 +28,14 @@ jobs:
           import json
           import os
           import urllib.request
+          import urllib.error
 
           def read_file(path):
               try:
                   with open(path, encoding="utf-8") as f:
                       return f.read()
-              except:
-                  return "[FILE NOT FOUND]"
+              except Exception as e:
+                  return f"[FILE NOT FOUND: {e}]"
 
           files = [
               ".ai/AGENT.md",
@@ -64,6 +65,7 @@ jobs:
           {context}
 
           Задача пользователя:
+
           {os.environ["TASK"]}
 
           ВАЖНО:
@@ -86,7 +88,7 @@ jobs:
 
           request = urllib.request.Request(
               "https://openrouter.ai/api/v1/chat/completions",
-              data=json.dumps(data).encode(),
+              data=json.dumps(data).encode("utf-8"),
               headers={
                   "Authorization": "Bearer " + os.environ["API"],
                   "Content-Type": "application/json"
@@ -94,8 +96,34 @@ jobs:
               method="POST"
           )
 
-          with urllib.request.urlopen(request) as response:
-              result = json.load(response)
+          try:
+              with urllib.request.urlopen(request) as response:
+                  raw = response.read().decode("utf-8")
+                  print("HTTP STATUS:", response.status)
+                  print("RAW RESPONSE:")
+                  print(raw)
 
-          print(result["choices"][0]["message"]["content"])
+                  result = json.loads(raw)
+
+          except urllib.error.HTTPError as e:
+              print("HTTP ERROR:", e.code)
+              print(e.read().decode("utf-8"))
+              raise
+
+          if "choices" not in result:
+              raise RuntimeError("OpenRouter response does not contain choices")
+
+          if not result["choices"]:
+              raise RuntimeError("OpenRouter returned empty choices")
+
+          message = result["choices"][0].get("message", {})
+          content = message.get("content")
+
+          if not content:
+              raise RuntimeError(
+                  "OpenRouter returned an empty message content"
+              )
+
+          print("\n===== AI RESPONSE =====\n")
+          print(content)
           PY
