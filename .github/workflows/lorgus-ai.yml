@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       task:
-        description: "Задача для AI"
+        description: "Task for LORGUS AI"
         required: true
         type: string
 
@@ -16,8 +16,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      CEREBRAS_API_KEY: ${{ secrets.API }}
-      CEREBRAS_MODEL: gpt-oss-120b
+      GROQ_API_KEY: ${{ secrets.API }}
+      GROQ_MODEL: openai/gpt-oss-120b
 
     steps:
       - name: Checkout repository
@@ -25,34 +25,34 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Run AI workspace
+      - name: Run LORGUS AI pipeline
         env:
           USER_TASK: ${{ inputs.task }}
         run: |
           python3 <<'PY'
-          import os
           import json
+          import os
           import re
           import subprocess
           import sys
           import time
-          import urllib.request
           import urllib.error
+          import urllib.request
 
-          API_KEY = os.environ.get("CEREBRAS_API_KEY")
-          MODEL = os.environ.get("CEREBRAS_MODEL", "gpt-oss-120b")
+          API_KEY = os.environ.get("GROQ_API_KEY")
+          MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
           TASK = os.environ.get("USER_TASK", "").strip()
 
           if not API_KEY:
               raise RuntimeError(
-                  "CEREBRAS_API_KEY is missing. "
-                  "Put the Cerebras API key into GitHub Secret 'API'."
+                  "Missing GitHub Secret 'API'. "
+                  "Put the Groq API key into Settings -> Secrets and variables -> Actions."
               )
 
           if not TASK:
               raise RuntimeError("USER_TASK is empty.")
 
-          API_URL = "https://api.cerebras.ai/v1/chat/completions"
+          API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
           ALLOWED_FILES = {
               "README.md",
@@ -64,7 +64,7 @@ jobs:
               "docs/PROJECT.md",
           }
 
-          MAX_RETRIES = 3
+          MAX_RETRIES = 2
 
           def run_cmd(command):
               result = subprocess.run(
@@ -83,34 +83,147 @@ jobs:
 
               return result.stdout
 
-          def scan_repository():
-              files = {}
+          def get_file(path):
+              if not os.path.isfile(path):
+                  return None
+
+              with open(path, "r", encoding="utf-8") as f:
+                  return f.read()
+
+          def repository_files():
+              result = {}
 
               for path in sorted(ALLOWED_FILES):
-                  if os.path.isfile(path):
-                      with open(path, "r", encoding="utf-8") as f:
-                          files[path] = f.read()
+                  content = get_file(path)
 
-              return files
+                  if content is not None:
+                      result[path] = content
 
-          def format_repository(files):
-              result = []
+              return result
 
-              for path, content in files.items():
-                  result.append(
-                      f"\n===== FILE: {path} =====\n"
-                      f"{content}\n"
-                      f"===== END FILE: {path} =====\n"
+          def git_status():
+              return run_cmd(
+                  "git status --short"
+              )
+
+          def git_diff():
+              return run_cmd(
+                  "git diff -- README.md index.html app.js style.css "
+                  "worker.js wrangler.toml docs/PROJECT.md"
+              )
+
+          def changed_files():
+              output = run_cmd(
+                  "git diff --name-only -- "
+                  "README.md index.html app.js style.css "
+                  "worker.js wrangler.toml docs/PROJECT.md"
+              )
+
+              return [
+                  line.strip()
+                  for line in output.splitlines()
+                  if line.strip()
+              ]
+
+          def relevant_files(task):
+              task_lower = task.lower()
+
+              keywords = {
+                  "README.md": [
+                      "readme",
+                      "документац",
+                      "описан"
+                  ],
+                  "index.html": [
+                      "html",
+                      "страниц",
+                      "интерфейс",
+                      "ui",
+                      "кнопк",
+                      "форма"
+                  ],
+                  "app.js": [
+                      "javascript",
+                      "js",
+                      "логик",
+                      "supabase",
+                      "auth",
+                      "авторизац",
+                      "персонаж",
+                      "admin",
+                      "админ"
+                  ],
+                  "style.css": [
+                      "css",
+                      "стиль",
+                      "цвет",
+                      "дизайн",
+                      "размер",
+                      "layout"
+                  ],
+                  "worker.js": [
+                      "worker",
+                      "cloudflare",
+                      "api",
+                      "endpoint",
+                      "запрос"
+                  ],
+                  "wrangler.toml": [
+                      "wrangler",
+                      "cloudflare",
+                      "deploy",
+                      "assets",
+                      "binding"
+                  ],
+                  "docs/PROJECT.md": [
+                      "project",
+                      "архитектур",
+                      "документац"
+                  ]
+              }
+
+              selected = []
+
+              for path, words in keywords.items():
+                  if any(word in task_lower for word in words):
+                      selected.append(path)
+
+              if not selected:
+                  selected = [
+                      "README.md",
+                      "index.html",
+                      "app.js",
+                      "style.css",
+                      "worker.js",
+                      "wrangler.toml",
+                      "docs/PROJECT.md"
+                  ]
+
+              return selected
+
+          def format_files(paths):
+              files = repository_files()
+              output = []
+
+              for path in paths:
+                  if path not in files:
+                      continue
+
+                  output.append(
+                      f"===== FILE: {path} =====\n"
+                      f"{files[path]}\n"
+                      f"===== END FILE: {path} ====="
                   )
 
-              return "\n".join(result)
+              return "\n\n".join(output)
 
-          def call_ai(messages, temperature=0.2):
+          def call_ai(messages, max_tokens=2500):
               payload = {
                   "model": MODEL,
                   "messages": messages,
-                  "temperature": temperature,
-                  "max_completion_tokens": 12000
+                  "temperature": 0.1,
+                  "max_completion_tokens": max_tokens,
+                  "reasoning_effort": "low"
               }
 
               data = json.dumps(payload).encode("utf-8")
@@ -120,8 +233,8 @@ jobs:
                       API_URL,
                       data=data,
                       headers={
-                          "Content-Type": "application/json",
-                          "Authorization": f"Bearer {API_KEY}"
+                          "Authorization": f"Bearer {API_KEY}",
+                          "Content-Type": "application/json"
                       },
                       method="POST"
                   )
@@ -131,52 +244,73 @@ jobs:
                           request,
                           timeout=180
                       ) as response:
-
                           body = response.read().decode("utf-8")
                           result = json.loads(body)
 
                           return result["choices"][0]["message"]["content"]
 
-                  except urllib.error.HTTPError as e:
-                      body = e.read().decode("utf-8", errors="replace")
+                  except urllib.error.HTTPError as error:
+                      body = error.read().decode(
+                          "utf-8",
+                          errors="replace"
+                      )
 
                       print(
-                          f"\nCerebras HTTP {e.code} "
+                          f"\nGroq HTTP {error.code} "
                           f"(attempt {attempt}/{MAX_RETRIES})"
                       )
                       print(body)
 
-                      if e.code == 429:
+                      if error.code == 429:
+                          retry_after = error.headers.get(
+                              "retry-after"
+                          )
+
+                          if retry_after:
+                              try:
+                                  delay = min(
+                                      int(float(retry_after)),
+                                      60
+                                  )
+                              except ValueError:
+                                  delay = 10
+                          else:
+                              delay = 10
+
                           if attempt < MAX_RETRIES:
-                              time.sleep(5 * attempt)
+                              print(
+                                  f"Rate limit. Waiting {delay} seconds..."
+                              )
+                              time.sleep(delay)
                               continue
 
                           raise RuntimeError(
-                              "Cerebras rate limit exceeded."
+                              "Groq rate limit reached. "
+                              "Check the current Free Plan limits."
                           )
 
-                      if e.code in (401, 403):
+                      if error.code in (401, 403):
                           raise RuntimeError(
-                              "Cerebras authentication failed. "
+                              "Groq authentication failed. "
                               "Check GitHub Secret 'API'."
                           )
 
                       if attempt < MAX_RETRIES:
-                          time.sleep(3 * attempt)
+                          time.sleep(3)
                           continue
 
                       raise RuntimeError(
-                          f"Cerebras returned HTTP {e.code}."
+                          f"Groq returned HTTP {error.code}."
                       )
 
-                  except Exception as e:
+                  except Exception as error:
                       print(
-                          f"\nCerebras request error "
-                          f"(attempt {attempt}/{MAX_RETRIES}): {e}"
+                          f"\nGroq request error "
+                          f"(attempt {attempt}/{MAX_RETRIES}): {error}"
                       )
 
                       if attempt < MAX_RETRIES:
-                          time.sleep(3 * attempt)
+                          time.sleep(3)
                           continue
 
                       raise
@@ -191,6 +325,7 @@ jobs:
                       text,
                       flags=re.IGNORECASE
                   )
+
                   text = re.sub(
                       r"\s*```$",
                       "",
@@ -200,7 +335,7 @@ jobs:
               start = text.find("{")
               end = text.rfind("}")
 
-              if start == -1 or end == -1 or end <= start:
+              if start == -1 or end == -1:
                   raise RuntimeError(
                       "AI did not return a JSON object.\n\n"
                       + text
@@ -210,41 +345,50 @@ jobs:
 
               try:
                   return json.loads(candidate)
-              except json.JSONDecodeError as e:
+              except json.JSONDecodeError as error:
                   raise RuntimeError(
                       "AI returned invalid JSON.\n\n"
-                      f"Error: {e}\n\n"
+                      f"{error}\n\n"
                       f"Response:\n{candidate}"
                   )
 
           def validate_changes(data):
               if not isinstance(data, dict):
-                  raise RuntimeError("AI changes response is not an object.")
+                  raise RuntimeError(
+                      "Changes response is not an object."
+                  )
 
               changes = data.get("changes")
 
               if not isinstance(changes, list):
                   raise RuntimeError(
-                      "AI response does not contain 'changes' array."
+                      "Missing 'changes' array."
                   )
 
               validated = []
 
               for change in changes:
                   if not isinstance(change, dict):
-                      raise RuntimeError("Invalid change object.")
+                      raise RuntimeError(
+                          "Invalid change object."
+                      )
 
                   path = change.get("path")
-                  content_lines = change.get("content_lines")
+                  content_lines = change.get(
+                      "content_lines"
+                  )
 
                   if path not in ALLOWED_FILES:
                       raise RuntimeError(
-                          f"AI attempted to modify forbidden file: {path}"
+                          f"Forbidden file modification: {path}"
                       )
 
-                  if not isinstance(content_lines, list):
+                  if not isinstance(
+                      content_lines,
+                      list
+                  ):
                       raise RuntimeError(
-                          f"'content_lines' must be an array for {path}"
+                          f"content_lines must be a list: {path}"
                       )
 
                   if not all(
@@ -252,7 +396,7 @@ jobs:
                       for line in content_lines
                   ):
                       raise RuntimeError(
-                          f"Every content_lines item must be a string: {path}"
+                          f"All content_lines must be strings: {path}"
                       )
 
                   validated.append(
@@ -267,15 +411,24 @@ jobs:
           def apply_changes(changes):
               for change in changes:
                   path = change["path"]
-                  content = "\n".join(change["content_lines"])
+
+                  content = "\n".join(
+                      change["content_lines"]
+                  )
 
                   if not content.endswith("\n"):
                       content += "\n"
 
-                  with open(path, "w", encoding="utf-8") as f:
-                      f.write(content)
+                  with open(
+                      path,
+                      "w",
+                      encoding="utf-8"
+                  ) as file:
+                      file.write(content)
 
-                  print(f"UPDATED: {path}")
+                  print(
+                      f"UPDATED: {path}"
+                  )
 
           def print_section(title, content):
               print("\n")
@@ -285,73 +438,76 @@ jobs:
               print(content)
               print("=" * 80)
 
-          # ------------------------------------------------------------
-          # REPOSITORY
-          # ------------------------------------------------------------
+          # ============================================================
+          # INITIAL REPOSITORY
+          # ============================================================
 
-          repository = scan_repository()
-          repository_text = format_repository(repository)
+          all_files = repository_files()
 
-          print_section(
-              "REPOSITORY BEFORE AI",
-              repository_text
+          relevant = relevant_files(TASK)
+
+          relevant_context = format_files(
+              relevant
           )
 
-          # ------------------------------------------------------------
+          print_section(
+              "TASK",
+              TASK
+          )
+
+          print_section(
+              "RELEVANT FILES",
+              relevant_context
+          )
+
+          # ============================================================
           # ARCHITECT
-          # ------------------------------------------------------------
+          # ============================================================
 
           architect_prompt = f"""
-          You are ARCHITECT of the LORGUS project.
+          You are the ARCHITECT Agent for LORGUS.
 
-          Read the repository provided below.
+          Analyze the user's task and the provided real repository files.
 
-          Your task is to analyze how the requested change should be
-          implemented.
+          Do NOT modify files.
+          Do NOT output code.
+          Do NOT output a diff.
 
-          DO NOT modify files.
+          Produce a concise implementation plan.
 
-          DO NOT output code.
+          Include only:
 
-          DO NOT output a diff.
+          - problem;
+          - relevant files;
+          - required changes;
+          - files that must remain untouched;
+          - risks;
+          - verification.
 
-          DO NOT invent files or functionality that do not exist.
-
-          Determine:
-
-          1. What the user wants.
-          2. Which existing files are relevant.
-          3. How the current implementation works.
-          4. What must be changed.
-          5. What must NOT be changed.
-          6. Possible regression risks.
-          7. How the result should be verified.
-
-          Keep the plan concise.
+          Do not invent files or functionality.
 
           USER TASK:
           {TASK}
 
           REPOSITORY:
-          {repository_text}
+          {relevant_context}
           """
 
           architect = call_ai(
               [
                   {
                       "role": "system",
-                      "content": """
-                      You are the Architect Agent of LORGUS.
-                      Analyze the real repository.
-                      Never invent repository contents.
-                      Never modify code.
-                      """
+                      "content": (
+                          "You are the LORGUS Architect. "
+                          "Analyze only the supplied repository."
+                      )
                   },
                   {
                       "role": "user",
                       "content": architect_prompt
                   }
-              ]
+              ],
+              max_tokens=1800
           )
 
           print_section(
@@ -359,40 +515,31 @@ jobs:
               architect
           )
 
-          # ------------------------------------------------------------
+          # ============================================================
           # CODER
-          # ------------------------------------------------------------
+          # ============================================================
+
+          coder_files = relevant_context
 
           coder_prompt = f"""
-          You are CODER of the LORGUS project.
+          You are the CODER Agent for LORGUS.
 
-          Implement the user's task using the repository below.
+          Implement the user's task.
 
-          IMPORTANT RULES:
+          IMPORTANT:
 
-          1. Read the existing files carefully.
-          2. Preserve existing functionality.
-          3. Make the smallest necessary changes.
-          4. Do not rewrite unrelated code.
-          5. Do not modify files unrelated to the task.
-          6. Do not create new files.
-          7. Only these files may be changed:
+          - Preserve existing functionality.
+          - Make the smallest possible change.
+          - Do not rewrite unrelated code.
+          - Do not modify files unrelated to the task.
+          - Do not create new files.
+          - Only modify allowed files.
+          - Return ONLY JSON.
+          - Do not return Markdown.
+          - Do not return a git diff.
+          - Changed files must contain COMPLETE final content.
 
-             README.md
-             index.html
-             app.js
-             style.css
-             worker.js
-             wrangler.toml
-             docs/PROJECT.md
-
-          8. Return ONLY valid JSON.
-          9. Do not use Markdown code fences.
-          10. Do not return a git diff.
-          11. Each changed file must contain its COMPLETE final content.
-          12. Files that do not need changes must not appear.
-
-          Required JSON format:
+          JSON:
 
           {{
             "changes": [
@@ -406,7 +553,7 @@ jobs:
             ]
           }}
 
-          If no changes are necessary:
+          If no changes are required:
 
           {{
             "changes": []
@@ -418,126 +565,135 @@ jobs:
           ARCHITECT PLAN:
           {architect}
 
-          CURRENT REPOSITORY:
-          {repository_text}
+          FILES:
+          {coder_files}
           """
 
           coder_raw = call_ai(
               [
                   {
                       "role": "system",
-                      "content": """
-                      You are the Coding Agent of LORGUS.
-                      Return strict JSON only.
-                      Never return a diff.
-                      """
+                      "content": (
+                          "You are the LORGUS Coding Agent. "
+                          "Return valid JSON only."
+                      )
                   },
                   {
                       "role": "user",
                       "content": coder_prompt
                   }
-              ]
+              ],
+              max_tokens=6000
           )
 
           print_section(
-              "CODER RAW RESPONSE",
+              "CODER",
               coder_raw
           )
 
-          coder_data = extract_json(coder_raw)
-          coder_changes = validate_changes(coder_data)
+          coder_data = extract_json(
+              coder_raw
+          )
+
+          coder_changes = validate_changes(
+              coder_data
+          )
 
           if coder_changes:
-              apply_changes(coder_changes)
+              apply_changes(
+                  coder_changes
+              )
           else:
-              print("\nCODER: NO CHANGES")
+              print(
+                  "\nCODER: NO CHANGES"
+              )
 
-          # ------------------------------------------------------------
-          # GIT DIFF
-          # ------------------------------------------------------------
+          # ============================================================
+          # DIFF
+          # ============================================================
 
-          diff_after_coder = run_cmd(
-              "git diff -- README.md index.html app.js style.css "
-              "worker.js wrangler.toml docs/PROJECT.md"
-          )
+          diff = git_diff()
 
           print_section(
               "DIFF AFTER CODER",
-              diff_after_coder or "NO DIFF"
+              diff or "NO DIFF"
           )
 
-          if not diff_after_coder.strip():
-              print("\nNo code changes were produced.")
+          if not diff.strip():
+              print(
+                  "\nNo changes were produced."
+              )
 
-              if TASK.lower().find("ничего не изменяй") >= 0:
-                  print("Task explicitly requested no changes.")
-                  sys.exit(0)
+              sys.exit(0)
 
-          # ------------------------------------------------------------
+          # ============================================================
           # QA
-          # ------------------------------------------------------------
+          # ============================================================
 
-          current_repository = scan_repository()
-          current_repository_text = format_repository(
-              current_repository
+          changed = changed_files()
+
+          qa_context = format_files(
+              changed
           )
 
           qa_prompt = f"""
-          You are QA of the LORGUS project.
+          You are QA for LORGUS.
 
-          Check the actual repository after the Coder changes.
+          Check the actual changed repository.
 
           USER TASK:
           {TASK}
 
-          ARCHITECT PLAN:
+          ARCHITECT:
           {architect}
 
-          CURRENT REPOSITORY:
-          {current_repository_text}
+          CHANGED FILES:
+          {qa_context}
 
           GIT DIFF:
-          {diff_after_coder}
+          {diff}
 
-          Verify:
+          Determine whether the implementation actually satisfies
+          the task.
 
-          - requested functionality;
-          - JavaScript syntax and logic;
+          Check:
+
+          - functionality;
+          - JavaScript;
           - HTML;
           - CSS;
-          - API interaction;
-          - Supabase usage;
+          - API;
+          - Supabase;
           - Cloudflare Worker;
+          - security;
           - regressions;
-          - accidental unrelated changes;
-          - security problems.
+          - unrelated changes.
 
-          You must start your response with exactly:
+          Start your response with exactly one of:
 
           PASS
 
-          or:
+          or
 
           FAIL
 
-          If FAIL, explain concrete problems.
+          If FAIL, list concrete problems.
           """
 
           qa_raw = call_ai(
               [
                   {
                       "role": "system",
-                      "content": """
-                      You are the QA Agent of LORGUS.
-                      Test the actual repository.
-                      Be strict.
-                      """
+                      "content": (
+                          "You are the strict LORGUS QA Agent."
+                      )
                   },
                   {
                       "role": "user",
                       "content": qa_prompt
                   }
-              ]
+              ],
+              max_tokens=1800
           )
 
           print_section(
@@ -556,48 +712,47 @@ jobs:
                   "QA did not start with PASS or FAIL."
               )
 
-          qa_status = qa_match.group(1).upper()
+          qa_status = (
+              qa_match.group(1).upper()
+          )
 
-          # ------------------------------------------------------------
+          # ============================================================
           # REVIEWER
-          # ------------------------------------------------------------
+          # ============================================================
 
           reviewer_prompt = f"""
-          You are REVIEWER of the LORGUS project.
+          You are the REVIEWER Agent for LORGUS.
 
-          Review the actual changes.
+          Review the actual implementation.
 
           USER TASK:
           {TASK}
 
-          ARCHITECT PLAN:
+          ARCHITECT:
           {architect}
 
-          QA RESULT:
+          QA:
           {qa_raw}
 
-          CURRENT REPOSITORY:
-          {current_repository_text}
-
           GIT DIFF:
-          {diff_after_coder}
+          {diff}
 
-          Check:
+          Review:
 
           - correctness;
           - security;
           - Supabase;
-          - Cloudflare Worker;
+          - Cloudflare;
           - JavaScript;
           - regressions;
-          - unnecessary changes;
-          - whether the task was actually completed.
+          - unrelated changes;
+          - whether the requested task is actually complete.
 
-          You must start your response with exactly:
+          Start your response with exactly:
 
           APPROVE
 
-          or:
+          or
 
           REJECT
 
@@ -608,17 +763,16 @@ jobs:
               [
                   {
                       "role": "system",
-                      "content": """
-                      You are the Reviewer Agent of LORGUS.
-                      Review real repository changes.
-                      Do not rewrite code.
-                      """
+                      "content": (
+                          "You are the strict LORGUS Reviewer Agent."
+                      )
                   },
                   {
                       "role": "user",
                       "content": reviewer_prompt
                   }
-              ]
+              ],
+              max_tokens=1800
           )
 
           print_section(
@@ -637,34 +791,44 @@ jobs:
                   "Reviewer did not start with APPROVE or REJECT."
               )
 
-          reviewer_status = reviewer_match.group(1).upper()
-
-          if reviewer_status.startswith("APPROVE"):
-              reviewer_status = "APPROVE"
-          else:
-              reviewer_status = "REJECT"
-
-          # ------------------------------------------------------------
-          # FIXER
-          # ------------------------------------------------------------
-
-          needs_fixer = (
-              qa_status == "FAIL"
-              or reviewer_status == "REJECT"
+          reviewer_status = (
+              reviewer_match.group(1).upper()
           )
 
-          if needs_fixer:
-              print("\nFIXER REQUIRED")
+          reviewer_status = (
+              "APPROVE"
+              if reviewer_status.startswith("APPROVE")
+              else "REJECT"
+          )
+
+          # ============================================================
+          # FIXER
+          # ============================================================
+
+          if (
+              qa_status == "FAIL"
+              or reviewer_status == "REJECT"
+          ):
+
+              print(
+                  "\nFIXER REQUIRED"
+              )
+
+              current_changed = changed_files()
+
+              fixer_context = format_files(
+                  current_changed
+              )
 
               fixer_prompt = f"""
-              You are FIXER of the LORGUS project.
+              You are the FIXER Agent for LORGUS.
 
-              The current implementation failed QA or Review.
+              The implementation failed QA or Review.
 
               USER TASK:
               {TASK}
 
-              ARCHITECT PLAN:
+              ARCHITECT:
               {architect}
 
               QA:
@@ -673,26 +837,28 @@ jobs:
               REVIEWER:
               {reviewer_raw}
 
-              CURRENT REPOSITORY:
-              {current_repository_text}
+              CURRENT CHANGED FILES:
+              {fixer_context}
 
-              GIT DIFF:
-              {diff_after_coder}
+              CURRENT DIFF:
+              {git_diff()}
 
-              Fix ONLY the problems identified by QA or Reviewer.
+              Fix ONLY the concrete problems identified by QA
+              or Reviewer.
+
+              Preserve everything else.
 
               Rules:
 
-              1. Preserve existing functionality.
-              2. Do not rewrite unrelated code.
-              3. Do not create new files.
-              4. Only modify allowed files.
-              5. Return ONLY valid JSON.
-              6. Do not use Markdown code fences.
-              7. Do not return a diff.
-              8. Every changed file must contain complete final content.
+              - no new files;
+              - no unrelated changes;
+              - only allowed files;
+              - return JSON only;
+              - no Markdown;
+              - no git diff;
+              - changed files must contain complete final content.
 
-              JSON format:
+              JSON:
 
               {{
                 "changes": [
@@ -706,7 +872,7 @@ jobs:
                 ]
               }}
 
-              If no fix is necessary:
+              If no fix is needed:
 
               {{
                 "changes": []
@@ -717,48 +883,51 @@ jobs:
                   [
                       {
                           "role": "system",
-                          "content": """
-                          You are the Fixer Agent of LORGUS.
-                          Return strict JSON only.
-                          Fix only verified problems.
-                          """
+                          "content": (
+                              "You are the LORGUS Fixer Agent. "
+                              "Return valid JSON only."
+                          )
                       },
                       {
                           "role": "user",
                           "content": fixer_prompt
                       }
-                  ]
+                  ],
+                  max_tokens=6000
               )
 
               print_section(
-                  "FIXER RAW RESPONSE",
+                  "FIXER",
                   fixer_raw
               )
 
-              fixer_data = extract_json(fixer_raw)
-              fixer_changes = validate_changes(fixer_data)
+              fixer_data = extract_json(
+                  fixer_raw
+              )
+
+              fixer_changes = validate_changes(
+                  fixer_data
+              )
 
               if fixer_changes:
-                  apply_changes(fixer_changes)
-              else:
-                  print("\nFIXER: NO CHANGES")
+                  apply_changes(
+                      fixer_changes
+                  )
 
-              # --------------------------------------------------------
-              # QA AFTER FIX
-              # --------------------------------------------------------
+              # ========================================================
+              # FINAL QA
+              # ========================================================
 
-              current_repository = scan_repository()
-              current_repository_text = format_repository(
-                  current_repository
+              final_changed = changed_files()
+
+              final_context = format_files(
+                  final_changed
               )
 
-              diff_after_fixer = run_cmd(
-                  "git diff -- README.md index.html app.js style.css "
-                  "worker.js wrangler.toml docs/PROJECT.md"
-              )
+              final_diff = git_diff()
 
-              qa_fix_prompt = f"""
-              Re-check the repository after the Fixer.
+              final_qa_prompt = f"""
+              Perform FINAL QA for LORGUS.
 
               USER TASK:
               {TASK}
@@ -769,84 +938,86 @@ jobs:
               ORIGINAL REVIEW:
               {reviewer_raw}
 
-              CURRENT REPOSITORY:
-              {current_repository_text}
+              CURRENT FILES:
+              {final_context}
 
               CURRENT DIFF:
-              {diff_after_fixer}
+              {final_diff}
+
+              Verify that the identified problems were actually fixed.
 
               Start exactly with:
 
               PASS
 
-              or:
+              or
 
               FAIL
               """
 
-              qa_fix_raw = call_ai(
+              final_qa_raw = call_ai(
                   [
                       {
                           "role": "system",
-                          "content": """
-                          You are QA Agent.
-                          Perform a final verification after a fix.
-                          """
+                          "content": (
+                              "You are the final LORGUS QA Agent."
+                          )
                       },
                       {
                           "role": "user",
-                          "content": qa_fix_prompt
+                          "content": final_qa_prompt
                       }
-                  ]
+                  ],
+                  max_tokens=1800
               )
 
               print_section(
-                  "QA AFTER FIX",
-                  qa_fix_raw
+                  "FINAL QA",
+                  final_qa_raw
               )
 
-              qa_fix_match = re.match(
+              final_qa_match = re.match(
                   r"^\s*(PASS|FAIL)\b",
-                  qa_fix_raw,
+                  final_qa_raw,
                   re.IGNORECASE
               )
 
-              if not qa_fix_match:
+              if not final_qa_match:
                   raise RuntimeError(
                       "Final QA did not start with PASS or FAIL."
                   )
 
-              qa_fix_status = qa_fix_match.group(1).upper()
-
-              if qa_fix_status == "FAIL":
+              if (
+                  final_qa_match.group(1).upper()
+                  == "FAIL"
+              ):
                   raise RuntimeError(
                       "Final QA failed after Fixer."
                   )
 
-              # --------------------------------------------------------
+              # ========================================================
               # FINAL REVIEW
-              # --------------------------------------------------------
+              # ========================================================
 
               final_review_prompt = f"""
-              Perform the final review of the current repository.
+              Perform FINAL REVIEW of the LORGUS repository.
 
               USER TASK:
               {TASK}
 
               FINAL QA:
-              {qa_fix_raw}
-
-              CURRENT REPOSITORY:
-              {current_repository_text}
+              {final_qa_raw}
 
               CURRENT DIFF:
-              {diff_after_fixer}
+              {git_diff()}
+
+              Verify that the final repository satisfies the task.
 
               Start exactly with:
 
               APPROVE
 
-              or:
+              or
 
               REJECT
               """
@@ -855,16 +1026,16 @@ jobs:
                   [
                       {
                           "role": "system",
-                          "content": """
-                          You are the final Reviewer Agent of LORGUS.
-                          Review the actual final repository.
-                          """
+                          "content": (
+                              "You are the final LORGUS Reviewer Agent."
+                          )
                       },
                       {
                           "role": "user",
                           "content": final_review_prompt
                       }
-                  ]
+                  ],
+                  max_tokens=1800
               )
 
               print_section(
@@ -887,27 +1058,27 @@ jobs:
                   final_review_match.group(1).upper()
               )
 
-              if final_review_status.startswith("REJECT"):
+              if final_review_status.startswith(
+                  "REJECT"
+              ):
                   raise RuntimeError(
                       "Final Reviewer rejected the changes."
                   )
 
           else:
-              print("\nQA + REVIEW PASSED")
-              print("FIXER NOT REQUIRED")
+              print(
+                  "\nQA + REVIEW PASSED"
+              )
 
-          # ------------------------------------------------------------
-          # FINAL VALIDATION
-          # ------------------------------------------------------------
+          # ============================================================
+          # FINAL LOCAL CHECK
+          # ============================================================
 
-          print("\nRunning git diff --check...")
-
-          run_cmd("git diff --check")
-
-          final_diff = run_cmd(
-              "git diff -- README.md index.html app.js style.css "
-              "worker.js wrangler.toml docs/PROJECT.md"
+          run_cmd(
+              "git diff --check"
           )
+
+          final_diff = git_diff()
 
           print_section(
               "FINAL DIFF",
@@ -915,12 +1086,14 @@ jobs:
           )
 
           if not final_diff.strip():
-              print("\nNothing to commit.")
+              print(
+                  "\nNothing to commit."
+              )
               sys.exit(0)
 
-          # ------------------------------------------------------------
+          # ============================================================
           # COMMIT
-          # ------------------------------------------------------------
+          # ============================================================
 
           run_cmd(
               'git config user.name "LORGUS AI"'
@@ -935,13 +1108,9 @@ jobs:
               "worker.js wrangler.toml docs/PROJECT.md"
           )
 
-          status = run_cmd(
-              "git status --short"
-          )
-
           print_section(
               "FILES TO COMMIT",
-              status
+              git_status()
           )
 
           run_cmd(
@@ -952,7 +1121,9 @@ jobs:
               "git push origin HEAD"
           )
 
-          print("\n========================================")
+          print("\n")
+          print("=" * 80)
           print("LORGUS AI WORKSPACE: SUCCESS")
-          print("========================================")
+          print("=" * 80)
+
           PY
