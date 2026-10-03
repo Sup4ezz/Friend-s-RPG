@@ -90,6 +90,7 @@ jobs:
                   with urllib.request.urlopen(request) as response:
                       raw = response.read().decode("utf-8")
                       result = json.loads(raw)
+
               except urllib.error.HTTPError as e:
                   print("AI HTTP ERROR:", e.code)
                   print(e.read().decode("utf-8"))
@@ -114,30 +115,29 @@ jobs:
           architect_prompt = f"""
           Ты ARCHITECT проекта LORGUS.
 
-          Изучи реальное содержимое репозитория ниже.
-
           ===== ROLE =====
           {read_file(".ai/ARCHITECT.md")}
 
           ===== GENERAL RULES =====
           {read_file(".ai/AGENT.md")}
 
-          ===== REPOSITORY =====
-          {context}
-
           ===== USER TASK =====
           {TASK}
 
+          ===== REPOSITORY =====
+          {context}
+
           Твоя задача:
 
-          1. Понять существующую архитектуру.
-          2. Найти реальные файлы и функции, относящиеся к задаче.
-          3. Не придумывать отсутствующие функции или файлы.
-          4. Определить минимальный набор необходимых изменений.
-          5. Не писать код.
-          6. Не изменять репозиторий.
+          1. Изучи реальный репозиторий.
+          2. Пойми существующую архитектуру.
+          3. Найди реальные файлы и функции, относящиеся к задаче.
+          4. Не придумывай отсутствующие функции, файлы или API.
+          5. Определи минимальный набор необходимых изменений.
+          6. Не пиши код.
+          7. Не изменяй репозиторий.
 
-          Верни:
+          Верни анализ:
 
           ПРОБЛЕМА
           ПРИЧИНА
@@ -190,12 +190,14 @@ jobs:
           6. Не добавляй секреты.
           7. Не изменяй .ai/ файлы.
           8. Не изменяй docs/PROJECT.md без необходимости.
-          9. Результат должен быть применим командой git apply.
-          10. НЕ используй Markdown-блок кода вокруг diff.
+          9. Если требуемая функциональность уже существует и работает,
+             никаких изменений не делай.
+          10. Если изменений не требуется, ответ должен содержать только:
+              NO_CHANGES
+          11. Если изменения нужны, верни только unified diff.
+          12. Не используй Markdown-блоки вокруг diff.
 
-          Верни ТОЛЬКО unified diff.
-
-          Формат:
+          Формат изменения:
 
           diff --git a/file b/file
           --- a/file
@@ -203,7 +205,7 @@ jobs:
           @@
           ...
 
-          Если изменений не требуется, верни:
+          Если изменений не требуется:
 
           NO_CHANGES
           """
@@ -214,32 +216,57 @@ jobs:
           print(coder)
 
           # ============================================================
-          # APPLY CODE CHANGES
+          # APPLY CODER CHANGES
           # ============================================================
 
-          if coder.strip() != "NO_CHANGES":
-              with open("/tmp/lorgus.patch", "w", encoding="utf-8") as f:
-                  f.write(coder)
+          coder_clean = coder.strip()
 
-              check = subprocess.run(
-                  ["git", "apply", "--check", "/tmp/lorgus.patch"],
-                  capture_output=True,
-                  text=True
-              )
+          # Убираем Markdown code fence, если модель всё-таки его добавила.
+          if coder_clean.startswith("```") and coder_clean.endswith("```"):
+              lines = coder_clean.splitlines()
 
-              if check.returncode != 0:
-                  print("\nCODER PRODUCED INVALID PATCH:\n")
-                  print(check.stdout)
-                  print(check.stderr)
-                  raise RuntimeError("Coder produced an invalid git patch")
+              if lines:
+                  lines = lines[1:]
 
-              subprocess.run(
-                  ["git", "apply", "/tmp/lorgus.patch"],
-                  check=True
-              )
+              if lines and lines[-1].strip() == "```":
+                  lines = lines[:-1]
+
+              coder_clean = "\n".join(lines).strip()
+
+          # Если модель сказала NO_CHANGES — ничего применять не нужно.
+          if coder_clean.strip() == "NO_CHANGES":
+              print("\nCODER: NO CHANGES\n")
+
+          else:
+              # Если модель написала дополнительный текст перед NO_CHANGES.
+              if "NO_CHANGES" in coder_clean and "diff --git" not in coder_clean:
+                  print("\nCODER: NO CHANGES\n")
+
+              else:
+                  with open("/tmp/lorgus.patch", "w", encoding="utf-8") as f:
+                      f.write(coder_clean)
+
+                  check = subprocess.run(
+                      ["git", "apply", "--check", "/tmp/lorgus.patch"],
+                      capture_output=True,
+                      text=True
+                  )
+
+                  if check.returncode != 0:
+                      print("\nCODER PRODUCED INVALID PATCH:\n")
+                      print(check.stdout)
+                      print(check.stderr)
+                      raise RuntimeError(
+                          "Coder produced an invalid git patch"
+                      )
+
+                  subprocess.run(
+                      ["git", "apply", "/tmp/lorgus.patch"],
+                      check=True
+                  )
 
           # ============================================================
-          # SHOW DIFF
+          # GIT DIFF
           # ============================================================
 
           diff = subprocess.run(
@@ -249,7 +276,11 @@ jobs:
           ).stdout
 
           print("\n================ GIT DIFF ================\n")
-          print(diff if diff else "NO CHANGES")
+
+          if diff:
+              print(diff)
+          else:
+              print("NO CHANGES")
 
           # ============================================================
           # QA
@@ -269,10 +300,10 @@ jobs:
           ===== USER TASK =====
           {TASK}
 
-          ===== ARCHITECT PLAN =====
+          ===== ARCHITECT =====
           {architect}
 
-          ===== CODER RESULT =====
+          ===== CODER =====
           {coder}
 
           ===== CURRENT REPOSITORY AFTER CODER =====
