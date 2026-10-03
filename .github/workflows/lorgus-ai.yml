@@ -762,7 +762,7 @@ jobs:
                           "content": architect_prompt
                       }
                   ],
-                  900,
+                  1400,
                   True
               )
           )
