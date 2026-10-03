@@ -36,34 +36,24 @@ jobs:
           import urllib.request
           import urllib.error
 
-          key = os.environ.get("GROQ_API_KEY", "")
-          model = os.environ.get("GROQ_MODEL", "")
-          url = os.environ.get("GROQ_MODELS_URL", "")
-
-          print("========================================")
-          print("GROQ PREFLIGHT")
-          print("========================================")
-
-          if not key:
-              raise SystemExit("GitHub Secret API is empty.")
-
-          print("API key detected: YES")
-          print(f"Key length: {len(key)}")
-          print(f"Model: {model}")
+          key = os.environ["GROQ_API_KEY"]
+          model = os.environ["GROQ_MODEL"]
 
           request = urllib.request.Request(
-              url,
+              os.environ["GROQ_MODELS_URL"],
               headers={
                   "Authorization": f"Bearer {key}",
                   "User-Agent": "LORGUS-GitHub-Actions"
-              },
-              method="GET"
+              }
           )
 
           try:
               with urllib.request.urlopen(request, timeout=30) as response:
                   data = json.loads(
-                      response.read().decode("utf-8", errors="replace")
+                      response.read().decode(
+                          "utf-8",
+                          errors="replace"
+                      )
                   )
 
               models = {
@@ -71,14 +61,13 @@ jobs:
                   for item in data.get("data", [])
               }
 
-              print(f"Models endpoint: HTTP {response.status}")
-
               if model not in models:
                   raise SystemExit(
-                      f"Model {model} is not available."
+                      f"Model {model} is unavailable."
                   )
 
-              print("Target model: AVAILABLE")
+              print("Groq: OK")
+              print(f"Model: {model}")
 
           except urllib.error.HTTPError as error:
               body = error.read().decode(
@@ -86,11 +75,10 @@ jobs:
                   errors="replace"
               )
 
-              print(f"Groq HTTP {error.code}")
               print(body)
 
               raise SystemExit(
-                  f"Groq preflight failed with HTTP {error.code}."
+                  f"Groq preflight failed: HTTP {error.code}"
               )
           PY
 
@@ -101,8 +89,8 @@ jobs:
           python3 <<'PY'
           import os
           import json
-          import time
           import re
+          import time
           import subprocess
           import urllib.request
           import urllib.error
@@ -122,8 +110,6 @@ jobs:
               "docs/PROJECT.md"
           }
 
-          MAX_CONTEXT = 10000
-
           print("========================================")
           print("LORGUS AI WORKSPACE")
           print("========================================")
@@ -131,6 +117,10 @@ jobs:
           print("USER TASK:")
           print(USER_TASK)
           print()
+
+          # ------------------------------------------------------------
+          # SHELL
+          # ------------------------------------------------------------
 
           def run(command):
               result = subprocess.run(
@@ -153,6 +143,10 @@ jobs:
 
               return result.stdout
 
+          # ------------------------------------------------------------
+          # GROQ
+          # ------------------------------------------------------------
+
           def groq(messages, max_tokens, json_mode=False):
               payload = {
                   "model": MODEL,
@@ -171,9 +165,8 @@ jobs:
                   ensure_ascii=False
               ).encode("utf-8")
 
-              last_error = None
+              for attempt in range(1, 4):
 
-              for attempt in range(1, 3):
                   request = urllib.request.Request(
                       GROQ_URL,
                       data=body,
@@ -186,21 +179,29 @@ jobs:
                   )
 
                   try:
+
                       with urllib.request.urlopen(
                           request,
                           timeout=180
                       ) as response:
 
-                          raw = response.read().decode(
-                              "utf-8",
-                              errors="replace"
+                          data = json.loads(
+                              response.read().decode(
+                                  "utf-8",
+                                  errors="replace"
+                              )
                           )
 
-                          data = json.loads(raw)
-
-                          return data["choices"][0]["message"]["content"]
+                          return data[
+                              "choices"
+                          ][0][
+                              "message"
+                          ][
+                              "content"
+                          ]
 
                   except urllib.error.HTTPError as error:
+
                       raw = error.read().decode(
                           "utf-8",
                           errors="replace"
@@ -208,34 +209,56 @@ jobs:
 
                       print(
                           f"Groq HTTP {error.code} "
-                          f"(attempt {attempt}/2)"
+                          f"(attempt {attempt}/3)"
                       )
 
                       print(raw)
 
-                      last_error = raw
-
-                      if error.code in (400, 401, 403):
-                          break
-
-                      if error.code == 413:
-                          break
-
                       if error.code == 429:
-                          time.sleep(5)
+
+                          wait = 15
+
+                          match = re.search(
+                              r"try again in ([0-9.]+)s",
+                              raw
+                          )
+
+                          if match:
+                              wait = max(
+                                  15,
+                                  int(
+                                      float(
+                                          match.group(1)
+                                      )
+                                  ) + 2
+                              )
+
+                          print(
+                              f"Waiting {wait}s..."
+                          )
+
+                          time.sleep(wait)
                           continue
 
-                      time.sleep(3)
+                      if error.code == 413:
+                          raise RuntimeError(
+                              "Groq request is too large."
+                          )
 
-                  except Exception as error:
-                      last_error = str(error)
-                      time.sleep(3)
+                      raise RuntimeError(
+                          f"Groq HTTP {error.code}: {raw}"
+                      )
 
               raise RuntimeError(
-                  f"Groq request failed: {last_error}"
+                  "Groq rate limit retry exhausted."
               )
 
+          # ------------------------------------------------------------
+          # JSON
+          # ------------------------------------------------------------
+
           def parse_json(raw):
+
               raw = raw.strip()
 
               if raw.startswith("```"):
@@ -256,13 +279,20 @@ jobs:
                   return json.loads(raw)
 
               except json.JSONDecodeError as error:
-                  print("INVALID JSON FROM MODEL:")
+
+                  print("MODEL RETURNED INVALID JSON:")
                   print(raw)
+
                   raise RuntimeError(
-                      f"Invalid JSON from model: {error}"
+                      f"Invalid JSON: {error}"
                   )
 
+          # ------------------------------------------------------------
+          # FILES
+          # ------------------------------------------------------------
+
           def read_file(path):
+
               with open(
                   path,
                   "r",
@@ -270,65 +300,19 @@ jobs:
               ) as file:
                   return file.read()
 
-          def write_content(path, content):
-              if not isinstance(content, str):
-                  raise RuntimeError(
-                      f"Invalid content for {path}"
-                  )
-
-              if not content.endswith("\n"):
-                  content += "\n"
-
-              with open(
-                  path,
-                  "w",
-                  encoding="utf-8"
-              ) as file:
-                  file.write(content)
-
           def get_files():
+
               result = {}
 
               for path in sorted(ALLOWED_FILES):
+
                   if os.path.isfile(path):
                       result[path] = read_file(path)
 
               return result
 
-          def build_context(paths, limit=MAX_CONTEXT):
-              files = get_files()
-              blocks = []
-              total = 0
-
-              for path in paths:
-                  if path not in files:
-                      continue
-
-                  content = files[path]
-
-                  remaining = limit - total
-
-                  if remaining <= 0:
-                      break
-
-                  if len(content) > remaining:
-                      content = (
-                          content[:remaining]
-                          + "\n[CONTEXT TRUNCATED]\n"
-                      )
-
-                  block = (
-                      f"\n===== FILE: {path} =====\n"
-                      f"{content}\n"
-                      f"===== END FILE: {path} =====\n"
-                  )
-
-                  blocks.append(block)
-                  total += len(block)
-
-              return "\n".join(blocks)
-
           def detect_files(task):
+
               task_lower = task.lower()
 
               selected = set()
@@ -337,8 +321,8 @@ jobs:
                   "readme": ["README.md"],
                   "index.html": ["index.html"],
                   "html": ["index.html"],
-                  "css": ["style.css"],
                   "style.css": ["style.css"],
+                  "css": ["style.css"],
                   "app.js": ["app.js"],
                   "javascript": ["app.js"],
                   "worker.js": ["worker.js"],
@@ -352,11 +336,16 @@ jobs:
                       "worker.js",
                       "wrangler.toml"
                   ],
-                  "project.md": ["docs/PROJECT.md"],
-                  "docs": ["docs/PROJECT.md"]
+                  "project.md": [
+                      "docs/PROJECT.md"
+                  ],
+                  "docs": [
+                      "docs/PROJECT.md"
+                  ]
               }
 
               for keyword, paths in mapping.items():
+
                   if keyword in task_lower:
                       selected.update(paths)
 
@@ -364,6 +353,128 @@ jobs:
                   selected = set(ALLOWED_FILES)
 
               return sorted(selected)
+
+          def build_context(paths, limit=16000):
+
+              files = get_files()
+
+              blocks = []
+              total = 0
+
+              for path in paths:
+
+                  if path not in files:
+                      continue
+
+                  content = files[path]
+
+                  remaining = limit - total
+
+                  if remaining <= 0:
+                      break
+
+                  if len(content) > remaining:
+
+                      content = (
+                          content[:remaining]
+                          + "\n[TRUNCATED]\n"
+                      )
+
+                  block = (
+                      f"\n===== FILE: {path} =====\n"
+                      f"{content}\n"
+                      f"===== END FILE: {path} =====\n"
+                  )
+
+                  blocks.append(block)
+
+                  total += len(block)
+
+              return "\n".join(blocks)
+
+          # ------------------------------------------------------------
+          # APPLY PATCHES
+          # ------------------------------------------------------------
+
+          def apply_changes(changes):
+
+              if not isinstance(changes, list):
+                  raise RuntimeError(
+                      "Changes must be a list."
+                  )
+
+              changed_paths = []
+
+              for change in changes:
+
+                  path = change.get("path")
+                  operation = change.get("operation")
+
+                  if path not in ALLOWED_FILES:
+                      raise RuntimeError(
+                          f"Forbidden file: {path}"
+                      )
+
+                  if operation != "replace":
+                      raise RuntimeError(
+                          f"Unsupported operation: "
+                          f"{operation}"
+                      )
+
+                  old = change.get("old")
+                  new = change.get("new")
+
+                  if not isinstance(old, str):
+                      raise RuntimeError(
+                          f"Invalid old content for {path}"
+                      )
+
+                  if not isinstance(new, str):
+                      raise RuntimeError(
+                          f"Invalid new content for {path}"
+                      )
+
+                  content = read_file(path)
+
+                  count = content.count(old)
+
+                  if count == 0:
+                      raise RuntimeError(
+                          f"Anchor not found in {path}."
+                      )
+
+                  if count > 1:
+                      raise RuntimeError(
+                          f"Anchor occurs {count} times "
+                          f"in {path}. Refusing to guess."
+                      )
+
+                  updated = content.replace(
+                      old,
+                      new,
+                      1
+                  )
+
+                  with open(
+                      path,
+                      "w",
+                      encoding="utf-8"
+                  ) as file:
+                      file.write(updated)
+
+                  changed_paths.append(path)
+
+                  print(
+                      f"Applied precise change: {path}"
+                  )
+
+              return sorted(
+                  set(changed_paths)
+              )
+
+          # ------------------------------------------------------------
+          # FILE DISCOVERY
+          # ------------------------------------------------------------
 
           selected = detect_files(USER_TASK)
 
@@ -374,52 +485,35 @@ jobs:
 
           print()
 
-          original_files = get_files()
-
-          # ============================================================
+          # ------------------------------------------------------------
           # ARCHITECT
-          # ============================================================
+          # ------------------------------------------------------------
 
           print("========================================")
           print("ARCHITECT")
           print("========================================")
 
-          architect_context = build_context(
-              selected,
-              8000
-          )
-
           architect_prompt = f"""
-          Ты Architect Agent проекта LORGUS.
+          Проанализируй ИСХОДНУЮ задачу пользователя.
 
-          ИСХОДНАЯ ЗАДАЧА ПОЛЬЗОВАТЕЛЯ:
+          ЗАДАЧА:
           {USER_TASK}
 
-          ВАЖНО:
+          ТЕКУЩИЙ ПРОЕКТ:
+          {build_context(selected, 12000)}
 
-          Исходная задача пользователя является главным источником
-          требований.
+          Исходная задача пользователя имеет абсолютный приоритет.
 
-          Нельзя заменять задачу пользователя собственной идеей.
-
-          Если пользователь указал конкретный файл или конкретное
-          содержимое, это требование имеет приоритет.
-
-          Не ищи посторонние проблемы проекта.
+          Не придумывай другую задачу.
 
           Не исправляй код.
-
-          ТЕКУЩИЕ ФАЙЛЫ:
-          {architect_context}
 
           Верни JSON:
 
           {{
             "problem": "...",
-            "cause": "...",
             "files": ["..."],
             "plan": ["..."],
-            "risks": ["..."],
             "checks": ["..."]
           }}
           """
@@ -438,7 +532,7 @@ jobs:
                           "content": architect_prompt
                       }
                   ],
-                  1200,
+                  1000,
                   True
               )
           )
@@ -451,22 +545,17 @@ jobs:
               )
           )
 
-          # ============================================================
+          # ------------------------------------------------------------
           # CODER
-          # ============================================================
+          # ------------------------------------------------------------
 
           print()
           print("========================================")
           print("CODER")
           print("========================================")
 
-          coder_context = build_context(
-              selected,
-              9000
-          )
-
           coder_prompt = f"""
-          Ты Coding Agent проекта LORGUS.
+          Ты Coding Agent LORGUS.
 
           ИСХОДНАЯ ЗАДАЧА ПОЛЬЗОВАТЕЛЯ:
           {USER_TASK}
@@ -477,44 +566,42 @@ jobs:
               ensure_ascii=False
           )}
 
-          ТЕКУЩИЕ ФАЙЛЫ:
-          {coder_context}
+          ТЕКУЩИЙ КОД:
+          {build_context(selected, 15000)}
 
-          КРИТИЧЕСКОЕ ПРАВИЛО:
+          КРИТИЧЕСКИЕ ПРАВИЛА:
 
-          Ты обязан выполнить ИСХОДНУЮ ЗАДАЧУ пользователя.
-
-          План Architect является вспомогательным.
-          Он НЕ может переопределять задачу пользователя.
-
-          Если пользователь дал точное содержимое файла,
-          сохрани это содержимое буквально.
-
-          Разрешённые файлы:
-
-          {sorted(ALLOWED_FILES)}
+          1. Выполни именно исходную задачу.
+          2. Никогда не переписывай файл целиком.
+          3. Никогда не возвращай полный content файла.
+          4. Используй только точечные изменения.
+          5. Для изменения существующего кода используй
+             operation = "replace".
+          6. Поле old должно содержать существующий фрагмент
+             файла БЕЗ изменений.
+          7. Поле new должно содержать только замену этого фрагмента.
+          8. old должен встречаться в файле ровно один раз.
+          9. Не меняй несвязанный код.
+          10. Не изменяй README.md, если это запрещено задачей.
 
           Верни ТОЛЬКО JSON:
 
           {{
             "changes": [
               {{
-                "path": "README.md",
-                "content": "полное содержимое файла"
+                "path": "app.js",
+                "operation": "replace",
+                "old": "точный существующий фрагмент",
+                "new": "новый фрагмент"
               }}
             ]
           }}
 
-          Правила:
+          Если изменений не требуется:
 
-          - content является полной строкой содержимого файла;
-          - переносы строк должны быть представлены как \\n;
-          - не используй unified diff;
-          - не используй markdown fences;
-          - не меняй несвязанные файлы;
-          - не удаляй существующую функциональность;
-          - если изменений не требуется:
-            {{"changes":[]}}
+          {{
+            "changes": []
+          }}
           """
 
           coder = parse_json(
@@ -531,47 +618,18 @@ jobs:
                           "content": coder_prompt
                       }
                   ],
-                  3500,
+                  2200,
                   True
               )
           )
 
-          changes = coder.get("changes", [])
+          changed_paths = apply_changes(
+              coder.get("changes", [])
+          )
 
-          if not isinstance(changes, list):
-              raise RuntimeError(
-                  "Coder returned invalid changes."
-              )
-
-          changed_paths = []
-
-          for change in changes:
-
-              path = change.get("path")
-              content = change.get("content")
-
-              if path not in ALLOWED_FILES:
-                  raise RuntimeError(
-                      f"Coder attempted to modify "
-                      f"forbidden file: {path}"
-                  )
-
-              if not isinstance(content, str):
-                  raise RuntimeError(
-                      f"Coder returned invalid content "
-                      f"for {path}"
-                  )
-
-              write_content(
-                  path,
-                  content
-              )
-
-              changed_paths.append(path)
-
-          # ============================================================
+          # ------------------------------------------------------------
           # DIFF
-          # ============================================================
+          # ------------------------------------------------------------
 
           print()
           print("========================================")
@@ -591,55 +649,42 @@ jobs:
 
           run("git diff --check")
 
-          # ============================================================
+          # ------------------------------------------------------------
           # QA
-          # ============================================================
+          # ------------------------------------------------------------
 
           print()
           print("========================================")
           print("QA")
           print("========================================")
 
-          qa_context = build_context(
-              changed_paths,
-              7000
-          )
-
           qa_prompt = f"""
-          Проверь РЕАЛЬНЫЙ результат работы Coding Agent.
+          Проведи независимую проверку.
 
-          ИСХОДНАЯ ЗАДАЧА ПОЛЬЗОВАТЕЛЯ:
+          ИСХОДНАЯ ЗАДАЧА:
           {USER_TASK}
 
-          CURRENT DIFF:
-          {diff[:7000]}
+          DIFF:
+          {diff[:8000]}
 
-          АКТУАЛЬНЫЕ ФАЙЛЫ:
-          {qa_context}
+          Проверяй именно исходную задачу.
 
-          Проверяй результат самостоятельно.
+          Особое внимание:
 
-          Не доверяй плану Architect.
+          - не удалён ли существующий код;
+          - не переписан ли файл целиком;
+          - выполнена ли задача;
+          - нет ли синтаксических ошибок;
+          - нет ли несвязанных изменений;
+          - не нарушена ли существующая функциональность.
 
-          Проверь:
-
-          1. Выполнена ли исходная задача пользователя.
-          2. Реально ли присутствуют изменения.
-          3. Сохранена ли существующая функциональность.
-          4. Нет ли синтаксических ошибок.
-          5. Изменены ли только необходимые файлы.
-          6. Если пользователь дал точное содержимое —
-             соответствует ли файл именно ему.
-
-          Первая строка ответа должна быть:
+          Если задача выполнена и код сохранён:
 
           PASS
 
-          или:
+          Иначе:
 
           FAIL
-
-          После первой строки дай краткое объяснение.
           """
 
           qa_raw = groq(
@@ -655,7 +700,7 @@ jobs:
                       "content": qa_prompt
                   }
               ],
-              1200,
+              700,
               False
           )
 
@@ -669,9 +714,9 @@ jobs:
               )
           )
 
-          # ============================================================
+          # ------------------------------------------------------------
           # REVIEWER
-          # ============================================================
+          # ------------------------------------------------------------
 
           print()
           print("========================================")
@@ -679,35 +724,25 @@ jobs:
           print("========================================")
 
           reviewer_prompt = f"""
-          Проведи независимый review изменений LORGUS.
+          Проведи независимый review.
 
-          ИСХОДНАЯ ЗАДАЧА ПОЛЬЗОВАТЕЛЯ:
+          ИСХОДНАЯ ЗАДАЧА:
           {USER_TASK}
 
           DIFF:
-          {diff[:7000]}
+          {diff[:8000]}
 
           QA:
-          {qa_raw[:3000]}
-
-          ВАЖНО:
-
-          Не принимай интерпретацию Architect как источник истины.
-
-          Проверяй исходную задачу пользователя напрямую.
+          {qa_raw[:2500]}
 
           Проверь:
 
           - соответствие задаче;
+          - регрессии;
           - безопасность;
           - секреты;
-          - Supabase;
-          - Cloudflare;
-          - XSS;
-          - регрессии;
-          - несвязанные изменения.
-
-          Не переписывай код.
+          - лишние изменения;
+          - сохранность существующего кода.
 
           Первая строка:
 
@@ -731,31 +766,23 @@ jobs:
                       "content": reviewer_prompt
                   }
               ],
-              1200,
+              700,
               False
           )
 
           print(reviewer_raw)
 
-          reviewer_match = re.match(
-              r"^\s*(APPROVED?|REJECT(?:ED)?)\b",
-              reviewer_raw,
-              re.IGNORECASE
+          reviewer_reject = bool(
+              re.match(
+                  r"^\s*REJECT\b",
+                  reviewer_raw,
+                  re.IGNORECASE
+              )
           )
 
-          reviewer_status = (
-              reviewer_match.group(1).upper()
-              if reviewer_match
-              else ""
-          )
-
-          reviewer_reject = (
-              reviewer_status.startswith("REJECT")
-          )
-
-          # ============================================================
+          # ------------------------------------------------------------
           # FIXER
-          # ============================================================
+          # ------------------------------------------------------------
 
           if not qa_pass or reviewer_reject:
 
@@ -764,53 +791,39 @@ jobs:
               print("FIXER")
               print("========================================")
 
-              fixer_context = build_context(
-                  changed_paths,
-                  7000
-              )
-
               fixer_prompt = f"""
-              Исправь реальные проблемы проекта.
+              Исправь только реальные проблемы.
 
-              ИСХОДНАЯ ЗАДАЧА ПОЛЬЗОВАТЕЛЯ:
+              ИСХОДНАЯ ЗАДАЧА:
               {USER_TASK}
 
-              CURRENT DIFF:
-              {diff[:6000]}
+              DIFF:
+              {diff[:8000]}
 
               QA:
-              {qa_raw[:3000]}
+              {qa_raw[:2500]}
 
               REVIEWER:
-              {reviewer_raw[:3000]}
+              {reviewer_raw[:2500]}
 
-              АКТУАЛЬНЫЕ ФАЙЛЫ:
-              {fixer_context}
+              Никогда не переписывай файл целиком.
 
-              ВАЖНО:
-
-              Исходная задача пользователя имеет приоритет.
-
-              Исправляй только проблемы, относящиеся к задаче.
-
-              Верни ТОЛЬКО JSON:
+              Используй только:
 
               {{
                 "changes": [
                   {{
-                    "path": "README.md",
-                    "content": "полное содержимое файла"
+                    "path": "app.js",
+                    "operation": "replace",
+                    "old": "точный существующий фрагмент",
+                    "new": "исправленный фрагмент"
                   }}
                 ]
               }}
 
-              Правила:
+              old должен встречаться ровно один раз.
 
-              - content = полное содержимое файла;
-              - переносы строк = \\n;
-              - не используй diff;
-              - не используй markdown fences;
-              - не меняй несвязанные файлы.
+              Не меняй несвязанный код.
               """
 
               fixer = parse_json(
@@ -827,61 +840,32 @@ jobs:
                               "content": fixer_prompt
                           }
                       ],
-                      3500,
+                      2200,
                       True
                   )
               )
 
-              fixer_changes = fixer.get(
-                  "changes",
-                  []
+              fixer_paths = apply_changes(
+                  fixer.get("changes", [])
               )
 
-              fixer_paths = []
-
-              for change in fixer_changes:
-
-                  path = change.get("path")
-                  content = change.get("content")
-
-                  if path not in ALLOWED_FILES:
-                      raise RuntimeError(
-                          f"Fixer attempted to modify "
-                          f"forbidden file: {path}"
-                      )
-
-                  if not isinstance(content, str):
-                      raise RuntimeError(
-                          f"Fixer returned invalid content "
-                          f"for {path}"
-                      )
-
-                  write_content(
-                      path,
-                      content
+              changed_paths = sorted(
+                  set(
+                      changed_paths
+                      + fixer_paths
                   )
-
-                  fixer_paths.append(path)
+              )
 
               run("git diff --check")
 
-              # ========================================================
+              # --------------------------------------------------------
               # FINAL QA
-              # ========================================================
+              # --------------------------------------------------------
 
               print()
               print("========================================")
               print("FINAL QA")
               print("========================================")
-
-              final_paths = sorted(
-                  set(changed_paths + fixer_paths)
-              )
-
-              final_context = build_context(
-                  final_paths,
-                  7000
-              )
 
               final_diff = run(
                   "git diff -- "
@@ -895,22 +879,22 @@ jobs:
               )
 
               final_qa_prompt = f"""
-              Проведи финальную независимую проверку.
+              Финальная независимая проверка.
 
               ИСХОДНАЯ ЗАДАЧА:
               {USER_TASK}
 
               ФИНАЛЬНЫЙ DIFF:
-              {final_diff[:7000]}
+              {final_diff[:9000]}
 
-              ФИНАЛЬНЫЕ ФАЙЛЫ:
-              {final_context}
+              Проверь:
 
-              Проверь непосредственно исходную задачу.
+              1. Задача выполнена.
+              2. Старый функционал сохранён.
+              3. Нет лишних изменений.
+              4. Нет очевидных ошибок.
 
-              Не доверяй Architect, Coder или Reviewer.
-
-              Первая строка:
+              Ответ должен начинаться:
 
               PASS
 
@@ -919,7 +903,7 @@ jobs:
               FAIL
               """
 
-              final_qa_raw = groq(
+              final_qa = groq(
                   [
                       {
                           "role": "system",
@@ -932,54 +916,31 @@ jobs:
                           "content": final_qa_prompt
                       }
                   ],
-                  1200,
+                  700,
                   False
               )
 
-              print(final_qa_raw)
+              print(final_qa)
 
               if not re.match(
                   r"^\s*PASS\b",
-                  final_qa_raw,
+                  final_qa,
                   re.IGNORECASE
               ):
                   raise RuntimeError(
                       "Final QA returned FAIL."
                   )
 
-              # ========================================================
+              # --------------------------------------------------------
               # FINAL REVIEW
-              # ========================================================
+              # --------------------------------------------------------
 
               print()
               print("========================================")
               print("FINAL REVIEW")
               print("========================================")
 
-              final_review_prompt = f"""
-              Финальный review.
-
-              ИСХОДНАЯ ЗАДАЧА:
-              {USER_TASK}
-
-              FINAL QA:
-              {final_qa_raw[:3000]}
-
-              FINAL DIFF:
-              {final_diff[:7000]}
-
-              Независимо проверь соответствие задаче.
-
-              Первая строка:
-
-              APPROVE
-
-              или:
-
-              REJECT
-              """
-
-              final_review_raw = groq(
+              final_review = groq(
                   [
                       {
                           "role": "system",
@@ -989,46 +950,46 @@ jobs:
                       },
                       {
                           "role": "user",
-                          "content": final_review_prompt
+                          "content": f"""
+                          Финальный review.
+
+                          ИСХОДНАЯ ЗАДАЧА:
+                          {USER_TASK}
+
+                          FINAL QA:
+                          {final_qa[:2500]}
+
+                          FINAL DIFF:
+                          {final_diff[:9000]}
+
+                          Первая строка:
+
+                          APPROVE
+
+                          или:
+
+                          REJECT
+                          """
                       }
                   ],
-                  1200,
+                  700,
                   False
               )
 
-              print(final_review_raw)
+              print(final_review)
 
-              final_match = re.match(
-                  r"^\s*(APPROVED?|REJECT(?:ED)?)\b",
-                  final_review_raw,
+              if re.match(
+                  r"^\s*REJECT\b",
+                  final_review,
                   re.IGNORECASE
-              )
-
-              if not final_match:
-                  raise RuntimeError(
-                      "Final Reviewer returned invalid status."
-                  )
-
-              final_status = (
-                  final_match.group(1).upper()
-              )
-
-              if final_status.startswith("REJECT"):
+              ):
                   raise RuntimeError(
                       "Final Reviewer returned REJECT."
                   )
 
-          else:
-
-              print()
-              print(
-                  "QA and Reviewer approved "
-                  "the first implementation."
-              )
-
-          # ============================================================
+          # ------------------------------------------------------------
           # FINAL CHECK
-          # ============================================================
+          # ------------------------------------------------------------
 
           print()
           print("========================================")
@@ -1049,14 +1010,12 @@ jobs:
           )
 
           if not final_diff.strip():
-
-              print("No changes detected.")
-
+              print("No changes.")
               raise SystemExit(0)
 
-          # ============================================================
+          # ------------------------------------------------------------
           # COMMIT
-          # ============================================================
+          # ------------------------------------------------------------
 
           print()
           print("========================================")
@@ -1087,9 +1046,7 @@ jobs:
               'git commit -m "AI: update LORGUS project"'
           )
 
-          run(
-              "git push origin HEAD"
-          )
+          run("git push origin HEAD")
 
           print()
           print("========================================")
