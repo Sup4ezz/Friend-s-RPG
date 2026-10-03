@@ -46,13 +46,9 @@ jobs:
           USER_TASK = os.environ["USER_TASK"]
 
           ALLOWED_FILES = {
-              "README.md",
               "index.html",
               "app.js",
-              "style.css",
-              "worker.js",
-              "wrangler.toml",
-              "docs/PROJECT.md"
+              "style.css"
           }
 
           FORBIDDEN_FILES = {
@@ -69,10 +65,6 @@ jobs:
           print("USER TASK:")
           print(USER_TASK)
           print()
-
-          # ============================================================
-          # SHELL
-          # ============================================================
 
           def run(command):
               result = subprocess.run(
@@ -94,10 +86,6 @@ jobs:
                   )
 
               return result.stdout
-
-          # ============================================================
-          # GROQ
-          # ============================================================
 
           def groq(messages, max_tokens):
               payload = {
@@ -129,7 +117,6 @@ jobs:
                   )
 
                   try:
-
                       with urllib.request.urlopen(
                           request,
                           timeout=180
@@ -204,16 +191,11 @@ jobs:
                   "Groq rate limit retry exhausted."
               )
 
-          # ============================================================
-          # JSON
-          # ============================================================
-
           def parse_json(raw):
 
               raw = raw.strip()
 
               if raw.startswith("```"):
-
                   raw = re.sub(
                       r"^```(?:json)?\s*",
                       "",
@@ -231,17 +213,12 @@ jobs:
                   return json.loads(raw)
 
               except json.JSONDecodeError as error:
-
                   print("INVALID JSON:")
                   print(raw)
 
                   raise RuntimeError(
                       f"Invalid JSON: {error}"
                   )
-
-          # ============================================================
-          # FILES
-          # ============================================================
 
           def read_file(path):
 
@@ -252,69 +229,51 @@ jobs:
               ) as file:
                   return file.read()
 
-          def existing_files():
-
-              return {
-                  path: read_file(path)
-                  for path in sorted(ALLOWED_FILES)
-                  if os.path.isfile(path)
-              }
-
-          # ============================================================
-          # FILE SELECTION
-          # ============================================================
-
-          def select_files(task):
+          def choose_files(task):
 
               text = task.lower()
 
               selected = set()
 
-              rules = {
-                  "html": {"index.html"},
-                  "страниц": {"index.html"},
-                  "интерфейс": {
+              if any(
+                  word in text
+                  for word in [
+                      "кноп",
+                      "интерфейс",
+                      "страниц",
+                      "ui",
+                      "html"
+                  ]
+              ):
+                  selected.update({
                       "index.html",
-                      "style.css",
-                      "app.js"
-                  },
-                  "кноп": {
-                      "index.html",
-                      "style.css",
-                      "app.js"
-                  },
-                  "ui": {
-                      "index.html",
-                      "style.css",
-                      "app.js"
-                  },
-                  "javascript": {"app.js"},
-                  "javascript": {"app.js"},
-                  "логик": {"app.js"},
-                  "обработчик": {"app.js"},
-                  "js": {"app.js"},
-                  "css": {"style.css"},
-                  "стиль": {"style.css"},
-                  "worker": {"worker.js"},
-                  "cloudflare": {
-                      "worker.js",
-                      "wrangler.toml"
-                  },
-                  "wrangler": {"wrangler.toml"},
-                  "supabase": {"app.js"},
-                  "readme": {"README.md"},
-                  "project.md": {"docs/PROJECT.md"}
-              }
+                      "app.js",
+                      "style.css"
+                  })
 
-              for keyword, paths in rules.items():
+              if any(
+                  word in text
+                  for word in [
+                      "javascript",
+                      "js",
+                      "логик",
+                      "обработчик",
+                      "событи"
+                  ]
+              ):
+                  selected.add("app.js")
 
-                  if keyword in text:
-                      selected.update(paths)
+              if any(
+                  word in text
+                  for word in [
+                      "css",
+                      "стиль",
+                      "оформлен"
+                  ]
+              ):
+                  selected.add("style.css")
 
-              # Если задача не позволяет определить файлы,
-              # даём AI ограниченный обзор основных файлов.
               if not selected:
-
                   selected.update({
                       "index.html",
                       "app.js",
@@ -323,69 +282,100 @@ jobs:
 
               return sorted(selected)
 
-          # ============================================================
-          # CONTEXT
-          # ============================================================
-
           def context_for(path, content):
 
               lines = content.splitlines()
 
-              # Для небольших файлов даём всё содержимое.
-              if len(content) <= 5000:
-                  return content
+              if path == "index.html":
 
-              selected = set()
+                  patterns = [
+                      r"<body",
+                      r"<main",
+                      r"<header",
+                      r"<section",
+                      r"<div",
+                      r"<button",
+                      r"id=",
+                      r"class=",
+                      r"<script"
+                  ]
 
-              patterns = {
-                  "index.html": (
-                      r"<body|<main|<header|<section|"
-                      r"<button|<script|id=|class="
-                  ),
+              elif path == "app.js":
 
-                  "app.js": (
-                      r"function\s+|async\s+function|"
-                      r"DOMContentLoaded|addEventListener|"
-                      r"querySelector|getElementById|"
-                      r"innerHTML|createElement|"
-                      r"render[A-Z]|window\."
-                  ),
+                  patterns = [
+                      r"initialize",
+                      r"render",
+                      r"innerHTML",
+                      r"createElement",
+                      r"addEventListener",
+                      r"querySelector",
+                      r"getElementById",
+                      r"DOMContentLoaded"
+                  ]
 
-                  "style.css": (
-                      r"button|\.btn|#|input|"
-                      r"header|main|section"
-                  )
-              }
+              elif path == "style.css":
 
-              pattern = patterns.get(path)
+                  patterns = [
+                      r"button",
+                      r"\.btn",
+                      r"\.gold-button",
+                      r"header",
+                      r"main",
+                      r"section",
+                      r"\."
+                  ]
 
-              if pattern:
+              else:
+                  patterns = []
 
-                  regex = re.compile(
+              regexes = [
+                  re.compile(
                       pattern,
                       re.IGNORECASE
                   )
+                  for pattern in patterns
+              ]
 
-                  for i, line in enumerate(lines):
+              selected = set()
 
-                      if regex.search(line):
+              for i, line in enumerate(lines):
 
-                          start = max(0, i - 4)
-                          end = min(
-                              len(lines),
-                              i + 5
-                          )
+                  if any(
+                      regex.search(line)
+                      for regex in regexes
+                  ):
 
-                          selected.update(
-                              range(start, end)
-                          )
+                      start = max(
+                          0,
+                          i - 5
+                      )
 
-              # Начало файла
+                      end = min(
+                          len(lines),
+                          i + 6
+                      )
+
+                      selected.update(
+                          range(start, end)
+                      )
+
               selected.update(
                   range(
-                      min(20, len(lines))
+                      min(30, len(lines))
                   )
               )
+
+              if path == "app.js":
+
+                  selected.update(
+                      range(
+                          max(
+                              0,
+                              len(lines) - 40
+                          ),
+                          len(lines)
+                      )
+                  )
 
               indexes = sorted(selected)
 
@@ -410,21 +400,24 @@ jobs:
 
               text = "\n".join(result)
 
-              if len(text) > 6000:
-                  text = text[:6000] + \
-                      "\n... [TRUNCATED] ..."
+              if len(text) > 5500:
+                  text = (
+                      text[:5500]
+                      + "\n... [TRUNCATED] ..."
+                  )
 
               return text
 
           def build_context(paths):
 
-              files = existing_files()
               blocks = []
 
               for path in paths:
 
-                  if path not in files:
+                  if not os.path.isfile(path):
                       continue
+
+                  content = read_file(path)
 
                   blocks.append(
                       "\n===== FILE: "
@@ -432,18 +425,14 @@ jobs:
                       + " =====\n"
                       + context_for(
                           path,
-                          files[path]
+                          content
                       )
                       + "\n===== END FILE =====\n"
                   )
 
               return "\n".join(blocks)
 
-          # ============================================================
-          # SELECT CONTEXT
-          # ============================================================
-
-          selected = select_files(
+          selected = choose_files(
               USER_TASK
           )
 
@@ -458,10 +447,6 @@ jobs:
               selected
           )
 
-          # ============================================================
-          # AI
-          # ============================================================
-
           print("========================================")
           print("LORGUS AI")
           print("========================================")
@@ -474,6 +459,7 @@ jobs:
           Репозиторий является источником истины.
 
           Твоя задача:
+
           1. Изучить предоставленный реальный код.
           2. Понять существующую архитектуру.
           3. Выполнить задачу пользователя.
@@ -499,6 +485,13 @@ jobs:
           - wrangler.toml запрещён для изменения.
           - docs/PROJECT.md запрещён для изменения.
           - Если достаточно одного файла — меняй один файл.
+          - Не добавляй лишние пустые строки в конце файла.
+          - new не должен создавать дополнительную пустую строку в конце файла.
+          - Для элементов интерфейса сначала ищи существующий HTML-контейнер или секцию интерфейса.
+          - Не добавляй UI через document.body.appendChild(), если существующая разметка уже позволяет встроить элемент.
+          - Не создавай элементы интерфейса вне существующей структуры приложения без необходимости.
+          - Не меняй index.html только ради того, чтобы создать параллельную структуру, если существующая архитектура позволяет сделать это через app.js.
+          - Сохраняй существующие классы и стили, если они подходят для новой функции.
 
           Пользовательская задача имеет абсолютный приоритет.
 
@@ -520,6 +513,8 @@ jobs:
           {
             "changes": []
           }
+
+          Не добавляй никаких других полей.
           """
 
           user_prompt = f"""
@@ -533,11 +528,16 @@ jobs:
 
           Выполни задачу.
 
-          Не выполняй никаких изменений, которые пользователь
-          прямо запретил.
+          Не изменяй файлы, которые пользователь запретил изменять.
 
           Не возвращай полный файл.
+
           Используй только точечные replace-изменения.
+
+          Все old должны точно существовать
+          в предоставленном коде.
+
+          Не добавляй лишние пустые строки.
           """
 
           response = groq(
@@ -554,9 +554,11 @@ jobs:
               2200
           )
 
-          changes = parse_json(
+          result = parse_json(
               response
-          ).get(
+          )
+
+          changes = result.get(
               "changes",
               []
           )
@@ -579,10 +581,6 @@ jobs:
                   indent=2
               )
           )
-
-          # ============================================================
-          # APPLY CHANGES
-          # ============================================================
 
           changed_paths = []
 
@@ -668,9 +666,27 @@ jobs:
               set(changed_paths)
           )
 
-          # ============================================================
-          # DIFF
-          # ============================================================
+          # Нормализуем конец изменённых файлов.
+          # Это предотвращает падение git diff --check
+          # из-за лишней пустой строки в конце файла.
+
+          for path in changed_paths:
+
+              content = read_file(path)
+
+              normalized = (
+                  content.rstrip("\r\n")
+                  + "\n"
+              )
+
+              if normalized != content:
+
+                  with open(
+                      path,
+                      "w",
+                      encoding="utf-8"
+                  ) as file:
+                      file.write(normalized)
 
           print()
           print("========================================")
@@ -679,13 +695,9 @@ jobs:
 
           diff = run(
               "git diff -- "
-              "README.md "
               "index.html "
               "app.js "
-              "style.css "
-              "worker.js "
-              "wrangler.toml "
-              "docs/PROJECT.md"
+              "style.css"
           )
 
           if not diff.strip():
@@ -696,10 +708,6 @@ jobs:
           run(
               "git diff --check"
           )
-
-          # ============================================================
-          # BASIC AUTOMATIC CHECKS
-          # ============================================================
 
           print()
           print("========================================")
@@ -716,7 +724,6 @@ jobs:
                   "JavaScript syntax: PASS"
               )
 
-          # Проверяем запрещённые файлы.
           changed_by_git = run(
               "git diff --name-only"
           ).splitlines()
@@ -728,6 +735,15 @@ jobs:
                       f"Forbidden file changed: {path}"
                   )
 
+              if path not in ALLOWED_FILES:
+                  raise RuntimeError(
+                      f"Unexpected file changed: {path}"
+                  )
+
+          print(
+              "Allowed files: PASS"
+          )
+
           print(
               "Forbidden files: PASS"
           )
@@ -735,10 +751,6 @@ jobs:
           print(
               "Git diff check: PASS"
           )
-
-          # ============================================================
-          # COMMIT
-          # ============================================================
 
           print()
           print("========================================")
