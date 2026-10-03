@@ -9,7 +9,7 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   workspace:
@@ -19,12 +19,60 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Show task
+      - name: Ask AI
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.API }}
+          TASK: ${{ inputs.task }}
         run: |
-          echo "TASK:"
-          echo "${{ inputs.task }}"
+          python - <<'PY'
+          import json
+          import os
+          import urllib.request
 
-      - name: Show workspace
-        run: |
-          echo "=== PROJECT ==="
-          find . -maxdepth 2 -type f | sort
+          with open(".ai/AGENT.md", encoding="utf-8") as f:
+              agent = f.read()
+
+          with open("docs/PROJECT.md", encoding="utf-8") as f:
+              project = f.read()
+
+          prompt = f"""
+          Ты работаешь над проектом LORGUS.
+
+          Общие правила:
+          {agent}
+
+          Описание проекта:
+          {project}
+
+          Задача пользователя:
+          {os.environ["TASK"]}
+
+          Пока НЕ изменяй файлы.
+          Проанализируй задачу и опиши, что необходимо сделать.
+          """
+
+          data = {
+              "model": "openrouter/free",
+              "messages": [
+                  {
+                      "role": "user",
+                      "content": prompt
+                  }
+              ]
+          }
+
+          request = urllib.request.Request(
+              "https://openrouter.ai/api/v1/chat/completions",
+              data=json.dumps(data).encode(),
+              headers={
+                  "Authorization": "Bearer " + os.environ["OPENROUTER_API_KEY"],
+                  "Content-Type": "application/json"
+              },
+              method="POST"
+          )
+
+          with urllib.request.urlopen(request) as response:
+              result = json.load(response)
+
+          print(result["choices"][0]["message"]["content"])
+          PY
