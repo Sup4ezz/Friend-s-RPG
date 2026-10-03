@@ -88,6 +88,7 @@ jobs:
               return result.stdout
 
           def groq(messages, max_tokens):
+
               payload = {
                   "model": MODEL,
                   "messages": messages,
@@ -117,6 +118,7 @@ jobs:
                   )
 
                   try:
+
                       with urllib.request.urlopen(
                           request,
                           timeout=180
@@ -162,6 +164,7 @@ jobs:
                           )
 
                           if match:
+
                               wait = max(
                                   30,
                                   int(
@@ -176,9 +179,11 @@ jobs:
                           )
 
                           time.sleep(wait)
+
                           continue
 
                       if error.code == 413:
+
                           raise RuntimeError(
                               "Groq request is too large."
                           )
@@ -196,6 +201,7 @@ jobs:
               raw = raw.strip()
 
               if raw.startswith("```"):
+
                   raw = re.sub(
                       r"^```(?:json)?\s*",
                       "",
@@ -210,9 +216,11 @@ jobs:
                   )
 
               try:
+
                   return json.loads(raw)
 
               except json.JSONDecodeError as error:
+
                   print("INVALID JSON:")
                   print(raw)
 
@@ -227,6 +235,7 @@ jobs:
                   "r",
                   encoding="utf-8"
               ) as file:
+
                   return file.read()
 
           def choose_files(task):
@@ -235,16 +244,38 @@ jobs:
 
               selected = set()
 
+              interface_words = [
+                  "кноп",
+                  "интерфейс",
+                  "страниц",
+                  "ui",
+                  "html",
+                  "элемент",
+                  "разметк"
+              ]
+
+              javascript_words = [
+                  "javascript",
+                  "js",
+                  "логик",
+                  "обработчик",
+                  "событи",
+                  "функци"
+              ]
+
+              css_words = [
+                  "css",
+                  "стиль",
+                  "оформлен",
+                  "цвет",
+                  "размер"
+              ]
+
               if any(
                   word in text
-                  for word in [
-                      "кноп",
-                      "интерфейс",
-                      "страниц",
-                      "ui",
-                      "html"
-                  ]
+                  for word in interface_words
               ):
+
                   selected.update({
                       "index.html",
                       "app.js",
@@ -253,27 +284,20 @@ jobs:
 
               if any(
                   word in text
-                  for word in [
-                      "javascript",
-                      "js",
-                      "логик",
-                      "обработчик",
-                      "событи"
-                  ]
+                  for word in javascript_words
               ):
+
                   selected.add("app.js")
 
               if any(
                   word in text
-                  for word in [
-                      "css",
-                      "стиль",
-                      "оформлен"
-                  ]
+                  for word in css_words
               ):
+
                   selected.add("style.css")
 
               if not selected:
+
                   selected.update({
                       "index.html",
                       "app.js",
@@ -285,6 +309,10 @@ jobs:
           def context_for(path, content):
 
               lines = content.splitlines()
+
+              if len(content) <= 9000:
+
+                  return content
 
               if path == "index.html":
 
@@ -313,7 +341,7 @@ jobs:
                       r"DOMContentLoaded"
                   ]
 
-              elif path == "style.css":
+              else:
 
                   patterns = [
                       r"button",
@@ -324,9 +352,6 @@ jobs:
                       r"section",
                       r"\."
                   ]
-
-              else:
-                  patterns = []
 
               regexes = [
                   re.compile(
@@ -347,12 +372,12 @@ jobs:
 
                       start = max(
                           0,
-                          i - 5
+                          i - 6
                       )
 
                       end = min(
                           len(lines),
-                          i + 6
+                          i + 7
                       )
 
                       selected.update(
@@ -361,7 +386,7 @@ jobs:
 
               selected.update(
                   range(
-                      min(30, len(lines))
+                      min(40, len(lines))
                   )
               )
 
@@ -371,7 +396,7 @@ jobs:
                       range(
                           max(
                               0,
-                              len(lines) - 40
+                              len(lines) - 60
                           ),
                           len(lines)
                       )
@@ -388,6 +413,7 @@ jobs:
                       last is not None
                       and i > last + 1
                   ):
+
                       result.append(
                           "\n... [GAP] ...\n"
                       )
@@ -400,9 +426,10 @@ jobs:
 
               text = "\n".join(result)
 
-              if len(text) > 5500:
+              if len(text) > 9000:
+
                   text = (
-                      text[:5500]
+                      text[:9000]
                       + "\n... [TRUNCATED] ..."
                   )
 
@@ -439,7 +466,10 @@ jobs:
           print("Files supplied to AI:")
 
           for path in selected:
-              print(f"  - {path}")
+
+              print(
+                  f"  - {path}"
+              )
 
           print()
 
@@ -456,7 +486,7 @@ jobs:
 
           Ты работаешь непосредственно с Git repository.
 
-          Репозиторий является источником истины.
+          Репозиторий является единственным источником истины.
 
           Твоя задача:
 
@@ -475,34 +505,63 @@ jobs:
           - Используй только operation "replace".
           - old должен быть точной строкой из предоставленного кода.
           - old должен встречаться ровно один раз.
-          - new должен содержать только необходимую замену.
+          - old должен содержать достаточно контекста,
+            чтобы однозначно определить место изменения.
+          - old должен содержать минимум 30 символов.
+          - Никогда не используй в качестве old только:
+            "}", "{", ";", ")", "(", ",", ":" или одну короткую строку.
+          - Не используй одиночную скобку или один оператор
+            как якорь для изменения.
+          - Для JavaScript используй несколько соседних строк
+            существующего кода.
+          - Для HTML используй несколько соседних строк
+            существующей разметки.
+          - Для CSS используй существующий небольшой блок
+            CSS целиком.
           - Не удаляй существующую функциональность.
           - Не меняй несвязанный код.
           - Не придумывай отсутствующий код.
-          - Не создавай новые файлы без крайней необходимости.
+          - Не создавай новые файлы.
+          - Не создавай новые архитектурные слои без необходимости.
           - README.md запрещён для изменения.
           - worker.js запрещён для изменения.
           - wrangler.toml запрещён для изменения.
           - docs/PROJECT.md запрещён для изменения.
           - Если достаточно одного файла — меняй один файл.
           - Не добавляй лишние пустые строки в конце файла.
-          - new не должен создавать дополнительную пустую строку в конце файла.
-          - Для элементов интерфейса сначала ищи существующий HTML-контейнер или секцию интерфейса.
-          - Не добавляй UI через document.body.appendChild(), если существующая разметка уже позволяет встроить элемент.
-          - Не создавай элементы интерфейса вне существующей структуры приложения без необходимости.
-          - Не меняй index.html только ради того, чтобы создать параллельную структуру, если существующая архитектура позволяет сделать это через app.js.
-          - Сохраняй существующие классы и стили, если они подходят для новой функции.
+          - new не должен создавать дополнительную пустую строку
+            в конце файла.
+          - Для элементов интерфейса сначала ищи существующий
+            HTML-контейнер или существующую секцию интерфейса.
+          - Не добавляй UI через document.body.appendChild(),
+            если существующая архитектура позволяет встроить элемент.
+          - Не предполагай существование элемента DOM,
+            которого нет в предоставленном коде.
+          - Не предполагай существование id, класса, функции,
+            переменной или контейнера, которого нет в коде.
+          - Перед использованием существующего DOM-элемента
+            убедись, что он действительно присутствует
+            в предоставленном коде.
+          - Сохраняй существующие классы и стили,
+            если они подходят для новой функции.
+          - Не добавляй inline style, если подходящий
+            существующий CSS-класс уже есть.
+          - Не создавай дублирующие элементы.
+          - Если нужная функциональность уже существует,
+            не создавай вторую реализацию.
 
           Пользовательская задача имеет абсолютный приоритет.
 
-          Верни ТОЛЬКО валидный JSON:
+          Верни ТОЛЬКО валидный JSON.
+
+          Формат:
 
           {
             "changes": [
               {
                 "path": "app.js",
                 "operation": "replace",
-                "old": "точный существующий фрагмент",
+                "old": "точный уникальный существующий фрагмент",
                 "new": "необходимая замена"
               }
             ]
@@ -514,7 +573,7 @@ jobs:
             "changes": []
           }
 
-          Не добавляй никаких других полей.
+          Не добавляй другие поля.
           """
 
           user_prompt = f"""
@@ -528,14 +587,23 @@ jobs:
 
           Выполни задачу.
 
-          Не изменяй файлы, которые пользователь запретил изменять.
+          Сначала определи точное существующее место,
+          куда необходимо внести изменение.
+
+          Не предполагай существование DOM-элементов,
+          которых нет в коде.
 
           Не возвращай полный файл.
 
           Используй только точечные replace-изменения.
 
-          Все old должны точно существовать
-          в предоставленном коде.
+          Каждый old обязан:
+
+          - существовать в реальном коде;
+          - встречаться ровно один раз;
+          - содержать минимум 30 символов;
+          - содержать достаточный окружающий контекст;
+          - не быть одиночной скобкой или коротким оператором.
 
           Не добавляй лишние пустые строки.
           """
@@ -567,6 +635,7 @@ jobs:
               changes,
               list
           ):
+
               raise RuntimeError(
                   "AI changes must be a list."
               )
@@ -586,49 +655,112 @@ jobs:
 
           for change in changes:
 
-              path = change.get("path")
-              operation = change.get("operation")
-              old = change.get("old")
-              new = change.get("new")
+              if not isinstance(
+                  change,
+                  dict
+              ):
+
+                  raise RuntimeError(
+                      "Each change must be an object."
+                  )
+
+              path = change.get(
+                  "path"
+              )
+
+              operation = change.get(
+                  "operation"
+              )
+
+              old = change.get(
+                  "old"
+              )
+
+              new = change.get(
+                  "new"
+              )
 
               if path not in ALLOWED_FILES:
+
                   raise RuntimeError(
                       f"Forbidden file: {path}"
                   )
 
               if path in FORBIDDEN_FILES:
+
                   raise RuntimeError(
                       f"Forbidden modification: {path}"
                   )
 
               if operation != "replace":
+
                   raise RuntimeError(
                       f"Unsupported operation: {operation}"
                   )
 
-              if not isinstance(old, str):
+              if not isinstance(
+                  old,
+                  str
+              ):
+
                   raise RuntimeError(
                       f"Invalid old content: {path}"
                   )
 
-              if not isinstance(new, str):
+              if not isinstance(
+                  new,
+                  str
+              ):
+
                   raise RuntimeError(
                       f"Invalid new content: {path}"
                   )
 
-              content = read_file(path)
+              if len(old.strip()) < 30:
 
-              count = content.count(old)
+                  raise RuntimeError(
+                      f"Anchor is too short in {path}. "
+                      f"AI must provide a larger unique "
+                      f"code fragment."
+                  )
+
+              forbidden_short_anchors = {
+                  "}",
+                  "{",
+                  ";",
+                  ")",
+                  "(",
+                  ",",
+                  ":"
+              }
+
+              if old.strip() in forbidden_short_anchors:
+
+                  raise RuntimeError(
+                      f"Invalid short anchor in {path}."
+                  )
+
+              content = read_file(
+                  path
+              )
+
+              count = content.count(
+                  old
+              )
 
               if count == 0:
+
                   raise RuntimeError(
                       f"Anchor not found in {path}."
                   )
 
               if count > 1:
+
                   raise RuntimeError(
                       f"Anchor occurs {count} times "
-                      f"in {path}. Refusing to guess."
+                      f"in {path}. "
+                      f"AI must provide a unique "
+                      f"code fragment."
                   )
 
               old_lines = len(
@@ -636,9 +768,11 @@ jobs:
               )
 
               if old_lines > 40:
+
                   raise RuntimeError(
                       f"Large replacement blocked "
-                      f"in {path}: {old_lines} lines."
+                      f"in {path}: "
+                      f"{old_lines} lines."
                   )
 
               updated = content.replace(
@@ -652,7 +786,10 @@ jobs:
                   "w",
                   encoding="utf-8"
               ) as file:
-                  file.write(updated)
+
+                  file.write(
+                      updated
+                  )
 
               changed_paths.append(
                   path
@@ -666,13 +803,11 @@ jobs:
               set(changed_paths)
           )
 
-          # Нормализуем конец изменённых файлов.
-          # Это предотвращает падение git diff --check
-          # из-за лишней пустой строки в конце файла.
-
           for path in changed_paths:
 
-              content = read_file(path)
+              content = read_file(
+                  path
+              )
 
               normalized = (
                   content.rstrip("\r\n")
@@ -686,7 +821,10 @@ jobs:
                       "w",
                       encoding="utf-8"
                   ) as file:
-                      file.write(normalized)
+
+                      file.write(
+                          normalized
+                      )
 
           print()
           print("========================================")
@@ -702,7 +840,10 @@ jobs:
 
           if not diff.strip():
 
-              print("AI made no changes.")
+              print(
+                  "AI made no changes."
+              )
+
               raise SystemExit(0)
 
           run(
@@ -731,11 +872,13 @@ jobs:
           for path in changed_by_git:
 
               if path in FORBIDDEN_FILES:
+
                   raise RuntimeError(
                       f"Forbidden file changed: {path}"
                   )
 
               if path not in ALLOWED_FILES:
+
                   raise RuntimeError(
                       f"Unexpected file changed: {path}"
                   )
