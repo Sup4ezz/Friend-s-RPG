@@ -30,11 +30,15 @@ jobs:
           import os
           import json
           import urllib.request
+          import urllib.error
           import subprocess
           import re
+          import time
 
           TASK = os.environ["TASK"]
           API_KEY = os.environ["OPENROUTER_API_KEY"]
+
+          MODEL = "openrouter/free"
 
           ALLOWED_FILES = {
               "README.md",
@@ -47,29 +51,96 @@ jobs:
           }
 
           MAX_FIX_ATTEMPTS = 2
+          MAX_API_RETRIES = 5
 
           def ask(system, user):
               data = json.dumps({
-                  "model": "openrouter/free",
+                  "model": MODEL,
                   "messages": [
-                      {"role": "system", "content": system},
-                      {"role": "user", "content": user}
+                      {
+                          "role": "system",
+                          "content": system
+                      },
+                      {
+                          "role": "user",
+                          "content": user
+                      }
                   ]
-              }).encode()
+              }).encode("utf-8")
 
-              request = urllib.request.Request(
-                  "https://openrouter.ai/api/v1/chat/completions",
-                  data=data,
-                  headers={
-                      "Authorization": f"Bearer {API_KEY}",
-                      "Content-Type": "application/json"
-                  }
-              )
+              for attempt in range(1, MAX_API_RETRIES + 1):
+                  request = urllib.request.Request(
+                      "https://openrouter.ai/api/v1/chat/completions",
+                      data=data,
+                      headers={
+                          "Authorization": f"Bearer {API_KEY}",
+                          "Content-Type": "application/json",
+                          "HTTP-Referer": "https://github.com/Sup4ezz/Friend-s-RPG",
+                          "X-Title": "LORGUS AI"
+                      }
+                  )
 
-              with urllib.request.urlopen(request) as response:
-                  result = json.loads(response.read())
+                  try:
+                      with urllib.request.urlopen(
+                          request,
+                          timeout=120
+                      ) as response:
+                          result = json.loads(response.read())
 
-              return result["choices"][0]["message"]["content"]
+                      if "choices" not in result:
+                          raise RuntimeError(
+                              f"OpenRouter returned unexpected response: {result}"
+                          )
+
+                      return result["choices"][0]["message"]["content"]
+
+                  except urllib.error.HTTPError as e:
+                      body = e.read().decode(
+                          "utf-8",
+                          errors="replace"
+                      )
+
+                      print(
+                          f"\nOPENROUTER HTTP ERROR {e.code} "
+                          f"(attempt {attempt}/{MAX_API_RETRIES})"
+                      )
+                      print(body)
+
+                      if e.code != 429:
+                          raise
+
+                      if attempt == MAX_API_RETRIES:
+                          raise RuntimeError(
+                              "OpenRouter returned HTTP 429 after "
+                              f"{MAX_API_RETRIES} attempts."
+                          )
+
+                      delay = 10 * (2 ** (attempt - 1))
+
+                      print(
+                          f"Rate limit detected. "
+                          f"Waiting {delay} seconds before retry..."
+                      )
+
+                      time.sleep(delay)
+
+                  except urllib.error.URLError as e:
+                      print(
+                          f"\nOPENROUTER NETWORK ERROR "
+                          f"(attempt {attempt}/{MAX_API_RETRIES})"
+                      )
+                      print(e)
+
+                      if attempt == MAX_API_RETRIES:
+                          raise
+
+                      delay = 10 * (2 ** (attempt - 1))
+
+                      print(
+                          f"Waiting {delay} seconds before retry..."
+                      )
+
+                      time.sleep(delay)
 
           def repository_text():
               result = []
@@ -85,12 +156,17 @@ jobs:
                           path = path[2:]
 
                       try:
-                          with open(path, "r", encoding="utf-8") as f:
+                          with open(
+                              path,
+                              "r",
+                              encoding="utf-8"
+                          ) as f:
                               content = f.read()
 
                           result.append(
                               f"\n===== {path} =====\n{content}"
                           )
+
                       except UnicodeDecodeError:
                           pass
 
@@ -98,7 +174,11 @@ jobs:
 
           def git_diff():
               return subprocess.check_output(
-                  ["git", "diff", "--no-ext-diff"],
+                  [
+                      "git",
+                      "diff",
+                      "--no-ext-diff"
+                  ],
                   text=True
               )
 
@@ -112,13 +192,19 @@ jobs:
                       text,
                       flags=re.IGNORECASE
                   )
-                  text = re.sub(r"\s*```$", "", text)
+
+                  text = re.sub(
+                      r"\s*```$",
+                      "",
+                      text
+                  )
 
               return json.loads(text)
 
           def apply_changes(raw, agent_name):
               try:
                   data = extract_json(raw)
+
               except Exception as e:
                   raise RuntimeError(
                       f"{agent_name} returned invalid JSON: {e}"
@@ -136,26 +222,40 @@ jobs:
 
                   if path not in ALLOWED_FILES:
                       raise RuntimeError(
-                          f"{agent_name} attempted to modify forbidden file: {path}"
+                          f"{agent_name} attempted to modify "
+                          f"forbidden file: {path}"
                       )
 
                   lines = change.get("content_lines")
 
                   if not isinstance(lines, list):
                       raise RuntimeError(
-                          f"{agent_name}: content_lines must be a list for {path}."
+                          f"{agent_name}: content_lines must be "
+                          f"a list for {path}."
                       )
 
-                  content = "\n".join(str(line) for line in lines)
+                  content = "\n".join(
+                      str(line)
+                      for line in lines
+                  )
 
-                  with open(path, "w", encoding="utf-8", newline="\n") as f:
-                      f.write(content.rstrip("\n") + "\n")
+                  with open(
+                      path,
+                      "w",
+                      encoding="utf-8",
+                      newline="\n"
+                  ) as f:
+                      f.write(
+                          content.rstrip("\n") + "\n"
+                      )
 
-                  print(f"{agent_name}: updated {path}")
+                  print(
+                      f"{agent_name}: updated {path}"
+                  )
 
               return data
 
-          def validate_qa(task, repo, diff):
+          def run_qa(task, repo, diff):
               print("\n===== QA =====\n")
 
               qa_raw = ask(
@@ -171,12 +271,13 @@ jobs:
 
                   FAIL
 
-                  Не используй "User Safety", "safe" или другие статусы.
+                  Не используй "User Safety", "safe"
+                  или другие статусы.
 
-                  PASS означает, что задача выполнена и состояние репозитория
-                  соответствует задаче.
+                  PASS означает, что задача выполнена
+                  и состояние репозитория соответствует задаче.
 
-                  FAIL означает, что есть реальная проблема.
+                  FAIL означает, что существует реальная проблема.
 
                   При FAIL обязательно укажи:
                   - файл;
@@ -221,9 +322,17 @@ jobs:
                       "QA returned neither PASS nor FAIL."
                   )
 
-              return match.group(1).upper(), qa_raw
+              return (
+                  match.group(1).upper(),
+                  qa_raw
+              )
 
-          def validate_reviewer(task, repo, diff, qa):
+          def run_reviewer(
+              task,
+              repo,
+              diff,
+              qa
+          ):
               print("\n===== REVIEWER =====\n")
 
               reviewer_raw = ask(
@@ -239,16 +348,17 @@ jobs:
 
                   REJECT
 
-                  Допускаются также формы:
+                  Допускаются также:
 
                   APPROVED
                   REJECTED
 
-                  Не используй "User Safety", "safe" или другие статусы.
+                  Не используй "User Safety", "safe"
+                  или другие статусы.
 
                   APPROVE означает, что изменение можно принять.
 
-                  REJECT означает, что есть реальная проблема.
+                  REJECT означает, что существует реальная проблема.
 
                   При REJECT обязательно укажи:
                   - файл;
@@ -257,7 +367,9 @@ jobs:
                   - что необходимо изменить.
 
                   ACTUAL GIT DIFF показывает только изменения.
-                  CURRENT REPOSITORY показывает полное состояние файлов.
+
+                  CURRENT REPOSITORY показывает полное
+                  текущее состояние файлов.
 
                   Не отклоняй изменение только потому,
                   что требуемый элемент отсутствует в diff:
@@ -327,10 +439,18 @@ jobs:
               - способ проверки.
 
               ВАЖНО:
-              - не переписывай существующий код без необходимости;
+              - не переписывай существующий код;
               - не меняй язык существующего текста;
               - не добавляй лишнюю функциональность;
-              - учитывай существующую архитектуру проекта.""",
+              - учитывай существующую архитектуру проекта.
+
+              Верни только JSON:
+
+              {
+                "changes": []
+              }
+
+              Architect не должен самостоятельно изменять файлы.""",
               f"""ЗАДАЧА:
           {TASK}
 
@@ -345,7 +465,8 @@ jobs:
           coder_raw = ask(
               """Ты CODER проекта LORGUS.
 
-              Изучи задачу, план Architect и полный текущий репозиторий.
+              Изучи задачу, план Architect
+              и полный текущий репозиторий.
 
               Верни ТОЛЬКО JSON:
 
@@ -365,14 +486,15 @@ jobs:
               - content_lines содержит ПОЛНОЕ содержимое изменяемого файла;
               - изменяй только необходимые файлы;
               - сохраняй существующий язык;
-              - сохраняй существующее содержимое, если оно не относится к задаче;
-              - не переписывай существующий текст без необходимости;
-              - не переводи документы на другой язык;
-              - не добавляй пояснения от себя;
+              - сохраняй существующее содержимое;
+              - не переписывай текст без необходимости;
+              - не переводи документы;
+              - не добавляй пояснения;
               - не меняй .ai;
               - не добавляй секреты;
               - не добавляй лишнюю функциональность;
-              - если изменений не требуется: {"changes": []}.""",
+              - если изменений не требуется:
+                {"changes": []}.""",
               f"""ЗАДАЧА:
           {TASK}
 
@@ -385,43 +507,92 @@ jobs:
 
           print(coder_raw)
 
-          apply_changes(coder_raw, "CODER")
+          apply_changes(
+              coder_raw,
+              "CODER"
+          )
 
           diff = git_diff()
 
-          print("\n===== ACTUAL GIT DIFF =====\n")
+          print(
+              "\n===== ACTUAL GIT DIFF =====\n"
+          )
           print(diff)
 
-          qa_status, qa_raw = validate_qa(
+          qa_status, qa_raw = run_qa(
               TASK,
               repository_text(),
               diff
           )
 
           if qa_status == "FAIL":
-              raise RuntimeError("QA reported FAIL.")
+              raise RuntimeError(
+                  "QA reported FAIL."
+              )
 
-          print("\nQA VALIDATION: PASS")
+          print(
+              "\nQA VALIDATION: PASS"
+          )
 
-          reviewer_status, reviewer_raw = validate_reviewer(
+          reviewer_status, reviewer_raw = run_reviewer(
               TASK,
               repository_text(),
               diff,
               qa_raw
           )
 
-          if reviewer_status == "APPROVE":
-              print("\nREVIEW VALIDATION: APPROVE")
-          else:
-              print("\nREVIEW VALIDATION: REJECT")
+          print(
+              f"\nREVIEW VALIDATION: "
+              f"{reviewer_status}"
+          )
+
+          # -------------------------------------------------
+          # DETERMINISTIC FIXER TEST
+          # -------------------------------------------------
+
+          if (
+              "FIXER_TEST_MARKER" in TASK
+              and reviewer_status == "APPROVE"
+          ):
+              print(
+                  "\n===== FIXER TEST MODE ====="
+              )
+              print(
+                  "Forcing REVIEWER REJECT "
+                  "to verify Fixer."
+              )
+
+              reviewer_status = "REJECT"
+
+              reviewer_raw = """
+          REJECT
+
+          FIXER TEST:
+          README.md contains FIXER_TEST_MARKER: ORIGINAL.
+
+          Required change:
+          change only:
+
+          FIXER_TEST_MARKER: ORIGINAL
+
+          to:
+
+          FIXER_TEST_MARKER: FIXED
+          """
+
+              print(reviewer_raw)
 
           fix_attempt = 0
 
-          while reviewer_status == "REJECT" and fix_attempt < MAX_FIX_ATTEMPTS:
+          while (
+              reviewer_status == "REJECT"
+              and fix_attempt < MAX_FIX_ATTEMPTS
+          ):
               fix_attempt += 1
 
               print(
-                  f"\n===== FIXER ATTEMPT {fix_attempt}/{MAX_FIX_ATTEMPTS} =====\n"
+                  f"\n===== FIXER ATTEMPT "
+                  f"{fix_attempt}/{MAX_FIX_ATTEMPTS} =====\n"
               )
 
               repo_before_fix = repository_text()
@@ -448,18 +619,29 @@ jobs:
 
                   КРИТИЧЕСКИЕ ПРАВИЛА:
 
-                  - content_lines содержит полное новое содержимое файла;
+                  - content_lines содержит полное содержимое файла;
                   - исправляй только конкретные найденные проблемы;
                   - не переписывай проект;
-                  - не рефактори код без необходимости;
+                  - не рефактори без необходимости;
                   - не переводи существующий текст;
                   - сохраняй существующий язык;
                   - сохраняй всё содержимое, не относящееся к проблеме;
                   - не меняй другие файлы без необходимости;
                   - не меняй .ai;
                   - не добавляй секреты;
-                  - не придумывай новые проблемы;
-                  - если проблема уже исправлена: {"changes": []}.""",
+                  - не придумывай новые проблемы.
+
+                  Для FIXER_TEST_MARKER:
+
+                  Если Reviewer требует изменить:
+
+                  FIXER_TEST_MARKER: ORIGINAL
+
+                  замени только значение ORIGINAL
+                  на FIXED.
+
+                  Если проблема уже исправлена:
+                  {"changes": []}.""",
                   f"""ИСХОДНАЯ ЗАДАЧА:
           {TASK}
 
@@ -478,53 +660,99 @@ jobs:
 
               print(fixer_raw)
 
-              apply_changes(fixer_raw, "FIXER")
+              apply_changes(
+                  fixer_raw,
+                  "FIXER"
+              )
 
               diff = git_diff()
 
-              print("\n===== DIFF AFTER FIXER =====\n")
+              print(
+                  "\n===== DIFF AFTER FIXER =====\n"
+              )
               print(diff)
 
-              qa_status, qa_raw = validate_qa(
+              qa_status, qa_raw = run_qa(
                   TASK,
                   repository_text(),
                   diff
               )
 
               if qa_status == "FAIL":
-                  print("\nQA VALIDATION: FAIL")
+                  print(
+                      "\nQA VALIDATION: FAIL"
+                  )
+
                   reviewer_status = "REJECT"
-                  reviewer_raw = "REJECT: QA failed after Fixer."
+
+                  reviewer_raw = """
+          REJECT
+
+          QA failed after Fixer.
+          """
+
                   continue
 
-              print("\nQA VALIDATION: PASS")
+              print(
+                  "\nQA VALIDATION: PASS"
+              )
 
-              reviewer_status, reviewer_raw = validate_reviewer(
+              reviewer_status, reviewer_raw = run_reviewer(
                   TASK,
                   repository_text(),
                   diff,
                   qa_raw
               )
 
-              if reviewer_status == "APPROVE":
-                  print("\nREVIEW VALIDATION: APPROVE")
+              # The deterministic test ends after the
+              # first successful Fixer pass.
+              if (
+                  "FIXER_TEST_MARKER" in TASK
+                  and "FIXER_TEST_MARKER: FIXED"
+                  in repository_text()
+              ):
+                  reviewer_status = "APPROVE"
+
+                  reviewer_raw = """
+          APPROVE
+
+          FIXER TEST PASSED:
+          FIXER_TEST_MARKER was changed
+          from ORIGINAL to FIXED.
+          """
+
+                  print(
+                      "\n===== FIXER TEST PASSED ====="
+                  )
+                  print(reviewer_raw)
+
                   break
 
-              print("\nREVIEW VALIDATION: REJECT")
+              print(
+                  f"\nREVIEW VALIDATION: "
+                  f"{reviewer_status}"
+              )
 
           if reviewer_status != "APPROVE":
               raise RuntimeError(
-                  f"Pipeline failed after {MAX_FIX_ATTEMPTS} Fixer attempts."
+                  "Pipeline failed after "
+                  f"{MAX_FIX_ATTEMPTS} Fixer attempts."
               )
 
-          print("\n===== FINAL CHECK =====\n")
+          print(
+              "\n===== FINAL CHECK =====\n"
+          )
 
           final_diff = git_diff()
 
           print(final_diff)
 
           check = subprocess.run(
-              ["git", "diff", "--check"],
+              [
+                  "git",
+                  "diff",
+                  "--check"
+              ],
               text=True,
               capture_output=True
           )
@@ -532,12 +760,18 @@ jobs:
           if check.returncode != 0:
               print(check.stdout)
               print(check.stderr)
+
               raise RuntimeError(
                   "git diff --check failed."
               )
 
-          print("\nFINAL GIT CHECK: PASS")
-          print("\nPIPELINE RESULT: APPROVED")
+          print(
+              "\nFINAL GIT CHECK: PASS"
+          )
+
+          print(
+              "\nPIPELINE RESULT: APPROVED"
+          )
 
           PY
 
@@ -568,4 +802,5 @@ jobs:
           fi
 
           git commit -m "AI: update LORGUS project"
+
           git push origin HEAD
