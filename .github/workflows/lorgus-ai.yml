@@ -31,6 +31,7 @@ jobs:
           import json
           import urllib.request
           import subprocess
+          import re
 
           TASK = os.environ["TASK"]
           API_KEY = os.environ["OPENROUTER_API_KEY"]
@@ -99,7 +100,23 @@ jobs:
                   text=True
               )
 
+          def extract_json(text):
+              text = text.strip()
+
+              if text.startswith("```"):
+                  text = re.sub(
+                      r"^```(?:json)?\s*",
+                      "",
+                      text,
+                      flags=re.IGNORECASE
+                  )
+                  text = re.sub(r"\s*```$", "", text)
+
+              return json.loads(text)
+
           repo = repository_text()
+
+          print("\n===== ARCHITECT =====\n")
 
           architect = ask(
               """Ты ARCHITECT проекта LORGUS.
@@ -111,12 +128,15 @@ jobs:
               Определи:
               - проблему;
               - затронутые файлы;
-              - план изменений;
+              - минимальный план изменений;
               - риски;
               - способ проверки.
 
-              Не придумывай существующий код.
-              Не предлагай изменения несвязанных файлов.""",
+              ВАЖНО:
+              - не предлагай переписывать уже существующий код без необходимости;
+              - не меняй язык существующего текста;
+              - не добавляй лишнюю функциональность;
+              - учитывай то, что уже существует в репозитории.""",
               f"""ЗАДАЧА:
           {TASK}
 
@@ -124,8 +144,9 @@ jobs:
           {repo}"""
           )
 
-          print("\n===== ARCHITECT =====\n")
           print(architect)
+
+          print("\n===== CODER =====\n")
 
           coder_raw = ask(
               """Ты CODER проекта LORGUS.
@@ -149,12 +170,13 @@ jobs:
 
               - content_lines содержит ПОЛНОЕ содержимое изменяемого файла;
               - изменяй только необходимые файлы;
-              - не переводи существующий текст;
-              - сохраняй существующую функциональность;
-              - не переписывай файл без необходимости;
+              - сохраняй существующий язык;
+              - сохраняй существующее содержимое, если оно не относится к задаче;
+              - не переписывай существующий текст без необходимости;
+              - не добавляй пояснения от себя;
               - не меняй .ai;
               - не добавляй секреты;
-              - если изменения не нужны: {"changes": []}.""",
+              - если изменений не требуется: {"changes": []}.""",
               f"""ЗАДАЧА:
           {TASK}
 
@@ -165,13 +187,14 @@ jobs:
           {repo}"""
           )
 
-          print("\n===== CODER =====\n")
           print(coder_raw)
 
           try:
-              coder = json.loads(coder_raw)
-          except json.JSONDecodeError:
-              raise RuntimeError("Coder returned invalid JSON")
+              coder = extract_json(coder_raw)
+          except Exception as e:
+              raise RuntimeError(
+                  f"Coder returned invalid JSON: {e}"
+              )
 
           for change in coder.get("changes", []):
               path = change["path"]
@@ -195,31 +218,20 @@ jobs:
 
           repo_after = repository_text()
 
-          qa = ask(
+          print("\n===== QA =====\n")
+
+          qa_raw = ask(
               """Ты QA Agent проекта LORGUS.
 
-              Проверяй РЕАЛЬНОЕ текущее состояние репозитория.
+              Проверь РЕАЛЬНОЕ текущее состояние репозитория.
 
               У тебя есть:
-              1. полный текущий репозиторий;
-              2. фактический git diff;
-              3. исходная задача.
+              - исходная задача;
+              - полный текущий репозиторий;
+              - фактический git diff.
 
-              Не считай изменение успешным только потому,
-              что код выглядит правильным.
-
-              Проверь:
-              - синтаксис;
-              - JavaScript;
-              - HTML;
-              - CSS;
-              - API;
-              - Supabase;
-              - Cloudflare Worker;
-              - соответствие задаче;
-              - отсутствие лишних изменений.
-
-              Верни:
+              ВАЖНО:
+              Твой ответ обязан начинаться ровно с одного из:
 
               PASS
 
@@ -227,45 +239,74 @@ jobs:
 
               FAIL
 
-              Для FAIL укажи конкретную проблему, файл,
-              ожидаемый результат и фактический результат.""",
+              После PASS можешь дать краткое объяснение.
+
+              После FAIL обязательно укажи:
+              - файл;
+              - проблему;
+              - ожидаемый результат;
+              - фактический результат.
+
+              Не пиши "User Safety", "safe" или другие статусы вместо PASS/FAIL.
+
+              Проверяй:
+              - соответствие задаче;
+              - синтаксис;
+              - JavaScript;
+              - HTML;
+              - CSS;
+              - API;
+              - Supabase;
+              - Cloudflare Worker;
+              - регрессии;
+              - лишние изменения.""",
               f"""ЗАДАЧА:
           {TASK}
 
-          ПОЛНЫЙ ТЕКУЩИЙ РЕПОЗИТОРИЙ:
+          CURRENT REPOSITORY:
           {repo_after}
 
-          ФАКТИЧЕСКИЙ GIT DIFF:
+          ACTUAL GIT DIFF:
           {diff}"""
           )
 
-          print("\n===== QA =====\n")
-          print(qa)
+          print(qa_raw)
 
-          reviewer = ask(
+          qa_match = re.match(
+              r"^\s*(PASS|FAIL)\b",
+              qa_raw,
+              re.IGNORECASE
+          )
+
+          if not qa_match:
+              raise RuntimeError(
+                  "QA returned neither PASS nor FAIL."
+              )
+
+          qa_status = qa_match.group(1).upper()
+
+          if qa_status == "FAIL":
+              raise RuntimeError(
+                  "QA reported FAIL."
+              )
+
+          print("\nQA VALIDATION: PASS")
+
+          print("\n===== REVIEWER =====\n")
+
+          reviewer_raw = ask(
               """Ты REVIEWER проекта LORGUS.
 
               Проведи независимое ревью.
 
-              Важно:
-              ACTUAL GIT DIFF показывает только изменения.
-              CURRENT REPOSITORY показывает полное состояние файлов.
+              У тебя есть:
+              - исходная задача;
+              - полный текущий репозиторий;
+              - фактический git diff;
+              - результат QA.
 
-              Не отклоняй изменение только потому,
-              что требуемый элемент отсутствует в diff:
-              он мог существовать до изменения.
-
-              Проверь:
-              - соответствие задаче;
-              - логику;
-              - безопасность;
-              - Supabase;
-              - Cloudflare Worker;
-              - регрессии;
-              - лишние изменения;
-              - сохранение существующего содержимого.
-
-              Верни строго:
+              ВАЖНО:
+              Твой ответ обязан начинаться ровно с одного из:
 
               APPROVE
 
@@ -273,11 +314,32 @@ jobs:
 
               REJECT
 
-              Для REJECT укажи:
+              После APPROVE можешь дать краткое объяснение.
+
+              После REJECT обязательно укажи:
               - файл;
               - проблему;
               - почему это проблема;
-              - что необходимо изменить.""",
+              - что необходимо изменить.
+
+              Не пиши "User Safety", "safe" или другие статусы вместо APPROVE/REJECT.
+
+              ACTUAL GIT DIFF показывает только изменения.
+              CURRENT REPOSITORY показывает полное состояние файлов.
+
+              Не отклоняй изменение только потому,
+              что требуемый элемент отсутствует в diff:
+              он мог существовать до изменения.
+
+              Проверяй:
+              - соответствие задаче;
+              - логику;
+              - безопасность;
+              - Supabase;
+              - Cloudflare Worker;
+              - регрессии;
+              - лишние изменения;
+              - сохранение существующего содержимого.""",
               f"""ЗАДАЧА:
           {TASK}
 
@@ -288,21 +350,29 @@ jobs:
           {diff}
 
           QA RESULT:
-          {qa}"""
+          {qa_raw}"""
           )
 
-          print("\n===== REVIEWER =====\n")
-          print(reviewer)
+          print(reviewer_raw)
 
-          if "REJECT" in reviewer.upper():
+          reviewer_match = re.match(
+              r"^\s*(APPROVE|REJECT)\b",
+              reviewer_raw,
+              re.IGNORECASE
+          )
+
+          if not reviewer_match:
+              raise RuntimeError(
+                  "Reviewer returned neither APPROVE nor REJECT."
+              )
+
+          reviewer_status = reviewer_match.group(1).upper()
+
+          if reviewer_status == "REJECT":
               raise RuntimeError(
                   "Reviewer rejected the changes."
               )
 
-          if "FAIL" in qa.upper():
-              raise RuntimeError(
-                  "QA reported FAIL."
-              )
-
+          print("\nREVIEW VALIDATION: APPROVE")
           print("\nPIPELINE RESULT: APPROVED")
           PY
