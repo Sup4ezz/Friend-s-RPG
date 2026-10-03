@@ -48,7 +48,11 @@ jobs:
           )
 
           try:
-              with urllib.request.urlopen(request, timeout=30) as response:
+              with urllib.request.urlopen(
+                  request,
+                  timeout=30
+              ) as response:
+
                   data = json.loads(
                       response.read().decode(
                           "utf-8",
@@ -70,6 +74,7 @@ jobs:
               print(f"Model: {model}")
 
           except urllib.error.HTTPError as error:
+
               body = error.read().decode(
                   "utf-8",
                   errors="replace"
@@ -110,6 +115,13 @@ jobs:
               "docs/PROJECT.md"
           }
 
+          FORBIDDEN_FILES = {
+              "README.md",
+              "worker.js",
+              "wrangler.toml",
+              "docs/PROJECT.md"
+          }
+
           print("========================================")
           print("LORGUS AI WORKSPACE")
           print("========================================")
@@ -118,9 +130,9 @@ jobs:
           print(USER_TASK)
           print()
 
-          # ------------------------------------------------------------
+          # ============================================================
           # SHELL
-          # ------------------------------------------------------------
+          # ============================================================
 
           def run(command):
               result = subprocess.run(
@@ -143,9 +155,9 @@ jobs:
 
               return result.stdout
 
-          # ------------------------------------------------------------
+          # ============================================================
           # GROQ
-          # ------------------------------------------------------------
+          # ============================================================
 
           def groq(messages, max_tokens, json_mode=False):
               payload = {
@@ -220,7 +232,8 @@ jobs:
 
                           match = re.search(
                               r"try again in ([0-9.]+)s",
-                              raw
+                              raw,
+                              re.IGNORECASE
                           )
 
                           if match:
@@ -241,6 +254,7 @@ jobs:
                           continue
 
                       if error.code == 413:
+
                           raise RuntimeError(
                               "Groq request is too large."
                           )
@@ -253,15 +267,16 @@ jobs:
                   "Groq rate limit retry exhausted."
               )
 
-          # ------------------------------------------------------------
+          # ============================================================
           # JSON
-          # ------------------------------------------------------------
+          # ============================================================
 
           def parse_json(raw):
 
               raw = raw.strip()
 
               if raw.startswith("```"):
+
                   raw = re.sub(
                       r"^```(?:json)?\s*",
                       "",
@@ -276,6 +291,7 @@ jobs:
                   )
 
               try:
+
                   return json.loads(raw)
 
               except json.JSONDecodeError as error:
@@ -287,9 +303,9 @@ jobs:
                       f"Invalid JSON: {error}"
                   )
 
-          # ------------------------------------------------------------
+          # ============================================================
           # FILES
-          # ------------------------------------------------------------
+          # ============================================================
 
           def read_file(path):
 
@@ -311,34 +327,98 @@ jobs:
 
               return result
 
+          # ============================================================
+          # FILE DETECTION
+          # ============================================================
+
           def detect_files(task):
 
-              task_lower = task.lower()
+              text = task.lower()
 
               selected = set()
 
               mapping = {
-                  "readme": ["README.md"],
-                  "index.html": ["index.html"],
-                  "html": ["index.html"],
-                  "style.css": ["style.css"],
-                  "css": ["style.css"],
-                  "app.js": ["app.js"],
-                  "javascript": ["app.js"],
-                  "worker.js": ["worker.js"],
+                  "readme": [
+                      "README.md"
+                  ],
+
+                  "index.html": [
+                      "index.html"
+                  ],
+
+                  "html": [
+                      "index.html"
+                  ],
+
+                  "страниц": [
+                      "index.html"
+                  ],
+
+                  "интерфейс": [
+                      "index.html",
+                      "style.css",
+                      "app.js"
+                  ],
+
+                  "кноп": [
+                      "index.html",
+                      "style.css",
+                      "app.js"
+                  ],
+
+                  "ui": [
+                      "index.html",
+                      "style.css",
+                      "app.js"
+                  ],
+
+                  "стиль": [
+                      "style.css"
+                  ],
+
+                  "css": [
+                      "style.css"
+                  ],
+
+                  "app.js": [
+                      "app.js"
+                  ],
+
+                  "javascript": [
+                      "app.js"
+                  ],
+
+                  "логик": [
+                      "app.js"
+                  ],
+
+                  "обработчик": [
+                      "app.js"
+                  ],
+
+                  "worker.js": [
+                      "worker.js"
+                  ],
+
                   "cloudflare": [
                       "worker.js",
                       "wrangler.toml"
                   ],
-                  "wrangler": ["wrangler.toml"],
+
+                  "wrangler": [
+                      "wrangler.toml"
+                  ],
+
                   "supabase": [
                       "app.js",
                       "worker.js",
                       "wrangler.toml"
                   ],
+
                   "project.md": [
                       "docs/PROJECT.md"
                   ],
+
                   "docs": [
                       "docs/PROJECT.md"
                   ]
@@ -346,20 +426,243 @@ jobs:
 
               for keyword, paths in mapping.items():
 
-                  if keyword in task_lower:
+                  if keyword in text:
                       selected.update(paths)
 
               if not selected:
-                  selected = set(ALLOWED_FILES)
+
+                  selected = set(
+                      ALLOWED_FILES
+                  )
 
               return sorted(selected)
 
-          def build_context(paths, limit=16000):
+          # ============================================================
+          # STRUCTURAL CONTEXT
+          # ============================================================
+
+          def numbered_lines(content):
+              return content.splitlines()
+
+          def add_window(
+              lines,
+              center,
+              radius,
+              output
+          ):
+
+              start = max(
+                  0,
+                  center - radius
+              )
+
+              end = min(
+                  len(lines),
+                  center + radius + 1
+              )
+
+              for number in range(
+                  start,
+                  end
+              ):
+
+                  output.add(number)
+
+          def html_context(content):
+
+              lines = numbered_lines(content)
+
+              selected = set()
+
+              important = re.compile(
+                  r"<body\b|"
+                  r"<main\b|"
+                  r"<header\b|"
+                  r"<section\b|"
+                  r"<div\b|"
+                  r"<button\b|"
+                  r"<script\b|"
+                  r"id=|"
+                  r"class=",
+                  re.IGNORECASE
+              )
+
+              for index, line in enumerate(lines):
+
+                  if important.search(line):
+                      add_window(
+                          lines,
+                          index,
+                          3,
+                          selected
+                      )
+
+              indexes = sorted(selected)
+
+              result = []
+
+              last = None
+
+              for index in indexes:
+
+                  if last is not None and index > last + 1:
+                      result.append(
+                          "\n... [HTML GAP] ...\n"
+                      )
+
+                  result.append(
+                      f"{index + 1}: "
+                      f"{lines[index]}"
+                  )
+
+                  last = index
+
+              text = "\n".join(result)
+
+              if len(text) > 7000:
+                  text = text[:7000] + \
+                      "\n... [TRUNCATED] ..."
+
+              return text
+
+          def js_context(content):
+
+              lines = numbered_lines(content)
+
+              selected = set()
+
+              important = re.compile(
+                  r"function\s+\w+\s*\("
+                  r"|async\s+function\s+\w+"
+                  r"|DOMContentLoaded"
+                  r"|addEventListener"
+                  r"|querySelector"
+                  r"|getElementById"
+                  r"|innerHTML"
+                  r"|createElement"
+                  r"|render[A-Z]"
+                  r"|window\."
+              )
+
+              for index, line in enumerate(lines):
+
+                  if important.search(line):
+
+                      add_window(
+                          lines,
+                          index,
+                          4,
+                          selected
+                      )
+
+              # Always provide beginning and end.
+              for index in range(
+                  min(30, len(lines))
+              ):
+                  selected.add(index)
+
+              for index in range(
+                  max(0, len(lines) - 30),
+                  len(lines)
+              ):
+                  selected.add(index)
+
+              indexes = sorted(selected)
+
+              result = []
+
+              last = None
+
+              for index in indexes:
+
+                  if last is not None and index > last + 1:
+                      result.append(
+                          "\n... [JS GAP] ...\n"
+                      )
+
+                  result.append(
+                      f"{index + 1}: "
+                      f"{lines[index]}"
+                  )
+
+                  last = index
+
+              text = "\n".join(result)
+
+              if len(text) > 9000:
+                  text = text[:9000] + \
+                      "\n... [TRUNCATED] ..."
+
+              return text
+
+          def css_context(content):
+
+              lines = numbered_lines(content)
+
+              selected = set()
+
+              important = re.compile(
+                  r"button|"
+                  r"\.btn|"
+                  r"#|"
+                  r"input|"
+                  r"header|"
+                  r"main|"
+                  r"section",
+                  re.IGNORECASE
+              )
+
+              for index, line in enumerate(lines):
+
+                  if important.search(line):
+
+                      add_window(
+                          lines,
+                          index,
+                          3,
+                          selected
+                      )
+
+              if not selected:
+
+                  for index in range(
+                      min(100, len(lines))
+                  ):
+                      selected.add(index)
+
+              indexes = sorted(selected)
+
+              result = []
+
+              last = None
+
+              for index in indexes:
+
+                  if last is not None and index > last + 1:
+                      result.append(
+                          "\n... [CSS GAP] ...\n"
+                      )
+
+                  result.append(
+                      f"{index + 1}: "
+                      f"{lines[index]}"
+                  )
+
+                  last = index
+
+              text = "\n".join(result)
+
+              if len(text) > 6000:
+                  text = text[:6000] + \
+                      "\n... [TRUNCATED] ..."
+
+              return text
+
+          def smart_context(paths):
 
               files = get_files()
 
               blocks = []
-              total = 0
 
               for path in paths:
 
@@ -368,115 +671,41 @@ jobs:
 
                   content = files[path]
 
-                  remaining = limit - total
-
-                  if remaining <= 0:
-                      break
-
-                  if len(content) > remaining:
-
-                      content = (
-                          content[:remaining]
-                          + "\n[TRUNCATED]\n"
+                  if path == "index.html":
+                      excerpt = html_context(
+                          content
                       )
 
-                  block = (
-                      f"\n===== FILE: {path} =====\n"
-                      f"{content}\n"
-                      f"===== END FILE: {path} =====\n"
+                  elif path == "app.js":
+                      excerpt = js_context(
+                          content
+                      )
+
+                  elif path == "style.css":
+                      excerpt = css_context(
+                          content
+                      )
+
+                  else:
+                      excerpt = content[:4000]
+
+                  blocks.append(
+                      "\n===== FILE: "
+                      + path
+                      + " =====\n"
+                      + excerpt
+                      + "\n===== END FILE =====\n"
                   )
-
-                  blocks.append(block)
-
-                  total += len(block)
 
               return "\n".join(blocks)
 
-          # ------------------------------------------------------------
-          # APPLY PATCHES
-          # ------------------------------------------------------------
+          # ============================================================
+          # ARCHITECT
+          # ============================================================
 
-          def apply_changes(changes):
-
-              if not isinstance(changes, list):
-                  raise RuntimeError(
-                      "Changes must be a list."
-                  )
-
-              changed_paths = []
-
-              for change in changes:
-
-                  path = change.get("path")
-                  operation = change.get("operation")
-
-                  if path not in ALLOWED_FILES:
-                      raise RuntimeError(
-                          f"Forbidden file: {path}"
-                      )
-
-                  if operation != "replace":
-                      raise RuntimeError(
-                          f"Unsupported operation: "
-                          f"{operation}"
-                      )
-
-                  old = change.get("old")
-                  new = change.get("new")
-
-                  if not isinstance(old, str):
-                      raise RuntimeError(
-                          f"Invalid old content for {path}"
-                      )
-
-                  if not isinstance(new, str):
-                      raise RuntimeError(
-                          f"Invalid new content for {path}"
-                      )
-
-                  content = read_file(path)
-
-                  count = content.count(old)
-
-                  if count == 0:
-                      raise RuntimeError(
-                          f"Anchor not found in {path}."
-                      )
-
-                  if count > 1:
-                      raise RuntimeError(
-                          f"Anchor occurs {count} times "
-                          f"in {path}. Refusing to guess."
-                      )
-
-                  updated = content.replace(
-                      old,
-                      new,
-                      1
-                  )
-
-                  with open(
-                      path,
-                      "w",
-                      encoding="utf-8"
-                  ) as file:
-                      file.write(updated)
-
-                  changed_paths.append(path)
-
-                  print(
-                      f"Applied precise change: {path}"
-                  )
-
-              return sorted(
-                  set(changed_paths)
-              )
-
-          # ------------------------------------------------------------
-          # FILE DISCOVERY
-          # ------------------------------------------------------------
-
-          selected = detect_files(USER_TASK)
+          selected = detect_files(
+              USER_TASK
+          )
 
           print("Relevant files:")
 
@@ -485,37 +714,38 @@ jobs:
 
           print()
 
-          # ------------------------------------------------------------
-          # ARCHITECT
-          # ------------------------------------------------------------
-
           print("========================================")
           print("ARCHITECT")
           print("========================================")
 
           architect_prompt = f"""
-          Проанализируй ИСХОДНУЮ задачу пользователя.
+          Проанализируй исходную задачу пользователя.
 
           ЗАДАЧА:
           {USER_TASK}
 
-          ТЕКУЩИЙ ПРОЕКТ:
-          {build_context(selected, 12000)}
+          ДОСТУПНЫЕ ФАЙЛЫ:
+          {smart_context(selected)}
 
           Исходная задача пользователя имеет абсолютный приоритет.
 
-          Не придумывай другую задачу.
-
-          Не исправляй код.
+          Ничего не изменяй.
 
           Верни JSON:
 
           {{
             "problem": "...",
-            "files": ["..."],
-            "plan": ["..."],
-            "checks": ["..."]
+            "files": ["index.html", "app.js"],
+            "plan": [
+              "..."
+            ],
+            "checks": [
+              "..."
+            ]
           }}
+
+          Указывай только файлы, которые реально необходимо
+          изменить для выполнения задачи.
           """
 
           architect = parse_json(
@@ -532,7 +762,7 @@ jobs:
                           "content": architect_prompt
                       }
                   ],
-                  1000,
+                  900,
                   True
               )
           )
@@ -546,16 +776,44 @@ jobs:
           )
 
           # ------------------------------------------------------------
-          # CODER
+          # MERGE ARCHITECT FILES
           # ------------------------------------------------------------
+
+          architect_files = architect.get(
+              "files",
+              []
+          )
+
+          for path in architect_files:
+
+              if path in ALLOWED_FILES:
+                  selected.append(path)
+
+          selected = sorted(
+              set(selected)
+          )
+
+          print()
+          print("Files selected by Architect:")
+
+          for path in selected:
+              print(f"  - {path}")
+
+          # ============================================================
+          # CODER
+          # ============================================================
 
           print()
           print("========================================")
           print("CODER")
           print("========================================")
 
+          coder_context = smart_context(
+              selected
+          )
+
           coder_prompt = f"""
-          Ты Coding Agent LORGUS.
+          Ты Coding Agent проекта LORGUS.
 
           ИСХОДНАЯ ЗАДАЧА ПОЛЬЗОВАТЕЛЯ:
           {USER_TASK}
@@ -566,30 +824,57 @@ jobs:
               ensure_ascii=False
           )}
 
-          ТЕКУЩИЙ КОД:
-          {build_context(selected, 15000)}
+          НИЖЕ НАХОДЯТСЯ ФРАГМЕНТЫ
+          РЕАЛЬНЫХ ФАЙЛОВ ИЗ REPOSITORY:
+
+          {coder_context}
 
           КРИТИЧЕСКИЕ ПРАВИЛА:
 
-          1. Выполни именно исходную задачу.
+          1. Выполни именно задачу пользователя.
+
           2. Никогда не переписывай файл целиком.
-          3. Никогда не возвращай полный content файла.
+
+          3. Никогда не возвращай полный файл.
+
           4. Используй только точечные изменения.
-          5. Для изменения существующего кода используй
-             operation = "replace".
-          6. Поле old должно содержать существующий фрагмент
-             файла БЕЗ изменений.
-          7. Поле new должно содержать только замену этого фрагмента.
+
+          5. operation всегда должна быть "replace".
+
+          6. old должен быть точной строкой,
+             существующей в реальном файле.
+
+          7. new должен содержать только необходимую замену.
+
           8. old должен встречаться в файле ровно один раз.
-          9. Не меняй несвязанный код.
-          10. Не изменяй README.md, если это запрещено задачей.
+
+          9. Не удаляй существующую функциональность.
+
+          10. Не изменяй несвязанные участки.
+
+          11. Не изменяй запрещённые файлы.
+
+          12. Не изменяй README.md.
+
+          13. Не изменяй worker.js.
+
+          14. Не изменяй wrangler.toml.
+
+          15. Не изменяй docs/PROJECT.md.
+
+          16. Если задачу можно выполнить изменением
+              одного файла — не меняй два.
+
+          17. Не придумывай anchor.
+              Используй только текст, который реально
+              присутствует в предоставленном контексте.
 
           Верни ТОЛЬКО JSON:
 
           {{
             "changes": [
               {{
-                "path": "app.js",
+                "path": "index.html",
                 "operation": "replace",
                 "old": "точный существующий фрагмент",
                 "new": "новый фрагмент"
@@ -618,18 +903,161 @@ jobs:
                           "content": coder_prompt
                       }
                   ],
-                  2200,
+                  1800,
                   True
               )
           )
+
+          # ============================================================
+          # APPLY CODER CHANGES
+          # ============================================================
+
+          def apply_changes(changes):
+
+              if not isinstance(
+                  changes,
+                  list
+              ):
+                  raise RuntimeError(
+                      "changes must be a list."
+                  )
+
+              changed_paths = []
+
+              for change in changes:
+
+                  path = change.get(
+                      "path"
+                  )
+
+                  operation = change.get(
+                      "operation"
+                  )
+
+                  if path not in ALLOWED_FILES:
+                      raise RuntimeError(
+                          f"Forbidden file: {path}"
+                      )
+
+                  if path in FORBIDDEN_FILES:
+                      raise RuntimeError(
+                          f"Forbidden modification: {path}"
+                      )
+
+                  if operation != "replace":
+                      raise RuntimeError(
+                          f"Unsupported operation: "
+                          f"{operation}"
+                      )
+
+                  old = change.get("old")
+                  new = change.get("new")
+
+                  if not isinstance(
+                      old,
+                      str
+                  ):
+                      raise RuntimeError(
+                          f"Invalid old content "
+                          f"for {path}"
+                      )
+
+                  if not isinstance(
+                      new,
+                      str
+                  ):
+                      raise RuntimeError(
+                          f"Invalid new content "
+                          f"for {path}"
+                      )
+
+                  content = read_file(path)
+
+                  count = content.count(old)
+
+                  if count == 0:
+
+                      raise RuntimeError(
+                          f"Anchor not found "
+                          f"in {path}."
+                      )
+
+                  if count > 1:
+
+                      raise RuntimeError(
+                          f"Anchor occurs "
+                          f"{count} times "
+                          f"in {path}. "
+                          f"Refusing to guess."
+                      )
+
+                  old_lines = len(
+                      old.splitlines()
+                  )
+
+                  new_lines = len(
+                      new.splitlines()
+                  )
+
+                  deleted = old_lines
+                  added = new_lines
+
+                  # --------------------------------------------------
+                  # DESTRUCTIVE CHANGE GUARD
+                  # --------------------------------------------------
+
+                  if deleted > 80:
+
+                      raise RuntimeError(
+                          f"Destructive change "
+                          f"blocked in {path}: "
+                          f"{deleted} old lines."
+                      )
+
+                  if (
+                      deleted > 20
+                      and added < deleted * 0.25
+                  ):
+
+                      raise RuntimeError(
+                          f"Suspicious destructive "
+                          f"change blocked in {path}."
+                      )
+
+                  updated = content.replace(
+                      old,
+                      new,
+                      1
+                  )
+
+                  with open(
+                      path,
+                      "w",
+                      encoding="utf-8"
+                  ) as file:
+
+                      file.write(updated)
+
+                  changed_paths.append(
+                      path
+                  )
+
+                  print(
+                      f"Applied precise change: "
+                      f"{path}"
+                  )
+
+              return sorted(
+                  set(changed_paths)
+              )
 
           changed_paths = apply_changes(
               coder.get("changes", [])
           )
 
-          # ------------------------------------------------------------
+          # ============================================================
           # DIFF
-          # ------------------------------------------------------------
+          # ============================================================
 
           print()
           print("========================================")
@@ -647,11 +1075,13 @@ jobs:
               "docs/PROJECT.md"
           )
 
-          run("git diff --check")
+          run(
+              "git diff --check"
+          )
 
-          # ------------------------------------------------------------
+          # ============================================================
           # QA
-          # ------------------------------------------------------------
+          # ============================================================
 
           print()
           print("========================================")
@@ -659,7 +1089,7 @@ jobs:
           print("========================================")
 
           qa_prompt = f"""
-          Проведи независимую проверку.
+          Проведи независимую проверку реального diff.
 
           ИСХОДНАЯ ЗАДАЧА:
           {USER_TASK}
@@ -667,24 +1097,28 @@ jobs:
           DIFF:
           {diff[:8000]}
 
-          Проверяй именно исходную задачу.
+          Проверь:
 
-          Особое внимание:
+          1. Задача действительно выполнена.
+          2. Существующая функциональность сохранена.
+          3. Нет уничтожения существующего кода.
+          4. Нет лишних изменений.
+          5. Нет изменений запрещённых файлов.
+          6. Нет очевидных JavaScript ошибок.
+          7. Нет очевидных HTML ошибок.
+          8. Нет очевидных CSS ошибок.
 
-          - не удалён ли существующий код;
-          - не переписан ли файл целиком;
-          - выполнена ли задача;
-          - нет ли синтаксических ошибок;
-          - нет ли несвязанных изменений;
-          - не нарушена ли существующая функциональность.
-
-          Если задача выполнена и код сохранён:
+          Ответ:
 
           PASS
+
+          если всё корректно.
 
           Иначе:
 
           FAIL
+
+          После PASS/FAIL кратко объясни результат.
           """
 
           qa_raw = groq(
@@ -714,9 +1148,9 @@ jobs:
               )
           )
 
-          # ------------------------------------------------------------
+          # ============================================================
           # REVIEWER
-          # ------------------------------------------------------------
+          # ============================================================
 
           print()
           print("========================================")
@@ -730,21 +1164,21 @@ jobs:
           {USER_TASK}
 
           DIFF:
-          {diff[:8000]}
+          {diff[:7000]}
 
           QA:
-          {qa_raw[:2500]}
+          {qa_raw[:2000]}
 
           Проверь:
 
           - соответствие задаче;
           - регрессии;
           - безопасность;
-          - секреты;
           - лишние изменения;
-          - сохранность существующего кода.
+          - изменение запрещённых файлов;
+          - уничтожение существующего функционала.
 
-          Первая строка:
+          Первая строка должна быть:
 
           APPROVE
 
@@ -780,35 +1214,47 @@ jobs:
               )
           )
 
-          # ------------------------------------------------------------
+          # ============================================================
           # FIXER
-          # ------------------------------------------------------------
+          # ============================================================
 
-          if not qa_pass or reviewer_reject:
+          if (
+              not qa_pass
+              or reviewer_reject
+          ):
 
               print()
               print("========================================")
               print("FIXER")
               print("========================================")
 
+              fixer_context = smart_context(
+                  changed_paths
+              )
+
               fixer_prompt = f"""
-              Исправь только реальные проблемы.
+              Исправь реальные проблемы в текущем коде.
 
               ИСХОДНАЯ ЗАДАЧА:
               {USER_TASK}
 
-              DIFF:
-              {diff[:8000]}
+              ТЕКУЩИЙ DIFF:
+              {diff[:7000]}
 
               QA:
-              {qa_raw[:2500]}
+              {qa_raw[:2200]}
 
               REVIEWER:
-              {reviewer_raw[:2500]}
+              {reviewer_raw[:2200]}
 
-              Никогда не переписывай файл целиком.
+              ТЕКУЩИЕ ФАЙЛЫ:
+              {fixer_context}
 
-              Используй только:
+              Используй только точечные изменения.
+
+              НИКОГДА НЕ ПЕРЕПИСЫВАЙ ФАЙЛ ЦЕЛИКОМ.
+
+              Верни:
 
               {{
                 "changes": [
@@ -821,7 +1267,8 @@ jobs:
                 ]
               }}
 
-              old должен встречаться ровно один раз.
+              old должен существовать в текущем файле
+              ровно один раз.
 
               Не меняй несвязанный код.
               """
@@ -840,7 +1287,7 @@ jobs:
                               "content": fixer_prompt
                           }
                       ],
-                      2200,
+                      1800,
                       True
                   )
               )
@@ -856,147 +1303,163 @@ jobs:
                   )
               )
 
-              run("git diff --check")
-
-              # --------------------------------------------------------
-              # FINAL QA
-              # --------------------------------------------------------
-
-              print()
-              print("========================================")
-              print("FINAL QA")
-              print("========================================")
-
-              final_diff = run(
-                  "git diff -- "
-                  "README.md "
-                  "index.html "
-                  "app.js "
-                  "style.css "
-                  "worker.js "
-                  "wrangler.toml "
-                  "docs/PROJECT.md"
+              run(
+                  "git diff --check"
               )
 
-              final_qa_prompt = f"""
-              Финальная независимая проверка.
+          # ============================================================
+          # FINAL DIFF
+          # ============================================================
 
-              ИСХОДНАЯ ЗАДАЧА:
-              {USER_TASK}
+          print()
+          print("========================================")
+          print("FINAL DIFF")
+          print("========================================")
 
-              ФИНАЛЬНЫЙ DIFF:
-              {final_diff[:9000]}
+          final_diff = run(
+              "git diff -- "
+              "README.md "
+              "index.html "
+              "app.js "
+              "style.css "
+              "worker.js "
+              "wrangler.toml "
+              "docs/PROJECT.md"
+          )
 
-              Проверь:
+          # ============================================================
+          # FINAL QA
+          # ============================================================
 
-              1. Задача выполнена.
-              2. Старый функционал сохранён.
-              3. Нет лишних изменений.
-              4. Нет очевидных ошибок.
+          print()
+          print("========================================")
+          print("FINAL QA")
+          print("========================================")
 
-              Ответ должен начинаться:
+          final_qa_prompt = f"""
+          Финальная проверка.
 
-              PASS
+          ИСХОДНАЯ ЗАДАЧА:
+          {USER_TASK}
 
-              или:
+          ФИНАЛЬНЫЙ DIFF:
+          {final_diff[:8000]}
 
-              FAIL
-              """
+          Проверь:
 
-              final_qa = groq(
-                  [
-                      {
-                          "role": "system",
-                          "content": read_file(
-                              ".ai/QA.md"
-                          )
-                      },
-                      {
-                          "role": "user",
-                          "content": final_qa_prompt
-                      }
-                  ],
-                  700,
-                  False
+          - задача выполнена;
+          - существующая функциональность не уничтожена;
+          - изменены только необходимые файлы;
+          - запрещённые файлы не изменены;
+          - нет очевидных ошибок.
+
+          Ответ должен начинаться:
+
+          PASS
+
+          или:
+
+          FAIL
+          """
+
+          final_qa = groq(
+              [
+                  {
+                      "role": "system",
+                      "content": read_file(
+                          ".ai/QA.md"
+                      )
+                  },
+                  {
+                      "role": "user",
+                      "content": final_qa_prompt
+                  }
+              ],
+              650,
+              False
+          )
+
+          print(final_qa)
+
+          if not re.match(
+              r"^\s*PASS\b",
+              final_qa,
+              re.IGNORECASE
+          ):
+
+              raise RuntimeError(
+                  "Final QA returned FAIL."
               )
 
-              print(final_qa)
+          # ============================================================
+          # FINAL REVIEW
+          # ============================================================
 
-              if not re.match(
-                  r"^\s*PASS\b",
-                  final_qa,
-                  re.IGNORECASE
-              ):
-                  raise RuntimeError(
-                      "Final QA returned FAIL."
-                  )
+          print()
+          print("========================================")
+          print("FINAL REVIEW")
+          print("========================================")
 
-              # --------------------------------------------------------
-              # FINAL REVIEW
-              # --------------------------------------------------------
+          final_review = groq(
+              [
+                  {
+                      "role": "system",
+                      "content": read_file(
+                          ".ai/REVIEWER.md"
+                      )
+                  },
+                  {
+                      "role": "user",
+                      "content": f"""
+                      Финальный review.
 
-              print()
-              print("========================================")
-              print("FINAL REVIEW")
-              print("========================================")
+                      ИСХОДНАЯ ЗАДАЧА:
+                      {USER_TASK}
 
-              final_review = groq(
-                  [
-                      {
-                          "role": "system",
-                          "content": read_file(
-                              ".ai/REVIEWER.md"
-                          )
-                      },
-                      {
-                          "role": "user",
-                          "content": f"""
-                          Финальный review.
+                      FINAL QA:
+                      {final_qa[:2000]}
 
-                          ИСХОДНАЯ ЗАДАЧА:
-                          {USER_TASK}
+                      FINAL DIFF:
+                      {final_diff[:8000]}
 
-                          FINAL QA:
-                          {final_qa[:2500]}
+                      Первая строка:
 
-                          FINAL DIFF:
-                          {final_diff[:9000]}
+                      APPROVE
 
-                          Первая строка:
+                      или:
 
-                          APPROVE
+                      REJECT
+                      """
+                  }
+              ],
+              650,
+              False
+          )
 
-                          или:
+          print(final_review)
 
-                          REJECT
-                          """
-                      }
-                  ],
-                  700,
-                  False
+          if re.match(
+              r"^\s*REJECT\b",
+              final_review,
+              re.IGNORECASE
+          ):
+
+              raise RuntimeError(
+                  "Final Reviewer returned REJECT."
               )
 
-              print(final_review)
-
-              if re.match(
-                  r"^\s*REJECT\b",
-                  final_review,
-                  re.IGNORECASE
-              ):
-                  raise RuntimeError(
-                      "Final Reviewer returned REJECT."
-                  )
-
-          # ------------------------------------------------------------
+          # ============================================================
           # FINAL CHECK
-          # ------------------------------------------------------------
+          # ============================================================
 
           print()
           print("========================================")
           print("FINAL CHECK")
           print("========================================")
 
-          run("git diff --check")
+          run(
+              "git diff --check"
+          )
 
           final_diff = run(
               "git diff -- "
@@ -1010,12 +1473,30 @@ jobs:
           )
 
           if not final_diff.strip():
+
               print("No changes.")
               raise SystemExit(0)
 
-          # ------------------------------------------------------------
+          # ============================================================
+          # FORBIDDEN FILE GUARD
+          # ============================================================
+
+          forbidden_diff = run(
+              "git diff --name-only"
+          ).splitlines()
+
+          for path in forbidden_diff:
+
+              if path in FORBIDDEN_FILES:
+
+                  raise RuntimeError(
+                      f"Forbidden file changed: "
+                      f"{path}"
+                  )
+
+          # ============================================================
           # COMMIT
-          # ------------------------------------------------------------
+          # ============================================================
 
           print()
           print("========================================")
@@ -1043,10 +1524,13 @@ jobs:
           )
 
           run(
-              'git commit -m "AI: update LORGUS project"'
+              'git commit -m '
+              '"AI: update LORGUS project"'
           )
 
-          run("git push origin HEAD")
+          run(
+              "git push origin HEAD"
+          )
 
           print()
           print("========================================")
