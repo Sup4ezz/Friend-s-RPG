@@ -9,7 +9,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   workspace:
@@ -19,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Ask AI
+      - name: Run AI pipeline
         env:
           API: ${{ secrets.API }}
           TASK: ${{ inputs.task }}
@@ -27,15 +27,12 @@ jobs:
           python - <<'PY'
           import json
           import os
+          import subprocess
           import urllib.request
           import urllib.error
 
-          def read_file(path):
-              try:
-                  with open(path, encoding="utf-8") as f:
-                      return f.read()
-              except Exception as e:
-                  return f"[FILE NOT FOUND: {e}]"
+          API = os.environ["API"]
+          TASK = os.environ["TASK"]
 
           files = [
               ".ai/AGENT.md",
@@ -52,78 +49,352 @@ jobs:
               "wrangler.toml"
           ]
 
-          context = ""
+          def read_file(path):
+              try:
+                  with open(path, encoding="utf-8") as f:
+                      return f.read()
+              except Exception as e:
+                  return f"[FILE NOT FOUND: {e}]"
 
-          for file in files:
-              context += f"\n\n===== {file} =====\n"
-              context += read_file(file)
+          def repository_context():
+              result = ""
 
-          prompt = f"""Ты работаешь непосредственно с репозиторием LORGUS.
+              for path in files:
+                  result += f"\n\n===== {path} =====\n"
+                  result += read_file(path)
 
-          Ниже находится реальное содержимое файлов репозитория.
+              return result
 
-          {context}
+          def ask_ai(instruction):
+              data = {
+                  "model": "openrouter/free",
+                  "messages": [
+                      {
+                          "role": "user",
+                          "content": instruction
+                      }
+                  ]
+              }
 
-          Задача пользователя:
-
-          {os.environ["TASK"]}
-
-          ВАЖНО:
-          - Используй только фактическое содержимое файлов выше.
-          - Не придумывай существование функций, API или компонентов.
-          - Если информации нет в файлах, так и скажи.
-          - Ничего не изменяй.
-          - Дай конкретный анализ задачи.
-          """
-
-          data = {
-              "model": "openrouter/free",
-              "messages": [
-                  {
-                      "role": "user",
-                      "content": prompt
-                  }
-              ]
-          }
-
-          request = urllib.request.Request(
-              "https://openrouter.ai/api/v1/chat/completions",
-              data=json.dumps(data).encode("utf-8"),
-              headers={
-                  "Authorization": "Bearer " + os.environ["API"],
-                  "Content-Type": "application/json"
-              },
-              method="POST"
-          )
-
-          try:
-              with urllib.request.urlopen(request) as response:
-                  raw = response.read().decode("utf-8")
-                  print("HTTP STATUS:", response.status)
-                  print("RAW RESPONSE:")
-                  print(raw)
-
-                  result = json.loads(raw)
-
-          except urllib.error.HTTPError as e:
-              print("HTTP ERROR:", e.code)
-              print(e.read().decode("utf-8"))
-              raise
-
-          if "choices" not in result:
-              raise RuntimeError("OpenRouter response does not contain choices")
-
-          if not result["choices"]:
-              raise RuntimeError("OpenRouter returned empty choices")
-
-          message = result["choices"][0].get("message", {})
-          content = message.get("content")
-
-          if not content:
-              raise RuntimeError(
-                  "OpenRouter returned an empty message content"
+              request = urllib.request.Request(
+                  "https://openrouter.ai/api/v1/chat/completions",
+                  data=json.dumps(data).encode("utf-8"),
+                  headers={
+                      "Authorization": "Bearer " + API,
+                      "Content-Type": "application/json"
+                  },
+                  method="POST"
               )
 
-          print("\n===== AI RESPONSE =====\n")
-          print(content)
+              try:
+                  with urllib.request.urlopen(request) as response:
+                      raw = response.read().decode("utf-8")
+                      result = json.loads(raw)
+              except urllib.error.HTTPError as e:
+                  print("AI HTTP ERROR:", e.code)
+                  print(e.read().decode("utf-8"))
+                  raise
+
+              if "choices" not in result or not result["choices"]:
+                  raise RuntimeError("AI returned no choices")
+
+              content = result["choices"][0]["message"].get("content")
+
+              if not content:
+                  raise RuntimeError("AI returned empty content")
+
+              return content
+
+          # ============================================================
+          # ARCHITECT
+          # ============================================================
+
+          context = repository_context()
+
+          architect_prompt = f"""
+          Ты ARCHITECT проекта LORGUS.
+
+          Изучи реальное содержимое репозитория ниже.
+
+          ===== ROLE =====
+          {read_file(".ai/ARCHITECT.md")}
+
+          ===== GENERAL RULES =====
+          {read_file(".ai/AGENT.md")}
+
+          ===== REPOSITORY =====
+          {context}
+
+          ===== USER TASK =====
+          {TASK}
+
+          Твоя задача:
+
+          1. Понять существующую архитектуру.
+          2. Найти реальные файлы и функции, относящиеся к задаче.
+          3. Не придумывать отсутствующие функции или файлы.
+          4. Определить минимальный набор необходимых изменений.
+          5. Не писать код.
+          6. Не изменять репозиторий.
+
+          Верни:
+
+          ПРОБЛЕМА
+          ПРИЧИНА
+          ЗАТРОНУТЫЕ ФАЙЛЫ
+          ПЛАН ИЗМЕНЕНИЙ
+          РИСКИ
+          ПРОВЕРКИ
+
+          Используй только фактическое содержимое репозитория.
+          """
+
+          architect = ask_ai(architect_prompt)
+
+          print("\n================ ARCHITECT ================\n")
+          print(architect)
+
+          # ============================================================
+          # CODER
+          # ============================================================
+
+          context = repository_context()
+
+          coder_prompt = f"""
+          Ты CODER проекта LORGUS.
+
+          ===== ROLE =====
+          {read_file(".ai/CODER.md")}
+
+          ===== GENERAL RULES =====
+          {read_file(".ai/AGENT.md")}
+
+          ===== USER TASK =====
+          {TASK}
+
+          ===== ARCHITECT PLAN =====
+          {architect}
+
+          ===== CURRENT REPOSITORY =====
+          {context}
+
+          Твоя задача — подготовить реальные изменения кода.
+
+          ВАЖНО:
+
+          1. Используй только существующие файлы и код.
+          2. Не переписывай проект целиком.
+          3. Не удаляй существующую функциональность без необходимости.
+          4. Изменяй только необходимые файлы.
+          5. Не создавай вымышленные зависимости.
+          6. Не добавляй секреты.
+          7. Не изменяй .ai/ файлы.
+          8. Не изменяй docs/PROJECT.md без необходимости.
+          9. Результат должен быть применим командой git apply.
+          10. НЕ используй Markdown-блок кода вокруг diff.
+
+          Верни ТОЛЬКО unified diff.
+
+          Формат:
+
+          diff --git a/file b/file
+          --- a/file
+          +++ b/file
+          @@
+          ...
+
+          Если изменений не требуется, верни:
+
+          NO_CHANGES
+          """
+
+          coder = ask_ai(coder_prompt)
+
+          print("\n================ CODER ================\n")
+          print(coder)
+
+          # ============================================================
+          # APPLY CODE CHANGES
+          # ============================================================
+
+          if coder.strip() != "NO_CHANGES":
+              with open("/tmp/lorgus.patch", "w", encoding="utf-8") as f:
+                  f.write(coder)
+
+              check = subprocess.run(
+                  ["git", "apply", "--check", "/tmp/lorgus.patch"],
+                  capture_output=True,
+                  text=True
+              )
+
+              if check.returncode != 0:
+                  print("\nCODER PRODUCED INVALID PATCH:\n")
+                  print(check.stdout)
+                  print(check.stderr)
+                  raise RuntimeError("Coder produced an invalid git patch")
+
+              subprocess.run(
+                  ["git", "apply", "/tmp/lorgus.patch"],
+                  check=True
+              )
+
+          # ============================================================
+          # SHOW DIFF
+          # ============================================================
+
+          diff = subprocess.run(
+              ["git", "diff", "--"],
+              capture_output=True,
+              text=True
+          ).stdout
+
+          print("\n================ GIT DIFF ================\n")
+          print(diff if diff else "NO CHANGES")
+
+          # ============================================================
+          # QA
+          # ============================================================
+
+          qa_context = repository_context()
+
+          qa_prompt = f"""
+          Ты QA AGENT проекта LORGUS.
+
+          ===== ROLE =====
+          {read_file(".ai/QA.md")}
+
+          ===== GENERAL RULES =====
+          {read_file(".ai/AGENT.md")}
+
+          ===== USER TASK =====
+          {TASK}
+
+          ===== ARCHITECT PLAN =====
+          {architect}
+
+          ===== CODER RESULT =====
+          {coder}
+
+          ===== CURRENT REPOSITORY AFTER CODER =====
+          {qa_context}
+
+          ===== GIT DIFF =====
+          {diff}
+
+          Проверь реальные изменения.
+
+          Проверяй:
+
+          - JavaScript;
+          - HTML;
+          - CSS;
+          - API;
+          - Supabase;
+          - Cloudflare Worker;
+          - синтаксис;
+          - регрессии;
+          - соответствие задаче.
+
+          Если возможно, выполняй доступные проверки.
+
+          Не изменяй файлы.
+
+          В конце обязательно напиши:
+
+          RESULT: PASS
+
+          или:
+
+          RESULT: FAIL
+
+          Для FAIL укажи конкретную проблему.
+          """
+
+          qa = ask_ai(qa_prompt)
+
+          print("\n================ QA ================\n")
+          print(qa)
+
+          # ============================================================
+          # REVIEWER
+          # ============================================================
+
+          reviewer_context = repository_context()
+
+          reviewer_prompt = f"""
+          Ты REVIEWER проекта LORGUS.
+
+          ===== ROLE =====
+          {read_file(".ai/REVIEWER.md")}
+
+          ===== GENERAL RULES =====
+          {read_file(".ai/AGENT.md")}
+
+          ===== USER TASK =====
+          {TASK}
+
+          ===== ARCHITECT =====
+          {architect}
+
+          ===== CODER =====
+          {coder}
+
+          ===== QA =====
+          {qa}
+
+          ===== CURRENT REPOSITORY =====
+          {reviewer_context}
+
+          ===== GIT DIFF =====
+          {diff}
+
+          Проведи финальное code review.
+
+          Проверяй:
+
+          - логику;
+          - безопасность;
+          - JavaScript;
+          - Supabase;
+          - Cloudflare Worker;
+          - XSS;
+          - пользовательские данные;
+          - регрессии;
+          - лишние изменения;
+          - соответствие архитектуре;
+          - соответствие исходной задаче.
+
+          Не изменяй файлы.
+
+          В конце обязательно напиши:
+
+          RESULT: APPROVE
+
+          или:
+
+          RESULT: REJECT
+
+          Если REJECT — перечисли конкретные проблемы.
+          """
+
+          reviewer = ask_ai(reviewer_prompt)
+
+          print("\n================ REVIEWER ================\n")
+          print(reviewer)
+
+          # ============================================================
+          # FINAL RESULT
+          # ============================================================
+
+          print("\n================ FINAL ================\n")
+
+          if "RESULT: FAIL" in qa:
+              print("PIPELINE RESULT: FAIL")
+              raise SystemExit(1)
+
+          if "RESULT: REJECT" in reviewer:
+              print("PIPELINE RESULT: REJECT")
+              raise SystemExit(1)
+
+          print("PIPELINE RESULT: APPROVED")
           PY
