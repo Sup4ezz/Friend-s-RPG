@@ -49,12 +49,30 @@ jobs:
               "wrangler.toml"
           ]
 
+          editable_files = [
+              "README.md",
+              "index.html",
+              "app.js",
+              "style.css",
+              "worker.js",
+              "wrangler.toml",
+              "docs/PROJECT.md"
+          ]
+
+          MAX_FIX_ATTEMPTS = 2
+
+
+          # ============================================================
+          # FILES
+          # ============================================================
+
           def read_file(path):
               try:
                   with open(path, encoding="utf-8") as f:
                       return f.read()
               except Exception as e:
                   return f"[FILE NOT FOUND: {e}]"
+
 
           def repository_context():
               result = ""
@@ -64,6 +82,21 @@ jobs:
                   result += read_file(path)
 
               return result
+
+
+          def get_diff():
+              result = subprocess.run(
+                  ["git", "diff", "--"],
+                  capture_output=True,
+                  text=True
+              )
+
+              return result.stdout
+
+
+          # ============================================================
+          # AI REQUEST
+          # ============================================================
 
           def ask_ai(instruction):
               data = {
@@ -106,6 +139,113 @@ jobs:
 
               return content
 
+
+          # ============================================================
+          # CLEAN DIFF
+          # ============================================================
+
+          def clean_diff(text):
+              text = text.strip()
+
+              if text == "NO_CHANGES":
+                  return "NO_CHANGES"
+
+              lines = text.splitlines()
+
+              # Remove opening markdown fence.
+              if lines and lines[0].strip().startswith("```"):
+                  lines = lines[1:]
+
+              # Remove closing markdown fence.
+              if lines and lines[-1].strip() == "```":
+                  lines = lines[:-1]
+
+              text = "\n".join(lines).strip()
+
+              if "NO_CHANGES" in text and "diff --git" not in text:
+                  return "NO_CHANGES"
+
+              # If model added text before the actual diff,
+              # start from the first diff header.
+              marker = text.find("diff --git ")
+
+              if marker > 0:
+                  text = text[marker:]
+
+              return text.strip()
+
+
+          # ============================================================
+          # VALIDATE DIFF PATHS
+          # ============================================================
+
+          def validate_diff(diff):
+              for line in diff.splitlines():
+                  if line.startswith("diff --git "):
+                      parts = line.split()
+
+                      if len(parts) < 4:
+                          raise RuntimeError(
+                              "Invalid diff header"
+                          )
+
+                      old_path = parts[2][2:]
+                      new_path = parts[3][2:]
+
+                      if old_path not in editable_files:
+                          raise RuntimeError(
+                              f"AI attempted to modify forbidden file: {old_path}"
+                          )
+
+                      if new_path not in editable_files:
+                          raise RuntimeError(
+                              f"AI attempted to modify forbidden file: {new_path}"
+                          )
+
+
+          # ============================================================
+          # APPLY DIFF
+          # ============================================================
+
+          def apply_diff(raw_diff, agent_name):
+              diff = clean_diff(raw_diff)
+
+              if diff == "NO_CHANGES":
+                  print(f"\n{agent_name}: NO CHANGES\n")
+                  return False
+
+              validate_diff(diff)
+
+              with open("/tmp/lorgus.patch", "w", encoding="utf-8") as f:
+                  f.write(diff)
+
+              check = subprocess.run(
+                  ["git", "apply", "--check", "/tmp/lorgus.patch"],
+                  capture_output=True,
+                  text=True
+              )
+
+              if check.returncode != 0:
+                  print(
+                      f"\n{agent_name} PRODUCED INVALID PATCH:\n"
+                  )
+                  print(check.stdout)
+                  print(check.stderr)
+
+                  raise RuntimeError(
+                      f"{agent_name} produced an invalid git patch"
+                  )
+
+              subprocess.run(
+                  ["git", "apply", "/tmp/lorgus.patch"],
+                  check=True
+              )
+
+              print(f"\n{agent_name}: PATCH APPLIED\n")
+
+              return True
+
+
           # ============================================================
           # ARCHITECT
           # ============================================================
@@ -127,24 +267,22 @@ jobs:
           ===== REPOSITORY =====
           {context}
 
-          Твоя задача:
+          Изучи реальный репозиторий.
 
-          1. Изучи реальный репозиторий.
-          2. Пойми существующую архитектуру.
-          3. Найди реальные файлы и функции, относящиеся к задаче.
-          4. Не придумывай отсутствующие функции, файлы или API.
-          5. Определи минимальный набор необходимых изменений.
-          6. Не пиши код.
-          7. Не изменяй репозиторий.
+          Определи:
 
-          Верни анализ:
+          1. Что сейчас существует.
+          2. Как работает нужная функциональность.
+          3. Какие файлы реально связаны с задачей.
+          4. Что необходимо изменить.
+          5. Что менять НЕ нужно.
+          6. Возможные риски.
+          7. Как проверить результат.
 
-          ПРОБЛЕМА
-          ПРИЧИНА
-          ЗАТРОНУТЫЕ ФАЙЛЫ
-          ПЛАН ИЗМЕНЕНИЙ
-          РИСКИ
-          ПРОВЕРКИ
+          Не пиши код.
+
+          Не придумывай отсутствующие функции,
+          файлы, API или зависимости.
 
           Используй только фактическое содержимое репозитория.
           """
@@ -153,6 +291,7 @@ jobs:
 
           print("\n================ ARCHITECT ================\n")
           print(architect)
+
 
           # ============================================================
           # CODER
@@ -178,26 +317,27 @@ jobs:
           ===== CURRENT REPOSITORY =====
           {context}
 
-          Твоя задача — подготовить реальные изменения кода.
+          Подготовь реальные изменения.
 
-          ВАЖНО:
+          Правила:
 
-          1. Используй только существующие файлы и код.
+          1. Используй только существующий код.
           2. Не переписывай проект целиком.
           3. Не удаляй существующую функциональность без необходимости.
           4. Изменяй только необходимые файлы.
-          5. Не создавай вымышленные зависимости.
-          6. Не добавляй секреты.
-          7. Не изменяй .ai/ файлы.
-          8. Не изменяй docs/PROJECT.md без необходимости.
-          9. Если требуемая функциональность уже существует и работает,
-             никаких изменений не делай.
-          10. Если изменений не требуется, ответ должен содержать только:
-              NO_CHANGES
-          11. Если изменения нужны, верни только unified diff.
-          12. Не используй Markdown-блоки вокруг diff.
+          5. Не добавляй секреты.
+          6. Не изменяй .ai/.
+          7. Не добавляй вымышленные зависимости.
+          8. Если функциональность уже существует и соответствует задаче,
+             верни только NO_CHANGES.
+          9. Если изменения нужны — верни только unified diff.
+          10. Не используй Markdown вокруг diff.
 
-          Формат изменения:
+          Разрешённые файлы:
+
+          {editable_files}
+
+          Формат:
 
           diff --git a/file b/file
           --- a/file
@@ -215,217 +355,273 @@ jobs:
           print("\n================ CODER ================\n")
           print(coder)
 
+          apply_diff(coder, "CODER")
+
+
           # ============================================================
-          # APPLY CODER CHANGES
+          # QA + REVIEWER LOOP
           # ============================================================
 
-          coder_clean = coder.strip()
+          for attempt in range(0, MAX_FIX_ATTEMPTS + 1):
 
-          # Убираем Markdown code fence, если модель всё-таки его добавила.
-          if coder_clean.startswith("```") and coder_clean.endswith("```"):
-              lines = coder_clean.splitlines()
+              print(
+                  f"\n\n================ ATTEMPT {attempt + 1} "
+                  f"================\n"
+              )
 
-              if lines:
-                  lines = lines[1:]
+              current_context = repository_context()
+              current_diff = get_diff()
 
-              if lines and lines[-1].strip() == "```":
-                  lines = lines[:-1]
 
-              coder_clean = "\n".join(lines).strip()
+              # ========================================================
+              # QA
+              # ========================================================
 
-          # Если модель сказала NO_CHANGES — ничего применять не нужно.
-          if coder_clean.strip() == "NO_CHANGES":
-              print("\nCODER: NO CHANGES\n")
+              qa_prompt = f"""
+              Ты QA AGENT проекта LORGUS.
 
-          else:
-              # Если модель написала дополнительный текст перед NO_CHANGES.
-              if "NO_CHANGES" in coder_clean and "diff --git" not in coder_clean:
-                  print("\nCODER: NO CHANGES\n")
+              ===== ROLE =====
+              {read_file(".ai/QA.md")}
 
-              else:
-                  with open("/tmp/lorgus.patch", "w", encoding="utf-8") as f:
-                      f.write(coder_clean)
+              ===== GENERAL RULES =====
+              {read_file(".ai/AGENT.md")}
 
-                  check = subprocess.run(
-                      ["git", "apply", "--check", "/tmp/lorgus.patch"],
-                      capture_output=True,
-                      text=True
+              ===== USER TASK =====
+              {TASK}
+
+              ===== ARCHITECT =====
+              {architect}
+
+              ===== CURRENT REPOSITORY =====
+              {current_context}
+
+              ===== GIT DIFF =====
+              {current_diff}
+
+              Проверь реальные изменения.
+
+              Проверяй:
+
+              - JavaScript;
+              - HTML;
+              - CSS;
+              - API;
+              - Supabase;
+              - Cloudflare Worker;
+              - синтаксис;
+              - регрессии;
+              - соответствие задаче;
+              - сохранение существующей функциональности.
+
+              Если возможно, выполняй доступные проверки.
+
+              Не изменяй файлы.
+
+              В конце обязательно напиши одну строку:
+
+              RESULT: PASS
+
+              или:
+
+              RESULT: FAIL
+
+              Если FAIL — перечисли конкретные проблемы.
+              """
+
+              qa = ask_ai(qa_prompt)
+
+              print("\n================ QA ================\n")
+              print(qa)
+
+
+              # ========================================================
+              # REVIEWER
+              # ========================================================
+
+              reviewer_context = repository_context()
+              reviewer_diff = get_diff()
+
+              reviewer_prompt = f"""
+              Ты REVIEWER проекта LORGUS.
+
+              ===== ROLE =====
+              {read_file(".ai/REVIEWER.md")}
+
+              ===== GENERAL RULES =====
+              {read_file(".ai/AGENT.md")}
+
+              ===== USER TASK =====
+              {TASK}
+
+              ===== ARCHITECT =====
+              {architect}
+
+              ===== QA RESULT =====
+              {qa}
+
+              ===== CURRENT REPOSITORY =====
+              {reviewer_context}
+
+              ===== GIT DIFF =====
+              {reviewer_diff}
+
+              Проведи финальное code review.
+
+              Проверяй:
+
+              - логику;
+              - безопасность;
+              - JavaScript;
+              - Supabase;
+              - Cloudflare Worker;
+              - XSS;
+              - пользовательские данные;
+              - регрессии;
+              - лишние изменения;
+              - архитектуру;
+              - соответствие исходной задаче.
+
+              Не изменяй файлы.
+
+              В конце обязательно напиши:
+
+              RESULT: APPROVE
+
+              или:
+
+              RESULT: REJECT
+
+              Если REJECT — перечисли конкретные проблемы.
+              """
+
+              reviewer = ask_ai(reviewer_prompt)
+
+              print("\n================ REVIEWER ================\n")
+              print(reviewer)
+
+
+              # ========================================================
+              # CHECK RESULT
+              # ========================================================
+
+              qa_failed = "RESULT: FAIL" in qa
+              reviewer_failed = "RESULT: REJECT" in reviewer
+
+              if not qa_failed and not reviewer_failed:
+                  print(
+                      "\n================ FINAL ================\n"
+                  )
+                  print("PIPELINE RESULT: APPROVED")
+                  break
+
+
+              # ========================================================
+              # FIXER
+              # ========================================================
+
+              if attempt >= MAX_FIX_ATTEMPTS:
+                  print(
+                      "\n================ FINAL ================\n"
+                  )
+                  print(
+                      "PIPELINE RESULT: FAILED "
+                      "(maximum fix attempts reached)"
+                  )
+                  raise SystemExit(1)
+
+
+              print(
+                  "\n================ FIXER ================\n"
+              )
+
+              fixer_context = repository_context()
+              fixer_diff = get_diff()
+
+              fixer_prompt = f"""
+              Ты FIXER проекта LORGUS.
+
+              Твоя задача — исправить реальные проблемы,
+              найденные QA или Reviewer.
+
+              ===== GENERAL RULES =====
+              {read_file(".ai/AGENT.md")}
+
+              ===== CODER RULES =====
+              {read_file(".ai/CODER.md")}
+
+              ===== USER TASK =====
+              {TASK}
+
+              ===== ARCHITECT PLAN =====
+              {architect}
+
+              ===== QA RESULT =====
+              {qa}
+
+              ===== REVIEWER RESULT =====
+              {reviewer}
+
+              ===== CURRENT REPOSITORY =====
+              {fixer_context}
+
+              ===== CURRENT GIT DIFF =====
+              {fixer_diff}
+
+              Исправь только реальные проблемы,
+              которые относятся к текущей задаче.
+
+              Правила:
+
+              1. Не переписывай проект целиком.
+              2. Не удаляй существующую функциональность.
+              3. Не добавляй секреты.
+              4. Не изменяй .ai/.
+              5. Не добавляй вымышленные зависимости.
+              6. Изменяй только необходимые файлы.
+              7. Верни только unified diff.
+              8. Не используй Markdown вокруг diff.
+
+              Разрешённые файлы:
+
+              {editable_files}
+
+              Если исправлений не требуется:
+
+              NO_CHANGES
+              """
+
+              fixer = ask_ai(fixer_prompt)
+
+              print(fixer)
+
+              changed = apply_diff(fixer, "FIXER")
+
+              if not changed:
+                  print(
+                      "\nFIXER сделал NO_CHANGES, "
+                      "но QA/Reviewer всё ещё отклоняют изменения."
                   )
 
-                  if check.returncode != 0:
-                      print("\nCODER PRODUCED INVALID PATCH:\n")
-                      print(check.stdout)
-                      print(check.stderr)
-                      raise RuntimeError(
-                          "Coder produced an invalid git patch"
-                      )
+                  raise SystemExit(1)
 
-                  subprocess.run(
-                      ["git", "apply", "/tmp/lorgus.patch"],
-                      check=True
-                  )
 
           # ============================================================
-          # GIT DIFF
+          # FINAL DIFF
           # ============================================================
 
-          diff = subprocess.run(
-              ["git", "diff", "--"],
-              capture_output=True,
-              text=True
-          ).stdout
+          final_diff = get_diff()
 
-          print("\n================ GIT DIFF ================\n")
+          print(
+              "\n\n================ FINAL GIT DIFF ================\n"
+          )
 
-          if diff:
-              print(diff)
+          if final_diff:
+              print(final_diff)
           else:
               print("NO CHANGES")
 
-          # ============================================================
-          # QA
-          # ============================================================
+          print(
+              "\n================ PIPELINE COMPLETE ================\n"
+          )
 
-          qa_context = repository_context()
-
-          qa_prompt = f"""
-          Ты QA AGENT проекта LORGUS.
-
-          ===== ROLE =====
-          {read_file(".ai/QA.md")}
-
-          ===== GENERAL RULES =====
-          {read_file(".ai/AGENT.md")}
-
-          ===== USER TASK =====
-          {TASK}
-
-          ===== ARCHITECT =====
-          {architect}
-
-          ===== CODER =====
-          {coder}
-
-          ===== CURRENT REPOSITORY AFTER CODER =====
-          {qa_context}
-
-          ===== GIT DIFF =====
-          {diff}
-
-          Проверь реальные изменения.
-
-          Проверяй:
-
-          - JavaScript;
-          - HTML;
-          - CSS;
-          - API;
-          - Supabase;
-          - Cloudflare Worker;
-          - синтаксис;
-          - регрессии;
-          - соответствие задаче.
-
-          Если возможно, выполняй доступные проверки.
-
-          Не изменяй файлы.
-
-          В конце обязательно напиши:
-
-          RESULT: PASS
-
-          или:
-
-          RESULT: FAIL
-
-          Для FAIL укажи конкретную проблему.
-          """
-
-          qa = ask_ai(qa_prompt)
-
-          print("\n================ QA ================\n")
-          print(qa)
-
-          # ============================================================
-          # REVIEWER
-          # ============================================================
-
-          reviewer_context = repository_context()
-
-          reviewer_prompt = f"""
-          Ты REVIEWER проекта LORGUS.
-
-          ===== ROLE =====
-          {read_file(".ai/REVIEWER.md")}
-
-          ===== GENERAL RULES =====
-          {read_file(".ai/AGENT.md")}
-
-          ===== USER TASK =====
-          {TASK}
-
-          ===== ARCHITECT =====
-          {architect}
-
-          ===== CODER =====
-          {coder}
-
-          ===== QA =====
-          {qa}
-
-          ===== CURRENT REPOSITORY =====
-          {reviewer_context}
-
-          ===== GIT DIFF =====
-          {diff}
-
-          Проведи финальное code review.
-
-          Проверяй:
-
-          - логику;
-          - безопасность;
-          - JavaScript;
-          - Supabase;
-          - Cloudflare Worker;
-          - XSS;
-          - пользовательские данные;
-          - регрессии;
-          - лишние изменения;
-          - соответствие архитектуре;
-          - соответствие исходной задаче.
-
-          Не изменяй файлы.
-
-          В конце обязательно напиши:
-
-          RESULT: APPROVE
-
-          или:
-
-          RESULT: REJECT
-
-          Если REJECT — перечисли конкретные проблемы.
-          """
-
-          reviewer = ask_ai(reviewer_prompt)
-
-          print("\n================ REVIEWER ================\n")
-          print(reviewer)
-
-          # ============================================================
-          # FINAL RESULT
-          # ============================================================
-
-          print("\n================ FINAL ================\n")
-
-          if "RESULT: FAIL" in qa:
-              print("PIPELINE RESULT: FAIL")
-              raise SystemExit(1)
-
-          if "RESULT: REJECT" in reviewer:
-              print("PIPELINE RESULT: REJECT")
-              raise SystemExit(1)
-
-          print("PIPELINE RESULT: APPROVED")
           PY
