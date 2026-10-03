@@ -21,7 +21,7 @@ jobs:
 
       - name: Ask AI
         env:
-          OPENROUTER_API_KEY: ${{ secrets.API }}
+          API: ${{ secrets.API }}
           TASK: ${{ inputs.task }}
         run: |
           python - <<'PY'
@@ -35,8 +35,7 @@ jobs:
           with open("docs/PROJECT.md", encoding="utf-8") as f:
               project = f.read()
 
-          prompt = f"""
-          Ты работаешь над проектом LORGUS.
+          prompt = f"""Ты работаешь над проектом LORGUS.
 
           Общие правила:
           {agent}
@@ -47,8 +46,8 @@ jobs:
           Задача пользователя:
           {os.environ["TASK"]}
 
-          Пока НЕ изменяй файлы.
-          Проанализируй задачу и опиши, что необходимо сделать.
+          Пока ничего не изменяй.
+          Проанализируй задачу и дай конкретный план действий.
           """
 
           data = {
@@ -65,7 +64,7 @@ jobs:
               "https://openrouter.ai/api/v1/chat/completions",
               data=json.dumps(data).encode(),
               headers={
-                  "Authorization": "Bearer " + os.environ["OPENROUTER_API_KEY"],
+                  "Authorization": "Bearer " + os.environ["API"],
                   "Content-Type": "application/json"
               },
               method="POST"
