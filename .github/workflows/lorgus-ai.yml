@@ -23,22 +23,20 @@ jobs:
 
     steps:
 
-      # ------------------------------------------------------------
+      # ============================================================
       # CHECKOUT
-      # ------------------------------------------------------------
+      # ============================================================
 
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # ------------------------------------------------------------
-      # GROQ DIAGNOSTICS
-      # ------------------------------------------------------------
+      # ============================================================
+      # GROQ PREFLIGHT
+      # ============================================================
 
       - name: Groq preflight diagnostics
-        env:
-          TASK: ${{ inputs.task }}
         run: |
           python3 <<'PY'
           import os
@@ -48,7 +46,7 @@ jobs:
 
           key = os.environ.get("GROQ_API_KEY", "")
           model = os.environ.get("GROQ_MODEL", "")
-          models_url = os.environ.get("GROQ_MODELS_URL", "")
+          url = os.environ.get("GROQ_MODELS_URL", "")
 
           print("========================================")
           print("GROQ PREFLIGHT DIAGNOSTICS")
@@ -56,16 +54,15 @@ jobs:
 
           if not key:
               print("ERROR: GitHub Secret 'API' is empty or unavailable.")
-              print("The workflow cannot authenticate against Groq.")
               raise SystemExit(1)
 
-          print(f"API key detected: YES")
+          print("API key detected: YES")
           print(f"API key length: {len(key)}")
           print(f"Target model: {model}")
           print()
 
           request = urllib.request.Request(
-              models_url,
+              url,
               headers={
                   "Authorization": f"Bearer {key}",
                   "Content-Type": "application/json",
@@ -76,11 +73,10 @@ jobs:
 
           try:
               with urllib.request.urlopen(request, timeout=30) as response:
-                  body = response.read().decode("utf-8", errors="replace")
-
-                  print(f"Models endpoint HTTP: {response.status}")
-                  print("Models endpoint: OK")
-                  print()
+                  body = response.read().decode(
+                      "utf-8",
+                      errors="replace"
+                  )
 
                   data = json.loads(body)
                   models = data.get("data", [])
@@ -91,86 +87,52 @@ jobs:
                       if item.get("id")
                   )
 
-                  print(f"Available models returned: {len(ids)}")
+                  print(f"Models endpoint HTTP: {response.status}")
+                  print(f"Available models: {len(ids)}")
 
                   if model in ids:
                       print(f"Target model '{model}': AVAILABLE")
                   else:
-                      print(f"Target model '{model}': NOT FOUND")
+                      print(
+                          f"ERROR: target model '{model}' "
+                          "is not available."
+                      )
+
                       print()
-                      print("Models containing 'gpt-oss':")
+                      print("Available gpt-oss models:")
 
                       for model_id in ids:
                           if "gpt-oss" in model_id:
                               print(f"  - {model_id}")
 
-                      print()
-                      print("First available models:")
-
-                      for model_id in ids[:30]:
-                          print(f"  - {model_id}")
-
-                      print()
-                      print("The API key works, but the selected model")
-                      print("is not available to this project/key.")
-
                       raise SystemExit(2)
 
           except urllib.error.HTTPError as error:
-              body = error.read().decode("utf-8", errors="replace")
+              body = error.read().decode(
+                  "utf-8",
+                  errors="replace"
+              )
 
               print(f"Models endpoint HTTP: {error.code}")
-              print("Models endpoint: FAILED")
-              print()
-              print("Groq response body:")
+              print("Groq response:")
               print(body)
               print()
 
               if error.code == 401:
-                  print("DIAGNOSIS:")
-                  print("HTTP 401 = invalid or missing authentication.")
+                  print("DIAGNOSIS: invalid authentication.")
               elif error.code == 403:
-                  print("DIAGNOSIS:")
-                  print("HTTP 403 = Groq rejected the request due to permissions.")
-                  print()
-                  print("This is NOT automatically an API-key authentication error.")
-                  print("The response body above is the important diagnostic.")
-                  print()
-                  print("If the body contains:")
-                  print("  model_permission_blocked_org")
-                  print("or")
-                  print("  model_permission_blocked_project")
-                  print("then the model is blocked by Groq permissions.")
-                  print()
-                  print("If the body is only something like:")
-                  print("  error code: 1010")
-                  print("then this is NOT the normal documented model-permission")
-                  print("response and needs separate investigation.")
+                  print("DIAGNOSIS: permission/security rejection.")
               elif error.code == 429:
-                  print("DIAGNOSIS:")
-                  print("HTTP 429 = Groq rate limit exceeded.")
+                  print("DIAGNOSIS: rate limit.")
               else:
-                  print("DIAGNOSIS:")
-                  print("Unexpected Groq HTTP error.")
+                  print("DIAGNOSIS: unexpected Groq error.")
 
               raise SystemExit(3)
-
-          except Exception as error:
-              print("Unexpected diagnostic failure:")
-              print(repr(error))
-              raise SystemExit(4)
           PY
 
-      # ------------------------------------------------------------
-      # PYTHON
-      # ------------------------------------------------------------
-
-      - name: Prepare Python
-        run: python3 --version
-
-      # ------------------------------------------------------------
-      # MAIN AI PIPELINE
-      # ------------------------------------------------------------
+      # ============================================================
+      # MAIN PIPELINE
+      # ============================================================
 
       - name: Run LORGUS AI agents
         env:
@@ -200,6 +162,11 @@ jobs:
               "docs/PROJECT.md"
           }
 
+          # Максимальный размер контекста в символах.
+          # Это специально ограничено, чтобы не пробивать
+          # бесплатный лимит Groq 8000 TPM.
+          MAX_CONTEXT_CHARS = 10000
+
           print("========================================")
           print("LORGUS AI WORKSPACE")
           print("========================================")
@@ -208,9 +175,9 @@ jobs:
           print(TASK)
           print()
 
-          # ----------------------------------------------------------
-          # HELPERS
-          # ----------------------------------------------------------
+          # ========================================================
+          # COMMANDS
+          # ========================================================
 
           def run_command(command):
               result = subprocess.run(
@@ -228,10 +195,15 @@ jobs:
 
               if result.returncode != 0:
                   raise RuntimeError(
-                      f"Command failed with code {result.returncode}: {command}"
+                      f"Command failed with code "
+                      f"{result.returncode}: {command}"
                   )
 
               return result.stdout
+
+          # ========================================================
+          # GROQ
+          # ========================================================
 
           def groq_call(messages, max_tokens):
               payload = {
@@ -241,11 +213,11 @@ jobs:
                   "max_tokens": max_tokens
               }
 
-              data = json.dumps(payload).encode("utf-8")
+              body = json.dumps(payload).encode("utf-8")
 
               request = urllib.request.Request(
                   GROQ_URL,
-                  data=data,
+                  data=body,
                   headers={
                       "Authorization": f"Bearer {GROQ_API_KEY}",
                       "Content-Type": "application/json",
@@ -257,23 +229,31 @@ jobs:
               last_error = None
 
               for attempt in range(1, 3):
+
                   try:
                       with urllib.request.urlopen(
                           request,
                           timeout=180
                       ) as response:
 
-                          body = response.read().decode(
+                          raw = response.read().decode(
                               "utf-8",
                               errors="replace"
                           )
 
-                          result = json.loads(body)
+                          data = json.loads(raw)
 
-                          return result["choices"][0]["message"]["content"]
+                          return data[
+                              "choices"
+                          ][0][
+                              "message"
+                          ][
+                              "content"
+                          ]
 
                   except urllib.error.HTTPError as error:
-                      body = error.read().decode(
+
+                      raw = error.read().decode(
                           "utf-8",
                           errors="replace"
                       )
@@ -284,14 +264,21 @@ jobs:
                           f"(attempt {attempt}/2)"
                       )
                       print("Response body:")
-                      print(body)
+                      print(raw)
                       print()
 
                       last_error = (
-                          f"Groq HTTP {error.code}: {body}"
+                          f"Groq HTTP {error.code}: {raw}"
                       )
 
                       if error.code in (401, 403):
+                          break
+
+                      if error.code == 413:
+                          print(
+                              "REQUEST TOO LARGE: "
+                              "reduce context or output size."
+                          )
                           break
 
                       if error.code == 429:
@@ -301,6 +288,7 @@ jobs:
                       time.sleep(3)
 
                   except Exception as error:
+
                       print(
                           f"Groq request error "
                           f"(attempt {attempt}/2): {error}"
@@ -309,7 +297,13 @@ jobs:
                       last_error = str(error)
                       time.sleep(3)
 
-              raise RuntimeError(last_error or "Groq request failed")
+              raise RuntimeError(
+                  last_error or "Groq request failed"
+              )
+
+          # ========================================================
+          # JSON
+          # ========================================================
 
           def clean_json(text):
               text = text.strip()
@@ -330,27 +324,39 @@ jobs:
 
               return text.strip()
 
-          def read_file(path):
-              with open(path, "r", encoding="utf-8") as f:
-                  return f.read()
+          # ========================================================
+          # FILES
+          # ========================================================
 
-          def write_file(path, content_lines):
-              content = "\n".join(content_lines)
+          def read_file(path):
+              with open(
+                  path,
+                  "r",
+                  encoding="utf-8"
+              ) as file:
+                  return file.read()
+
+          def write_file(path, lines):
+              content = "\n".join(lines)
 
               if not content.endswith("\n"):
                   content += "\n"
 
-              with open(path, "w", encoding="utf-8") as f:
-                  f.write(content)
+              with open(
+                  path,
+                  "w",
+                  encoding="utf-8"
+              ) as file:
+                  file.write(content)
 
-          def repo_snapshot():
-              files = {}
+          def current_files():
+              result = {}
 
               for path in sorted(ALLOWED_FILES):
                   if os.path.isfile(path):
-                      files[path] = read_file(path)
+                      result[path] = read_file(path)
 
-              return files
+              return result
 
           def relevant_files(task):
               task_lower = task.lower()
@@ -361,16 +367,35 @@ jobs:
                   "readme": ["README.md"],
                   "html": ["index.html"],
                   "страниц": ["index.html"],
-                  "интерфейс": ["index.html", "style.css", "app.js"],
-                  "ui": ["index.html", "style.css", "app.js"],
+                  "интерфейс": [
+                      "index.html",
+                      "style.css",
+                      "app.js"
+                  ],
+                  "ui": [
+                      "index.html",
+                      "style.css",
+                      "app.js"
+                  ],
                   "css": ["style.css"],
                   "стиль": ["style.css"],
                   "javascript": ["app.js"],
+                  "javascript": ["app.js"],
                   "js": ["app.js"],
                   "логик": ["app.js"],
-                  "supabase": ["app.js", "worker.js", "wrangler.toml"],
-                  "cloudflare": ["worker.js", "wrangler.toml"],
-                  "worker": ["worker.js", "wrangler.toml"],
+                  "supabase": [
+                      "app.js",
+                      "worker.js",
+                      "wrangler.toml"
+                  ],
+                  "cloudflare": [
+                      "worker.js",
+                      "wrangler.toml"
+                  ],
+                  "worker": [
+                      "worker.js",
+                      "wrangler.toml"
+                  ],
                   "wrangler": ["wrangler.toml"],
                   "конфиг": ["wrangler.toml"],
                   "докум": ["docs/PROJECT.md"],
@@ -387,57 +412,83 @@ jobs:
 
               return sorted(selected)
 
-          # ----------------------------------------------------------
-          # FILE CONTEXT
-          # ----------------------------------------------------------
+          # ========================================================
+          # CONTEXT LIMITER
+          # ========================================================
+
+          def build_context(paths, max_chars=MAX_CONTEXT_CHARS):
+              files = current_files()
+
+              result = []
+              total = 0
+
+              for path in paths:
+
+                  if path not in files:
+                      continue
+
+                  content = files[path]
+
+                  remaining = max_chars - total
+
+                  if remaining <= 0:
+                      break
+
+                  if len(content) > remaining:
+                      content = (
+                          content[:remaining]
+                          + "\n\n[CONTEXT TRUNCATED]\n"
+                      )
+
+                  block = (
+                      f"\n===== FILE: {path} =====\n"
+                      f"{content}"
+                      f"\n===== END FILE: {path} =====\n"
+                  )
+
+                  result.append(block)
+                  total += len(block)
+
+              return "\n".join(result)
+
+          # ========================================================
+          # RELEVANT FILES
+          # ========================================================
 
           selected = relevant_files(TASK)
 
           print("Relevant files:")
+
           for path in selected:
               print(f"  - {path}")
 
           print()
 
-          snapshot = repo_snapshot()
-
-          def context_for(paths):
-              parts = []
-
-              for path in paths:
-                  if path in snapshot:
-                      parts.append(
-                          f"\n===== FILE: {path} =====\n"
-                          f"{snapshot[path]}"
-                          f"\n===== END FILE: {path} =====\n"
-                      )
-
-              return "\n".join(parts)
-
-          context = context_for(selected)
-
-          # ----------------------------------------------------------
+          # ========================================================
           # ARCHITECT
-          # ----------------------------------------------------------
+          # ========================================================
 
           print("========================================")
           print("ARCHITECT")
           print("========================================")
 
-          architect_prompt = f"""
-          Ты Architect Agent проекта LORGUS.
+          architect_context = build_context(
+              selected,
+              max_chars=8000
+          )
 
-          Проанализируй реальный код репозитория перед изменениями.
+          architect_prompt = f"""
+          Проанализируй проект LORGUS.
 
           ЗАДАЧА:
           {TASK}
 
-          Текущие файлы:
-          {context}
+          ТЕКУЩИЙ КОД:
+          {architect_context}
 
           Ничего не изменяй.
 
-          Верни только JSON:
+          Верни ТОЛЬКО JSON:
 
           {{
             "problem": "...",
@@ -457,39 +508,47 @@ jobs:
               [
                   {
                       "role": "system",
-                      "content": open(".ai/AGENT.md", encoding="utf-8").read()
+                      "content": read_file(
+                          ".ai/ARCHITECT.md"
+                      )
                   },
                   {
                       "role": "user",
                       "content": architect_prompt
                   }
               ],
-              1800
+              1200
           )
 
-          architect_raw = clean_json(architect_raw)
+          architect_raw = clean_json(
+              architect_raw
+          )
 
-          try:
-              architect = json.loads(architect_raw)
-          except Exception:
-              print("ARCHITECT returned invalid JSON:")
-              print(architect_raw)
-              raise
+          architect = json.loads(
+              architect_raw
+          )
 
-          print(json.dumps(
-              architect,
-              ensure_ascii=False,
-              indent=2
-          ))
+          print(
+              json.dumps(
+                  architect,
+                  ensure_ascii=False,
+                  indent=2
+              )
+          )
 
-          # ----------------------------------------------------------
+          # ========================================================
           # CODER
-          # ----------------------------------------------------------
+          # ========================================================
 
           print()
           print("========================================")
           print("CODER")
           print("========================================")
+
+          coder_context = build_context(
+              selected,
+              max_chars=9000
+          )
 
           coder_prompt = f"""
           Ты Coding Agent проекта LORGUS.
@@ -498,17 +557,20 @@ jobs:
           {TASK}
 
           ПЛАН ARCHITECT:
-          {json.dumps(architect, ensure_ascii=False, indent=2)}
+          {json.dumps(
+              architect,
+              ensure_ascii=False
+          )}
 
           ТЕКУЩИЕ ФАЙЛЫ:
-          {context}
+          {coder_context}
 
-          Изучи существующий код и внеси минимальные необходимые изменения.
+          Внеси минимальные необходимые изменения.
 
           Разрешённые файлы:
           {sorted(ALLOWED_FILES)}
 
-          Верни ТОЛЬКО JSON следующего формата:
+          Верни ТОЛЬКО JSON:
 
           {{
             "changes": [
@@ -516,7 +578,6 @@ jobs:
                 "path": "README.md",
                 "content_lines": [
                   "полное",
-                  "новое",
                   "содержимое",
                   "файла"
                 ]
@@ -526,47 +587,57 @@ jobs:
 
           ВАЖНО:
 
-          - content_lines содержит ПОЛНОЕ содержимое файла;
-          - не используй unified diff;
-          - не используй markdown fences;
-          - не меняй несвязанные файлы;
-          - не удаляй существующую функциональность;
-          - если изменений не требуется, верни {{"changes":[]}};
-          - каждый path обязан находиться в списке разрешённых файлов.
+          - content_lines = ПОЛНОЕ содержимое файла;
+          - НЕ используй unified diff;
+          - НЕ используй markdown fences;
+          - НЕ меняй несвязанные файлы;
+          - НЕ удаляй существующую функциональность;
+          - если изменений не нужно, верни {{"changes":[]}};
+          - каждый path должен быть разрешён.
           """
 
           coder_raw = groq_call(
               [
                   {
                       "role": "system",
-                      "content": open(".ai/CODER.md", encoding="utf-8").read()
+                      "content": read_file(
+                          ".ai/CODER.md"
+                      )
                   },
                   {
                       "role": "user",
                       "content": coder_prompt
                   }
               ],
-              6000
+              3500
           )
 
-          coder_raw = clean_json(coder_raw)
+          coder_raw = clean_json(
+              coder_raw
+          )
 
-          try:
-              coder = json.loads(coder_raw)
-          except Exception:
-              print("CODER returned invalid JSON:")
-              print(coder_raw)
-              raise
+          coder = json.loads(
+              coder_raw
+          )
 
-          changes = coder.get("changes", [])
+          changes = coder.get(
+              "changes",
+              []
+          )
+
+          changed_paths = []
 
           for change in changes:
+
               path = change.get("path")
-              lines = change.get("content_lines")
+              lines = change.get(
+                  "content_lines"
+              )
 
               if path not in ALLOWED_FILES:
                   raise RuntimeError(
-                      f"Coder attempted to modify forbidden file: {path}"
+                      f"Coder attempted to modify "
+                      f"forbidden file: {path}"
                   )
 
               if not isinstance(lines, list):
@@ -574,68 +645,81 @@ jobs:
                       f"Invalid content_lines for {path}"
                   )
 
-              write_file(path, lines)
+              write_file(
+                  path,
+                  lines
+              )
 
-          # ----------------------------------------------------------
-          # DIFF
-          # ----------------------------------------------------------
+              changed_paths.append(path)
+
+          # ========================================================
+          # DIFF AFTER CODER
+          # ========================================================
 
           print()
           print("========================================")
           print("CURRENT DIFF")
           print("========================================")
 
-          run_command(
-              "git diff -- README.md index.html app.js style.css "
-              "worker.js wrangler.toml docs/PROJECT.md"
+          diff = run_command(
+              "git diff -- "
+              "README.md "
+              "index.html "
+              "app.js "
+              "style.css "
+              "worker.js "
+              "wrangler.toml "
+              "docs/PROJECT.md"
           )
 
-          run_command("git diff --check")
+          run_command(
+              "git diff --check"
+          )
 
-          # ----------------------------------------------------------
+          # ========================================================
           # QA
-          # ----------------------------------------------------------
+          # ========================================================
 
           print()
           print("========================================")
           print("QA")
           print("========================================")
 
-          current = repo_snapshot()
+          # ВАЖНО:
+          # здесь читаются ФАКТИЧЕСКИЕ текущие файлы,
+          # а не старый snapshot до Coder.
 
-          qa_context = context_for(
-              sorted(set(selected) | set(
-                  change.get("path")
-                  for change in changes
-                  if change.get("path") in ALLOWED_FILES
-              ))
+          qa_context = build_context(
+              changed_paths,
+              max_chars=7000
           )
 
+          qa_diff = diff[:6000]
+
           qa_prompt = f"""
-          Ты QA Agent проекта LORGUS.
+          Проверь реальные изменения LORGUS.
 
           ЗАДАЧА:
           {TASK}
 
-          ИЗМЕНЕНИЯ CODER:
-          {json.dumps(coder, ensure_ascii=False, indent=2)}
+          CURRENT DIFF:
+          {qa_diff}
 
-          ТЕКУЩИЕ ФАЙЛЫ ПОСЛЕ ИЗМЕНЕНИЙ:
+          АКТУАЛЬНОЕ СОДЕРЖИМОЕ ИЗМЕНЁННЫХ ФАЙЛОВ:
           {qa_context}
 
-          Проверь реальные изменения.
-
           Проверь:
-          - синтаксис;
-          - JavaScript;
-          - HTML;
-          - CSS;
-          - Cloudflare Worker;
-          - Supabase;
-          - регрессии;
-          - соответствие задаче.
 
-          Верни первую строку строго:
+          - задача действительно выполнена;
+          - изменения реально присутствуют;
+          - нет синтаксических ошибок;
+          - нет регрессий;
+          - изменены только необходимые файлы.
+
+          Для простой текстовой задачи проверяй реальное содержимое
+          файла, а не только diff.
+
+          Первая строка ответа должна быть строго:
 
           PASS
 
@@ -643,21 +727,23 @@ jobs:
 
           FAIL
 
-          После неё объяснение.
+          После неё краткое объяснение.
           """
 
           qa_raw = groq_call(
               [
                   {
                       "role": "system",
-                      "content": open(".ai/QA.md", encoding="utf-8").read()
+                      "content": read_file(
+                          ".ai/QA.md"
+                      )
                   },
                   {
                       "role": "user",
                       "content": qa_prompt
                   }
               ],
-              1800
+              1200
           )
 
           print(qa_raw)
@@ -670,9 +756,9 @@ jobs:
               )
           )
 
-          # ----------------------------------------------------------
+          # ========================================================
           # REVIEWER
-          # ----------------------------------------------------------
+          # ========================================================
 
           print()
           print("========================================")
@@ -680,35 +766,31 @@ jobs:
           print("========================================")
 
           reviewer_prompt = f"""
-          Ты Reviewer Agent проекта LORGUS.
+          Проверь изменения LORGUS.
 
           ЗАДАЧА:
           {TASK}
 
-          ИЗМЕНЕНИЯ:
-          {json.dumps(coder, ensure_ascii=False, indent=2)}
+          DIFF:
+          {diff[:7000]}
 
           QA:
-          {qa_raw}
+          {qa_raw[:3000]}
 
-          ТЕКУЩИЙ DIFF:
-          {run_command(
-              "git diff -- README.md index.html app.js style.css "
-              "worker.js wrangler.toml docs/PROJECT.md"
-          )}
+          Проверь:
 
-          Проверь реальные изменения.
-
-          Особое внимание:
           - безопасность;
+          - секреты;
           - Supabase;
           - Cloudflare;
           - XSS;
-          - секреты;
           - регрессии;
-          - несвязанные изменения.
+          - несвязанные изменения;
+          - соответствие задаче.
 
-          Первая строка должна быть:
+          Не переписывай код.
+
+          Первая строка строго:
 
           APPROVE
 
@@ -721,14 +803,16 @@ jobs:
               [
                   {
                       "role": "system",
-                      "content": open(".ai/REVIEWER.md", encoding="utf-8").read()
+                      "content": read_file(
+                          ".ai/REVIEWER.md"
+                      )
                   },
                   {
                       "role": "user",
                       "content": reviewer_prompt
                   }
               ],
-              1800
+              1200
           )
 
           print(reviewer_raw)
@@ -742,13 +826,21 @@ jobs:
           reviewer_status = ""
 
           if reviewer_match:
-              reviewer_status = reviewer_match.group(1).upper()
+              reviewer_status = (
+                  reviewer_match
+                  .group(1)
+                  .upper()
+              )
 
-          reviewer_reject = reviewer_status.startswith("REJECT")
+          reviewer_reject = (
+              reviewer_status.startswith(
+                  "REJECT"
+              )
+          )
 
-          # ----------------------------------------------------------
+          # ========================================================
           # FIXER
-          # ----------------------------------------------------------
+          # ========================================================
 
           if (not qa_pass) or reviewer_reject:
 
@@ -757,25 +849,30 @@ jobs:
               print("FIXER")
               print("========================================")
 
+              fixer_context = build_context(
+                  changed_paths,
+                  max_chars=7000
+              )
+
               fixer_prompt = f"""
-              Ты Fixer Agent проекта LORGUS.
+              Исправь проблемы, найденные QA или Reviewer.
 
               ЗАДАЧА:
               {TASK}
 
-              CODER:
-              {json.dumps(coder, ensure_ascii=False, indent=2)}
+              CURRENT DIFF:
+              {diff[:6000]}
 
               QA:
-              {qa_raw}
+              {qa_raw[:3000]}
 
               REVIEWER:
-              {reviewer_raw}
+              {reviewer_raw[:3000]}
 
-              ТЕКУЩИЕ ФАЙЛЫ:
-              {repo_snapshot()}
+              АКТУАЛЬНЫЕ ФАЙЛЫ:
+              {fixer_context}
 
-              Исправь только проблемы, найденные QA или Reviewer.
+              Исправляй только реальные проблемы.
 
               Верни ТОЛЬКО JSON:
 
@@ -800,33 +897,44 @@ jobs:
                   [
                       {
                           "role": "system",
-                          "content": open(".ai/CODER.md", encoding="utf-8").read()
+                          "content": read_file(
+                              ".ai/CODER.md"
+                          )
                       },
                       {
                           "role": "user",
                           "content": fixer_prompt
                       }
                   ],
-                  6000
+                  3500
               )
 
-              fixer_raw = clean_json(fixer_raw)
+              fixer_raw = clean_json(
+                  fixer_raw
+              )
 
-              try:
-                  fixer = json.loads(fixer_raw)
-              except Exception:
-                  print("FIXER returned invalid JSON:")
-                  print(fixer_raw)
-                  raise
+              fixer = json.loads(
+                  fixer_raw
+              )
 
-              for change in fixer.get("changes", []):
+              fixer_changes = fixer.get(
+                  "changes",
+                  []
+              )
+
+              fixer_paths = []
+
+              for change in fixer_changes:
 
                   path = change.get("path")
-                  lines = change.get("content_lines")
+                  lines = change.get(
+                      "content_lines"
+                  )
 
                   if path not in ALLOWED_FILES:
                       raise RuntimeError(
-                          f"Fixer attempted to modify forbidden file: {path}"
+                          f"Fixer attempted to modify "
+                          f"forbidden file: {path}"
                       )
 
                   if not isinstance(lines, list):
@@ -834,46 +942,64 @@ jobs:
                           f"Invalid content_lines for {path}"
                       )
 
-                  write_file(path, lines)
+                  write_file(
+                      path,
+                      lines
+                  )
 
-              run_command("git diff --check")
+                  fixer_paths.append(path)
 
-              # ------------------------------------------------------
+              run_command(
+                  "git diff --check"
+              )
+
+              # ====================================================
               # FINAL QA
-              # ------------------------------------------------------
+              # ====================================================
 
               print()
               print("========================================")
               print("FINAL QA")
               print("========================================")
 
-              final_context = context_for(
-                  sorted(
-                      set(selected) |
-                      {
-                          p for p in ALLOWED_FILES
-                          if os.path.isfile(p)
-                      }
-                  )
+              final_paths = sorted(
+                  set(changed_paths + fixer_paths)
+              )
+
+              final_context = build_context(
+                  final_paths,
+                  max_chars=7000
+              )
+
+              final_diff = run_command(
+                  "git diff -- "
+                  "README.md "
+                  "index.html "
+                  "app.js "
+                  "style.css "
+                  "worker.js "
+                  "wrangler.toml "
+                  "docs/PROJECT.md"
               )
 
               final_qa_prompt = f"""
-              Ты финальный QA Agent проекта LORGUS.
+              Проведи финальную проверку LORGUS.
 
               ЗАДАЧА:
               {TASK}
 
-              Предыдущий QA:
-              {qa_raw}
+              ФИНАЛЬНЫЙ DIFF:
+              {final_diff[:6000]}
 
-              Предыдущий Reviewer:
-              {reviewer_raw}
-
-              Текущие файлы:
+              АКТУАЛЬНЫЕ ФАЙЛЫ:
               {final_context}
 
-              Проверь, что первоначальная задача выполнена
-              и проблемы QA/Reviewer исправлены.
+              Убедись, что:
+
+              1. первоначальная задача выполнена;
+              2. проблемы QA исправлены;
+              3. проблемы Reviewer исправлены;
+              4. нет очевидных регрессий.
 
               Первая строка строго:
 
@@ -888,14 +1014,16 @@ jobs:
                   [
                       {
                           "role": "system",
-                          "content": open(".ai/QA.md", encoding="utf-8").read()
+                          "content": read_file(
+                              ".ai/QA.md"
+                          )
                       },
                       {
                           "role": "user",
                           "content": final_qa_prompt
                       }
                   ],
-                  1800
+                  1200
               )
 
               print(final_qa_raw)
@@ -909,39 +1037,33 @@ jobs:
                       "Final QA returned FAIL."
                   )
 
-              # ------------------------------------------------------
+              # ====================================================
               # FINAL REVIEW
-              # ------------------------------------------------------
+              # ====================================================
 
               print()
               print("========================================")
               print("FINAL REVIEW")
               print("========================================")
 
-              final_diff = run_command(
-                  "git diff -- README.md index.html app.js style.css "
-                  "worker.js wrangler.toml docs/PROJECT.md"
-              )
-
               final_review_prompt = f"""
-              Ты финальный Reviewer Agent проекта LORGUS.
+              Проведи финальный review изменений LORGUS.
 
               ЗАДАЧА:
               {TASK}
 
               FINAL QA:
-              {final_qa_raw}
+              {final_qa_raw[:3000]}
 
               FINAL DIFF:
-              {final_diff}
+              {final_diff[:7000]}
 
-              Проверь итоговый diff.
-
-              Первая строка строго:
+              Если всё соответствует задаче,
+              первая строка должна быть:
 
               APPROVE
 
-              или
+              Иначе:
 
               REJECT
               """
@@ -950,14 +1072,16 @@ jobs:
                   [
                       {
                           "role": "system",
-                          "content": open(".ai/REVIEWER.md", encoding="utf-8").read()
+                          "content": read_file(
+                              ".ai/REVIEWER.md"
+                          )
                       },
                       {
                           "role": "user",
                           "content": final_review_prompt
                       }
                   ],
-                  1800
+                  1200
               )
 
               print(final_reviewer_raw)
@@ -970,44 +1094,65 @@ jobs:
 
               if not final_match:
                   raise RuntimeError(
-                      "Final Reviewer returned an invalid status."
+                      "Final Reviewer returned invalid status."
                   )
 
-              final_status = final_match.group(1).upper()
+              final_status = (
+                  final_match
+                  .group(1)
+                  .upper()
+              )
 
-              if final_status.startswith("REJECT"):
+              if final_status.startswith(
+                  "REJECT"
+              ):
                   raise RuntimeError(
                       "Final Reviewer returned REJECT."
                   )
 
           else:
-              print()
-              print("QA and Reviewer approved the first implementation.")
 
-          # ----------------------------------------------------------
-          # FINAL DIFF CHECK
-          # ----------------------------------------------------------
+              print()
+              print(
+                  "QA and Reviewer approved "
+                  "the first implementation."
+              )
+
+          # ========================================================
+          # FINAL DIFF
+          # ========================================================
 
           print()
           print("========================================")
           print("FINAL DIFF CHECK")
           print("========================================")
 
-          run_command("git diff --check")
+          run_command(
+              "git diff --check"
+          )
 
           final_diff = run_command(
-              "git diff -- README.md index.html app.js style.css "
-              "worker.js wrangler.toml docs/PROJECT.md"
+              "git diff -- "
+              "README.md "
+              "index.html "
+              "app.js "
+              "style.css "
+              "worker.js "
+              "wrangler.toml "
+              "docs/PROJECT.md"
           )
 
           if not final_diff.strip():
-              print("No changes detected.")
-              print("Nothing to commit.")
+
+              print(
+                  "No changes detected."
+              )
+
               raise SystemExit(0)
 
-          # ----------------------------------------------------------
+          # ========================================================
           # COMMIT
-          # ----------------------------------------------------------
+          # ========================================================
 
           print()
           print("========================================")
@@ -1024,8 +1169,14 @@ jobs:
           )
 
           run_command(
-              "git add -- README.md index.html app.js style.css "
-              "worker.js wrangler.toml docs/PROJECT.md"
+              "git add -- "
+              "README.md "
+              "index.html "
+              "app.js "
+              "style.css "
+              "worker.js "
+              "wrangler.toml "
+              "docs/PROJECT.md"
           )
 
           run_command(
