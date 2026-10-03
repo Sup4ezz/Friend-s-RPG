@@ -1,0 +1,30 @@
+name: LORGUS AI Workspace
+
+on:
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "Задача для AI"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  workspace:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show task
+        run: |
+          echo "TASK:"
+          echo "${{ inputs.task }}"
+
+      - name: Show workspace
+        run: |
+          echo "=== PROJECT ==="
+          find . -maxdepth 2 -type f | sort
