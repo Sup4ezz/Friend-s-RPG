@@ -1,16 +1,9 @@
 name: LORGUS AI Agent
 on:
 workflow_dispatch:
-inputs:
-task:
-description: Задача для AI
-required: true
-type: string
 jobs:
 test:
 runs-on: ubuntu-latest
 steps:
-- name: Test workflow
+- name: Test
 run: echo "LORGUS AI WORKFLOW OK"
-- name: Show task
-run: 'echo "TASK: ${{ inputs.task }}"'
