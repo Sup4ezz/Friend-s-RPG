@@ -22,7 +22,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Run AI agents
+      - name: Run AI pipeline
         env:
           TASK: ${{ inputs.task }}
         run: |
@@ -30,9 +30,20 @@ jobs:
           import os
           import json
           import urllib.request
+          import subprocess
 
-          task = os.environ["TASK"]
-          api_key = os.environ["OPENROUTER_API_KEY"]
+          TASK = os.environ["TASK"]
+          API_KEY = os.environ["OPENROUTER_API_KEY"]
+
+          ALLOWED_FILES = {
+              "README.md",
+              "index.html",
+              "app.js",
+              "style.css",
+              "worker.js",
+              "wrangler.toml",
+              "docs/PROJECT.md"
+          }
 
           def ask(system, user):
               data = json.dumps({
@@ -47,7 +58,7 @@ jobs:
                   "https://openrouter.ai/api/v1/chat/completions",
                   data=data,
                   headers={
-                      "Authorization": f"Bearer {api_key}",
+                      "Authorization": f"Bearer {API_KEY}",
                       "Content-Type": "application/json"
                   }
               )
@@ -57,69 +68,241 @@ jobs:
 
               return result["choices"][0]["message"]["content"]
 
+          def repository_text():
+              result = []
+
+              for root, dirs, files in os.walk("."):
+                  if ".git" in root.split(os.sep):
+                      continue
+
+                  for filename in files:
+                      path = os.path.join(root, filename)
+
+                      if path.startswith("./"):
+                          path = path[2:]
+
+                      try:
+                          with open(path, "r", encoding="utf-8") as f:
+                              content = f.read()
+
+                          result.append(
+                              f"\n===== {path} =====\n{content}"
+                          )
+                      except UnicodeDecodeError:
+                          pass
+
+              return "\n".join(result)
+
+          def git_diff():
+              return subprocess.check_output(
+                  ["git", "diff", "--no-ext-diff"],
+                  text=True
+              )
+
+          repo = repository_text()
+
           architect = ask(
               """Ты ARCHITECT проекта LORGUS.
 
-              Изучи задачу и существующий репозиторий.
-              Ничего не изменяй.
-              Определи:
-              1. проблему;
-              2. какие файлы затронуты;
-              3. план изменений;
-              4. возможные риски;
-              5. способ проверки.
+              Изучи реальный репозиторий.
 
-              Не придумывай содержимое файлов.""",
+              Не изменяй файлы.
+
+              Определи:
+              - проблему;
+              - затронутые файлы;
+              - план изменений;
+              - риски;
+              - способ проверки.
+
+              Не придумывай существующий код.
+              Не предлагай изменения несвязанных файлов.""",
               f"""ЗАДАЧА:
-          {task}
+          {TASK}
 
           ТЕКУЩИЙ РЕПОЗИТОРИЙ:
-          {os.popen("find . -type f -not -path './.git/*' | sort").read()}"""
+          {repo}"""
           )
 
           print("\n===== ARCHITECT =====\n")
           print(architect)
 
-          coder = ask(
+          coder_raw = ask(
               """Ты CODER проекта LORGUS.
 
-              Получи задачу и план Architect.
-              Изучи существующий код.
-              Верни JSON строго следующего вида:
+              Изучи задачу, план Architect и полный текущий репозиторий.
+
+              Верни ТОЛЬКО JSON:
 
               {
                 "changes": [
                   {
                     "path": "README.md",
                     "content_lines": [
-                      "строка 1",
-                      "строка 2"
+                      "полное новое содержимое файла"
                     ]
                   }
                 ]
               }
 
-              content_lines должен содержать ПОЛНОЕ новое содержимое изменяемого файла.
+              Правила:
 
-              Можно изменять только необходимые файлы.
-              Не переводи существующий текст на другой язык.
-              Не переписывай файл без необходимости.
-              Не изменяй несвязанные файлы.
-              Если изменений не требуется:
-              {"changes": []}""",
+              - content_lines содержит ПОЛНОЕ содержимое изменяемого файла;
+              - изменяй только необходимые файлы;
+              - не переводи существующий текст;
+              - сохраняй существующую функциональность;
+              - не переписывай файл без необходимости;
+              - не меняй .ai;
+              - не добавляй секреты;
+              - если изменения не нужны: {"changes": []}.""",
               f"""ЗАДАЧА:
-          {task}
+          {TASK}
 
           ПЛАН ARCHITECT:
           {architect}
 
-          ФАЙЛЫ РЕПОЗИТОРИЯ:
-          {os.popen("find . -type f -not -path './.git/*' | sort").read()}"""
+          ПОЛНЫЙ РЕПОЗИТОРИЙ:
+          {repo}"""
           )
 
           print("\n===== CODER =====\n")
-          print(coder)
+          print(coder_raw)
 
-          with open("/tmp/coder.json", "w", encoding="utf-8") as f:
-              f.write(coder)
+          try:
+              coder = json.loads(coder_raw)
+          except json.JSONDecodeError:
+              raise RuntimeError("Coder returned invalid JSON")
+
+          for change in coder.get("changes", []):
+              path = change["path"]
+
+              if path not in ALLOWED_FILES:
+                  raise RuntimeError(
+                      f"Coder attempted to modify forbidden file: {path}"
+                  )
+
+              content = "\n".join(change["content_lines"])
+
+              with open(path, "w", encoding="utf-8") as f:
+                  f.write(content)
+
+              print(f"CODER: updated {path}")
+
+          diff = git_diff()
+
+          print("\n===== ACTUAL GIT DIFF =====\n")
+          print(diff)
+
+          repo_after = repository_text()
+
+          qa = ask(
+              """Ты QA Agent проекта LORGUS.
+
+              Проверяй РЕАЛЬНОЕ текущее состояние репозитория.
+
+              У тебя есть:
+              1. полный текущий репозиторий;
+              2. фактический git diff;
+              3. исходная задача.
+
+              Не считай изменение успешным только потому,
+              что код выглядит правильным.
+
+              Проверь:
+              - синтаксис;
+              - JavaScript;
+              - HTML;
+              - CSS;
+              - API;
+              - Supabase;
+              - Cloudflare Worker;
+              - соответствие задаче;
+              - отсутствие лишних изменений.
+
+              Верни:
+
+              PASS
+
+              или
+
+              FAIL
+
+              Для FAIL укажи конкретную проблему, файл,
+              ожидаемый результат и фактический результат.""",
+              f"""ЗАДАЧА:
+          {TASK}
+
+          ПОЛНЫЙ ТЕКУЩИЙ РЕПОЗИТОРИЙ:
+          {repo_after}
+
+          ФАКТИЧЕСКИЙ GIT DIFF:
+          {diff}"""
+          )
+
+          print("\n===== QA =====\n")
+          print(qa)
+
+          reviewer = ask(
+              """Ты REVIEWER проекта LORGUS.
+
+              Проведи независимое ревью.
+
+              Важно:
+              ACTUAL GIT DIFF показывает только изменения.
+              CURRENT REPOSITORY показывает полное состояние файлов.
+
+              Не отклоняй изменение только потому,
+              что требуемый элемент отсутствует в diff:
+              он мог существовать до изменения.
+
+              Проверь:
+              - соответствие задаче;
+              - логику;
+              - безопасность;
+              - Supabase;
+              - Cloudflare Worker;
+              - регрессии;
+              - лишние изменения;
+              - сохранение существующего содержимого.
+
+              Верни строго:
+
+              APPROVE
+
+              или
+
+              REJECT
+
+              Для REJECT укажи:
+              - файл;
+              - проблему;
+              - почему это проблема;
+              - что необходимо изменить.""",
+              f"""ЗАДАЧА:
+          {TASK}
+
+          CURRENT REPOSITORY:
+          {repo_after}
+
+          ACTUAL GIT DIFF:
+          {diff}
+
+          QA RESULT:
+          {qa}"""
+          )
+
+          print("\n===== REVIEWER =====\n")
+          print(reviewer)
+
+          if "REJECT" in reviewer.upper():
+              raise RuntimeError(
+                  "Reviewer rejected the changes."
+              )
+
+          if "FAIL" in qa.upper():
+              raise RuntimeError(
+                  "QA reported FAIL."
+              )
+
+          print("\nPIPELINE RESULT: APPROVED")
           PY
