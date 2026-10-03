@@ -2,12 +2,14 @@
 
 ## LORGUS AI Workspace
 
-Этот репозиторий используется как единое рабочее пространство для AI-агентов проекта LORGUS.
+This repository is used as a unified workspace for AI agents of the LORGUS project.
 
-### Роли
+### Roles
 
-- **Architect** — архитектурный аналитик
-- **Coder** — реализация кода
-- **QA** — тестирование и контроль качества
-- **Reviewer** — ревью и проверка
-- **Fixer** — исправление ошибок
+- **Architect**
+- **Coder**
+- **QA**
+- **Reviewer**
+- **Fixer**
+
+LORGUS TEST MARKER: QA_FIX_TEST
