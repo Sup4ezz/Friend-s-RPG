@@ -23,20 +23,12 @@ jobs:
 
     steps:
 
-      # ============================================================
-      # CHECKOUT
-      # ============================================================
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      # ============================================================
-      # GROQ PREFLIGHT
-      # ============================================================
-
-      - name: Groq preflight diagnostics
+      - name: Groq preflight
         run: |
           python3 <<'PY'
           import os
@@ -49,23 +41,20 @@ jobs:
           url = os.environ.get("GROQ_MODELS_URL", "")
 
           print("========================================")
-          print("GROQ PREFLIGHT DIAGNOSTICS")
+          print("GROQ PREFLIGHT")
           print("========================================")
 
           if not key:
-              print("ERROR: GitHub Secret 'API' is empty or unavailable.")
-              raise SystemExit(1)
+              raise SystemExit("GitHub Secret API is empty.")
 
           print("API key detected: YES")
-          print(f"API key length: {len(key)}")
-          print(f"Target model: {model}")
-          print()
+          print(f"Key length: {len(key)}")
+          print(f"Model: {model}")
 
           request = urllib.request.Request(
               url,
               headers={
                   "Authorization": f"Bearer {key}",
-                  "Content-Type": "application/json",
                   "User-Agent": "LORGUS-GitHub-Actions"
               },
               method="GET"
@@ -73,39 +62,23 @@ jobs:
 
           try:
               with urllib.request.urlopen(request, timeout=30) as response:
-                  body = response.read().decode(
-                      "utf-8",
-                      errors="replace"
+                  data = json.loads(
+                      response.read().decode("utf-8", errors="replace")
                   )
 
-                  data = json.loads(body)
-                  models = data.get("data", [])
+              models = {
+                  item.get("id")
+                  for item in data.get("data", [])
+              }
 
-                  ids = sorted(
-                      item.get("id")
-                      for item in models
-                      if item.get("id")
+              print(f"Models endpoint: HTTP {response.status}")
+
+              if model not in models:
+                  raise SystemExit(
+                      f"Model {model} is not available."
                   )
 
-                  print(f"Models endpoint HTTP: {response.status}")
-                  print(f"Available models: {len(ids)}")
-
-                  if model in ids:
-                      print(f"Target model '{model}': AVAILABLE")
-                  else:
-                      print(
-                          f"ERROR: target model '{model}' "
-                          "is not available."
-                      )
-
-                      print()
-                      print("Available gpt-oss models:")
-
-                      for model_id in ids:
-                          if "gpt-oss" in model_id:
-                              print(f"  - {model_id}")
-
-                      raise SystemExit(2)
+              print("Target model: AVAILABLE")
 
           except urllib.error.HTTPError as error:
               body = error.read().decode(
@@ -113,44 +86,31 @@ jobs:
                   errors="replace"
               )
 
-              print(f"Models endpoint HTTP: {error.code}")
-              print("Groq response:")
+              print(f"Groq HTTP {error.code}")
               print(body)
-              print()
 
-              if error.code == 401:
-                  print("DIAGNOSIS: invalid authentication.")
-              elif error.code == 403:
-                  print("DIAGNOSIS: permission/security rejection.")
-              elif error.code == 429:
-                  print("DIAGNOSIS: rate limit.")
-              else:
-                  print("DIAGNOSIS: unexpected Groq error.")
-
-              raise SystemExit(3)
+              raise SystemExit(
+                  f"Groq preflight failed with HTTP {error.code}."
+              )
           PY
 
-      # ============================================================
-      # MAIN PIPELINE
-      # ============================================================
-
-      - name: Run LORGUS AI agents
+      - name: Run LORGUS AI pipeline
         env:
-          TASK: ${{ inputs.task }}
+          USER_TASK: ${{ inputs.task }}
         run: |
           python3 <<'PY'
           import os
           import json
           import time
           import re
+          import subprocess
           import urllib.request
           import urllib.error
-          import subprocess
 
-          GROQ_API_KEY = os.environ["GROQ_API_KEY"]
+          API_KEY = os.environ["GROQ_API_KEY"]
           GROQ_URL = os.environ["GROQ_URL"]
           MODEL = os.environ["GROQ_MODEL"]
-          TASK = os.environ["TASK"]
+          USER_TASK = os.environ["USER_TASK"]
 
           ALLOWED_FILES = {
               "README.md",
@@ -162,24 +122,17 @@ jobs:
               "docs/PROJECT.md"
           }
 
-          # Максимальный размер контекста в символах.
-          # Это специально ограничено, чтобы не пробивать
-          # бесплатный лимит Groq 8000 TPM.
-          MAX_CONTEXT_CHARS = 10000
+          MAX_CONTEXT = 10000
 
           print("========================================")
           print("LORGUS AI WORKSPACE")
           print("========================================")
           print()
-          print("TASK:")
-          print(TASK)
+          print("USER TASK:")
+          print(USER_TASK)
           print()
 
-          # ========================================================
-          # COMMANDS
-          # ========================================================
-
-          def run_command(command):
+          def run(command):
               result = subprocess.run(
                   command,
                   shell=True,
@@ -195,17 +148,12 @@ jobs:
 
               if result.returncode != 0:
                   raise RuntimeError(
-                      f"Command failed with code "
-                      f"{result.returncode}: {command}"
+                      f"Command failed: {command}"
                   )
 
               return result.stdout
 
-          # ========================================================
-          # GROQ
-          # ========================================================
-
-          def groq_call(messages, max_tokens):
+          def groq(messages, max_tokens, json_mode=False):
               payload = {
                   "model": MODEL,
                   "messages": messages,
@@ -213,22 +161,29 @@ jobs:
                   "max_tokens": max_tokens
               }
 
-              body = json.dumps(payload).encode("utf-8")
+              if json_mode:
+                  payload["response_format"] = {
+                      "type": "json_object"
+                  }
 
-              request = urllib.request.Request(
-                  GROQ_URL,
-                  data=body,
-                  headers={
-                      "Authorization": f"Bearer {GROQ_API_KEY}",
-                      "Content-Type": "application/json",
-                      "User-Agent": "LORGUS-GitHub-Actions"
-                  },
-                  method="POST"
-              )
+              body = json.dumps(
+                  payload,
+                  ensure_ascii=False
+              ).encode("utf-8")
 
               last_error = None
 
               for attempt in range(1, 3):
+                  request = urllib.request.Request(
+                      GROQ_URL,
+                      data=body,
+                      headers={
+                          "Authorization": f"Bearer {API_KEY}",
+                          "Content-Type": "application/json",
+                          "User-Agent": "LORGUS-GitHub-Actions"
+                      },
+                      method="POST"
+                  )
 
                   try:
                       with urllib.request.urlopen(
@@ -243,42 +198,27 @@ jobs:
 
                           data = json.loads(raw)
 
-                          return data[
-                              "choices"
-                          ][0][
-                              "message"
-                          ][
-                              "content"
-                          ]
+                          return data["choices"][0]["message"]["content"]
 
                   except urllib.error.HTTPError as error:
-
                       raw = error.read().decode(
                           "utf-8",
                           errors="replace"
                       )
 
-                      print()
                       print(
                           f"Groq HTTP {error.code} "
                           f"(attempt {attempt}/2)"
                       )
-                      print("Response body:")
+
                       print(raw)
-                      print()
 
-                      last_error = (
-                          f"Groq HTTP {error.code}: {raw}"
-                      )
+                      last_error = raw
 
-                      if error.code in (401, 403):
+                      if error.code in (400, 401, 403):
                           break
 
                       if error.code == 413:
-                          print(
-                              "REQUEST TOO LARGE: "
-                              "reduce context or output size."
-                          )
                           break
 
                       if error.code == 429:
@@ -288,45 +228,39 @@ jobs:
                       time.sleep(3)
 
                   except Exception as error:
-
-                      print(
-                          f"Groq request error "
-                          f"(attempt {attempt}/2): {error}"
-                      )
-
                       last_error = str(error)
                       time.sleep(3)
 
               raise RuntimeError(
-                  last_error or "Groq request failed"
+                  f"Groq request failed: {last_error}"
               )
 
-          # ========================================================
-          # JSON
-          # ========================================================
+          def parse_json(raw):
+              raw = raw.strip()
 
-          def clean_json(text):
-              text = text.strip()
-
-              if text.startswith("```"):
-                  text = re.sub(
+              if raw.startswith("```"):
+                  raw = re.sub(
                       r"^```(?:json)?\s*",
                       "",
-                      text,
+                      raw,
                       flags=re.IGNORECASE
                   )
 
-                  text = re.sub(
+                  raw = re.sub(
                       r"\s*```$",
                       "",
-                      text
+                      raw
                   )
 
-              return text.strip()
+              try:
+                  return json.loads(raw)
 
-          # ========================================================
-          # FILES
-          # ========================================================
+              except json.JSONDecodeError as error:
+                  print("INVALID JSON FROM MODEL:")
+                  print(raw)
+                  raise RuntimeError(
+                      f"Invalid JSON from model: {error}"
+                  )
 
           def read_file(path):
               with open(
@@ -336,8 +270,11 @@ jobs:
               ) as file:
                   return file.read()
 
-          def write_file(path, lines):
-              content = "\n".join(lines)
+          def write_content(path, content):
+              if not isinstance(content, str):
+                  raise RuntimeError(
+                      f"Invalid content for {path}"
+                  )
 
               if not content.endswith("\n"):
                   content += "\n"
@@ -349,7 +286,7 @@ jobs:
               ) as file:
                   file.write(content)
 
-          def current_files():
+          def get_files():
               result = {}
 
               for path in sorted(ALLOWED_FILES):
@@ -358,49 +295,65 @@ jobs:
 
               return result
 
-          def relevant_files(task):
+          def build_context(paths, limit=MAX_CONTEXT):
+              files = get_files()
+              blocks = []
+              total = 0
+
+              for path in paths:
+                  if path not in files:
+                      continue
+
+                  content = files[path]
+
+                  remaining = limit - total
+
+                  if remaining <= 0:
+                      break
+
+                  if len(content) > remaining:
+                      content = (
+                          content[:remaining]
+                          + "\n[CONTEXT TRUNCATED]\n"
+                      )
+
+                  block = (
+                      f"\n===== FILE: {path} =====\n"
+                      f"{content}\n"
+                      f"===== END FILE: {path} =====\n"
+                  )
+
+                  blocks.append(block)
+                  total += len(block)
+
+              return "\n".join(blocks)
+
+          def detect_files(task):
               task_lower = task.lower()
 
               selected = set()
 
               mapping = {
                   "readme": ["README.md"],
+                  "index.html": ["index.html"],
                   "html": ["index.html"],
-                  "страниц": ["index.html"],
-                  "интерфейс": [
-                      "index.html",
-                      "style.css",
-                      "app.js"
-                  ],
-                  "ui": [
-                      "index.html",
-                      "style.css",
-                      "app.js"
-                  ],
                   "css": ["style.css"],
-                  "стиль": ["style.css"],
+                  "style.css": ["style.css"],
+                  "app.js": ["app.js"],
                   "javascript": ["app.js"],
-                  "javascript": ["app.js"],
-                  "js": ["app.js"],
-                  "логик": ["app.js"],
+                  "worker.js": ["worker.js"],
+                  "cloudflare": [
+                      "worker.js",
+                      "wrangler.toml"
+                  ],
+                  "wrangler": ["wrangler.toml"],
                   "supabase": [
                       "app.js",
                       "worker.js",
                       "wrangler.toml"
                   ],
-                  "cloudflare": [
-                      "worker.js",
-                      "wrangler.toml"
-                  ],
-                  "worker": [
-                      "worker.js",
-                      "wrangler.toml"
-                  ],
-                  "wrangler": ["wrangler.toml"],
-                  "конфиг": ["wrangler.toml"],
-                  "докум": ["docs/PROJECT.md"],
-                  "архитект": ["docs/PROJECT.md"],
-                  "проект": ["docs/PROJECT.md"]
+                  "project.md": ["docs/PROJECT.md"],
+                  "docs": ["docs/PROJECT.md"]
               }
 
               for keyword, paths in mapping.items():
@@ -412,50 +365,7 @@ jobs:
 
               return sorted(selected)
 
-          # ========================================================
-          # CONTEXT LIMITER
-          # ========================================================
-
-          def build_context(paths, max_chars=MAX_CONTEXT_CHARS):
-              files = current_files()
-
-              result = []
-              total = 0
-
-              for path in paths:
-
-                  if path not in files:
-                      continue
-
-                  content = files[path]
-
-                  remaining = max_chars - total
-
-                  if remaining <= 0:
-                      break
-
-                  if len(content) > remaining:
-                      content = (
-                          content[:remaining]
-                          + "\n\n[CONTEXT TRUNCATED]\n"
-                      )
-
-                  block = (
-                      f"\n===== FILE: {path} =====\n"
-                      f"{content}"
-                      f"\n===== END FILE: {path} =====\n"
-                  )
-
-                  result.append(block)
-                  total += len(block)
-
-              return "\n".join(result)
-
-          # ========================================================
-          # RELEVANT FILES
-          # ========================================================
-
-          selected = relevant_files(TASK)
+          selected = detect_files(USER_TASK)
 
           print("Relevant files:")
 
@@ -464,9 +374,11 @@ jobs:
 
           print()
 
-          # ========================================================
+          original_files = get_files()
+
+          # ============================================================
           # ARCHITECT
-          # ========================================================
+          # ============================================================
 
           print("========================================")
           print("ARCHITECT")
@@ -474,21 +386,33 @@ jobs:
 
           architect_context = build_context(
               selected,
-              max_chars=8000
+              8000
           )
 
           architect_prompt = f"""
-          Проанализируй проект LORGUS.
+          Ты Architect Agent проекта LORGUS.
 
-          ЗАДАЧА:
-          {TASK}
+          ИСХОДНАЯ ЗАДАЧА ПОЛЬЗОВАТЕЛЯ:
+          {USER_TASK}
 
-          ТЕКУЩИЙ КОД:
+          ВАЖНО:
+
+          Исходная задача пользователя является главным источником
+          требований.
+
+          Нельзя заменять задачу пользователя собственной идеей.
+
+          Если пользователь указал конкретный файл или конкретное
+          содержимое, это требование имеет приоритет.
+
+          Не ищи посторонние проблемы проекта.
+
+          Не исправляй код.
+
+          ТЕКУЩИЕ ФАЙЛЫ:
           {architect_context}
 
-          Ничего не изменяй.
-
-          Верни ТОЛЬКО JSON:
+          Верни JSON:
 
           {{
             "problem": "...",
@@ -498,34 +422,25 @@ jobs:
             "risks": ["..."],
             "checks": ["..."]
           }}
-
-          Не создавай diff.
-          Не возвращай код.
-          Не придумывай отсутствующие файлы.
           """
 
-          architect_raw = groq_call(
-              [
-                  {
-                      "role": "system",
-                      "content": read_file(
-                          ".ai/ARCHITECT.md"
-                      )
-                  },
-                  {
-                      "role": "user",
-                      "content": architect_prompt
-                  }
-              ],
-              1200
-          )
-
-          architect_raw = clean_json(
-              architect_raw
-          )
-
-          architect = json.loads(
-              architect_raw
+          architect = parse_json(
+              groq(
+                  [
+                      {
+                          "role": "system",
+                          "content": read_file(
+                              ".ai/ARCHITECT.md"
+                          )
+                      },
+                      {
+                          "role": "user",
+                          "content": architect_prompt
+                      }
+                  ],
+                  1200,
+                  True
+              )
           )
 
           print(
@@ -536,9 +451,9 @@ jobs:
               )
           )
 
-          # ========================================================
+          # ============================================================
           # CODER
-          # ========================================================
+          # ============================================================
 
           print()
           print("========================================")
@@ -547,14 +462,14 @@ jobs:
 
           coder_context = build_context(
               selected,
-              max_chars=9000
+              9000
           )
 
           coder_prompt = f"""
           Ты Coding Agent проекта LORGUS.
 
-          ЗАДАЧА:
-          {TASK}
+          ИСХОДНАЯ ЗАДАЧА ПОЛЬЗОВАТЕЛЯ:
+          {USER_TASK}
 
           ПЛАН ARCHITECT:
           {json.dumps(
@@ -565,9 +480,18 @@ jobs:
           ТЕКУЩИЕ ФАЙЛЫ:
           {coder_context}
 
-          Внеси минимальные необходимые изменения.
+          КРИТИЧЕСКОЕ ПРАВИЛО:
+
+          Ты обязан выполнить ИСХОДНУЮ ЗАДАЧУ пользователя.
+
+          План Architect является вспомогательным.
+          Он НЕ может переопределять задачу пользователя.
+
+          Если пользователь дал точное содержимое файла,
+          сохрани это содержимое буквально.
 
           Разрешённые файлы:
+
           {sorted(ALLOWED_FILES)}
 
           Верни ТОЛЬКО JSON:
@@ -576,63 +500,55 @@ jobs:
             "changes": [
               {{
                 "path": "README.md",
-                "content_lines": [
-                  "полное",
-                  "содержимое",
-                  "файла"
-                ]
+                "content": "полное содержимое файла"
               }}
             ]
           }}
 
-          ВАЖНО:
+          Правила:
 
-          - content_lines = ПОЛНОЕ содержимое файла;
-          - НЕ используй unified diff;
-          - НЕ используй markdown fences;
-          - НЕ меняй несвязанные файлы;
-          - НЕ удаляй существующую функциональность;
-          - если изменений не нужно, верни {{"changes":[]}};
-          - каждый path должен быть разрешён.
+          - content является полной строкой содержимого файла;
+          - переносы строк должны быть представлены как \\n;
+          - не используй unified diff;
+          - не используй markdown fences;
+          - не меняй несвязанные файлы;
+          - не удаляй существующую функциональность;
+          - если изменений не требуется:
+            {{"changes":[]}}
           """
 
-          coder_raw = groq_call(
-              [
-                  {
-                      "role": "system",
-                      "content": read_file(
-                          ".ai/CODER.md"
-                      )
-                  },
-                  {
-                      "role": "user",
-                      "content": coder_prompt
-                  }
-              ],
-              3500
+          coder = parse_json(
+              groq(
+                  [
+                      {
+                          "role": "system",
+                          "content": read_file(
+                              ".ai/CODER.md"
+                          )
+                      },
+                      {
+                          "role": "user",
+                          "content": coder_prompt
+                      }
+                  ],
+                  3500,
+                  True
+              )
           )
 
-          coder_raw = clean_json(
-              coder_raw
-          )
+          changes = coder.get("changes", [])
 
-          coder = json.loads(
-              coder_raw
-          )
-
-          changes = coder.get(
-              "changes",
-              []
-          )
+          if not isinstance(changes, list):
+              raise RuntimeError(
+                  "Coder returned invalid changes."
+              )
 
           changed_paths = []
 
           for change in changes:
 
               path = change.get("path")
-              lines = change.get(
-                  "content_lines"
-              )
+              content = change.get("content")
 
               if path not in ALLOWED_FILES:
                   raise RuntimeError(
@@ -640,28 +556,29 @@ jobs:
                       f"forbidden file: {path}"
                   )
 
-              if not isinstance(lines, list):
+              if not isinstance(content, str):
                   raise RuntimeError(
-                      f"Invalid content_lines for {path}"
+                      f"Coder returned invalid content "
+                      f"for {path}"
                   )
 
-              write_file(
+              write_content(
                   path,
-                  lines
+                  content
               )
 
               changed_paths.append(path)
 
-          # ========================================================
-          # DIFF AFTER CODER
-          # ========================================================
+          # ============================================================
+          # DIFF
+          # ============================================================
 
           print()
           print("========================================")
           print("CURRENT DIFF")
           print("========================================")
 
-          diff = run_command(
+          diff = run(
               "git diff -- "
               "README.md "
               "index.html "
@@ -672,65 +589,60 @@ jobs:
               "docs/PROJECT.md"
           )
 
-          run_command(
-              "git diff --check"
-          )
+          run("git diff --check")
 
-          # ========================================================
+          # ============================================================
           # QA
-          # ========================================================
+          # ============================================================
 
           print()
           print("========================================")
           print("QA")
           print("========================================")
 
-          # ВАЖНО:
-          # здесь читаются ФАКТИЧЕСКИЕ текущие файлы,
-          # а не старый snapshot до Coder.
-
           qa_context = build_context(
               changed_paths,
-              max_chars=7000
+              7000
           )
 
-          qa_diff = diff[:6000]
-
           qa_prompt = f"""
-          Проверь реальные изменения LORGUS.
+          Проверь РЕАЛЬНЫЙ результат работы Coding Agent.
 
-          ЗАДАЧА:
-          {TASK}
+          ИСХОДНАЯ ЗАДАЧА ПОЛЬЗОВАТЕЛЯ:
+          {USER_TASK}
 
           CURRENT DIFF:
-          {qa_diff}
+          {diff[:7000]}
 
-          АКТУАЛЬНОЕ СОДЕРЖИМОЕ ИЗМЕНЁННЫХ ФАЙЛОВ:
+          АКТУАЛЬНЫЕ ФАЙЛЫ:
           {qa_context}
+
+          Проверяй результат самостоятельно.
+
+          Не доверяй плану Architect.
 
           Проверь:
 
-          - задача действительно выполнена;
-          - изменения реально присутствуют;
-          - нет синтаксических ошибок;
-          - нет регрессий;
-          - изменены только необходимые файлы.
+          1. Выполнена ли исходная задача пользователя.
+          2. Реально ли присутствуют изменения.
+          3. Сохранена ли существующая функциональность.
+          4. Нет ли синтаксических ошибок.
+          5. Изменены ли только необходимые файлы.
+          6. Если пользователь дал точное содержимое —
+             соответствует ли файл именно ему.
 
-          Для простой текстовой задачи проверяй реальное содержимое
-          файла, а не только diff.
-
-          Первая строка ответа должна быть строго:
+          Первая строка ответа должна быть:
 
           PASS
 
-          или
+          или:
 
           FAIL
 
-          После неё краткое объяснение.
+          После первой строки дай краткое объяснение.
           """
 
-          qa_raw = groq_call(
+          qa_raw = groq(
               [
                   {
                       "role": "system",
@@ -743,7 +655,8 @@ jobs:
                       "content": qa_prompt
                   }
               ],
-              1200
+              1200,
+              False
           )
 
           print(qa_raw)
@@ -756,9 +669,9 @@ jobs:
               )
           )
 
-          # ========================================================
+          # ============================================================
           # REVIEWER
-          # ========================================================
+          # ============================================================
 
           print()
           print("========================================")
@@ -766,10 +679,10 @@ jobs:
           print("========================================")
 
           reviewer_prompt = f"""
-          Проверь изменения LORGUS.
+          Проведи независимый review изменений LORGUS.
 
-          ЗАДАЧА:
-          {TASK}
+          ИСХОДНАЯ ЗАДАЧА ПОЛЬЗОВАТЕЛЯ:
+          {USER_TASK}
 
           DIFF:
           {diff[:7000]}
@@ -777,29 +690,35 @@ jobs:
           QA:
           {qa_raw[:3000]}
 
+          ВАЖНО:
+
+          Не принимай интерпретацию Architect как источник истины.
+
+          Проверяй исходную задачу пользователя напрямую.
+
           Проверь:
 
+          - соответствие задаче;
           - безопасность;
           - секреты;
           - Supabase;
           - Cloudflare;
           - XSS;
           - регрессии;
-          - несвязанные изменения;
-          - соответствие задаче.
+          - несвязанные изменения.
 
           Не переписывай код.
 
-          Первая строка строго:
+          Первая строка:
 
           APPROVE
 
-          или
+          или:
 
           REJECT
           """
 
-          reviewer_raw = groq_call(
+          reviewer_raw = groq(
               [
                   {
                       "role": "system",
@@ -812,7 +731,8 @@ jobs:
                       "content": reviewer_prompt
                   }
               ],
-              1200
+              1200,
+              False
           )
 
           print(reviewer_raw)
@@ -823,26 +743,21 @@ jobs:
               re.IGNORECASE
           )
 
-          reviewer_status = ""
-
-          if reviewer_match:
-              reviewer_status = (
-                  reviewer_match
-                  .group(1)
-                  .upper()
-              )
-
-          reviewer_reject = (
-              reviewer_status.startswith(
-                  "REJECT"
-              )
+          reviewer_status = (
+              reviewer_match.group(1).upper()
+              if reviewer_match
+              else ""
           )
 
-          # ========================================================
-          # FIXER
-          # ========================================================
+          reviewer_reject = (
+              reviewer_status.startswith("REJECT")
+          )
 
-          if (not qa_pass) or reviewer_reject:
+          # ============================================================
+          # FIXER
+          # ============================================================
+
+          if not qa_pass or reviewer_reject:
 
               print()
               print("========================================")
@@ -851,14 +766,14 @@ jobs:
 
               fixer_context = build_context(
                   changed_paths,
-                  max_chars=7000
+                  7000
               )
 
               fixer_prompt = f"""
-              Исправь проблемы, найденные QA или Reviewer.
+              Исправь реальные проблемы проекта.
 
-              ЗАДАЧА:
-              {TASK}
+              ИСХОДНАЯ ЗАДАЧА ПОЛЬЗОВАТЕЛЯ:
+              {USER_TASK}
 
               CURRENT DIFF:
               {diff[:6000]}
@@ -872,7 +787,11 @@ jobs:
               АКТУАЛЬНЫЕ ФАЙЛЫ:
               {fixer_context}
 
-              Исправляй только реальные проблемы.
+              ВАЖНО:
+
+              Исходная задача пользователя имеет приоритет.
+
+              Исправляй только проблемы, относящиеся к задаче.
 
               Верни ТОЛЬКО JSON:
 
@@ -880,41 +799,37 @@ jobs:
                 "changes": [
                   {{
                     "path": "README.md",
-                    "content_lines": [
-                      "полное",
-                      "исправленное",
-                      "содержимое"
-                    ]
+                    "content": "полное содержимое файла"
                   }}
                 ]
               }}
 
-              Не используй diff.
-              Не меняй несвязанные файлы.
+              Правила:
+
+              - content = полное содержимое файла;
+              - переносы строк = \\n;
+              - не используй diff;
+              - не используй markdown fences;
+              - не меняй несвязанные файлы.
               """
 
-              fixer_raw = groq_call(
-                  [
-                      {
-                          "role": "system",
-                          "content": read_file(
-                              ".ai/CODER.md"
-                          )
-                      },
-                      {
-                          "role": "user",
-                          "content": fixer_prompt
-                      }
-                  ],
-                  3500
-              )
-
-              fixer_raw = clean_json(
-                  fixer_raw
-              )
-
-              fixer = json.loads(
-                  fixer_raw
+              fixer = parse_json(
+                  groq(
+                      [
+                          {
+                              "role": "system",
+                              "content": read_file(
+                                  ".ai/CODER.md"
+                              )
+                          },
+                          {
+                              "role": "user",
+                              "content": fixer_prompt
+                          }
+                      ],
+                      3500,
+                      True
+                  )
               )
 
               fixer_changes = fixer.get(
@@ -927,9 +842,7 @@ jobs:
               for change in fixer_changes:
 
                   path = change.get("path")
-                  lines = change.get(
-                      "content_lines"
-                  )
+                  content = change.get("content")
 
                   if path not in ALLOWED_FILES:
                       raise RuntimeError(
@@ -937,25 +850,24 @@ jobs:
                           f"forbidden file: {path}"
                       )
 
-                  if not isinstance(lines, list):
+                  if not isinstance(content, str):
                       raise RuntimeError(
-                          f"Invalid content_lines for {path}"
+                          f"Fixer returned invalid content "
+                          f"for {path}"
                       )
 
-                  write_file(
+                  write_content(
                       path,
-                      lines
+                      content
                   )
 
                   fixer_paths.append(path)
 
-              run_command(
-                  "git diff --check"
-              )
+              run("git diff --check")
 
-              # ====================================================
+              # ========================================================
               # FINAL QA
-              # ====================================================
+              # ========================================================
 
               print()
               print("========================================")
@@ -968,10 +880,10 @@ jobs:
 
               final_context = build_context(
                   final_paths,
-                  max_chars=7000
+                  7000
               )
 
-              final_diff = run_command(
+              final_diff = run(
                   "git diff -- "
                   "README.md "
                   "index.html "
@@ -983,34 +895,31 @@ jobs:
               )
 
               final_qa_prompt = f"""
-              Проведи финальную проверку LORGUS.
+              Проведи финальную независимую проверку.
 
-              ЗАДАЧА:
-              {TASK}
+              ИСХОДНАЯ ЗАДАЧА:
+              {USER_TASK}
 
               ФИНАЛЬНЫЙ DIFF:
-              {final_diff[:6000]}
+              {final_diff[:7000]}
 
-              АКТУАЛЬНЫЕ ФАЙЛЫ:
+              ФИНАЛЬНЫЕ ФАЙЛЫ:
               {final_context}
 
-              Убедись, что:
+              Проверь непосредственно исходную задачу.
 
-              1. первоначальная задача выполнена;
-              2. проблемы QA исправлены;
-              3. проблемы Reviewer исправлены;
-              4. нет очевидных регрессий.
+              Не доверяй Architect, Coder или Reviewer.
 
-              Первая строка строго:
+              Первая строка:
 
               PASS
 
-              или
+              или:
 
               FAIL
               """
 
-              final_qa_raw = groq_call(
+              final_qa_raw = groq(
                   [
                       {
                           "role": "system",
@@ -1023,7 +932,8 @@ jobs:
                           "content": final_qa_prompt
                       }
                   ],
-                  1200
+                  1200,
+                  False
               )
 
               print(final_qa_raw)
@@ -1037,9 +947,9 @@ jobs:
                       "Final QA returned FAIL."
                   )
 
-              # ====================================================
+              # ========================================================
               # FINAL REVIEW
-              # ====================================================
+              # ========================================================
 
               print()
               print("========================================")
@@ -1047,10 +957,10 @@ jobs:
               print("========================================")
 
               final_review_prompt = f"""
-              Проведи финальный review изменений LORGUS.
+              Финальный review.
 
-              ЗАДАЧА:
-              {TASK}
+              ИСХОДНАЯ ЗАДАЧА:
+              {USER_TASK}
 
               FINAL QA:
               {final_qa_raw[:3000]}
@@ -1058,17 +968,18 @@ jobs:
               FINAL DIFF:
               {final_diff[:7000]}
 
-              Если всё соответствует задаче,
-              первая строка должна быть:
+              Независимо проверь соответствие задаче.
+
+              Первая строка:
 
               APPROVE
 
-              Иначе:
+              или:
 
               REJECT
               """
 
-              final_reviewer_raw = groq_call(
+              final_review_raw = groq(
                   [
                       {
                           "role": "system",
@@ -1081,14 +992,15 @@ jobs:
                           "content": final_review_prompt
                       }
                   ],
-                  1200
+                  1200,
+                  False
               )
 
-              print(final_reviewer_raw)
+              print(final_review_raw)
 
               final_match = re.match(
                   r"^\s*(APPROVED?|REJECT(?:ED)?)\b",
-                  final_reviewer_raw,
+                  final_review_raw,
                   re.IGNORECASE
               )
 
@@ -1098,14 +1010,10 @@ jobs:
                   )
 
               final_status = (
-                  final_match
-                  .group(1)
-                  .upper()
+                  final_match.group(1).upper()
               )
 
-              if final_status.startswith(
-                  "REJECT"
-              ):
+              if final_status.startswith("REJECT"):
                   raise RuntimeError(
                       "Final Reviewer returned REJECT."
                   )
@@ -1118,20 +1026,18 @@ jobs:
                   "the first implementation."
               )
 
-          # ========================================================
-          # FINAL DIFF
-          # ========================================================
+          # ============================================================
+          # FINAL CHECK
+          # ============================================================
 
           print()
           print("========================================")
-          print("FINAL DIFF CHECK")
+          print("FINAL CHECK")
           print("========================================")
 
-          run_command(
-              "git diff --check"
-          )
+          run("git diff --check")
 
-          final_diff = run_command(
+          final_diff = run(
               "git diff -- "
               "README.md "
               "index.html "
@@ -1144,31 +1050,29 @@ jobs:
 
           if not final_diff.strip():
 
-              print(
-                  "No changes detected."
-              )
+              print("No changes detected.")
 
               raise SystemExit(0)
 
-          # ========================================================
+          # ============================================================
           # COMMIT
-          # ========================================================
+          # ============================================================
 
           print()
           print("========================================")
           print("COMMIT")
           print("========================================")
 
-          run_command(
+          run(
               'git config user.name "LORGUS AI"'
           )
 
-          run_command(
+          run(
               'git config user.email '
               '"lorgus-ai@users.noreply.github.com"'
           )
 
-          run_command(
+          run(
               "git add -- "
               "README.md "
               "index.html "
@@ -1179,11 +1083,11 @@ jobs:
               "docs/PROJECT.md"
           )
 
-          run_command(
+          run(
               'git commit -m "AI: update LORGUS project"'
           )
 
-          run_command(
+          run(
               "git push origin HEAD"
           )
 
