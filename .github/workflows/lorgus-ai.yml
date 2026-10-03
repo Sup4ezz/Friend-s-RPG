@@ -1,6 +1,8 @@
 name: LORGUS AI Agent
+
 on:
 workflow_dispatch:
+
 jobs:
 test:
 runs-on: ubuntu-latest
