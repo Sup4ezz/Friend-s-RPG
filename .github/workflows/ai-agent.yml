@@ -20,7 +20,6 @@ jobs:
       OPENROUTER_API_KEY: ${{ secrets.API }}
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -90,8 +89,13 @@ jobs:
               )
 
               try:
-                  with urllib.request.urlopen(request, timeout=180) as response:
-                      data = json.loads(response.read().decode())
+                  with urllib.request.urlopen(
+                      request,
+                      timeout=180
+                  ) as response:
+                      data = json.loads(
+                          response.read().decode()
+                      )
 
                   return data["choices"][0]["message"]["content"]
 
@@ -160,18 +164,24 @@ jobs:
 
           def apply_changes(changes):
               for change in changes:
-
                   path = change.get("path")
-                  content_lines = change.get("content_lines")
+                  content_lines = change.get(
+                      "content_lines"
+                  )
 
                   if path not in ALLOWED_FILES:
                       raise RuntimeError(
-                          f"AI attempted to modify forbidden file: {path}"
+                          f"AI attempted to modify "
+                          f"forbidden file: {path}"
                       )
 
-                  if not isinstance(content_lines, list):
+                  if not isinstance(
+                      content_lines,
+                      list
+                  ):
                       raise RuntimeError(
-                          f"Invalid content_lines for {path}"
+                          f"Invalid content_lines "
+                          f"for {path}"
                       )
 
                   content = "\n".join(
@@ -263,7 +273,8 @@ jobs:
           coder_prompt = f"""
           Ты Coder Agent проекта LORGUS.
 
-          Ты работаешь с реальным текущим состоянием репозитория.
+          Ты работаешь с реальным текущим состоянием
+          репозитория.
 
           ЗАДАЧА:
           {TASK}
@@ -283,10 +294,11 @@ jobs:
           5. Не переписывай файл целиком без необходимости.
           6. Не переводи существующий текст на другой язык.
           7. Сохраняй существующий язык, форматирование и стиль.
-          8. Не меняй существующий контент, если этого не требует задача.
+          8. Не меняй существующий контент,
+             если этого не требует задача.
           9. Не добавляй секреты.
           10. Не меняй .ai файлы.
-          11. Если файл уже содержит нужную функциональность,
+          11. Если нужная функциональность уже существует,
               не переписывай её без причины.
 
           Верни ТОЛЬКО JSON:
@@ -361,7 +373,7 @@ jobs:
               qa_prompt = f"""
               Ты QA Agent проекта LORGUS.
 
-              Твоя задача — проверить реальное текущее состояние
+              Проверь реальное текущее состояние
               репозитория после изменений.
 
               ЗАДАЧА:
@@ -382,8 +394,8 @@ jobs:
               содержимое файлов.
 
               Если требуемый элемент уже существовал до изменения,
-              его отсутствие в diff НЕ означает, что его нет
-              в текущем файле.
+              его отсутствие в diff НЕ означает,
+              что его нет в текущем файле.
 
               Проверь:
 
@@ -391,9 +403,9 @@ jobs:
               2. Не сломана ли существующая функциональность.
               3. Нет ли ошибок JavaScript.
               4. Нет ли ошибок HTML/CSS.
-              5. Нет ли проблем с API.
-              6. Нет ли проблем с Supabase.
-              7. Нет ли проблем с Cloudflare Worker.
+              5. Нет ли проблем API.
+              6. Нет ли проблем Supabase.
+              7. Нет ли проблем Cloudflare Worker.
               8. Не изменены ли несвязанные файлы.
               9. Не изменён ли существующий контент без причины.
 
@@ -467,16 +479,16 @@ jobs:
 
                   1. Исправляй только указанные проблемы.
                   2. Не переписывай проект.
-                  3. Не переводь существующий текст.
+                  3. Не переводи существующий текст.
                   4. Сохраняй язык файлов.
                   5. Сохраняй существующее содержимое.
                   6. Не меняй несвязанные части.
                   7. Не делай рефакторинг без необходимости.
                   8. Если проблема уже исправлена —
                      верни changes: [].
-                  9. Если QA ошибся и проблема основана только
-                     на неправильном чтении diff — не вноси
-                     бессмысленные изменения.
+                  9. Если QA ошибся и проблема основана
+                     только на неправильном чтении diff —
+                     не вноси бессмысленные изменения.
 
                   Верни ТОЛЬКО JSON:
 
@@ -740,7 +752,8 @@ jobs:
               )
 
               run_cmd(
-                  'git config user.email "lorgus-ai@users.noreply.github.com"'
+                  'git config user.email '
+                  '"lorgus-ai@users.noreply.github.com"'
               )
 
               run_cmd(
