@@ -25,11 +25,11 @@ jobs:
           TASK: ${{ inputs.task }}
         run: |
           python - <<'PY'
-          import json
           import os
           import subprocess
           import urllib.request
           import urllib.error
+          import json
 
           API = os.environ["API"]
           TASK = os.environ["TASK"]
@@ -49,7 +49,7 @@ jobs:
               "wrangler.toml"
           ]
 
-          editable_files = [
+          editable_files = {
               "README.md",
               "index.html",
               "app.js",
@@ -57,13 +57,13 @@ jobs:
               "worker.js",
               "wrangler.toml",
               "docs/PROJECT.md"
-          ]
+          }
 
           MAX_FIX_ATTEMPTS = 2
 
 
           # ============================================================
-          # FILES
+          # FILE READING
           # ============================================================
 
           def read_file(path):
@@ -95,16 +95,16 @@ jobs:
 
 
           # ============================================================
-          # AI REQUEST
+          # OPENROUTER
           # ============================================================
 
-          def ask_ai(instruction):
+          def ask_ai(prompt):
               data = {
                   "model": "openrouter/free",
                   "messages": [
                       {
                           "role": "user",
-                          "content": instruction
+                          "content": prompt
                       }
                   ]
               }
@@ -129,22 +129,22 @@ jobs:
                   print(e.read().decode("utf-8"))
                   raise
 
-              if "choices" not in result or not result["choices"]:
-                  raise RuntimeError("AI returned no choices")
+              if not result.get("choices"):
+                  raise RuntimeError("OpenRouter returned no choices")
 
               content = result["choices"][0]["message"].get("content")
 
               if not content:
-                  raise RuntimeError("AI returned empty content")
+                  raise RuntimeError("OpenRouter returned empty content")
 
-              return content
+              return content.strip()
 
 
           # ============================================================
-          # CLEAN DIFF
+          # NORMALIZE AI DIFF
           # ============================================================
 
-          def clean_diff(text):
+          def normalize_diff(text):
               text = text.strip()
 
               if text == "NO_CHANGES":
@@ -162,31 +162,55 @@ jobs:
 
               text = "\n".join(lines).strip()
 
-              if "NO_CHANGES" in text and "diff --git" not in text:
-                  return "NO_CHANGES"
-
-              # If model added text before the actual diff,
-              # start from the first diff header.
+              # Find the actual beginning of the diff.
               marker = text.find("diff --git ")
 
-              if marker > 0:
+              if marker >= 0:
                   text = text[marker:]
+
+              # Remove accidental trailing markdown fence.
+              if text.endswith("```"):
+                  text = text[:-3].rstrip()
 
               return text.strip()
 
 
           # ============================================================
-          # VALIDATE DIFF PATHS
+          # VALIDATE DIFF
           # ============================================================
 
-          def validate_diff(diff):
+          def validate_diff(diff, agent):
+              if diff == "NO_CHANGES":
+                  return
+
+              if not diff.startswith("diff --git "):
+                  raise RuntimeError(
+                      f"{agent} did not return a valid unified diff"
+                  )
+
               for line in diff.splitlines():
+
+                  if line.startswith("<<<<<<<"):
+                      raise RuntimeError(
+                          f"{agent} returned merge-conflict markers"
+                      )
+
+                  if line.startswith("======="):
+                      raise RuntimeError(
+                          f"{agent} returned invalid separator"
+                      )
+
+                  if line.startswith(">>>>>>>"):
+                      raise RuntimeError(
+                          f"{agent} returned merge-conflict markers"
+                      )
+
                   if line.startswith("diff --git "):
                       parts = line.split()
 
-                      if len(parts) < 4:
+                      if len(parts) != 4:
                           raise RuntimeError(
-                              "Invalid diff header"
+                              f"{agent} returned malformed diff header"
                           )
 
                       old_path = parts[2][2:]
@@ -194,12 +218,14 @@ jobs:
 
                       if old_path not in editable_files:
                           raise RuntimeError(
-                              f"AI attempted to modify forbidden file: {old_path}"
+                              f"{agent} attempted to modify forbidden file: "
+                              f"{old_path}"
                           )
 
                       if new_path not in editable_files:
                           raise RuntimeError(
-                              f"AI attempted to modify forbidden file: {new_path}"
+                              f"{agent} attempted to modify forbidden file: "
+                              f"{new_path}"
                           )
 
 
@@ -207,17 +233,17 @@ jobs:
           # APPLY DIFF
           # ============================================================
 
-          def apply_diff(raw_diff, agent_name):
-              diff = clean_diff(raw_diff)
+          def apply_ai_diff(text, agent):
+              diff = normalize_diff(text)
 
               if diff == "NO_CHANGES":
-                  print(f"\n{agent_name}: NO CHANGES\n")
+                  print(f"\n{agent}: NO CHANGES\n")
                   return False
 
-              validate_diff(diff)
+              validate_diff(diff, agent)
 
               with open("/tmp/lorgus.patch", "w", encoding="utf-8") as f:
-                  f.write(diff)
+                  f.write(diff + "\n")
 
               check = subprocess.run(
                   ["git", "apply", "--check", "/tmp/lorgus.patch"],
@@ -226,14 +252,12 @@ jobs:
               )
 
               if check.returncode != 0:
-                  print(
-                      f"\n{agent_name} PRODUCED INVALID PATCH:\n"
-                  )
+                  print(f"\n{agent} INVALID PATCH:\n")
                   print(check.stdout)
                   print(check.stderr)
 
                   raise RuntimeError(
-                      f"{agent_name} produced an invalid git patch"
+                      f"{agent} produced an invalid git patch"
                   )
 
               subprocess.run(
@@ -241,7 +265,7 @@ jobs:
                   check=True
               )
 
-              print(f"\n{agent_name}: PATCH APPLIED\n")
+              print(f"\n{agent}: PATCH APPLIED\n")
 
               return True
 
@@ -255,36 +279,51 @@ jobs:
           architect_prompt = f"""
           Ты ARCHITECT проекта LORGUS.
 
+          Твоя задача — ТОЛЬКО анализировать проект.
+
+          НИКОГДА не создавай diff.
+          НИКОГДА не используй строки:
+          diff --git
+          +++
+          ---
+          <<<<<<<
+          =======
+          >>>>>>>
+
           ===== ROLE =====
+
           {read_file(".ai/ARCHITECT.md")}
 
           ===== GENERAL RULES =====
+
           {read_file(".ai/AGENT.md")}
 
           ===== USER TASK =====
+
           {TASK}
 
-          ===== REPOSITORY =====
+          ===== REAL REPOSITORY =====
+
           {context}
 
-          Изучи реальный репозиторий.
+          Изучи реальный код.
 
           Определи:
 
           1. Что сейчас существует.
           2. Как работает нужная функциональность.
-          3. Какие файлы реально связаны с задачей.
+          3. Какие файлы относятся к задаче.
           4. Что необходимо изменить.
-          5. Что менять НЕ нужно.
+          5. Что менять не нужно.
           6. Возможные риски.
           7. Как проверить результат.
 
+          Ответ должен быть ОБЫЧНЫМ ТЕКСТОМ.
+
           Не пиши код.
-
-          Не придумывай отсутствующие функции,
-          файлы, API или зависимости.
-
-          Используй только фактическое содержимое репозитория.
+          Не пиши diff.
+          Не предлагай вымышленные файлы.
+          Не придумывай функции.
           """
 
           architect = ask_ai(architect_prompt)
@@ -303,51 +342,69 @@ jobs:
           Ты CODER проекта LORGUS.
 
           ===== ROLE =====
+
           {read_file(".ai/CODER.md")}
 
           ===== GENERAL RULES =====
+
           {read_file(".ai/AGENT.md")}
 
           ===== USER TASK =====
+
           {TASK}
 
-          ===== ARCHITECT PLAN =====
+          ===== ARCHITECT ANALYSIS =====
+
           {architect}
 
-          ===== CURRENT REPOSITORY =====
+          ===== REAL REPOSITORY =====
+
           {context}
 
-          Подготовь реальные изменения.
+          Твоя задача — внести необходимые изменения.
 
-          Правила:
+          Используй только существующий код.
 
-          1. Используй только существующий код.
-          2. Не переписывай проект целиком.
-          3. Не удаляй существующую функциональность без необходимости.
-          4. Изменяй только необходимые файлы.
-          5. Не добавляй секреты.
-          6. Не изменяй .ai/.
-          7. Не добавляй вымышленные зависимости.
-          8. Если функциональность уже существует и соответствует задаче,
-             верни только NO_CHANGES.
-          9. Если изменения нужны — верни только unified diff.
-          10. Не используй Markdown вокруг diff.
+          Не переписывай проект целиком.
+
+          Не удаляй существующую функциональность без необходимости.
+
+          Не создавай вымышленные зависимости.
+
+          Не добавляй секреты.
+
+          Не изменяй .ai/.
+
+          Если функциональность уже существует и задача выполнена,
+          верни ровно:
+
+          NO_CHANGES
+
+          Если изменения нужны, верни ТОЛЬКО настоящий unified git diff.
+
+          ПЕРВАЯ СТРОКА ДОЛЖНА БЫТЬ:
+
+          diff --git
+
+          НЕЛЬЗЯ использовать Markdown-блоки.
+
+          НЕЛЬЗЯ писать пояснения до или после diff.
+
+          НЕЛЬЗЯ использовать:
+
+          <<<<<<<
+          =======
+          >>>>>>>
 
           Разрешённые файлы:
 
-          {editable_files}
-
-          Формат:
-
-          diff --git a/file b/file
-          --- a/file
-          +++ b/file
-          @@
-          ...
-
-          Если изменений не требуется:
-
-          NO_CHANGES
+          README.md
+          index.html
+          app.js
+          style.css
+          worker.js
+          wrangler.toml
+          docs/PROJECT.md
           """
 
           coder = ask_ai(coder_prompt)
@@ -355,18 +412,20 @@ jobs:
           print("\n================ CODER ================\n")
           print(coder)
 
-          apply_diff(coder, "CODER")
+          apply_ai_diff(coder, "CODER")
 
 
           # ============================================================
-          # QA + REVIEWER LOOP
+          # QA / REVIEWER / FIXER LOOP
           # ============================================================
+
+          approved = False
 
           for attempt in range(0, MAX_FIX_ATTEMPTS + 1):
 
               print(
-                  f"\n\n================ ATTEMPT {attempt + 1} "
-                  f"================\n"
+                  f"\n================ ATTEMPT "
+                  f"{attempt + 1} ================\n"
               )
 
               current_context = repository_context()
@@ -378,54 +437,58 @@ jobs:
               # ========================================================
 
               qa_prompt = f"""
-              Ты QA AGENT проекта LORGUS.
+              Ты QA проекта LORGUS.
 
               ===== ROLE =====
+
               {read_file(".ai/QA.md")}
 
               ===== GENERAL RULES =====
+
               {read_file(".ai/AGENT.md")}
 
               ===== USER TASK =====
+
               {TASK}
 
               ===== ARCHITECT =====
+
               {architect}
 
               ===== CURRENT REPOSITORY =====
+
               {current_context}
 
-              ===== GIT DIFF =====
+              ===== CURRENT GIT DIFF =====
+
               {current_diff}
 
               Проверь реальные изменения.
 
-              Проверяй:
+              Проверь:
 
-              - JavaScript;
-              - HTML;
-              - CSS;
-              - API;
-              - Supabase;
-              - Cloudflare Worker;
-              - синтаксис;
-              - регрессии;
-              - соответствие задаче;
-              - сохранение существующей функциональности.
-
-              Если возможно, выполняй доступные проверки.
+              - JavaScript
+              - HTML
+              - CSS
+              - Supabase
+              - Cloudflare Worker
+              - API
+              - синтаксис
+              - регрессии
+              - соответствие задаче
+              - сохранение старой функциональности
 
               Не изменяй файлы.
 
-              В конце обязательно напиши одну строку:
+              В конце напиши одну из двух строк:
 
               RESULT: PASS
 
-              или:
+              или
 
               RESULT: FAIL
 
-              Если FAIL — перечисли конкретные проблемы.
+              Если FAIL — обязательно перечисли конкретные проблемы.
               """
 
               qa = ask_ai(qa_prompt)
@@ -445,49 +508,56 @@ jobs:
               Ты REVIEWER проекта LORGUS.
 
               ===== ROLE =====
+
               {read_file(".ai/REVIEWER.md")}
 
               ===== GENERAL RULES =====
+
               {read_file(".ai/AGENT.md")}
 
               ===== USER TASK =====
+
               {TASK}
 
               ===== ARCHITECT =====
+
               {architect}
 
-              ===== QA RESULT =====
+              ===== QA =====
+
               {qa}
 
               ===== CURRENT REPOSITORY =====
+
               {reviewer_context}
 
               ===== GIT DIFF =====
+
               {reviewer_diff}
 
               Проведи финальное code review.
 
-              Проверяй:
+              Проверь:
 
-              - логику;
-              - безопасность;
-              - JavaScript;
-              - Supabase;
-              - Cloudflare Worker;
-              - XSS;
-              - пользовательские данные;
-              - регрессии;
-              - лишние изменения;
-              - архитектуру;
-              - соответствие исходной задаче.
+              - логику
+              - безопасность
+              - JavaScript
+              - Supabase
+              - Cloudflare Worker
+              - XSS
+              - пользовательские данные
+              - регрессии
+              - лишние изменения
+              - архитектуру
+              - соответствие задаче
 
               Не изменяй файлы.
 
-              В конце обязательно напиши:
+              В конце напиши:
 
               RESULT: APPROVE
 
-              или:
+              или
 
               RESULT: REJECT
 
@@ -501,17 +571,15 @@ jobs:
 
 
               # ========================================================
-              # CHECK RESULT
+              # APPROVED
               # ========================================================
 
-              qa_failed = "RESULT: FAIL" in qa
-              reviewer_failed = "RESULT: REJECT" in reviewer
-
-              if not qa_failed and not reviewer_failed:
-                  print(
-                      "\n================ FINAL ================\n"
-                  )
-                  print("PIPELINE RESULT: APPROVED")
+              if (
+                  "RESULT: PASS" in qa
+                  and
+                  "RESULT: APPROVE" in reviewer
+              ):
+                  approved = True
                   break
 
 
@@ -520,19 +588,9 @@ jobs:
               # ========================================================
 
               if attempt >= MAX_FIX_ATTEMPTS:
-                  print(
-                      "\n================ FINAL ================\n"
-                  )
-                  print(
-                      "PIPELINE RESULT: FAILED "
-                      "(maximum fix attempts reached)"
-                  )
-                  raise SystemExit(1)
+                  break
 
-
-              print(
-                  "\n================ FIXER ================\n"
-              )
+              print("\n================ FIXER ================\n")
 
               fixer_context = repository_context()
               fixer_diff = get_diff()
@@ -540,79 +598,91 @@ jobs:
               fixer_prompt = f"""
               Ты FIXER проекта LORGUS.
 
-              Твоя задача — исправить реальные проблемы,
+              Исправь реальные проблемы,
               найденные QA или Reviewer.
 
               ===== GENERAL RULES =====
+
               {read_file(".ai/AGENT.md")}
 
               ===== CODER RULES =====
+
               {read_file(".ai/CODER.md")}
 
               ===== USER TASK =====
+
               {TASK}
 
-              ===== ARCHITECT PLAN =====
+              ===== ARCHITECT =====
+
               {architect}
 
               ===== QA RESULT =====
+
               {qa}
 
               ===== REVIEWER RESULT =====
+
               {reviewer}
 
               ===== CURRENT REPOSITORY =====
+
               {fixer_context}
 
-              ===== CURRENT GIT DIFF =====
+              ===== CURRENT DIFF =====
+
               {fixer_diff}
 
-              Исправь только реальные проблемы,
-              которые относятся к текущей задаче.
+              Исправляй только проблемы,
+              относящиеся к текущей задаче.
 
-              Правила:
+              Не переписывай проект.
 
-              1. Не переписывай проект целиком.
-              2. Не удаляй существующую функциональность.
-              3. Не добавляй секреты.
-              4. Не изменяй .ai/.
-              5. Не добавляй вымышленные зависимости.
-              6. Изменяй только необходимые файлы.
-              7. Верни только unified diff.
-              8. Не используй Markdown вокруг diff.
+              Не удаляй существующую функциональность.
 
-              Разрешённые файлы:
+              Не добавляй секреты.
 
-              {editable_files}
+              Не изменяй .ai/.
 
-              Если исправлений не требуется:
+              Если исправлять нечего:
 
               NO_CHANGES
+
+              Иначе верни ТОЛЬКО unified git diff.
+
+              Первая строка:
+
+              diff --git
+
+              Без Markdown.
+
+              Без пояснений.
+
+              Без:
+
+              <<<<<<<
+              =======
+              >>>>>>> 
               """
 
               fixer = ask_ai(fixer_prompt)
 
               print(fixer)
 
-              changed = apply_diff(fixer, "FIXER")
+              changed = apply_ai_diff(fixer, "FIXER")
 
               if not changed:
-                  print(
-                      "\nFIXER сделал NO_CHANGES, "
-                      "но QA/Reviewer всё ещё отклоняют изменения."
-                  )
-
-                  raise SystemExit(1)
+                  break
 
 
           # ============================================================
-          # FINAL DIFF
+          # FINAL RESULT
           # ============================================================
 
           final_diff = get_diff()
 
           print(
-              "\n\n================ FINAL GIT DIFF ================\n"
+              "\n================ FINAL GIT DIFF ================\n"
           )
 
           if final_diff:
@@ -621,7 +691,13 @@ jobs:
               print("NO CHANGES")
 
           print(
-              "\n================ PIPELINE COMPLETE ================\n"
+              "\n================ FINAL ================\n"
           )
+
+          if approved:
+              print("PIPELINE RESULT: APPROVED")
+          else:
+              print("PIPELINE RESULT: FAILED")
+              raise SystemExit(1)
 
           PY
