@@ -9,7 +9,7 @@ on:
         type: string
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   ai:
@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Run AI pipeline
         env:
@@ -25,18 +27,19 @@ jobs:
           TASK: ${{ inputs.task }}
         run: |
           python3 <<'PY'
-          import os
           import json
+          import os
           import subprocess
           import sys
           import urllib.request
-
-          API_KEY = os.environ["OPENROUTER_API_KEY"]
-          TASK = os.environ["TASK"]
+          import urllib.error
 
           MODEL = "openrouter/free"
 
-          EDITABLE_FILES = {
+          TASK = os.environ["TASK"]
+          API_KEY = os.environ["OPENROUTER_API_KEY"]
+
+          ALLOWED_FILES = {
               "README.md",
               "index.html",
               "app.js",
@@ -45,6 +48,7 @@ jobs:
               "wrangler.toml",
               "docs/PROJECT.md",
           }
+
 
           def run(cmd):
               result = subprocess.run(
@@ -55,61 +59,27 @@ jobs:
               )
 
               if result.returncode != 0:
-                  raise RuntimeError(
-                      f"Command failed:\n{cmd}\n\n"
-                      f"STDOUT:\n{result.stdout}\n\n"
-                      f"STDERR:\n{result.stderr}"
-                  )
+                  print(result.stdout)
+                  print(result.stderr)
+                  raise RuntimeError(f"Command failed: {cmd}")
 
               return result.stdout
 
-          def repo_text():
-              files = []
 
-              for root, dirs, names in os.walk("."):
-                  dirs[:] = [
-                      d for d in dirs
-                      if d not in {".git", ".github"}
-                  ]
-
-                  for name in names:
-                      path = os.path.join(root, name)
-
-                      if path.startswith("./"):
-                          path = path[2:]
-
-                      try:
-                          with open(path, "r", encoding="utf-8") as f:
-                              content = f.read()
-                      except (UnicodeDecodeError, OSError):
-                          continue
-
-                      files.append(
-                          f"\n===== FILE: {path} =====\n"
-                          f"{content}\n"
-                          f"===== END FILE =====\n"
-                      )
-
-              return "".join(sorted(files))
-
-          def ask_ai(system_prompt, user_prompt):
-              payload = {
+          def ask_ai(prompt):
+              data = json.dumps({
                   "model": MODEL,
                   "messages": [
                       {
-                          "role": "system",
-                          "content": system_prompt
-                      },
-                      {
                           "role": "user",
-                          "content": user_prompt
+                          "content": prompt
                       }
                   ]
-              }
+              }).encode("utf-8")
 
               request = urllib.request.Request(
                   "https://openrouter.ai/api/v1/chat/completions",
-                  data=json.dumps(payload).encode("utf-8"),
+                  data=data,
                   headers={
                       "Authorization": f"Bearer {API_KEY}",
                       "Content-Type": "application/json",
@@ -119,12 +89,18 @@ jobs:
                   method="POST"
               )
 
-              with urllib.request.urlopen(request, timeout=180) as response:
-                  data = json.loads(
-                      response.read().decode("utf-8")
+              try:
+                  with urllib.request.urlopen(request, timeout=180) as response:
+                      result = json.loads(response.read().decode("utf-8"))
+
+                  return result["choices"][0]["message"]["content"]
+
+              except urllib.error.HTTPError as e:
+                  body = e.read().decode("utf-8", errors="replace")
+                  raise RuntimeError(
+                      f"OpenRouter HTTP {e.code}: {body}"
                   )
 
-              return data["choices"][0]["message"]["content"]
 
           def clean_json(text):
               text = text.strip()
@@ -140,560 +116,638 @@ jobs:
 
                   text = "\n".join(lines).strip()
 
+              start = text.find("{")
+              end = text.rfind("}")
+
+              if start != -1 and end != -1 and end > start:
+                  text = text[start:end + 1]
+
+              return text
+
+
+          def parse_json(text):
+              cleaned = clean_json(text)
+
               try:
-                  return json.loads(text)
-              except json.JSONDecodeError:
-                  start = text.find("{")
-                  end = text.rfind("}")
-
-                  if start == -1 or end == -1 or end <= start:
-                      raise RuntimeError(
-                          "AI did not return valid JSON:\n\n" + text
-                      )
-
-                  try:
-                      return json.loads(
-                          text[start:end + 1]
-                      )
-                  except json.JSONDecodeError as e:
-                      raise RuntimeError(
-                          "AI returned invalid JSON:\n\n"
-                          + text
-                      ) from e
-
-          def apply_changes(response, agent_name):
-              if not isinstance(response, dict):
+                  return json.loads(cleaned)
+              except Exception as e:
                   raise RuntimeError(
-                      f"{agent_name}: response must be a JSON object"
+                      "AI did not return valid JSON:\n\n" + text
+                  ) from e
+
+
+          def read_repository():
+              files = {}
+
+              for path in ALLOWED_FILES:
+                  if os.path.isfile(path):
+                      with open(path, "r", encoding="utf-8") as f:
+                          files[path] = f.read()
+
+              return files
+
+
+          def repository_text():
+              files = read_repository()
+
+              parts = []
+
+              for path, content in files.items():
+                  parts.append(
+                      f"\n===== FILE: {path} =====\n"
+                      f"{content}\n"
                   )
 
-              changes = response.get("changes")
+              return "\n".join(parts)
+
+
+          def apply_changes(result):
+              if "changes" not in result:
+                  raise RuntimeError(
+                      "AI JSON does not contain 'changes'"
+                  )
+
+              changes = result["changes"]
 
               if not isinstance(changes, list):
                   raise RuntimeError(
-                      f"{agent_name}: 'changes' must be an array"
+                      "'changes' must be a list"
                   )
 
-              if len(changes) > 10:
-                  raise RuntimeError(
-                      f"{agent_name}: too many changed files"
-                  )
-
-              seen = set()
+              changed_paths = []
 
               for change in changes:
-                  if not isinstance(change, dict):
-                      raise RuntimeError(
-                          f"{agent_name}: invalid change object"
-                      )
-
                   path = change.get("path")
-                  lines = change.get("content_lines")
+                  content_lines = change.get("content_lines")
 
-                  if not isinstance(path, str):
+                  if path not in ALLOWED_FILES:
                       raise RuntimeError(
-                          f"{agent_name}: invalid file path"
+                          f"AI attempted to modify forbidden file: {path}"
                       )
 
-                  if not isinstance(lines, list):
+                  if not isinstance(content_lines, list):
                       raise RuntimeError(
-                          f"{agent_name}: content_lines must be an array"
+                          f"content_lines missing or invalid for {path}"
                       )
 
-                  if path.startswith("/"):
-                      raise RuntimeError(
-                          f"{agent_name}: absolute path forbidden: {path}"
-                      )
+                  content = "\n".join(content_lines) + "\n"
 
-                  if ".." in path.split("/"):
-                      raise RuntimeError(
-                          f"{agent_name}: parent path forbidden: {path}"
-                      )
-
-                  if path not in EDITABLE_FILES:
-                      raise RuntimeError(
-                          f"{agent_name}: file is not allowed: {path}"
-                      )
-
-                  if path in seen:
-                      raise RuntimeError(
-                          f"{agent_name}: duplicate file: {path}"
-                      )
-
-                  seen.add(path)
-
-                  for line in lines:
-                      if not isinstance(line, str):
-                          raise RuntimeError(
-                              f"{agent_name}: every content_lines item must be a string"
-                          )
-
-                  content = "\n".join(lines)
-
-                  if lines:
-                      content += "\n"
-
-                  directory = os.path.dirname(path)
-
-                  if directory:
-                      os.makedirs(
-                          directory,
-                          exist_ok=True
-                      )
-
-                  with open(
-                      path,
-                      "w",
-                      encoding="utf-8",
-                      newline=""
-                  ) as f:
+                  with open(path, "w", encoding="utf-8") as f:
                       f.write(content)
 
-                  print(
-                      f"{agent_name}: updated {path}"
-                  )
+                  changed_paths.append(path)
 
-              if not changes:
-                  print(
-                      f"{agent_name}: no changes"
-                  )
+              return changed_paths
 
-          print("========================================")
+
+          def git_diff():
+              return run("git diff --")
+
+
+          print("=" * 40)
           print("LORGUS AI WORKSPACE")
-          print("========================================")
+          print("=" * 40)
           print()
           print("TASK:")
           print(TASK)
           print()
 
-          initial_repo = repo_text()
+          initial_files = read_repository()
 
-          print("========================================")
+
+          # ============================================================
+          # ARCHITECT
+          # ============================================================
+
+          print("=" * 40)
           print("ARCHITECT")
-          print("========================================")
+          print("=" * 40)
 
-          architect = ask_ai(
-              """
+          architect_prompt = f"""
           Ты Architect Agent проекта LORGUS.
 
-          Изучи реальное содержимое репозитория.
+          Твоя задача — только проанализировать задачу.
+          НИЧЕГО НЕ ИЗМЕНЯЙ.
 
-          Твоя задача:
-          - понять задачу;
-          - изучить существующую архитектуру;
-          - определить необходимые файлы;
-          - определить минимальный план изменений;
-          - учитывать существующий код;
-          - не придумывать отсутствующую функциональность.
+          Ты НЕ имеешь доступа к shell, terminal, git или filesystem.
+          Не используй <tool_call>.
+          Не пиши команды cat, git, bash, python и т.п.
 
-          НЕ изменяй файлы.
+          Изучи реальное содержимое репозитория ниже.
 
-          НЕ создавай git diff.
-
-          НЕ пиши код.
-
-          НЕ возвращай JSON.
-
-          Верни обычный текстовый архитектурный анализ.
-          """,
-              f"""
-          ЗАДАЧА:
-
+          ТЕКУЩАЯ ЗАДАЧА:
           {TASK}
 
-          ТЕКУЩИЙ РЕПОЗИТОРИЙ:
+          РЕПОЗИТОРИЙ:
+          {repository_text()}
 
-          {initial_repo}
+          Ответь обычным текстом.
+
+          Обязательно укажи:
+          - проблему;
+          - причину;
+          - затронутые файлы;
+          - план изменений;
+          - возможные риски;
+          - способ проверки результата.
+
+          Не создавай diff.
+          Не пиши код изменений.
           """
-          )
+
+          architect = ask_ai(architect_prompt)
 
           print(architect)
-
           print()
-          print("========================================")
+
+
+          # ============================================================
+          # CODER
+          # ============================================================
+
+          print("=" * 40)
           print("CODER")
-          print("========================================")
+          print("=" * 40)
 
-          coder_raw = ask_ai(
-              """
-          Ты Coding Agent проекта LORGUS.
+          coder_prompt = f"""
+          Ты Coder Agent проекта LORGUS.
 
-          Ты должен реализовать поставленную задачу.
+          Твоя задача — реализовать поставленную задачу.
 
-          Перед изменением изучи реальный репозиторий.
+          ТЫ НЕ ИМЕЕШЬ shell, terminal, git или filesystem.
+          Не используй <tool_call>.
+          Не пиши команды cat, git, bash, python и т.п.
 
-          ВАЖНО.
+          Ты должен работать ТОЛЬКО с реальным содержимым файлов,
+          приведённым ниже.
 
-          Ты НЕ должен создавать git diff.
-
-          Ты НЕ должен создавать unified diff.
-
-          Ты НЕ должен использовать:
-          @@
-          +++
-          ---
-          diff --git
-
-          Вместо этого верни ТОЛЬКО JSON следующего формата:
-
-          {
-            "changes": [
-              {
-                "path": "README.md",
-                "content_lines": [
-                  "# Friend-s-RPG",
-                  "",
-                  "## LORGUS AI Workspace",
-                  "",
-                  "текст"
-                ]
-              }
-            ]
-          }
-
-          КРИТИЧЕСКИ ВАЖНО:
-
-          content_lines содержит ПОЛНОЕ содержимое файла.
-
-          Каждый элемент content_lines является ОДНОЙ строкой файла.
-
-          НЕ помещай переносы строк внутрь строк content_lines.
-
-          НЕ возвращай только изменённый фрагмент.
-
-          Если файл нужно изменить — верни его полностью.
-
-          Если изменений не требуется:
-
-          {
-            "changes": []
-          }
-
-          Можно изменять только:
-
-          README.md
-          index.html
-          app.js
-          style.css
-          worker.js
-          wrangler.toml
-          docs/PROJECT.md
-
-          НЕ изменяй другие файлы.
-
-          Верни ТОЛЬКО JSON.
-          Без Markdown.
-          Без ```json.
-          Без пояснений.
-          """,
-              f"""
-          ЗАДАЧА:
-
+          ТЕКУЩАЯ ЗАДАЧА:
           {TASK}
 
           АРХИТЕКТУРНЫЙ АНАЛИЗ:
-
           {architect}
 
-          ТЕКУЩИЙ РЕПОЗИТОРИЙ:
-
-          {repo_text()}
-          """
-          )
-
-          coder = clean_json(coder_raw)
-
-          print(
-              json.dumps(
-                  coder,
-                  ensure_ascii=False,
-                  indent=2
-              )
-          )
-
-          apply_changes(
-              coder,
-              "CODER"
-          )
-
-          print()
-          print("========================================")
-          print("ACTUAL GIT DIFF")
-          print("========================================")
-
-          diff = run(
-              "git diff -- README.md index.html app.js style.css worker.js wrangler.toml docs/PROJECT.md"
-          )
-
-          if not diff.strip():
-              print("NO CHANGES")
-          else:
-              print(diff)
-
-          def current_diff():
-              return run(
-                  "git diff -- README.md index.html app.js style.css worker.js wrangler.toml docs/PROJECT.md"
-              )
-
-          def run_qa():
-              print()
-              print("========================================")
-              print("QA")
-              print("========================================")
-
-              result = ask_ai(
-                  """
-          Ты QA Agent проекта LORGUS.
-
-          Проверь РЕАЛЬНОЕ состояние репозитория после изменений.
-
-          Проверь:
-          - JavaScript;
-          - HTML;
-          - CSS;
-          - Worker;
-          - Supabase;
-          - отсутствие очевидных регрессий;
-          - соответствие поставленной задаче.
-
-          Используй реальное содержимое файлов и реальный git diff.
-
-          В конце обязательно напиши ровно одну из строк:
-
-          RESULT: PASS
-
-          или
-
-          RESULT: FAIL
-
-          Если FAIL — подробно объясни проблему.
-          """,
-                  f"""
-          ЗАДАЧА:
-
-          {TASK}
-
-          АРХИТЕКТ:
-
-          {architect}
-
-          РЕПОЗИТОРИЙ:
-
-          {repo_text()}
-
-          GIT DIFF:
-
-          {current_diff()}
-          """
-              )
-
-              print(result)
-
-              if "RESULT: PASS" in result:
-                  return True, result
-
-              return False, result
-
-          def run_reviewer():
-              print()
-              print("========================================")
-              print("REVIEWER")
-              print("========================================")
-
-              result = ask_ai(
-                  """
-          Ты Reviewer Agent проекта LORGUS.
-
-          Проверь реальные изменения в репозитории.
-
-          Проверяй:
-          - логику;
-          - безопасность;
-          - JavaScript;
-          - Supabase;
-          - Cloudflare Worker;
-          - регрессии;
-          - лишние изменения;
-          - соответствие архитектуре.
-
-          Особенно проверь:
-          - секреты;
-          - service-role ключи;
-          - пользовательские данные;
-          - XSS;
-          - неправильные права;
-          - ошибки API.
-
-          В конце обязательно напиши ровно одну из строк:
-
-          RESULT: APPROVE
-
-          или
-
-          RESULT: REJECT
-
-          Если REJECT — подробно укажи проблемы.
-          """,
-                  f"""
-          ЗАДАЧА:
-
-          {TASK}
-
-          АРХИТЕКТ:
-
-          {architect}
-
-          РЕПОЗИТОРИЙ:
-
-          {repo_text()}
-
-          GIT DIFF:
-
-          {current_diff()}
-          """
-              )
-
-              print(result)
-
-              if "RESULT: APPROVE" in result:
-                  return True, result
-
-              return False, result
-
-          for attempt in range(3):
-
-              print()
-              print("========================================")
-              print(
-                  f"VALIDATION PASS {attempt + 1}"
-              )
-              print("========================================")
-
-              qa_ok, qa_result = run_qa()
-
-              reviewer_ok, reviewer_result = run_reviewer()
-
-              if qa_ok and reviewer_ok:
-                  print()
-                  print("========================================")
-                  print("PIPELINE RESULT: APPROVED")
-                  print("========================================")
-
-                  print()
-                  print("FINAL DIFF:")
-
-                  print(current_diff())
-
-                  sys.exit(0)
-
-              if attempt == 2:
-                  print()
-                  print("========================================")
-                  print("PIPELINE RESULT: FAILED")
-                  print("========================================")
-
-                  sys.exit(1)
-
-              print()
-              print("========================================")
-              print("FIXER")
-              print("========================================")
-
-              fixer_raw = ask_ai(
-                  """
-          Ты Fixer Agent проекта LORGUS.
-
-          QA или Reviewer нашли проблему.
-
-          Исправь проблему в реальном коде.
-
-          НЕ создавай git diff.
-
-          Верни ТОЛЬКО JSON:
-
-          {
+          ТЕКУЩИЕ ФАЙЛЫ:
+          {repository_text()}
+
+          ВАЖНО:
+
+          1. Не придумывай содержимое существующих файлов.
+          2. Сохрани существующую функциональность.
+          3. Измени только необходимые файлы.
+          4. Не изменяй файлы, которых нет в задаче.
+          5. Не изменяй .ai/.
+          6. Не создавай unified diff.
+          7. Не используй markdown fences.
+          8. Верни ТОЛЬКО JSON.
+
+          Формат:
+
+          {{
             "changes": [
-              {
+              {{
                 "path": "README.md",
                 "content_lines": [
-                  "# Friend-s-RPG",
-                  "",
-                  "исправленное содержимое"
+                  "строка 1",
+                  "строка 2"
                 ]
-              }
+              }}
             ]
-          }
+          }}
 
-          content_lines содержит ПОЛНОЕ содержимое файла.
-
-          Каждый элемент content_lines — ОДНА строка файла.
-
-          НЕ помещай переносы строк внутрь элементов content_lines.
+          Для каждого изменяемого файла передай ПОЛНОЕ новое содержимое
+          через content_lines.
 
           Если изменений не требуется:
 
-          {
+          {{
             "changes": []
-          }
-
-          Разрешённые файлы:
-
-          README.md
-          index.html
-          app.js
-          style.css
-          worker.js
-          wrangler.toml
-          docs/PROJECT.md
-
-          НЕ изменяй другие файлы.
-
-          Без Markdown.
-          Без ```json.
-          Без пояснений.
-          """,
-                  f"""
-          ЗАДАЧА:
-
-          {TASK}
-
-          АРХИТЕКТ:
-
-          {architect}
-
-          ТЕКУЩИЙ РЕПОЗИТОРИЙ:
-
-          {repo_text()}
-
-          QA:
-
-          {qa_result}
-
-          REVIEWER:
-
-          {reviewer_result}
-
-          ТЕКУЩИЙ GIT DIFF:
-
-          {current_diff()}
+          }}
           """
-              )
 
-              fixer = clean_json(
-                  fixer_raw
-              )
+          coder_raw = ask_ai(coder_prompt)
 
-              print(
-                  json.dumps(
-                      fixer,
-                      ensure_ascii=False,
-                      indent=2
-                  )
-              )
+          print(coder_raw)
 
-              apply_changes(
-                  fixer,
-                  "FIXER"
-              )
+          coder = parse_json(coder_raw)
 
+          changed = apply_changes(coder)
+
+          print()
+          print("CODER: updated " + ", ".join(changed))
+
+
+          # ============================================================
+          # GIT DIFF
+          # ============================================================
+
+          print()
+          print("=" * 40)
+          print("ACTUAL GIT DIFF")
+          print("=" * 40)
+
+          diff = git_diff()
+
+          if not diff.strip():
+              print("NO CHANGES")
+              sys.exit(0)
+
+          print(diff)
+
+
+          # ============================================================
+          # VALIDATION LOOP
+          # ============================================================
+
+          approved = False
+
+          for validation_pass in range(1, 4):
+
+              print()
+              print("=" * 40)
+              print(f"VALIDATION PASS {validation_pass}")
+              print("=" * 40)
+
+
+              current_repository = repository_text()
+              current_diff = git_diff()
+
+
+              # ========================================================
+              # QA
+              # ========================================================
+
+              print()
+              print("=" * 40)
+              print("QA")
+              print("=" * 40)
+
+              qa_prompt = f"""
+              Ты QA Agent проекта LORGUS.
+
+              У тебя НЕТ shell, terminal, git, filesystem или других
+              инструментов.
+
+              НИКОГДА не используй:
+              <tool_call>
+              cat
+              git
+              bash
+              python
+              shell
+
+              Проверяй изменения ТОЛЬКО по данным,
+              которые приведены ниже.
+
+              ТЕКУЩАЯ ЗАДАЧА:
+              {TASK}
+
+              ТЕКУЩИЙ КОД:
+              {current_repository}
+
+              ACTUAL GIT DIFF:
+              {current_diff}
+
+              Проверь:
+
+              1. Выполнена ли задача.
+              2. Не изменены ли лишние файлы.
+              3. Сохранена ли существующая функциональность.
+              4. Нет ли очевидных ошибок.
+              5. Соответствует ли изменение задаче.
+
+              Верни ТОЛЬКО JSON.
+
+              Если всё правильно:
+
+              {{
+                "result": "PASS",
+                "summary": "краткое описание",
+                "problems": []
+              }}
+
+              Если есть проблема:
+
+              {{
+                "result": "FAIL",
+                "summary": "краткое описание",
+                "problems": [
+                  {{
+                    "file": "README.md",
+                    "problem": "что не так",
+                    "required_change": "что исправить"
+                  }}
+                ]
+              }}
+              """
+
+              qa_raw = ask_ai(qa_prompt)
+
+              print(qa_raw)
+
+              try:
+                  qa = parse_json(qa_raw)
+              except Exception as e:
+                  qa = {
+                      "result": "FAIL",
+                      "summary": "QA returned invalid JSON.",
+                      "problems": [
+                          {
+                              "file": "unknown",
+                              "problem": str(e),
+                              "required_change": "Повторно проверить изменения."
+                          }
+                      ]
+                  }
+
+
+              if qa.get("result") != "PASS":
+
+                  print()
+                  print("QA: FAIL")
+
+
+                  # ====================================================
+                  # FIXER
+                  # ====================================================
+
+                  print()
+                  print("=" * 40)
+                  print("FIXER")
+                  print("=" * 40)
+
+                  fixer_prompt = f"""
+                  Ты Fixer Agent проекта LORGUS.
+
+                  Исправь проблемы, найденные QA.
+
+                  У тебя НЕТ shell, terminal, git, filesystem
+                  или других инструментов.
+
+                  Не используй <tool_call>.
+                  Не используй cat, git, bash, python или shell.
+
+                  ТЕКУЩАЯ ЗАДАЧА:
+                  {TASK}
+
+                  ТЕКУЩИЕ ФАЙЛЫ:
+                  {current_repository}
+
+                  QA:
+                  {json.dumps(qa, ensure_ascii=False, indent=2)}
+
+                  ВАЖНО:
+
+                  Верни ТОЛЬКО JSON.
+
+                  Формат:
+
+                  {{
+                    "changes": [
+                      {{
+                        "path": "README.md",
+                        "content_lines": [
+                          "полное содержимое файла"
+                        ]
+                      }}
+                    ]
+                  }}
+
+                  Передавай полное содержимое изменяемого файла.
+
+                  Не изменяй несвязанные файлы.
+                  """
+
+                  fixer_raw = ask_ai(fixer_prompt)
+
+                  print(fixer_raw)
+
+                  fixer = parse_json(fixer_raw)
+
+                  fixed = apply_changes(fixer)
+
+                  print()
+                  print("FIXER: updated " + ", ".join(fixed))
+
+                  continue
+
+
+              print()
+              print("QA: PASS")
+
+
+              # ========================================================
+              # REVIEWER
+              # ========================================================
+
+              print()
+              print("=" * 40)
+              print("REVIEWER")
+              print("=" * 40)
+
+              reviewer_prompt = f"""
+              Ты Reviewer Agent проекта LORGUS.
+
+              У тебя НЕТ shell, terminal, git, filesystem
+              или других инструментов.
+
+              Не используй:
+              <tool_call>
+              cat
+              git
+              bash
+              python
+              shell
+
+              Проверяй реальные изменения по представленному diff.
+
+              ТЕКУЩАЯ ЗАДАЧА:
+              {TASK}
+
+              ACTUAL GIT DIFF:
+              {current_diff}
+
+              Проверь:
+
+              1. Логику.
+              2. Безопасность.
+              3. Архитектуру.
+              4. Регрессии.
+              5. Несвязанные изменения.
+              6. Соответствие задаче.
+              7. Секреты.
+              8. Supabase.
+              9. Cloudflare Worker.
+
+              Верни ТОЛЬКО JSON.
+
+              Если проблем нет:
+
+              {{
+                "result": "APPROVE",
+                "summary": "краткое описание",
+                "problems": []
+              }}
+
+              Если есть проблемы:
+
+              {{
+                "result": "REJECT",
+                "summary": "краткое описание",
+                "problems": [
+                  {{
+                    "file": "README.md",
+                    "problem": "что не так",
+                    "required_change": "что исправить"
+                  }}
+                ]
+              }}
+              """
+
+              reviewer_raw = ask_ai(reviewer_prompt)
+
+              print(reviewer_raw)
+
+              try:
+                  reviewer = parse_json(reviewer_raw)
+              except Exception as e:
+                  reviewer = {
+                      "result": "REJECT",
+                      "summary": "Reviewer returned invalid JSON.",
+                      "problems": [
+                          {
+                              "file": "unknown",
+                              "problem": str(e),
+                              "required_change": "Повторно проверить изменения."
+                          }
+                      ]
+                  }
+
+
+              if reviewer.get("result") != "APPROVE":
+
+                  print()
+                  print("REVIEWER: REJECT")
+
+
+                  # ====================================================
+                  # FIXER
+                  # ====================================================
+
+                  print()
+                  print("=" * 40)
+                  print("FIXER")
+                  print("=" * 40)
+
+                  fixer_prompt = f"""
+                  Ты Fixer Agent проекта LORGUS.
+
+                  Исправь проблемы Reviewer.
+
+                  У тебя НЕТ shell, terminal, git, filesystem
+                  или других инструментов.
+
+                  Не используй <tool_call>.
+                  Не используй cat, git, bash, python или shell.
+
+                  ТЕКУЩАЯ ЗАДАЧА:
+                  {TASK}
+
+                  ТЕКУЩИЕ ФАЙЛЫ:
+                  {current_repository}
+
+                  REVIEWER:
+                  {json.dumps(reviewer, ensure_ascii=False, indent=2)}
+
+                  Верни ТОЛЬКО JSON:
+
+                  {{
+                    "changes": [
+                      {{
+                        "path": "README.md",
+                        "content_lines": [
+                          "полное содержимое файла"
+                        ]
+                      }}
+                    ]
+                  }}
+
+                  Передавай полное содержимое изменяемого файла.
+
+                  Не изменяй несвязанные файлы.
+                  """
+
+                  fixer_raw = ask_ai(fixer_prompt)
+
+                  print(fixer_raw)
+
+                  fixer = parse_json(fixer_raw)
+
+                  fixed = apply_changes(fixer)
+
+                  print()
+                  print("FIXER: updated " + ", ".join(fixed))
+
+                  continue
+
+
+              print()
+              print("REVIEWER: APPROVE")
+
+              approved = True
+              break
+
+
+          if not approved:
+              print()
+              print("=" * 40)
+              print("PIPELINE RESULT: FAILED")
+              print("=" * 40)
+              sys.exit(1)
+
+
+          # ============================================================
+          # FINAL DIFF
+          # ============================================================
+
+          print()
+          print("=" * 40)
+          print("PIPELINE RESULT: APPROVED")
+          print("=" * 40)
+
+          final_diff = git_diff()
+
+          print()
+          print("FINAL DIFF:")
+          print(final_diff)
+
+
+          # ============================================================
+          # COMMIT + PUSH
+          # ============================================================
+
+          print()
+          print("=" * 40)
+          print("COMMIT + PUSH")
+          print("=" * 40)
+
+          run('git config user.name "LORGUS AI"')
+          run('git config user.email "lorgus-ai@users.noreply.github.com"')
+
+          run("git add -- README.md index.html app.js style.css worker.js wrangler.toml docs/PROJECT.md")
+
+          status = run("git status --short")
+
+          if not status.strip():
+              print("Nothing to commit.")
+              sys.exit(0)
+
+          run('git commit -m "AI: update LORGUS project"')
+
+          run("git push origin HEAD")
+
+          print()
+          print("=" * 40)
+          print("PUSH SUCCESSFUL")
+          print("=" * 40)
           PY
