@@ -46,6 +46,8 @@ jobs:
               "docs/PROJECT.md"
           }
 
+          MAX_FIX_ATTEMPTS = 2
+
           def ask(system, user):
               data = json.dumps({
                   "model": "openrouter/free",
@@ -114,6 +116,198 @@ jobs:
 
               return json.loads(text)
 
+          def apply_changes(raw, agent_name):
+              try:
+                  data = extract_json(raw)
+              except Exception as e:
+                  raise RuntimeError(
+                      f"{agent_name} returned invalid JSON: {e}"
+                  )
+
+              changes = data.get("changes", [])
+
+              if not isinstance(changes, list):
+                  raise RuntimeError(
+                      f"{agent_name}: changes must be a list."
+                  )
+
+              for change in changes:
+                  path = change["path"]
+
+                  if path not in ALLOWED_FILES:
+                      raise RuntimeError(
+                          f"{agent_name} attempted to modify forbidden file: {path}"
+                      )
+
+                  lines = change.get("content_lines")
+
+                  if not isinstance(lines, list):
+                      raise RuntimeError(
+                          f"{agent_name}: content_lines must be a list for {path}."
+                      )
+
+                  content = "\n".join(str(line) for line in lines)
+
+                  with open(path, "w", encoding="utf-8", newline="\n") as f:
+                      f.write(content.rstrip("\n") + "\n")
+
+                  print(f"{agent_name}: updated {path}")
+
+              return data
+
+          def validate_qa(task, repo, diff):
+              print("\n===== QA =====\n")
+
+              qa_raw = ask(
+                  """Ты QA Agent проекта LORGUS.
+
+                  Проверь РЕАЛЬНОЕ текущее состояние репозитория.
+
+                  Ответ ОБЯЗАН начинаться ровно с:
+
+                  PASS
+
+                  или:
+
+                  FAIL
+
+                  Не используй "User Safety", "safe" или другие статусы.
+
+                  PASS означает, что задача выполнена и состояние репозитория
+                  соответствует задаче.
+
+                  FAIL означает, что есть реальная проблема.
+
+                  При FAIL обязательно укажи:
+                  - файл;
+                  - проблему;
+                  - ожидаемый результат;
+                  - фактический результат.
+
+                  Проверяй:
+                  - соответствие задаче;
+                  - синтаксис;
+                  - JavaScript;
+                  - HTML;
+                  - CSS;
+                  - API;
+                  - Supabase;
+                  - Cloudflare Worker;
+                  - регрессии;
+                  - лишние изменения;
+                  - сохранение существующей функциональности.
+
+                  Не требуй изменений, которые не относятся к задаче.""",
+                  f"""ЗАДАЧА:
+          {task}
+
+          CURRENT REPOSITORY:
+          {repo}
+
+          ACTUAL GIT DIFF:
+          {diff}"""
+              )
+
+              print(qa_raw)
+
+              match = re.match(
+                  r"^\s*(PASS|FAIL)\b",
+                  qa_raw,
+                  re.IGNORECASE
+              )
+
+              if not match:
+                  raise RuntimeError(
+                      "QA returned neither PASS nor FAIL."
+                  )
+
+              return match.group(1).upper(), qa_raw
+
+          def validate_reviewer(task, repo, diff, qa):
+              print("\n===== REVIEWER =====\n")
+
+              reviewer_raw = ask(
+                  """Ты REVIEWER проекта LORGUS.
+
+                  Проведи независимое ревью.
+
+                  Ответ ОБЯЗАН начинаться ровно с:
+
+                  APPROVE
+
+                  или:
+
+                  REJECT
+
+                  Допускаются также формы:
+
+                  APPROVED
+                  REJECTED
+
+                  Не используй "User Safety", "safe" или другие статусы.
+
+                  APPROVE означает, что изменение можно принять.
+
+                  REJECT означает, что есть реальная проблема.
+
+                  При REJECT обязательно укажи:
+                  - файл;
+                  - проблему;
+                  - почему это проблема;
+                  - что необходимо изменить.
+
+                  ACTUAL GIT DIFF показывает только изменения.
+                  CURRENT REPOSITORY показывает полное состояние файлов.
+
+                  Не отклоняй изменение только потому,
+                  что требуемый элемент отсутствует в diff:
+                  он мог существовать до изменения.
+
+                  Проверяй:
+                  - соответствие задаче;
+                  - логику;
+                  - безопасность;
+                  - Supabase;
+                  - Cloudflare Worker;
+                  - регрессии;
+                  - лишние изменения;
+                  - сохранение существующего содержимого;
+                  - сохранение языка существующих документов.
+
+                  Не требуй рефакторинга без необходимости.""",
+                  f"""ЗАДАЧА:
+          {task}
+
+          CURRENT REPOSITORY:
+          {repo}
+
+          ACTUAL GIT DIFF:
+          {diff}
+
+          QA RESULT:
+          {qa}"""
+              )
+
+              print(reviewer_raw)
+
+              match = re.match(
+                  r"^\s*(APPROVED?|REJECT(?:ED)?)\b",
+                  reviewer_raw,
+                  re.IGNORECASE
+              )
+
+              if not match:
+                  raise RuntimeError(
+                      "Reviewer returned neither APPROVE nor REJECT."
+                  )
+
+              status = match.group(1).upper()
+
+              if status.startswith("REJECT"):
+                  return "REJECT", reviewer_raw
+
+              return "APPROVE", reviewer_raw
+
           repo = repository_text()
 
           print("\n===== ARCHITECT =====\n")
@@ -133,10 +327,10 @@ jobs:
               - способ проверки.
 
               ВАЖНО:
-              - не предлагай переписывать уже существующий код без необходимости;
+              - не переписывай существующий код без необходимости;
               - не меняй язык существующего текста;
               - не добавляй лишнюю функциональность;
-              - учитывай то, что уже существует в репозитории.""",
+              - учитывай существующую архитектуру проекта.""",
               f"""ЗАДАЧА:
           {TASK}
 
@@ -173,9 +367,11 @@ jobs:
               - сохраняй существующий язык;
               - сохраняй существующее содержимое, если оно не относится к задаче;
               - не переписывай существующий текст без необходимости;
+              - не переводи документы на другой язык;
               - не добавляй пояснения от себя;
               - не меняй .ai;
               - не добавляй секреты;
+              - не добавляй лишнюю функциональность;
               - если изменений не требуется: {"changes": []}.""",
               f"""ЗАДАЧА:
           {TASK}
@@ -189,190 +385,187 @@ jobs:
 
           print(coder_raw)
 
-          try:
-              coder = extract_json(coder_raw)
-          except Exception as e:
-              raise RuntimeError(
-                  f"Coder returned invalid JSON: {e}"
-              )
-
-          for change in coder.get("changes", []):
-              path = change["path"]
-
-              if path not in ALLOWED_FILES:
-                  raise RuntimeError(
-                      f"Coder attempted to modify forbidden file: {path}"
-                  )
-
-              content = "\n".join(change["content_lines"])
-
-              with open(path, "w", encoding="utf-8") as f:
-                  f.write(content)
-
-              print(f"CODER: updated {path}")
+          apply_changes(coder_raw, "CODER")
 
           diff = git_diff()
 
           print("\n===== ACTUAL GIT DIFF =====\n")
           print(diff)
 
-          repo_after = repository_text()
-
-          print("\n===== QA =====\n")
-
-          qa_raw = ask(
-              """Ты QA Agent проекта LORGUS.
-
-              Проверь РЕАЛЬНОЕ текущее состояние репозитория.
-
-              У тебя есть:
-              - исходная задача;
-              - полный текущий репозиторий;
-              - фактический git diff.
-
-              ВАЖНО:
-              Твой ответ обязан начинаться ровно с одного из:
-
-              PASS
-
-              или
-
-              FAIL
-
-              После PASS можешь дать краткое объяснение.
-
-              После FAIL обязательно укажи:
-              - файл;
-              - проблему;
-              - ожидаемый результат;
-              - фактический результат.
-
-              Не пиши "User Safety", "safe" или другие статусы вместо PASS/FAIL.
-
-              Проверяй:
-              - соответствие задаче;
-              - синтаксис;
-              - JavaScript;
-              - HTML;
-              - CSS;
-              - API;
-              - Supabase;
-              - Cloudflare Worker;
-              - регрессии;
-              - лишние изменения.""",
-              f"""ЗАДАЧА:
-          {TASK}
-
-          CURRENT REPOSITORY:
-          {repo_after}
-
-          ACTUAL GIT DIFF:
-          {diff}"""
+          qa_status, qa_raw = validate_qa(
+              TASK,
+              repository_text(),
+              diff
           )
-
-          print(qa_raw)
-
-          qa_match = re.match(
-              r"^\s*(PASS|FAIL)\b",
-              qa_raw,
-              re.IGNORECASE
-          )
-
-          if not qa_match:
-              raise RuntimeError(
-                  "QA returned neither PASS nor FAIL."
-              )
-
-          qa_status = qa_match.group(1).upper()
 
           if qa_status == "FAIL":
-              raise RuntimeError(
-                  "QA reported FAIL."
-              )
+              raise RuntimeError("QA reported FAIL.")
 
           print("\nQA VALIDATION: PASS")
 
-          print("\n===== REVIEWER =====\n")
+          reviewer_status, reviewer_raw = validate_reviewer(
+              TASK,
+              repository_text(),
+              diff,
+              qa_raw
+          )
 
-          reviewer_raw = ask(
-              """Ты REVIEWER проекта LORGUS.
+          if reviewer_status == "APPROVE":
+              print("\nREVIEW VALIDATION: APPROVE")
+          else:
+              print("\nREVIEW VALIDATION: REJECT")
 
-              Проведи независимое ревью.
+          fix_attempt = 0
 
-              У тебя есть:
-              - исходная задача;
-              - полный текущий репозиторий;
-              - фактический git diff;
-              - результат QA.
+          while reviewer_status == "REJECT" and fix_attempt < MAX_FIX_ATTEMPTS:
+              fix_attempt += 1
 
-              ВАЖНО:
-              Твой ответ обязан начинаться ровно с одного из:
+              print(
+                  f"\n===== FIXER ATTEMPT {fix_attempt}/{MAX_FIX_ATTEMPTS} =====\n"
+              )
 
-              APPROVE
+              repo_before_fix = repository_text()
+              diff_before_fix = git_diff()
 
-              или
+              fixer_raw = ask(
+                  """Ты FIXER проекта LORGUS.
 
-              REJECT
+                  Ты исправляешь только реальные проблемы,
+                  найденные QA или Reviewer.
 
-              После APPROVE можешь дать краткое объяснение.
+                  Верни ТОЛЬКО JSON:
 
-              После REJECT обязательно укажи:
-              - файл;
-              - проблему;
-              - почему это проблема;
-              - что необходимо изменить.
+                  {
+                    "changes": [
+                      {
+                        "path": "README.md",
+                        "content_lines": [
+                          "полное новое содержимое файла"
+                        ]
+                      }
+                    ]
+                  }
 
-              Не пиши "User Safety", "safe" или другие статусы вместо APPROVE/REJECT.
+                  КРИТИЧЕСКИЕ ПРАВИЛА:
 
-              ACTUAL GIT DIFF показывает только изменения.
-              CURRENT REPOSITORY показывает полное состояние файлов.
-
-              Не отклоняй изменение только потому,
-              что требуемый элемент отсутствует в diff:
-              он мог существовать до изменения.
-
-              Проверяй:
-              - соответствие задаче;
-              - логику;
-              - безопасность;
-              - Supabase;
-              - Cloudflare Worker;
-              - регрессии;
-              - лишние изменения;
-              - сохранение существующего содержимого.""",
-              f"""ЗАДАЧА:
+                  - content_lines содержит полное новое содержимое файла;
+                  - исправляй только конкретные найденные проблемы;
+                  - не переписывай проект;
+                  - не рефактори код без необходимости;
+                  - не переводи существующий текст;
+                  - сохраняй существующий язык;
+                  - сохраняй всё содержимое, не относящееся к проблеме;
+                  - не меняй другие файлы без необходимости;
+                  - не меняй .ai;
+                  - не добавляй секреты;
+                  - не придумывай новые проблемы;
+                  - если проблема уже исправлена: {"changes": []}.""",
+                  f"""ИСХОДНАЯ ЗАДАЧА:
           {TASK}
 
+          QA RESULT:
+          {qa_raw}
+
+          REVIEWER RESULT:
+          {reviewer_raw}
+
           CURRENT REPOSITORY:
-          {repo_after}
+          {repo_before_fix}
 
           ACTUAL GIT DIFF:
-          {diff}
-
-          QA RESULT:
-          {qa_raw}"""
-          )
-
-          print(reviewer_raw)
-
-          reviewer_match = re.match(
-              r"^\s*(APPROVE|REJECT)\b",
-              reviewer_raw,
-              re.IGNORECASE
-          )
-
-          if not reviewer_match:
-              raise RuntimeError(
-                  "Reviewer returned neither APPROVE nor REJECT."
+          {diff_before_fix}"""
               )
 
-          reviewer_status = reviewer_match.group(1).upper()
+              print(fixer_raw)
 
-          if reviewer_status == "REJECT":
-              raise RuntimeError(
-                  "Reviewer rejected the changes."
+              apply_changes(fixer_raw, "FIXER")
+
+              diff = git_diff()
+
+              print("\n===== DIFF AFTER FIXER =====\n")
+              print(diff)
+
+              qa_status, qa_raw = validate_qa(
+                  TASK,
+                  repository_text(),
+                  diff
               )
 
-          print("\nREVIEW VALIDATION: APPROVE")
+              if qa_status == "FAIL":
+                  print("\nQA VALIDATION: FAIL")
+                  reviewer_status = "REJECT"
+                  reviewer_raw = "REJECT: QA failed after Fixer."
+                  continue
+
+              print("\nQA VALIDATION: PASS")
+
+              reviewer_status, reviewer_raw = validate_reviewer(
+                  TASK,
+                  repository_text(),
+                  diff,
+                  qa_raw
+              )
+
+              if reviewer_status == "APPROVE":
+                  print("\nREVIEW VALIDATION: APPROVE")
+                  break
+
+              print("\nREVIEW VALIDATION: REJECT")
+
+          if reviewer_status != "APPROVE":
+              raise RuntimeError(
+                  f"Pipeline failed after {MAX_FIX_ATTEMPTS} Fixer attempts."
+              )
+
+          print("\n===== FINAL CHECK =====\n")
+
+          final_diff = git_diff()
+
+          print(final_diff)
+
+          check = subprocess.run(
+              ["git", "diff", "--check"],
+              text=True,
+              capture_output=True
+          )
+
+          if check.returncode != 0:
+              print(check.stdout)
+              print(check.stderr)
+              raise RuntimeError(
+                  "git diff --check failed."
+              )
+
+          print("\nFINAL GIT CHECK: PASS")
           print("\nPIPELINE RESULT: APPROVED")
+
           PY
+
+      - name: Commit and push approved changes
+        run: |
+          if git diff --quiet; then
+            echo "NO CHANGES TO COMMIT"
+            exit 0
+          fi
+
+          git config user.name "LORGUS AI"
+          git config user.email "lorgus-ai@users.noreply.github.com"
+
+          git add -- \
+            README.md \
+            index.html \
+            app.js \
+            style.css \
+            worker.js \
+            wrangler.toml \
+            docs/PROJECT.md
+
+          git diff --cached --check
+
+          if git diff --cached --quiet; then
+            echo "NO STAGED CHANGES"
+            exit 0
+          fi
+
+          git commit -m "AI: update LORGUS project"
+          git push origin HEAD
