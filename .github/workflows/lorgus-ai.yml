@@ -2,10 +2,124 @@ name: LORGUS AI Agent
 
 on:
   workflow_dispatch:
+    inputs:
+      task:
+        description: "Задача для AI"
+        required: true
+        type: string
+
+permissions:
+  contents: write
 
 jobs:
-  test:
+  ai:
     runs-on: ubuntu-latest
+
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.API }}
+
     steps:
-      - name: Test
-        run: echo "LORGUS AI WORKFLOW OK"
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run AI agents
+        env:
+          TASK: ${{ inputs.task }}
+        run: |
+          python3 - <<'PY'
+          import os
+          import json
+          import urllib.request
+
+          task = os.environ["TASK"]
+          api_key = os.environ["OPENROUTER_API_KEY"]
+
+          def ask(system, user):
+              data = json.dumps({
+                  "model": "openrouter/free",
+                  "messages": [
+                      {"role": "system", "content": system},
+                      {"role": "user", "content": user}
+                  ]
+              }).encode()
+
+              request = urllib.request.Request(
+                  "https://openrouter.ai/api/v1/chat/completions",
+                  data=data,
+                  headers={
+                      "Authorization": f"Bearer {api_key}",
+                      "Content-Type": "application/json"
+                  }
+              )
+
+              with urllib.request.urlopen(request) as response:
+                  result = json.loads(response.read())
+
+              return result["choices"][0]["message"]["content"]
+
+          architect = ask(
+              """Ты ARCHITECT проекта LORGUS.
+
+              Изучи задачу и существующий репозиторий.
+              Ничего не изменяй.
+              Определи:
+              1. проблему;
+              2. какие файлы затронуты;
+              3. план изменений;
+              4. возможные риски;
+              5. способ проверки.
+
+              Не придумывай содержимое файлов.""",
+              f"""ЗАДАЧА:
+          {task}
+
+          ТЕКУЩИЙ РЕПОЗИТОРИЙ:
+          {os.popen("find . -type f -not -path './.git/*' | sort").read()}"""
+          )
+
+          print("\n===== ARCHITECT =====\n")
+          print(architect)
+
+          coder = ask(
+              """Ты CODER проекта LORGUS.
+
+              Получи задачу и план Architect.
+              Изучи существующий код.
+              Верни JSON строго следующего вида:
+
+              {
+                "changes": [
+                  {
+                    "path": "README.md",
+                    "content_lines": [
+                      "строка 1",
+                      "строка 2"
+                    ]
+                  }
+                ]
+              }
+
+              content_lines должен содержать ПОЛНОЕ новое содержимое изменяемого файла.
+
+              Можно изменять только необходимые файлы.
+              Не переводи существующий текст на другой язык.
+              Не переписывай файл без необходимости.
+              Не изменяй несвязанные файлы.
+              Если изменений не требуется:
+              {"changes": []}""",
+              f"""ЗАДАЧА:
+          {task}
+
+          ПЛАН ARCHITECT:
+          {architect}
+
+          ФАЙЛЫ РЕПОЗИТОРИЯ:
+          {os.popen("find . -type f -not -path './.git/*' | sort").read()}"""
+          )
+
+          print("\n===== CODER =====\n")
+          print(coder)
+
+          with open("/tmp/coder.json", "w", encoding="utf-8") as f:
+              f.write(coder)
+          PY
