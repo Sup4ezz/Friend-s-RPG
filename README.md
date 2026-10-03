@@ -13,3 +13,4 @@ This repository is used as a unified workspace for AI agents of the LORGUS proje
 - **Fixer**
 
 LORGUS TEST MARKER: QA_FIX_TEST
+FIXER_TEST_MARKER: ORIGINAL
