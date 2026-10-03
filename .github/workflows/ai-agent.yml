@@ -29,25 +29,49 @@ jobs:
           import os
           import urllib.request
 
-          with open(".ai/AGENT.md", encoding="utf-8") as f:
-              agent = f.read()
+          def read_file(path):
+              try:
+                  with open(path, encoding="utf-8") as f:
+                      return f.read()
+              except:
+                  return "[FILE NOT FOUND]"
 
-          with open("docs/PROJECT.md", encoding="utf-8") as f:
-              project = f.read()
+          files = [
+              ".ai/AGENT.md",
+              ".ai/ARCHITECT.md",
+              ".ai/CODER.md",
+              ".ai/REVIEWER.md",
+              ".ai/QA.md",
+              "docs/PROJECT.md",
+              "README.md",
+              "index.html",
+              "app.js",
+              "style.css",
+              "worker.js",
+              "wrangler.toml"
+          ]
 
-          prompt = f"""Ты работаешь над проектом LORGUS.
+          context = ""
 
-          Общие правила:
-          {agent}
+          for file in files:
+              context += f"\n\n===== {file} =====\n"
+              context += read_file(file)
 
-          Описание проекта:
-          {project}
+          prompt = f"""Ты работаешь непосредственно с репозиторием LORGUS.
+
+          Ниже находится реальное содержимое файлов репозитория.
+
+          {context}
 
           Задача пользователя:
           {os.environ["TASK"]}
 
-          Пока ничего не изменяй.
-          Проанализируй задачу и дай конкретный план действий.
+          ВАЖНО:
+          - Используй только фактическое содержимое файлов выше.
+          - Не придумывай существование функций, API или компонентов.
+          - Если информации нет в файлах, так и скажи.
+          - Ничего не изменяй.
+          - Дай конкретный анализ задачи.
           """
 
           data = {
