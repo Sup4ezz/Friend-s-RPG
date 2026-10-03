@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       task:
-        description: "Task for LORGUS AI"
+        description: "Задача для AI"
         required: true
         type: string
 
@@ -18,41 +18,177 @@ jobs:
     env:
       GROQ_API_KEY: ${{ secrets.API }}
       GROQ_MODEL: openai/gpt-oss-120b
+      GROQ_URL: https://api.groq.com/openai/v1/chat/completions
+      GROQ_MODELS_URL: https://api.groq.com/openai/v1/models
 
     steps:
+
+      # ------------------------------------------------------------
+      # CHECKOUT
+      # ------------------------------------------------------------
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Run LORGUS AI pipeline
+      # ------------------------------------------------------------
+      # GROQ DIAGNOSTICS
+      # ------------------------------------------------------------
+
+      - name: Groq preflight diagnostics
         env:
-          USER_TASK: ${{ inputs.task }}
+          TASK: ${{ inputs.task }}
         run: |
           python3 <<'PY'
-          import json
           import os
-          import re
-          import subprocess
-          import sys
-          import time
-          import urllib.error
+          import json
           import urllib.request
+          import urllib.error
 
-          API_KEY = os.environ.get("GROQ_API_KEY")
-          MODEL = os.environ.get("GROQ_MODEL", "openai/gpt-oss-120b")
-          TASK = os.environ.get("USER_TASK", "").strip()
+          key = os.environ.get("GROQ_API_KEY", "")
+          model = os.environ.get("GROQ_MODEL", "")
+          models_url = os.environ.get("GROQ_MODELS_URL", "")
 
-          if not API_KEY:
-              raise RuntimeError(
-                  "Missing GitHub Secret 'API'. "
-                  "Put the Groq API key into Settings -> Secrets and variables -> Actions."
-              )
+          print("========================================")
+          print("GROQ PREFLIGHT DIAGNOSTICS")
+          print("========================================")
 
-          if not TASK:
-              raise RuntimeError("USER_TASK is empty.")
+          if not key:
+              print("ERROR: GitHub Secret 'API' is empty or unavailable.")
+              print("The workflow cannot authenticate against Groq.")
+              raise SystemExit(1)
 
-          API_URL = "https://api.groq.com/openai/v1/chat/completions"
+          print(f"API key detected: YES")
+          print(f"API key length: {len(key)}")
+          print(f"Target model: {model}")
+          print()
+
+          request = urllib.request.Request(
+              models_url,
+              headers={
+                  "Authorization": f"Bearer {key}",
+                  "Content-Type": "application/json",
+                  "User-Agent": "LORGUS-GitHub-Actions"
+              },
+              method="GET"
+          )
+
+          try:
+              with urllib.request.urlopen(request, timeout=30) as response:
+                  body = response.read().decode("utf-8", errors="replace")
+
+                  print(f"Models endpoint HTTP: {response.status}")
+                  print("Models endpoint: OK")
+                  print()
+
+                  data = json.loads(body)
+                  models = data.get("data", [])
+
+                  ids = sorted(
+                      item.get("id")
+                      for item in models
+                      if item.get("id")
+                  )
+
+                  print(f"Available models returned: {len(ids)}")
+
+                  if model in ids:
+                      print(f"Target model '{model}': AVAILABLE")
+                  else:
+                      print(f"Target model '{model}': NOT FOUND")
+                      print()
+                      print("Models containing 'gpt-oss':")
+
+                      for model_id in ids:
+                          if "gpt-oss" in model_id:
+                              print(f"  - {model_id}")
+
+                      print()
+                      print("First available models:")
+
+                      for model_id in ids[:30]:
+                          print(f"  - {model_id}")
+
+                      print()
+                      print("The API key works, but the selected model")
+                      print("is not available to this project/key.")
+
+                      raise SystemExit(2)
+
+          except urllib.error.HTTPError as error:
+              body = error.read().decode("utf-8", errors="replace")
+
+              print(f"Models endpoint HTTP: {error.code}")
+              print("Models endpoint: FAILED")
+              print()
+              print("Groq response body:")
+              print(body)
+              print()
+
+              if error.code == 401:
+                  print("DIAGNOSIS:")
+                  print("HTTP 401 = invalid or missing authentication.")
+              elif error.code == 403:
+                  print("DIAGNOSIS:")
+                  print("HTTP 403 = Groq rejected the request due to permissions.")
+                  print()
+                  print("This is NOT automatically an API-key authentication error.")
+                  print("The response body above is the important diagnostic.")
+                  print()
+                  print("If the body contains:")
+                  print("  model_permission_blocked_org")
+                  print("or")
+                  print("  model_permission_blocked_project")
+                  print("then the model is blocked by Groq permissions.")
+                  print()
+                  print("If the body is only something like:")
+                  print("  error code: 1010")
+                  print("then this is NOT the normal documented model-permission")
+                  print("response and needs separate investigation.")
+              elif error.code == 429:
+                  print("DIAGNOSIS:")
+                  print("HTTP 429 = Groq rate limit exceeded.")
+              else:
+                  print("DIAGNOSIS:")
+                  print("Unexpected Groq HTTP error.")
+
+              raise SystemExit(3)
+
+          except Exception as error:
+              print("Unexpected diagnostic failure:")
+              print(repr(error))
+              raise SystemExit(4)
+          PY
+
+      # ------------------------------------------------------------
+      # PYTHON
+      # ------------------------------------------------------------
+
+      - name: Prepare Python
+        run: python3 --version
+
+      # ------------------------------------------------------------
+      # MAIN AI PIPELINE
+      # ------------------------------------------------------------
+
+      - name: Run LORGUS AI agents
+        env:
+          TASK: ${{ inputs.task }}
+        run: |
+          python3 <<'PY'
+          import os
+          import json
+          import time
+          import re
+          import urllib.request
+          import urllib.error
+          import subprocess
+
+          GROQ_API_KEY = os.environ["GROQ_API_KEY"]
+          GROQ_URL = os.environ["GROQ_URL"]
+          MODEL = os.environ["GROQ_MODEL"]
+          TASK = os.environ["TASK"]
 
           ALLOWED_FILES = {
               "README.md",
@@ -61,12 +197,22 @@ jobs:
               "style.css",
               "worker.js",
               "wrangler.toml",
-              "docs/PROJECT.md",
+              "docs/PROJECT.md"
           }
 
-          MAX_RETRIES = 2
+          print("========================================")
+          print("LORGUS AI WORKSPACE")
+          print("========================================")
+          print()
+          print("TASK:")
+          print(TASK)
+          print()
 
-          def run_cmd(command):
+          # ----------------------------------------------------------
+          # HELPERS
+          # ----------------------------------------------------------
+
+          def run_command(command):
               result = subprocess.run(
                   command,
                   shell=True,
@@ -74,177 +220,54 @@ jobs:
                   capture_output=True
               )
 
+              if result.stdout:
+                  print(result.stdout)
+
+              if result.stderr:
+                  print(result.stderr)
+
               if result.returncode != 0:
                   raise RuntimeError(
-                      f"Command failed:\n{command}\n\n"
-                      f"STDOUT:\n{result.stdout}\n\n"
-                      f"STDERR:\n{result.stderr}"
+                      f"Command failed with code {result.returncode}: {command}"
                   )
 
               return result.stdout
 
-          def get_file(path):
-              if not os.path.isfile(path):
-                  return None
-
-              with open(path, "r", encoding="utf-8") as f:
-                  return f.read()
-
-          def repository_files():
-              result = {}
-
-              for path in sorted(ALLOWED_FILES):
-                  content = get_file(path)
-
-                  if content is not None:
-                      result[path] = content
-
-              return result
-
-          def git_status():
-              return run_cmd(
-                  "git status --short"
-              )
-
-          def git_diff():
-              return run_cmd(
-                  "git diff -- README.md index.html app.js style.css "
-                  "worker.js wrangler.toml docs/PROJECT.md"
-              )
-
-          def changed_files():
-              output = run_cmd(
-                  "git diff --name-only -- "
-                  "README.md index.html app.js style.css "
-                  "worker.js wrangler.toml docs/PROJECT.md"
-              )
-
-              return [
-                  line.strip()
-                  for line in output.splitlines()
-                  if line.strip()
-              ]
-
-          def relevant_files(task):
-              task_lower = task.lower()
-
-              keywords = {
-                  "README.md": [
-                      "readme",
-                      "документац",
-                      "описан"
-                  ],
-                  "index.html": [
-                      "html",
-                      "страниц",
-                      "интерфейс",
-                      "ui",
-                      "кнопк",
-                      "форма"
-                  ],
-                  "app.js": [
-                      "javascript",
-                      "js",
-                      "логик",
-                      "supabase",
-                      "auth",
-                      "авторизац",
-                      "персонаж",
-                      "admin",
-                      "админ"
-                  ],
-                  "style.css": [
-                      "css",
-                      "стиль",
-                      "цвет",
-                      "дизайн",
-                      "размер",
-                      "layout"
-                  ],
-                  "worker.js": [
-                      "worker",
-                      "cloudflare",
-                      "api",
-                      "endpoint",
-                      "запрос"
-                  ],
-                  "wrangler.toml": [
-                      "wrangler",
-                      "cloudflare",
-                      "deploy",
-                      "assets",
-                      "binding"
-                  ],
-                  "docs/PROJECT.md": [
-                      "project",
-                      "архитектур",
-                      "документац"
-                  ]
-              }
-
-              selected = []
-
-              for path, words in keywords.items():
-                  if any(word in task_lower for word in words):
-                      selected.append(path)
-
-              if not selected:
-                  selected = [
-                      "README.md",
-                      "index.html",
-                      "app.js",
-                      "style.css",
-                      "worker.js",
-                      "wrangler.toml",
-                      "docs/PROJECT.md"
-                  ]
-
-              return selected
-
-          def format_files(paths):
-              files = repository_files()
-              output = []
-
-              for path in paths:
-                  if path not in files:
-                      continue
-
-                  output.append(
-                      f"===== FILE: {path} =====\n"
-                      f"{files[path]}\n"
-                      f"===== END FILE: {path} ====="
-                  )
-
-              return "\n\n".join(output)
-
-          def call_ai(messages, max_tokens=2500):
+          def groq_call(messages, max_tokens):
               payload = {
                   "model": MODEL,
                   "messages": messages,
                   "temperature": 0.1,
-                  "max_completion_tokens": max_tokens,
-                  "reasoning_effort": "low"
+                  "max_tokens": max_tokens
               }
 
               data = json.dumps(payload).encode("utf-8")
 
-              for attempt in range(1, MAX_RETRIES + 1):
-                  request = urllib.request.Request(
-                      API_URL,
-                      data=data,
-                      headers={
-                          "Authorization": f"Bearer {API_KEY}",
-                          "Content-Type": "application/json"
-                      },
-                      method="POST"
-                  )
+              request = urllib.request.Request(
+                  GROQ_URL,
+                  data=data,
+                  headers={
+                      "Authorization": f"Bearer {GROQ_API_KEY}",
+                      "Content-Type": "application/json",
+                      "User-Agent": "LORGUS-GitHub-Actions"
+                  },
+                  method="POST"
+              )
 
+              last_error = None
+
+              for attempt in range(1, 3):
                   try:
                       with urllib.request.urlopen(
                           request,
                           timeout=180
                       ) as response:
-                          body = response.read().decode("utf-8")
+
+                          body = response.read().decode(
+                              "utf-8",
+                              errors="replace"
+                          )
+
                           result = json.loads(body)
 
                           return result["choices"][0]["message"]["content"]
@@ -255,67 +278,40 @@ jobs:
                           errors="replace"
                       )
 
+                      print()
                       print(
-                          f"\nGroq HTTP {error.code} "
-                          f"(attempt {attempt}/{MAX_RETRIES})"
+                          f"Groq HTTP {error.code} "
+                          f"(attempt {attempt}/2)"
                       )
+                      print("Response body:")
                       print(body)
+                      print()
 
-                      if error.code == 429:
-                          retry_after = error.headers.get(
-                              "retry-after"
-                          )
-
-                          if retry_after:
-                              try:
-                                  delay = min(
-                                      int(float(retry_after)),
-                                      60
-                                  )
-                              except ValueError:
-                                  delay = 10
-                          else:
-                              delay = 10
-
-                          if attempt < MAX_RETRIES:
-                              print(
-                                  f"Rate limit. Waiting {delay} seconds..."
-                              )
-                              time.sleep(delay)
-                              continue
-
-                          raise RuntimeError(
-                              "Groq rate limit reached. "
-                              "Check the current Free Plan limits."
-                          )
+                      last_error = (
+                          f"Groq HTTP {error.code}: {body}"
+                      )
 
                       if error.code in (401, 403):
-                          raise RuntimeError(
-                              "Groq authentication failed. "
-                              "Check GitHub Secret 'API'."
-                          )
+                          break
 
-                      if attempt < MAX_RETRIES:
-                          time.sleep(3)
+                      if error.code == 429:
+                          time.sleep(5)
                           continue
 
-                      raise RuntimeError(
-                          f"Groq returned HTTP {error.code}."
-                      )
+                      time.sleep(3)
 
                   except Exception as error:
                       print(
-                          f"\nGroq request error "
-                          f"(attempt {attempt}/{MAX_RETRIES}): {error}"
+                          f"Groq request error "
+                          f"(attempt {attempt}/2): {error}"
                       )
 
-                      if attempt < MAX_RETRIES:
-                          time.sleep(3)
-                          continue
+                      last_error = str(error)
+                      time.sleep(3)
 
-                      raise
+              raise RuntimeError(last_error or "Groq request failed")
 
-          def extract_json(text):
+          def clean_json(text):
               text = text.strip()
 
               if text.startswith("```"):
@@ -332,504 +328,443 @@ jobs:
                       text
                   )
 
-              start = text.find("{")
-              end = text.rfind("}")
+              return text.strip()
 
-              if start == -1 or end == -1:
-                  raise RuntimeError(
-                      "AI did not return a JSON object.\n\n"
-                      + text
-                  )
+          def read_file(path):
+              with open(path, "r", encoding="utf-8") as f:
+                  return f.read()
 
-              candidate = text[start:end + 1]
+          def write_file(path, content_lines):
+              content = "\n".join(content_lines)
 
-              try:
-                  return json.loads(candidate)
-              except json.JSONDecodeError as error:
-                  raise RuntimeError(
-                      "AI returned invalid JSON.\n\n"
-                      f"{error}\n\n"
-                      f"Response:\n{candidate}"
-                  )
+              if not content.endswith("\n"):
+                  content += "\n"
 
-          def validate_changes(data):
-              if not isinstance(data, dict):
-                  raise RuntimeError(
-                      "Changes response is not an object."
-                  )
+              with open(path, "w", encoding="utf-8") as f:
+                  f.write(content)
 
-              changes = data.get("changes")
+          def repo_snapshot():
+              files = {}
 
-              if not isinstance(changes, list):
-                  raise RuntimeError(
-                      "Missing 'changes' array."
-                  )
+              for path in sorted(ALLOWED_FILES):
+                  if os.path.isfile(path):
+                      files[path] = read_file(path)
 
-              validated = []
+              return files
 
-              for change in changes:
-                  if not isinstance(change, dict):
-                      raise RuntimeError(
-                          "Invalid change object."
+          def relevant_files(task):
+              task_lower = task.lower()
+
+              selected = set()
+
+              mapping = {
+                  "readme": ["README.md"],
+                  "html": ["index.html"],
+                  "страниц": ["index.html"],
+                  "интерфейс": ["index.html", "style.css", "app.js"],
+                  "ui": ["index.html", "style.css", "app.js"],
+                  "css": ["style.css"],
+                  "стиль": ["style.css"],
+                  "javascript": ["app.js"],
+                  "js": ["app.js"],
+                  "логик": ["app.js"],
+                  "supabase": ["app.js", "worker.js", "wrangler.toml"],
+                  "cloudflare": ["worker.js", "wrangler.toml"],
+                  "worker": ["worker.js", "wrangler.toml"],
+                  "wrangler": ["wrangler.toml"],
+                  "конфиг": ["wrangler.toml"],
+                  "докум": ["docs/PROJECT.md"],
+                  "архитект": ["docs/PROJECT.md"],
+                  "проект": ["docs/PROJECT.md"]
+              }
+
+              for keyword, paths in mapping.items():
+                  if keyword in task_lower:
+                      selected.update(paths)
+
+              if not selected:
+                  selected = set(ALLOWED_FILES)
+
+              return sorted(selected)
+
+          # ----------------------------------------------------------
+          # FILE CONTEXT
+          # ----------------------------------------------------------
+
+          selected = relevant_files(TASK)
+
+          print("Relevant files:")
+          for path in selected:
+              print(f"  - {path}")
+
+          print()
+
+          snapshot = repo_snapshot()
+
+          def context_for(paths):
+              parts = []
+
+              for path in paths:
+                  if path in snapshot:
+                      parts.append(
+                          f"\n===== FILE: {path} =====\n"
+                          f"{snapshot[path]}"
+                          f"\n===== END FILE: {path} =====\n"
                       )
 
-                  path = change.get("path")
-                  content_lines = change.get(
-                      "content_lines"
-                  )
+              return "\n".join(parts)
 
-                  if path not in ALLOWED_FILES:
-                      raise RuntimeError(
-                          f"Forbidden file modification: {path}"
-                      )
+          context = context_for(selected)
 
-                  if not isinstance(
-                      content_lines,
-                      list
-                  ):
-                      raise RuntimeError(
-                          f"content_lines must be a list: {path}"
-                      )
-
-                  if not all(
-                      isinstance(line, str)
-                      for line in content_lines
-                  ):
-                      raise RuntimeError(
-                          f"All content_lines must be strings: {path}"
-                      )
-
-                  validated.append(
-                      {
-                          "path": path,
-                          "content_lines": content_lines
-                      }
-                  )
-
-              return validated
-
-          def apply_changes(changes):
-              for change in changes:
-                  path = change["path"]
-
-                  content = "\n".join(
-                      change["content_lines"]
-                  )
-
-                  if not content.endswith("\n"):
-                      content += "\n"
-
-                  with open(
-                      path,
-                      "w",
-                      encoding="utf-8"
-                  ) as file:
-                      file.write(content)
-
-                  print(
-                      f"UPDATED: {path}"
-                  )
-
-          def print_section(title, content):
-              print("\n")
-              print("=" * 80)
-              print(title)
-              print("=" * 80)
-              print(content)
-              print("=" * 80)
-
-          # ============================================================
-          # INITIAL REPOSITORY
-          # ============================================================
-
-          all_files = repository_files()
-
-          relevant = relevant_files(TASK)
-
-          relevant_context = format_files(
-              relevant
-          )
-
-          print_section(
-              "TASK",
-              TASK
-          )
-
-          print_section(
-              "RELEVANT FILES",
-              relevant_context
-          )
-
-          # ============================================================
+          # ----------------------------------------------------------
           # ARCHITECT
-          # ============================================================
+          # ----------------------------------------------------------
+
+          print("========================================")
+          print("ARCHITECT")
+          print("========================================")
 
           architect_prompt = f"""
-          You are the ARCHITECT Agent for LORGUS.
+          Ты Architect Agent проекта LORGUS.
 
-          Analyze the user's task and the provided real repository files.
+          Проанализируй реальный код репозитория перед изменениями.
 
-          Do NOT modify files.
-          Do NOT output code.
-          Do NOT output a diff.
-
-          Produce a concise implementation plan.
-
-          Include only:
-
-          - problem;
-          - relevant files;
-          - required changes;
-          - files that must remain untouched;
-          - risks;
-          - verification.
-
-          Do not invent files or functionality.
-
-          USER TASK:
+          ЗАДАЧА:
           {TASK}
 
-          REPOSITORY:
-          {relevant_context}
+          Текущие файлы:
+          {context}
+
+          Ничего не изменяй.
+
+          Верни только JSON:
+
+          {{
+            "problem": "...",
+            "cause": "...",
+            "files": ["..."],
+            "plan": ["..."],
+            "risks": ["..."],
+            "checks": ["..."]
+          }}
+
+          Не создавай diff.
+          Не возвращай код.
+          Не придумывай отсутствующие файлы.
           """
 
-          architect = call_ai(
+          architect_raw = groq_call(
               [
                   {
                       "role": "system",
-                      "content": (
-                          "You are the LORGUS Architect. "
-                          "Analyze only the supplied repository."
-                      )
+                      "content": open(".ai/AGENT.md", encoding="utf-8").read()
                   },
                   {
                       "role": "user",
                       "content": architect_prompt
                   }
               ],
-              max_tokens=1800
+              1800
           )
 
-          print_section(
-              "ARCHITECT",
-              architect
-          )
+          architect_raw = clean_json(architect_raw)
 
-          # ============================================================
+          try:
+              architect = json.loads(architect_raw)
+          except Exception:
+              print("ARCHITECT returned invalid JSON:")
+              print(architect_raw)
+              raise
+
+          print(json.dumps(
+              architect,
+              ensure_ascii=False,
+              indent=2
+          ))
+
+          # ----------------------------------------------------------
           # CODER
-          # ============================================================
+          # ----------------------------------------------------------
 
-          coder_files = relevant_context
+          print()
+          print("========================================")
+          print("CODER")
+          print("========================================")
 
           coder_prompt = f"""
-          You are the CODER Agent for LORGUS.
+          Ты Coding Agent проекта LORGUS.
 
-          Implement the user's task.
+          ЗАДАЧА:
+          {TASK}
 
-          IMPORTANT:
+          ПЛАН ARCHITECT:
+          {json.dumps(architect, ensure_ascii=False, indent=2)}
 
-          - Preserve existing functionality.
-          - Make the smallest possible change.
-          - Do not rewrite unrelated code.
-          - Do not modify files unrelated to the task.
-          - Do not create new files.
-          - Only modify allowed files.
-          - Return ONLY JSON.
-          - Do not return Markdown.
-          - Do not return a git diff.
-          - Changed files must contain COMPLETE final content.
+          ТЕКУЩИЕ ФАЙЛЫ:
+          {context}
 
-          JSON:
+          Изучи существующий код и внеси минимальные необходимые изменения.
+
+          Разрешённые файлы:
+          {sorted(ALLOWED_FILES)}
+
+          Верни ТОЛЬКО JSON следующего формата:
 
           {{
             "changes": [
               {{
                 "path": "README.md",
                 "content_lines": [
-                  "line 1",
-                  "line 2"
+                  "полное",
+                  "новое",
+                  "содержимое",
+                  "файла"
                 ]
               }}
             ]
           }}
 
-          If no changes are required:
+          ВАЖНО:
 
-          {{
-            "changes": []
-          }}
-
-          USER TASK:
-          {TASK}
-
-          ARCHITECT PLAN:
-          {architect}
-
-          FILES:
-          {coder_files}
+          - content_lines содержит ПОЛНОЕ содержимое файла;
+          - не используй unified diff;
+          - не используй markdown fences;
+          - не меняй несвязанные файлы;
+          - не удаляй существующую функциональность;
+          - если изменений не требуется, верни {{"changes":[]}};
+          - каждый path обязан находиться в списке разрешённых файлов.
           """
 
-          coder_raw = call_ai(
+          coder_raw = groq_call(
               [
                   {
                       "role": "system",
-                      "content": (
-                          "You are the LORGUS Coding Agent. "
-                          "Return valid JSON only."
-                      )
+                      "content": open(".ai/CODER.md", encoding="utf-8").read()
                   },
                   {
                       "role": "user",
                       "content": coder_prompt
                   }
               ],
-              max_tokens=6000
+              6000
           )
 
-          print_section(
-              "CODER",
-              coder_raw
-          )
+          coder_raw = clean_json(coder_raw)
 
-          coder_data = extract_json(
-              coder_raw
-          )
+          try:
+              coder = json.loads(coder_raw)
+          except Exception:
+              print("CODER returned invalid JSON:")
+              print(coder_raw)
+              raise
 
-          coder_changes = validate_changes(
-              coder_data
-          )
+          changes = coder.get("changes", [])
 
-          if coder_changes:
-              apply_changes(
-                  coder_changes
-              )
-          else:
-              print(
-                  "\nCODER: NO CHANGES"
-              )
+          for change in changes:
+              path = change.get("path")
+              lines = change.get("content_lines")
 
-          # ============================================================
+              if path not in ALLOWED_FILES:
+                  raise RuntimeError(
+                      f"Coder attempted to modify forbidden file: {path}"
+                  )
+
+              if not isinstance(lines, list):
+                  raise RuntimeError(
+                      f"Invalid content_lines for {path}"
+                  )
+
+              write_file(path, lines)
+
+          # ----------------------------------------------------------
           # DIFF
-          # ============================================================
+          # ----------------------------------------------------------
 
-          diff = git_diff()
+          print()
+          print("========================================")
+          print("CURRENT DIFF")
+          print("========================================")
 
-          print_section(
-              "DIFF AFTER CODER",
-              diff or "NO DIFF"
+          run_command(
+              "git diff -- README.md index.html app.js style.css "
+              "worker.js wrangler.toml docs/PROJECT.md"
           )
 
-          if not diff.strip():
-              print(
-                  "\nNo changes were produced."
-              )
+          run_command("git diff --check")
 
-              sys.exit(0)
-
-          # ============================================================
+          # ----------------------------------------------------------
           # QA
-          # ============================================================
+          # ----------------------------------------------------------
 
-          changed = changed_files()
+          print()
+          print("========================================")
+          print("QA")
+          print("========================================")
 
-          qa_context = format_files(
-              changed
+          current = repo_snapshot()
+
+          qa_context = context_for(
+              sorted(set(selected) | set(
+                  change.get("path")
+                  for change in changes
+                  if change.get("path") in ALLOWED_FILES
+              ))
           )
 
           qa_prompt = f"""
-          You are QA for LORGUS.
+          Ты QA Agent проекта LORGUS.
 
-          Check the actual changed repository.
-
-          USER TASK:
+          ЗАДАЧА:
           {TASK}
 
-          ARCHITECT:
-          {architect}
+          ИЗМЕНЕНИЯ CODER:
+          {json.dumps(coder, ensure_ascii=False, indent=2)}
 
-          CHANGED FILES:
+          ТЕКУЩИЕ ФАЙЛЫ ПОСЛЕ ИЗМЕНЕНИЙ:
           {qa_context}
 
-          GIT DIFF:
-          {diff}
+          Проверь реальные изменения.
 
-          Determine whether the implementation actually satisfies
-          the task.
-
-          Check:
-
-          - functionality;
+          Проверь:
+          - синтаксис;
           - JavaScript;
           - HTML;
           - CSS;
-          - API;
-          - Supabase;
           - Cloudflare Worker;
-          - security;
-          - regressions;
-          - unrelated changes.
+          - Supabase;
+          - регрессии;
+          - соответствие задаче.
 
-          Start your response with exactly one of:
+          Верни первую строку строго:
 
           PASS
 
-          or
+          или
 
           FAIL
 
-          If FAIL, list concrete problems.
+          После неё объяснение.
           """
 
-          qa_raw = call_ai(
+          qa_raw = groq_call(
               [
                   {
                       "role": "system",
-                      "content": (
-                          "You are the strict LORGUS QA Agent."
-                      )
+                      "content": open(".ai/QA.md", encoding="utf-8").read()
                   },
                   {
                       "role": "user",
                       "content": qa_prompt
                   }
               ],
-              max_tokens=1800
+              1800
           )
 
-          print_section(
-              "QA",
-              qa_raw
-          )
+          print(qa_raw)
 
-          qa_match = re.match(
-              r"^\s*(PASS|FAIL)\b",
-              qa_raw,
-              re.IGNORECASE
-          )
-
-          if not qa_match:
-              raise RuntimeError(
-                  "QA did not start with PASS or FAIL."
+          qa_pass = bool(
+              re.match(
+                  r"^\s*PASS\b",
+                  qa_raw,
+                  re.IGNORECASE
               )
-
-          qa_status = (
-              qa_match.group(1).upper()
           )
 
-          # ============================================================
+          # ----------------------------------------------------------
           # REVIEWER
-          # ============================================================
+          # ----------------------------------------------------------
+
+          print()
+          print("========================================")
+          print("REVIEWER")
+          print("========================================")
 
           reviewer_prompt = f"""
-          You are the REVIEWER Agent for LORGUS.
+          Ты Reviewer Agent проекта LORGUS.
 
-          Review the actual implementation.
-
-          USER TASK:
+          ЗАДАЧА:
           {TASK}
 
-          ARCHITECT:
-          {architect}
+          ИЗМЕНЕНИЯ:
+          {json.dumps(coder, ensure_ascii=False, indent=2)}
 
           QA:
           {qa_raw}
 
-          GIT DIFF:
-          {diff}
+          ТЕКУЩИЙ DIFF:
+          {run_command(
+              "git diff -- README.md index.html app.js style.css "
+              "worker.js wrangler.toml docs/PROJECT.md"
+          )}
 
-          Review:
+          Проверь реальные изменения.
 
-          - correctness;
-          - security;
+          Особое внимание:
+          - безопасность;
           - Supabase;
           - Cloudflare;
-          - JavaScript;
-          - regressions;
-          - unrelated changes;
-          - whether the requested task is actually complete.
+          - XSS;
+          - секреты;
+          - регрессии;
+          - несвязанные изменения.
 
-          Start your response with exactly:
+          Первая строка должна быть:
 
           APPROVE
 
-          or
+          или
 
           REJECT
-
-          If REJECT, list concrete problems.
           """
 
-          reviewer_raw = call_ai(
+          reviewer_raw = groq_call(
               [
                   {
                       "role": "system",
-                      "content": (
-                          "You are the strict LORGUS Reviewer Agent."
-                      )
+                      "content": open(".ai/REVIEWER.md", encoding="utf-8").read()
                   },
                   {
                       "role": "user",
                       "content": reviewer_prompt
                   }
               ],
-              max_tokens=1800
+              1800
           )
 
-          print_section(
-              "REVIEWER",
-              reviewer_raw
-          )
+          print(reviewer_raw)
 
           reviewer_match = re.match(
-              r"^\s*(APPROVE|APPROVED|REJECT|REJECTED)\b",
+              r"^\s*(APPROVED?|REJECT(?:ED)?)\b",
               reviewer_raw,
               re.IGNORECASE
           )
 
-          if not reviewer_match:
-              raise RuntimeError(
-                  "Reviewer did not start with APPROVE or REJECT."
-              )
+          reviewer_status = ""
 
-          reviewer_status = (
-              reviewer_match.group(1).upper()
-          )
+          if reviewer_match:
+              reviewer_status = reviewer_match.group(1).upper()
 
-          reviewer_status = (
-              "APPROVE"
-              if reviewer_status.startswith("APPROVE")
-              else "REJECT"
-          )
+          reviewer_reject = reviewer_status.startswith("REJECT")
 
-          # ============================================================
+          # ----------------------------------------------------------
           # FIXER
-          # ============================================================
+          # ----------------------------------------------------------
 
-          if (
-              qa_status == "FAIL"
-              or reviewer_status == "REJECT"
-          ):
+          if (not qa_pass) or reviewer_reject:
 
-              print(
-                  "\nFIXER REQUIRED"
-              )
-
-              current_changed = changed_files()
-
-              fixer_context = format_files(
-                  current_changed
-              )
+              print()
+              print("========================================")
+              print("FIXER")
+              print("========================================")
 
               fixer_prompt = f"""
-              You are the FIXER Agent for LORGUS.
+              Ты Fixer Agent проекта LORGUS.
 
-              The implementation failed QA or Review.
-
-              USER TASK:
+              ЗАДАЧА:
               {TASK}
 
-              ARCHITECT:
-              {architect}
+              CODER:
+              {json.dumps(coder, ensure_ascii=False, indent=2)}
 
               QA:
               {qa_raw}
@@ -837,293 +772,272 @@ jobs:
               REVIEWER:
               {reviewer_raw}
 
-              CURRENT CHANGED FILES:
-              {fixer_context}
+              ТЕКУЩИЕ ФАЙЛЫ:
+              {repo_snapshot()}
 
-              CURRENT DIFF:
-              {git_diff()}
+              Исправь только проблемы, найденные QA или Reviewer.
 
-              Fix ONLY the concrete problems identified by QA
-              or Reviewer.
-
-              Preserve everything else.
-
-              Rules:
-
-              - no new files;
-              - no unrelated changes;
-              - only allowed files;
-              - return JSON only;
-              - no Markdown;
-              - no git diff;
-              - changed files must contain complete final content.
-
-              JSON:
+              Верни ТОЛЬКО JSON:
 
               {{
                 "changes": [
                   {{
                     "path": "README.md",
                     "content_lines": [
-                      "line 1",
-                      "line 2"
+                      "полное",
+                      "исправленное",
+                      "содержимое"
                     ]
                   }}
                 ]
               }}
 
-              If no fix is needed:
-
-              {{
-                "changes": []
-              }}
+              Не используй diff.
+              Не меняй несвязанные файлы.
               """
 
-              fixer_raw = call_ai(
+              fixer_raw = groq_call(
                   [
                       {
                           "role": "system",
-                          "content": (
-                              "You are the LORGUS Fixer Agent. "
-                              "Return valid JSON only."
-                          )
+                          "content": open(".ai/CODER.md", encoding="utf-8").read()
                       },
                       {
                           "role": "user",
                           "content": fixer_prompt
                       }
                   ],
-                  max_tokens=6000
+                  6000
               )
 
-              print_section(
-                  "FIXER",
-                  fixer_raw
-              )
+              fixer_raw = clean_json(fixer_raw)
 
-              fixer_data = extract_json(
-                  fixer_raw
-              )
+              try:
+                  fixer = json.loads(fixer_raw)
+              except Exception:
+                  print("FIXER returned invalid JSON:")
+                  print(fixer_raw)
+                  raise
 
-              fixer_changes = validate_changes(
-                  fixer_data
-              )
+              for change in fixer.get("changes", []):
 
-              if fixer_changes:
-                  apply_changes(
-                      fixer_changes
-                  )
+                  path = change.get("path")
+                  lines = change.get("content_lines")
 
-              # ========================================================
+                  if path not in ALLOWED_FILES:
+                      raise RuntimeError(
+                          f"Fixer attempted to modify forbidden file: {path}"
+                      )
+
+                  if not isinstance(lines, list):
+                      raise RuntimeError(
+                          f"Invalid content_lines for {path}"
+                      )
+
+                  write_file(path, lines)
+
+              run_command("git diff --check")
+
+              # ------------------------------------------------------
               # FINAL QA
-              # ========================================================
+              # ------------------------------------------------------
 
-              final_changed = changed_files()
+              print()
+              print("========================================")
+              print("FINAL QA")
+              print("========================================")
 
-              final_context = format_files(
-                  final_changed
+              final_context = context_for(
+                  sorted(
+                      set(selected) |
+                      {
+                          p for p in ALLOWED_FILES
+                          if os.path.isfile(p)
+                      }
+                  )
               )
-
-              final_diff = git_diff()
 
               final_qa_prompt = f"""
-              Perform FINAL QA for LORGUS.
+              Ты финальный QA Agent проекта LORGUS.
 
-              USER TASK:
+              ЗАДАЧА:
               {TASK}
 
-              ORIGINAL QA:
+              Предыдущий QA:
               {qa_raw}
 
-              ORIGINAL REVIEW:
+              Предыдущий Reviewer:
               {reviewer_raw}
 
-              CURRENT FILES:
+              Текущие файлы:
               {final_context}
 
-              CURRENT DIFF:
-              {final_diff}
+              Проверь, что первоначальная задача выполнена
+              и проблемы QA/Reviewer исправлены.
 
-              Verify that the identified problems were actually fixed.
-
-              Start exactly with:
+              Первая строка строго:
 
               PASS
 
-              or
+              или
 
               FAIL
               """
 
-              final_qa_raw = call_ai(
+              final_qa_raw = groq_call(
                   [
                       {
                           "role": "system",
-                          "content": (
-                              "You are the final LORGUS QA Agent."
-                          )
+                          "content": open(".ai/QA.md", encoding="utf-8").read()
                       },
                       {
                           "role": "user",
                           "content": final_qa_prompt
                       }
                   ],
-                  max_tokens=1800
+                  1800
               )
 
-              print_section(
-                  "FINAL QA",
-                  final_qa_raw
-              )
+              print(final_qa_raw)
 
-              final_qa_match = re.match(
-                  r"^\s*(PASS|FAIL)\b",
+              if not re.match(
+                  r"^\s*PASS\b",
                   final_qa_raw,
                   re.IGNORECASE
-              )
-
-              if not final_qa_match:
-                  raise RuntimeError(
-                      "Final QA did not start with PASS or FAIL."
-                  )
-
-              if (
-                  final_qa_match.group(1).upper()
-                  == "FAIL"
               ):
                   raise RuntimeError(
-                      "Final QA failed after Fixer."
+                      "Final QA returned FAIL."
                   )
 
-              # ========================================================
+              # ------------------------------------------------------
               # FINAL REVIEW
-              # ========================================================
+              # ------------------------------------------------------
+
+              print()
+              print("========================================")
+              print("FINAL REVIEW")
+              print("========================================")
+
+              final_diff = run_command(
+                  "git diff -- README.md index.html app.js style.css "
+                  "worker.js wrangler.toml docs/PROJECT.md"
+              )
 
               final_review_prompt = f"""
-              Perform FINAL REVIEW of the LORGUS repository.
+              Ты финальный Reviewer Agent проекта LORGUS.
 
-              USER TASK:
+              ЗАДАЧА:
               {TASK}
 
               FINAL QA:
               {final_qa_raw}
 
-              CURRENT DIFF:
-              {git_diff()}
+              FINAL DIFF:
+              {final_diff}
 
-              Verify that the final repository satisfies the task.
+              Проверь итоговый diff.
 
-              Start exactly with:
+              Первая строка строго:
 
               APPROVE
 
-              or
+              или
 
               REJECT
               """
 
-              final_review_raw = call_ai(
+              final_reviewer_raw = groq_call(
                   [
                       {
                           "role": "system",
-                          "content": (
-                              "You are the final LORGUS Reviewer Agent."
-                          )
+                          "content": open(".ai/REVIEWER.md", encoding="utf-8").read()
                       },
                       {
                           "role": "user",
                           "content": final_review_prompt
                       }
                   ],
-                  max_tokens=1800
+                  1800
               )
 
-              print_section(
-                  "FINAL REVIEW",
-                  final_review_raw
-              )
+              print(final_reviewer_raw)
 
-              final_review_match = re.match(
-                  r"^\s*(APPROVE|APPROVED|REJECT|REJECTED)\b",
-                  final_review_raw,
+              final_match = re.match(
+                  r"^\s*(APPROVED?|REJECT(?:ED)?)\b",
+                  final_reviewer_raw,
                   re.IGNORECASE
               )
 
-              if not final_review_match:
+              if not final_match:
                   raise RuntimeError(
-                      "Final Reviewer did not start with APPROVE or REJECT."
+                      "Final Reviewer returned an invalid status."
                   )
 
-              final_review_status = (
-                  final_review_match.group(1).upper()
-              )
+              final_status = final_match.group(1).upper()
 
-              if final_review_status.startswith(
-                  "REJECT"
-              ):
+              if final_status.startswith("REJECT"):
                   raise RuntimeError(
-                      "Final Reviewer rejected the changes."
+                      "Final Reviewer returned REJECT."
                   )
 
           else:
-              print(
-                  "\nQA + REVIEW PASSED"
-              )
+              print()
+              print("QA and Reviewer approved the first implementation.")
 
-          # ============================================================
-          # FINAL LOCAL CHECK
-          # ============================================================
+          # ----------------------------------------------------------
+          # FINAL DIFF CHECK
+          # ----------------------------------------------------------
 
-          run_cmd(
-              "git diff --check"
-          )
+          print()
+          print("========================================")
+          print("FINAL DIFF CHECK")
+          print("========================================")
 
-          final_diff = git_diff()
+          run_command("git diff --check")
 
-          print_section(
-              "FINAL DIFF",
-              final_diff or "NO CHANGES"
+          final_diff = run_command(
+              "git diff -- README.md index.html app.js style.css "
+              "worker.js wrangler.toml docs/PROJECT.md"
           )
 
           if not final_diff.strip():
-              print(
-                  "\nNothing to commit."
-              )
-              sys.exit(0)
+              print("No changes detected.")
+              print("Nothing to commit.")
+              raise SystemExit(0)
 
-          # ============================================================
+          # ----------------------------------------------------------
           # COMMIT
-          # ============================================================
+          # ----------------------------------------------------------
 
-          run_cmd(
+          print()
+          print("========================================")
+          print("COMMIT")
+          print("========================================")
+
+          run_command(
               'git config user.name "LORGUS AI"'
           )
 
-          run_cmd(
-              'git config user.email "lorgus-ai@users.noreply.github.com"'
+          run_command(
+              'git config user.email '
+              '"lorgus-ai@users.noreply.github.com"'
           )
 
-          run_cmd(
+          run_command(
               "git add -- README.md index.html app.js style.css "
               "worker.js wrangler.toml docs/PROJECT.md"
           )
 
-          print_section(
-              "FILES TO COMMIT",
-              git_status()
-          )
-
-          run_cmd(
+          run_command(
               'git commit -m "AI: update LORGUS project"'
           )
 
-          run_cmd(
+          run_command(
               "git push origin HEAD"
           )
 
-          print("\n")
-          print("=" * 80)
+          print()
+          print("========================================")
           print("LORGUS AI WORKSPACE: SUCCESS")
-          print("=" * 80)
-
+          print("========================================")
           PY
