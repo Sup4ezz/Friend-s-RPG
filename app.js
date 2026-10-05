@@ -536,6 +536,17 @@ async function loadPlayerState(session) {
         return;
     }
 
+    const approvedApplications = applications.filter(
+        application =>
+            application.status === "approved" &&
+            application.character_id
+    );
+
+    if (approvedApplications.length > 0) {
+        await renderCharacterSelection(container, approvedApplications);
+        return;
+    }
+
     const pendingApplication =
         applications.find(
             application =>
@@ -547,17 +558,6 @@ async function loadPlayerState(session) {
             container,
             pendingApplication
         );
-        return;
-    }
-
-    const approvedApplications = applications.filter(
-        application =>
-            application.status === "approved" &&
-            application.character_id
-    );
-
-    if (approvedApplications.length > 0) {
-        await renderCharacterSelection(container, approvedApplications);
         return;
     }
 
