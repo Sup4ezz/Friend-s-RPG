@@ -2801,29 +2801,52 @@ async function loadMailRecipients() {
     const select = document.getElementById("lorgus-mail-recipient");
     if (!select) return;
 
-    const { data, error } = await supabase
-        .from("characters")
-        .select("id, name, race, status")
-        .eq("status", "ACTIVE")
-        .neq("id", window.activeCharacterId)
-        .order("name", { ascending: true });
+    // Статус персонажа хранится не в characters, а в character_applications.
+    // Для почты показываем только персонажей с одобренной заявкой.
+    const { data: applications, error: applicationsError } = await supabase
+        .from("character_applications")
+        .select("character_id")
+        .eq("status", "approved")
+        .not("character_id", "is", null);
 
-    if (error) {
-        console.error("Не удалось загрузить адресатов:", error);
-        select.innerHTML = `<option value="">Не удалось загрузить персонажей: ${escapeHtml(error.message)}</option>`;
+    if (applicationsError) {
+        console.error("Не удалось загрузить одобренные заявки:", applicationsError);
+        select.innerHTML = `<option value="">Не удалось загрузить персонажей: ${escapeHtml(applicationsError.message)}</option>`;
         return;
     }
 
-    const active = data || [];
+    const characterIds = [...new Set(
+        (applications || [])
+            .map(application => application.character_id)
+            .filter(Boolean)
+            .filter(id => String(id) !== String(window.activeCharacterId))
+    )];
 
-    if (!active.length) {
+    if (!characterIds.length) {
+        select.innerHTML = '<option value="">Нет доступных адресатов</option>';
+        return;
+    }
+
+    const { data: characters, error: charactersError } = await supabase
+        .from("characters")
+        .select("id, name, race")
+        .in("id", characterIds)
+        .order("name", { ascending: true });
+
+    if (charactersError) {
+        console.error("Не удалось загрузить персонажей:", charactersError);
+        select.innerHTML = `<option value="">Не удалось загрузить персонажей: ${escapeHtml(charactersError.message)}</option>`;
+        return;
+    }
+
+    if (!characters?.length) {
         select.innerHTML = '<option value="">Нет доступных адресатов</option>';
         return;
     }
 
     select.innerHTML =
         '<option value="">Выбери персонажа</option>' +
-        active.map(character =>
+        characters.map(character =>
             `<option value="${escapeHtml(character.id)}">${escapeHtml(character.name || "Без имени")} · ${escapeHtml(character.race || "персонаж")}</option>`
         ).join("");
 }
