@@ -1934,7 +1934,113 @@ function renderCharacter(
                 ""
             )}
         </p>
+
+        <div class="character-game-actions">
+            <button
+                class="gold-button"
+                type="button"
+                onclick="openActiveCharacterProfile()"
+            >
+                Профиль персонажа
+            </button>
+
+            <button
+                class="character-secondary-button"
+                type="button"
+                onclick="switchCharacter()"
+            >
+                Сменить персонажа
+            </button>
+        </div>
     `;
+}
+
+/* =========================================================
+   ПРОФИЛЬ И СМЕНА ПЕРСОНАЖА
+   ========================================================= */
+
+function openActiveCharacterProfile() {
+    const character = window.activeCharacter;
+
+    if (!character) {
+        showCharacterError(
+            document.getElementById("cabinet-content"),
+            "Активный персонаж не выбран."
+        );
+        return;
+    }
+
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    container.className = "character-profile-page";
+
+    container.innerHTML = `
+        <div class="character-profile-header">
+            <div class="welcome-symbol">✦</div>
+            <h1>${escapeHtml(character.name || "Без имени")}</h1>
+            <p>${escapeHtml(character.race || "Раса не указана")}</p>
+        </div>
+
+        <div class="character-profile-grid">
+            <div class="character-profile-field">
+                <span>Возраст</span>
+                <strong>${escapeHtml(character.age ?? "Не указан")}</strong>
+            </div>
+            <div class="character-profile-field">
+                <span>Родина</span>
+                <strong>${escapeHtml(character.homeland || "Не указана")}</strong>
+            </div>
+            <div class="character-profile-field">
+                <span>Род занятий</span>
+                <strong>${escapeHtml(character.occupation || "Не указан")}</strong>
+            </div>
+            <div class="character-profile-field">
+                <span>Статус</span>
+                <strong>${escapeHtml(String(character.status || "ACTIVE").toUpperCase())}</strong>
+            </div>
+            <div class="character-profile-field full">
+                <span>Характер</span>
+                <p>${escapeHtml(character.personality || "Не указан")}</p>
+            </div>
+            <div class="character-profile-field full">
+                <span>Предыстория</span>
+                <p>${escapeHtml(character.backstory || "Не указана")}</p>
+            </div>
+            <div class="character-profile-field full">
+                <span>Особые навыки</span>
+                <p>${escapeHtml(character.special_skills || "Не указаны")}</p>
+            </div>
+        </div>
+
+        <div class="character-game-actions">
+            <button class="gold-button" type="button" onclick="returnToGame()">
+                Вернуться к игре
+            </button>
+            <button class="character-secondary-button" type="button" onclick="switchCharacter()">
+                Сменить персонажа
+            </button>
+        </div>
+    `;
+}
+
+async function switchCharacter() {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    sessionStorage.removeItem("lorgus_active_character_id");
+    window.activeCharacterId = null;
+    window.activeCharacter = null;
+
+    await loadPlayerState({
+        user: (await supabase.auth.getUser()).data.user
+    });
+}
+
+function returnToGame() {
+    const container = document.getElementById("cabinet-content");
+    if (!container || !window.activeCharacter) return;
+    renderCharacter(container, window.activeCharacter);
 }
 
 /* =========================================================
@@ -2069,6 +2175,10 @@ window.register = register;
 window.logout = logout;
 window.submitCharacterApplication =
     submitCharacterApplication;
+window.openActiveCharacterProfile = openActiveCharacterProfile;
+window.switchCharacter = switchCharacter;
+window.returnToGame = returnToGame;
+
 
 /* =========================================================
    ЗАПУСК
