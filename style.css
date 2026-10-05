@@ -2064,3 +2064,30 @@ img {
         width: 100%;
     }
 }
+
+
+/* Проверка анкеты: правки администрации */
+.character-review-notes {
+    margin: 0 auto 24px;
+    max-width: 900px;
+    padding: 18px 20px;
+    border: 1px solid rgba(201, 164, 92, 0.45);
+    border-left: 3px solid #c9a45c;
+    background: rgba(201, 164, 92, 0.08);
+    text-align: left;
+}
+
+.character-review-notes h3 {
+    margin: 0 0 8px;
+}
+
+.character-review-notes p {
+    margin: 0;
+    white-space: pre-wrap;
+    line-height: 1.6;
+}
+
+.admin-revision-button {
+    border: 1px solid rgba(201, 164, 92, 0.55);
+}
+
