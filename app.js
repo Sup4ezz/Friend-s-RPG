@@ -1817,35 +1817,61 @@ function renderLocationChats(locationName, regionName) {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
-    container.className = "lorgus-world-page";
-    const name = escapeHtml(window.activeCharacter?.name || "Без имени");
+    container.className = "lorgus-rp-page";
+    const character = window.activeCharacter;
+    const name = escapeHtml(character?.name || "Без имени");
+    const location = escapeHtml(locationName);
+    const region = escapeHtml(regionName);
 
     container.innerHTML = `
-        <div class="lorgus-world-shell">
-            <aside class="lorgus-world-sidebar">
-                <div class="lorgus-world-sidebar-symbol">✦</div>
-                <div class="lorgus-world-sidebar-label">ПЕРСОНАЖ</div>
-                <div class="lorgus-world-sidebar-name">${name}</div>
-                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="renderKingdomLocations('${escapeHtml(regionName)}')">
-                    ← К локациям
-                </button>
+        <div class="lorgus-rp-shell">
+            <aside class="lorgus-rp-sidebar">
+                <button class="lorgus-rp-back" type="button" onclick="renderKingdomLocations('${region}')">← К локациям</button>
+
+                <div class="lorgus-rp-place-mark">✦</div>
+                <span class="lorgus-rp-overline">ЛОКАЦИЯ</span>
+                <h1>${location}</h1>
+                <p class="lorgus-rp-region">${region}</p>
+
+                <div class="lorgus-rp-divider"></div>
+
+                <div class="lorgus-rp-sidebar-label">ПЕРСОНАЖ</div>
+                <div class="lorgus-rp-character">
+                    <span>✦</span>
+                    <div>
+                        <strong>${name}</strong>
+                        <small>Готов к сцене</small>
+                    </div>
+                </div>
+
+                <div class="lorgus-rp-sidebar-note">
+                    <span>✧</span>
+                    <p>Здесь будут жить твои истории. Каждая сцена начинается с первого действия.</p>
+                </div>
             </aside>
 
-            <main class="lorgus-world-browser">
-                <header class="lorgus-world-header">
-                    <span class="lorgus-world-kicker">${escapeHtml(regionName)}</span>
-                    <h1>${escapeHtml(locationName)}</h1>
-                    <p>RP-сцены этой локации.</p>
+            <main class="lorgus-rp-main">
+                <header class="lorgus-rp-header">
+                    <div>
+                        <span class="lorgus-rp-overline">RP · ${region}</span>
+                        <h2>${location}</h2>
+                    </div>
+                    <div class="lorgus-rp-status"><i></i> СЦЕНЫ ОТСУТСТВУЮТ</div>
                 </header>
 
-                <section class="lorgus-world-section">
-                    <div class="lorgus-world-section-title">RP-ЧАТЫ</div>
-                    <div class="lorgus-empty-location">
-                        <span>✦</span>
-                        <h2>Пока пусто</h2>
-                        <p>В этой локации пока нет созданных RP-чатов. Здесь будут отображаться только реально созданные сцены.</p>
-                    </div>
+                <section class="lorgus-rp-stage">
+                    <div class="lorgus-rp-stage-glow"></div>
+                    <div class="lorgus-rp-symbol">✦</div>
+                    <span class="lorgus-rp-stage-kicker">НАЧАЛО ИСТОРИИ</span>
+                    <h3>Здесь пока тихо.</h3>
+                    <p>В этой локации ещё нет созданных RP-сцен. Когда сцена появится, здесь будет происходить повествование, диалоги персонажей и действия игрока.</p>
+                    <button class="gold-button lorgus-rp-create-button" type="button" disabled>СОЗДАТЬ СЦЕНУ · СКОРО</button>
                 </section>
+
+                <footer class="lorgus-rp-footer">
+                    <span>ЛОРГУС</span>
+                    <span>Мир продолжает жить за пределами этой сцены.</span>
+                </footer>
             </main>
         </div>
     `;
