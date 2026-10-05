@@ -31,7 +31,9 @@ export default {
         /*
             STATIC FILES
         */
-        const response = await env.ASSETS.fetch(new Request(request, {\n            headers: new Headers(request.headers)\n        }));
+        const response = await env.ASSETS.fetch(new Request(request, {
+            headers: new Headers(request.headers)
+        }));
 
         const headers = new Headers(response.headers);
 
