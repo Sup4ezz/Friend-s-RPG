@@ -4875,3 +4875,370 @@ select:focus-visible{
         grid-template-columns:1fr;
     }
 }
+
+
+/* =========================================================
+   LORGUS RP — CINEMATIC SCENE INTERFACE
+   ========================================================= */
+
+.lorgus-rp-page{
+    width:min(1540px,calc(100% - 34px));
+    min-height:calc(100vh - 120px);
+    margin:22px auto 50px;
+}
+
+.lorgus-rp-shell{
+    min-height:calc(100vh - 140px);
+    display:grid;
+    grid-template-columns:310px minmax(0,1fr);
+    overflow:hidden;
+    border:1px solid rgba(217,183,108,.18);
+    background:#090806;
+    box-shadow:0 35px 110px rgba(0,0,0,.58);
+}
+
+.lorgus-rp-sidebar{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    padding:30px 28px;
+    overflow:hidden;
+    border-right:1px solid rgba(217,183,108,.13);
+    background:
+        radial-gradient(300px 300px at 50% 10%,rgba(217,183,108,.10),transparent 70%),
+        linear-gradient(165deg,rgba(28,23,16,.98),rgba(7,6,5,.99));
+}
+
+.lorgus-rp-sidebar::before{
+    content:"";
+    position:absolute;
+    inset:15px;
+    border:1px solid rgba(217,183,108,.065);
+    pointer-events:none;
+}
+
+.lorgus-rp-back{
+    position:relative;
+    z-index:2;
+    align-self:flex-start;
+    padding:8px 0;
+    border:0;
+    background:none;
+    color:#9c8e78;
+    font-family:var(--body-font);
+    font-size:12px;
+    letter-spacing:.04em;
+    cursor:pointer;
+}
+
+.lorgus-rp-back:hover{
+    color:#e0c98f;
+}
+
+.lorgus-rp-place-mark{
+    position:relative;
+    z-index:1;
+    width:76px;
+    height:76px;
+    margin:58px auto 24px;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(217,183,108,.30);
+    border-radius:50%;
+    color:#e5c980;
+    font-size:30px;
+    box-shadow:0 0 50px rgba(217,183,108,.08),inset 0 0 25px rgba(217,183,108,.04);
+}
+
+.lorgus-rp-overline{
+    position:relative;
+    z-index:1;
+    color:#8b7b62;
+    font-size:10px;
+    letter-spacing:.22em;
+    text-transform:uppercase;
+}
+
+.lorgus-rp-sidebar h1{
+    position:relative;
+    z-index:1;
+    margin:8px 0 2px;
+    font-family:var(--title-font);
+    font-size:39px;
+    font-weight:600;
+    line-height:1;
+    color:#eee1c4;
+}
+
+.lorgus-rp-region{
+    position:relative;
+    z-index:1;
+    margin:8px 0 0;
+    color:#9a8c77;
+    font-size:13px;
+}
+
+.lorgus-rp-divider{
+    position:relative;
+    z-index:1;
+    height:1px;
+    margin:32px 0 25px;
+    background:linear-gradient(90deg,rgba(217,183,108,.25),transparent);
+}
+
+.lorgus-rp-sidebar-label{
+    position:relative;
+    z-index:1;
+    margin-bottom:12px;
+    color:#796d5c;
+    font-size:9px;
+    letter-spacing:.20em;
+}
+
+.lorgus-rp-character{
+    position:relative;
+    z-index:1;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:13px;
+    border:1px solid rgba(217,183,108,.10);
+    background:rgba(255,255,255,.018);
+}
+
+.lorgus-rp-character > span{
+    width:34px;
+    height:34px;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(217,183,108,.20);
+    border-radius:50%;
+    color:#d5b36b;
+}
+
+.lorgus-rp-character strong,
+.lorgus-rp-character small{
+    display:block;
+}
+
+.lorgus-rp-character strong{
+    color:#dbc89d;
+    font-family:var(--title-font);
+    font-size:18px;
+}
+
+.lorgus-rp-character small{
+    margin-top:2px;
+    color:#756a59;
+    font-size:10px;
+}
+
+.lorgus-rp-sidebar-note{
+    position:relative;
+    z-index:1;
+    display:flex;
+    gap:10px;
+    margin-top:auto;
+    padding-top:30px;
+    color:#766c5e;
+}
+
+.lorgus-rp-sidebar-note span{
+    color:#b89651;
+}
+
+.lorgus-rp-sidebar-note p{
+    margin:0;
+    font-size:11px;
+    line-height:1.7;
+}
+
+.lorgus-rp-main{
+    position:relative;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    background:
+        radial-gradient(900px 500px at 55% 30%,rgba(217,183,108,.045),transparent 72%),
+        #090806;
+}
+
+.lorgus-rp-header{
+    min-height:94px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:20px;
+    padding:22px 32px;
+    border-bottom:1px solid rgba(217,183,108,.11);
+    background:rgba(8,7,5,.72);
+}
+
+.lorgus-rp-header h2{
+    margin:5px 0 0;
+    font-family:var(--title-font);
+    font-size:31px;
+    font-weight:500;
+    color:#ead9b3;
+}
+
+.lorgus-rp-status{
+    padding:8px 11px;
+    border:1px solid rgba(217,183,108,.11);
+    color:#6f675a;
+    font-size:8px;
+    letter-spacing:.15em;
+    white-space:nowrap;
+}
+
+.lorgus-rp-status i{
+    display:inline-block;
+    width:5px;
+    height:5px;
+    margin-right:7px;
+    border-radius:50%;
+    background:#665a4b;
+}
+
+.lorgus-rp-stage{
+    position:relative;
+    flex:1;
+    min-height:540px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:60px;
+    overflow:hidden;
+    text-align:center;
+    border-bottom:1px solid rgba(217,183,108,.08);
+    background:
+        radial-gradient(600px 420px at 50% 45%,rgba(217,183,108,.055),transparent 68%),
+        linear-gradient(180deg,rgba(16,13,9,.4),rgba(5,4,3,.7));
+}
+
+.lorgus-rp-stage::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:
+        linear-gradient(rgba(217,183,108,.022) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(217,183,108,.022) 1px,transparent 1px);
+    background-size:64px 64px;
+    mask-image:radial-gradient(circle at center,#000,transparent 75%);
+}
+
+.lorgus-rp-stage-glow{
+    position:absolute;
+    width:420px;
+    height:420px;
+    border:1px solid rgba(217,183,108,.045);
+    border-radius:50%;
+    box-shadow:0 0 0 50px rgba(217,183,108,.012),0 0 0 110px rgba(217,183,108,.008);
+}
+
+.lorgus-rp-symbol{
+    position:relative;
+    z-index:1;
+    margin-bottom:26px;
+    color:#c7a45e;
+    font-size:31px;
+    text-shadow:0 0 35px rgba(217,183,108,.22);
+}
+
+.lorgus-rp-stage-kicker,
+.lorgus-rp-stage h3,
+.lorgus-rp-stage p,
+.lorgus-rp-create-button{
+    position:relative;
+    z-index:1;
+}
+
+.lorgus-rp-stage-kicker{
+    color:#82745e;
+    font-size:9px;
+    letter-spacing:.28em;
+}
+
+.lorgus-rp-stage h3{
+    margin:15px 0 10px;
+    font-family:var(--title-font);
+    font-size:43px;
+    font-weight:500;
+    color:#e6d7b7;
+}
+
+.lorgus-rp-stage p{
+    max-width:580px;
+    margin:0;
+    color:#817668;
+    font-size:13px;
+    line-height:1.85;
+}
+
+.lorgus-rp-create-button{
+    margin-top:28px;
+    min-width:230px;
+}
+
+.lorgus-rp-footer{
+    display:flex;
+    justify-content:space-between;
+    gap:20px;
+    padding:15px 32px;
+    color:#5f574b;
+    font-size:9px;
+    letter-spacing:.05em;
+}
+
+.lorgus-rp-footer span:first-child{
+    color:#927848;
+    letter-spacing:.18em;
+}
+
+@media(max-width:850px){
+    .lorgus-rp-shell{
+        grid-template-columns:1fr;
+    }
+
+    .lorgus-rp-sidebar{
+        min-height:350px;
+        border-right:0;
+        border-bottom:1px solid rgba(217,183,108,.13);
+    }
+
+    .lorgus-rp-place-mark{
+        margin-top:25px;
+    }
+
+    .lorgus-rp-sidebar-note{
+        margin-top:25px;
+    }
+}
+
+@media(max-width:600px){
+    .lorgus-rp-page{
+        width:calc(100% - 14px);
+        margin-top:10px;
+    }
+
+    .lorgus-rp-header{
+        align-items:flex-start;
+        flex-direction:column;
+        padding:20px;
+    }
+
+    .lorgus-rp-stage{
+        min-height:500px;
+        padding:35px 20px;
+    }
+
+    .lorgus-rp-stage h3{
+        font-size:35px;
+    }
+
+    .lorgus-rp-footer{
+        flex-direction:column;
+        padding:15px 20px;
+    }
+}
