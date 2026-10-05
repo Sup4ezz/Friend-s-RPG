@@ -1603,110 +1603,254 @@ function renderCharacter(
     container,
     character
 ) {
-    container.className = "lorgus-game-page";
+    container.className = "lorgus-world-page";
 
     const name = escapeHtml(character.name || "Без имени");
     const race = escapeHtml(character.race || "Раса не указана");
-    const occupation = escapeHtml(character.occupation || "Путник");
+    const homeland = escapeHtml(character.homeland || "Родина не указана");
 
     container.innerHTML = `
-        <div class="lorgus-game-layout">
-            <aside class="lorgus-player-panel">
-                <div class="lorgus-player-portrait">
-                    <div class="lorgus-player-portrait-placeholder">✦</div>
-                </div>
+        <div class="lorgus-world-shell">
+            <aside class="lorgus-world-sidebar">
+                <div class="lorgus-world-sidebar-symbol">✦</div>
+                <div class="lorgus-world-sidebar-label">ПЕРСОНАЖ</div>
+                <div class="lorgus-world-sidebar-name">${name}</div>
+                <div class="lorgus-world-sidebar-meta">${race}</div>
+                <div class="lorgus-world-sidebar-meta">${homeland}</div>
 
-                <div class="lorgus-player-name">${name}</div>
-                <div class="lorgus-player-subtitle">${race}</div>
-
-                <div class="lorgus-level-row">
-                    <span>Уровень 1</span>
-                    <span>0 / 100 XP</span>
-                </div>
-                <div class="lorgus-progress">
-                    <span style="width:0%"></span>
-                </div>
-
-                <div class="lorgus-stat">
-                    <span>Здоровье</span>
-                    <strong>100 / 100</strong>
-                </div>
-                <div class="lorgus-progress health">
-                    <span style="width:100%"></span>
-                </div>
-
-                <div class="lorgus-quick-stats">
-                    <div><span>Золото</span><strong>0</strong></div>
-                    <div><span>Опыт</span><strong>0</strong></div>
-                </div>
-
-                <button class="gold-button lorgus-side-button" type="button" onclick="openActiveCharacterProfile()">
-                    Профиль персонажа
+                <button class="gold-button lorgus-world-sidebar-button" type="button" onclick="openActiveCharacterProfile()">
+                    Профиль
                 </button>
-                <button class="character-secondary-button lorgus-side-button" type="button" onclick="switchCharacter()">
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="switchCharacter()">
                     Сменить персонажа
                 </button>
             </aside>
 
-            <main class="lorgus-world-panel">
-                <header class="lorgus-location-header">
-                    <div>
-                        <span class="lorgus-kicker">ТЕКУЩЕЕ МЕСТО</span>
-                        <h1>Начало пути</h1>
-                        <p>${occupation}</p>
-                    </div>
-                    <div class="lorgus-location-mark">✦</div>
+            <main class="lorgus-world-browser">
+                <header class="lorgus-world-header">
+                    <span class="lorgus-world-kicker">МИР ЛОРГУСА</span>
+                    <h1>Мир</h1>
+                    <p>Выбери край, в который хочешь войти. Здесь начинается навигация по миру и его RP-сценам.</p>
                 </header>
 
-                <section class="lorgus-scene">
-                    <h2>Мир ЛОРГУС ждёт тебя</h2>
-                    <p>
-                        Твой путь только начинается. Здесь будет разворачиваться
-                        история ${name}, а каждое принятое решение сможет изменить
-                        дальнейшее путешествие.
-                    </p>
+                <section class="lorgus-world-section">
+                    <div class="lorgus-world-section-title">КОРОЛЕВСТВА</div>
+                    <div class="lorgus-region-grid">
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Атэрон')">
+                            <span class="lorgus-region-card-symbol">✦</span>
+                            <strong>Атэрон</strong>
+                            <small>Королевство Нечто</small>
+                            <p>Знания, древности, исследования и руины.</p>
+                        </button>
+
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Каэлор')">
+                            <span class="lorgus-region-card-symbol">◆</span>
+                            <strong>Каэлор</strong>
+                            <small>Королевство Вечного Пламени</small>
+                            <p>Горы, кузницы, шахты и древнее мастерство.</p>
+                        </button>
+
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Ксандр')">
+                            <span class="lorgus-region-card-symbol">◇</span>
+                            <strong>Ксандр</strong>
+                            <small>Королевство Воздаяния</small>
+                            <p>Торговля, банки, дороги и большие рынки.</p>
+                        </button>
+
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Лирэн')">
+                            <span class="lorgus-region-card-symbol">❖</span>
+                            <strong>Лирэн</strong>
+                            <small>Королевство Плодородия</small>
+                            <p>Леса, плодородные земли и древняя природа.</p>
+                        </button>
+
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Морвейн')">
+                            <span class="lorgus-region-card-symbol">†</span>
+                            <strong>Морвейн</strong>
+                            <small>Королевство Последнего Пути</small>
+                            <p>Паломничество, память, туманные долины и Фин.</p>
+                        </button>
+                    </div>
                 </section>
 
-                <section class="lorgus-actions">
-                    <div class="lorgus-section-title">
-                        <span>ДЕЙСТВИЯ</span>
-                        <i></i>
-                    </div>
+                <section class="lorgus-world-section">
+                    <div class="lorgus-world-section-title">НЕЗАВИСИМЫЕ ЗЕМЛИ</div>
+                    <div class="lorgus-region-grid lorgus-region-grid-small">
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Святые Земли')">
+                            <span class="lorgus-region-card-symbol">✧</span>
+                            <strong>Святые Земли</strong>
+                            <small>Нейтральная территория</small>
+                            <p>Место переговоров монархов и глав церквей.</p>
+                        </button>
 
-                    <div class="lorgus-action-grid">
-                        <button class="lorgus-action-card" type="button">
-                            <strong>Осмотреться</strong>
-                            <span>Изучить место, в котором ты оказался.</span>
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Спорные Земли')">
+                            <span class="lorgus-region-card-symbol">◇</span>
+                            <strong>Спорные Земли</strong>
+                            <small>Вне власти пяти королевств</small>
+                            <p>Независимые поселения и земли без единого хозяина.</p>
                         </button>
-                        <button class="lorgus-action-card" type="button">
-                            <strong>Исследовать</strong>
-                            <span>Отправиться навстречу неизвестному.</span>
-                        </button>
-                        <button class="lorgus-action-card" type="button">
-                            <strong>Инвентарь</strong>
-                            <span>Посмотреть вещи и снаряжение.</span>
-                        </button>
-                        <button class="lorgus-action-card" type="button">
-                            <strong>Персонаж</strong>
-                            <span>Открыть подробности своего героя.</span>
-                        </button>
-                    </div>
-                </section>
 
-                <section class="lorgus-log">
-                    <div class="lorgus-section-title">
-                        <span>ЖУРНАЛ</span>
-                        <i></i>
-                    </div>
-                    <div class="lorgus-log-entry">
-                        <span class="lorgus-log-symbol">◆</span>
-                        <p>Ты вступаешь в мир ЛОРГУС. История начинается.</p>
+                        <div class="lorgus-region-card lorgus-region-card-closed">
+                            <span class="lorgus-region-card-symbol">✕</span>
+                            <strong>Геена</strong>
+                            <small>Континент закрыт для игроков</small>
+                            <p>Эта территория пока недоступна для посещения и происхождения персонажей.</p>
+                        </div>
                     </div>
                 </section>
             </main>
         </div>
     `;
 }
+
+const LORGUS_LOCATIONS = {
+    "Атэрон": {
+        subtitle: "Королевство Нечто",
+        description: "Земля знаний, исследований, древних руин и реликвий.",
+        locations: [
+            ["Примум", "Столица Атэрона", "Центр образования, исследований и древних знаний."]
+        ]
+    },
+    "Каэлор": {
+        subtitle: "Королевство Вечного Пламени",
+        description: "Горное королевство дварфов, кузниц, шахт и торговых путей.",
+        locations: [
+            ["Хелион", "Столица Каэлора", "Дворец, кузницы, рынки и учреждения королевства."],
+            ["Древнее Пламя", "Священное место", "Священное место Вечного Пламени."]
+        ]
+    },
+    "Ксандр": {
+        subtitle: "Королевство Воздаяния",
+        description: "Торговое и финансовое сердце континента.",
+        locations: [
+            ["Арджент", "Столица Ксандра", "Великий рынок, королевский двор и финансовые дома."],
+            ["Меридиан", "Город Ксандра", "Один из известных городов королевства."],
+            ["Валькрофт", "Город Ксандра", "Город на торговых путях."],
+            ["Солмир", "Город Ксандра", "Город торгового королевства."]
+        ]
+    },
+    "Лирэн": {
+        subtitle: "Королевство Плодородия",
+        description: "Леса, плодородные земли и владения лесных эльфов.",
+        locations: [
+            ["Аврора", "Столица Лирэна", "Город, построенный внутри огромного древнего дерева."],
+            ["Элвэйн", "Город Лирэна", "Один из городов лесного королевства."],
+            ["Таллирион", "Город Лирэна", "Город среди лесов и плодородных земель."],
+            ["Эстерваль", "Город Лирэна", "Город западного королевства."]
+        ]
+    },
+    "Морвейн": {
+        subtitle: "Королевство Последнего Пути",
+        description: "Холодная земля паломничества, памяти и Последнего Пути.",
+        locations: [
+            ["Фин", "Столица Морвейна", "Дворец, храмы, архивы и главные паломнические учреждения."]
+        ]
+    },
+    "Святые Земли": {
+        subtitle: "Нейтральная территория",
+        description: "Земли, где встречаются представители пяти королевств и церквей.",
+        locations: []
+    },
+    "Спорные Земли": {
+        subtitle: "Независимые территории",
+        description: "Земли вне власти пяти королевств.",
+        locations: []
+    }
+};
+
+function renderKingdomLocations(regionName) {
+    const container = document.getElementById("cabinet-content");
+    const region = LORGUS_LOCATIONS[regionName];
+    if (!container || !region) return;
+
+    container.className = "lorgus-world-page";
+    const character = window.activeCharacter;
+    const name = escapeHtml(character?.name || "Без имени");
+
+    const locationCards = region.locations.length
+        ? region.locations.map(([title, subtitle, description]) => `
+            <button class="lorgus-location-card" type="button" onclick="renderLocationChats('${escapeHtml(title)}', '${escapeHtml(regionName)}')">
+                <span class="lorgus-location-card-mark">✦</span>
+                <strong>${escapeHtml(title)}</strong>
+                <small>${escapeHtml(subtitle)}</small>
+                <p>${escapeHtml(description)}</p>
+            </button>
+        `).join("")
+        : `
+            <div class="lorgus-empty-location">
+                <span>✦</span>
+                <h2>Локации ещё не добавлены</h2>
+                <p>Здесь появятся конкретные места и RP-сцены, когда они будут определены в мире ЛОРГУС.</p>
+            </div>
+        `;
+
+    container.innerHTML = `
+        <div class="lorgus-world-shell">
+            <aside class="lorgus-world-sidebar">
+                <div class="lorgus-world-sidebar-symbol">✦</div>
+                <div class="lorgus-world-sidebar-label">ПЕРСОНАЖ</div>
+                <div class="lorgus-world-sidebar-name">${name}</div>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="renderCharacter(document.getElementById('cabinet-content'), window.activeCharacter)">
+                    ← Вернуться к миру
+                </button>
+            </aside>
+
+            <main class="lorgus-world-browser">
+                <header class="lorgus-world-header">
+                    <span class="lorgus-world-kicker">РЕГИОН</span>
+                    <h1>${escapeHtml(regionName)}</h1>
+                    <p>${escapeHtml(region.description)}</p>
+                </header>
+
+                <section class="lorgus-world-section">
+                    <div class="lorgus-world-section-title">${escapeHtml(region.subtitle)}</div>
+                    <div class="lorgus-location-grid">
+                        ${locationCards}
+                    </div>
+                </section>
+            </main>
+        </div>
+    `;
+}
+
+function renderLocationChats(locationName, regionName) {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    container.className = "lorgus-world-page";
+    const name = escapeHtml(window.activeCharacter?.name || "Без имени");
+
+    container.innerHTML = `
+        <div class="lorgus-world-shell">
+            <aside class="lorgus-world-sidebar">
+                <div class="lorgus-world-sidebar-symbol">✦</div>
+                <div class="lorgus-world-sidebar-label">ПЕРСОНАЖ</div>
+                <div class="lorgus-world-sidebar-name">${name}</div>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="renderKingdomLocations('${escapeHtml(regionName)}')">
+                    ← К локациям
+                </button>
+            </aside>
+
+            <main class="lorgus-world-browser">
+                <header class="lorgus-world-header">
+                    <span class="lorgus-world-kicker">${escapeHtml(regionName)}</span>
+                    <h1>${escapeHtml(locationName)}</h1>
+                    <p>RP-сцены этой локации.</p>
+                </header>
+
+                <section class="lorgus-world-section">
+                    <div class="lorgus-world-section-title">RP-ЧАТЫ</div>
+                    <div class="lorgus-empty-location">
+                        <span>✦</span>
+                        <h2>Пока пусто</h2>
+                        <p>В этой локации пока нет созданных RP-чатов. Здесь будут отображаться только реально созданные сцены.</p>
+                    </div>
+                </section>
+            </main>
+        </div>
+    `;
+}
+
 
 /* =========================================================
    ПРОФИЛЬ И СМЕНА ПЕРСОНАЖА
