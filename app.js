@@ -595,8 +595,30 @@ async function renderCharacterSelection(container, applications, pendingApplicat
         card.className = "character-card";
 
         const avatar = document.createElement("div");
-        avatar.className = "character-card-avatar character-card-placeholder";
-        avatar.textContent = "✦";
+        avatar.className = "character-card-avatar";
+
+        if (application.photo_path) {
+            const { data: photoData, error: photoError } = await supabase
+                .storage
+                .from("character-applications")
+                .createSignedUrl(application.photo_path, 60 * 60);
+
+            if (!photoError && photoData?.signedUrl) {
+                avatar.innerHTML = "";
+                const image = document.createElement("img");
+                image.src = photoData.signedUrl;
+                image.alt = character.name || "Персонаж";
+                image.className = "character-card-photo";
+                avatar.appendChild(image);
+            } else {
+                avatar.classList.add("character-card-placeholder");
+                avatar.textContent = "✦";
+            }
+        } else {
+            avatar.classList.add("character-card-placeholder");
+            avatar.textContent = "✦";
+        }
+
         card.appendChild(avatar);
 
         const body = document.createElement("div");
