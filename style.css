@@ -6124,3 +6124,25 @@ select:focus-visible{
 .lorgus-world-section .lorgus-location-grid {
     align-items: stretch;
 }
+
+/* LORGUS — unified heraldic glyphs, no text/emoji icons */
+.lorgus-region-card-symbol{position:relative;width:46px;height:46px;display:grid;place-items:center;margin-bottom:18px;border:1px solid rgba(198,164,91,.24);border-radius:50%;background:radial-gradient(circle,rgba(198,164,91,.10),rgba(198,164,91,.025) 58%,transparent 60%);color:rgba(214,184,118,.78);box-sizing:border-box}
+.lorgus-region-glyph::before,.lorgus-region-glyph::after{content:"";position:absolute;display:block}
+.lorgus-region-glyph-aetheron::before{width:12px;height:12px;border:1px solid currentColor;transform:rotate(45deg)}
+.lorgus-region-glyph-aetheron::after{width:1px;height:28px;background:currentColor;opacity:.42}
+.lorgus-region-glyph-kaelor::before{width:15px;height:15px;border:1px solid currentColor;transform:rotate(45deg)}
+.lorgus-region-glyph-kaelor::after{width:7px;height:7px;border:1px solid currentColor;transform:rotate(45deg)}
+.lorgus-region-glyph-xandr::before{width:18px;height:10px;border-top:1px solid currentColor;border-bottom:1px solid currentColor}
+.lorgus-region-glyph-xandr::after{width:1px;height:22px;background:currentColor;box-shadow:-7px 0 currentColor,7px 0 currentColor;opacity:.62}
+.lorgus-region-glyph-lyren::before{width:14px;height:22px;border:1px solid currentColor;border-radius:100% 0 100% 0;transform:rotate(45deg)}
+.lorgus-region-glyph-lyren::after{width:1px;height:25px;background:currentColor;transform:rotate(45deg);opacity:.58}
+.lorgus-region-glyph-morvein::before{width:13px;height:25px;border-left:1px solid currentColor;border-right:1px solid currentColor}
+.lorgus-region-glyph-morvein::after{width:21px;height:1px;background:currentColor;box-shadow:0 -7px currentColor,0 7px currentColor;opacity:.62}
+.lorgus-region-glyph-holy::before{width:17px;height:17px;border:1px solid currentColor;border-radius:50%}
+.lorgus-region-glyph-holy::after{width:27px;height:1px;background:currentColor;opacity:.58}
+.lorgus-region-glyph-disputed{border-style:dashed;opacity:.68}
+.lorgus-region-glyph-disputed::before{width:17px;height:17px;border:1px solid currentColor;transform:rotate(45deg)}
+.lorgus-region-glyph-disputed::after{width:1px;height:23px;background:currentColor;transform:rotate(45deg);opacity:.48}
+.lorgus-world-symbol-character{width:42px;height:42px;position:relative;border:1px solid rgba(198,164,91,.28);border-radius:50%;background:radial-gradient(circle,rgba(198,164,91,.11),transparent 62%)}
+.lorgus-world-symbol-character::before{content:"";position:absolute;width:11px;height:11px;border:1px solid rgba(214,184,118,.84);border-radius:50%}
+.lorgus-world-symbol-character::after{content:"";position:absolute;width:24px;height:1px;background:rgba(214,184,118,.55)}
