@@ -6,6 +6,10 @@ on:
     paths-ignore:
       - "Obsidian Vault/**"
       - "Obsidian Vault.zip"
+      - ".agent/**"
+      - "AGENTS.md"
+      - "LORGUS_CHECKLIST.md"
+      - "README.md"
   workflow_dispatch:
 
 permissions:
