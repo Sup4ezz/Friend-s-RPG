@@ -2420,3 +2420,120 @@ img {
         font-size: 32px;
     }
 }
+
+
+/* =========================================================
+   СПРАВКА ПЕРЕД АНКЕТОЙ: РАСЫ И ЛОКАЦИИ
+   ========================================================= */
+
+.character-lore-guide {
+    margin: 0 auto 32px;
+    max-width: 1180px;
+    padding: 28px;
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 14px;
+    background: rgba(20, 17, 13, 0.72);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.18);
+}
+
+.character-lore-guide-intro h2 {
+    margin: 0 0 10px;
+}
+
+.character-lore-guide-intro p,
+.character-lore-note {
+    margin: 0;
+    line-height: 1.65;
+    opacity: 0.82;
+}
+
+.character-lore-section {
+    margin-top: 28px;
+}
+
+.character-lore-section h3 {
+    margin: 0 0 14px;
+}
+
+.character-lore-cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.character-lore-card {
+    padding: 18px;
+    border: 1px solid rgba(212, 175, 55, 0.16);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.character-lore-card h4 {
+    margin: 0 0 8px;
+}
+
+.character-lore-card p {
+    margin: 0;
+    line-height: 1.55;
+    font-size: 0.94rem;
+    opacity: 0.82;
+}
+
+.character-lore-location-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.character-lore-location {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    padding: 15px 16px;
+    border: 1px solid rgba(212, 175, 55, 0.16);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.025);
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.character-lore-location:hover {
+    border-color: rgba(212, 175, 55, 0.48);
+    background: rgba(212, 175, 55, 0.055);
+    transform: translateY(-1px);
+}
+
+.character-lore-location span {
+    font-size: 0.85rem;
+    opacity: 0.68;
+    line-height: 1.4;
+}
+
+.character-lore-note {
+    margin-top: 14px;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+    .character-lore-cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .character-lore-location-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .character-lore-guide {
+        padding: 20px;
+    }
+
+    .character-lore-cards,
+    .character-lore-location-list {
+        grid-template-columns: 1fr;
+    }
+}
