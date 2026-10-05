@@ -577,7 +577,7 @@ async function renderCharacterSelection(container, applications, pendingApplicat
     container.innerHTML = "";
 
     const header = document.createElement("div");
-    header.className = "character-header";
+    header.className = "character-selection-header";
     header.innerHTML = `
         <div class="character-selection-eyebrow">ЛОРГУС · ВАШИ ИСТОРИИ</div>
         <div class="character-selection-title-row">
