@@ -1309,7 +1309,8 @@ function renderAdminApplication(application) {
 
 /* =========================================================
    КНОПКИ АДМИНКИ
-   ========================================================function bindAdminButtons(container) {
+   ========================================================= */
+function bindAdminButtons(container) {
     container.querySelectorAll(".admin-approve-button").forEach(button => {
         button.addEventListener("click", async () => {
             const applicationId = button.dataset.applicationId;
@@ -1401,32 +1402,32 @@ function findApplicationById(id) {
 function renderPendingApplication(container, application) {
     container.className = "character-application";
     const reviewNotes = application.review_notes
-        ? \`<div class="character-review-notes"><h3>Правки от администрации</h3><p>\${escapeHtml(application.review_notes)}</p></div>\`
+        ? `<div class="character-review-notes"><h3>Правки от администрации</h3><p>${escapeHtml(application.review_notes)}</p></div>`
         : "";
 
-    container.innerHTML = \`
+    container.innerHTML = `
         <div class="character-header">
             <div class="welcome-symbol">✦</div>
-            <h1>\${escapeHtml(application.name)}</h1>
+            <h1>${escapeHtml(application.name)}</h1>
             <p>Твоя анкета находится на рассмотрении.</p>
         </div>
-        \${reviewNotes}
-        <form id="character-application-form" onsubmit="updateCharacterApplication(event, '\${application.id}')">
+        ${reviewNotes}
+        <form id="character-application-form" onsubmit="updateCharacterApplication(event, '${application.id}')">
             <div class="character-grid">
-                <div class="character-field"><label>Имя персонажа</label><input id="character-name" type="text" value="\${escapeHtml(application.name)}" required></div>
-                <div class="character-field"><label>Раса</label><input id="character-race" type="text" value="\${escapeHtml(application.race)}" required></div>
-                <div class="character-field"><label>Возраст</label><input id="character-age" type="number" min="1" max="1000" value="\${application.age}" required></div>
-                <div class="character-field"><label>Родина</label><input id="character-homeland" type="text" value="\${escapeHtml(application.homeland)}" required></div>
-                <div class="character-field full"><label>Характер</label><textarea id="character-personality" required>\${escapeHtml(application.personality)}</textarea></div>
-                <div class="character-field full"><label>Предыстория</label><textarea id="character-backstory" required>\${escapeHtml(application.backstory)}</textarea></div>
-                <div class="character-field full"><label>Особые навыки</label><textarea id="character-skills" required>\${escapeHtml(application.special_skills)}</textarea></div>
-                <div class="character-field"><label>Предпочитаемое оружие</label><input id="character-weapon" type="text" value="\${escapeHtml(application.preferred_weapon || "")}"></div>
-                <div class="character-field"><label>Род занятий</label><input id="character-occupation" type="text" value="\${escapeHtml(application.occupation)}" required></div>
+                <div class="character-field"><label>Имя персонажа</label><input id="character-name" type="text" value="${escapeHtml(application.name)}" required></div>
+                <div class="character-field"><label>Раса</label><input id="character-race" type="text" value="${escapeHtml(application.race)}" required></div>
+                <div class="character-field"><label>Возраст</label><input id="character-age" type="number" min="1" max="1000" value="${application.age}" required></div>
+                <div class="character-field"><label>Родина</label><input id="character-homeland" type="text" value="${escapeHtml(application.homeland)}" required></div>
+                <div class="character-field full"><label>Характер</label><textarea id="character-personality" required>${escapeHtml(application.personality)}</textarea></div>
+                <div class="character-field full"><label>Предыстория</label><textarea id="character-backstory" required>${escapeHtml(application.backstory)}</textarea></div>
+                <div class="character-field full"><label>Особые навыки</label><textarea id="character-skills" required>${escapeHtml(application.special_skills)}</textarea></div>
+                <div class="character-field"><label>Предпочитаемое оружие</label><input id="character-weapon" type="text" value="${escapeHtml(application.preferred_weapon || "")}"></div>
+                <div class="character-field"><label>Род занятий</label><input id="character-occupation" type="text" value="${escapeHtml(application.occupation)}" required></div>
             </div>
             <div id="character-message" class="character-message"></div>
             <button type="submit" class="gold-button character-submit">Сохранить исправления и отправить на проверку</button>
         </form>
-    \`;
+    `;
 }
 
 async function updateCharacterApplication(event, applicationId) {
