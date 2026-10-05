@@ -1253,10 +1253,10 @@ function renderAdminApplication(application) {
 
             <div class="admin-application-actions">
                 <button
-                    class="gold-button admin-edit-button"
+                    class="gold-button admin-revision-button"
                     data-application-id="${application.id}"
                 >
-                    Редактировать
+                    Выписать правки
                 </button>
 
                 <button
@@ -1279,128 +1279,79 @@ function renderAdminApplication(application) {
 
 /* =========================================================
    КНОПКИ АДМИНКИ
-   ========================================================= */
-
-function bindAdminButtons(container) {
-    container
-        .querySelectorAll(".admin-edit-button")
-        .forEach(button => {
-            button.addEventListener(
-                "click",
-                () => {
-                    const application =
-                        findApplicationById(
-                            button.dataset.applicationId
-                        );
-
-                    if (!application) return;
-
-                    renderAdminEditForm(
-                        button.closest(".admin-application"),
-                        application
-                    );
-                }
-            );
+   ========================================================function bindAdminButtons(container) {
+    container.querySelectorAll(".admin-approve-button").forEach(button => {
+        button.addEventListener("click", async () => {
+            const applicationId = button.dataset.applicationId;
+            if (!confirm("Одобрить эту заявку и создать персонажа?")) return;
+            button.disabled = true;
+            button.textContent = "Одобрение...";
+            const { error } = await supabase.rpc("approve_character_application", { application_id: applicationId });
+            if (error) {
+                console.error(error);
+                alert("Не удалось одобрить заявку:\n\n" + error.message);
+                button.disabled = false;
+                button.textContent = "Одобрить";
+                return;
+            }
+            await loadAdminPanel(container);
         });
+    });
 
-    container
-        .querySelectorAll(".admin-approve-button")
-        .forEach(button => {
-            button.addEventListener(
-                "click",
-                async () => {
-                    const applicationId =
-                        button.dataset.applicationId;
-
-                    const confirmed =
-                        confirm(
-                            "Одобрить эту заявку и создать персонажа?"
-                        );
-
-                    if (!confirmed) return;
-
-                    button.disabled = true;
-                    button.textContent = "Одобрение...";
-
-                    const {
-                        error
-                    } = await supabase.rpc(
-                        "approve_character_application",
-                        {
-                            application_id:
-                                applicationId
-                        }
-                    );
-
-                    if (error) {
-                        console.error(error);
-
-                        alert(
-                            "Не удалось одобрить заявку:\n\n" +
-                            error.message
-                        );
-
-                        button.disabled = false;
-                        button.textContent = "Одобрить";
-                        return;
-                    }
-
-                    await loadAdminPanel(container);
-                }
-            );
+    container.querySelectorAll(".admin-revision-button").forEach(button => {
+        button.addEventListener("click", async () => {
+            const applicationId = button.dataset.applicationId;
+            const notes = prompt("Укажи, что игроку необходимо исправить:", "");
+            if (notes === null) return;
+            const cleanNotes = notes.trim();
+            if (!cleanNotes) {
+                alert("Укажи хотя бы одну правку.");
+                return;
+            }
+            button.disabled = true;
+            button.textContent = "Сохранение...";
+            const { error } = await supabase
+                .from("character_applications")
+                .update({ review_notes: cleanNotes, status: "pending" })
+                .eq("id", applicationId);
+            if (error) {
+                console.error(error);
+                alert("Не удалось отправить правки игроку:\n\n" + error.message);
+                button.disabled = false;
+                button.textContent = "Выписать правки";
+                return;
+            }
+            await loadAdminPanel(container);
         });
+    });
 
-    container
-        .querySelectorAll(".admin-reject-button")
-        .forEach(button => {
-            button.addEventListener(
-                "click",
-                async () => {
-                    const applicationId =
-                        button.dataset.applicationId;
-
-                    const confirmed =
-                        confirm(
-                            "Отклонить эту заявку?"
-                        );
-
-                    if (!confirmed) return;
-
-                    button.disabled = true;
-                    button.textContent = "Отклонение...";
-
-                    const {
-                        error
-                    } = await supabase.rpc(
-                        "reject_character_application",
-                        {
-                            application_id:
-                                applicationId
-                        }
-                    );
-
-                    if (error) {
-                        console.error(error);
-
-                        alert(
-                            "Не удалось отклонить заявку:\n\n" +
-                            error.message
-                        );
-
-                        button.disabled = false;
-                        button.textContent = "Отклонить";
-                        return;
-                    }
-
-                    await loadAdminPanel(container);
-                }
-            );
+    container.querySelectorAll(".admin-reject-button").forEach(button => {
+        button.addEventListener("click", async () => {
+            const applicationId = button.dataset.applicationId;
+            const reason = prompt("Укажи причину отклонения:", "");
+            if (reason === null) return;
+            const cleanReason = reason.trim();
+            if (!cleanReason) {
+                alert("Укажи причину отклонения.");
+                return;
+            }
+            button.disabled = true;
+            button.textContent = "Отклонение...";
+            const { error } = await supabase.rpc("reject_character_application", {
+                application_id: applicationId,
+                reason: cleanReason
+            });
+            if (error) {
+                console.error(error);
+                alert("Не удалось отклонить заявку:\n\n" + error.message);
+                button.disabled = false;
+                button.textContent = "Отклонить";
+                return;
+            }
+            await loadAdminPanel(container);
         });
+    });
 }
-
-/* =========================================================
-   ПОИСК ЗАЯВКИ
-   ========================================================= */
 
 function findApplicationById(id) {
     const article =
@@ -1420,451 +1371,89 @@ function findApplicationById(id) {
    РЕДАКТИРОВАНИЕ ЗАЯВКИ
    ========================================================= */
 
-function renderAdminEditForm(
-    article,
-    application
-) {
-    article.innerHTML = `
-        <div class="admin-application-main">
-            <h3>
-                Редактирование:
-                ${escapeHtml(application.name)}
-            </h3>
+function renderPendingApplication(container, application) {
+    container.className = "character-application";
+    const reviewNotes = application.review_notes
+        ? \`<div class="character-review-notes"><h3>Правки от администрации</h3><p>\${escapeHtml(application.review_notes)}</p></div>\`
+        : "";
 
+    container.innerHTML = \`
+        <div class="character-header">
+            <div class="welcome-symbol">✦</div>
+            <h1>\${escapeHtml(application.name)}</h1>
+            <p>Твоя анкета находится на рассмотрении.</p>
+        </div>
+        \${reviewNotes}
+        <form id="character-application-form" onsubmit="updateCharacterApplication(event, '\${application.id}')">
             <div class="character-grid">
-
-                <div class="character-field">
-                    <label>Имя</label>
-                    <input
-                        id="edit-name-${application.id}"
-                        value="${escapeHtml(application.name)}"
-                        type="text"
-                    >
-                </div>
-
-                <div class="character-field">
-                    <label>Раса</label>
-                    <input
-                        id="edit-race-${application.id}"
-                        value="${escapeHtml(application.race)}"
-                        type="text"
-                    >
-                </div>
-
-                <div class="character-field">
-                    <label>Возраст</label>
-                    <input
-                        id="edit-age-${application.id}"
-                        value="${application.age}"
-                        type="number"
-                        min="1"
-                        max="1000"
-                    >
-                </div>
-
-                <div class="character-field">
-                    <label>Родина</label>
-                    <input
-                        id="edit-homeland-${application.id}"
-                        value="${escapeHtml(application.homeland)}"
-                        type="text"
-                    >
-                </div>
-
-                <div class="character-field">
-                    <label>Род занятий</label>
-                    <input
-                        id="edit-occupation-${application.id}"
-                        value="${escapeHtml(application.occupation)}"
-                        type="text"
-                    >
-                </div>
-
-                <div class="character-field">
-                    <label>Оружие</label>
-                    <input
-                        id="edit-weapon-${application.id}"
-                        value="${escapeHtml(application.preferred_weapon || "")}"
-                        type="text"
-                    >
-                </div>
-
-                <div class="character-field full">
-                    <label>Характер</label>
-                    <textarea
-                        id="edit-personality-${application.id}"
-                    >${escapeHtml(application.personality)}</textarea>
-                </div>
-
-                <div class="character-field full">
-                    <label>Предыстория</label>
-                    <textarea
-                        id="edit-backstory-${application.id}"
-                    >${escapeHtml(application.backstory)}</textarea>
-                </div>
-
-                <div class="character-field full">
-                    <label>Особые навыки</label>
-                    <textarea
-                        id="edit-skills-${application.id}"
-                    >${escapeHtml(application.special_skills)}</textarea>
-                </div>
-
-                <div class="character-field full">
-                    <label>Изображение персонажа</label>
-                    <input
-                        id="edit-photo-${application.id}"
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                    >
-
-                    ${
-                        application.photo_url
-                            ? `
-                                <img
-                                    class="admin-application-photo"
-                                    src="${escapeHtml(application.photo_url)}"
-                                    alt="Текущее изображение"
-                                >
-                            `
-                            : `
-                                <div class="character-hint">
-                                    Изображение не загружено.
-                                </div>
-                            `
-                    }
-                </div>
-
+                <div class="character-field"><label>Имя персонажа</label><input id="character-name" type="text" value="\${escapeHtml(application.name)}" required></div>
+                <div class="character-field"><label>Раса</label><input id="character-race" type="text" value="\${escapeHtml(application.race)}" required></div>
+                <div class="character-field"><label>Возраст</label><input id="character-age" type="number" min="1" max="1000" value="\${application.age}" required></div>
+                <div class="character-field"><label>Родина</label><input id="character-homeland" type="text" value="\${escapeHtml(application.homeland)}" required></div>
+                <div class="character-field full"><label>Характер</label><textarea id="character-personality" required>\${escapeHtml(application.personality)}</textarea></div>
+                <div class="character-field full"><label>Предыстория</label><textarea id="character-backstory" required>\${escapeHtml(application.backstory)}</textarea></div>
+                <div class="character-field full"><label>Особые навыки</label><textarea id="character-skills" required>\${escapeHtml(application.special_skills)}</textarea></div>
+                <div class="character-field"><label>Предпочитаемое оружие</label><input id="character-weapon" type="text" value="\${escapeHtml(application.preferred_weapon || "")}"></div>
+                <div class="character-field"><label>Род занятий</label><input id="character-occupation" type="text" value="\${escapeHtml(application.occupation)}" required></div>
             </div>
-        </div>
-
-        <div class="admin-application-actions">
-            <button
-                class="gold-button admin-save-button"
-                data-application-id="${application.id}"
-            >
-                Сохранить
-            </button>
-
-            <button
-                class="admin-cancel-button"
-                data-application-id="${application.id}"
-            >
-                Отмена
-            </button>
-        </div>
-    `;
-
-    article
-        .querySelector(".admin-save-button")
-        .addEventListener(
-            "click",
-            () => saveAdminApplication(
-                article,
-                application
-            )
-        );
-
-    article
-        .querySelector(".admin-cancel-button")
-        .addEventListener(
-            "click",
-            () => {
-                article.outerHTML =
-                    renderAdminApplication(
-                        application
-                    );
-
-                bindAdminButtons(
-                    article.parentElement
-                );
-            }
-        );
+            <div id="character-message" class="character-message"></div>
+            <button type="submit" class="gold-button character-submit">Сохранить исправления и отправить на проверку</button>
+        </form>
+    \`;
 }
 
-/* =========================================================
-   СОХРАНЕНИЕ РЕДАКТИРОВАНИЯ
-   ========================================================= */
-
-async function saveAdminApplication(
-    article,
-    application
-) {
-    const id = application.id;
-
-    const name =
-        document.getElementById(
-            `edit-name-${id}`
-        ).value.trim();
-
-    const race =
-        document.getElementById(
-            `edit-race-${id}`
-        ).value.trim();
-
-    const age =
-        Number(
-            document.getElementById(
-                `edit-age-${id}`
-            ).value
-        );
-
-    const homeland =
-        document.getElementById(
-            `edit-homeland-${id}`
-        ).value.trim();
-
-    const occupation =
-        document.getElementById(
-            `edit-occupation-${id}`
-        ).value.trim();
-
-    const preferredWeapon =
-        document.getElementById(
-            `edit-weapon-${id}`
-        ).value.trim();
-
-    const personality =
-        document.getElementById(
-            `edit-personality-${id}`
-        ).value.trim();
-
-    const backstory =
-        document.getElementById(
-            `edit-backstory-${id}`
-        ).value.trim();
-
-    const specialSkills =
-        document.getElementById(
-            `edit-skills-${id}`
-        ).value.trim();
-
-    const photoInput =
-        document.getElementById(
-            `edit-photo-${id}`
-        );
-
-    if (
-        !name ||
-        !race ||
-        !age ||
-        !homeland ||
-        !occupation ||
-        !personality ||
-        !backstory ||
-        !specialSkills
-    ) {
-        alert(
-            "Заполни все обязательные поля."
-        );
+async function updateCharacterApplication(event, applicationId) {
+    event.preventDefault();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        setCharacterMessage("Необходимо войти в аккаунт.", "error");
         return;
     }
 
-    const saveButton =
-        article.querySelector(
-            ".admin-save-button"
-        );
+    const values = {
+        name: document.getElementById("character-name").value.trim(),
+        race: document.getElementById("character-race").value.trim(),
+        age: Number(document.getElementById("character-age").value),
+        homeland: document.getElementById("character-homeland").value.trim(),
+        personality: document.getElementById("character-personality").value.trim(),
+        backstory: document.getElementById("character-backstory").value.trim(),
+        special_skills: document.getElementById("character-skills").value.trim(),
+        preferred_weapon: document.getElementById("character-weapon").value.trim() || null,
+        occupation: document.getElementById("character-occupation").value.trim(),
+        review_notes: null,
+        status: "pending"
+    };
 
-    saveButton.disabled = true;
-    saveButton.textContent = "Сохранение...";
-
-    let photoPath =
-        application.photo_path;
-
-    if (
-        photoInput &&
-        photoInput.files &&
-        photoInput.files.length > 0
-    ) {
-        const photo =
-            photoInput.files[0];
-
-        if (photo.size > 5 * 1024 * 1024) {
-            alert(
-                "Изображение не должно превышать 5 МБ."
-            );
-
-            saveButton.disabled = false;
-            saveButton.textContent = "Сохранить";
-
-            return;
-        }
-
-        const extension =
-            getFileExtension(photo.name);
-
-        photoPath =
-            `${application.player_id}/${application.id}/photo.${extension}`;
-
-        const {
-            error: uploadError
-        } = await supabase.storage
-            .from("character-applications")
-            .upload(
-                photoPath,
-                photo,
-                {
-                    contentType: photo.type,
-                    upsert: true
-                }
-            );
-
-        if (uploadError) {
-            console.error(uploadError);
-
-            alert(
-                "Не удалось загрузить новое изображение:\n\n" +
-                uploadError.message
-            );
-
-            saveButton.disabled = false;
-            saveButton.textContent = "Сохранить";
-
-            return;
-        }
+    if (!values.name || !values.race || !values.age || !values.homeland || !values.personality || !values.backstory || !values.special_skills || !values.occupation) {
+        setCharacterMessage("Заполни все обязательные поля.", "error");
+        return;
     }
 
-    const {
-        error
-    } = await supabase
+    const button = document.querySelector(".character-submit");
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Сохранение...";
+    }
+
+    const { error } = await supabase
         .from("character_applications")
-        .update({
-            name,
-            race,
-            age,
-            homeland,
-            occupation,
-            preferred_weapon:
-                preferredWeapon || null,
-            personality,
-            backstory,
-            special_skills:
-                specialSkills,
-            photo_path:
-                photoPath
-        })
-        .eq(
-            "id",
-            application.id
-        );
+        .update(values)
+        .eq("id", applicationId)
+        .eq("player_id", user.id)
+        .eq("status", "pending");
 
     if (error) {
         console.error(error);
-
-        alert(
-            "Не удалось сохранить изменения:\n\n" +
-            error.message
-        );
-
-        saveButton.disabled = false;
-        saveButton.textContent = "Сохранить";
-
+        setCharacterMessage("Не удалось сохранить исправления: " + error.message, "error");
+        if (button) {
+            button.disabled = false;
+            button.textContent = "Сохранить исправления и отправить на проверку";
+        }
         return;
     }
 
-    const parent =
-        article.parentElement;
-
-    await loadAdminPanel(parent.closest(".admin-panel"));
+    await loadPlayerState({ user });
 }
-
-/* =========================================================
-   ЗАЯВКА НА РАССМОТРЕНИИ
-   ========================================================= */
-
-function renderPendingApplication(
-    container,
-    application
-) {
-    container.className = "admin-panel";
-
-    container.innerHTML = `
-        <div class="character-header">
-            <div class="welcome-symbol">✦</div>
-
-            <h1>
-                ${escapeHtml(application.name)}
-            </h1>
-
-            <p>
-                Твоя заявка находится на рассмотрении.
-            </p>
-        </div>
-
-        <article class="admin-application">
-            <div class="admin-application-main">
-                <div class="admin-application-info">
-
-                    <span>
-                        <strong>Раса:</strong>
-                        ${escapeHtml(application.race)}
-                    </span>
-
-                    <span>
-                        <strong>Возраст:</strong>
-                        ${application.age} лет
-                    </span>
-
-                    <span>
-                        <strong>Родина:</strong>
-                        ${escapeHtml(application.homeland)}
-                    </span>
-
-                    <span>
-                        <strong>Род занятий:</strong>
-                        ${escapeHtml(application.occupation)}
-                    </span>
-
-                    <span>
-                        <strong>Оружие:</strong>
-                        ${
-                            application.preferred_weapon
-                                ? escapeHtml(
-                                    application.preferred_weapon
-                                )
-                                : "Не указано"
-                        }
-                    </span>
-
-                    <span>
-                        <strong>Характер:</strong>
-                        ${escapeHtml(application.personality)}
-                    </span>
-
-                    <span>
-                        <strong>Предыстория:</strong>
-                        ${escapeHtml(application.backstory)}
-                    </span>
-
-                    <span>
-                        <strong>Особые навыки:</strong>
-                        ${escapeHtml(application.special_skills)}
-                    </span>
-
-                    <span>
-                        <strong>Изображение персонажа:</strong>
-                        ${
-                            application.photo_path
-                                ? "Изображение загружено."
-                                : "Не загружено."
-                        }
-                    </span>
-
-                </div>
-            </div>
-
-            <div class="admin-application-actions">
-                <span>
-                    Заявка ожидает решения администрации.
-                </span>
-            </div>
-        </article>
-    `;
-}
-
-/* =========================================================
-   ЗАГРУЗКА ПЕРСОНАЖА
-   ========================================================= */
 
 async function loadCharacter(
     container,
@@ -2175,6 +1764,8 @@ window.register = register;
 window.logout = logout;
 window.submitCharacterApplication =
     submitCharacterApplication;
+window.updateCharacterApplication =
+    updateCharacterApplication;
 window.openActiveCharacterProfile = openActiveCharacterProfile;
 window.switchCharacter = switchCharacter;
 window.returnToGame = returnToGame;
