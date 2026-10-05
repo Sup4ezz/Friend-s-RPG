@@ -1337,10 +1337,7 @@ function renderAdminApplication(application) {
             }
             button.disabled = true;
             button.textContent = "Отклонение...";
-            const { error } = await supabase.rpc("reject_character_application", {
-                application_id: applicationId,
-                reason: cleanReason
-            });
+            const { error } = await supabase.rpc("reject_character_application", { application_id: applicationId });
             if (error) {
                 console.error(error);
                 alert("Не удалось отклонить заявку:\n\n" + error.message);
