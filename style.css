@@ -3299,3 +3299,449 @@ body {
         animation: none;
     }
 }
+
+
+/* =========================================================
+   LORGUS — CINEMATIC UI POLISH v3
+   Visual-only layer. Keeps the existing RP architecture intact.
+   ========================================================= */
+
+:root {
+    --l3-bg: #060504;
+    --l3-panel: rgba(16, 13, 9, .78);
+    --l3-panel-2: rgba(25, 20, 13, .72);
+    --l3-gold: #d8b56a;
+    --l3-gold-hi: #f3d99b;
+    --l3-gold-dim: #8d754b;
+    --l3-text: #eee4d1;
+    --l3-muted: #918573;
+    --l3-line: rgba(216, 181, 106, .17);
+    --l3-line-hi: rgba(216, 181, 106, .42);
+}
+
+/* Overall atmosphere */
+.game-page {
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(900px 500px at 50% -12%, rgba(216,181,106,.13), transparent 65%),
+        radial-gradient(600px 500px at 0% 60%, rgba(95,70,35,.09), transparent 70%),
+        radial-gradient(700px 600px at 100% 80%, rgba(95,70,35,.07), transparent 70%),
+        #060504;
+}
+
+.game-page::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: .17;
+    background-image:
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: linear-gradient(to bottom, black, transparent 82%);
+}
+
+/* Header */
+.game-page .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    min-height: 72px;
+    padding: 0 34px;
+    border-bottom: 1px solid rgba(216,181,106,.13);
+    background: rgba(7,6,5,.72);
+    backdrop-filter: blur(22px) saturate(120%);
+    -webkit-backdrop-filter: blur(22px) saturate(120%);
+    box-shadow: 0 12px 45px rgba(0,0,0,.25);
+}
+
+.topbar-brand {
+    gap: 12px;
+}
+
+.topbar-brand span {
+    color: var(--l3-gold-hi);
+    font-family: var(--title-font);
+    font-size: 24px;
+    letter-spacing: .13em;
+    text-shadow: 0 0 24px rgba(216,181,106,.12);
+}
+
+.mini-symbol {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(216,181,106,.3);
+    color: var(--l3-gold-hi);
+    background: rgba(216,181,106,.035);
+    box-shadow: 0 0 22px rgba(216,181,106,.07);
+}
+
+.player-area {
+    gap: 14px;
+}
+
+.player-email {
+    color: #b7aa95;
+    font-size: 12px;
+    letter-spacing: .04em;
+}
+
+.logout-button {
+    border: 1px solid rgba(216,181,106,.18);
+    border-radius: 2px;
+    padding: 9px 14px;
+    color: #c9bca6;
+    background: rgba(255,255,255,.025);
+    transition: .2s ease;
+}
+
+.logout-button:hover {
+    color: var(--l3-gold-hi);
+    border-color: var(--l3-line-hi);
+    background: rgba(216,181,106,.06);
+}
+
+/* Character/world canvas */
+#cabinet-content.lorgus-world-page {
+    width: min(1540px, calc(100% - 42px));
+    margin: 24px auto 70px;
+}
+
+.lorgus-world-shell {
+    grid-template-columns: 270px minmax(0, 1fr);
+    gap: 18px;
+}
+
+/* Character rail */
+.lorgus-world-sidebar {
+    border-radius: 4px;
+    border-color: var(--l3-line);
+    background:
+        linear-gradient(155deg, rgba(30,24,16,.94), rgba(8,7,5,.96)),
+        var(--l3-panel);
+    box-shadow:
+        0 28px 80px rgba(0,0,0,.45),
+        inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.lorgus-world-sidebar::after {
+    content: "";
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    bottom: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(216,181,106,.2), transparent);
+}
+
+.lorgus-world-sidebar-name {
+    font-size: 32px;
+    letter-spacing: .015em;
+}
+
+.lorgus-world-sidebar-meta {
+    border-radius: 2px;
+    color: #a99a84;
+    background: rgba(255,255,255,.025);
+}
+
+.lorgus-world-sidebar-button {
+    border-radius: 2px;
+}
+
+/* Main world surface */
+.lorgus-world-browser {
+    border-radius: 5px;
+    border-color: var(--l3-line);
+    background:
+        linear-gradient(145deg, rgba(23,19,14,.92), rgba(6,5,4,.97));
+    box-shadow:
+        0 35px 110px rgba(0,0,0,.55),
+        inset 0 1px 0 rgba(255,255,255,.02);
+}
+
+.lorgus-world-header {
+    min-height: 340px;
+    padding: 58px 58px 52px;
+    background:
+        radial-gradient(500px 260px at 82% 18%, rgba(216,181,106,.11), transparent 72%),
+        radial-gradient(400px 300px at 55% 100%, rgba(125,91,42,.07), transparent 70%),
+        linear-gradient(135deg, rgba(55,42,24,.3), transparent 55%);
+}
+
+.lorgus-world-header h1 {
+    font-size: clamp(64px, 8vw, 104px);
+    letter-spacing: .015em;
+}
+
+.lorgus-world-header p {
+    max-width: 760px;
+    font-size: 15px;
+    color: #aaa08f;
+}
+
+/* Breadcrumb-like kicker */
+.lorgus-world-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.lorgus-world-kicker::before {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: var(--l3-gold);
+    box-shadow: 0 0 10px rgba(216,181,106,.25);
+}
+
+/* Kingdom layout */
+.lorgus-world-section {
+    padding-left: 58px;
+    padding-right: 58px;
+}
+
+.lorgus-world-section-title {
+    color: #80735f;
+    font-weight: 600;
+}
+
+.lorgus-region-grid {
+    gap: 14px;
+}
+
+/* Premium cards */
+.lorgus-region-card,
+.lorgus-location-card {
+    border-radius: 3px;
+    border-color: rgba(216,181,106,.14);
+    background:
+        linear-gradient(145deg, rgba(36,29,19,.82), rgba(7,6,5,.97));
+}
+
+.lorgus-region-card {
+    min-height: 245px;
+}
+
+.lorgus-region-card::after {
+    height: 1px;
+    opacity: .5;
+    transition: opacity .25s ease;
+}
+
+.lorgus-region-card:hover::after {
+    opacity: 1;
+}
+
+.lorgus-region-card-symbol {
+    width: 40px;
+    height: 40px;
+    border-radius: 2px;
+    font-size: 16px;
+    box-shadow: inset 0 0 22px rgba(216,181,106,.025);
+}
+
+.lorgus-region-card strong,
+.lorgus-location-card strong {
+    letter-spacing: .01em;
+    text-shadow: 0 4px 20px rgba(0,0,0,.45);
+}
+
+.lorgus-region-card small,
+.lorgus-location-card small {
+    font-weight: 600;
+}
+
+.lorgus-region-card p,
+.lorgus-location-card p {
+    font-size: 13px;
+    color: #948875;
+}
+
+/* Closed Gehenna — clearly inaccessible, not visually broken */
+.lorgus-region-card-closed {
+    position: relative;
+    overflow: hidden;
+}
+
+.lorgus-region-card-closed::before {
+    opacity: .5;
+}
+
+.lorgus-region-card-closed::after {
+    background: linear-gradient(90deg, transparent, rgba(150,140,120,.16), transparent);
+}
+
+.lorgus-region-card-closed strong {
+    color: #9a9181;
+}
+
+.lorgus-region-card-closed small {
+    color: #716a5e;
+}
+
+/* Location cards */
+.lorgus-location-card {
+    min-height: 225px;
+}
+
+.lorgus-location-card-mark {
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(216,181,106,.14);
+    background: rgba(216,181,106,.025);
+}
+
+/* Empty states */
+.lorgus-empty-location {
+    border-radius: 3px;
+    border-color: rgba(216,181,106,.13);
+    background:
+        radial-gradient(circle at 50% 40%, rgba(216,181,106,.055), transparent 34%),
+        rgba(4,4,3,.4);
+}
+
+.lorgus-empty-location > span {
+    width: 54px;
+    height: 54px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(216,181,106,.2);
+    border-radius: 50%;
+    background: rgba(216,181,106,.025);
+}
+
+/* Profile */
+.character-profile-page {
+    width: min(1120px, calc(100% - 42px));
+    margin: 38px auto 70px;
+    padding: 48px;
+    border: 1px solid var(--l3-line);
+    border-radius: 5px;
+    background:
+        linear-gradient(145deg, rgba(25,21,15,.94), rgba(7,6,5,.97));
+    box-shadow: 0 35px 100px rgba(0,0,0,.5);
+}
+
+.character-profile-header {
+    padding-bottom: 30px;
+    margin-bottom: 26px;
+    border-bottom: 1px solid var(--l3-line);
+}
+
+.character-profile-header h1 {
+    color: var(--l3-gold-hi);
+    font-family: var(--title-font);
+    font-size: clamp(46px, 7vw, 76px);
+}
+
+.character-profile-grid {
+    gap: 12px;
+}
+
+.character-profile-field {
+    border: 1px solid rgba(216,181,106,.12);
+    border-radius: 3px;
+    background: rgba(255,255,255,.018);
+    transition: border-color .2s ease, background .2s ease;
+}
+
+.character-profile-field:hover {
+    border-color: rgba(216,181,106,.25);
+    background: rgba(216,181,106,.025);
+}
+
+/* Auth gets the same visual language */
+.auth-page {
+    background:
+        radial-gradient(700px 420px at 50% 18%, rgba(216,181,106,.12), transparent 68%),
+        radial-gradient(500px 500px at 12% 80%, rgba(85,64,35,.08), transparent 72%),
+        #060504;
+}
+
+.auth-panel {
+    border-color: rgba(216,181,106,.2);
+    background: rgba(14,11,8,.84);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 35px 100px rgba(0,0,0,.55);
+}
+
+.gold-button {
+    border-radius: 2px;
+    box-shadow: 0 8px 25px rgba(0,0,0,.2);
+    transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+
+.gold-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 32px rgba(0,0,0,.3), 0 0 24px rgba(216,181,106,.08);
+}
+
+.character-secondary-button {
+    border-radius: 2px;
+    transition: .2s ease;
+}
+
+/* Small screens */
+@media (max-width: 1050px) {
+    .lorgus-world-shell {
+        grid-template-columns: 230px minmax(0, 1fr);
+    }
+
+    .lorgus-world-section {
+        padding-left: 34px;
+        padding-right: 34px;
+    }
+
+    .lorgus-world-header {
+        padding-left: 34px;
+        padding-right: 34px;
+    }
+}
+
+@media (max-width: 800px) {
+    .game-page .topbar {
+        padding: 0 18px;
+    }
+
+    .player-email {
+        display: none;
+    }
+
+    #cabinet-content.lorgus-world-page {
+        width: calc(100% - 18px);
+        margin-top: 12px;
+    }
+
+    .lorgus-world-header {
+        min-height: 290px;
+        padding: 42px 24px 36px;
+    }
+
+    .lorgus-world-section {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .character-profile-page {
+        width: calc(100% - 18px);
+        padding: 28px 20px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .gold-button,
+    .lorgus-region-card,
+    .lorgus-location-card,
+    .character-profile-field {
+        transition: none;
+    }
+}
