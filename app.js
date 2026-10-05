@@ -1636,6 +1636,10 @@ function openActiveCharacterProfile() {
                 <span>Род занятий</span>
                 <strong>${escapeHtml(character.occupation || "Не указан")}</strong>
             </div>
+            <div class="character-profile-field">
+                <span>Состояние</span>
+                <strong>Готов к игре</strong>
+            </div>
             <div class="character-profile-field full">
                 <span>Характер</span>
                 <p>${escapeHtml(character.personality || "Не указан")}</p>
