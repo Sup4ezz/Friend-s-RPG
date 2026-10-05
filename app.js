@@ -1942,15 +1942,29 @@ function renderKingdomLocations(regionName) {
     const character = window.activeCharacter;
     const name = escapeHtml(character?.name || "Без имени");
 
+    const currentPresence = window.activeRpPresence;
     const locationCards = region.locations.length
-        ? region.locations.map(([title, subtitle, description]) => `
-            <button class="lorgus-location-card" type="button" onclick="enterLocationRp('${escapeHtml(title)}', '${escapeHtml(regionName)}')">
-                <span class="lorgus-location-card-mark">✦</span>
-                <strong>${escapeHtml(title)}</strong>
-                <small>${escapeHtml(subtitle)}</small>
-                <p>${escapeHtml(description)}</p>
-            </button>
-        `).join("")
+        ? region.locations.map(([title, subtitle, description]) => {
+            const isCurrent =
+                currentPresence?.type === "location" &&
+                currentPresence.location === title &&
+                currentPresence.region === regionName;
+
+            const isOnRoad = currentPresence?.type === "road";
+
+            return `
+                <button class="lorgus-location-card ${isCurrent ? "current" : "locked"}" type="button"
+                    onclick="enterLocationRp('${escapeHtml(title)}', '${escapeHtml(regionName)}')">
+                    <span class="lorgus-location-card-mark">${isCurrent ? "✦" : "🔒"}</span>
+                    <strong>${escapeHtml(title)}</strong>
+                    <small>${escapeHtml(subtitle)}</small>
+                    <p>${escapeHtml(description)}</p>
+                    <span class="lorgus-location-card-access">
+                        ${isCurrent ? "Вы здесь · открыть RP-чат" : (isOnRoad ? "Персонаж в пути · чат закрыт" : "Не здесь · RP-чат закрыт")}
+                    </span>
+                </button>
+            `;
+        }).join("")
         : `
             <div class="lorgus-empty-location">
                 <span>✦</span>
@@ -2391,6 +2405,43 @@ function renderFloodChat() {
     `;
 }
 
+function renderLocationEntryLock(locationName, regionName) {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    container.className = "lorgus-world-page";
+    container.innerHTML = `
+        <div class="lorgus-world-shell">
+            <aside class="lorgus-world-sidebar">
+                <div class="lorgus-world-sidebar-symbol">🔒</div>
+                <div class="lorgus-world-sidebar-label">RP-ЧАТ ЗАКРЫТ</div>
+                <div class="lorgus-world-sidebar-name">${escapeHtml(locationName)}</div>
+                <p class="lorgus-world-sidebar-meta">${escapeHtml(regionName)}</p>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button"
+                    onclick="renderKingdomLocations('${escapeHtml(regionName)}')">
+                    ← К локациям
+                </button>
+            </aside>
+
+            <main class="lorgus-world-browser">
+                <header class="lorgus-world-header">
+                    <span class="lorgus-world-kicker">ФИЗИЧЕСКОЕ ПРИСУТСТВИЕ</span>
+                    <h1>${escapeHtml(locationName)}</h1>
+                    <p>Персонаж не находится здесь. Читать и писать в этом RP-чате нельзя.</p>
+                </header>
+
+                <section class="lorgus-world-section">
+                    <div class="lorgus-empty-location">
+                        <span>🔒</span>
+                        <h2>Чат недоступен</h2>
+                        <p>Чтобы попасть сюда, персонаж должен физически прибыть в эту локацию через систему перемещения.</p>
+                    </div>
+                </section>
+            </main>
+        </div>
+    `;
+}
+
 async function renderLocationParticipants(locationName, regionName) {
     const box = document.querySelector(".lorgus-rp-participants");
     if (!box) return;
@@ -2466,33 +2517,37 @@ function sendLocalFloodMessage() {
     feed.scrollTop = feed.scrollHeight;
 }
 
-async function renderLocationChats(locationName, regionName, alreadyPresent = false) {
+async async function renderLocationChats(locationName, regionName, alreadyPresent = false) {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
     const presence = await getRpPresence();
 
-    if (!alreadyPresent) {
+    // RP-чат открывается только в физически текущем пространстве.
+    // Открытие карточки локации само по себе не перемещает персонажа.
+    if (
+        !presence ||
+        presence.type !== "location" ||
+        presence.location !== locationName ||
+        presence.region !== regionName
+    ) {
         if (presence?.type === "road") {
-            renderRoadChat(presence);
+            await renderRoadChat(presence);
             return;
         }
 
-        if (presence?.type === "location" &&
-            (presence.location !== locationName || presence.region !== regionName)) {
-            renderTravelScreen(presence.location, presence.region, locationName, regionName);
+        if (presence?.type === "location") {
+            renderTravelScreen(
+                presence.location,
+                presence.region,
+                locationName,
+                regionName
+            );
             return;
         }
 
-        if (!presence) {
-            await saveRpPresence({
-                type: "location",
-                location: locationName,
-                region: regionName,
-                enteredAt: new Date().toISOString(),
-                visibility: "public"
-            });
-        }
+        renderLocationEntryLock(locationName, regionName);
+        return;
     }
 
     await renderLocationParticipants(locationName, regionName);
