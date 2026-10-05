@@ -2275,7 +2275,7 @@ function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
     `;
 }
 
-function renderRoadChat(presence) {
+async function renderRoadChat(presence) {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
