@@ -550,22 +550,111 @@ async function loadPlayerState(session) {
         return;
     }
 
-    const approvedApplication =
-        applications.find(
-            application =>
-                application.status === "approved" &&
-                application.character_id
-        );
+    const approvedApplications = applications.filter(
+        application =>
+            application.status === "approved" &&
+            application.character_id
+    );
 
-    if (approvedApplication) {
-        await loadCharacter(
-            container,
-            approvedApplication.character_id
-        );
+    if (approvedApplications.length > 0) {
+        await renderCharacterSelection(container, approvedApplications);
         return;
     }
 
     renderCharacterApplicationForm(container);
+}
+
+/* =========================================================
+   ВЫБОР ПЕРСОНАЖА
+   ========================================================= */
+
+async function renderCharacterSelection(container, applications) {
+    container.className = "character-selection";
+    container.innerHTML = "";
+
+    const header = document.createElement("div");
+    header.className = "character-header";
+    header.innerHTML = "<div class=\"welcome-symbol\">✦</div><h1>Выбор персонажа</h1><p>Выбери персонажа, которым хочешь продолжить игру.</p>";
+    container.appendChild(header);
+
+    const grid = document.createElement("div");
+    grid.className = "character-selection-grid";
+    container.appendChild(grid);
+
+    for (const application of applications) {
+        const result = await supabase.from("characters").select("*").eq("id", application.character_id).single();
+        if (result.error || !result.data) continue;
+
+        const character = result.data;
+        const status = String(character.status || "ACTIVE").toUpperCase();
+        const card = document.createElement("article");
+        card.className = "character-card";
+
+        const avatar = document.createElement("div");
+        avatar.className = "character-card-avatar character-card-placeholder";
+        avatar.textContent = "✦";
+        card.appendChild(avatar);
+
+        const body = document.createElement("div");
+        body.className = "character-card-body";
+
+        const statusNode = document.createElement("div");
+        statusNode.className = "character-card-status" + (status === "DEAD" ? " dead" : "");
+        statusNode.textContent = status === "DEAD" ? "МЕРТВ" : status;
+        body.appendChild(statusNode);
+
+        const name = document.createElement("h2");
+        name.textContent = character.name || "Без имени";
+        body.appendChild(name);
+
+        const race = document.createElement("p");
+        race.textContent = character.race || "Раса не указана";
+        body.appendChild(race);
+
+        if (status === "ACTIVE" || !character.status) {
+            const button = document.createElement("button");
+            button.className = "gold-button character-select-button";
+            button.textContent = "Играть";
+            button.addEventListener("click", () => selectCharacter(container, character.id));
+            body.appendChild(button);
+        } else {
+            const disabled = document.createElement("div");
+            disabled.className = "character-card-disabled-label";
+            disabled.textContent = "Персонаж недоступен";
+            body.appendChild(disabled);
+        }
+
+        card.appendChild(body);
+        grid.appendChild(card);
+    }
+
+    if (applications.length < 3) {
+        const createButton = document.createElement("button");
+        createButton.className = "gold-button character-create-button";
+        createButton.textContent = "Создать нового персонажа";
+        createButton.addEventListener("click", () => renderCharacterApplicationForm(container));
+        container.appendChild(createButton);
+    }
+}
+
+async function selectCharacter(container, characterId) {
+    const result = await supabase.from("characters").select("*").eq("id", characterId).single();
+    if (result.error || !result.data) {
+        showCharacterError(container, result.error ? result.error.message : "Персонаж не найден.");
+        return;
+    }
+
+    const character = result.data;
+    const status = String(character.status || "ACTIVE").toUpperCase();
+    if (status !== "ACTIVE") {
+        showCharacterError(container, "Этот персонаж сейчас недоступен для игры.");
+        return;
+    }
+
+    window.activeCharacterId = character.id;
+    window.activeCharacter = character;
+    sessionStorage.setItem("lorgus_active_character_id", character.id);
+    renderCharacter(container, character);
 }
 
 /* =========================================================
@@ -731,6 +820,25 @@ async function submitCharacterApplication(event) {
             "Необходимо войти в аккаунт.",
             "error"
         );
+        return;
+    }
+
+    const { data: existingApplications, error: countError } = await supabase
+        .from("character_applications")
+        .select("id,status")
+        .eq("player_id", user.id);
+
+    if (countError) {
+        setCharacterMessage("Не удалось проверить количество персонажей: " + countError.message, "error");
+        return;
+    }
+
+    const characterCount = (existingApplications || []).filter(
+        application => application.status !== "rejected"
+    ).length;
+
+    if (characterCount >= 3) {
+        setCharacterMessage("Можно иметь не более 3 персонажей.", "error");
         return;
     }
 
