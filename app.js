@@ -718,7 +718,7 @@ async function selectCharacter(container, characterId) {
     window.activeCharacterId = character.id;
     window.activeCharacter = character;
     sessionStorage.setItem("lorgus_active_character_id", character.id);
-    initializeRpPresence(character);
+    await initializeRpPresence(character);
     renderCharacter(container, character);
 }
 
@@ -1907,7 +1907,41 @@ async function saveRpPresence(presence) {
 async function initializeRpPresence(character) {
     if (!character?.id) return;
     window.activeCharacterId = character.id;
+
+    if (window.rpPresenceChannel) {
+        await supabase.removeChannel(window.rpPresenceChannel);
+    }
+
+    window.rpPresenceChannel = supabase
+        .channel("lorgus-rp-presence")
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "rp_presence"
+            },
+            async () => {
+                window.activeRpPresence = await getRpPresence();
+                await renderLocationParticipantsIfVisible();
+            }
+        )
+        .subscribe();
+
     await getRpPresence();
+}
+
+async function renderLocationParticipantsIfVisible() {
+    const presence = window.activeRpPresence;
+    if (!presence || presence.type !== "location") return;
+
+    const box = document.querySelector(".lorgus-rp-participants");
+    if (!box) return;
+
+    await renderLocationParticipants(
+        presence.location,
+        presence.region
+    );
 }
 
 async function clearRpPresence() {
