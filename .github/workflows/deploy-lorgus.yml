@@ -11,10 +11,6 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: lorgus-production
-  cancel-in-progress: true
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
