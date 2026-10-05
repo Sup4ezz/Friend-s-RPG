@@ -1545,53 +1545,107 @@ function renderCharacter(
     container,
     character
 ) {
-    container.className = "welcome-panel";
+    container.className = "lorgus-game-page";
+
+    const name = escapeHtml(character.name || "Без имени");
+    const race = escapeHtml(character.race || "Раса не указана");
+    const occupation = escapeHtml(character.occupation || "Путник");
 
     container.innerHTML = `
-        <div class="welcome-symbol">✦</div>
+        <div class="lorgus-game-layout">
+            <aside class="lorgus-player-panel">
+                <div class="lorgus-player-portrait">
+                    <div class="lorgus-player-portrait-placeholder">✦</div>
+                </div>
 
-        <h1>
-            ${escapeHtml(character.name)}
-        </h1>
+                <div class="lorgus-player-name">${name}</div>
+                <div class="lorgus-player-subtitle">${race}</div>
 
-        <p>
-            Твой персонаж принят в мир ЛОРГУС.
-        </p>
+                <div class="lorgus-level-row">
+                    <span>Уровень 1</span>
+                    <span>0 / 100 XP</span>
+                </div>
+                <div class="lorgus-progress">
+                    <span style="width:0%"></span>
+                </div>
 
-        <div class="ornament">
-            <span></span>
-            <i>
-                ${escapeHtml(
-                    character.race ||
-                    "Персонаж"
-                )}
-            </i>
-            <span></span>
-        </div>
+                <div class="lorgus-stat">
+                    <span>Здоровье</span>
+                    <strong>100 / 100</strong>
+                </div>
+                <div class="lorgus-progress health">
+                    <span style="width:100%"></span>
+                </div>
 
-        <p>
-            ${escapeHtml(
-                character.occupation ||
-                ""
-            )}
-        </p>
+                <div class="lorgus-quick-stats">
+                    <div><span>Золото</span><strong>0</strong></div>
+                    <div><span>Опыт</span><strong>0</strong></div>
+                </div>
 
-        <div class="character-game-actions">
-            <button
-                class="gold-button"
-                type="button"
-                onclick="openActiveCharacterProfile()"
-            >
-                Профиль персонажа
-            </button>
+                <button class="gold-button lorgus-side-button" type="button" onclick="openActiveCharacterProfile()">
+                    Профиль персонажа
+                </button>
+                <button class="character-secondary-button lorgus-side-button" type="button" onclick="switchCharacter()">
+                    Сменить персонажа
+                </button>
+            </aside>
 
-            <button
-                class="character-secondary-button"
-                type="button"
-                onclick="switchCharacter()"
-            >
-                Сменить персонажа
-            </button>
+            <main class="lorgus-world-panel">
+                <header class="lorgus-location-header">
+                    <div>
+                        <span class="lorgus-kicker">ТЕКУЩЕЕ МЕСТО</span>
+                        <h1>Начало пути</h1>
+                        <p>${occupation}</p>
+                    </div>
+                    <div class="lorgus-location-mark">✦</div>
+                </header>
+
+                <section class="lorgus-scene">
+                    <h2>Мир ЛОРГУС ждёт тебя</h2>
+                    <p>
+                        Твой путь только начинается. Здесь будет разворачиваться
+                        история ${name}, а каждое принятое решение сможет изменить
+                        дальнейшее путешествие.
+                    </p>
+                </section>
+
+                <section class="lorgus-actions">
+                    <div class="lorgus-section-title">
+                        <span>ДЕЙСТВИЯ</span>
+                        <i></i>
+                    </div>
+
+                    <div class="lorgus-action-grid">
+                        <button class="lorgus-action-card" type="button">
+                            <strong>Осмотреться</strong>
+                            <span>Изучить место, в котором ты оказался.</span>
+                        </button>
+                        <button class="lorgus-action-card" type="button">
+                            <strong>Исследовать</strong>
+                            <span>Отправиться навстречу неизвестному.</span>
+                        </button>
+                        <button class="lorgus-action-card" type="button">
+                            <strong>Инвентарь</strong>
+                            <span>Посмотреть вещи и снаряжение.</span>
+                        </button>
+                        <button class="lorgus-action-card" type="button">
+                            <strong>Персонаж</strong>
+                            <span>Открыть подробности своего героя.</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="lorgus-log">
+                    <div class="lorgus-section-title">
+                        <span>ЖУРНАЛ</span>
+                        <i></i>
+                    </div>
+                    <div class="lorgus-log-entry">
+                        <span class="lorgus-log-symbol">◆</span>
+                        <p>Ты вступаешь в мир ЛОРГУС. История начинается.</p>
+                    </div>
+                </section>
+            </main>
         </div>
     `;
 }
