@@ -718,6 +718,7 @@ async function selectCharacter(container, characterId) {
     window.activeCharacterId = character.id;
     window.activeCharacter = character;
     sessionStorage.setItem("lorgus_active_character_id", character.id);
+    initializeRpPresence(character);
     renderCharacter(container, character);
 }
 
@@ -1823,16 +1824,369 @@ function renderKingdomLocations(regionName) {
     `;
 }
 
-function renderLocationChats(locationName, regionName) {
+function getPresenceKey(characterId = window.activeCharacterId) {
+    return characterId ? `lorgus_presence_${characterId}` : null;
+}
+
+function getRpPresence() {
+    const key = getPresenceKey();
+    if (!key) return null;
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : null;
+    } catch (error) {
+        console.error("Не удалось прочитать присутствие персонажа:", error);
+        return null;
+    }
+}
+
+function saveRpPresence(presence) {
+    const key = getPresenceKey();
+    if (!key) return;
+    localStorage.setItem(key, JSON.stringify(presence));
+    window.activeRpPresence = presence;
+}
+
+function initializeRpPresence(character) {
+    if (!character?.id) return;
+    window.activeRpPresence = getRpPresence();
+}
+
+function clearRpPresence() {
+    const key = getPresenceKey();
+    if (!key) return;
+    localStorage.removeItem(key);
+    window.activeRpPresence = null;
+}
+
+function getAvailableTravelDestinations(regionName, locationName) {
+    const destinations = [];
+    for (const [region, data] of Object.entries(LORGUS_LOCATIONS)) {
+        for (const [location] of data.locations || []) {
+            if (region === regionName && location === locationName) continue;
+            destinations.push({ region, location });
+        }
+    }
+    return destinations;
+}
+
+function enterLocationRp(locationName, regionName) {
+    const presence = getRpPresence();
+
+    if (presence?.type === "road") {
+        renderRoadChat(presence);
+        return;
+    }
+
+    if (presence?.type === "location" &&
+        presence.location === locationName &&
+        presence.region === regionName) {
+        renderLocationChats(locationName, regionName, true);
+        return;
+    }
+
+    if (presence?.type === "location") {
+        renderTravelScreen(presence.location, presence.region, locationName, regionName);
+        return;
+    }
+
+    saveRpPresence({
+        type: "location",
+        location: locationName,
+        region: regionName,
+        enteredAt: new Date().toISOString()
+    });
+
+    renderLocationChats(locationName, regionName, true);
+}
+
+function startTravel(fromLocation, fromRegion, toLocation, toRegion) {
+    const presence = getRpPresence();
+
+    if (presence?.type === "road") {
+        renderRoadChat(presence);
+        return;
+    }
+
+    if (presence?.type === "location" &&
+        (presence.location !== fromLocation || presence.region !== fromRegion)) {
+        renderTravelScreen(presence.location, presence.region, toLocation, toRegion);
+        return;
+    }
+
+    const road = {
+        type: "road",
+        fromLocation,
+        fromRegion,
+        toLocation,
+        toRegion,
+        startedAt: new Date().toISOString()
+    };
+
+    saveRpPresence(road);
+    renderRoadChat(road);
+}
+
+function arriveAtDestination() {
+    const presence = getRpPresence();
+    if (!presence || presence.type !== "road") return;
+
+    saveRpPresence({
+        type: "location",
+        location: presence.toLocation,
+        region: presence.toRegion,
+        enteredAt: new Date().toISOString()
+    });
+
+    renderLocationChats(presence.toLocation, presence.toRegion, true);
+}
+
+function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
-    container.className = "lorgus-rp-page";
+    const destinations = getAvailableTravelDestinations(fromRegion, fromLocation);
+    const requested = destinations.find(item =>
+        item.location === toLocation && item.region === toRegion
+    );
+
+    const choices = requested
+        ? [requested, ...destinations.filter(item =>
+            item.location !== requested.location || item.region !== requested.region
+        )]
+        : destinations;
+
+    container.className = "lorgus-road-page";
+    container.innerHTML = `
+        <div class="lorgus-road-shell">
+            <header class="lorgus-road-header">
+                <span class="lorgus-rp-overline">ПЕРЕМЕЩЕНИЕ</span>
+                <h1>Путь начинается не в чате.</h1>
+                <p>
+                    ${escapeHtml(fromLocation)}, ${escapeHtml(fromRegion)}
+                    · выбери место, куда направляется персонаж.
+                </p>
+            </header>
+
+            <section class="lorgus-road-panel">
+                <div class="lorgus-road-current">
+                    <span>СЕЙЧАС</span>
+                    <strong>${escapeHtml(fromLocation)}</strong>
+                    <small>${escapeHtml(fromRegion)}</small>
+                </div>
+                <div class="lorgus-road-arrow">→</div>
+                <div class="lorgus-road-current">
+                    <span>НАЗНАЧЕНИЕ</span>
+                    <strong>${escapeHtml(toLocation)}</strong>
+                    <small>${escapeHtml(toRegion)}</small>
+                </div>
+            </section>
+
+            <section class="lorgus-road-destinations">
+                <div class="lorgus-world-section-title">ДОСТУПНЫЕ НАПРАВЛЕНИЯ</div>
+                <div class="lorgus-road-destination-grid">
+                    ${choices.slice(0, 12).map(item => `
+                        <button class="lorgus-road-destination ${item.location === toLocation && item.region === toRegion ? "selected" : ""}" type="button"
+                            onclick="startTravel('${escapeHtml(fromLocation)}','${escapeHtml(fromRegion)}','${escapeHtml(item.location)}','${escapeHtml(item.region)}')">
+                            <strong>${escapeHtml(item.location)}</strong>
+                            <small>${escapeHtml(item.region)}</small>
+                        </button>
+                    `).join("")}
+                </div>
+            </section>
+
+            <div class="lorgus-road-actions">
+                <button class="character-secondary-button" type="button"
+                    onclick="renderKingdomLocations('${escapeHtml(fromRegion)}')">
+                    ← Остаться здесь
+                </button>
+                <button class="gold-button" type="button"
+                    onclick="startTravel('${escapeHtml(fromLocation)}','${escapeHtml(fromRegion)}','${escapeHtml(toLocation)}','${escapeHtml(toRegion)}')">
+                    Выйти на дорогу
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+function renderRoadChat(presence) {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    const character = window.activeCharacter;
+    const name = escapeHtml(character?.name || "Без имени");
+
+    container.className = "lorgus-road-page";
+    container.innerHTML = `
+        <div class="lorgus-rp-shell lorgus-road-chat-shell">
+            <aside class="lorgus-rp-sidebar">
+                <button class="lorgus-rp-back" type="button" onclick="renderRoadChat(getRpPresence())">↻ Обновить путь</button>
+                <div class="lorgus-rp-place-mark">→</div>
+                <span class="lorgus-rp-overline">ДОРОГА</span>
+                <h1>${escapeHtml(presence.fromLocation)} → ${escapeHtml(presence.toLocation)}</h1>
+                <p class="lorgus-rp-region">${escapeHtml(presence.fromRegion)} → ${escapeHtml(presence.toRegion)}</p>
+                <div class="lorgus-rp-divider"></div>
+                <div class="lorgus-rp-sidebar-label">ВАШЕ ПРИСУТСТВИЕ</div>
+                <div class="lorgus-rp-road-lock">
+                    Пока персонаж в пути, он не может писать в чатах исходной или конечной локации.
+                </div>
+                <div class="lorgus-rp-sidebar-note">
+                    <span>✧</span>
+                    <p>Дорога — самостоятельное RP-пространство. Здесь можно встретить других путников.</p>
+                </div>
+            </aside>
+
+            <main class="lorgus-rp-main">
+                <header class="lorgus-rp-header">
+                    <div>
+                        <span class="lorgus-rp-overline">RP · ДОРОГА</span>
+                        <h2>${escapeHtml(presence.fromLocation)} → ${escapeHtml(presence.toLocation)}</h2>
+                    </div>
+                    <div class="lorgus-rp-status"><i></i> ПУТЬ</div>
+                </header>
+
+                <section class="lorgus-rp-feed" id="lorgus-rp-feed">
+                    <div class="lorgus-rp-empty">
+                        <div class="lorgus-rp-symbol">→</div>
+                        <span class="lorgus-rp-stage-kicker">ДОРОЖНЫЙ ЧАТ</span>
+                        <h3>Персонаж находится в пути.</h3>
+                        <p>Пока ты здесь, другие RP-чаты для этого персонажа закрыты.</p>
+                    </div>
+                </section>
+
+                <section class="lorgus-rp-composer">
+                    <div class="lorgus-rp-composer-top">
+                        <span>РОЛЬ: <strong>${name}</strong></span>
+                        <span>ПРОСТРАНСТВО: <b>ДОРОГА</b></span>
+                    </div>
+                    <textarea id="lorgus-rp-input" placeholder="Опиши дорогу, встречу или действие персонажа..." rows="4"></textarea>
+                    <div class="lorgus-rp-composer-bottom">
+                        <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalRpMessage()">Отправить</button>
+                    </div>
+                </section>
+
+                <div class="lorgus-road-arrival">
+                    <button class="gold-button" type="button" onclick="arriveAtDestination()">
+                        Прибыть в ${escapeHtml(presence.toLocation)}
+                    </button>
+                </div>
+            </main>
+        </div>
+    `;
+}
+
+function renderFloodChat() {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    const character = window.activeCharacter;
+    const name = escapeHtml(character?.name || "Без имени");
+
+    container.className = "lorgus-flood-page";
+    container.innerHTML = `
+        <div class="lorgus-flood-shell">
+            <header class="lorgus-flood-header">
+                <div>
+                    <span class="lorgus-rp-overline">ОБЩИЙ КАНАЛ</span>
+                    <h1>Флуд</h1>
+                    <p>Свободное общение игроков. Флуд не считается RP-присутствием.</p>
+                </div>
+                <button class="character-secondary-button" type="button" onclick="returnToGame()">← К миру</button>
+            </header>
+
+            <section class="lorgus-flood-feed" id="lorgus-flood-feed">
+                <div class="lorgus-rp-empty">
+                    <div class="lorgus-rp-symbol">✧</div>
+                    <span class="lorgus-rp-stage-kicker">ФЛУД</span>
+                    <h3>Общий разговор ещё пуст.</h3>
+                    <p>Здесь можно общаться вне роли, не покидая своё текущее RP-пространство.</p>
+                </div>
+            </section>
+
+            <section class="lorgus-rp-composer">
+                <div class="lorgus-rp-composer-top">
+                    <span>АККАУНТ: <strong>${name}</strong></span>
+                    <span>НЕ ВЛИЯЕТ НА ПЕРЕМЕЩЕНИЕ</span>
+                </div>
+                <textarea id="lorgus-flood-input" placeholder="Напиши сообщение во флуд..." rows="3"></textarea>
+                <div class="lorgus-rp-composer-bottom">
+                    <span class="lorgus-rp-mention">Флуд доступен независимо от RP-присутствия.</span>
+                    <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalFloodMessage()">Отправить</button>
+                </div>
+            </section>
+        </div>
+    `;
+}
+
+function sendLocalFloodMessage() {
+    const input = document.getElementById("lorgus-flood-input");
+    const feed = document.getElementById("lorgus-flood-feed");
+    const character = window.activeCharacter;
+    if (!input || !feed || !character) return;
+
+    const text = input.value.trim();
+    if (!text) return;
+
+    const presence = getRpPresence();
+    if (!presence || (presence.type !== "location" && presence.type !== "road")) {
+        alert("Персонаж не находится ни в одном RP-пространстве.");
+        return;
+    }
+
+    const empty = feed.querySelector(".lorgus-rp-empty");
+    if (empty) empty.remove();
+
+    const message = document.createElement("article");
+    message.className = "lorgus-rp-message";
+    message.innerHTML = `
+        <div class="lorgus-rp-message-avatar">✧</div>
+        <div class="lorgus-rp-message-body">
+            <div class="lorgus-rp-message-meta">
+                <strong>${escapeHtml(character.name || "Без имени")}</strong>
+                <span>флуд · сейчас</span>
+            </div>
+            <p>${escapeHtml(text)}</p>
+        </div>
+    `;
+    feed.appendChild(message);
+    input.value = "";
+    feed.scrollTop = feed.scrollHeight;
+}
+
+function renderLocationChats(locationName, regionName, alreadyPresent = false) {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    const presence = getRpPresence();
+
+    if (!alreadyPresent) {
+        if (presence?.type === "road") {
+            renderRoadChat(presence);
+            return;
+        }
+
+        if (presence?.type === "location" &&
+            (presence.location !== locationName || presence.region !== regionName)) {
+            renderTravelScreen(presence.location, presence.region, locationName, regionName);
+            return;
+        }
+
+        if (!presence) {
+            saveRpPresence({
+                type: "location",
+                location: locationName,
+                region: regionName,
+                enteredAt: new Date().toISOString()
+            });
+        }
+    }
+
     const character = window.activeCharacter;
     const name = escapeHtml(character?.name || "Без имени");
     const location = escapeHtml(locationName);
     const region = escapeHtml(regionName);
 
+    container.className = "lorgus-rp-page";
     container.innerHTML = `
         <div class="lorgus-rp-shell">
             <aside class="lorgus-rp-sidebar">
@@ -1845,6 +2199,11 @@ function renderLocationChats(locationName, regionName) {
 
                 <div class="lorgus-rp-divider"></div>
 
+                <div class="lorgus-rp-sidebar-label">ПРИСУТСТВИЕ</div>
+                <div class="lorgus-rp-presence-lock">
+                    Персонаж находится здесь. Войти в другую RP-локацию можно только через дорогу.
+                </div>
+
                 <div class="lorgus-rp-sidebar-label">УЧАСТНИКИ</div>
                 <div class="lorgus-rp-participants">
                     <div class="lorgus-rp-participant active">
@@ -1856,7 +2215,7 @@ function renderLocationChats(locationName, regionName) {
 
                 <div class="lorgus-rp-sidebar-note">
                     <span>✧</span>
-                    <p>Ролите свободно. Пишите действия, речь и мысли своего персонажа.</p>
+                    <p>Ролите свободно. Флуд можно открыть отдельно и он не меняет положение персонажа.</p>
                 </div>
             </aside>
 
@@ -1874,14 +2233,14 @@ function renderLocationChats(locationName, regionName) {
                         <div class="lorgus-rp-symbol">✦</div>
                         <span class="lorgus-rp-stage-kicker">НАЧАЛО ИСТОРИИ</span>
                         <h3>Сцена ещё не началась.</h3>
-                        <p>Первое сообщение создаст начало истории. Здесь игроки будут отвечать друг другу, отмечать участников и продолжать общий сюжет.</p>
+                        <p>Первое сообщение создаст начало истории. Здесь игроки будут отвечать друг другу и продолжать общий сюжет.</p>
                     </div>
                 </section>
 
                 <section class="lorgus-rp-composer">
                     <div class="lorgus-rp-composer-top">
                         <span>РОЛЬ: <strong>${name}</strong></span>
-                        <span>Можно отметить: <b>@персонаж</b></span>
+                        <span>ПРОСТРАНСТВО: <b>ЛОКАЦИЯ</b></span>
                     </div>
                     <textarea id="lorgus-rp-input" placeholder="Опиши действие, реплику или мысль персонажа..." rows="4"></textarea>
                     <div class="lorgus-rp-composer-bottom">
@@ -1892,13 +2251,12 @@ function renderLocationChats(locationName, regionName) {
 
                 <footer class="lorgus-rp-footer">
                     <span>ЛОРГУС</span>
-                    <span>История создаётся действиями игроков.</span>
+                    <button class="lorgus-flood-link" type="button" onclick="renderFloodChat()">Открыть флуд</button>
                 </footer>
             </main>
         </div>
     `;
 }
-
 function sendLocalRpMessage() {
     const input = document.getElementById("lorgus-rp-input");
     const feed = document.getElementById("lorgus-rp-feed");
@@ -2158,6 +2516,12 @@ window.renderCharacter = renderCharacter;
 window.renderKingdomLocations = renderKingdomLocations;
 window.renderLocationChats = renderLocationChats;
 window.sendLocalRpMessage = sendLocalRpMessage;
+window.renderFloodChat = renderFloodChat;
+window.sendLocalFloodMessage = sendLocalFloodMessage;
+window.renderRoadChat = renderRoadChat;
+window.startTravel = startTravel;
+window.arriveAtDestination = arriveAtDestination;
+window.getRpPresence = getRpPresence;
 
 
 /* =========================================================
