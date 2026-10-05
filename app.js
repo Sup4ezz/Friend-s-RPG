@@ -624,10 +624,12 @@ async function renderCharacterSelection(container, applications, pendingApplicat
         const body = document.createElement("div");
         body.className = "character-card-body";
 
-        const statusNode = document.createElement("div");
-        statusNode.className = "character-card-status" + (status === "DEAD" ? " dead" : "");
-        statusNode.textContent = status === "DEAD" ? "МЕРТВ" : status;
-        body.appendChild(statusNode);
+        if (status === "DEAD") {
+            const statusNode = document.createElement("div");
+            statusNode.className = "character-card-status dead";
+            statusNode.textContent = "Погиб";
+            body.appendChild(statusNode);
+        }
 
         const name = document.createElement("h2");
         name.textContent = character.name || "Без имени";
@@ -1633,10 +1635,6 @@ function openActiveCharacterProfile() {
             <div class="character-profile-field">
                 <span>Род занятий</span>
                 <strong>${escapeHtml(character.occupation || "Не указан")}</strong>
-            </div>
-            <div class="character-profile-field">
-                <span>Статус</span>
-                <strong>${escapeHtml(String(character.status || "ACTIVE").toUpperCase())}</strong>
             </div>
             <div class="character-profile-field full">
                 <span>Характер</span>
