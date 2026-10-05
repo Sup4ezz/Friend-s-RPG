@@ -1632,6 +1632,9 @@ function renderCharacter(
                 <button class="gold-button lorgus-world-sidebar-button" type="button" onclick="openActiveCharacterProfile()">
                     Профиль
                 </button>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="renderWorldCharacterTracker()">
+                    Люди мира
+                </button>
                 <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="switchCharacter()">
                     Сменить персонажа
                 </button>
@@ -1768,6 +1771,81 @@ const LORGUS_LOCATIONS = {
         locations: []
     }
 };
+
+async function renderWorldCharacterTracker() {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    container.className = "lorgus-world-page";
+    container.innerHTML = `
+        <div class="lorgus-world-shell">
+            <aside class="lorgus-world-sidebar">
+                <div class="lorgus-world-sidebar-symbol">✦</div>
+                <div class="lorgus-world-sidebar-label">ЛОРГУС</div>
+                <div class="lorgus-world-sidebar-name">Люди мира</div>
+                <p class="lorgus-world-sidebar-meta">Актуальное публичное местоположение персонажей.</p>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="returnToGame()">
+                    ← Вернуться к миру
+                </button>
+            </aside>
+            <main class="lorgus-world-browser">
+                <header class="lorgus-world-header">
+                    <span class="lorgus-world-kicker">ОТСЛЕЖИВАНИЕ</span>
+                    <h1>Люди мира</h1>
+                    <p>Персонажи, которые не скрывают своё местоположение.</p>
+                </header>
+                <section class="lorgus-world-section">
+                    <div class="lorgus-world-section-title">ТЕКУЩЕЕ ПОЛОЖЕНИЕ</div>
+                    <div id="lorgus-character-tracker" class="lorgus-location-grid">
+                        <div class="lorgus-empty-location"><span>✦</span><h2>Загрузка...</h2></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    `;
+
+    const tracker = document.getElementById("lorgus-character-tracker");
+    const { data, error } = await supabase
+        .from("rp_presence")
+        .select("character_id, presence_type, region, location, from_region, from_location, to_region, to_location, updated_at, characters(name, race)")
+        .eq("visibility", "public")
+        .order("updated_at", { ascending: false });
+
+    if (error) {
+        tracker.innerHTML = `<div class="lorgus-empty-location"><span>!</span><h2>Не удалось загрузить людей мира</h2><p>${escapeHtml(error.message)}</p></div>`;
+        return;
+    }
+
+    if (!data?.length) {
+        tracker.innerHTML = `<div class="lorgus-empty-location"><span>✦</span><h2>Пока никого нет</h2><p>Когда персонажи войдут в мир, они появятся здесь.</p></div>`;
+        return;
+    }
+
+    tracker.innerHTML = data.map(row => {
+        const character = row.characters || {};
+        const isSelf = row.character_id === window.activeCharacterId;
+
+        let place;
+        let status;
+
+        if (row.presence_type === "road") {
+            place = `${escapeHtml(row.from_location)} → ${escapeHtml(row.to_location)}`;
+            status = `В пути · ${escapeHtml(row.from_region)} → ${escapeHtml(row.to_region)}`;
+        } else {
+            place = escapeHtml(row.location || "Неизвестно");
+            status = escapeHtml(row.region || "Неизвестный край");
+        }
+
+        return `
+            <article class="lorgus-location-card" style="cursor:default">
+                <span class="lorgus-location-card-mark">${row.presence_type === "road" ? "→" : "✦"}</span>
+                <strong>${escapeHtml(character.name || "Без имени")}${isSelf ? " · Вы" : ""}</strong>
+                <small>${escapeHtml(character.race || "Персонаж")}</small>
+                <p>${place}<br><span>${status}</span></p>
+            </article>
+        `;
+    }).join("");
+}
 
 function renderKingdomLocations(regionName) {
     const container = document.getElementById("cabinet-content");
@@ -2671,6 +2749,7 @@ window.renderRoadChat = renderRoadChat;
 window.startTravel = startTravel;
 window.arriveAtDestination = arriveAtDestination;
 window.getRpPresence = getRpPresence;
+window.renderWorldCharacterTracker = renderWorldCharacterTracker;
 
 
 /* =========================================================
