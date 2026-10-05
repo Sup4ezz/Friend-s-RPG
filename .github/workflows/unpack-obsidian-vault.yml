@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "Obsidian Vault.zip"
+      - ".github/workflows/unpack-obsidian-vault.yml"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,13 +17,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Unpack vault
         run: |
           rm -rf "Obsidian Vault"
           mkdir -p "Obsidian Vault"
           unzip -q "Obsidian Vault.zip" -d "Obsidian Vault"
-
       - name: Commit unpacked vault
         run: |
           git config user.name "github-actions[bot]"
