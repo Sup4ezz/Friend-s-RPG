@@ -5988,3 +5988,139 @@ select:focus-visible{
         flex-direction: column;
     }
 }
+
+
+/* LORGUS — refined location cards */
+.lorgus-location-card {
+    position: relative;
+    overflow: hidden;
+    text-align: left;
+    isolation: isolate;
+    transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease;
+}
+
+.lorgus-location-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at 88% 12%, rgba(198, 164, 91, .10), transparent 32%),
+        linear-gradient(135deg, rgba(255,255,255,.025), transparent 45%);
+    pointer-events: none;
+    z-index: -1;
+}
+
+.lorgus-location-card:hover {
+    transform: translateY(-3px);
+}
+
+.lorgus-location-card.locked {
+    opacity: .78;
+    border-color: rgba(184, 156, 98, .18);
+}
+
+.lorgus-location-card.locked:hover {
+    opacity: .94;
+    border-color: rgba(184, 156, 98, .34);
+}
+
+.lorgus-location-card.current {
+    border-color: rgba(198, 164, 91, .55);
+    box-shadow: 0 12px 34px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.lorgus-location-card-mark {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    border-radius: 50%;
+    background: rgba(188, 154, 82, .07);
+    border: 1px solid rgba(188, 154, 82, .22);
+}
+
+.lorgus-location-card-glyph {
+    position: relative;
+    width: 15px;
+    height: 15px;
+    display: block;
+    border: 1.5px solid currentColor;
+    border-radius: 50%;
+    color: rgba(198, 164, 91, .62);
+}
+
+.lorgus-location-card-glyph::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.lorgus-location-card-glyph::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: -5px;
+    width: 1px;
+    height: 25px;
+    transform: translateX(-50%);
+    background: currentColor;
+    opacity: .45;
+}
+
+.lorgus-location-card-glyph.is-current {
+    color: rgba(220, 190, 119, .95);
+    box-shadow: 0 0 0 4px rgba(198, 164, 91, .07), 0 0 18px rgba(198, 164, 91, .16);
+}
+
+.lorgus-location-card-glyph.is-current::after {
+    transform: translateX(-50%) rotate(90deg);
+}
+
+.lorgus-location-card-glyph.is-closed {
+    width: 17px;
+    height: 12px;
+    border-radius: 3px 3px 5px 5px;
+    color: rgba(185, 167, 130, .55);
+    transform: translateY(2px);
+}
+
+.lorgus-location-card-glyph.is-closed::before {
+    width: 9px;
+    height: 9px;
+    top: -6px;
+    background: transparent;
+    border: 1.5px solid currentColor;
+    border-bottom: 0;
+    border-radius: 7px 7px 0 0;
+}
+
+.lorgus-location-card-glyph.is-closed::after {
+    display: none;
+}
+
+.lorgus-location-card-access {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 13px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(188, 154, 82, .12);
+    color: rgba(221, 207, 177, .58);
+    font-family: "Lora", serif;
+    font-size: .76rem;
+    letter-spacing: .03em;
+}
+
+.lorgus-location-card.current .lorgus-location-card-access {
+    color: rgba(221, 190, 119, .88);
+}
+
+.lorgus-world-section .lorgus-location-grid {
+    align-items: stretch;
+}
