@@ -765,10 +765,9 @@ function renderCharacterApplicationForm(container) {
                     <article class="character-lore-card">
                         <h4>Другие народы</h4>
                         <p>
-                            В Спорных Землях и особенно в Геене встречаются
-                            различные народы и существа. Такие персонажи
-                            требуют соответствующего происхождения и обоснования
-                            в анкете.
+                            В Спорных Землях встречаются различные народы
+                            и существа. Такие персонажи требуют соответствующего
+                            происхождения и обоснования в анкете.
                         </p>
                     </article>
                 </div>
@@ -800,9 +799,6 @@ function renderCharacterApplicationForm(container) {
                     </button>
                     <button type="button" class="character-lore-location" data-location="Спорные Земли">
                         <strong>Спорные Земли</strong><span>вне власти пяти королевств · независимые поселения</span>
-                    </button>
-                    <button type="button" class="character-lore-location" data-location="Геена">
-                        <strong>Геена</strong><span>отдельный континент · неизвестные народы и раздробленная власть</span>
                     </button>
                 </div>
                 <p class="character-lore-note">
@@ -862,7 +858,6 @@ function renderCharacterApplicationForm(container) {
                         <option value="Фин"></option>
                         <option value="Святые Земли"></option>
                         <option value="Спорные Земли"></option>
-                        <option value="Геена"></option>
                     </datalist>
                 </div>
 
