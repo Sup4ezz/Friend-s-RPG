@@ -2256,6 +2256,10 @@ function renderRoadChat(presence) {
             </main>
         </div>
     `;
+    const currentPresence = await getRpPresence();
+    await loadRpMessages(currentPresence);
+    await subscribeToRpMessages(currentPresence);
+
 }
 
 function renderFloodChat() {
@@ -2483,33 +2487,163 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
         </div>
     `;
 }
-function sendLocalRpMessage() {
-    const input = document.getElementById("lorgus-rp-input");
+async function loadRpMessages(presence) {
     const feed = document.getElementById("lorgus-rp-feed");
-    const character = window.activeCharacter;
-    if (!input || !feed || !character) return;
+    if (!feed || !presence) return;
 
-    const text = input.value.trim();
-    if (!text) return;
+    let query = supabase
+        .from("rp_messages")
+        .select("id, character_id, body, created_at, characters(name)")
+        .eq("presence_type", presence.type)
+        .order("created_at", { ascending: true })
+        .limit(200);
+
+    if (presence.type === "location") {
+        query = query.eq("region", presence.region).eq("location", presence.location);
+    } else {
+        query = query.eq("from_region", presence.fromRegion)
+            .eq("from_location", presence.fromLocation)
+            .eq("to_region", presence.toRegion)
+            .eq("to_location", presence.toLocation);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+        console.error("Не удалось загрузить RP-сообщения:", error);
+        return;
+    }
+
+    feed.innerHTML = "";
+    if (!data?.length) {
+        feed.innerHTML = '<div class="lorgus-rp-empty"><div class="lorgus-rp-symbol">✦</div><span class="lorgus-rp-stage-kicker">НАЧАЛО ИСТОРИИ</span><h3>Сцена ещё не началась.</h3><p>Первое сообщение создаст начало истории.</p></div>';
+        return;
+    }
+
+    data.forEach(appendRpMessage);
+    feed.scrollTop = feed.scrollHeight;
+    const currentPresence = await getRpPresence();
+    await loadRpMessages(currentPresence);
+    await subscribeToRpMessages(currentPresence);
+
+}
+
+function appendRpMessage(message) {
+    const feed = document.getElementById("lorgus-rp-feed");
+    if (!feed || feed.querySelector('[data-rp-message-id="' + message.id + '"]')) return;
 
     const empty = feed.querySelector(".lorgus-rp-empty");
     if (empty) empty.remove();
 
-    const message = document.createElement("article");
-    message.className = "lorgus-rp-message";
-    message.innerHTML = `
-        <div class="lorgus-rp-message-avatar">✦</div>
-        <div class="lorgus-rp-message-body">
-            <div class="lorgus-rp-message-meta">
-                <strong>${escapeHtml(character.name || "Без имени")}</strong>
-                <span>сейчас</span>
-            </div>
-            <p>${escapeHtml(text)}</p>
-        </div>
-    `;
-    feed.appendChild(message);
-    input.value = "";
+    const article = document.createElement("article");
+    article.className = "lorgus-rp-message";
+    article.dataset.rpMessageId = message.id;
+
+    const time = new Date(message.created_at).toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+
+    article.innerHTML =
+        '<div class="lorgus-rp-message-avatar">✦</div>' +
+        '<div class="lorgus-rp-message-body">' +
+            '<div class="lorgus-rp-message-meta">' +
+                '<strong>' + escapeHtml(message.characters?.name || "Без имени") + '</strong>' +
+                '<span>' + escapeHtml(time) + '</span>' +
+            '</div>' +
+            '<p>' + escapeHtml(message.body) + '</p>' +
+        '</div>';
+
+    feed.appendChild(article);
     feed.scrollTop = feed.scrollHeight;
+}
+
+async function subscribeToRpMessages(presence) {
+    if (!supabase || !presence) return;
+
+    if (window.rpMessagesChannel) {
+        await supabase.removeChannel(window.rpMessagesChannel);
+    }
+
+    window.rpMessagesChannel = supabase
+        .channel("lorgus-rp-messages-" + window.activeCharacterId)
+        .on("postgres_changes", {
+            event: "INSERT",
+            schema: "public",
+            table: "rp_messages"
+        }, async payload => {
+            const row = payload.new;
+            const sameLocation = presence.type === "location" &&
+                row.presence_type === "location" &&
+                row.region === presence.region &&
+                row.location === presence.location;
+
+            const sameRoad = presence.type === "road" &&
+                row.presence_type === "road" &&
+                row.from_region === presence.fromRegion &&
+                row.from_location === presence.fromLocation &&
+                row.to_region === presence.toRegion &&
+                row.to_location === presence.toLocation;
+
+            if (!sameLocation && !sameRoad) return;
+
+            const { data: character } = await supabase
+                .from("characters")
+                .select("name")
+                .eq("id", row.character_id)
+                .single();
+
+            appendRpMessage({ ...row, characters: character });
+        })
+        .subscribe();
+}
+
+async function sendLocalRpMessage() {
+    const input = document.getElementById("lorgus-rp-input");
+    if (!input || !window.activeCharacterId) return;
+
+    const body = input.value.trim();
+    if (!body) return;
+
+    const presence = await getRpPresence();
+    if (!presence) {
+        alert("Персонаж не находится в RP-пространстве.");
+        return;
+    }
+
+    const user = (await supabase.auth.getUser()).data.user;
+    if (!user) return;
+
+    const payload = {
+        character_id: window.activeCharacterId,
+        player_id: user.id,
+        presence_type: presence.type,
+        body
+    };
+
+    if (presence.type === "location") {
+        payload.region = presence.region;
+        payload.location = presence.location;
+    } else {
+        payload.from_region = presence.fromRegion;
+        payload.from_location = presence.fromLocation;
+        payload.to_region = presence.toRegion;
+        payload.to_location = presence.toLocation;
+    }
+
+    const { data, error } = await supabase
+        .from("rp_messages")
+        .insert(payload)
+        .select("id, character_id, body, created_at, characters(name)")
+        .single();
+
+    if (error) {
+        console.error("Не удалось отправить RP-сообщение:", error);
+        alert("Не удалось отправить сообщение.");
+        return;
+    }
+
+    input.value = "";
+    appendRpMessage(data);
 }
 
 
