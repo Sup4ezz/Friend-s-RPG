@@ -5858,3 +5858,133 @@ select:focus-visible{
         flex-direction: column-reverse;
     }
 }
+
+/* =========================================================
+   LORGUS — MAIL / PIGEON POST
+   ========================================================= */
+
+.lorgus-mail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+    gap: 18px;
+    padding: 34px 52px 52px;
+}
+
+.lorgus-mail-compose,
+.lorgus-mail-inbox {
+    min-width: 0;
+    padding: 24px;
+    border: 1px solid var(--l-line);
+    background: rgba(8,7,5,.38);
+}
+
+.lorgus-mail-compose label {
+    display: block;
+    margin: 18px 0 8px;
+    color: #b9aa90;
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+}
+
+.lorgus-mail-compose select,
+.lorgus-mail-compose textarea {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgba(217,183,108,.2);
+    background: rgba(4,4,3,.72);
+    color: #eee4cf;
+    padding: 12px 14px;
+    outline: none;
+    font: inherit;
+}
+
+.lorgus-mail-compose textarea {
+    min-height: 220px;
+    resize: vertical;
+    line-height: 1.65;
+}
+
+.lorgus-mail-compose select:focus,
+.lorgus-mail-compose textarea:focus {
+    border-color: rgba(217,183,108,.52);
+}
+
+.lorgus-mail-compose-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-top: 16px;
+    color: #9d917c;
+    font-size: 12px;
+}
+
+.lorgus-mail-status {
+    min-height: 20px;
+    margin-top: 12px;
+    color: var(--l-gold-bright);
+    font-size: 12px;
+}
+
+.lorgus-mail-list {
+    display: grid;
+    gap: 12px;
+}
+
+.lorgus-mail-card {
+    padding: 18px;
+    border: 1px solid rgba(217,183,108,.14);
+    background: rgba(12,10,7,.72);
+}
+
+.lorgus-mail-card.unread {
+    border-color: rgba(217,183,108,.42);
+    box-shadow: inset 3px 0 0 var(--l-gold);
+}
+
+.lorgus-mail-card-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.lorgus-mail-card-top strong {
+    color: var(--l-gold-bright);
+    font-family: var(--title-font);
+    font-size: 22px;
+}
+
+.lorgus-mail-card-top span,
+.lorgus-mail-card-meta {
+    color: #948874;
+    font-size: 11px;
+}
+
+.lorgus-mail-card-meta {
+    margin-top: 5px;
+}
+
+.lorgus-mail-card p {
+    margin: 14px 0;
+    color: #d7cebc;
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+
+.lorgus-mail-card .character-secondary-button {
+    padding: 8px 12px;
+    font-size: 10px;
+}
+
+@media (max-width: 900px) {
+    .lorgus-mail-layout {
+        grid-template-columns: 1fr;
+        padding: 25px 20px 35px;
+    }
+
+    .lorgus-mail-compose-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
