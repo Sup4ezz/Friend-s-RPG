@@ -578,7 +578,17 @@ async function renderCharacterSelection(container, applications, pendingApplicat
 
     const header = document.createElement("div");
     header.className = "character-header";
-    header.innerHTML = "<div class=\"welcome-symbol\">✦</div><h1>Выбор персонажа</h1><p>Выбери персонажа, которым хочешь продолжить игру.</p>";
+    header.innerHTML = `
+        <div class="character-selection-eyebrow">ЛОРГУС · ВАШИ ИСТОРИИ</div>
+        <div class="character-selection-title-row">
+            <span class="character-selection-ornament">✦</span>
+            <div>
+                <h1>Кто продолжит историю?</h1>
+                <p>Выбери персонажа и войди в мир его глазами.</p>
+            </div>
+        </div>
+        <div class="character-selection-rule"><span></span><i>АКТИВНЫЕ ПЕРСОНАЖИ</i><span></span></div>
+    `;
     container.appendChild(header);
 
     const grid = document.createElement("div");
@@ -1835,18 +1845,18 @@ function renderLocationChats(locationName, regionName) {
 
                 <div class="lorgus-rp-divider"></div>
 
-                <div class="lorgus-rp-sidebar-label">ПЕРСОНАЖ</div>
-                <div class="lorgus-rp-character">
-                    <span>✦</span>
-                    <div>
-                        <strong>${name}</strong>
-                        <small>Готов к сцене</small>
+                <div class="lorgus-rp-sidebar-label">УЧАСТНИКИ</div>
+                <div class="lorgus-rp-participants">
+                    <div class="lorgus-rp-participant active">
+                        <span class="lorgus-rp-avatar">✦</span>
+                        <div><strong>${name}</strong><small>Вы</small></div>
                     </div>
+                    <div class="lorgus-rp-participant-empty">Другие игроки появятся здесь</div>
                 </div>
 
                 <div class="lorgus-rp-sidebar-note">
                     <span>✧</span>
-                    <p>Здесь будут жить твои истории. Каждая сцена начинается с первого действия.</p>
+                    <p>Ролите свободно. Пишите действия, речь и мысли своего персонажа.</p>
                 </div>
             </aside>
 
@@ -1856,25 +1866,66 @@ function renderLocationChats(locationName, regionName) {
                         <span class="lorgus-rp-overline">RP · ${region}</span>
                         <h2>${location}</h2>
                     </div>
-                    <div class="lorgus-rp-status"><i></i> СЦЕНЫ ОТСУТСТВУЮТ</div>
+                    <div class="lorgus-rp-status"><i></i> ЖИВАЯ СЦЕНА</div>
                 </header>
 
-                <section class="lorgus-rp-stage">
-                    <div class="lorgus-rp-stage-glow"></div>
-                    <div class="lorgus-rp-symbol">✦</div>
-                    <span class="lorgus-rp-stage-kicker">НАЧАЛО ИСТОРИИ</span>
-                    <h3>Здесь пока тихо.</h3>
-                    <p>В этой локации ещё нет созданных RP-сцен. Когда сцена появится, здесь будет происходить повествование, диалоги персонажей и действия игрока.</p>
-                    <button class="gold-button lorgus-rp-create-button" type="button" disabled>СОЗДАТЬ СЦЕНУ · СКОРО</button>
+                <section class="lorgus-rp-feed" id="lorgus-rp-feed">
+                    <div class="lorgus-rp-empty">
+                        <div class="lorgus-rp-symbol">✦</div>
+                        <span class="lorgus-rp-stage-kicker">НАЧАЛО ИСТОРИИ</span>
+                        <h3>Сцена ещё не началась.</h3>
+                        <p>Первое сообщение создаст начало истории. Здесь игроки будут отвечать друг другу, отмечать участников и продолжать общий сюжет.</p>
+                    </div>
+                </section>
+
+                <section class="lorgus-rp-composer">
+                    <div class="lorgus-rp-composer-top">
+                        <span>РОЛЬ: <strong>${name}</strong></span>
+                        <span>Можно отметить: <b>@персонаж</b></span>
+                    </div>
+                    <textarea id="lorgus-rp-input" placeholder="Опиши действие, реплику или мысль персонажа..." rows="4"></textarea>
+                    <div class="lorgus-rp-composer-bottom">
+                        <button class="lorgus-rp-mention" type="button" disabled>@ Отметить участника</button>
+                        <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalRpMessage()">Отправить</button>
+                    </div>
                 </section>
 
                 <footer class="lorgus-rp-footer">
                     <span>ЛОРГУС</span>
-                    <span>Мир продолжает жить за пределами этой сцены.</span>
+                    <span>История создаётся действиями игроков.</span>
                 </footer>
             </main>
         </div>
     `;
+}
+
+function sendLocalRpMessage() {
+    const input = document.getElementById("lorgus-rp-input");
+    const feed = document.getElementById("lorgus-rp-feed");
+    const character = window.activeCharacter;
+    if (!input || !feed || !character) return;
+
+    const text = input.value.trim();
+    if (!text) return;
+
+    const empty = feed.querySelector(".lorgus-rp-empty");
+    if (empty) empty.remove();
+
+    const message = document.createElement("article");
+    message.className = "lorgus-rp-message";
+    message.innerHTML = `
+        <div class="lorgus-rp-message-avatar">✦</div>
+        <div class="lorgus-rp-message-body">
+            <div class="lorgus-rp-message-meta">
+                <strong>${escapeHtml(character.name || "Без имени")}</strong>
+                <span>сейчас</span>
+            </div>
+            <p>${escapeHtml(text)}</p>
+        </div>
+    `;
+    feed.appendChild(message);
+    input.value = "";
+    feed.scrollTop = feed.scrollHeight;
 }
 
 
