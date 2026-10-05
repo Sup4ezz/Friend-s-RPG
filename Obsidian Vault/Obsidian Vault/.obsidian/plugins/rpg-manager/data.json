@@ -1,0 +1,9 @@
+{
+  "model": "gpt-4.1-nano",
+  "hasLLM": false,
+  "automaticMove": false,
+  "useSceneAnalyser": true,
+  "version": "4.2.1",
+  "customAttributes": [],
+  "forceFullWidth": true
+}

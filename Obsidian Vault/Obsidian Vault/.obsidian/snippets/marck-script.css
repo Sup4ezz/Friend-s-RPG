@@ -1,0 +1,37 @@
+body {
+    --font-text: "Marck Script";
+    --font-interface: "Marck Script";
+    --font-monospace: "Marck Script";
+}
+
+.markdown-preview-view,
+.markdown-source-view,
+.workspace {
+    font-family: "Marck Script";
+}
+
+/* Размер основного текста */
+.markdown-preview-view,
+.markdown-source-view {
+    font-size: 21px;
+    line-height: 1.6;
+}
+
+/* Заголовки */
+.markdown-preview-view h1,
+.markdown-preview-view h2,
+.markdown-preview-view h3,
+.markdown-source-view h1,
+.markdown-source-view h2,
+.markdown-source-view h3 {
+    font-family: "Marck Script";
+    line-height: 1.4;
+}
+
+/* Цитаты */
+.markdown-preview-view blockquote,
+.markdown-source-view blockquote {
+    font-family: "Marck Script";
+    font-size: 23px;
+    line-height: 1.5;
+}

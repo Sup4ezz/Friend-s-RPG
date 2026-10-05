@@ -1,0 +1,89 @@
+{
+  "callouts": {
+    "custom": [
+      "ateron",
+      "kaelor",
+      "liren",
+      "morveyn",
+      "ksandr",
+      "geena",
+      "sword"
+    ],
+    "settings": {
+      "ateron": [
+        {
+          "changes": {
+            "icon": "lucide-scroll"
+          }
+        },
+        {
+          "condition": {
+            "colorScheme": "light"
+          },
+          "changes": {}
+        },
+        {
+          "condition": {
+            "colorScheme": "dark"
+          },
+          "changes": {
+            "color": "126, 200, 227"
+          }
+        }
+      ],
+      "kaelor": [
+        {
+          "changes": {
+            "icon": "lucide-sun-dim",
+            "color": "200, 60, 20"
+          }
+        }
+      ],
+      "liren": [
+        {
+          "changes": {
+            "icon": "lucide-leaf",
+            "color": "63, 163, 77"
+          }
+        }
+      ],
+      "morveyn": [
+        {
+          "changes": {
+            "icon": "lucide-door-closed",
+            "color": "46, 46, 46"
+          }
+        }
+      ],
+      "ksandr": [
+        {
+          "changes": {
+            "icon": "lucide-hand-coins",
+            "color": "255, 214, 0"
+          }
+        }
+      ],
+      "geena": [
+        {
+          "changes": {
+            "icon": "lucide-eye",
+            "color": "230, 57, 70"
+          }
+        }
+      ],
+      "sword": [
+        {
+          "changes": {
+            "icon": "lucide-swords",
+            "color": "0, 238, 255"
+          }
+        }
+      ]
+    }
+  },
+  "calloutDetection": {
+    "obsidian": true,
+    "theme": true,
+    "snippet": true
+  }
+}

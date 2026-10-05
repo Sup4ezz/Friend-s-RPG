@@ -1,0 +1,318 @@
+/* ChartSpark plugin styles */
+
+.chartspark-delete-btn {
+	position: absolute;
+	top: 6px;
+	left: 6px;
+	z-index: 10;
+	width: 22px;
+	height: 22px;
+	padding: 0;
+	font-size: 1em;
+	font-weight: bold;
+	line-height: 1;
+	border-radius: 50%;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+	color: var(--text-muted);
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	overflow: visible;
+	transition: opacity 0.15s, background 0.15s, color 0.15s;
+}
+
+.chartspark-container:hover .chartspark-delete-btn {
+	opacity: 1;
+}
+
+.chartspark-delete-btn:hover {
+	background: var(--background-modifier-error);
+	color: var(--text-error);
+	border-color: var(--background-modifier-error);
+}
+
+.chartspark-container {
+	position: relative;
+	padding: 1rem;
+	border-radius: 8px;
+	background: var(--background-secondary);
+	margin: 0.5rem 0;
+}
+
+.chartspark-sizer {
+	position: relative;
+	height: 350px;
+	width: 100%;
+}
+
+.chartspark-canvas {
+	display: block;
+}
+
+.chartspark-controls {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 0.5rem;
+}
+
+.chartspark-refresh-btn {
+	font-size: 0.8em;
+	padding: 2px 8px;
+	cursor: pointer;
+	background: var(--interactive-normal);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	color: var(--text-muted);
+}
+
+.chartspark-refresh-btn:hover {
+	background: var(--interactive-hover);
+	color: var(--text-normal);
+}
+
+.chartspark-error {
+	padding: 0.75rem 1rem;
+	border-radius: 6px;
+	background: var(--background-modifier-error);
+	color: var(--text-error);
+	font-size: 0.9em;
+}
+
+/* Chart type modal grid */
+.chartspark-chart-type-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 0.75rem;
+	padding: 0.5rem 0;
+	min-width: 280px;
+}
+
+.chartspark-chart-type-btn {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 1.2rem 1rem;
+	min-height: 90px;
+	border-radius: 8px;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+	cursor: pointer;
+	font-size: 0.95em;
+	line-height: 1.2;
+	color: var(--text-normal);
+	overflow: visible;
+	transition: background 0.15s, border-color 0.15s;
+	box-sizing: border-box;
+}
+
+.chartspark-chart-type-btn:hover {
+	background: var(--interactive-hover);
+	border-color: var(--interactive-accent);
+}
+
+.chartspark-chart-icon {
+	font-size: 2em;
+	line-height: 1;
+	display: block;
+}
+
+.chartspark-chart-label {
+	display: block;
+	font-size: 0.9em;
+	font-weight: 500;
+}
+
+/* Column picker */
+.chartspark-column-picker {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	padding: 0.75rem 0;
+	border-bottom: 1px solid var(--background-modifier-border);
+	margin-bottom: 0.75rem;
+}
+
+.chartspark-col-row {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	flex-wrap: wrap;
+}
+
+.chartspark-col-row > label {
+	font-size: 0.85em;
+	font-weight: 600;
+	color: var(--text-muted);
+	min-width: 160px;
+	white-space: nowrap;
+}
+
+.chartspark-col-select {
+	background: var(--background-secondary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	padding: 2px 6px;
+	color: var(--text-normal);
+	font-size: 0.9em;
+	cursor: pointer;
+}
+
+.chartspark-checkbox-group {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.chartspark-checkbox-label {
+	display: flex;
+	align-items: center;
+	gap: 0.3rem;
+	font-size: 0.9em;
+	cursor: pointer;
+	padding: 2px 8px;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+}
+
+.chartspark-checkbox-label:hover {
+	background: var(--interactive-hover);
+}
+
+.chartspark-swap-row {
+	justify-content: flex-end;
+	margin-bottom: 0.25rem;
+}
+
+.chartspark-swap-btn {
+	font-size: 0.82em;
+	padding: 3px 10px;
+	border-radius: 4px;
+	border: 1px solid var(--background-modifier-border);
+	background: var(--background-secondary);
+	color: var(--text-muted);
+	cursor: pointer;
+}
+
+.chartspark-swap-btn.is-active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	border-color: var(--interactive-accent);
+}
+
+.chartspark-col-hint {
+	color: var(--text-muted);
+	font-size: 0.85em;
+	text-align: center;
+	padding: 2rem 0;
+}
+
+/* Preview modal */
+.chartspark-tabs {
+	display: flex;
+	gap: 0.5rem;
+	margin-bottom: 1rem;
+	border-bottom: 1px solid var(--background-modifier-border);
+	padding-bottom: 0.5rem;
+}
+
+.chartspark-tab {
+	padding: 4px 12px;
+	border-radius: 4px 4px 0 0;
+	border: none;
+	background: transparent;
+	cursor: pointer;
+	color: var(--text-muted);
+}
+
+.chartspark-tab.is-active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+}
+
+.chartspark-axis-toggle {
+	margin-left: auto;
+	font-size: 0.8em;
+	opacity: 0.75;
+}
+
+.chartspark-axis-toggle.is-active {
+	background: var(--interactive-accent);
+	color: var(--text-on-accent);
+	opacity: 1;
+}
+
+.chartspark-preview {
+	min-height: 200px;
+}
+
+.chartspark-modal-footer {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 1rem;
+}
+
+/* Data block picker modal */
+.chartspark-block-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.6rem;
+	padding: 0.25rem 0;
+	min-width: 340px;
+}
+
+.chartspark-block-card {
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	padding: 0.75rem 1rem;
+	cursor: pointer;
+	background: var(--background-secondary);
+	transition: background 0.12s, border-color 0.12s;
+}
+
+.chartspark-block-card:hover {
+	background: var(--interactive-hover);
+	border-color: var(--interactive-accent);
+}
+
+.chartspark-block-card-header {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	margin-bottom: 0.4rem;
+}
+
+.chartspark-block-type-icon {
+	font-size: 1.1em;
+}
+
+.chartspark-block-type-label {
+	font-weight: 600;
+	font-size: 0.9em;
+	color: var(--text-normal);
+}
+
+.chartspark-block-lines {
+	margin-left: auto;
+	font-size: 0.75em;
+	color: var(--text-faint);
+}
+
+.chartspark-block-preview {
+	font-size: 0.78em;
+	color: var(--text-muted);
+	background: transparent;
+	border: none;
+	margin: 0;
+	padding: 0;
+	white-space: pre;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-height: 4.5em;
+	font-family: var(--font-monospace);
+}

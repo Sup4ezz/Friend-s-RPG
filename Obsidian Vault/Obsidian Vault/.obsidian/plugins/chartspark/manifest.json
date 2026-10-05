@@ -1,0 +1,10 @@
+{
+	"id": "chartspark",
+	"name": "ChartSpark",
+	"version": "0.1.0",
+	"minAppVersion": "1.0.0",
+	"description": "Instantly turn tables, checkboxes, and key:value data into interactive charts.",
+	"author": "Pouya Esfahani",
+	"authorUrl": "https://github.com/Pooyash1998",
+	"isDesktopOnly": false
+}
