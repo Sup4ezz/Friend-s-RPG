@@ -1706,7 +1706,7 @@ function renderCharacter(
     container.innerHTML = `
         <div class="lorgus-world-shell">
             <aside class="lorgus-world-sidebar">
-                <div class="lorgus-world-sidebar-symbol">✦</div>
+                <div class="lorgus-world-sidebar-symbol lorgus-world-symbol lorgus-world-symbol-character" aria-hidden="true"></div>
                 <div class="lorgus-world-sidebar-label">ПЕРСОНАЖ</div>
                 <div class="lorgus-world-sidebar-name">${name}</div>
                 <div class="lorgus-world-sidebar-meta">${race}</div>
@@ -1737,35 +1737,35 @@ function renderCharacter(
                     <div class="lorgus-world-section-title">КОРОЛЕВСТВА</div>
                     <div class="lorgus-region-grid">
                         <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Атэрон')">
-                            <span class="lorgus-region-card-symbol">✦</span>
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-aetheron" aria-hidden="true"></span>
                             <strong>Атэрон</strong>
                             <small>Королевство Нечто</small>
                             <p>Знания, древности, исследования и руины.</p>
                         </button>
 
                         <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Каэлор')">
-                            <span class="lorgus-region-card-symbol">◆</span>
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-kaelor" aria-hidden="true"></span>
                             <strong>Каэлор</strong>
                             <small>Королевство Вечного Пламени</small>
                             <p>Горы, кузницы, шахты и древнее мастерство.</p>
                         </button>
 
                         <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Ксандр')">
-                            <span class="lorgus-region-card-symbol">◇</span>
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-xandr" aria-hidden="true"></span>
                             <strong>Ксандр</strong>
                             <small>Королевство Воздаяния</small>
                             <p>Торговля, банки, дороги и большие рынки.</p>
                         </button>
 
                         <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Лирэн')">
-                            <span class="lorgus-region-card-symbol">❖</span>
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-lyren" aria-hidden="true"></span>
                             <strong>Лирэн</strong>
                             <small>Королевство Плодородия</small>
                             <p>Леса, плодородные земли и древняя природа.</p>
                         </button>
 
                         <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Морвейн')">
-                            <span class="lorgus-region-card-symbol">†</span>
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-morvein" aria-hidden="true"></span>
                             <strong>Морвейн</strong>
                             <small>Королевство Последнего Пути</small>
                             <p>Паломничество, память, туманные долины и Фин.</p>
@@ -1777,7 +1777,7 @@ function renderCharacter(
                     <div class="lorgus-world-section-title">НЕЗАВИСИМЫЕ ЗЕМЛИ</div>
                     <div class="lorgus-region-grid lorgus-region-grid-small">
                         <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Святые Земли')">
-                            <span class="lorgus-region-card-symbol">✧</span>
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-holy" aria-hidden="true"></span>
                             <strong>Святые Земли</strong>
                             <small>Нейтральная территория</small>
                             <p>Место переговоров монархов и глав церквей.</p>
@@ -1791,7 +1791,7 @@ function renderCharacter(
                         </button>
 
                         <div class="lorgus-region-card lorgus-region-card-closed">
-                            <span class="lorgus-region-card-symbol">✕</span>
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-disputed" aria-hidden="true"></span>
                             <strong>Геена</strong>
                             <small>Континент закрыт для игроков</small>
                             <p>Эта территория пока недоступна для посещения и происхождения персонажей.</p>
