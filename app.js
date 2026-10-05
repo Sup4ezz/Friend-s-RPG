@@ -2157,6 +2157,7 @@ window.returnToGame = returnToGame;
 window.renderCharacter = renderCharacter;
 window.renderKingdomLocations = renderKingdomLocations;
 window.renderLocationChats = renderLocationChats;
+window.sendLocalRpMessage = sendLocalRpMessage;
 
 
 /* =========================================================
