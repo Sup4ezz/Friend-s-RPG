@@ -722,8 +722,95 @@ function renderCharacterApplicationForm(container) {
         <div class="character-header">
             <div class="welcome-symbol">✦</div>
             <h1>Создание персонажа</h1>
-            <p>Заполни анкету персонажа.</p>
+            <p>Перед анкетой ознакомься с расами и местами мира Лоргуса.</p>
         </div>
+
+        <section class="character-lore-guide">
+            <div class="character-lore-guide-intro">
+                <h2>Сначала — выбери, кем и откуда будет твой персонаж</h2>
+                <p>
+                    Лоргус — мир для свободного RP. Здесь нет классов и уровней.
+                    В анкете важно понимать происхождение персонажа, его культуру,
+                    окружение и место, откуда он пришёл.
+                </p>
+            </div>
+
+            <div class="character-lore-section">
+                <h3>Расы</h3>
+                <div class="character-lore-cards">
+                    <article class="character-lore-card">
+                        <h4>Люди</h4>
+                        <p>
+                            Наиболее распространены в Ксандре и Морвейне.
+                            Люди также живут в других королевствах и могут
+                            свободно встречаться по всему Лоргусу.
+                        </p>
+                    </article>
+                    <article class="character-lore-card">
+                        <h4>Эльфы</h4>
+                        <p>
+                            Особенно распространены в Атэроне и Лирэне.
+                            Лесные эльфы Лирэна связаны с древними лесами,
+                            природой и магией.
+                        </p>
+                    </article>
+                    <article class="character-lore-card">
+                        <h4>Дварфы</h4>
+                        <p>
+                            Основной народ Каэлора — дварфы, известные
+                            кузнечным ремеслом, шахтами и мастерством.
+                            Другие народы также могут жить в Каэлоре.
+                        </p>
+                    </article>
+                    <article class="character-lore-card">
+                        <h4>Другие народы</h4>
+                        <p>
+                            В Спорных Землях и особенно в Геене встречаются
+                            различные народы и существа. Такие персонажи
+                            требуют соответствующего происхождения и обоснования
+                            в анкете.
+                        </p>
+                    </article>
+                </div>
+            </div>
+
+            <div class="character-lore-section">
+                <h3>Основные места</h3>
+                <div class="character-lore-location-list">
+                    <button type="button" class="character-lore-location" data-location="Примум">
+                        <strong>Примум</strong><span>Атэрон · столица · знания и древности</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Хелион">
+                        <strong>Хелион</strong><span>Каэлор · столица · кузницы и торговля металлом</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Древнее Пламя">
+                        <strong>Древнее Пламя</strong><span>Каэлор · священное место Вечного Пламени</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Арджент">
+                        <strong>Арджент</strong><span>Ксандр · столица · торговля и финансы</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Аврора">
+                        <strong>Аврора</strong><span>Лирэн · столица · лесные эльфы и плодородие</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Фин">
+                        <strong>Фин</strong><span>Морвейн · столица · память, паломничество и Последний Путь</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Святые Земли">
+                        <strong>Святые Земли</strong><span>нейтральная территория · дипломатия пяти королевств</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Спорные Земли">
+                        <strong>Спорные Земли</strong><span>вне власти пяти королевств · независимые поселения</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Геена">
+                        <strong>Геена</strong><span>отдельный континент · неизвестные народы и раздробленная власть</span>
+                    </button>
+                </div>
+                <p class="character-lore-note">
+                    Локация — это не «класс» персонажа. Она помогает понять,
+                    где он вырос, какую культуру знает и почему оказался в мире RP.
+                </p>
+            </div>
+        </section>
 
         <form
             id="character-application-form"
@@ -732,14 +819,8 @@ function renderCharacterApplicationForm(container) {
             <div class="character-grid">
 
                 <div class="character-field">
-                    <label for="character-name">
-                        Имя персонажа
-                    </label>
-                    <input
-                        id="character-name"
-                        type="text"
-                        required
-                    >
+                    <label for="character-name">Имя персонажа</label>
+                    <input id="character-name" type="text" required>
                 </div>
 
                 <div class="character-field">
@@ -747,19 +828,21 @@ function renderCharacterApplicationForm(container) {
                     <input
                         id="character-race"
                         type="text"
+                        list="character-races"
+                        placeholder="Например: человек, эльф, дварф"
                         required
                     >
+                    <datalist id="character-races">
+                        <option value="Человек"></option>
+                        <option value="Эльф"></option>
+                        <option value="Лесной эльф"></option>
+                        <option value="Дварф"></option>
+                    </datalist>
                 </div>
 
                 <div class="character-field">
                     <label for="character-age">Возраст</label>
-                    <input
-                        id="character-age"
-                        type="number"
-                        min="1"
-                        max="1000"
-                        required
-                    >
+                    <input id="character-age" type="number" min="1" max="1000" required>
                 </div>
 
                 <div class="character-field">
@@ -767,96 +850,76 @@ function renderCharacterApplicationForm(container) {
                     <input
                         id="character-homeland"
                         type="text"
+                        list="character-homelands"
+                        placeholder="Выбери место из списка или укажи другое"
                         required
                     >
+                    <datalist id="character-homelands">
+                        <option value="Примум"></option>
+                        <option value="Хелион"></option>
+                        <option value="Арджент"></option>
+                        <option value="Аврора"></option>
+                        <option value="Фин"></option>
+                        <option value="Святые Земли"></option>
+                        <option value="Спорные Земли"></option>
+                        <option value="Геена"></option>
+                    </datalist>
                 </div>
 
                 <div class="character-field full">
-                    <label for="character-personality">
-                        Характер
-                    </label>
-                    <textarea
-                        id="character-personality"
-                        required
-                    ></textarea>
+                    <label for="character-personality">Характер</label>
+                    <textarea id="character-personality" required></textarea>
                 </div>
 
                 <div class="character-field full">
-                    <label for="character-backstory">
-                        Предыстория
-                    </label>
-                    <textarea
-                        id="character-backstory"
-                        required
-                    ></textarea>
+                    <label for="character-backstory">Предыстория</label>
+                    <textarea id="character-backstory" required></textarea>
                 </div>
 
                 <div class="character-field full">
-                    <label for="character-skills">
-                        Особые навыки
-                    </label>
-                    <textarea
-                        id="character-skills"
-                        required
-                    ></textarea>
+                    <label for="character-skills">Особые навыки</label>
+                    <textarea id="character-skills" required></textarea>
                 </div>
 
                 <div class="character-field">
-                    <label for="character-weapon">
-                        Предпочитаемое оружие
-                    </label>
-                    <input
-                        id="character-weapon"
-                        type="text"
-                    >
-                    <div class="character-hint">
-                        Поле необязательное.
-                    </div>
+                    <label for="character-weapon">Предпочитаемое оружие</label>
+                    <input id="character-weapon" type="text">
+                    <div class="character-hint">Поле необязательное.</div>
                 </div>
 
                 <div class="character-field">
-                    <label for="character-occupation">
-                        Род занятий
-                    </label>
-                    <input
-                        id="character-occupation"
-                        type="text"
-                        required
-                    >
+                    <label for="character-occupation">Род занятий</label>
+                    <input id="character-occupation" type="text" required>
                 </div>
 
                 <div class="character-field full">
-                    <label for="character-photo">
-                        Изображение персонажа
-                    </label>
-                    <input
-                        id="character-photo"
-                        type="file"
-                        accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
-                    >
-                    <div class="character-hint">
-                        JPG, PNG или WEBP. Максимальный размер — 5 МБ.
-                    </div>
+                    <label for="character-photo">Изображение персонажа</label>
+                    <input id="character-photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                    <div class="character-hint">JPG, PNG или WEBP. Максимальный размер — 5 МБ.</div>
                 </div>
-
             </div>
 
-            <div
-                id="character-message"
-                class="character-message"
-            ></div>
+            <div id="character-message" class="character-message"></div>
 
-            <button
-                type="submit"
-                class="gold-button character-submit"
-            >
+            <button type="submit" class="gold-button character-submit">
                 Отправить заявку
             </button>
         </form>
     `;
+
+    container.querySelectorAll(".character-lore-location").forEach(button => {
+        button.addEventListener("click", () => {
+            const homeland = container.querySelector("#character-homeland");
+            if (!homeland) return;
+            homeland.value = button.dataset.location || "";
+            homeland.focus();
+            homeland.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+    });
 }
 
 /* =========================================================
+   ОТПРАВКА ЗАЯВКИ/* =========================================================
    ОТПРАВКА ЗАЯВКИ
    ========================================================= */
 
