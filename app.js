@@ -2103,6 +2103,9 @@ window.updateCharacterApplication =
 window.openActiveCharacterProfile = openActiveCharacterProfile;
 window.switchCharacter = switchCharacter;
 window.returnToGame = returnToGame;
+window.renderCharacter = renderCharacter;
+window.renderKingdomLocations = renderKingdomLocations;
+window.renderLocationChats = renderLocationChats;
 
 
 /* =========================================================
