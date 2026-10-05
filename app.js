@@ -1824,42 +1824,105 @@ function renderKingdomLocations(regionName) {
     `;
 }
 
-function getPresenceKey(characterId = window.activeCharacterId) {
-    return characterId ? `lorgus_presence_${characterId}` : null;
-}
+async function getRpPresence() {
+    const characterId = window.activeCharacterId;
+    if (!characterId || !supabase) return null;
 
-function getRpPresence() {
-    const key = getPresenceKey();
-    if (!key) return null;
-    try {
-        const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : null;
-    } catch (error) {
-        console.error("Не удалось прочитать присутствие персонажа:", error);
+    const { data, error } = await supabase
+        .from("rp_presence")
+        .select("*")
+        .eq("character_id", characterId)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Не удалось получить RP-присутствие:", error);
         return null;
     }
-}
 
-function saveRpPresence(presence) {
-    const key = getPresenceKey();
-    if (!key) return;
-    localStorage.setItem(key, JSON.stringify(presence));
+    const presence = data ? mapServerPresence(data) : null;
     window.activeRpPresence = presence;
+    return presence;
 }
 
-function initializeRpPresence(character) {
+function mapServerPresence(row) {
+    if (!row) return null;
+
+    if (row.presence_type === "road") {
+        return {
+            type: "road",
+            fromLocation: row.from_location,
+            fromRegion: row.from_region,
+            toLocation: row.to_location,
+            toRegion: row.to_region,
+            startedAt: row.started_at,
+            visibility: row.visibility
+        };
+    }
+
+    return {
+        type: "location",
+        location: row.location,
+        region: row.region,
+        enteredAt: row.entered_at,
+        visibility: row.visibility
+    };
+}
+
+async function saveRpPresence(presence) {
+    if (!window.activeCharacterId || !supabase) return null;
+
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData?.user;
+    if (!user) return null;
+
+    const payload = {
+        character_id: window.activeCharacterId,
+        player_id: user.id,
+        presence_type: presence.type,
+        region: presence.type === "location" ? presence.region : null,
+        location: presence.type === "location" ? presence.location : null,
+        from_region: presence.type === "road" ? presence.fromRegion : null,
+        from_location: presence.type === "road" ? presence.fromLocation : null,
+        to_region: presence.type === "road" ? presence.toRegion : null,
+        to_location: presence.type === "road" ? presence.toLocation : null,
+        visibility: presence.visibility || "public"
+    };
+
+    const { data, error } = await supabase
+        .from("rp_presence")
+        .upsert(payload, { onConflict: "character_id" })
+        .select("*")
+        .single();
+
+    if (error) {
+        console.error("Не удалось сохранить RP-присутствие:", error);
+        throw error;
+    }
+
+    const mapped = mapServerPresence(data);
+    window.activeRpPresence = mapped;
+    return mapped;
+}
+
+async function initializeRpPresence(character) {
     if (!character?.id) return;
-    window.activeRpPresence = getRpPresence();
+    window.activeCharacterId = character.id;
+    await getRpPresence();
 }
 
-function clearRpPresence() {
-    const key = getPresenceKey();
-    if (!key) return;
-    localStorage.removeItem(key);
+async function clearRpPresence() {
+    if (!window.activeCharacterId || !supabase) return;
+
+    const { error } = await supabase
+        .from("rp_presence")
+        .delete()
+        .eq("character_id", window.activeCharacterId);
+
+    if (error) console.error("Не удалось очистить RP-присутствие:", error);
     window.activeRpPresence = null;
 }
 
-function getAvailableTravelDestinations(regionName, locationName) {
+async function getAvailableTravelDestinations(regionName, locationName) {
     const destinations = [];
     for (const [region, data] of Object.entries(LORGUS_LOCATIONS)) {
         for (const [location] of data.locations || []) {
@@ -1870,8 +1933,8 @@ function getAvailableTravelDestinations(regionName, locationName) {
     return destinations;
 }
 
-function enterLocationRp(locationName, regionName) {
-    const presence = getRpPresence();
+async function enterLocationRp(locationName, regionName) {
+    const presence = await getRpPresence();
 
     if (presence?.type === "road") {
         renderRoadChat(presence);
@@ -1890,18 +1953,19 @@ function enterLocationRp(locationName, regionName) {
         return;
     }
 
-    saveRpPresence({
+    const saved = await saveRpPresence({
         type: "location",
         location: locationName,
         region: regionName,
-        enteredAt: new Date().toISOString()
+        enteredAt: new Date().toISOString(),
+        visibility: "public"
     });
 
-    renderLocationChats(locationName, regionName, true);
+    if (saved) renderLocationChats(locationName, regionName, true);
 }
 
-function startTravel(fromLocation, fromRegion, toLocation, toRegion) {
-    const presence = getRpPresence();
+async function startTravel(fromLocation, fromRegion, toLocation, toRegion) {
+    const presence = await getRpPresence();
 
     if (presence?.type === "road") {
         renderRoadChat(presence);
@@ -1914,31 +1978,38 @@ function startTravel(fromLocation, fromRegion, toLocation, toRegion) {
         return;
     }
 
-    const road = {
+    const road = await saveRpPresence({
         type: "road",
         fromLocation,
         fromRegion,
         toLocation,
         toRegion,
-        startedAt: new Date().toISOString()
-    };
+        startedAt: new Date().toISOString(),
+        visibility: "public"
+    });
 
-    saveRpPresence(road);
-    renderRoadChat(road);
+    if (road) renderRoadChat(road);
 }
 
-function arriveAtDestination() {
-    const presence = getRpPresence();
+async function arriveAtDestination() {
+    const presence = await getRpPresence();
     if (!presence || presence.type !== "road") return;
 
-    saveRpPresence({
+    const destination = await saveRpPresence({
         type: "location",
         location: presence.toLocation,
         region: presence.toRegion,
-        enteredAt: new Date().toISOString()
+        enteredAt: new Date().toISOString(),
+        visibility: presence.visibility || "public"
     });
 
-    renderLocationChats(presence.toLocation, presence.toRegion, true);
+    if (destination) {
+        renderLocationChats(
+            destination.location,
+            destination.region,
+            true
+        );
+    }
 }
 
 function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
@@ -2118,6 +2189,46 @@ function renderFloodChat() {
     `;
 }
 
+async function renderLocationParticipants(locationName, regionName) {
+    const box = document.querySelector(".lorgus-rp-participants");
+    if (!box) return;
+
+    const { data, error } = await supabase
+        .from("rp_presence")
+        .select("character_id, presence_type, location, region, from_location, from_region, to_location, to_region, visibility, characters(name, race)")
+        .eq("visibility", "public");
+
+    if (error) {
+        console.error("Не удалось загрузить участников:", error);
+        return;
+    }
+
+    const participants = (data || []).filter(row =>
+        row.presence_type === "location" &&
+        row.region === regionName &&
+        row.location === locationName
+    );
+
+    if (!participants.length) {
+        box.innerHTML = '<div class="lorgus-rp-participant-empty">Здесь пока никого нет</div>';
+        return;
+    }
+
+    box.innerHTML = participants.map(row => {
+        const character = row.characters || {};
+        const isCurrent = row.character_id === window.activeCharacterId;
+        return `
+            <div class="lorgus-rp-participant ${isCurrent ? "active" : ""}">
+                <span class="lorgus-rp-avatar">✦</span>
+                <div>
+                    <strong>${escapeHtml(character.name || "Без имени")}</strong>
+                    <small>${isCurrent ? "Вы" : escapeHtml(character.race || "Персонаж")}</small>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
 function sendLocalFloodMessage() {
     const input = document.getElementById("lorgus-flood-input");
     const feed = document.getElementById("lorgus-flood-feed");
@@ -2153,11 +2264,11 @@ function sendLocalFloodMessage() {
     feed.scrollTop = feed.scrollHeight;
 }
 
-function renderLocationChats(locationName, regionName, alreadyPresent = false) {
+async function renderLocationChats(locationName, regionName, alreadyPresent = false) {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
-    const presence = getRpPresence();
+    const presence = await getRpPresence();
 
     if (!alreadyPresent) {
         if (presence?.type === "road") {
@@ -2172,14 +2283,17 @@ function renderLocationChats(locationName, regionName, alreadyPresent = false) {
         }
 
         if (!presence) {
-            saveRpPresence({
+            await saveRpPresence({
                 type: "location",
                 location: locationName,
                 region: regionName,
-                enteredAt: new Date().toISOString()
+                enteredAt: new Date().toISOString(),
+                visibility: "public"
             });
         }
     }
+
+    await renderLocationParticipants(locationName, regionName);
 
     const character = window.activeCharacter;
     const name = escapeHtml(character?.name || "Без имени");
