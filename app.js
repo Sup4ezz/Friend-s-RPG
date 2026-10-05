@@ -542,16 +542,20 @@ async function loadPlayerState(session) {
             application.character_id
     );
 
-    if (approvedApplications.length > 0) {
-        await renderCharacterSelection(container, approvedApplications);
-        return;
-    }
-
     const pendingApplication =
         applications.find(
             application =>
                 application.status === "pending"
         );
+
+    if (approvedApplications.length > 0) {
+        await renderCharacterSelection(
+            container,
+            approvedApplications,
+            pendingApplication
+        );
+        return;
+    }
 
     if (pendingApplication) {
         renderPendingApplication(
@@ -568,7 +572,7 @@ async function loadPlayerState(session) {
    ВЫБОР ПЕРСОНАЖА
    ========================================================= */
 
-async function renderCharacterSelection(container, applications) {
+async function renderCharacterSelection(container, applications, pendingApplication = null) {
     container.className = "character-selection";
     container.innerHTML = "";
 
@@ -628,7 +632,33 @@ async function renderCharacterSelection(container, applications) {
         grid.appendChild(card);
     }
 
-    if (applications.length < 3) {
+    if (pendingApplication) {
+        const reviewPanel = document.createElement("div");
+        reviewPanel.className = "character-review-pending-panel";
+        reviewPanel.innerHTML = `
+            <h2>Есть заявка на проверке</h2>
+            <p>У тебя есть ещё одна анкета, ожидающая решения администрации.</p>
+            ${pendingApplication.review_notes ? `
+                <div class="character-review-notes">
+                    <h3>Правки от администрации</h3>
+                    <p>${escapeHtml(pendingApplication.review_notes)}</p>
+                </div>
+            ` : ""}
+        `;
+
+        const reviewButton = document.createElement("button");
+        reviewButton.className = "gold-button";
+        reviewButton.textContent = pendingApplication.review_notes
+            ? "Исправить анкету"
+            : "Открыть заявку";
+        reviewButton.addEventListener("click", () => {
+            renderPendingApplication(container, pendingApplication);
+        });
+        reviewPanel.appendChild(reviewButton);
+        container.appendChild(reviewPanel);
+    }
+
+    if (applications.length + (pendingApplication ? 1 : 0) < 3) {
         const createButton = document.createElement("button");
         createButton.className = "gold-button character-create-button";
         createButton.textContent = "Создать нового персонажа";
