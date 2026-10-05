@@ -2804,18 +2804,17 @@ async function loadMailRecipients() {
     const { data, error } = await supabase
         .from("characters")
         .select("id, name, race, status")
+        .eq("status", "ACTIVE")
         .neq("id", window.activeCharacterId)
         .order("name", { ascending: true });
 
     if (error) {
         console.error("Не удалось загрузить адресатов:", error);
-        select.innerHTML = '<option value="">Не удалось загрузить персонажей</option>';
+        select.innerHTML = `<option value="">Не удалось загрузить персонажей: ${escapeHtml(error.message)}</option>`;
         return;
     }
 
-    const active = (data || []).filter(character =>
-        String(character.status || "ACTIVE").toUpperCase() === "ACTIVE"
-    );
+    const active = data || [];
 
     if (!active.length) {
         select.innerHTML = '<option value="">Нет доступных адресатов</option>';
