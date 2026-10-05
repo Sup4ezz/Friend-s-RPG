@@ -1955,7 +1955,9 @@ function renderKingdomLocations(regionName) {
             return `
                 <button class="lorgus-location-card ${isCurrent ? "current" : "locked"}" type="button"
                     onclick="enterLocationRp('${escapeHtml(title)}', '${escapeHtml(regionName)}')">
-                    <span class="lorgus-location-card-mark">${isCurrent ? "✦" : "🔒"}</span>
+                    <span class="lorgus-location-card-mark" aria-hidden="true">
+                        <span class="lorgus-location-card-glyph ${isCurrent ? "is-current" : "is-closed"}"></span>
+                    </span>
                     <strong>${escapeHtml(title)}</strong>
                     <small>${escapeHtml(subtitle)}</small>
                     <p>${escapeHtml(description)}</p>
