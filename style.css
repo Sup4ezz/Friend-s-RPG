@@ -1949,3 +1949,118 @@ img {
 .character-card-disabled-label { margin-top:20px; padding:11px; border:1px solid var(--border-soft); color:var(--text-muted); text-align:center; font-size:12px; }
 @media (max-width:900px) { .character-selection { width:calc(100% - 32px); padding:34px 28px; } .character-selection-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
 @media (max-width:600px) { .character-selection { width:calc(100% - 24px); padding:30px 18px; } .character-selection-grid { grid-template-columns:1fr; } }
+
+/* =========================================================
+   CHARACTER GAME CONTROLS
+   ========================================================= */
+
+.character-game-actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.character-secondary-button {
+    padding: 11px 19px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: rgba(20, 17, 12, .75);
+    color: var(--text-soft);
+    font-family: var(--title-font);
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    transition: .2s ease;
+}
+
+.character-secondary-button:hover {
+    border-color: var(--border-strong);
+    color: var(--gold-light);
+    transform: translateY(-1px);
+}
+
+.character-profile-page {
+    position: relative;
+    width: min(900px, 100%);
+    margin: 0 auto;
+    padding: 42px;
+    background: linear-gradient(145deg, rgba(34,30,23,.98), rgba(13,12,10,.99));
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow), var(--inner-shadow);
+}
+
+.character-profile-header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.character-profile-header h1 {
+    margin: 0 0 8px;
+    color: var(--gold-light);
+    font-family: var(--title-font);
+    font-size: clamp(36px, 7vw, 58px);
+}
+
+.character-profile-header p {
+    margin: 0;
+    color: var(--gold);
+    font-family: var(--title-font);
+    font-size: 20px;
+}
+
+.character-profile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.character-profile-field {
+    padding: 18px;
+    border: 1px solid var(--border-soft);
+    background: rgba(7, 7, 6, .42);
+}
+
+.character-profile-field.full {
+    grid-column: 1 / -1;
+}
+
+.character-profile-field span {
+    display: block;
+    margin-bottom: 7px;
+    color: var(--text-muted);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+}
+
+.character-profile-field strong,
+.character-profile-field p {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.65;
+}
+
+@media (max-width: 650px) {
+    .character-profile-page {
+        padding: 25px 18px;
+    }
+
+    .character-profile-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .character-profile-field.full {
+        grid-column: auto;
+    }
+
+    .character-game-actions {
+        flex-direction: column;
+    }
+
+    .character-game-actions button {
+        width: 100%;
+    }
+}
