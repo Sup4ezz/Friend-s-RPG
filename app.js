@@ -1780,7 +1780,7 @@ function renderKingdomLocations(regionName) {
 
     const locationCards = region.locations.length
         ? region.locations.map(([title, subtitle, description]) => `
-            <button class="lorgus-location-card" type="button" onclick="renderLocationChats('${escapeHtml(title)}', '${escapeHtml(regionName)}')">
+            <button class="lorgus-location-card" type="button" onclick="enterLocationRp('${escapeHtml(title)}', '${escapeHtml(regionName)}')">
                 <span class="lorgus-location-card-mark">✦</span>
                 <strong>${escapeHtml(title)}</strong>
                 <small>${escapeHtml(subtitle)}</small>
@@ -2515,6 +2515,7 @@ window.returnToGame = returnToGame;
 window.renderCharacter = renderCharacter;
 window.renderKingdomLocations = renderKingdomLocations;
 window.renderLocationChats = renderLocationChats;
+window.enterLocationRp = enterLocationRp;
 window.sendLocalRpMessage = sendLocalRpMessage;
 window.renderFloodChat = renderFloodChat;
 window.sendLocalFloodMessage = sendLocalFloodMessage;
