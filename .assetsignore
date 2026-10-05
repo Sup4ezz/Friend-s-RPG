@@ -2,3 +2,7 @@
 .git/**
 .wrangler/
 .wrangler/**
+node_modules/
+.github/
+Obsidian Vault/
+Obsidian Vault.zip
