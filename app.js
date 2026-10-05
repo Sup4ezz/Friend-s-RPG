@@ -2516,7 +2516,7 @@ function sendLocalFloodMessage() {
     feed.scrollTop = feed.scrollHeight;
 }
 
-async async function renderLocationChats(locationName, regionName, alreadyPresent = false) {
+async function renderLocationChats(locationName, regionName, alreadyPresent = false) {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
