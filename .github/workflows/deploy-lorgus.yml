@@ -1,0 +1,39 @@
+name: Deploy LORGUS to Cloudflare Workers
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "Obsidian Vault/**"
+      - "Obsidian Vault.zip"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lorgus-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+
+      - name: Deployment summary
+        run: |
+          echo "LORGUS production deployed from commit ${GITHUB_SHA}"
