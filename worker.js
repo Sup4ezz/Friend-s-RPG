@@ -1,3 +1,4 @@
+// LORGUS deployment marker: 2026-10-05 asset binding fix
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
