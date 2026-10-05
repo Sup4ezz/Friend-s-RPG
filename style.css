@@ -2092,3 +2092,331 @@ img {
     border: 1px solid rgba(201, 164, 92, 0.55);
 }
 
+
+
+/* =========================================================
+   LORGUS — ИГРОВОЙ ЭКРАН
+   ========================================================= */
+
+.lorgus-game-page {
+    width: min(1280px, calc(100% - 40px));
+    margin: 42px auto 70px;
+}
+
+.lorgus-game-layout {
+    display: grid;
+    grid-template-columns: 290px minmax(0, 1fr);
+    gap: 20px;
+}
+
+.lorgus-player-panel,
+.lorgus-world-panel {
+    border: 1px solid var(--border);
+    background: linear-gradient(145deg, rgba(34,30,23,.98), rgba(13,12,10,.99));
+    box-shadow: var(--shadow), var(--inner-shadow);
+}
+
+.lorgus-player-panel {
+    padding: 24px;
+    align-self: start;
+}
+
+.lorgus-player-portrait {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+    border: 1px solid var(--border);
+    background: radial-gradient(circle, rgba(201,164,92,.12), rgba(0,0,0,.35));
+}
+
+.lorgus-player-portrait-placeholder {
+    color: var(--gold);
+    font-size: 54px;
+}
+
+.lorgus-player-name {
+    color: var(--gold-light);
+    font-family: var(--title-font);
+    font-size: 29px;
+    line-height: 1.1;
+}
+
+.lorgus-player-subtitle {
+    margin-top: 5px;
+    color: var(--text-soft);
+    font-size: 14px;
+}
+
+.lorgus-level-row,
+.lorgus-stat {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 22px;
+    color: var(--text-muted);
+    font-size: 12px;
+}
+
+.lorgus-level-row span:last-child,
+.lorgus-stat strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.lorgus-progress {
+    height: 5px;
+    margin-top: 8px;
+    overflow: hidden;
+    background: rgba(255,255,255,.06);
+}
+
+.lorgus-progress span {
+    display: block;
+    height: 100%;
+    background: var(--gold);
+}
+
+.lorgus-progress.health span {
+    background: #8f9f69;
+}
+
+.lorgus-quick-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.lorgus-quick-stats div {
+    padding: 12px;
+    border: 1px solid var(--border-soft);
+    background: rgba(7,7,6,.35);
+}
+
+.lorgus-quick-stats span,
+.lorgus-quick-stats strong {
+    display: block;
+}
+
+.lorgus-quick-stats span {
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.lorgus-quick-stats strong {
+    margin-top: 5px;
+    color: var(--gold-light);
+    font-family: var(--title-font);
+    font-size: 20px;
+}
+
+.lorgus-side-button {
+    width: 100%;
+    margin-top: 12px;
+}
+
+.lorgus-world-panel {
+    min-width: 0;
+    padding: 34px;
+}
+
+.lorgus-location-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid var(--border-soft);
+}
+
+.lorgus-kicker {
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: .16em;
+}
+
+.lorgus-location-header h1 {
+    margin: 7px 0 4px;
+    color: var(--gold-light);
+    font-family: var(--title-font);
+    font-size: clamp(34px, 5vw, 52px);
+}
+
+.lorgus-location-header p {
+    margin: 0;
+    color: var(--text-soft);
+}
+
+.lorgus-location-mark {
+    color: var(--gold);
+    font-size: 48px;
+}
+
+.lorgus-scene {
+    margin-top: 28px;
+    padding: 28px;
+    border: 1px solid var(--border-soft);
+    background: rgba(7,7,6,.38);
+}
+
+.lorgus-scene h2 {
+    margin: 0 0 10px;
+    color: var(--gold);
+    font-family: var(--title-font);
+    font-size: 27px;
+}
+
+.lorgus-scene p {
+    max-width: 780px;
+    margin: 0;
+    color: var(--text);
+    line-height: 1.8;
+}
+
+.lorgus-actions,
+.lorgus-log {
+    margin-top: 30px;
+}
+
+.lorgus-section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: .16em;
+}
+
+.lorgus-section-title i {
+    flex: 1;
+    height: 1px;
+    background: var(--border-soft);
+}
+
+.lorgus-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.lorgus-action-card {
+    min-height: 105px;
+    padding: 18px;
+    border: 1px solid var(--border-soft);
+    background: rgba(20,17,12,.65);
+    text-align: left;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.lorgus-action-card:hover {
+    border-color: var(--border-strong);
+    background: rgba(35,29,19,.82);
+    transform: translateY(-1px);
+}
+
+.lorgus-action-card strong,
+.lorgus-action-card span {
+    display: block;
+}
+
+.lorgus-action-card strong {
+    color: var(--gold-light);
+    font-family: var(--title-font);
+    font-size: 20px;
+}
+
+.lorgus-action-card span {
+    margin-top: 6px;
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.lorgus-log-entry {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 15px 18px;
+    border: 1px solid var(--border-soft);
+    background: rgba(7,7,6,.32);
+}
+
+.lorgus-log-symbol {
+    color: var(--gold);
+}
+
+.lorgus-log-entry p {
+    margin: 0;
+    color: var(--text-soft);
+    line-height: 1.55;
+}
+
+@media (max-width: 850px) {
+    .lorgus-game-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .lorgus-player-panel {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        gap: 0 18px;
+    }
+
+    .lorgus-player-portrait {
+        grid-row: span 5;
+        margin: 0;
+    }
+
+    .lorgus-player-name,
+    .lorgus-player-subtitle {
+        grid-column: 2;
+    }
+
+    .lorgus-level-row,
+    .lorgus-progress,
+    .lorgus-stat,
+    .lorgus-quick-stats,
+    .lorgus-side-button {
+        grid-column: 2;
+    }
+}
+
+@media (max-width: 600px) {
+    .lorgus-game-page {
+        width: calc(100% - 24px);
+        margin-top: 25px;
+    }
+
+    .lorgus-player-panel,
+    .lorgus-world-panel {
+        padding: 20px;
+    }
+
+    .lorgus-player-panel {
+        display: block;
+    }
+
+    .lorgus-player-portrait {
+        width: 150px;
+        margin: 0 auto 18px;
+    }
+
+    .lorgus-action-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lorgus-location-header {
+        align-items: flex-start;
+    }
+
+    .lorgus-location-mark {
+        font-size: 32px;
+    }
+}
