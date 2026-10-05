@@ -2156,7 +2156,12 @@ async function enterLocationRp(locationName, regionName) {
     if (presence?.type === "location" &&
         presence.location === locationName &&
         presence.region === regionName) {
-        renderLocationChats(locationName, regionName, true);
+        await renderLocationChats(locationName, regionName, true);
+        return;
+    }
+
+    if (presence?.type === "road") {
+        await renderRoadChat(presence);
         return;
     }
 
@@ -2165,15 +2170,9 @@ async function enterLocationRp(locationName, regionName) {
         return;
     }
 
-    const saved = await saveRpPresence({
-        type: "location",
-        location: locationName,
-        region: regionName,
-        enteredAt: new Date().toISOString(),
-        visibility: "public"
-    });
-
-    if (saved) renderLocationChats(locationName, regionName, true);
+    // Открытие локации НЕ считается прибытием.
+    // При отсутствии присутствия показываем закрытый RP-чат.
+    renderLocationEntryLock(locationName, regionName);
 }
 
 async function startTravel(fromLocation, fromRegion, toLocation, toRegion) {
