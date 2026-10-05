@@ -556,12 +556,13 @@ async function loadPlayerState(session) {
         относится к одобренной заявке текущего пользователя.
     */
     const savedCharacterId =
-        sessionStorage.getItem("lorgus_active_character_id");
+        sessionStorage.getItem("lorgus_active_character_id") ||
+        localStorage.getItem("lorgus_active_character_id");
 
     if (savedCharacterId) {
         const savedApplication = approvedApplications.find(
             application =>
-                application.character_id === savedCharacterId
+                String(application.character_id) === String(savedCharacterId)
         );
 
         if (savedApplication) {
@@ -571,21 +572,59 @@ async function loadPlayerState(session) {
                 .eq("id", savedCharacterId)
                 .single();
 
+            const savedCharacter = characterResult.data;
+            const savedCharacterStatus =
+                String(savedCharacter?.status || "ACTIVE").toUpperCase();
+
             if (
                 !characterResult.error &&
-                characterResult.data &&
-                String(characterResult.data.status || "ACTIVE").toUpperCase() === "ACTIVE"
+                savedCharacter &&
+                savedCharacterStatus === "ACTIVE"
             ) {
-                window.activeCharacterId = characterResult.data.id;
-                window.activeCharacter = characterResult.data;
+                window.activeCharacterId = savedCharacter.id;
+                window.activeCharacter = savedCharacter;
 
-                await initializeRpPresence(characterResult.data);
-                renderCharacter(container, characterResult.data);
+                sessionStorage.setItem(
+                    "lorgus_active_character_id",
+                    savedCharacter.id
+                );
+                localStorage.setItem(
+                    "lorgus_active_character_id",
+                    savedCharacter.id
+                );
+
+                await initializeRpPresence(savedCharacter);
+
+                /*
+                    Если игрок обновил страницу прямо внутри RP,
+                    восстанавливаем не только персонажа, но и
+                    последнее RP-пространство.
+                */
+                const restoredPresence = window.activeRpPresence;
+
+                if (restoredPresence?.type === "location") {
+                    await renderLocationChats(
+                        restoredPresence.location,
+                        restoredPresence.region,
+                        true
+                    );
+                } else if (restoredPresence?.type === "road") {
+                    renderRoadChat(restoredPresence);
+                } else {
+                    renderCharacter(container, savedCharacter);
+                }
+
                 return;
             }
+
+            console.error(
+                "Не удалось восстановить выбранного персонажа:",
+                characterResult.error || "персонаж недоступен"
+            );
         }
 
         sessionStorage.removeItem("lorgus_active_character_id");
+        localStorage.removeItem("lorgus_active_character_id");
     }
 
     window.activeCharacterId = null;
@@ -761,6 +800,7 @@ async function selectCharacter(container, characterId) {
     window.activeCharacterId = character.id;
     window.activeCharacter = character;
     sessionStorage.setItem("lorgus_active_character_id", character.id);
+    localStorage.setItem("lorgus_active_character_id", character.id);
     await initializeRpPresence(character);
     renderCharacter(container, character);
 }
@@ -2764,6 +2804,7 @@ async function switchCharacter() {
     if (!container) return;
 
     sessionStorage.removeItem("lorgus_active_character_id");
+    localStorage.removeItem("lorgus_active_character_id");
     window.activeCharacterId = null;
     window.activeCharacter = null;
 
