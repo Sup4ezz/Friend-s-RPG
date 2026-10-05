@@ -548,6 +548,49 @@ async function loadPlayerState(session) {
                 application.status === "pending"
         );
 
+    /*
+        Восстанавливаем выбранного персонажа после перезагрузки.
+        sessionStorage хранит только ID, поэтому самого персонажа
+        и его RP-присутствие нужно заново загрузить из Supabase.
+        Одновременно проверяем, что этот персонаж действительно
+        относится к одобренной заявке текущего пользователя.
+    */
+    const savedCharacterId =
+        sessionStorage.getItem("lorgus_active_character_id");
+
+    if (savedCharacterId) {
+        const savedApplication = approvedApplications.find(
+            application =>
+                application.character_id === savedCharacterId
+        );
+
+        if (savedApplication) {
+            const characterResult = await supabase
+                .from("characters")
+                .select("*")
+                .eq("id", savedCharacterId)
+                .single();
+
+            if (
+                !characterResult.error &&
+                characterResult.data &&
+                String(characterResult.data.status || "ACTIVE").toUpperCase() === "ACTIVE"
+            ) {
+                window.activeCharacterId = characterResult.data.id;
+                window.activeCharacter = characterResult.data;
+
+                await initializeRpPresence(characterResult.data);
+                renderCharacter(container, characterResult.data);
+                return;
+            }
+        }
+
+        sessionStorage.removeItem("lorgus_active_character_id");
+    }
+
+    window.activeCharacterId = null;
+    window.activeCharacter = null;
+
     if (approvedApplications.length > 0) {
         await renderCharacterSelection(
             container,
