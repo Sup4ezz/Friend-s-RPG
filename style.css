@@ -3745,3 +3745,779 @@ body {
         transition: none;
     }
 }
+
+
+/* =========================================================
+   LORGUS UI OVERHAUL — COMPLETE GUI
+   v4 / visual layer
+   ========================================================= */
+
+:root{
+    --ui-bg:#070605;
+    --ui-surface:rgba(20,16,11,.88);
+    --ui-surface-2:rgba(30,24,16,.78);
+    --ui-surface-3:rgba(10,9,7,.92);
+    --ui-gold:#d9b76c;
+    --ui-gold-hi:#f2d99b;
+    --ui-gold-low:#765a2d;
+    --ui-text:#eee4d2;
+    --ui-muted:#958a78;
+    --ui-line:rgba(217,183,108,.18);
+    --ui-line-hi:rgba(217,183,108,.48);
+    --ui-danger:#c48678;
+    --ui-success:#c9b87e;
+}
+
+/* ---- Global atmosphere ---- */
+body{
+    background:
+        radial-gradient(900px 500px at 50% -15%,rgba(217,183,108,.12),transparent 68%),
+        radial-gradient(650px 600px at -10% 70%,rgba(101,72,30,.08),transparent 70%),
+        radial-gradient(650px 600px at 110% 80%,rgba(101,72,30,.07),transparent 70%),
+        #070605;
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:-1;
+    opacity:.12;
+    background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:64px 64px;
+    mask-image:linear-gradient(to bottom,#000,transparent 90%);
+}
+
+/* ---- Buttons, inputs, selects: unified language ---- */
+button{
+    -webkit-tap-highlight-color:transparent;
+}
+
+.gold-button,
+.character-secondary-button,
+.admin-reject-button,
+.logout-button{
+    position:relative;
+    overflow:hidden;
+}
+
+.gold-button::before,
+.character-secondary-button::before,
+.admin-reject-button::before,
+.logout-button::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.08) 48%,transparent 72%);
+    transform:translateX(-120%);
+    transition:transform .5s ease;
+    pointer-events:none;
+}
+
+.gold-button:hover::before,
+.character-secondary-button:hover::before,
+.admin-reject-button:hover::before,
+.logout-button:hover::before{
+    transform:translateX(120%);
+}
+
+input,textarea,select{
+    transition:border-color .2s ease,box-shadow .2s ease,background .2s ease,transform .2s ease!important;
+}
+
+input:hover,textarea:hover,select:hover{
+    border-color:rgba(217,183,108,.30)!important;
+}
+
+/* =========================================================
+   AUTH / LOGIN / REGISTRATION
+   ========================================================= */
+
+.auth-page{
+    position:relative;
+    isolation:isolate;
+    min-height:100vh;
+    padding:48px 20px;
+    background:
+        radial-gradient(700px 500px at 50% 15%,rgba(217,183,108,.14),transparent 68%),
+        linear-gradient(180deg,#0a0806,#050403);
+}
+
+.auth-page::before{
+    content:"✦";
+    position:fixed;
+    left:50%;
+    top:7%;
+    transform:translateX(-50%);
+    color:rgba(242,217,155,.18);
+    font-size:18px;
+    text-shadow:0 0 35px rgba(217,183,108,.3);
+}
+
+.auth-page::after{
+    content:"";
+    position:fixed;
+    width:min(760px,92vw);
+    height:min(760px,92vw);
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    border:1px solid rgba(217,183,108,.055);
+    border-radius:50%;
+    box-shadow:
+        0 0 0 38px rgba(217,183,108,.015),
+        0 0 0 78px rgba(217,183,108,.01);
+    pointer-events:none;
+}
+
+.background-glow{
+    width:820px;
+    height:820px;
+    background:radial-gradient(circle,rgba(217,183,108,.10),transparent 68%);
+}
+
+.auth-container{
+    width:min(520px,100%);
+}
+
+.brand{
+    margin-bottom:28px;
+}
+
+.brand-symbol{
+    font-size:36px;
+    text-shadow:0 0 30px rgba(217,183,108,.3);
+}
+
+.brand h1{
+    font-size:clamp(68px,13vw,94px);
+    letter-spacing:.16em;
+    text-shadow:0 8px 50px rgba(0,0,0,.7),0 0 35px rgba(217,183,108,.10);
+}
+
+.brand-line{
+    max-width:430px;
+    margin:22px auto 0;
+}
+
+.auth-panel{
+    padding:38px;
+    border:1px solid var(--ui-line);
+    border-radius:4px;
+    background:
+        linear-gradient(145deg,rgba(30,24,16,.94),rgba(8,7,5,.97));
+    box-shadow:
+        0 35px 110px rgba(0,0,0,.65),
+        inset 0 1px 0 rgba(255,255,255,.025);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+}
+
+.auth-panel::before,
+.auth-panel::after{
+    width:48px;
+    height:48px;
+    opacity:.7;
+}
+
+.auth-tabs{
+    position:relative;
+    gap:4px;
+    padding:4px;
+    margin-bottom:34px;
+    border:1px solid rgba(217,183,108,.10);
+    background:rgba(0,0,0,.25);
+}
+
+.auth-tab{
+    position:relative;
+    z-index:1;
+    padding:13px 10px;
+    border:0!important;
+    color:#716858;
+    border-radius:2px;
+    transition:.2s ease;
+}
+
+.auth-tab:hover{
+    color:#cdbd9d;
+    background:rgba(217,183,108,.04);
+}
+
+.auth-tab.active{
+    color:var(--ui-gold-hi);
+    background:linear-gradient(135deg,rgba(217,183,108,.13),rgba(217,183,108,.035));
+    box-shadow:inset 0 0 0 1px rgba(217,183,108,.18),0 5px 18px rgba(0,0,0,.18);
+}
+
+.form-heading h2{
+    font-size:34px;
+    letter-spacing:.025em;
+}
+
+.form-heading p{
+    max-width:360px;
+    margin:0 auto;
+    line-height:1.6;
+}
+
+.auth-form-container label{
+    display:block;
+    margin-bottom:8px;
+    color:#c9bda7;
+    letter-spacing:.015em;
+}
+
+.input-wrapper{
+    margin-bottom:19px;
+}
+
+.input-wrapper input,
+.auth-form-container input{
+    min-height:50px;
+}
+
+.input-wrapper input:focus,
+.auth-form-container input:focus{
+    transform:translateY(-1px);
+}
+
+.input-icon{
+    color:var(--ui-gold-low);
+    transition:color .2s ease;
+}
+
+.input-wrapper:focus-within .input-icon{
+    color:var(--ui-gold);
+}
+
+.main-button{
+    min-height:54px;
+    margin-top:10px;
+    font-size:20px;
+    letter-spacing:.10em;
+}
+
+.auth-message{
+    border-radius:2px;
+    background:rgba(0,0,0,.22);
+}
+
+.auth-footer{
+    margin-top:22px;
+    line-height:1.7;
+}
+
+/* =========================================================
+   TOP BAR / MAIN APP
+   ========================================================= */
+
+.game-page{
+    position:relative;
+    isolation:isolate;
+    min-height:100vh;
+    background:transparent;
+}
+
+.game-page .topbar{
+    position:sticky;
+    top:0;
+    z-index:100;
+    min-height:76px;
+    padding:0 34px;
+    border-bottom:1px solid rgba(217,183,108,.15);
+    background:rgba(7,6,5,.76);
+    backdrop-filter:blur(22px) saturate(120%);
+    -webkit-backdrop-filter:blur(22px) saturate(120%);
+    box-shadow:0 16px 50px rgba(0,0,0,.34);
+}
+
+.topbar-brand{
+    font-size:29px;
+}
+
+.topbar-brand .mini-symbol{
+    width:38px;
+    height:38px;
+    border:1px solid rgba(217,183,108,.25);
+    background:rgba(217,183,108,.035);
+    box-shadow:0 0 24px rgba(217,183,108,.06);
+}
+
+.player-area{
+    gap:13px;
+}
+
+.player-email{
+    padding:8px 12px;
+    border-left:1px solid rgba(217,183,108,.12);
+    color:#aa9e8b;
+}
+
+.logout-button{
+    padding:10px 16px;
+    border-radius:2px;
+    border-color:rgba(217,183,108,.24);
+    background:rgba(255,255,255,.025);
+}
+
+/* =========================================================
+   WELCOME / CHARACTER SELECTION
+   ========================================================= */
+
+.welcome-panel{
+    position:relative;
+    width:min(920px,calc(100% - 36px));
+    margin:75px auto;
+    padding:64px 54px;
+    border-radius:5px;
+    border-color:var(--ui-line);
+    background:
+        radial-gradient(450px 220px at 50% 0%,rgba(217,183,108,.08),transparent 70%),
+        linear-gradient(145deg,rgba(29,24,17,.95),rgba(7,6,5,.98));
+    box-shadow:0 35px 110px rgba(0,0,0,.58),inset 0 1px 0 rgba(255,255,255,.025);
+}
+
+.welcome-panel::before,
+.welcome-panel::after{
+    content:"";
+    position:absolute;
+    width:46px;
+    height:46px;
+    pointer-events:none;
+}
+
+.welcome-panel::before{
+    left:15px;
+    top:15px;
+    border-top:1px solid var(--ui-line-hi);
+    border-left:1px solid var(--ui-line-hi);
+}
+
+.welcome-panel::after{
+    right:15px;
+    bottom:15px;
+    border-right:1px solid var(--ui-line-hi);
+    border-bottom:1px solid var(--ui-line-hi);
+}
+
+.welcome-symbol{
+    font-size:38px;
+    text-shadow:0 0 28px rgba(217,183,108,.25);
+}
+
+.welcome-panel h1{
+    margin-top:10px;
+    font-size:clamp(44px,7vw,70px);
+}
+
+.welcome-panel p{
+    max-width:650px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+/* =========================================================
+   CHARACTER CREATION / EDIT FORM
+   ========================================================= */
+
+.character-application{
+    width:min(1180px,calc(100% - 42px));
+    margin:42px auto 70px;
+    padding:56px;
+    border-radius:5px;
+    background:
+        radial-gradient(500px 260px at 50% 0%,rgba(217,183,108,.065),transparent 72%),
+        linear-gradient(145deg,rgba(29,24,17,.96),rgba(7,6,5,.98));
+}
+
+.character-header{
+    margin-bottom:46px;
+}
+
+.character-header h1{
+    font-size:clamp(42px,6vw,66px);
+}
+
+.character-grid{
+    gap:26px 30px;
+}
+
+.character-field{
+    gap:10px;
+}
+
+.character-field label{
+    position:relative;
+    padding-left:13px;
+}
+
+.character-field label::before{
+    content:"";
+    position:absolute;
+    left:0;
+    top:50%;
+    width:3px;
+    height:3px;
+    border-radius:50%;
+    background:var(--ui-gold);
+    box-shadow:0 0 8px rgba(217,183,108,.35);
+}
+
+.character-field input,
+.character-field textarea,
+.character-field select{
+    min-height:52px;
+    border-color:rgba(217,183,108,.16);
+    border-radius:3px;
+    background:
+        linear-gradient(180deg,rgba(5,4,3,.9),rgba(25,20,14,.9));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.015);
+}
+
+.character-field textarea{
+    min-height:180px;
+}
+
+.character-field input:focus,
+.character-field textarea:focus,
+.character-field select:focus{
+    border-color:var(--ui-line-hi);
+    box-shadow:0 0 0 1px rgba(217,183,108,.11),0 10px 30px rgba(0,0,0,.20);
+}
+
+.character-hint{
+    border-left-color:var(--ui-gold);
+    background:rgba(217,183,108,.035);
+    border-top:1px solid rgba(217,183,108,.07);
+    border-bottom:1px solid rgba(217,183,108,.07);
+}
+
+/* =========================================================
+   ADMIN PANEL — COMMAND CENTER
+   ========================================================= */
+
+.admin-panel{
+    width:min(1450px,calc(100% - 42px));
+    margin:36px auto 70px;
+    padding:52px;
+    border-radius:5px;
+    background:
+        radial-gradient(650px 260px at 50% 0%,rgba(217,183,108,.07),transparent 70%),
+        linear-gradient(145deg,rgba(28,23,16,.97),rgba(7,6,5,.99));
+}
+
+.admin-panel .character-header{
+    margin-bottom:34px;
+}
+
+.admin-panel .character-header h1{
+    font-size:clamp(38px,5vw,58px);
+}
+
+.admin-stats{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:14px;
+    margin-bottom:30px;
+}
+
+.admin-stat{
+    position:relative;
+    overflow:hidden;
+    min-height:118px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding:22px;
+    border-radius:3px;
+    border-color:rgba(217,183,108,.14);
+    background:
+        radial-gradient(180px 90px at 50% 0%,rgba(217,183,108,.075),transparent 75%),
+        linear-gradient(145deg,rgba(35,29,20,.9),rgba(9,8,6,.95));
+    transition:transform .2s ease,border-color .2s ease;
+}
+
+.admin-stat:hover{
+    transform:translateY(-2px);
+    border-color:rgba(217,183,108,.30);
+}
+
+.admin-stat-value{
+    font-size:42px;
+    text-shadow:0 0 25px rgba(217,183,108,.12);
+}
+
+.admin-stat-label{
+    letter-spacing:.06em;
+}
+
+.admin-applications{
+    gap:16px;
+}
+
+.admin-application{
+    position:relative;
+    grid-template-columns:minmax(0,1fr) 175px;
+    gap:26px;
+    padding:26px;
+    border-radius:3px;
+    border-color:rgba(217,183,108,.13);
+    background:
+        linear-gradient(145deg,rgba(27,23,17,.95),rgba(9,8,6,.98));
+    box-shadow:0 12px 38px rgba(0,0,0,.22);
+    transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+
+.admin-application:hover{
+    transform:translateY(-2px);
+    border-color:rgba(217,183,108,.27);
+    box-shadow:0 18px 50px rgba(0,0,0,.34);
+}
+
+.admin-application-main h3{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    font-size:30px;
+}
+
+.admin-application-main h3::before{
+    content:"✦";
+    color:var(--ui-gold);
+    font-size:15px;
+}
+
+.admin-application-info{
+    border-top-color:rgba(217,183,108,.12);
+}
+
+.admin-application-info span{
+    padding:11px 12px;
+    border-bottom-color:rgba(217,183,108,.09);
+    color:#c7bcaa;
+}
+
+.admin-application-info span:nth-child(even){
+    background:rgba(255,255,255,.012);
+}
+
+.admin-application-info strong{
+    min-width:150px;
+    display:inline-block;
+    color:#dfcc9d;
+}
+
+.admin-application-photo{
+    width:250px;
+    max-height:360px;
+    border-radius:2px;
+    border-color:rgba(217,183,108,.20);
+    box-shadow:0 15px 40px rgba(0,0,0,.45);
+}
+
+.admin-application-actions{
+    justify-content:flex-start;
+    padding-top:2px;
+}
+
+.admin-application-actions button{
+    min-height:46px;
+    border-radius:2px;
+}
+
+.admin-approve-button{
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+}
+
+.admin-revision-button{
+    background:linear-gradient(135deg,rgba(150,110,40,.22),rgba(65,45,18,.30));
+}
+
+.admin-reject-button{
+    border-color:rgba(145,75,65,.42);
+    background:rgba(110,45,35,.09);
+}
+
+.admin-reject-button:hover{
+    border-color:rgba(190,105,90,.65);
+    background:rgba(110,45,35,.18);
+}
+
+.admin-empty{
+    min-height:300px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    border-radius:3px;
+    background:
+        radial-gradient(circle at center,rgba(217,183,108,.045),transparent 40%),
+        rgba(7,6,5,.55);
+}
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
+
+.character-profile-page{
+    width:min(1180px,calc(100% - 42px));
+    margin:42px auto 70px;
+    padding:56px;
+    border-radius:5px;
+    border-color:var(--ui-line);
+    background:
+        radial-gradient(500px 250px at 50% 0%,rgba(217,183,108,.065),transparent 72%),
+        linear-gradient(145deg,rgba(28,23,16,.96),rgba(7,6,5,.98));
+    box-shadow:0 35px 110px rgba(0,0,0,.55);
+}
+
+.character-profile-header{
+    margin-bottom:34px;
+}
+
+.character-profile-header h1{
+    margin:8px 0 4px;
+    font-size:clamp(48px,7vw,80px);
+}
+
+.character-profile-field{
+    position:relative;
+    border-color:rgba(217,183,108,.13);
+    border-radius:3px;
+    background:rgba(255,255,255,.015);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.018);
+}
+
+.character-profile-field span{
+    color:#9c8e78;
+    letter-spacing:.08em;
+}
+
+.character-profile-field strong{
+    color:#ead59e;
+}
+
+.character-game-actions{
+    gap:12px!important;
+    margin-top:28px!important;
+}
+
+/* =========================================================
+   WORLD / RP — retain previous design, unify surfaces
+   ========================================================= */
+
+.lorgus-world-shell{
+    gap:16px;
+}
+
+.lorgus-world-sidebar{
+    border-radius:4px;
+    border-color:var(--ui-line);
+    box-shadow:0 30px 90px rgba(0,0,0,.45);
+}
+
+.lorgus-world-browser{
+    border-radius:4px;
+    border-color:var(--ui-line);
+}
+
+.lorgus-region-card,
+.lorgus-location-card{
+    border-radius:3px;
+    border-color:rgba(217,183,108,.14);
+}
+
+.lorgus-region-card:hover,
+.lorgus-location-card:hover{
+    border-color:rgba(217,183,108,.45);
+}
+
+/* =========================================================
+   DISABLED / LOADING STATES
+   ========================================================= */
+
+button:disabled{
+    cursor:wait!important;
+    opacity:.55;
+    filter:saturate(.55);
+    transform:none!important;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible{
+    outline:1px solid rgba(242,217,155,.55);
+    outline-offset:3px;
+}
+
+/* =========================================================
+   RESPONSIVE COMPLETE
+   ========================================================= */
+
+@media(max-width:900px){
+    .admin-panel{
+        padding:38px 28px;
+    }
+
+    .admin-application{
+        grid-template-columns:1fr;
+    }
+
+    .admin-application-actions{
+        display:grid;
+        grid-template-columns:repeat(3,1fr);
+    }
+}
+
+@media(max-width:650px){
+    .auth-page{
+        padding:25px 12px;
+    }
+
+    .auth-panel{
+        padding:27px 20px;
+    }
+
+    .brand h1{
+        font-size:65px;
+    }
+
+    .game-page .topbar{
+        padding:0 15px;
+    }
+
+    .player-email{
+        display:none;
+    }
+
+    .character-application,
+    .admin-panel,
+    .character-profile-page{
+        width:calc(100% - 22px);
+        padding:30px 18px;
+        margin-top:25px;
+    }
+
+    .admin-stats{
+        grid-template-columns:1fr;
+    }
+
+    .admin-application-actions{
+        grid-template-columns:1fr;
+    }
+
+    .admin-application-info strong{
+        min-width:0;
+        display:block;
+        margin-bottom:3px;
+    }
+
+    .admin-application-photo{
+        width:100%;
+        max-height:420px;
+    }
+}
