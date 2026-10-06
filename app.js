@@ -1525,15 +1525,28 @@ function renderCharacterApplicationForm(container) {
                 </section>
 
                 <style>
-.character-application .character-creation-form{display:grid!important;grid-template-columns:1fr 1fr!important;gap:22px!important;position:relative!important;z-index:100!important}
-.character-application .character-creation-panel{display:block!important;visibility:visible!important;opacity:1!important;min-height:0!important;padding:30px!important;background:rgba(8,8,7,.96)!important;border:1px solid rgba(218,186,111,.5)!important}
-.character-application .character-creation-panel .creation-fields{display:grid!important;grid-template-columns:1fr 1fr!important;gap:16px!important}
+/* Cinematic character form — same visual language as LORGUS main menu */
+.character-application .character-creation-form{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:24px!important;position:relative!important;z-index:100!important}
+.character-application .character-creation-panel{display:block!important;visibility:visible!important;opacity:1!important;min-height:0!important;padding:34px!important;background:linear-gradient(145deg,rgba(17,15,11,.88),rgba(4,4,4,.78))!important;border:1px solid rgba(216,182,109,.28)!important;box-shadow:0 22px 70px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.045)!important;backdrop-filter:blur(10px)!important}
+.character-application .character-creation-panel:before{content:""!important;position:absolute!important;left:0!important;top:0!important;width:58px!important;height:1px!important;background:linear-gradient(90deg,#d9b76c,transparent)!important}
+.character-application .creation-panel-heading{display:flex!important;gap:16px!important;align-items:flex-start!important;margin-bottom:26px!important}
+.character-application .creation-panel-heading>span{color:rgba(216,182,109,.55)!important;font-family:var(--title-font)!important;font-size:11px!important;letter-spacing:.16em!important}
+.character-application .creation-panel-heading small{color:#b99a5d!important;font-family:var(--title-font)!important;font-size:9px!important;letter-spacing:.3em!important}
+.character-application .creation-panel-heading h2{color:#eee2c6!important;font-family:var(--title-font)!important;font-size:28px!important;font-weight:500!important}
+.character-application .character-creation-panel .creation-fields{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:16px!important}
 .character-application .character-creation-panel label{display:flex!important;flex-direction:column!important;gap:8px!important;visibility:visible!important}
-.character-application .character-creation-panel input,.character-application .character-creation-panel textarea{display:block!important;width:100%!important;box-sizing:border-box!important;min-height:49px!important;padding:14px!important;background:#050505!important;color:#f5ead2!important;border:1px solid rgba(218,186,111,.45)!important;visibility:visible!important;opacity:1!important}
-.character-application .character-creation-panel textarea{min-height:150px!important}
-.character-application .character-creation-panel .creation-origins{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:8px!important}
-.character-application .character-creation-submit{display:flex!important;grid-column:1/-1!important;visibility:visible!important}
-@media(max-width:900px){.character-application .character-creation-form{grid-template-columns:1fr!important}.character-application .character-creation-panel .creation-fields{grid-template-columns:1fr!important}.character-application .character-creation-panel .creation-origins{grid-template-columns:1fr 1fr!important}}
+.character-application .character-creation-panel label>span{color:rgba(233,223,201,.68)!important;font-family:var(--title-font)!important;font-size:9px!important;letter-spacing:.16em!important;text-transform:uppercase!important}
+.character-application .character-creation-panel input,.character-application .character-creation-panel textarea{display:block!important;width:100%!important;box-sizing:border-box!important;min-height:50px!important;padding:13px 14px!important;background:rgba(2,2,2,.52)!important;color:#f3ead8!important;border:1px solid rgba(216,182,109,.2)!important;border-radius:2px!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.025)!important;visibility:visible!important;opacity:1!important;outline:none!important}
+.character-application .character-creation-panel input:focus,.character-application .character-creation-panel textarea:focus{border-color:rgba(216,182,109,.62)!important;box-shadow:0 0 22px rgba(216,182,109,.07)!important}
+.character-application .character-creation-panel textarea{min-height:145px!important;resize:vertical!important;line-height:1.6!important}
+.character-application .character-creation-panel .creation-wide-field{display:flex!important;width:100%!important;margin-bottom:17px!important}
+.character-application .character-creation-panel .creation-origins{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+.character-application .character-creation-panel .creation-origins button{min-height:62px!important;padding:10px 12px!important;background:rgba(2,2,2,.34)!important;border:1px solid rgba(216,182,109,.14)!important;color:#ded1b5!important}
+.character-application .character-creation-panel .creation-origins button:hover{background:rgba(216,182,109,.07)!important;border-color:rgba(216,182,109,.42)!important}
+.character-application .creation-upload{display:flex!important;padding:24px!important;background:rgba(2,2,2,.32)!important;border:1px dashed rgba(216,182,109,.25)!important}
+.character-application .character-creation-submit{display:flex!important;grid-column:1/-1!important;visibility:visible!important;min-height:68px!important;background:linear-gradient(180deg,rgba(110,82,35,.72),rgba(48,34,16,.86))!important;border:1px solid rgba(216,182,109,.5)!important;color:#f1e3c4!important;letter-spacing:.25em!important}
+@media(max-width:900px){.character-application .character-creation-form{grid-template-columns:1fr!important}.character-application .character-creation-panel .creation-fields{grid-template-columns:1fr 1fr!important}.character-application .character-creation-panel .creation-origins{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:600px){.character-application .character-creation-panel .creation-fields{grid-template-columns:1fr!important}.character-application .character-creation-panel{padding:24px!important}}
 </style>
 <form id="character-application-form" class="character-creation-form" onsubmit="submitCharacterApplication(event)">
                     <section class="character-creation-panel identity-panel">
