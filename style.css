@@ -8946,7 +8946,8 @@ body{
   min-height:100%;
   max-width:none;
   object-fit:contain;
-  transform:translate3d(0,0,0) scale(1);
+  transform:translate3d(-50%,-50%,0);
+  transform-origin:center center;
   transform-origin:center center;
   user-select:none;
   -webkit-user-drag:none;
@@ -9504,4 +9505,22 @@ body{
 }
 .lorgus-map-editor-toggle{
   min-width:145px;
+}
+
+
+/* =========================================================
+   LORGUS 2.3 — STATIC WORLD MAP
+   Карта открывается строго по центру и не перемещается.
+   ========================================================= */
+
+.lorgus-map-image-wrap{
+  cursor:default;
+}
+
+.lorgus-map-image{
+  pointer-events:none;
+}
+
+.lorgus-map-controls{
+  display:none !important;
 }
