@@ -72,14 +72,21 @@ function render(session) {
         const authScene = document.querySelector(".lorgus-cinematic-auth");
 
         if (authScene && !lorgusPortalEntering) {
-            lorgusPortalEntering = true;
-            lorgusPortalEnterStartedAt = performance.now();
+            // First dissolve the interface completely, then start the physical camera flight.
+            authScene.classList.add("lorgus-auth-exit");
 
             window.setTimeout(() => {
-                if (!lorgusPortalEntering) return;
-                lorgusPortalEntering = false;
-                renderCabinet(session);
-            }, 1900);
+                if (!document.querySelector(".lorgus-cinematic-auth")) return;
+
+                lorgusPortalEntering = true;
+                lorgusPortalEnterStartedAt = performance.now();
+
+                window.setTimeout(() => {
+                    if (!lorgusPortalEntering) return;
+                    lorgusPortalEntering = false;
+                    renderCabinet(session);
+                }, 1900);
+            }, 850);
 
             return;
         }
@@ -997,8 +1004,7 @@ async function renderCharacterSelection(container, applications, pendingApplicat
             <span class="character-selection-ornament">✦</span>
             <div>
                 <h1>Кто продолжит историю?</h1>
-                <p>Выбери персонажа и войди в мир его глазами.</p>
-            </div>
+                <p>Выбери персонажа и войди в мир его глазами.</p>            </div>
         </div>
         <div class="character-selection-rule"><span></span><i>АКТИВНЫЕ ПЕРСОНАЖИ</i><span></span></div>
     `;
@@ -1997,8 +2003,7 @@ function findApplicationById(id) {
     ) || null;
 }
 
-/* =========================================================
-   РЕДАКТИРОВАНИЕ ЗАЯВКИ
+/* =========================================================   РЕДАКТИРОВАНИЕ ЗАЯВКИ
    ========================================================= */
 
 function renderPendingApplication(container, application) {
@@ -2997,8 +3002,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
         ) {
             renderTravelScreen(
                 presence.location,
-                presence.region,
-                locationName,
+                presence.region,                locationName,
                 regionName
             );
             return;
@@ -3997,7 +4001,6 @@ function renderLorgusMapEditorRects() {
     } else {
         image.addEventListener("load", render, { once: true });
     }
-
     if (window.lorgusMapLabelResizeObserver) {
         window.lorgusMapLabelResizeObserver.disconnect();
     }
@@ -4997,7 +5000,6 @@ const openingShape = new THREE.Shape();
     world.add(riftLight);
     world.add(new THREE.HemisphereLight(0xc8a879, 0x17120d, 1.3));
     world.add(new THREE.AmbientLight(0xb08f68, 0.48));
-
     const coolFill = new THREE.DirectionalLight(0x7898ad, 1.8);
     coolFill.position.set(18, 12, 10);
     world.add(coolFill);
@@ -5370,5 +5372,4 @@ const openingShape = new THREE.Shape();
             world.add(base);
         }
     }
-
 
