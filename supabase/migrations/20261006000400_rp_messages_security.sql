@@ -3,6 +3,7 @@
 -- The authoritative physical state is public.rp_presence.
 
 drop policy if exists "rp_messages_select_authenticated" on public.rp_messages;
+drop policy if exists "rp_messages_select_current_presence" on public.rp_messages;
 create policy "rp_messages_select_current_presence"
 on public.rp_messages
 for select
@@ -32,6 +33,7 @@ using (
 );
 
 drop policy if exists "rp_messages_insert_own" on public.rp_messages;
+drop policy if exists "rp_messages_insert_current_presence" on public.rp_messages;
 create policy "rp_messages_insert_current_presence"
 on public.rp_messages
 for insert
