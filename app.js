@@ -1185,6 +1185,7 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
    ========================================================= */
 
 async function renderCharacterSelection(container, applications, pendingApplication = null) {
+    if (lorgusAudioCleanup) { lorgusAudioCleanup(); lorgusAudioCleanup = null; }
     initializeLorgusCharacterSelectionAudio();
 
     container.className = "character-selection";
@@ -1309,7 +1310,7 @@ async function renderCharacterSelection(container, applications, pendingApplicat
         reviewButton.type = "button";
         reviewButton.className = "character-create-button";
         reviewButton.textContent = pendingApplication.review_notes ? "ИСПРАВИТЬ АНКЕТУ" : "ОТКРЫТЬ ЗАЯВКУ";
-        reviewButton.addEventListener("click", () => renderPendingApplication(container, pendingApplication));
+        reviewButton.addEventListener("click", () => { if (window.lorgusCharacterAudioCleanup) window.lorgusCharacterAudioCleanup(); renderPendingApplication(container, pendingApplication); });
         reviewPanel.appendChild(reviewButton);
         grid.appendChild(reviewPanel);
     }
@@ -1319,7 +1320,7 @@ async function renderCharacterSelection(container, applications, pendingApplicat
         createButton.type = "button";
         createButton.className = "character-create-button character-create-card";
         createButton.innerHTML = "<span class=\"create-plus\">+</span><span><b>НОВАЯ ИСТОРИЯ</b><small>Создать ещё одного персонажа</small></span>";
-        createButton.addEventListener("click", () => renderCharacterApplicationForm(container));
+        createButton.addEventListener("click", () => { if (window.lorgusCharacterAudioCleanup) window.lorgusCharacterAudioCleanup(); renderCharacterApplicationForm(container); });
         grid.appendChild(createButton);
     }
 }
@@ -1455,6 +1456,7 @@ function initializeLorgusCharacterSelectionAudio() {
 }
 
 async function selectCharacter(container, characterId) {
+    if (window.lorgusCharacterAudioCleanup) window.lorgusCharacterAudioCleanup();
     const result = await supabase.from("characters").select("*").eq("id", characterId).single();
     if (result.error || !result.data) {
         showCharacterError(container, result.error ? result.error.message : "Персонаж не найден.");
