@@ -9611,14 +9611,23 @@ body{
 /* LORGUS auth input readability fix */
 .lorgus-cinematic-auth .input-wrapper input,
 .lorgus-cinematic-auth .input-wrapper input:focus,
-.lorgus-cinematic-auth .input-wrapper input:active,
+.lorgus-cinematic-auth .input-wrapper input:active{
+  color:var(--text) !important;
+  -webkit-text-fill-color:var(--text) !important;
+  caret-color:var(--gold-light) !important;
+  background:linear-gradient(180deg,rgba(5,5,4,.92),rgba(25,21,15,.96)) !important;
+  background-color:#0b0a08 !important;
+}
+
 .lorgus-cinematic-auth .input-wrapper input:-webkit-autofill,
 .lorgus-cinematic-auth .input-wrapper input:-webkit-autofill:hover,
 .lorgus-cinematic-auth .input-wrapper input:-webkit-autofill:focus{
   color:var(--text) !important;
   -webkit-text-fill-color:var(--text) !important;
   caret-color:var(--gold-light) !important;
-  background-color:transparent !important;
+  -webkit-box-shadow:0 0 0 1000px #0b0a08 inset !important;
+  box-shadow:0 0 0 1000px #0b0a08 inset !important;
+  background-color:#0b0a08 !important;
 }
 
 .lorgus-cinematic-auth .input-wrapper input::placeholder{
