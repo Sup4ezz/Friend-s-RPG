@@ -13637,3 +13637,85 @@ body:has(#root > #cabinet-content.character-application){
     #root > #cabinet-content.character-application .creation-origin-kingdoms{grid-template-columns:1fr 1fr!important}
     #root > #cabinet-content.character-application .origin-kingdom{border-bottom:1px solid rgba(220,184,102,.10)!important}
 }
+
+
+/* Origin lore context */
+#root > #cabinet-content.character-application .origin-context{
+    margin-top:18px!important;
+    border-top:1px solid rgba(220,184,102,.16)!important;
+    border-bottom:1px solid rgba(220,184,102,.12)!important;
+    background:rgba(5,4,2,.34)!important;
+}
+#root > #cabinet-content.character-application .origin-context-main{
+    display:grid!important;
+    grid-template-columns:minmax(280px,1.15fr) minmax(360px,1fr)!important;
+}
+#root > #cabinet-content.character-application .origin-context-title{
+    padding:24px 26px!important;
+    border-right:1px solid rgba(220,184,102,.10)!important;
+}
+#root > #cabinet-content.character-application .origin-context-title small,
+#root > #cabinet-content.character-application .origin-context-life small{
+    display:block!important;
+    color:rgba(220,207,184,.38)!important;
+    font-size:8px!important;
+    letter-spacing:.2em!important;
+}
+#root > #cabinet-content.character-application .origin-context-title h3{
+    margin:7px 0 8px!important;
+    color:#e2cc99!important;
+    font-size:27px!important;
+    font-weight:500!important;
+    letter-spacing:.08em!important;
+}
+#root > #cabinet-content.character-application .origin-context-title p{
+    margin:0!important;
+    max-width:560px!important;
+    color:rgba(232,220,195,.70)!important;
+    font-size:12px!important;
+    line-height:1.65!important;
+}
+#root > #cabinet-content.character-application .origin-context-facts{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:0!important;
+}
+#root > #cabinet-content.character-application .origin-context-facts div{
+    padding:18px 20px!important;
+    border-bottom:1px solid rgba(220,184,102,.09)!important;
+}
+#root > #cabinet-content.character-application .origin-context-facts div:last-child{
+    grid-column:1 / -1!important;
+    border-bottom:0!important;
+}
+#root > #cabinet-content.character-application .origin-context-facts small{
+    display:block!important;
+    margin-bottom:6px!important;
+    color:rgba(220,207,184,.34)!important;
+    font-size:7px!important;
+    letter-spacing:.18em!important;
+}
+#root > #cabinet-content.character-application .origin-context-facts b{
+    color:rgba(236,224,201,.76)!important;
+    font-size:11px!important;
+    line-height:1.45!important;
+    font-weight:400!important;
+}
+#root > #cabinet-content.character-application .origin-context-life{
+    display:flex!important;
+    gap:22px!important;
+    padding:13px 20px!important;
+    border-top:1px solid rgba(220,184,102,.08)!important;
+    align-items:baseline!important;
+}
+#root > #cabinet-content.character-application .origin-context-life span{
+    color:rgba(232,220,195,.55)!important;
+    font-size:10px!important;
+    line-height:1.5!important;
+}
+@media(max-width:760px){
+    #root > #cabinet-content.character-application .origin-context-main{grid-template-columns:1fr!important}
+    #root > #cabinet-content.character-application .origin-context-title{border-right:0!important;border-bottom:1px solid rgba(220,184,102,.10)!important}
+    #root > #cabinet-content.character-application .origin-context-life{display:block!important}
+    #root > #cabinet-content.character-application .origin-context-life span{display:block!important;margin-top:6px!important}
+}
