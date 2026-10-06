@@ -4244,16 +4244,20 @@ function initializeLorgusWebGL() {
     const groundTexture = makeStoneTexture("#39332c", true);
 
     const stone = new THREE.MeshStandardMaterial({
-        map: stoneTexture, color: 0xb8a68c, roughness: 0.91, metalness: 0
+        map: stoneTexture, color: 0xb8a68c, roughness: 0.91, metalness: 0,
+        bumpMap: stoneTexture, bumpScale: 0.16
     });
     const stoneDark = new THREE.MeshStandardMaterial({
-        map: darkStoneTexture, color: 0xaaa092, roughness: 0.96, metalness: 0
+        map: darkStoneTexture, color: 0xaaa092, roughness: 0.96, metalness: 0,
+        bumpMap: darkStoneTexture, bumpScale: 0.12
     });
     const stoneEdge = new THREE.MeshStandardMaterial({
-        map: stoneTexture, color: 0xc5b39a, roughness: 0.84, metalness: 0
+        map: stoneTexture, color: 0xc5b39a, roughness: 0.84, metalness: 0,
+        bumpMap: stoneTexture, bumpScale: 0.18
     });
     const groundStone = new THREE.MeshStandardMaterial({
-        map: groundTexture, color: 0xb0a18e, roughness: 0.98, metalness: 0
+        map: groundTexture, color: 0xb0a18e, roughness: 0.98, metalness: 0,
+        bumpMap: groundTexture, bumpScale: 0.08
     });
     const rune = new THREE.MeshStandardMaterial({ color: 0x8c6827, emissive: 0x8c6827, emissiveIntensity: 4.2, transparent: true, opacity: 0.82 });
     const ember = new THREE.MeshBasicMaterial({ color: 0xe2a33d, transparent: true, opacity: 0.8 });
@@ -4319,6 +4323,99 @@ function initializeLorgusWebGL() {
             cap.receiveShadow = true;
             world.add(cap);
         }
+    }
+
+    // Architectural masonry pass: layered stone courses with bevels and irregular faces.
+    const makeMasonryBlock = (x, y, z, w, h, d, material, rotation = 0, scaleY = 1) => {
+        const geo = new THREE.BoxGeometry(w, h, d, 2, 2, 2);
+        const pos = geo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+            const px = pos.getX(i), py = pos.getY(i), pz = pos.getZ(i);
+            if (Math.abs(px) > w * 0.35) pos.setX(i, px + (Math.random() - 0.5) * 0.12);
+            if (Math.abs(py) > h * 0.35) pos.setY(i, py + (Math.random() - 0.5) * 0.10);
+            if (Math.abs(pz) > d * 0.35) pos.setZ(i, pz + (Math.random() - 0.5) * 0.08);
+        }
+        pos.needsUpdate = true;
+        geo.computeVertexNormals();
+        const mesh = new THREE.Mesh(geo, material);
+        mesh.position.set(x, y, z);
+        mesh.rotation.z = rotation;
+        mesh.scale.y = scaleY;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        world.add(mesh);
+        return mesh;
+    };
+
+    // Massive masonry courses replace the "two giant cubes" silhouette.
+    for (const side of [-1, 1]) {
+        const sx = side;
+        for (let row = 0; row < 6; row++) {
+            const y = 2.9 + row * 1.95;
+            const count = row % 2 ? 3 : 2;
+            const total = 5.1;
+            const bw = total / count;
+            for (let col = 0; col < count; col++) {
+                const x = sx * (7.85 + col * bw);
+                makeMasonryBlock(
+                    x, y, 1.05,
+                    bw * 0.92, 1.72 + Math.random() * 0.22, 4.65,
+                    row % 3 === 0 ? stoneEdge : stone,
+                    (Math.random() - 0.5) * 0.012
+                );
+            }
+        }
+    }
+
+    // Deep carved seams on the front face.
+    const seamMat = new THREE.MeshBasicMaterial({
+        color: 0x15110e,
+        transparent: true,
+        opacity: 0.62
+    });
+    for (const side of [-1, 1]) {
+        for (let row = 0; row < 7; row++) {
+            const seam = new THREE.Mesh(
+                new THREE.BoxGeometry(4.9, 0.075, 0.055),
+                seamMat
+            );
+            seam.position.set(side * 10.0, 2.0 + row * 1.95, 3.43);
+            world.add(seam);
+        }
+    }
+
+    // Broken masonry and fallen stones at the bases.
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 12; i++) {
+            const w = 0.8 + Math.random() * 1.5;
+            const h = 0.35 + Math.random() * 0.9;
+            const d = 0.8 + Math.random() * 1.5;
+            const chunk = makeMasonryBlock(
+                side * (5.8 + Math.random() * 5.4),
+                h * 0.45 - 0.08,
+                2.5 + (Math.random() - 0.5) * 4,
+                w, h, d, stoneDark,
+                (Math.random() - 0.5) * 0.7
+            );
+            chunk.rotation.x = (Math.random() - 0.5) * 0.35;
+            chunk.rotation.y = (Math.random() - 0.5) * 0.35;
+        }
+    }
+
+    // Foreground slabs: irregular perspective lines lead the eye into the portal.
+    for (let i = 0; i < 8; i++) {
+        const width = 4.5 + i * 0.8;
+        const slab = makeMasonryBlock(
+            (Math.random() - 0.5) * (1.0 + i * 0.3),
+            -0.12 + Math.random() * 0.08,
+            5.5 + i * 2.9,
+            width,
+            0.22 + Math.random() * 0.18,
+            2.5 + Math.random() * 0.8,
+            i % 2 ? groundStone : stoneDark,
+            (Math.random() - 0.5) * 0.045
+        );
+        slab.scale.x *= 0.8 + Math.random() * 0.35;
     }
 
     const addBox = (x, y, z, sx, sy, sz, material = stone, rot = 0) => {
