@@ -8620,3 +8620,9 @@ body{
     white-space:nowrap !important;
   }
 }
+
+/* Remove redundant auth panel caption */
+.auth-panel::before{
+  content:none !important;
+  display:none !important;
+}
