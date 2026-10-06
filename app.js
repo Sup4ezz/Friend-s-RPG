@@ -2117,10 +2117,9 @@ async function renderLocationParticipantsIfVisible() {
 async function clearRpPresence() {
     if (!window.activeCharacterId || !supabase) return;
 
-    const { error } = await supabase
-        .from("rp_presence")
-        .delete()
-        .eq("character_id", window.activeCharacterId);
+    const { error } = await supabase.rpc("clear_lorgus_rp_presence", {
+        p_character_id: window.activeCharacterId
+    });
 
     if (error) console.error("Не удалось очистить RP-присутствие:", error);
     window.activeRpPresence = null;
