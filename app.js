@@ -4554,10 +4554,18 @@ function initializeLorgusWebGL() {
     const archShape = new THREE.Shape();
     archShape.moveTo(-7.2, 0);
     archShape.lineTo(-7.2, 8.2);
-    // Explicit quadratic crown: unambiguously an upright ∩ arch.
     archShape.quadraticCurveTo(0, 15.4, 7.2, 8.2);
     archShape.lineTo(7.2, 0);
     archShape.closePath();
+
+    // Cut the actual passage out of the gate. The gate is a stone FRAME, not a filled wall.
+    const openingHole = new THREE.Path();
+    openingHole.moveTo(-5.15, 0.08);
+    openingHole.lineTo(-5.15, 8.25);
+    openingHole.quadraticCurveTo(0, 13.4, 5.15, 8.25);
+    openingHole.lineTo(5.15, 0.08);
+    openingHole.closePath();
+    archShape.holes.push(openingHole);
 
     const archGeo = new THREE.ExtrudeGeometry(archShape, {
         depth: 5.2,
