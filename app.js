@@ -4606,18 +4606,28 @@ function initializeLorgusWebGL() {
     // Crown stone gives the gate a strong readable silhouette.
     // No horizontal crown: the arch itself forms the complete central silhouette.
 
+    // Portal glow uses the exact same arched silhouette as the passage.
+    // No rectangular plane, no border: just a soft luminous shape behind the stone frame.
+    const glowShape = new THREE.Shape();
+    glowShape.moveTo(-5.05, 0.04);
+    glowShape.lineTo(-5.05, 8.15);
+    glowShape.quadraticCurveTo(0, 13.45, 5.05, 8.15);
+    glowShape.lineTo(5.05, 0.04);
+    glowShape.closePath();
+
     const rift = new THREE.Mesh(
-        new THREE.PlaneGeometry(12.2, 12.8, 48, 80),
-        new THREE.ShaderMaterial({
+        new THREE.ShapeGeometry(glowShape, 48),
+        new THREE.MeshBasicMaterial({
+            color: 0xd47b24,
             transparent: true,
-            depthWrite: false,
+            opacity: 0.34,
             blending: THREE.AdditiveBlending,
-            uniforms: { time: { value: 0 } },
-            vertexShader: "uniform float time; varying vec2 vUv; void main(){vUv=uv;vec3 p=position;p.x+=sin(uv.y*18.0+time*1.4)*0.13;p.x+=sin(uv.y*43.0-time*2.1)*0.045;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}",
-            fragmentShader: "uniform float time; varying vec2 vUv; void main(){float x=(vUv.x-0.5)*10.0;float y=vUv.y*11.4;float roof=9.0-sqrt(max(0.0,25.0-x*x));float inside=step(y,roof);float edge=1.0-smoothstep(0.0,0.72,abs(x));float vertical=smoothstep(0.02,0.16,vUv.y)*inside;float wave=0.55+0.45*sin(vUv.y*28.0-time*3.0);float core=pow(edge,1.25)*vertical*(0.72+wave*0.28);vec3 c=mix(vec3(0.20,0.045,0.006),vec3(0.95,0.52,0.11),edge);gl_FragColor=vec4(c,core*0.62);}"
+            depthWrite: false,
+            depthTest: true,
+            side: THREE.DoubleSide
         })
     );
-    rift.position.set(0, 6.0, -0.28);
+    rift.position.set(0, 0, -0.72);
     rift.renderOrder = 1;
     world.add(rift);
 
