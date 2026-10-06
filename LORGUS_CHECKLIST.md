@@ -737,3 +737,11 @@ Commit:
 
 ### Текущая точка остановки
 Workflow снова можно пнуть вручную. Ожидаемый результат: 004 должен пройти даже при уже существующих policies, затем 005 должен примениться; после этого `supabase migration list --linked` должен показать актуальную remote history.
+
+
+### 21.3 FIX — 004 delimiter was still wrong in main
+- [x] Повторный CI подтвердил, что в production доходит `as $`, то есть предыдущая попытка исправления delimiter не попала в фактическое содержимое файла.
+- [x] Повторно прочитан файл из `main` через GitHub и исправлен именно фактический текст: `as $ ... $;` → `as $$ ... $$;`.
+- [x] Commit: b7d63b44e5954dfe57ee62a143db702e05481527 — Fix RP message trigger delimiter correctly
+- [ ] Повторно запустить `Deploy Supabase migrations` вручную.
+- [ ] Подтвердить применение 004 и 005.
