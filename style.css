@@ -11753,7 +11753,7 @@ body{
     inset:0;
     z-index:99990;
     pointer-events:none;
-    background:radial-gradient(ellipse at 50% 52%,rgba(255,228,163,0) 0%,rgba(255,166,55,0) 24%,rgba(255,215,135,.78) 72%,rgba(7,4,2,.98) 100%);
+    background:radial-gradient(ellipse at 50% 52%,rgba(255,228,163,0) 0%,rgba(255,166,55,.02) 28%,rgba(255,215,135,.92) 78%,rgba(255,241,199,1) 100%);
     opacity:0;
     animation:lorgusPortalPass 2.02s ease-in-out both;
 }
@@ -11766,10 +11766,10 @@ body{
 }
 
 @keyframes lorgusPortalPass{
-    0%,66%{opacity:0}
-    82%{opacity:.18}
-    91%{opacity:.86}
-    96%{opacity:1}
+    0%,72%{opacity:0}
+    86%{opacity:.06}
+    93%{opacity:.34}
+    98%{opacity:.82}
     100%{opacity:1}
 }
 
@@ -11781,8 +11781,7 @@ body{
 .lorgus-cabinet-entering{
     min-height:100vh!important;
     background:#050403!important;
-    opacity:0!important;
-    transition:opacity .42s ease!important;
+    opacity:1!important;
 }
 .lorgus-cabinet-entering.ready{
     opacity:1!important;
