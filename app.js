@@ -4592,26 +4592,8 @@ function initializeLorgusWebGL() {
         world.add(innerJamb);
     }
 
-    // Individual voussoirs make the arch read as hand-built masonry.
-    for (let n = 0; n < 17; n++) {
-        const a = Math.PI * (n / 16);
-        const radius = 7.45;
-        const block = new THREE.Mesh(
-            new THREE.BoxGeometry(1.55, 2.05, 5.65, 2, 2, 2),
-            n % 4 === 0 ? stoneEdge : stone
-        );
-        block.position.set(
-            Math.cos(a) * radius,
-            10.25 + Math.sin(a) * radius,
-            0.45 + Math.sin(a * 3.0) * 0.05
-        );
-        block.rotation.z = Math.PI / 2 - a;
-        block.rotation.y = (Math.random() - 0.5) * 0.025;
-        block.castShadow = true;
-        block.receiveShadow = true;
-        world.add(block);
-    }
-
+    // Clean outer arch: no oversized floating voussoirs.
+    // The extruded arch itself is the masonry silhouette.
     // Crown stone gives the gate a strong readable silhouette.
     const crown = new THREE.Mesh(
         new THREE.BoxGeometry(17.2, 1.25, 5.9, 3, 3, 3),
@@ -4626,7 +4608,7 @@ function initializeLorgusWebGL() {
     // No floating halo above the gate: the crown remains purely architectural.
 
     const rift = new THREE.Mesh(
-        new THREE.PlaneGeometry(10.2, 12.8, 40, 80),
+        new THREE.PlaneGeometry(10.0, 11.4, 40, 80),
         new THREE.ShaderMaterial({
             transparent: true,
             depthWrite: false,
@@ -4636,7 +4618,7 @@ function initializeLorgusWebGL() {
             fragmentShader: "uniform float time; varying vec2 vUv; void main(){float edge=1.0-smoothstep(0.40,0.50,abs(vUv.x-0.5));float vertical=smoothstep(0.015,0.09,vUv.y)*smoothstep(0.015,0.09,1.0-vUv.y);float wave=0.55+0.45*sin(vUv.y*28.0-time*3.0);float core=pow(edge,1.25)*vertical*(0.72+wave*0.28);vec3 c=mix(vec3(0.20,0.045,0.006),vec3(0.95,0.52,0.11),edge);gl_FragColor=vec4(c,core*0.62);}"
         })
     );
-    rift.position.set(0, 6.5, -0.28);
+    rift.position.set(0, 5.7, -0.28);
     rift.renderOrder = 1;
     world.add(rift);
 
