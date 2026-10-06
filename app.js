@@ -1886,10 +1886,10 @@ async function loadCharacter(
 }
 
 /* =========================================================
-   ОТОБРАЖЕНИЕ ПЕРСОНАЖА
+   ОТОБРАЖЕНИЕ ПЕРСОНАЖА — LEGACY
    ========================================================= */
 
-function renderCharacter(
+function renderCharacterLegacy(
     container,
     character
 ) {
