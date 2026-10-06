@@ -3559,13 +3559,13 @@ const LORGUS_MAP_MARKERS = [
 ];
 
 const LORGUS_MAP_EDITOR_RECTS = [
-    { id:"Атэрон", x:22, y:34, w:14, h:12, rotation:0 },
-    { id:"Каэлор", x:72, y:27, w:14, h:12, rotation:0 },
-    { id:"Ксандр", x:79, y:61, w:14, h:12, rotation:0 },
-    { id:"Лирэн", x:31, y:69, w:14, h:12, rotation:0 },
-    { id:"Морвейн", x:51, y:82, w:14, h:12, rotation:0 },
-    { id:"Святые Земли", x:52, y:50, w:12, h:10, rotation:0 },
-    { id:"Спорные Земли", x:62, y:66, w:12, h:10, rotation:0 }
+    { id:"Атэрон", x:62.4, y:64.4, w:11.2, h:5.6, rotation:0 },
+    { id:"Каэлор", x:63.1, y:74.4, w:10.8, h:5.9, rotation:0 },
+    { id:"Ксандр", x:48.4, y:60.7, w:6.7, h:6.9, rotation:0 },
+    { id:"Лирэн", x:26.4, y:57.2, w:12.9, h:7.5, rotation:0 },
+    { id:"Морвейн", x:71.3, y:37.5, w:9.6, h:7.7, rotation:0 },
+    { id:"Святые Земли", x:51.9, y:44.8, w:3.0, h:3.0, rotation:0 },
+    { id:"Спорные Земли", x:54.6, y:24.7, w:5.5, h:4.9, rotation:0 }
 ];
 function enableLorgusMapEditor() {
     const layer = document.getElementById("lorgus-map-marker-layer");
