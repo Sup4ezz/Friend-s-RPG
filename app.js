@@ -157,6 +157,124 @@ function renderAuth() {
     showLogin(true);
     initializeLorgusScene();
     initializeLorgusWebGL();
+    initializeLorgusAudio();
+}
+
+let lorgusAudioCleanup = null;
+
+function initializeLorgusAudio() {
+    if (lorgusAudioCleanup) lorgusAudioCleanup();
+    const root = document.querySelector(".lorgus-cinematic-auth");
+    if (!root) return;
+
+    let audioContext = null;
+    let master = null;
+    let musicGain = null;
+    let started = false;
+    let musicTimer = null;
+    const listeners = [];
+
+    const on = (target, event, handler, options) => {
+        target.addEventListener(event, handler, options);
+        listeners.push(() => target.removeEventListener(event, handler, options));
+    };
+
+    const ensureAudio = () => {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            master = audioContext.createGain();
+            master.gain.value = 0.16;
+            master.connect(audioContext.destination);
+
+            musicGain = audioContext.createGain();
+            musicGain.gain.value = 0.0001;
+            musicGain.connect(master);
+        }
+        if (audioContext.state === "suspended") audioContext.resume();
+        if (!started) startMusic();
+    };
+
+    const tone = (frequency, duration, volume, type = "sine", glide = 0) => {
+        if (!audioContext || !master) return;
+        const now = audioContext.currentTime;
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(frequency, now);
+        if (glide) osc.frequency.exponentialRampToValueAtTime(Math.max(20, frequency + glide), now + duration);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(volume, now + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(now);
+        osc.stop(now + duration + 0.03);
+    };
+
+    const hover = () => {
+        ensureAudio();
+        tone(880, 0.075, 0.018, "sine", 55);
+    };
+
+    const click = () => {
+        ensureAudio();
+        tone(220, 0.16, 0.055, "triangle", 32);
+        window.setTimeout(() => tone(440, 0.22, 0.035, "sine", 18), 35);
+    };
+
+    const startMusic = () => {
+        if (started || !audioContext || !musicGain) return;
+        started = true;
+        const now = audioContext.currentTime;
+        musicGain.gain.cancelScheduledValues(now);
+        musicGain.gain.setValueAtTime(0.0001, now);
+        musicGain.gain.exponentialRampToValueAtTime(0.32, now + 2.8);
+
+        const roots = [55, 65.41, 49, 58.27];
+        let step = 0;
+
+        const playPad = () => {
+            if (!audioContext || !musicGain) return;
+            const t = audioContext.currentTime;
+            const rootFreq = roots[step % roots.length];
+            [rootFreq, rootFreq * 1.498, rootFreq * 2].forEach((freq, index) => {
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+                osc.type = index === 0 ? "triangle" : "sine";
+                osc.frequency.setValueAtTime(freq, t);
+                gain.gain.setValueAtTime(0.0001, t);
+                gain.gain.exponentialRampToValueAtTime(index === 0 ? 0.08 : 0.035, t + 0.9);
+                gain.gain.exponentialRampToValueAtTime(0.0001, t + 5.2);
+                osc.connect(gain);
+                gain.connect(musicGain);
+                osc.start(t);
+                osc.stop(t + 5.4);
+            });
+            step++;
+        };
+
+        playPad();
+        musicTimer = window.setInterval(playPad, 5200);
+    };
+
+    const activate = () => {
+        try { ensureAudio(); } catch (error) { console.warn("LORGUS audio unavailable:", error); }
+    };
+
+    on(root, "pointerdown", activate, { passive: true });
+    on(root, "mouseover", event => {
+        if (event.target.closest("button")) hover();
+    });
+    on(root, "click", event => {
+        if (event.target.closest("button")) click();
+    });
+
+    lorgusAudioCleanup = () => {
+        listeners.forEach(remove => remove());
+        if (musicTimer) window.clearInterval(musicTimer);
+        if (audioContext) audioContext.close().catch(() => {});
+        lorgusAudioCleanup = null;
+    };
 }
 
 let lorgusSceneCleanup = null;
