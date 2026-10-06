@@ -111,12 +111,12 @@ function createLorgusEyeTransition() {
             <defs>
                 <linearGradient id="lorgus-lid-top" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0" stop-color="#080605"/>
-                    <stop offset="0.76" stop-color="#19120e"/>
+                    <stop offset="0.8" stop-color="#19120e"/>
                     <stop offset="1" stop-color="#090706"/>
                 </linearGradient>
                 <linearGradient id="lorgus-lid-bottom" x1="0" y1="1" x2="0" y2="0">
                     <stop offset="0" stop-color="#080605"/>
-                    <stop offset="0.76" stop-color="#19120e"/>
+                    <stop offset="0.8" stop-color="#19120e"/>
                     <stop offset="1" stop-color="#090706"/>
                 </linearGradient>
                 <filter id="lorgus-lid-shadow" x="-20%" y="-20%" width="140%" height="140%">
@@ -124,29 +124,29 @@ function createLorgusEyeTransition() {
                 </filter>
             </defs>
 
-            <!-- Верхнее веко. При закрытии оно опускается до центра. -->
+            <!-- Верхнее веко. В закрытом состоянии его край доходит до самой середины. -->
             <g class="lorgus-lid-group lorgus-lid-group-top">
                 <path class="lorgus-lid-shadow"
-                      d="M-10 0H110V58C87 48 68 43 50 42C32 43 13 48-10 58Z"
+                      d="M-10 0H110V58C87 54 68 51 50 50C32 51 13 54-10 58Z"
                       fill="#000" opacity=".75" filter="url(#lorgus-lid-shadow)"/>
                 <path class="lorgus-lid-surface"
-                      d="M-10 0H110V56C87 46 68 41 50 40C32 41 13 46-10 56Z"
+                      d="M-10 0H110V56C87 52 68 50 50 49.8C32 50 13 52-10 56Z"
                       fill="url(#lorgus-lid-top)"/>
                 <path class="lorgus-lid-edge"
-                      d="M-2 55C17 46 34 40 50 40C66 40 83 46 102 55"
+                      d="M-2 55C17 50 34 49.8 50 49.8C66 49.8 83 50 102 55"
                       fill="none" stroke="#020201" stroke-width="1.15" stroke-linecap="round"/>
             </g>
 
-            <!-- Нижнее веко. При закрытии оно поднимается до центра. -->
+            <!-- Нижнее веко. В закрытом состоянии его край приходит в ту же точку. -->
             <g class="lorgus-lid-group lorgus-lid-group-bottom">
                 <path class="lorgus-lid-shadow"
-                      d="M-10 100H110V42C87 52 68 57 50 58C32 57 13 52-10 42Z"
+                      d="M-10 100H110V42C87 46 68 49 50 50C32 49 13 46-10 42Z"
                       fill="#000" opacity=".75" filter="url(#lorgus-lid-shadow)"/>
                 <path class="lorgus-lid-surface"
-                      d="M-10 100H110V44C87 54 68 59 50 60C32 59 13 54-10 44Z"
+                      d="M-10 100H110V44C87 48 68 50 50 50.2C32 50 13 48-10 44Z"
                       fill="url(#lorgus-lid-bottom)"/>
                 <path class="lorgus-lid-edge"
-                      d="M-2 45C17 54 34 60 50 60C66 60 83 54 102 45"
+                      d="M-2 45C17 50 34 50.2 50 50.2C66 50.2 83 50 102 45"
                       fill="none" stroke="#020201" stroke-width="1.15" stroke-linecap="round"/>
             </g>
         </svg>
@@ -178,13 +178,8 @@ function createLorgusEyeTransition() {
             will-change:transform;
             transition:transform 1180ms cubic-bezier(.7,0,.2,1);
         }
-
-        .lorgus-lid-group-top{
-            transform:translateY(-58%);
-        }
-        .lorgus-lid-group-bottom{
-            transform:translateY(58%);
-        }
+        .lorgus-lid-group-top{transform:translateY(-58%);}
+        .lorgus-lid-group-bottom{transform:translateY(58%);}
 
         .lorgus-eye-transition.closed .lorgus-lid-group-top,
         .lorgus-eye-transition.closed .lorgus-lid-group-bottom{
