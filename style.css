@@ -10927,3 +10927,61 @@ body{
         display:none;
     }
 }
+
+
+/* =========================================================
+   LORGUS AUTH / WORLD ENTRY v3
+   ========================================================= */
+.lorgus-cinematic-auth .lorgus-portal-mark{
+    opacity:.88;
+    filter:drop-shadow(0 0 80px rgba(210,165,75,.12));
+}
+.lorgus-cinematic-auth .portal-ring-1{
+    border-color:rgba(220,181,98,.16);
+}
+.lorgus-cinematic-auth .portal-ring-2{
+    border-color:rgba(220,181,98,.22);
+    box-shadow:0 0 45px rgba(214,179,106,.035);
+}
+.lorgus-cinematic-auth .portal-ring-3{
+    border-color:rgba(220,181,98,.14);
+}
+.lorgus-cinematic-auth .portal-core{
+    color:rgba(242,220,169,.95);
+    background:radial-gradient(circle,rgba(214,179,106,.07),transparent 70%);
+}
+.lorgus-cinematic-auth .brand h1{
+    letter-spacing:.075em;
+    text-shadow:0 0 80px rgba(214,179,106,.045),0 24px 80px rgba(0,0,0,.8);
+}
+.lorgus-cinematic-auth .brand-line i{
+    color:rgba(232,218,190,.62);
+}
+.lorgus-cinematic-auth .auth-panel{
+    min-height:430px;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-start;
+}
+.lorgus-cinematic-auth .auth-panel::after{
+    box-shadow:0 0 24px rgba(214,179,106,.05);
+}
+.lorgus-cinematic-auth .auth-tabs::before{
+    content:"ACCESS GATE";
+    position:absolute;
+    right:0;
+    top:2px;
+    color:rgba(216,207,189,.2);
+    font-family:var(--body-font);
+    font-size:7px;
+    letter-spacing:.28em;
+}
+.lorgus-cinematic-auth .form-heading p::after{
+    content:"  /  WORLD 001";
+    color:rgba(214,179,106,.28);
+}
+@media(max-width:900px){
+    .lorgus-cinematic-auth .lorgus-portal-mark{
+        opacity:.3;
+    }
+}
