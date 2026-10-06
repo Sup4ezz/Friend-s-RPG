@@ -1572,15 +1572,19 @@ function renderCharacterApplicationForm(container) {
 
                     <section class="character-creation-panel origin-panel">
                         <div class="creation-panel-heading"><span>02</span><div><small>ПРОИСХОЖДЕНИЕ</small><h2>Откуда ты?</h2></div></div>
-                        <label class="creation-wide-field"><span>Родина</span><input id="character-homeland" type="text" list="character-homelands" placeholder="Город, край или земля..." required></label>
-                        <div class="creation-origins">
-                            <button type="button" data-location="Примум"><i>01</i><b>ПРИМУМ</b><small>АТЭРОН · ЗЕМЛИ ЗНАНИЙ</small><span>◆</span></button>
-                            <button type="button" data-location="Хелион"><i>02</i><b>ХЕЛИОН</b><small>КАЭЛОР · ЗЕМЛИ ОГНЯ</small><span>◆</span></button>
-                            <button type="button" data-location="Арджент"><i>03</i><b>АРДЖЕНТ</b><small>КСАНДР · ТОРГОВЫЕ ЗЕМЛИ</small><span>◆</span></button>
-                            <button type="button" data-location="Аврора"><i>04</i><b>АВРОРА</b><small>ЛИРЭН · ЛЕСНЫЕ ЗЕМЛИ</small><span>◆</span></button>
-                            <button type="button" data-location="Фин"><i>05</i><b>ФИН</b><small>МОРВЕЙН · СЕВЕРНЫЕ ЗЕМЛИ</small><span>◆</span></button>
-                            <button type="button" data-location="Святые Земли"><i>06</i><b>СВЯТЫЕ ЗЕМЛИ</b><small>НЕЙТРАЛЬНАЯ ТЕРРИТОРИЯ</small><span>◆</span></button>
-                            <button type="button" data-location="Спорные Земли"><i>07</i><b>СПОРНЫЕ ЗЕМЛИ</b><small>ЗЕМЛИ БЕЗ ЕДИНОЙ ВЛАСТИ</small><span>◆</span></button>
+                        <div class="creation-origin-picker">
+                            <div class="creation-origin-kingdoms">
+                                <button type="button" class="origin-kingdom active" data-kingdom="Атэрон"><b>АТЭРОН</b><small>ЗЕМЛИ ЗНАНИЙ</small></button>
+                                <button type="button" class="origin-kingdom" data-kingdom="Каэлор"><b>КАЭЛОР</b><small>ВЕЧНОЕ ПЛАМЯ</small></button>
+                                <button type="button" class="origin-kingdom" data-kingdom="Ксандр"><b>КСАНДР</b><small>ВОЗДАЯНИЕ</small></button>
+                                <button type="button" class="origin-kingdom" data-kingdom="Лирэн"><b>ЛИРЭН</b><small>ПЛОДОРОДИЕ</small></button>
+                                <button type="button" class="origin-kingdom" data-kingdom="Морвейн"><b>МОРВЕЙН</b><small>ПОСЛЕДНИЙ ПУТЬ</small></button>
+                            </div>
+                            <div class="creation-origin-location-wrap">
+                                <div class="creation-origin-location-head"><span id="origin-kingdom-label">АТЭРОН</span><small>ВЫБЕРИ МЕСТО РОЖДЕНИЯ</small></div>
+                                <div id="creation-origin-locations" class="creation-origin-locations"></div>
+                            </div>
+                            <label class="creation-wide-field"><span>Родина</span><input id="character-homeland" type="text" list="character-homelands" placeholder="Выбери место выше" required readonly></label>
                         </div>
                         <datalist id="character-homelands">
                             <option value="Примум"></option><option value="Хелион"></option><option value="Арджент"></option><option value="Аврора"></option><option value="Фин"></option><option value="Святые Земли"></option><option value="Спорные Земли"></option>
@@ -1629,14 +1633,63 @@ function renderCharacterApplicationForm(container) {
 
     initializeCharacterPortraitCrop();
 
-    container.querySelectorAll(".creation-origins button").forEach(button => {
+    const originData = {
+        "Атэрон": [
+            ["Примум", "СТОЛИЦА АТЭРОНА", "Центр образования, исследований и древних знаний."]
+        ],
+        "Каэлор": [
+            ["Хелион", "СТОЛИЦА КАЭЛОРА", "Дворец, кузницы, рынки и учреждения королевства."],
+            ["Древнее Пламя", "СВЯЩЕННОЕ МЕСТО", "Священное место Вечного Пламени."]
+        ],
+        "Ксандр": [
+            ["Арджент", "СТОЛИЦА КСАНДРА", "Великий рынок, королевский двор и финансовые дома."],
+            ["Меридиан", "ГОРОД КСАНДРА", "Один из известных городов королевства."],
+            ["Валькрофт", "ГОРОД КСАНДРА", "Город на торговых путях."],
+            ["Солмир", "ГОРОД КСАНДРА", "Город торгового королевства."]
+        ],
+        "Лирэн": [
+            ["Аврора", "СТОЛИЦА ЛИРЭНА", "Город, построенный внутри огромного древнего дерева."],
+            ["Элвэйн", "ГОРОД ЛИРЭНА", "Один из городов лесного королевства."],
+            ["Таллирион", "ГОРОД ЛИРЭНА", "Город среди лесов и плодородных земель."],
+            ["Эстерваль", "ГОРОД ЛИРЭНА", "Город западного королевства."]
+        ],
+        "Морвейн": [
+            ["Фин", "СТОЛИЦА МОРВЕЙНА", "Дворец, храмы, архивы и главные паломнические учреждения."]
+        ]
+    };
+
+    const renderOrigins = kingdom => {
+        const list = container.querySelector("#creation-origin-locations");
+        const label = container.querySelector("#origin-kingdom-label");
+        if (!list || !label) return;
+        label.textContent = kingdom.toUpperCase();
+        list.innerHTML = (originData[kingdom] || []).map(([name, type, description], index) => `
+            <button type="button" class="origin-location" data-location="${name}">
+                <i>${String(index + 1).padStart(2, "0")}</i>
+                <span><b>${name}</b><small>${type}</small><em>${description}</em></span>
+                <strong>→</strong>
+            </button>
+        `).join("");
+        list.querySelectorAll(".origin-location").forEach(button => {
+            button.addEventListener("click", () => {
+                const homeland = container.querySelector("#character-homeland");
+                if (!homeland) return;
+                list.querySelectorAll(".origin-location").forEach(item => item.classList.remove("active"));
+                button.classList.add("active");
+                homeland.value = button.dataset.location || "";
+            });
+        });
+    };
+
+    container.querySelectorAll(".origin-kingdom").forEach(button => {
         button.addEventListener("click", () => {
-            const homeland = container.querySelector("#character-homeland");
-            if (!homeland) return;
-            homeland.value = button.dataset.location || "";
-            homeland.focus();
+            container.querySelectorAll(".origin-kingdom").forEach(item => item.classList.remove("active"));
+            button.classList.add("active");
+            renderOrigins(button.dataset.kingdom);
         });
     });
+
+    renderOrigins("Атэрон");
 }
 
 function initializeCharacterPortraitCrop() {
