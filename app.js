@@ -568,26 +568,6 @@ async function renderCabinet(session) {
 
     document.getElementById("root").innerHTML = `
         <main class="game-page">
-            <header class="topbar">
-                <div class="topbar-brand">
-                    <div class="mini-symbol">✦</div>
-                    <span>ЛОРГУС</span>
-                </div>
-
-                <div class="player-area">
-                    <span class="player-email">
-                        ${escapeHtml(username)}
-                    </span>
-
-                    <button
-                        class="logout-button"
-                        onclick="logout()"
-                    >
-                        Выйти
-                    </button>
-                </div>
-            </header>
-
             <section
                 id="cabinet-content"
                 class="welcome-panel"
