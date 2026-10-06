@@ -4278,6 +4278,47 @@ function initializeLorgusWebGL() {
     directional.position.set(-8, 12, 18);
     world.add(directional);
 
+    const floor = new THREE.Mesh(
+        new THREE.PlaneGeometry(80, 70),
+        new THREE.MeshStandardMaterial({ color: 0x090806, roughness: 1, metalness: 0 })
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(0, -0.15, -8);
+    world.add(floor);
+
+    const floorGlow = new THREE.Mesh(
+        new THREE.CircleGeometry(5.8, 64),
+        new THREE.MeshBasicMaterial({ color: 0x8d5a1f, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending })
+    );
+    floorGlow.rotation.x = -Math.PI / 2;
+    floorGlow.position.set(0, 0.02, 1.5);
+    world.add(floorGlow);
+
+    const sideStones = [];
+    for (let side of [-1, 1]) {
+        for (let n = 0; n < 9; n++) {
+            const w = 1.2 + Math.random() * 1.8;
+            const h = 0.7 + Math.random() * 1.7;
+            const stoneBlock = new THREE.Mesh(
+                new THREE.BoxGeometry(w, h, 1.8 + Math.random() * 1.4),
+                stoneDark
+            );
+            stoneBlock.position.set(
+                side * (12.5 + Math.random() * 4.5),
+                h * 0.5 - 0.1,
+                -2 - n * 1.8 + Math.random() * 1.2
+            );
+            stoneBlock.rotation.y = (Math.random() - 0.5) * 0.18;
+            stoneBlock.rotation.z = (Math.random() - 0.5) * 0.12;
+            world.add(stoneBlock);
+            sideStones.push(stoneBlock);
+        }
+    }
+
+    const gateInnerGlow = new THREE.PointLight(0xc97826, 16, 20, 2);
+    gateInnerGlow.position.set(0, 5, 0);
+    world.add(gateInnerGlow);
+
     const debris = [];
     for (let n = 0; n < 95; n++) {
         const size = 0.05 + Math.random() * 0.28;
@@ -4325,7 +4366,9 @@ function initializeLorgusWebGL() {
         camera.lookAt(pointer.x * 0.7, 7.9 + pointer.y * 0.55, 1.2);
 
         rift.material.uniforms.time.value = time;
-        riftLight.intensity = 32 + Math.sin(time * 2.1) * 8;
+        riftLight.intensity = 26 + Math.sin(time * 2.1) * 6;
+        gateInnerGlow.intensity = 12 + Math.sin(time * 1.7) * 3;
+        floorGlow.material.opacity = 0.11 + Math.sin(time * 1.9) * 0.025;
         world.rotation.y = pointer.x * -0.025;
 
         for (const mesh of debris) {
