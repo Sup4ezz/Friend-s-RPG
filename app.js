@@ -3976,6 +3976,7 @@ function renderLorgusWorldMap(container, character) {
     selectLorgusMapRegion("Атэрон");
     initializeLorgusMapViewport();
     renderLorgusMapEditorRects(true);
+    addLorgusMapEditorUI();
 }
 
 let lorgusMapScale = 1;
