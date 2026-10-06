@@ -8388,3 +8388,112 @@ body{
     font-size:clamp(52px,18vw,74px);
   }
 }
+
+
+/* =========================================================
+   LORGUS — AUTH PANEL FINAL FIT
+   Keep the login/register header and panel contents inside
+   the actual auth card at every desktop width.
+   ========================================================= */
+
+@media(min-width:1051px){
+  .auth-container{
+    grid-template-columns:minmax(0,760px) minmax(420px,500px);
+    grid-template-rows:auto auto;
+    column-gap:clamp(60px,6vw,110px);
+    row-gap:12px;
+  }
+
+  .auth-page .brand{
+    grid-column:1;
+    grid-row:1 / span 2;
+  }
+
+  .auth-panel{
+    grid-column:2;
+    grid-row:1;
+    min-width:0;
+    overflow:hidden;
+  }
+
+  .auth-tabs{
+    width:100%;
+    min-width:0;
+  }
+
+  .auth-tab{
+    min-width:0;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    padding-inline:8px;
+  }
+
+  .auth-form-container,
+  .auth-form-container form,
+  .form-heading{
+    min-width:0;
+    max-width:100%;
+  }
+
+  .form-heading h2{
+    max-width:100%;
+    margin-inline:auto;
+    font-size:clamp(24px,2vw,30px);
+    line-height:1.05;
+    overflow-wrap:anywhere;
+  }
+
+  .form-heading p{
+    max-width:100%;
+    margin-inline:auto;
+    overflow-wrap:anywhere;
+  }
+
+  .auth-footer{
+    grid-column:2;
+    grid-row:2;
+    width:100%;
+    max-width:500px;
+    margin:0;
+    padding:0 8px;
+    line-height:1.4;
+    text-align:center;
+    overflow-wrap:anywhere;
+  }
+}
+
+@media(max-width:1050px){
+  .auth-footer{
+    position:static;
+    width:100%;
+    max-width:100%;
+    margin:0;
+    padding:0 8px;
+    line-height:1.4;
+    overflow-wrap:anywhere;
+  }
+
+  .auth-tab{
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  .form-heading h2{
+    max-width:100%;
+    line-height:1.05;
+    overflow-wrap:anywhere;
+  }
+}
+
+@media(max-width:380px){
+  .auth-tab{
+    padding-inline:5px;
+    font-size:14px;
+  }
+
+  .form-heading h2{
+    font-size:24px;
+  }
+}
