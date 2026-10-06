@@ -1196,6 +1196,8 @@ async function renderCharacterSelection(container, applications, pendingApplicat
             <div class="character-selection-stars"></div>
         </div>
 
+        <button type="button" class="lorgus-screen-logout" onclick="logout()">ВЫХОД</button>
+
         <header class="character-selection-header">
             <div class="character-selection-brand">
                 <span class="character-selection-mark">✦</span>
@@ -1486,7 +1488,17 @@ function renderCharacterApplicationForm(container) {
     container.className = "character-application";
 
     container.innerHTML = `
-        <div class="admin-header-row">
+        <button type="button" class="lorgus-screen-logout" onclick="logout()">ВЫХОД</button>
+        <div class="character-creation-shell">
+            <header class="character-creation-hero">
+                <div class="character-creation-mark">✦</div>
+                <span class="character-creation-kicker">ЛОРГУС · НОВАЯ ИСТОРИЯ</span>
+                <h1>Кем ты войдёшь в этот мир?</h1>
+                <p>Создай персонажа, который существует не только в анкете — у него есть прошлое, место в мире и собственная причина идти дальше.</p>
+                <div class="character-creation-rule"><i></i><span>СОЗДАНИЕ ПЕРСОНАЖА</span><i></i></div>
+            </header>
+            <div class="character-creation-content">
+                <div class="admin-header-row">
             <div class="character-header">
                 <div class="welcome-symbol">✦</div>
             <h1>Создание персонажа</h1>
@@ -1668,6 +1680,8 @@ function renderCharacterApplicationForm(container) {
                 Отправить заявку
             </button>
         </form>
+            </div>
+        </div>
     `;
 
     container.querySelectorAll(".character-lore-location").forEach(button => {
@@ -2348,6 +2362,8 @@ function renderPendingApplication(container, application) {
         : "";
 
     container.innerHTML = `
+        <button type="button" class="lorgus-screen-logout" onclick="logout()">ВЫХОД</button>
+        <div class="character-creation-shell character-edit-shell">
         <div class="character-header">
             <div class="welcome-symbol">✦</div>
             <h1>${escapeHtml(application.name)}</h1>
@@ -2369,7 +2385,9 @@ function renderPendingApplication(container, application) {
             <div id="character-message" class="character-message"></div>
             <button type="submit" class="gold-button character-submit">Сохранить исправления и отправить на проверку</button>
         </form>
-    `;
+            </div>
+        </div>
+        `;
 }
 
 async function updateCharacterApplication(event, applicationId) {
