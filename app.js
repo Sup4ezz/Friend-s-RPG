@@ -6,7 +6,9 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.m
 let supabase;
 let authSwitching = false;
 let lorgusPortalEntering = false;
+let lorgusPortalDepartureAligning = false;
 let lorgusPortalEnterStartedAt = 0;
+let lorgusPortalOverlay = null;
 
 /* =========================================================
    ИНИЦИАЛИЗАЦИЯ
@@ -67,26 +69,67 @@ async function initialize() {
    ОСНОВНОЙ РЕНДЕР
    ========================================================= */
 
+function createPortalTransitionOverlay() {
+    const old = document.querySelector(".lorgus-portal-transition");
+    if (old) old.remove();
+
+    const overlay = document.createElement("div");
+    overlay.className = "lorgus-portal-transition";
+    overlay.innerHTML = `
+        <div class="lorgus-portal-transition-veil"></div>
+        <div class="lorgus-portal-transition-core"></div>
+        <div class="lorgus-portal-transition-ring"></div>
+    `;
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => {
+        overlay.classList.add("active");
+    });
+
+    lorgusPortalOverlay = overlay;
+    return overlay;
+}
+
+function finishPortalTransition() {
+    if (!lorgusPortalOverlay) return;
+
+    lorgusPortalOverlay.classList.add("release");
+    window.setTimeout(() => {
+        if (lorgusPortalOverlay) {
+            lorgusPortalOverlay.remove();
+            lorgusPortalOverlay = null;
+        }
+    }, 850);
+}
+
 function render(session) {
     if (session) {
         const authScene = document.querySelector(".lorgus-cinematic-auth");
 
-        if (authScene && !lorgusPortalEntering) {
-            // First dissolve the interface completely, then start the physical camera flight.
+        if (authScene && !lorgusPortalEntering && !lorgusPortalDepartureAligning) {
+            // Phase 1: remove the interface and straighten the view toward the gate.
+            lorgusPortalDepartureAligning = true;
             authScene.classList.add("portal-departure");
 
             window.setTimeout(() => {
                 if (!document.querySelector(".lorgus-cinematic-auth")) return;
 
+                // Phase 2: only after the screen is clean, begin the actual flight.
+                lorgusPortalDepartureAligning = false;
                 lorgusPortalEntering = true;
                 lorgusPortalEnterStartedAt = performance.now();
+                createPortalTransitionOverlay();
 
+                // Keep the portal itself on screen while the new cabinet is mounted behind it.
                 window.setTimeout(() => {
                     if (!lorgusPortalEntering) return;
                     lorgusPortalEntering = false;
                     renderCabinet(session);
-                }, 1900);
-            }, 850);
+
+                    // The portal flare becomes the transition into the cabinet instead of a hard cut.
+                    window.setTimeout(finishPortalTransition, 420);
+                }, 1780);
+            }, 900);
 
             return;
         }
@@ -94,6 +137,11 @@ function render(session) {
         renderCabinet(session);
     } else {
         lorgusPortalEntering = false;
+        lorgusPortalDepartureAligning = false;
+        if (lorgusPortalOverlay) {
+            lorgusPortalOverlay.remove();
+            lorgusPortalOverlay = null;
+        }
         renderAuth();
     }
 }
@@ -5238,16 +5286,30 @@ const openingShape = new THREE.Shape();
         pointer.x += (pointer.tx - pointer.x) * 0.035;
         pointer.y += (pointer.ty - pointer.y) * 0.035;
 
-        if (lorgusPortalEntering) {
+        if (lorgusPortalDepartureAligning) {
+            // The UI disappears first. During that quiet beat the camera settles to the exact
+            // center of the gate, so the subsequent flight has no visible lateral "splice".
+            camera.position.x += (0 - camera.position.x) * 0.075;
+            camera.position.y += (8.2 - camera.position.y) * 0.075;
+            camera.lookAt(0, 7.2, -0.5);
+        } else if (lorgusPortalEntering) {
             const elapsed = performance.now() - lorgusPortalEnterStartedAt;
-            const progress = Math.min(1, elapsed / 1900);
-            const ease = progress * progress * (3 - 2 * progress);
+            const progress = Math.min(1, elapsed / 1780);
+            const ease = 1 - Math.pow(1 - progress, 3);
 
+            // Start exactly from the centered establishing shot and travel on one straight axis.
             camera.position.x = 0;
-            camera.position.y = 8.2 + (6.7 - 8.2) * ease;
-            camera.position.z = 36 + (0.9 - 36) * ease;
-            camera.lookAt(0, 6.8, -1.15);
+            camera.position.y = 8.2 + (6.55 - 8.2) * ease;
+            camera.position.z = 36 + (1.65 - 36) * ease;
+
+            // Narrow the view slightly as we approach the portal to make the movement feel
+            // like entering a real space rather than scaling a flat image.
+            camera.fov = 46 + (39 - 46) * ease;
+            camera.updateProjectionMatrix();
+            camera.lookAt(0, 6.8, -0.72);
         } else {
+            camera.fov += (46 - camera.fov) * 0.06;
+            camera.updateProjectionMatrix();
             camera.position.x += (pointer.x * 1.8 - camera.position.x) * 0.018;
             camera.position.y += (7.2 - pointer.y * 1.5 - camera.position.y) * 0.018;
             camera.lookAt(pointer.x * 0.7, 7.5 + pointer.y * 0.55, -0.5);
