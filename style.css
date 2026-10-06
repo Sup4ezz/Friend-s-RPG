@@ -11669,3 +11669,31 @@ body{
     .lorgus-webgl{transform:none}
     .lorgus-fantasy-stage{transform:none}
 }
+
+
+/* LORGUS // MONUMENTAL GATE SILHOUETTE */
+.lorgus-fantasy-stage .ancient-gate{
+    width:min(520px,38vw);
+    height:min(610px,68vh);
+    bottom:4%;
+    filter:drop-shadow(0 18px 45px rgba(0,0,0,.9));
+}
+.lorgus-fantasy-stage .gate-crown{
+    left:2%;
+    right:2%;
+    top:2%;
+    height:38%;
+    border-width:11px;
+}
+.lorgus-fantasy-stage .gate-pillar{
+    width:25%;
+    height:82%;
+}
+.lorgus-fantasy-stage .gate-fire{
+    left:27%;
+    right:27%;
+    height:80%;
+}
+.lorgus-webgl{
+    opacity:1;
+}
