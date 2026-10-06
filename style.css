@@ -12318,3 +12318,175 @@ body{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
 }
+
+
+/* LORGUS — character creation final visual pass */
+.character-application .character-creation-main{
+  width:min(1160px,calc(100% - 48px));
+  margin:0 auto;
+  padding:18px 0 72px;
+}
+.character-application .character-creation-intro{
+  padding:18px 20px 42px;
+}
+.character-application .character-creation-intro h1{
+  font-size:clamp(50px,5.2vw,78px);
+  line-height:.98;
+  margin:13px 0 15px;
+}
+.character-application .character-creation-intro p{
+  max-width:610px;
+  font-size:14px;
+}
+.character-application .character-creation-form{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:18px!important;
+  align-items:start;
+}
+.character-application .character-creation-panel{
+  display:block!important;
+  position:relative;
+  min-width:0;
+  padding:26px 28px!important;
+  background:
+    linear-gradient(135deg,rgba(18,16,12,.72),rgba(3,3,3,.54))!important;
+  border:1px solid rgba(218,186,111,.18)!important;
+  box-shadow:0 18px 55px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.035)!important;
+  backdrop-filter:blur(5px);
+}
+.character-application .character-creation-panel:before{
+  width:48px!important;
+  height:1px!important;
+  background:linear-gradient(90deg,#d7b56c,transparent)!important;
+}
+.character-application .character-creation-panel:after{
+  width:32px!important;
+  height:1px!important;
+  background:rgba(215,181,108,.25)!important;
+}
+.character-application .creation-panel-heading{
+  margin-bottom:21px!important;
+  gap:13px!important;
+}
+.character-application .creation-panel-heading>span{
+  font-size:10px!important;
+  padding-top:2px;
+}
+.character-application .creation-panel-heading small{
+  font-size:8px!important;
+  letter-spacing:.3em!important;
+  margin-bottom:5px!important;
+}
+.character-application .creation-panel-heading h2{
+  font-size:24px!important;
+  line-height:1.1;
+}
+.character-application .character-creation-panel .creation-fields{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:13px!important;
+}
+.character-application .character-creation-panel label{
+  gap:7px!important;
+}
+.character-application .character-creation-panel label>span{
+  font-size:8px!important;
+  letter-spacing:.15em!important;
+}
+.character-application .character-creation-panel input,
+.character-application .character-creation-panel textarea{
+  min-height:46px!important;
+  padding:11px 12px!important;
+  background:rgba(0,0,0,.32)!important;
+  border:1px solid rgba(218,186,111,.16)!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  font-size:13px;
+}
+.character-application .character-creation-panel input:focus,
+.character-application .character-creation-panel textarea:focus{
+  background:rgba(0,0,0,.48)!important;
+  border-color:rgba(218,186,111,.52)!important;
+  box-shadow:0 0 20px rgba(218,186,111,.05)!important;
+}
+.character-application .character-creation-panel textarea{
+  min-height:116px!important;
+}
+.character-application .origin-panel .creation-wide-field{
+  margin-bottom:13px!important;
+}
+.character-application .creation-origins{
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:6px!important;
+}
+.character-application .creation-origins button{
+  min-height:52px!important;
+  padding:8px 9px!important;
+  background:rgba(0,0,0,.2)!important;
+  border:1px solid rgba(218,186,111,.11)!important;
+  color:#d9c9a8!important;
+}
+.character-application .creation-origins b{
+  font-size:9px!important;
+}
+.character-application .creation-origins small{
+  margin-top:3px!important;
+  font-size:8px!important;
+}
+.character-application .story-panel,
+.character-application .portrait-panel{
+  grid-column:1/-1!important;
+}
+.character-application .story-panel .creation-wide-field{
+  margin-bottom:13px!important;
+}
+.character-application .story-panel .creation-fields{
+  grid-template-columns:1fr 1fr!important;
+}
+.character-application .creation-upload{
+  min-height:88px;
+  display:grid!important;
+  grid-template-columns:1fr auto;
+  grid-template-rows:auto auto;
+  column-gap:20px;
+  align-items:center;
+  padding:18px 20px!important;
+  background:rgba(0,0,0,.2)!important;
+  border:1px dashed rgba(218,186,111,.2)!important;
+}
+.character-application .creation-upload>span{grid-column:1;font-size:9px!important}
+.character-application .creation-upload input{grid-column:2;grid-row:1/3;width:260px!important}
+.character-application .creation-upload small{grid-column:1;font-size:9px!important}
+.character-application .character-creation-form .character-message{
+  grid-column:1/-1;
+}
+.character-application .character-creation-submit{
+  grid-column:1/-1!important;
+  min-height:58px!important;
+  background:linear-gradient(180deg,rgba(105,79,34,.72),rgba(42,30,14,.78))!important;
+  border:1px solid rgba(218,186,111,.42)!important;
+  box-shadow:0 16px 45px rgba(0,0,0,.32)!important;
+  font-size:10px!important;
+  letter-spacing:.3em!important;
+}
+.character-application .character-creation-submit:hover{
+  transform:translateY(-1px);
+}
+@media(max-width:900px){
+  .character-application .character-creation-main{width:min(760px,calc(100% - 32px))}
+  .character-application .character-creation-form{grid-template-columns:1fr!important}
+  .character-application .story-panel,
+  .character-application .portrait-panel{grid-column:auto!important}
+}
+@media(max-width:620px){
+  .character-application .character-creation-main{width:calc(100% - 24px)}
+  .character-application .character-creation-topbar{padding:20px 16px}
+  .character-application .character-creation-intro h1{font-size:42px}
+  .character-application .character-creation-panel{padding:22px 18px!important}
+  .character-application .character-creation-panel .creation-fields,
+  .character-application .story-panel .creation-fields{grid-template-columns:1fr!important}
+  .character-application .creation-origins{grid-template-columns:1fr 1fr!important}
+  .character-application .creation-upload{display:flex!important;flex-direction:column!important;align-items:stretch}
+  .character-application .creation-upload input{width:100%!important}
+}
