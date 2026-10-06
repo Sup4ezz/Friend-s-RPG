@@ -3509,3 +3509,255 @@ window.markLorgusMailRead = markLorgusMailRead;
    ========================================================= */
 
 initialize();
+
+
+/* =========================================================
+   LORGUS 2.1 — CINEMATIC WORLD MAP
+   Карта остаётся исходным PNG. Игровые элементы лежат
+   отдельным слоем поверх неё.
+   ========================================================= */
+
+function selectLorgusMapRegion(region) {
+    const title = document.getElementById("lorgus-map-selection-title");
+    const text = document.getElementById("lorgus-map-selection-text");
+    const buttons = document.querySelectorAll(".lorgus-map-region-button");
+
+    buttons.forEach(button => {
+        button.classList.toggle("active", button.dataset.region === region);
+    });
+
+    const descriptions = {
+        "Атэрон": "Знания, древности, исследования и руины.",
+        "Каэлор": "Горы, кузницы, шахты и древнее мастерство.",
+        "Ксандр": "Торговля, банки, дороги и большие рынки.",
+        "Лирэн": "Леса, плодородные земли и древняя природа.",
+        "Морвейн": "Паломничество, память и туманные долины.",
+        "Святые Земли": "Нейтральная территория для переговоров монархов и глав церквей.",
+        "Спорные Земли": "Независимые поселения и территории вне власти пяти королевств."
+    };
+
+    if (title) title.textContent = region;
+    if (text) text.textContent = descriptions[region] || "Выбери край мира, чтобы узнать больше.";
+
+    const enterButton = document.getElementById("lorgus-map-enter-button");
+    if (!enterButton) return;
+
+    const openable = Object.prototype.hasOwnProperty.call(descriptions, region);
+    enterButton.disabled = !openable;
+    enterButton.textContent = openable ? "Открыть край" : "Территория закрыта";
+    enterButton.onclick = openable ? () => renderKingdomLocations(region) : null;
+}
+
+function renderLorgusWorldMap(container, character) {
+    if (!container || !character) return;
+
+    container.className = "lorgus-map-page";
+
+    const name = escapeHtml(character.name || "Без имени");
+    const race = escapeHtml(character.race || "Раса не указана");
+    const homeland = escapeHtml(character.homeland || "Родина не указана");
+
+    const presence = window.activeRpPresence;
+    const currentLocation =
+        presence?.type === "location"
+            ? presence.location
+            : presence?.type === "road"
+                ? "В пути"
+                : "Местоположение ещё не определено";
+
+    container.innerHTML = `
+        <div class="lorgus-map-shell">
+            <aside class="lorgus-map-sidebar">
+                <div class="lorgus-map-brand">
+                    <span class="lorgus-map-brand-mark">✦</span>
+                    <span>ЛОРГУС</span>
+                </div>
+
+                <div class="lorgus-map-character">
+                    <span class="lorgus-map-kicker">ПУТЬ ПЕРСОНАЖА</span>
+                    <h1>${name}</h1>
+                    <p>${race} · ${homeland}</p>
+                </div>
+
+                <div class="lorgus-map-location-status">
+                    <span>ТЕКУЩЕЕ МЕСТОПОЛОЖЕНИЕ</span>
+                    <strong>${escapeHtml(currentLocation)}</strong>
+                </div>
+
+                <div class="lorgus-map-divider"></div>
+
+                <button class="gold-button lorgus-map-side-button" type="button" onclick="openActiveCharacterProfile()">Профиль</button>
+                <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="renderWorldCharacterTracker()">Люди мира</button>
+                <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="renderMail()">Письма</button>
+                <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="switchCharacter()">Сменить персонажа</button>
+            </aside>
+
+            <main class="lorgus-map-main">
+                <header class="lorgus-map-header">
+                    <div>
+                        <span class="lorgus-map-kicker">МИР ЛОРГУСА · КАРТА</span>
+                        <h2>Неровланд</h2>
+                    </div>
+                    <div class="lorgus-map-header-status">
+                        <span class="lorgus-map-status-dot"></span>
+                        <span>МИР АКТИВЕН</span>
+                    </div>
+                </header>
+
+                <section class="lorgus-map-stage">
+                    <div class="lorgus-map-frame">
+                        <div class="lorgus-map-image-wrap" id="lorgus-map-viewport">
+                            <img class="lorgus-map-image" src="/assets/world/nerovland-map.png.png" alt="Карта Неровланда" draggable="false">
+                            <div class="lorgus-map-overlay">
+                                <div class="lorgus-map-compass" aria-hidden="true"><span>N</span><i></i></div>
+                                <div class="lorgus-map-scale"><span></span><small>МИР</small></div>
+                            </div>
+                        </div>
+
+                        <div class="lorgus-map-controls" aria-label="Управление картой">
+                            <button type="button" onclick="lorgusMapZoom(1.12)" aria-label="Увеличить">+</button>
+                            <button type="button" onclick="lorgusMapZoom(.89)" aria-label="Уменьшить">−</button>
+                            <button type="button" onclick="lorgusMapReset()" aria-label="Сбросить масштаб">↺</button>
+                        </div>
+
+                        <div class="lorgus-map-hint">
+                            <span>КАРТА МИРА</span>
+                            <small>Колесо мыши — масштаб · перетаскивание — обзор</small>
+                        </div>
+                    </div>
+
+                    <aside class="lorgus-map-inspector">
+                        <span class="lorgus-map-kicker">ВЫБРАННЫЙ КРАЙ</span>
+                        <div class="lorgus-map-selection-symbol">◇</div>
+                        <h3 id="lorgus-map-selection-title">Атэрон</h3>
+                        <p id="lorgus-map-selection-text">Знания, древности, исследования и руины.</p>
+
+                        <button id="lorgus-map-enter-button" class="gold-button lorgus-map-enter-button" type="button" onclick="renderKingdomLocations('Атэрон')">Открыть край</button>
+
+                        <div class="lorgus-map-regions">
+                            <span class="lorgus-map-regions-title">РЕГИОНЫ</span>
+                            <button class="lorgus-map-region-button active" data-region="Атэрон" type="button" onclick="selectLorgusMapRegion('Атэрон')"><i></i><span>Атэрон</span></button>
+                            <button class="lorgus-map-region-button" data-region="Каэлор" type="button" onclick="selectLorgusMapRegion('Каэлор')"><i></i><span>Каэлор</span></button>
+                            <button class="lorgus-map-region-button" data-region="Ксандр" type="button" onclick="selectLorgusMapRegion('Ксандр')"><i></i><span>Ксандр</span></button>
+                            <button class="lorgus-map-region-button" data-region="Лирэн" type="button" onclick="selectLorgusMapRegion('Лирэн')"><i></i><span>Лирэн</span></button>
+                            <button class="lorgus-map-region-button" data-region="Морвейн" type="button" onclick="selectLorgusMapRegion('Морвейн')"><i></i><span>Морвейн</span></button>
+                            <button class="lorgus-map-region-button" data-region="Святые Земли" type="button" onclick="selectLorgusMapRegion('Святые Земли')"><i></i><span>Святые Земли</span></button>
+                            <button class="lorgus-map-region-button" data-region="Спорные Земли" type="button" onclick="selectLorgusMapRegion('Спорные Земли')"><i></i><span>Спорные Земли</span></button>
+                        </div>
+
+                        <div class="lorgus-map-closed">
+                            <span>ЗАКРЫТАЯ ТЕРРИТОРИЯ</span>
+                            <strong>Геена</strong>
+                            <p>Континент закрыт для игроков. Посещение и происхождение персонажа здесь недоступны.</p>
+                        </div>
+                    </aside>
+                </section>
+            </main>
+        </div>
+    `;
+
+    selectLorgusMapRegion("Атэрон");
+    initializeLorgusMapViewport();
+}
+
+let lorgusMapScale = 1;
+let lorgusMapOffsetX = 0;
+let lorgusMapOffsetY = 0;
+let lorgusMapViewportCleanup = null;
+
+function initializeLorgusMapViewport() {
+    if (lorgusMapViewportCleanup) {
+        lorgusMapViewportCleanup();
+        lorgusMapViewportCleanup = null;
+    }
+
+    const viewport = document.getElementById("lorgus-map-viewport");
+    const image = viewport?.querySelector(".lorgus-map-image");
+    if (!viewport || !image) return;
+
+    lorgusMapScale = 1;
+    lorgusMapOffsetX = 0;
+    lorgusMapOffsetY = 0;
+
+    let dragging = false;
+    let startX = 0;
+    let startY = 0;
+    let startOffsetX = 0;
+    let startOffsetY = 0;
+
+    const apply = () => {
+        image.style.transform = `translate3d(${lorgusMapOffsetX}px,${lorgusMapOffsetY}px,0) scale(${lorgusMapScale})`;
+    };
+
+    const onWheel = event => {
+        event.preventDefault();
+        const factor = event.deltaY < 0 ? 1.08 : .925;
+        lorgusMapScale = Math.min(3.2, Math.max(.8, lorgusMapScale * factor));
+        apply();
+    };
+
+    const onPointerDown = event => {
+        dragging = true;
+        startX = event.clientX;
+        startY = event.clientY;
+        startOffsetX = lorgusMapOffsetX;
+        startOffsetY = lorgusMapOffsetY;
+        viewport.classList.add("dragging");
+        viewport.setPointerCapture?.(event.pointerId);
+    };
+
+    const onPointerMove = event => {
+        if (!dragging) return;
+        lorgusMapOffsetX = startOffsetX + event.clientX - startX;
+        lorgusMapOffsetY = startOffsetY + event.clientY - startY;
+        apply();
+    };
+
+    const stopDragging = () => {
+        dragging = false;
+        viewport.classList.remove("dragging");
+    };
+
+    viewport.addEventListener("wheel", onWheel, { passive: false });
+    viewport.addEventListener("pointerdown", onPointerDown);
+    viewport.addEventListener("pointermove", onPointerMove);
+    viewport.addEventListener("pointerup", stopDragging);
+    viewport.addEventListener("pointercancel", stopDragging);
+    viewport.addEventListener("pointerleave", stopDragging);
+
+    lorgusMapViewportCleanup = () => {
+        viewport.removeEventListener("wheel", onWheel);
+        viewport.removeEventListener("pointerdown", onPointerDown);
+        viewport.removeEventListener("pointermove", onPointerMove);
+        viewport.removeEventListener("pointerup", stopDragging);
+        viewport.removeEventListener("pointercancel", stopDragging);
+        viewport.removeEventListener("pointerleave", stopDragging);
+    };
+
+    apply();
+}
+
+function lorgusMapZoom(factor) {
+    lorgusMapScale = Math.min(3.2, Math.max(.8, lorgusMapScale * factor));
+    const image = document.querySelector(".lorgus-map-image");
+    if (image) {
+        image.style.transform = `translate3d(${lorgusMapOffsetX}px,${lorgusMapOffsetY}px,0) scale(${lorgusMapScale})`;
+    }
+}
+
+function lorgusMapReset() {
+    lorgusMapScale = 1;
+    lorgusMapOffsetX = 0;
+    lorgusMapOffsetY = 0;
+    const image = document.querySelector(".lorgus-map-image");
+    if (image) image.style.transform = "translate3d(0,0,0) scale(1)";
+}
+
+/* Последняя декларация заменяет старый экран выбора королевств. */
+function renderCharacter(container, character) {
+    renderLorgusWorldMap(container, character);
+}
+
+window.selectLorgusMapRegion = selectLorgusMapRegion;
+window.lorgusMapZoom = lorgusMapZoom;
+window.lorgusMapReset = lorgusMapReset;
