@@ -3641,10 +3641,35 @@ function renderLorgusMapEditorRects(active = true) {
                     Math.atan2(event.clientY - cy, event.clientX - cx) * 180 / Math.PI + 90
                 );
             } else {
-                const sx = mode.includes("e") ? 1 : -1;
-                const sy = mode.includes("s") ? 1 : -1;
-                rectData.w = Math.max(2, startData.w + dx * sx * 2);
-                rectData.h = Math.max(2, startData.h + dy * sy * 2);
+                // Resize in the rectangle's own rotated coordinate system.
+                const angle = -startData.rotation * Math.PI / 180;
+                const localDx = dx * Math.cos(angle) - dy * Math.sin(angle);
+                const localDy = dx * Math.sin(angle) + dy * Math.cos(angle);
+
+                const fromWest = mode.includes("w");
+                const fromNorth = mode.includes("n");
+                const fromEast = mode.includes("e");
+                const fromSouth = mode.includes("s");
+
+                const minSize = 2;
+                const newW = Math.max(minSize, startData.w + localDx * (fromEast ? 2 : fromWest ? -2 : 0));
+                const newH = Math.max(minSize, startData.h + localDy * (fromSouth ? 2 : fromNorth ? -2 : 0));
+
+                const dw = newW - startData.w;
+                const dh = newH - startData.h;
+
+                rectData.w = newW;
+                rectData.h = newH;
+
+                // Keep the opposite edge fixed while resizing.
+                const anchorX = fromWest ? 1 : fromEast ? -1 : 0;
+                const anchorY = fromNorth ? 1 : fromSouth ? -1 : 0;
+                const angleForward = startData.rotation * Math.PI / 180;
+                const shiftX = (dw * anchorX * Math.cos(angleForward) - dh * anchorY * Math.sin(angleForward)) / 2;
+                const shiftY = (dw * anchorX * Math.sin(angleForward) + dh * anchorY * Math.cos(angleForward)) / 2;
+
+                rectData.x = Math.max(1, Math.min(99, startData.x + shiftX));
+                rectData.y = Math.max(1, Math.min(99, startData.y + shiftY));
             }
 
             rect.style.left = rectData.x + "%";
@@ -3654,7 +3679,7 @@ function renderLorgusMapEditorRects(active = true) {
             rect.style.transform = "translate(-50%,-50%) rotate(" + rectData.rotation + "deg)";
         };
 
-        rect.onpointerup = event => {
+        const finishPointer = event => {
             if (event.pointerId !== pointerId) return;
             rect.releasePointerCapture?.(pointerId);
             pointerId = null;
@@ -3668,6 +3693,8 @@ function renderLorgusMapEditorRects(active = true) {
                 window.lorgusMapHintTimer = setTimeout(() => hint.classList.remove("visible"), 3500);
             }
         };
+
+        rect.onpointercancel = finishPointer;
 
         layer.appendChild(rect);
     });
