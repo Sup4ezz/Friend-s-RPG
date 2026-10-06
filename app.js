@@ -1564,13 +1564,13 @@ function renderCharacterApplicationForm(container) {
                         <div class="creation-panel-heading"><span>02</span><div><small>ПРОИСХОЖДЕНИЕ</small><h2>Откуда ты?</h2></div></div>
                         <label class="creation-wide-field"><span>Родина</span><input id="character-homeland" type="text" list="character-homelands" placeholder="Город, край или земля..." required></label>
                         <div class="creation-origins">
-                            <button type="button" data-location="Примум"><b>ПРИМУМ</b><small>Атэрон · знания</small></button>
-                            <button type="button" data-location="Хелион"><b>ХЕЛИОН</b><small>Каэлор · кузницы</small></button>
-                            <button type="button" data-location="Арджент"><b>АРДЖЕНТ</b><small>Ксандр · торговля</small></button>
-                            <button type="button" data-location="Аврора"><b>АВРОРА</b><small>Лирэн · леса</small></button>
-                            <button type="button" data-location="Фин"><b>ФИН</b><small>Морвейн · память</small></button>
-                            <button type="button" data-location="Святые Земли"><b>СВЯТЫЕ ЗЕМЛИ</b><small>нейтральная территория</small></button>
-                            <button type="button" data-location="Спорные Земли"><b>СПОРНЫЕ ЗЕМЛИ</b><small>вне власти королевств</small></button>
+                            <button type="button" data-location="Примум"><i>01</i><b>ПРИМУМ</b><small>АТЭРОН · ЗЕМЛИ ЗНАНИЙ</small><span>◆</span></button>
+                            <button type="button" data-location="Хелион"><i>02</i><b>ХЕЛИОН</b><small>КАЭЛОР · ЗЕМЛИ ОГНЯ</small><span>◆</span></button>
+                            <button type="button" data-location="Арджент"><i>03</i><b>АРДЖЕНТ</b><small>КСАНДР · ТОРГОВЫЕ ЗЕМЛИ</small><span>◆</span></button>
+                            <button type="button" data-location="Аврора"><i>04</i><b>АВРОРА</b><small>ЛИРЭН · ЛЕСНЫЕ ЗЕМЛИ</small><span>◆</span></button>
+                            <button type="button" data-location="Фин"><i>05</i><b>ФИН</b><small>МОРВЕЙН · СЕВЕРНЫЕ ЗЕМЛИ</small><span>◆</span></button>
+                            <button type="button" data-location="Святые Земли"><i>06</i><b>СВЯТЫЕ ЗЕМЛИ</b><small>НЕЙТРАЛЬНАЯ ТЕРРИТОРИЯ</small><span>◆</span></button>
+                            <button type="button" data-location="Спорные Земли"><i>07</i><b>СПОРНЫЕ ЗЕМЛИ</b><small>ЗЕМЛИ БЕЗ ЕДИНОЙ ВЛАСТИ</small><span>◆</span></button>
                         </div>
                         <datalist id="character-homelands">
                             <option value="Примум"></option><option value="Хелион"></option><option value="Арджент"></option><option value="Аврора"></option><option value="Фин"></option><option value="Святые Земли"></option><option value="Спорные Земли"></option>
