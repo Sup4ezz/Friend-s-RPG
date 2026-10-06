@@ -12,7 +12,6 @@ using (
         select 1
         from public.rp_presence p
         where p.player_id = auth.uid()
-          and p.character_id = p.character_id
           and p.presence_type = rp_messages.presence_type
           and (
               (
@@ -81,5 +80,27 @@ grant insert on table public.rp_messages to authenticated;
 
 -- Keep message timestamps authoritative.
 revoke update(created_at, player_id, character_id) on public.rp_messages from authenticated;
+
+create or replace function public.set_rp_message_server_fields()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $
+begin
+    new.player_id := auth.uid();
+    new.created_at := now();
+    return new;
+end;
+$;
+
+drop trigger if exists trg_rp_messages_server_fields on public.rp_messages;
+create trigger trg_rp_messages_server_fields
+before insert on public.rp_messages
+for each row
+execute function public.set_rp_message_server_fields();
+
+revoke all on function public.set_rp_message_server_fields() from public;
+grant execute on function public.set_rp_message_server_fields() to authenticated;
 
 alter table public.rp_messages replica identity full;
