@@ -4435,8 +4435,8 @@ function initializeLorgusWebGL() {
     }
 
     // Long approach masonry connects the bottom of the frame to the portal.
-    for (let row = 0; row < 7; row++) {
-        const z = 8.5 - row * 2.35;
+    for (let row = 0; row < 14; row++) {
+        const z = 8.5 - row * 2.75;
         const spread = 5.2 + row * 0.75;
         const pieces = 5 + (row % 2);
         for (let col = 0; col < pieces; col++) {
@@ -4607,17 +4607,17 @@ function initializeLorgusWebGL() {
     // No horizontal crown: the arch itself forms the complete central silhouette.
 
     const rift = new THREE.Mesh(
-        new THREE.PlaneGeometry(10.0, 11.4, 40, 80),
+        new THREE.PlaneGeometry(12.2, 12.8, 48, 80),
         new THREE.ShaderMaterial({
             transparent: true,
             depthWrite: false,
             blending: THREE.AdditiveBlending,
             uniforms: { time: { value: 0 } },
             vertexShader: "uniform float time; varying vec2 vUv; void main(){vUv=uv;vec3 p=position;p.x+=sin(uv.y*18.0+time*1.4)*0.13;p.x+=sin(uv.y*43.0-time*2.1)*0.045;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}",
-            fragmentShader: "uniform float time; varying vec2 vUv; void main(){float edge=1.0-smoothstep(0.40,0.50,abs(vUv.x-0.5));float vertical=smoothstep(0.015,0.09,vUv.y)*smoothstep(0.015,0.09,1.0-vUv.y);float wave=0.55+0.45*sin(vUv.y*28.0-time*3.0);float core=pow(edge,1.25)*vertical*(0.72+wave*0.28);vec3 c=mix(vec3(0.20,0.045,0.006),vec3(0.95,0.52,0.11),edge);gl_FragColor=vec4(c,core*0.62);}"
+            fragmentShader: "uniform float time; varying vec2 vUv; void main(){float x=(vUv.x-0.5)*10.0;float y=vUv.y*11.4;float roof=9.0-sqrt(max(0.0,25.0-x*x));float inside=step(y,roof);float edge=1.0-smoothstep(0.0,0.72,abs(x));float vertical=smoothstep(0.02,0.16,vUv.y)*inside;float wave=0.55+0.45*sin(vUv.y*28.0-time*3.0);float core=pow(edge,1.25)*vertical*(0.72+wave*0.28);vec3 c=mix(vec3(0.20,0.045,0.006),vec3(0.95,0.52,0.11),edge);gl_FragColor=vec4(c,core*0.62);}"
         })
     );
-    rift.position.set(0, 5.7, -0.28);
+    rift.position.set(0, 6.0, -0.28);
     rift.renderOrder = 1;
     world.add(rift);
 
