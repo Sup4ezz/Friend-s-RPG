@@ -12215,3 +12215,41 @@ body{
   .character-creation-form{grid-template-columns:1fr}
   .story-panel,.portrait-panel{grid-column:auto}
 }
+
+
+/* Character creation: restore the column layout INSIDE the cards */
+.character-creation-panel .creation-fields{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:16px!important;
+}
+.identity-panel .creation-fields label{min-width:0}
+.story-panel .creation-fields{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+.origin-panel .creation-origins{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:10px!important;
+}
+.character-creation-panel .creation-wide-field{
+  width:100%;
+}
+@media(max-width:900px){
+  .character-creation-panel .creation-fields,
+  .story-panel .creation-fields{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .origin-panel .creation-origins{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media(max-width:600px){
+  .character-creation-panel .creation-fields,
+  .story-panel .creation-fields{
+    grid-template-columns:1fr!important;
+  }
+  .origin-panel .creation-origins{
+    grid-template-columns:1fr 1fr!important;
+  }
+}
