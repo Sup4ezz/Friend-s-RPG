@@ -1577,8 +1577,8 @@ function renderCharacterApplicationForm(container) {
 .character-application .character-creation-panel button,
 .character-application .character-creation-submit{visibility:visible!important;opacity:1!important;pointer-events:auto!important}
 </style>
-<form id="character-application-form" class="character-creation-form" onsubmit="submitCharacterApplication(event)">
-                    <section class="character-creation-panel identity-panel">
+<form id="character-application-form" class="character-creation-form" style="display:grid!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:9999!important;width:100%!important;" onsubmit="submitCharacterApplication(event)">
+                    <section class="character-creation-panel identity-panel" style="display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:10000!important;">
                         <div class="creation-panel-heading"><span>01</span><div><small>ЛИЧНОСТЬ</small><h2>Кто ты?</h2></div></div>
                         <div class="creation-fields">
                             <label><span>Имя персонажа</span><input id="character-name" type="text" required placeholder="Имя"></label>
