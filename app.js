@@ -3664,6 +3664,9 @@ function renderLorgusMapEditorRects() {
         window.lorgusMapLabelResizeObserver.disconnect();
     }
 
+    const world = document.getElementById("lorgus-map-world");
+    if (!world) return;
+
     window.lorgusMapLabelResizeObserver = new ResizeObserver(() => {
         syncLorgusMapLabelLayer();
         layer.querySelectorAll(".lorgus-map-editor-rect").forEach(fitLorgusMapLabel);
@@ -3888,6 +3891,7 @@ function initializeLorgusMapViewport() {
 
     syncLorgusMapLabelLayer();
     requestAnimationFrame(syncLorgusMapLabelLayer);
+}
 
 function lorgusMapZoom(factor) {
     lorgusMapScale = Math.min(3.2, Math.max(.8, lorgusMapScale * factor));
