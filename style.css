@@ -13648,3 +13648,63 @@ body{
     padding:24px 20px!important;
   }
 }
+
+/* LORGUS — center the creation composition, never pin it to the left edge */
+#root > #cabinet-content.character-application .character-creation-main{
+  width:min(1540px,calc(100% - 80px))!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  padding-left:0!important;
+  padding-right:0!important;
+  grid-template-columns:minmax(0,1fr) minmax(560px,680px)!important;
+  justify-content:center!important;
+}
+#root > #cabinet-content.character-application .character-creation-intro{
+  width:min(680px,100%)!important;
+  justify-self:center!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+#root > #cabinet-content.character-application #character-application-form{
+  width:min(680px,100%)!important;
+  justify-self:center!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+#root > #cabinet-content.character-application .character-creation-panel,
+#root > #cabinet-content.character-application .creation-panel-heading,
+#root > #cabinet-content.character-application .character-creation-panel label{
+  text-align:left!important;
+}
+#root > #cabinet-content.character-application .character-creation-intro{
+  text-align:center!important;
+}
+#root > #cabinet-content.character-application .character-creation-intro p{
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+#root > #cabinet-content.character-application .character-creation-line{
+  margin-left:auto!important;
+  margin-right:auto!important;
+  justify-content:center!important;
+}
+#root > #cabinet-content.character-application .character-creation-line i{
+  flex:1 1 90px!important;
+}
+@media(max-width:1050px){
+  #root > #cabinet-content.character-application .character-creation-main{
+    width:min(820px,calc(100% - 48px))!important;
+    margin-left:auto!important;
+    margin-right:auto!important;
+  }
+  #root > #cabinet-content.character-application .character-creation-intro,
+  #root > #cabinet-content.character-application #character-application-form{
+    width:100%!important;
+    justify-self:stretch!important;
+  }
+}
+@media(max-width:620px){
+  #root > #cabinet-content.character-application .character-creation-main{
+    width:calc(100% - 28px)!important;
+  }
+}
