@@ -89,9 +89,9 @@ function renderAuth() {
                 <div class="world-arc world-arc-a"></div>
                 <div class="world-arc world-arc-b"></div>
                 <div class="world-arc world-arc-c"></div>
-                <div class="world-coordinate world-coordinate-a">43° 17' / 001</div>
-                <div class="world-coordinate world-coordinate-b">THE WORLD IS NOT EMPTY</div>
-                <div class="world-coordinate world-coordinate-c">NO RETURN // NO RECORD</div>
+                <div class="world-coordinate world-coordinate-a">43° 17'</div>
+                <div class="world-coordinate world-coordinate-b">МИР ЖИВ</div>
+                <div class="world-coordinate world-coordinate-c">ПУТЬ НАЗАД ЗАКРЫТ</div>
             </div>
 
             <header class="lorgus-auth-header">
@@ -117,9 +117,9 @@ function renderAuth() {
             <section class="auth-container">
                 <div class="auth-panel">
                     <div class="auth-panel-kicker">
-                        <span>ACCESS NODE</span>
+                        <span>ВРАТА</span>
                         <i></i>
-                        <span>AUTHORIZED PERSONNEL ONLY</span>
+                        <span>ТОЛЬКО ДЛЯ ПУТЕШЕСТВЕННИКОВ</span>
                     </div>
 
                     <div class="auth-tabs">
