@@ -1533,28 +1533,6 @@ function renderCharacterApplicationForm(container) {
     root.replaceChildren(container);
     container.innerHTML = `
         <div class="character-creation-scene" style="display:block;visibility:visible;opacity:1;">
-            <div class="lorgus-fantasy-stage" aria-hidden="true">
-                <div class="void-sky"></div>
-                <div class="world-rift"></div>
-                <div class="rift-glow"></div>
-                <div class="rift-shard shard-a"></div>
-                <div class="rift-shard shard-b"></div>
-                <div class="rift-shard shard-c"></div>
-                <div class="rift-shard shard-d"></div>
-                <div class="colossus colossus-a"></div>
-                <div class="colossus colossus-b"></div>
-                <div class="ancient-gate">
-                    <div class="gate-crown"></div>
-                    <div class="gate-pillar gate-pillar-left"></div>
-                    <div class="gate-pillar gate-pillar-right"></div>
-                    <div class="gate-fire"></div>
-                </div>
-                <div class="ground-mist mist-one"></div>
-                <div class="ground-mist mist-two"></div>
-                <div class="ember-field"></div>
-            </div>
-            <div class="character-creation-vignette" aria-hidden="true"></div>
-
             <header class="character-creation-topbar">
                 <div><strong>✦ ЛОРГУС</strong><span>СОЗДАНИЕ ПЕРСОНАЖА</span></div>
                 <button type="button" class="lorgus-screen-logout" onclick="logout()">ВЫХОД</button>
