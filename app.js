@@ -4436,8 +4436,8 @@ function initializeLorgusWebGL() {
 
     // Long approach masonry connects the bottom of the frame to the portal.
     for (let row = 0; row < 14; row++) {
-        const z = 8.5 - row * 4.4;
-        const spread = 5.0 + row * 1.15;
+        const z = 8.5 - row * 5.2;
+        const spread = 5.0 + row * 1.55;
         const pieces = 5 + (row % 2);
         for (let col = 0; col < pieces; col++) {
             const width = (spread * 2) / pieces - 0.14;
@@ -4535,8 +4535,8 @@ function initializeLorgusWebGL() {
     }
 
     // Foreground slabs: irregular perspective lines lead the eye into the portal.
-    for (let i = 0; i < 12; i++) {
-        const width = 4.5 + i * 0.95;
+    for (let i = 0; i < 16; i++) {
+        const width = 4.5 + i * 1.05;
         const slab = makeMasonryBlock(
             (Math.random() - 0.5) * (1.0 + i * 0.45),
             -0.12 + Math.random() * 0.08,
@@ -4609,10 +4609,10 @@ function initializeLorgusWebGL() {
     // Portal glow uses the exact same arched silhouette as the passage.
     // No rectangular plane, no border: just a soft luminous shape behind the stone frame.
     const glowShape = new THREE.Shape();
-    glowShape.moveTo(-5.05, 0.04);
-    glowShape.lineTo(-5.05, 8.15);
-    glowShape.quadraticCurveTo(0, 13.45, 5.05, 8.15);
-    glowShape.lineTo(5.05, 0.04);
+    glowShape.moveTo(-5.85, 0.04);
+    glowShape.lineTo(-5.85, 8.15);
+    glowShape.quadraticCurveTo(0, 14.45, 5.85, 8.15);
+    glowShape.lineTo(5.85, 0.04);
     glowShape.closePath();
 
     const rift = new THREE.Mesh(
