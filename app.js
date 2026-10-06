@@ -4402,6 +4402,29 @@ function initializeLorgusWebGL() {
         }
     }
 
+    // Long approach masonry connects the bottom of the frame to the portal.
+    for (let row = 0; row < 7; row++) {
+        const z = 8.5 - row * 2.35;
+        const spread = 5.2 + row * 0.75;
+        const pieces = 5 + (row % 2);
+        for (let col = 0; col < pieces; col++) {
+            const width = (spread * 2) / pieces - 0.14;
+            const slab = new THREE.Mesh(
+                new THREE.BoxGeometry(width, 0.28 + Math.random() * 0.16, 2.05 + Math.random() * 0.35),
+                row < 3 ? stoneEdge : groundStone
+            );
+            slab.position.set(
+                -spread + width * 0.5 + col * (width + 0.14) + (Math.random() - 0.5) * 0.12,
+                -0.03 + Math.random() * 0.07,
+                z
+            );
+            slab.rotation.y = (Math.random() - 0.5) * 0.035;
+            slab.castShadow = true;
+            slab.receiveShadow = true;
+            world.add(slab);
+        }
+    }
+
     // Foreground slabs: irregular perspective lines lead the eye into the portal.
     for (let i = 0; i < 8; i++) {
         const width = 4.5 + i * 0.8;
@@ -4449,7 +4472,7 @@ function initializeLorgusWebGL() {
     }
 
     const rift = new THREE.Mesh(
-        new THREE.PlaneGeometry(10.0, 18.0, 40, 80),
+        new THREE.PlaneGeometry(11.8, 21.5, 40, 80),
         new THREE.ShaderMaterial({
             transparent: true,
             depthWrite: false,
@@ -4459,7 +4482,7 @@ function initializeLorgusWebGL() {
             fragmentShader: "uniform float time; varying vec2 vUv; void main(){float edge=1.0-smoothstep(0.40,0.50,abs(vUv.x-0.5));float vertical=smoothstep(0.015,0.09,vUv.y)*smoothstep(0.015,0.09,1.0-vUv.y);float wave=0.55+0.45*sin(vUv.y*28.0-time*3.0);float core=pow(edge,1.25)*vertical*(0.72+wave*0.28);vec3 c=mix(vec3(0.20,0.045,0.006),vec3(0.95,0.52,0.11),edge);gl_FragColor=vec4(c,core*0.62);}"
         })
     );
-    rift.position.set(0, 8.0, -0.28);
+    rift.position.set(0, 9.5, -0.28);
     rift.renderOrder = 1;
     world.add(rift);
 
