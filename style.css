@@ -9539,7 +9539,56 @@ body{
 }
 
 .lorgus-map-controls{
-  display:none !important;
+  position:absolute;
+  top:18px;
+  left:18px;
+  z-index:30;
+  display:flex !important;
+  align-items:flex-start;
+  gap:10px;
+  pointer-events:auto;
+}
+
+.lorgus-map-control{
+  min-height:38px;
+  padding:0 14px;
+  border:1px solid rgba(235,210,154,.45);
+  background:rgba(10,8,6,.9);
+  color:var(--gold-light);
+  font-family:var(--title-font);
+  font-size:11px;
+  letter-spacing:.08em;
+  cursor:pointer;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  backdrop-filter:blur(8px);
+}
+
+.lorgus-map-control:hover{
+  border-color:rgba(245,225,170,.8);
+  background:rgba(30,23,14,.94);
+}
+
+.lorgus-map-editor-readout{
+  min-width:230px;
+  padding:9px 12px;
+  border:1px solid rgba(215,174,90,.28);
+  background:rgba(8,7,5,.9);
+  color:rgba(240,228,200,.8);
+  font-size:10px;
+  line-height:1.35;
+  letter-spacing:.05em;
+  box-shadow:0 8px 24px rgba(0,0,0,.35);
+  backdrop-filter:blur(8px);
+}
+
+.lorgus-map-editor-readout strong,
+.lorgus-map-editor-readout span{
+  display:block;
+}
+
+.lorgus-map-editor-readout strong{
+  color:var(--gold-light);
+  margin-bottom:3px;
 }
 
 
