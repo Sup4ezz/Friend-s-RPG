@@ -1568,17 +1568,8 @@ function renderCharacterApplicationForm(container) {
                     <div class="character-creation-line"><i></i><b>ТВОЙ ПУТЬ НАЧИНАЕТСЯ ЗДЕСЬ</b><i></i></div>
                 </section>
 
-                <style>
-.character-application .character-creation-form,
-.character-application .character-creation-panel,
-.character-application .character-creation-panel label,
-.character-application .character-creation-panel input,
-.character-application .character-creation-panel textarea,
-.character-application .character-creation-panel button,
-.character-application .character-creation-submit{visibility:visible!important;opacity:1!important;pointer-events:auto!important}
-</style>
-<form id="character-application-form" class="character-creation-form" style="display:grid!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:9999!important;width:100%!important;" onsubmit="submitCharacterApplication(event)">
-                    <section class="character-creation-panel identity-panel" style="display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:10000!important;">
+                <form id="character-application-form" class="character-creation-form" onsubmit="submitCharacterApplication(event)">
+                    <section class="character-creation-panel identity-panel">
                         <div class="creation-panel-heading"><span>01</span><div><small>ЛИЧНОСТЬ</small><h2>Кто ты?</h2></div></div>
                         <div class="creation-fields">
                             <label><span>Имя персонажа</span><input id="character-name" type="text" required placeholder="Имя"></label>
@@ -1629,19 +1620,6 @@ function renderCharacterApplicationForm(container) {
             </main>
         </div>
     `;
-
-    const creationScene = container.querySelector(".character-creation-scene");
-    const creationForm = container.querySelector("#character-application-form");
-    if (creationScene) {
-        creationScene.style.display = "block";
-        creationScene.style.visibility = "visible";
-        creationScene.style.opacity = "1";
-    }
-    if (creationForm) {
-        creationForm.style.display = "grid";
-        creationForm.style.visibility = "visible";
-        creationForm.style.opacity = "1";
-    }
 
     container.querySelectorAll(".creation-origins button").forEach(button => {
         button.addEventListener("click", () => {
