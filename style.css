@@ -8573,3 +8573,50 @@ body{
     white-space:normal;
   }
 }
+
+/* =========================================================
+   LORGUS — AUTH TITLE FINAL
+   Render the caption as plain text inside the card.
+   ========================================================= */
+
+.auth-panel{
+  position:relative !important;
+  overflow:visible !important;
+  padding-top:72px !important;
+}
+
+.auth-panel::before{
+  content:"ВХОД В ЛОРГУС" !important;
+  position:absolute !important;
+  top:28px !important;
+  left:38px !important;
+  right:auto !important;
+  display:block !important;
+  width:auto !important;
+  height:auto !important;
+  margin:0 !important;
+  padding:0 !important;
+  background:none !important;
+  background-color:transparent !important;
+  border:0 !important;
+  border-radius:0 !important;
+  box-shadow:none !important;
+  outline:0 !important;
+  color:var(--ui-gold) !important;
+  font:600 10px/1.2 var(--body-font) !important;
+  letter-spacing:.25em !important;
+  white-space:nowrap !important;
+  z-index:10 !important;
+}
+
+@media(max-width:560px){
+  .auth-panel{
+    padding-top:68px !important;
+  }
+
+  .auth-panel::before{
+    top:25px !important;
+    left:20px !important;
+    white-space:nowrap !important;
+  }
+}
