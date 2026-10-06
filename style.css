@@ -9589,9 +9589,9 @@ body{
   overflow:hidden;
   text-align:center;
   text-shadow:0 2px 8px rgba(0,0,0,.98);
-  cursor:default;
+  cursor:pointer;
   user-select:none;
-  touch-action:none;
+  touch-action:manipulation;
   pointer-events:auto;
 }
 .lorgus-map-marker-layer.editor-mode .lorgus-map-editor-rect{
