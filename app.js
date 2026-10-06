@@ -107,28 +107,38 @@ function render(session) {
         const authScene = document.querySelector(".lorgus-cinematic-auth");
 
         if (authScene && !lorgusPortalEntering && !lorgusPortalDepartureAligning) {
-            // Phase 1: remove the interface and straighten the view toward the gate.
+            // Phase 1: ONLY the interface disappears. The camera stays completely still.
             lorgusPortalDepartureAligning = true;
             authScene.classList.add("portal-departure");
 
             window.setTimeout(() => {
                 if (!document.querySelector(".lorgus-cinematic-auth")) return;
 
-                // Phase 2: only after the screen is clean, begin the actual flight.
+                // Phase 2: hide the scene for a fraction of a second and reset the camera
+                // to the exact centered establishing shot. This removes the visible splice
+                // caused by pointer/parallax movement before the flight.
+                const overlay = createPortalTransitionOverlay();
+                overlay.classList.add("blackout");
+
                 lorgusPortalDepartureAligning = false;
                 lorgusPortalEntering = true;
                 lorgusPortalEnterStartedAt = performance.now();
-                createPortalTransitionOverlay();
 
-                // Keep the portal itself on screen while the new cabinet is mounted behind it.
+                window.setTimeout(() => {
+                    const canvas = document.getElementById("lorgus-webgl");
+                    if (canvas) canvas.classList.add("portal-flight-ready");
+                    overlay.classList.remove("blackout");
+                }, 260);
+
+                // The portal reaches the camera, the frame becomes light, then the new
+                // cabinet is mounted underneath a fully closed veil. Only after that veil
+                // starts opening do we reveal the cabinet.
                 window.setTimeout(() => {
                     if (!lorgusPortalEntering) return;
                     lorgusPortalEntering = false;
                     renderCabinet(session);
-
-                    // The portal flare becomes the transition into the cabinet instead of a hard cut.
-                    window.setTimeout(finishPortalTransition, 420);
-                }, 1780);
+                    window.setTimeout(finishPortalTransition, 220);
+                }, 2020);
             }, 900);
 
             return;
@@ -5287,26 +5297,23 @@ const openingShape = new THREE.Shape();
         pointer.y += (pointer.ty - pointer.y) * 0.035;
 
         if (lorgusPortalDepartureAligning) {
-            // The UI disappears first. During that quiet beat the camera settles to the exact
-            // center of the gate, so the subsequent flight has no visible lateral "splice".
-            camera.position.x += (0 - camera.position.x) * 0.075;
-            camera.position.y += (8.2 - camera.position.y) * 0.075;
-            camera.lookAt(0, 7.2, -0.5);
+            // The interface is leaving. The camera MUST NOT move yet.
+            camera.fov += (46 - camera.fov) * 0.08;
+            camera.updateProjectionMatrix();
+            camera.lookAt(pointer.x * 0.7, 7.5 + pointer.y * 0.55, -0.5);
         } else if (lorgusPortalEntering) {
             const elapsed = performance.now() - lorgusPortalEnterStartedAt;
-            const progress = Math.min(1, elapsed / 1780);
+            const progress = Math.min(1, elapsed / 2020);
             const ease = 1 - Math.pow(1 - progress, 3);
 
-            // Start exactly from the centered establishing shot and travel on one straight axis.
+            // One clean, centered shot: no pointer influence, no lateral correction,
+            // no sudden change of direction.
             camera.position.x = 0;
-            camera.position.y = 8.2 + (6.55 - 8.2) * ease;
-            camera.position.z = 36 + (1.65 - 36) * ease;
-
-            // Narrow the view slightly as we approach the portal to make the movement feel
-            // like entering a real space rather than scaling a flat image.
-            camera.fov = 46 + (39 - 46) * ease;
+            camera.position.y = 8.2 + (6.35 - 8.2) * ease;
+            camera.position.z = 36 + (0.85 - 36) * ease;
+            camera.fov = 46 + (34 - 46) * ease;
             camera.updateProjectionMatrix();
-            camera.lookAt(0, 6.8, -0.72);
+            camera.lookAt(0, 6.9, -0.85);
         } else {
             camera.fov += (46 - camera.fov) * 0.06;
             camera.updateProjectionMatrix();
