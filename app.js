@@ -4201,9 +4201,9 @@ function initializeLorgusWebGL() {
         return;
     }
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x18130d, 0.014);
-    const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 180);
-    camera.position.set(0, 7.8, 34);
+    scene.fog = new THREE.FogExp2(0x171511, 0.0105);
+    const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 220);
+    camera.position.set(0, 8.2, 36);
     const world = new THREE.Group();
     scene.add(world);
 
@@ -4410,6 +4410,117 @@ function initializeLorgusWebGL() {
     }
     floorPositions.needsUpdate = true;
     floorGeometry.computeVertexNormals();
+    // Full cinematic environment: eliminate the empty black frame around the monument.
+    const skyGradient = new THREE.Mesh(
+        new THREE.PlaneGeometry(150, 90),
+        new THREE.ShaderMaterial({
+            transparent: false,
+            depthWrite: false,
+            uniforms: {},
+            vertexShader: "varying vec2 vUv; void main(){vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}",
+            fragmentShader: "varying vec2 vUv; void main(){vec3 top=vec3(0.045,0.055,0.075); vec3 mid=vec3(0.16,0.105,0.055); vec3 low=vec3(0.025,0.018,0.014); float h=smoothstep(0.0,1.0,vUv.y); vec3 c=mix(low,mid,smoothstep(0.05,0.58,h)); c=mix(c,top,smoothstep(0.55,1.0,h)); float horizon=exp(-pow((vUv.y-0.34)*5.5,2.0)); c+=vec3(0.18,0.075,0.02)*horizon; gl_FragColor=vec4(c,1.0);}"
+        })
+    );
+    skyGradient.position.set(0, 25, -18);
+    world.add(skyGradient);
+
+    // Distant mountain silhouettes give the scene a horizon and scale.
+    const mountainMat = new THREE.MeshStandardMaterial({
+        color: 0x211d1a, roughness: 1, metalness: 0
+    });
+    const mountainGroup = new THREE.Group();
+    for (let i = 0; i < 11; i++) {
+        const width = 9 + Math.random() * 9;
+        const height = 7 + Math.random() * 13;
+        const mountain = new THREE.Mesh(
+            new THREE.ConeGeometry(width, height, 5 + Math.floor(Math.random() * 3)),
+            mountainMat
+        );
+        mountain.position.set(-48 + i * 9.5 + Math.random() * 3, height * 0.5 - 1, -15 - Math.random() * 5);
+        mountain.rotation.y = Math.random() * Math.PI;
+        mountainGroup.add(mountain);
+    }
+    world.add(mountainGroup);
+
+    // Giant side monoliths frame the gate instead of leaving empty black corners.
+    const monolithMat = new THREE.MeshStandardMaterial({
+        map: darkStoneTexture, color: 0x81776a, roughness: 0.98
+    });
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 4; i++) {
+            const h = 8 + Math.random() * 8;
+            const monolith = new THREE.Mesh(
+                new THREE.DodecahedronGeometry(2.0 + Math.random() * 1.5, 1),
+                monolithMat
+            );
+            monolith.scale.y = h / 4.0;
+            monolith.position.set(
+                side * (19 + i * 5 + Math.random() * 2),
+                h * 0.5 - 1,
+                -4 - i * 3.5
+            );
+            monolith.rotation.set(
+                (Math.random() - 0.5) * 0.12,
+                Math.random() * Math.PI,
+                (Math.random() - 0.5) * 0.08
+            );
+            monolith.castShadow = true;
+            monolith.receiveShadow = true;
+            world.add(monolith);
+        }
+    }
+
+    // Elevated cliffs behind the gate connect the architecture to the horizon.
+    const cliffMat = new THREE.MeshStandardMaterial({
+        map: darkStoneTexture, color: 0x62594f, roughness: 1
+    });
+    for (const side of [-1, 1]) {
+        const cliff = new THREE.Mesh(
+            new THREE.ConeGeometry(15, 20, 7, 3),
+            cliffMat
+        );
+        cliff.scale.z = 0.42;
+        cliff.position.set(side * 23, 7, -9);
+        cliff.rotation.y = side * 0.35;
+        cliff.castShadow = true;
+        cliff.receiveShadow = true;
+        world.add(cliff);
+    }
+
+    // Foreground ruins create depth near the camera.
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 7; i++) {
+            const rock = new THREE.Mesh(
+                new THREE.DodecahedronGeometry(0.8 + Math.random() * 1.8, 1),
+                stoneDark
+            );
+            rock.scale.y = 0.45 + Math.random() * 1.1;
+            rock.position.set(
+                side * (9 + Math.random() * 13),
+                rock.scale.y * 0.7 - 0.05,
+                8 - i * 2.7 + Math.random() * 2
+            );
+            rock.rotation.set(Math.random(), Math.random(), Math.random());
+            rock.castShadow = true;
+            rock.receiveShadow = true;
+            world.add(rock);
+        }
+    }
+
+    // A broad warm horizon haze physically sits behind the gate.
+    const horizonGlow = new THREE.Mesh(
+        new THREE.PlaneGeometry(72, 26),
+        new THREE.MeshBasicMaterial({
+            color: 0xa35e24,
+            transparent: true,
+            opacity: 0.14,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        })
+    );
+    horizonGlow.position.set(0, 5, -6.5);
+    world.add(horizonGlow);
+
     const floor = new THREE.Mesh(
         floorGeometry,
         groundStone
@@ -4528,7 +4639,7 @@ function initializeLorgusWebGL() {
 
         camera.position.x += (pointer.x * 1.8 - camera.position.x) * 0.018;
         camera.position.y += (7.2 - pointer.y * 1.5 - camera.position.y) * 0.018;
-        camera.lookAt(pointer.x * 0.7, 7.9 + pointer.y * 0.55, 1.2);
+        camera.lookAt(pointer.x * 0.7, 7.5 + pointer.y * 0.55, -0.5);
 
         rift.material.uniforms.time.value = time;
         riftLight.intensity = 26 + Math.sin(time * 2.1) * 6;
