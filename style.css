@@ -13728,6 +13728,7 @@ body{
 
 #root > #cabinet-content.character-application .character-creation-scene{
   position:relative!important;
+  isolation:isolate!important;
   width:100%!important;
   min-height:100svh!important;
   box-sizing:border-box!important;
@@ -13966,4 +13967,38 @@ body{
   #root > #cabinet-content.character-application #character-application-form{
     padding:22px 16px 24px!important;
   }
+/* Background art is a layer of the scene, never a layer above the UI. */
+#root > #cabinet-content.character-application .lorgus-fantasy-stage{
+  position:absolute!important;
+  inset:0!important;
+  z-index:0!important;
+  pointer-events:none!important;
+}
+
+#root > #cabinet-content.character-application .character-creation-vignette{
+  position:absolute!important;
+  inset:0!important;
+  z-index:1!important;
+  pointer-events:none!important;
+}
+
+#root > #cabinet-content.character-application .character-creation-main{
+  position:relative!important;
+  z-index:10!important;
+}
+
+#root > #cabinet-content.character-application #character-application-form{
+  position:relative!important;
+  z-index:20!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
+#root > #cabinet-content.character-application .character-creation-submit{
+  position:relative!important;
+  z-index:25!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+
 }
