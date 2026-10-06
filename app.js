@@ -5034,4 +5034,48 @@ const openingShape = new THREE.Shape();
         renderer.dispose();
         if (previousCleanup) previousCleanup();
     };
-}
+}    // Unified gate-side masonry: symmetrical layered piers, same material language.
+    for (const side of [-1, 1]) {
+        const pier = new THREE.Group();
+
+        const main = new THREE.Mesh(
+            new THREE.BoxGeometry(4.8, 11.8, 5.25, 3, 3, 3),
+            stone
+        );
+        main.position.set(0, 5.9, 0.15);
+        main.castShadow = true;
+        main.receiveShadow = true;
+        pier.add(main);
+
+        const lower = new THREE.Mesh(
+            new THREE.BoxGeometry(5.5, 1.35, 5.7, 3, 2, 3),
+            stoneEdge
+        );
+        lower.position.set(0, 0.68, 0.12);
+        lower.castShadow = true;
+        lower.receiveShadow = true;
+        pier.add(lower);
+
+        const upper = new THREE.Mesh(
+            new THREE.BoxGeometry(5.25, 1.15, 5.55, 3, 2, 3),
+            stoneEdge
+        );
+        upper.position.set(0, 11.7, 0.15);
+        upper.castShadow = true;
+        upper.receiveShadow = true;
+        pier.add(upper);
+
+        const inset = new THREE.Mesh(
+            new THREE.BoxGeometry(3.15, 8.9, 0.34, 2, 2, 2),
+            stoneDark
+        );
+        inset.position.set(0, 5.85, 2.77);
+        inset.castShadow = true;
+        inset.receiveShadow = true;
+        pier.add(inset);
+
+        pier.position.set(side * 9.15, 0, 0.75);
+        world.add(pier);
+    }
+
+
