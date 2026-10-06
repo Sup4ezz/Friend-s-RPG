@@ -4554,7 +4554,7 @@ function initializeLorgusWebGL() {
     const archShape = new THREE.Shape();
     archShape.moveTo(-7.2, 0);
     archShape.lineTo(-7.2, 8.2);
-    archShape.absarc(0, 8.2, 7.2, Math.PI, 0, false);
+    archShape.absarc(0, 8.2, 7.2, 0, Math.PI, false);
     archShape.lineTo(7.2, 0);
     archShape.closePath();
 
@@ -4626,7 +4626,7 @@ function initializeLorgusWebGL() {
     // No floating halo above the gate: the crown remains purely architectural.
 
     const rift = new THREE.Mesh(
-        new THREE.PlaneGeometry(11.8, 21.5, 40, 80),
+        new THREE.PlaneGeometry(12.8, 15.2, 40, 80),
         new THREE.ShaderMaterial({
             transparent: true,
             depthWrite: false,
@@ -4636,7 +4636,7 @@ function initializeLorgusWebGL() {
             fragmentShader: "uniform float time; varying vec2 vUv; void main(){float edge=1.0-smoothstep(0.40,0.50,abs(vUv.x-0.5));float vertical=smoothstep(0.015,0.09,vUv.y)*smoothstep(0.015,0.09,1.0-vUv.y);float wave=0.55+0.45*sin(vUv.y*28.0-time*3.0);float core=pow(edge,1.25)*vertical*(0.72+wave*0.28);vec3 c=mix(vec3(0.20,0.045,0.006),vec3(0.95,0.52,0.11),edge);gl_FragColor=vec4(c,core*0.62);}"
         })
     );
-    rift.position.set(0, 9.5, -0.28);
+    rift.position.set(0, 7.6, -0.28);
     rift.renderOrder = 1;
     world.add(rift);
 
