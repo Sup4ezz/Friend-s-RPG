@@ -3661,6 +3661,15 @@ function renderLorgusMapEditorRects(active = true) {
         label.appendChild(resize);
 
         layer.appendChild(label);
+
+        requestAnimationFrame(() => {
+            let size = Math.min(24, Math.max(7, label.clientHeight * 0.42));
+            label.style.fontSize = size + "px";
+            while (size > 7 && (label.scrollWidth > label.clientWidth || label.scrollHeight > label.clientHeight)) {
+                size -= 0.5;
+                label.style.fontSize = size + "px";
+            }
+        });
     });
 }
 function addLorgusMapEditorUI() {
