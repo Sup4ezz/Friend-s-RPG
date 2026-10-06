@@ -4311,7 +4311,7 @@ function initializeLorgusWebGL() {
     for (const side of [-1, 1]) {
         for (let i = 0; i < 4; i++) {
             const cap = new THREE.Mesh(
-                new THREE.BoxGeometry(2.4 + Math.random(, 2, 2) * 0.7, 1.0 + Math.random() * 0.35, 5.5, 2, 0.14),
+                new THREE.BoxGeometry(2.4 + Math.random() * 0.7, 1.0 + Math.random() * 0.35, 5.5, 2, 2, 2),
                 i === 3 ? stoneEdge : stone
             );
             cap.position.set(
