@@ -4436,7 +4436,7 @@ function initializeLorgusWebGL() {
         new THREE.TorusGeometry(11.8, 2.0, 20, 56, Math.PI),
         stoneEdge
     );
-    arch.rotation.z = Math.PI;
+    arch.rotation.z = 0;
     arch.position.y = 12.6;
     world.add(arch);
 
