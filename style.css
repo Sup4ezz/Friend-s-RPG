@@ -9588,7 +9588,7 @@ body{
   white-space:normal;
   overflow:hidden;
   text-align:center;
-  text-shadow:0 2px 8px rgba(0,0,0,.98);
+  text-shadow:-1px -1px 0 rgba(18,14,9,.95),1px -1px 0 rgba(18,14,9,.95),-1px 1px 0 rgba(18,14,9,.95),1px 1px 0 rgba(18,14,9,.95),0 0 7px rgba(18,14,9,.9),0 2px 10px rgba(0,0,0,.9);
   cursor:pointer;
   user-select:none;
   touch-action:manipulation;
