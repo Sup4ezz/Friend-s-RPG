@@ -4205,10 +4205,54 @@ function initializeLorgusWebGL() {
     const world = new THREE.Group();
     scene.add(world);
 
-    const stone = new THREE.MeshStandardMaterial({ color: 0x4a4035, roughness: 0.86, metalness: 0.02 });
-    const stoneDark = new THREE.MeshStandardMaterial({ color: 0x29241f, roughness: 0.94, metalness: 0.01 });
-    const stoneEdge = new THREE.MeshStandardMaterial({ color: 0x6a5b48, roughness: 0.78, metalness: 0.01 });
-    const groundStone = new THREE.MeshStandardMaterial({ color: 0x312b25, roughness: 0.98, metalness: 0 });
+    const makeStoneTexture = (base, mortar = false) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 256;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = base;
+        ctx.fillRect(0, 0, 256, 256);
+        for (let i = 0; i < 1800; i++) {
+            const x = Math.random() * 256;
+            const y = Math.random() * 256;
+            const v = 18 + Math.random() * 34;
+            ctx.fillStyle = `rgba(${v},${v * .86},${v * .7},${Math.random() * .16})`;
+            ctx.fillRect(x, y, 1 + Math.random() * 3, 1 + Math.random() * 3);
+        }
+        ctx.strokeStyle = mortar ? "rgba(12,10,8,.42)" : "rgba(16,13,10,.25)";
+        ctx.lineWidth = mortar ? 2 : 1;
+        for (let y = 18; y < 256; y += 42 + Math.random() * 12) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(256, y + (Math.random() - .5) * 8); ctx.stroke();
+        }
+        for (let i = 0; i < 28; i++) {
+            const x = Math.random() * 256, y = Math.random() * 256;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + (Math.random() - .5) * 28, y + 8 + Math.random() * 22);
+            ctx.stroke();
+        }
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2.2, 2.2);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        return texture;
+    };
+
+    const stoneTexture = makeStoneTexture("#51483d", true);
+    const darkStoneTexture = makeStoneTexture("#302b26", false);
+    const groundTexture = makeStoneTexture("#39332c", true);
+
+    const stone = new THREE.MeshStandardMaterial({
+        map: stoneTexture, color: 0xb8a68c, roughness: 0.91, metalness: 0
+    });
+    const stoneDark = new THREE.MeshStandardMaterial({
+        map: darkStoneTexture, color: 0xaaa092, roughness: 0.96, metalness: 0
+    });
+    const stoneEdge = new THREE.MeshStandardMaterial({
+        map: stoneTexture, color: 0xc5b39a, roughness: 0.84, metalness: 0
+    });
+    const groundStone = new THREE.MeshStandardMaterial({
+        map: groundTexture, color: 0xb0a18e, roughness: 0.98, metalness: 0
+    });
     const rune = new THREE.MeshStandardMaterial({ color: 0x8c6827, emissive: 0x8c6827, emissiveIntensity: 4.2, transparent: true, opacity: 0.82 });
     const ember = new THREE.MeshBasicMaterial({ color: 0xe2a33d, transparent: true, opacity: 0.8 });
 
@@ -4277,8 +4321,8 @@ function initializeLorgusWebGL() {
     world.add(new THREE.HemisphereLight(0xb9a17d, 0x17120d, 1.05));
     world.add(new THREE.AmbientLight(0x9a8567, 0.48));
 
-    const directional = new THREE.DirectionalLight(0xb29a73, 2.2);
-    directional.position.set(-8, 12, 18);
+    const directional = new THREE.DirectionalLight(0xc8b99f, 3.2);
+    directional.position.set(-12, 18, 22);
     world.add(directional);
 
     const floor = new THREE.Mesh(
@@ -4314,7 +4358,7 @@ function initializeLorgusWebGL() {
 
     const rearWall = new THREE.Mesh(
         new THREE.BoxGeometry(42, 23, 2.4),
-        new THREE.MeshStandardMaterial({ color: 0x211c17, roughness: 1 })
+        new THREE.MeshStandardMaterial({ map: darkStoneTexture, color: 0x8d8172, roughness: 1 })
     );
     rearWall.position.set(0, 8, -8);
     world.add(rearWall);
