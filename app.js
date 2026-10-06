@@ -2078,49 +2078,8 @@ async function initializeRpPresence(character) {
     if (!character?.id) return;
     window.activeCharacterId = character.id;
 
-    // First entry into the world: place the character at their canonical homeland.
-    // After that, all movement goes through the protected location -> road -> destination flow.
-    const { data: existingPresence, error: presenceError } = await supabase
-        .from("rp_presence")
-        .select("*")
-        .eq("character_id", character.id)
-        .maybeSingle();
-
-    if (presenceError) {
-        console.error("Не удалось проверить RP-присутствие:", presenceError);
-    } else if (!existingPresence && character.homeland) {
-        const home = {
-            "Примум": ["Атэрон", "Примум"],
-            "Хелион": ["Каэлор", "Хелион"],
-            "Древнее Пламя": ["Каэлор", "Древнее Пламя"],
-            "Арджент": ["Ксандр", "Арджент"],
-            "Меридиан": ["Ксандр", "Меридиан"],
-            "Валькрофт": ["Ксандр", "Валькрофт"],
-            "Солмир": ["Ксандр", "Солмир"],
-            "Аврора": ["Лирэн", "Аврора"],
-            "Элвэйн": ["Лирэн", "Элвэйн"],
-            "Таллирион": ["Лирэн", "Таллирион"],
-            "Эстерваль": ["Лирэн", "Эстерваль"],
-            "Фин": ["Морвейн", "Фин"]
-        }[character.homeland];
-
-        if (home) {
-            const { error: initError } = await supabase.rpc(
-                "initialize_lorgus_rp_presence",
-                {
-                    p_character_id: character.id,
-                    p_region: home[0],
-                    p_location: home[1],
-                    p_visibility: "public"
-                }
-            );
-
-            if (initError) {
-                console.error("Не удалось установить начальное RP-присутствие:", initError);
-            }
-        }
-    }
-
+    // No automatic placement. The character becomes physically fixed only
+    // after the first RP location post.
     if (window.rpPresenceChannel) {
         await supabase.removeChannel(window.rpPresenceChannel);
     }
@@ -2594,20 +2553,19 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
 
     const presence = await getRpPresence();
 
-    // RP-чат открывается только в физически текущем пространстве.
-    // Открытие карточки локации само по себе не перемещает персонажа.
-    if (
-        !presence ||
-        presence.type !== "location" ||
-        presence.location !== locationName ||
-        presence.region !== regionName
-    ) {
-        if (presence?.type === "road") {
+    // Before the first RP post there is no physical lock:
+    // any location chat may be opened and read.
+    if (presence) {
+        if (presence.type === "road") {
             await renderRoadChat(presence);
             return;
         }
 
-        if (presence?.type === "location") {
+        if (
+            presence.type !== "location" ||
+            presence.location !== locationName ||
+            presence.region !== regionName
+        ) {
             renderTravelScreen(
                 presence.location,
                 presence.region,
@@ -2616,10 +2574,14 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
             );
             return;
         }
-
-        renderLocationEntryLock(locationName, regionName);
-        return;
     }
+
+    window.activeRpChatSpace = {
+        type: "location",
+        location: locationName,
+        region: regionName,
+        visibility: "public"
+    };
 
     await renderLocationParticipants(locationName, regionName);
 
@@ -2855,7 +2817,6 @@ async function sendLocalRpMessage() {
         await subscribeToRpMessages(chat);
     }
 }
-
 
 
 /* =========================================================
