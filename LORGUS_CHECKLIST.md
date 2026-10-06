@@ -720,3 +720,20 @@ The workflow is committed, but it cannot prove production deployment until the t
 - [ ] Re-run `Deploy Supabase migrations` and confirm migrations 004 and 005 apply successfully.
 
 Commit: 49690069e8a68df14172edc540448d87c6121552 — Fix RP message trigger SQL delimiter
+
+
+### 21.2 FIX — migration 004 was partially present in production
+- [x] GitHub Actions повторный запуск дошёл до `20261006000400_rp_messages_security.sql`, но остановился на `policy "rp_messages_select_current_presence" already exists` (SQLSTATE 42710).
+- [x] Установлена причина: схема 004 уже частично/полностью присутствует в production, но её версия отсутствует в remote migration history, поэтому `db push` пытается выполнить файл повторно.
+- [x] Migration 004 сделана безопасно повторяемой: перед созданием обеих новых policies теперь выполняется `drop policy if exists`.
+- [x] Исправлен фактический PostgreSQL dollar-quote delimiter в репозитории: `as $$ ... $$;`.
+- [x] Не выполняем migration repair вслепую: сначала даём самой migration корректно завершиться и записаться в историю.
+- [ ] Повторно запустить `Deploy Supabase migrations` вручную.
+- [ ] Подтвердить успешное применение 004 и 005.
+- [ ] После успешного CI проверить migration list и затем отключить Supabase Integration → Deploy to production, чтобы оставить один production deployer.
+
+Commit:
+- e72ff5e40243e0a72676d587f81ed88a9c5eb54c — Make RP messages migration safely rerunnable
+
+### Текущая точка остановки
+Workflow снова можно пнуть вручную. Ожидаемый результат: 004 должен пройти даже при уже существующих policies, затем 005 должен примениться; после этого `supabase migration list --linked` должен показать актуальную remote history.
