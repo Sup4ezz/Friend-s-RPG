@@ -8963,6 +8963,7 @@ body{
 .lorgus-map-overlay{
   position:absolute;
   inset:0;
+  z-index:1;
   pointer-events:none;
   background:
     radial-gradient(ellipse at center,transparent 48%,rgba(0,0,0,.16) 76%,rgba(0,0,0,.6) 100%),
@@ -9367,6 +9368,17 @@ body{
   inset:0;
   z-index:2;
   pointer-events:none;
+}
+
+.lorgus-map-marker-layer.editor-mode{
+  z-index:20;
+  pointer-events:auto;
+  user-select:none;
+}
+
+.lorgus-map-marker-layer.editor-mode .lorgus-map-editor-rect,
+.lorgus-map-marker-layer.editor-mode .lorgus-map-editor-handle{
+  pointer-events:auto;
 }
 
 .lorgus-map-marker{
