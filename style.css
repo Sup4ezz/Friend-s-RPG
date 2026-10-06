@@ -9580,10 +9580,13 @@ body{
   color:rgba(255,239,193,1);
   font-family:var(--title-font);
   font-size:18px;
+  line-height:.9;
   font-weight:700;
   letter-spacing:.08em;
   text-transform:uppercase;
-  white-space:nowrap;
+  white-space:normal;
+  overflow:hidden;
+  text-align:center;
   text-shadow:0 2px 8px rgba(0,0,0,.98);
   cursor:default;
   user-select:none;
