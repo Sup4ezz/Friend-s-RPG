@@ -1885,7 +1885,11 @@ async function submitCharacterApplication(event) {
         photoInput.files &&
         photoInput.files.length > 0
     ) {
-        const photo = photoInput.files[0];
+        const originalPhoto = photoInput.files[0];
+        const croppedPhoto = window.characterPortraitPrepare
+            ? await window.characterPortraitPrepare()
+            : null;
+        const photo = croppedPhoto || originalPhoto;
 
         if (photo.size > 5 * 1024 * 1024) {
             setCharacterMessage(
