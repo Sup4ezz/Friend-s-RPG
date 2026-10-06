@@ -12791,3 +12791,387 @@ body:has(#root > #cabinet-content.character-application){
     padding:26px 20px !important;
   }
 }
+
+
+/* =========================================================
+   LORGUS — CHARACTER CREATION / CINEMATIC MASTER PASS
+   ========================================================= */
+
+body:has(#root > #cabinet-content.character-application){
+  background:#020202 !important;
+}
+
+#root > #cabinet-content.character-application{
+  isolation:isolate !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-scene{
+  overflow:hidden !important;
+  min-height:100vh !important;
+  background:
+    radial-gradient(ellipse at 72% 18%,rgba(226,190,105,.11),transparent 18%),
+    radial-gradient(ellipse at 74% 48%,rgba(154,108,39,.055),transparent 30%),
+    linear-gradient(105deg,#030303 0%,#080706 48%,#020202 100%) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-scene::before{
+  display:block !important;
+  content:"" !important;
+  position:absolute !important;
+  inset:0 !important;
+  z-index:0 !important;
+  pointer-events:none !important;
+  background:
+    linear-gradient(90deg,transparent 0 49.85%,rgba(220,184,102,.075) 49.9%,transparent 50.05%),
+    linear-gradient(180deg,transparent 0 72%,rgba(220,184,102,.055) 72.1%,transparent 72.2%),
+    repeating-linear-gradient(90deg,transparent 0 119px,rgba(255,255,255,.012) 120px),
+    radial-gradient(circle at 75% 22%,rgba(235,209,151,.55) 0 1px,transparent 1.8px);
+  opacity:.55 !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-scene::after{
+  display:block !important;
+  content:"" !important;
+  position:absolute !important;
+  width:min(44vw,620px) !important;
+  height:min(70vw,760px) !important;
+  right:5% !important;
+  top:11% !important;
+  z-index:0 !important;
+  pointer-events:none !important;
+  border:1px solid rgba(220,184,102,.075) !important;
+  border-bottom:0 !important;
+  border-radius:48% 48% 0 0 !important;
+  box-shadow:
+    0 0 0 16px rgba(220,184,102,.018),
+    0 0 110px rgba(191,139,55,.045),
+    inset 0 0 80px rgba(191,139,55,.025) !important;
+  transform:perspective(900px) rotateY(-8deg) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar{
+  min-height:78px !important;
+  padding:0 42px !important;
+  background:linear-gradient(180deg,rgba(3,3,3,.88),rgba(3,3,3,.5)) !important;
+  border-bottom:1px solid rgba(220,184,102,.11) !important;
+  backdrop-filter:blur(16px) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar::before{
+  content:"01 / CHARACTER ORIGIN" !important;
+  position:absolute !important;
+  left:50% !important;
+  transform:translateX(-50%) !important;
+  color:rgba(225,203,157,.22) !important;
+  font:8px var(--body-font) !important;
+  letter-spacing:.38em !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar::after{
+  content:"ЛОРГУС // ЗА ПРЕДЕЛАМИ КАРТЫ" !important;
+  position:absolute !important;
+  left:42px !important;
+  bottom:-23px !important;
+  color:rgba(220,184,102,.26) !important;
+  font:7px var(--body-font) !important;
+  letter-spacing:.3em !important;
+  white-space:nowrap !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar > div{
+  position:relative !important;
+  z-index:2 !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar strong{
+  font-size:26px !important;
+  letter-spacing:.15em !important;
+  color:#e5d2a2 !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar span{
+  color:rgba(220,202,165,.34) !important;
+}
+
+#root > #cabinet-content.character-application .lorgus-screen-logout{
+  z-index:2 !important;
+  border:0 !important;
+  border-bottom:1px solid rgba(220,184,102,.3) !important;
+  border-radius:0 !important;
+  padding:9px 2px !important;
+  color:rgba(226,207,168,.62) !important;
+  background:transparent !important;
+  letter-spacing:.2em !important;
+}
+
+#root > #cabinet-content.character-application .lorgus-screen-logout:hover{
+  color:#ead29a !important;
+  border-bottom-color:#d6b36a !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-main{
+  width:min(1260px,calc(100% - 84px)) !important;
+  margin:0 auto !important;
+  padding:112px 0 150px !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro{
+  position:relative !important;
+  z-index:2 !important;
+  width:min(760px,100%) !important;
+  max-width:none !important;
+  margin:0 0 82px !important;
+  text-align:left !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro > span{
+  display:flex !important;
+  align-items:center !important;
+  gap:15px !important;
+  color:#a77d3d !important;
+  letter-spacing:.42em !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro > span::before{
+  content:"✦" !important;
+  color:#d6b36a !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro > span::after{
+  content:"" !important;
+  width:74px !important;
+  height:1px !important;
+  background:rgba(214,179,106,.28) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro h1{
+  margin:22px 0 25px !important;
+  color:#e9e0cf !important;
+  font-size:clamp(64px,8vw,116px) !important;
+  line-height:.78 !important;
+  letter-spacing:-.045em !important;
+  font-weight:500 !important;
+  text-shadow:0 28px 80px rgba(0,0,0,.9) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro p{
+  max-width:570px !important;
+  margin:0 !important;
+  color:rgba(216,205,184,.48) !important;
+  font-size:14px !important;
+  line-height:1.9 !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-line{
+  justify-content:flex-start !important;
+  width:520px !important;
+  max-width:100% !important;
+  margin-top:34px !important;
+  color:rgba(220,184,102,.34) !important;
+  letter-spacing:.28em !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-line i{
+  flex:0 1 72px !important;
+  background:rgba(220,184,102,.2) !important;
+}
+
+#root > #cabinet-content.character-application #character-application-form{
+  position:relative !important;
+  z-index:3 !important;
+  display:grid !important;
+  grid-template-columns:repeat(12,minmax(0,1fr)) !important;
+  gap:22px 26px !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel{
+  grid-column:span 6 !important;
+  padding:36px 34px 38px !important;
+  background:linear-gradient(135deg,rgba(13,11,8,.82),rgba(5,5,4,.68)) !important;
+  border:0 !important;
+  border-top:1px solid rgba(220,184,102,.22) !important;
+  border-bottom:1px solid rgba(220,184,102,.07) !important;
+  border-radius:0 !important;
+  box-shadow:
+    30px 35px 80px rgba(0,0,0,.42),
+    inset 0 1px rgba(255,255,255,.025) !important;
+  backdrop-filter:blur(14px) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel:nth-of-type(3){
+  grid-column:1 / -1 !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel:nth-of-type(4){
+  grid-column:1 / -1 !important;
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading{
+  margin:0 0 30px !important;
+  padding:0 !important;
+  border:0 !important;
+  align-items:flex-start !important;
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading > span{
+  min-width:48px !important;
+  color:rgba(220,184,102,.45) !important;
+  font-size:38px !important;
+  line-height:.8 !important;
+  font-weight:500 !important;
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading small{
+  color:rgba(220,184,102,.48) !important;
+  font-size:8px !important;
+  letter-spacing:.34em !important;
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading h2{
+  margin-top:6px !important;
+  color:#dfd2b9 !important;
+  font-size:35px !important;
+  font-weight:500 !important;
+  letter-spacing:-.01em !important;
+}
+
+#root > #cabinet-content.character-application label{
+  color:rgba(204,193,172,.54) !important;
+  font-size:11px !important;
+  letter-spacing:.08em !important;
+}
+
+#root > #cabinet-content.character-application label > span{
+  color:rgba(211,192,153,.72) !important;
+}
+
+#root > #cabinet-content.character-application input,
+#root > #cabinet-content.character-application textarea,
+#root > #cabinet-content.character-application select{
+  min-height:52px !important;
+  padding:14px 0 !important;
+  border:0 !important;
+  border-bottom:1px solid rgba(220,184,102,.15) !important;
+  border-radius:0 !important;
+  background:transparent !important;
+  color:#e4d9c4 !important;
+  box-shadow:none !important;
+  font-size:15px !important;
+}
+
+#root > #cabinet-content.character-application input:hover,
+#root > #cabinet-content.character-application textarea:hover{
+  border-bottom-color:rgba(220,184,102,.3) !important;
+}
+
+#root > #cabinet-content.character-application input:focus,
+#root > #cabinet-content.character-application textarea:focus{
+  border-bottom-color:rgba(220,184,102,.72) !important;
+  box-shadow:0 7px 25px rgba(214,179,106,.025) !important;
+}
+
+#root > #cabinet-content.character-application .creation-origins{
+  grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+  gap:0 !important;
+  border-top:1px solid rgba(220,184,102,.1) !important;
+  border-left:1px solid rgba(220,184,102,.1) !important;
+}
+
+#root > #cabinet-content.character-application .creation-origin{
+  min-height:58px !important;
+  border:0 !important;
+  border-right:1px solid rgba(220,184,102,.1) !important;
+  border-bottom:1px solid rgba(220,184,102,.1) !important;
+  border-radius:0 !important;
+  background:rgba(0,0,0,.12) !important;
+  color:rgba(210,195,166,.48) !important;
+  font-size:11px !important;
+  letter-spacing:.08em !important;
+  transition:.28s ease !important;
+}
+
+#root > #cabinet-content.character-application .creation-origin:hover,
+#root > #cabinet-content.character-application .creation-origin.active{
+  background:rgba(220,184,102,.055) !important;
+  color:#e6cf9c !important;
+  box-shadow:inset 0 0 35px rgba(220,184,102,.025) !important;
+}
+
+#root > #cabinet-content.character-application .creation-upload{
+  border:1px dashed rgba(220,184,102,.18) !important;
+  padding:26px !important;
+  min-height:130px !important;
+  justify-content:center !important;
+}
+
+#root > #cabinet-content.character-application .creation-upload input[type=file]{
+  border:0 !important;
+  padding:10px 0 !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-submit{
+  grid-column:1 / -1 !important;
+  min-height:72px !important;
+  margin:10px 0 0 !important;
+  border:0 !important;
+  border-top:1px solid rgba(220,184,102,.35) !important;
+  border-bottom:1px solid rgba(220,184,102,.18) !important;
+  border-radius:0 !important;
+  background:
+    linear-gradient(90deg,transparent,rgba(220,184,102,.055),transparent) !important;
+  color:#dfc98f !important;
+  font-size:19px !important;
+  letter-spacing:.25em !important;
+  box-shadow:none !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-submit:hover{
+  transform:none !important;
+  background:linear-gradient(90deg,transparent,rgba(220,184,102,.11),transparent) !important;
+  border-top-color:rgba(220,184,102,.7) !important;
+  border-bottom-color:rgba(220,184,102,.35) !important;
+}
+
+#root > #cabinet-content.character-application #character-message{
+  grid-column:1 / -1 !important;
+}
+
+@media(max-width:900px){
+  #root > #cabinet-content.character-application .character-creation-main{
+    width:calc(100% - 42px) !important;
+  }
+  #root > #cabinet-content.character-application #character-application-form{
+    grid-template-columns:1fr !important;
+  }
+  #root > #cabinet-content.character-application .character-creation-panel,
+  #root > #cabinet-content.character-application .character-creation-panel:nth-of-type(3),
+  #root > #cabinet-content.character-application .character-creation-panel:nth-of-type(4){
+    grid-column:1 !important;
+  }
+  #root > #cabinet-content.character-application .creation-origins{
+    grid-template-columns:repeat(2,1fr) !important;
+  }
+}
+
+@media(max-width:600px){
+  #root > #cabinet-content.character-application .character-creation-topbar{
+    padding:0 18px !important;
+  }
+  #root > #cabinet-content.character-application .character-creation-topbar::before,
+  #root > #cabinet-content.character-application .character-creation-topbar::after{
+    display:none !important;
+  }
+  #root > #cabinet-content.character-application .character-creation-main{
+    width:calc(100% - 28px) !important;
+    padding-top:72px !important;
+  }
+  #root > #cabinet-content.character-application .character-creation-intro h1{
+    font-size:17vw !important;
+  }
+  #root > #cabinet-content.character-application .character-creation-panel{
+    padding:28px 20px !important;
+  }
+  #root > #cabinet-content.character-application .creation-origins{
+    grid-template-columns:1fr !important;
+  }
+}
