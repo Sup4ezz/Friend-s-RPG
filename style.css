@@ -14225,3 +14225,142 @@ body:has(#root > #cabinet-content.character-application) #root > #cabinet-conten
   border-radius:0 !important;
   overflow:visible !important;
 }
+
+
+/* =========================================================
+   LORGUS — REGISTRATION / НАЧАЛО ПУТИ
+   Визуально ближе к главной сцене, но без изменения логина.
+   ========================================================= */
+
+.auth-form-container:has(.register-auth-form){
+    position:relative;
+}
+
+.auth-form-container:has(.register-auth-form)::before{
+    content:"НАЧАЛО ПУТИ";
+    display:block;
+    margin:-10px auto 18px;
+    color:rgba(217,183,108,.48);
+    font-family:var(--title-font);
+    font-size:9px;
+    font-weight:600;
+    letter-spacing:.34em;
+    text-align:center;
+}
+
+.auth-form-container:has(.register-auth-form) .form-heading{
+    position:relative;
+    margin-bottom:30px;
+    padding-bottom:22px;
+}
+
+.auth-form-container:has(.register-auth-form) .form-heading::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    bottom:0;
+    width:min(250px,80%);
+    height:1px;
+    transform:translateX(-50%);
+    background:linear-gradient(90deg,transparent,rgba(217,183,108,.42),transparent);
+}
+
+.auth-form-container:has(.register-auth-form) .form-heading h2{
+    color:#f0dba5;
+    font-size:38px;
+    letter-spacing:.04em;
+    text-shadow:0 0 28px rgba(217,183,108,.10);
+}
+
+.auth-form-container:has(.register-auth-form) .form-heading p{
+    color:#968a76;
+    max-width:390px;
+}
+
+.auth-form-container:has(.register-auth-form) .register-auth-form{
+    position:relative;
+}
+
+.auth-form-container:has(.register-auth-form) .register-auth-form::before{
+    content:"✦";
+    position:absolute;
+    right:2px;
+    top:-18px;
+    color:rgba(217,183,108,.28);
+    font-size:12px;
+    pointer-events:none;
+}
+
+.auth-form-container:has(.register-auth-form) label{
+    color:#d3c5aa;
+    font-family:var(--title-font);
+    font-size:16px;
+    letter-spacing:.04em;
+}
+
+.auth-form-container:has(.register-auth-form) .input-wrapper{
+    margin-bottom:21px;
+}
+
+.auth-form-container:has(.register-auth-form) .input-wrapper input{
+    min-height:54px;
+    border-color:rgba(217,183,108,.18);
+    background:
+        linear-gradient(180deg,rgba(7,6,5,.94),rgba(25,20,14,.92));
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.018);
+}
+
+.auth-form-container:has(.register-auth-form) .input-wrapper input:focus{
+    border-color:rgba(217,183,108,.58);
+    box-shadow:
+        0 0 0 1px rgba(217,183,108,.10),
+        0 12px 35px rgba(0,0,0,.25),
+        0 0 24px rgba(217,183,108,.05);
+}
+
+.auth-form-container:has(.register-auth-form) .input-icon{
+    font-size:12px;
+}
+
+.auth-form-container:has(.register-auth-form) .main-button{
+    min-height:58px;
+    margin-top:14px;
+    border-color:rgba(217,183,108,.62);
+    background:
+        linear-gradient(135deg,rgba(160,110,35,.34),rgba(65,44,16,.48));
+    color:#f1dba5;
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.35),
+        0 0 30px rgba(217,183,108,.045);
+}
+
+.auth-form-container:has(.register-auth-form) .main-button:hover{
+    border-color:#f0d99d;
+    background:
+        linear-gradient(135deg,rgba(190,140,50,.42),rgba(80,54,18,.52));
+    box-shadow:
+        0 18px 45px rgba(0,0,0,.42),
+        0 0 35px rgba(217,183,108,.10);
+}
+
+.auth-panel:has(.register-auth-form){
+    border-color:rgba(217,183,108,.28);
+    background:
+        radial-gradient(420px 220px at 50% 0%,rgba(217,183,108,.075),transparent 72%),
+        linear-gradient(145deg,rgba(30,24,16,.95),rgba(8,7,5,.98));
+}
+
+.auth-panel:has(.register-auth-form)::before,
+.auth-panel:has(.register-auth-form)::after{
+    opacity:.9;
+}
+
+@media(max-width:600px){
+    .auth-form-container:has(.register-auth-form) .form-heading h2{
+        font-size:32px;
+    }
+
+    .auth-form-container:has(.register-auth-form) .input-wrapper input{
+        min-height:51px;
+    }
+}
