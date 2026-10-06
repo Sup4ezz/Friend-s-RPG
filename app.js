@@ -78,7 +78,9 @@ function render(session) {
 
 function renderAuth() {
     document.getElementById("root").innerHTML = `
-        <main class="auth-page">
+        <main class="auth-page lorgus-cinematic-auth">
+            <canvas id="lorgus-scene" class="lorgus-scene" aria-hidden="true"></canvas>
+            <div class="lorgus-vignette" aria-hidden="true"></div>
             <div class="background-glow"></div>
 
             <section class="auth-container">
@@ -126,6 +128,115 @@ function renderAuth() {
     `;
 
     showLogin(true);
+    initializeLorgusScene();
+}
+
+let lorgusSceneCleanup = null;
+
+function initializeLorgusScene() {
+    if (lorgusSceneCleanup) {
+        lorgusSceneCleanup();
+        lorgusSceneCleanup = null;
+    }
+
+    const canvas = document.getElementById("lorgus-scene");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let width = 0;
+    let height = 0;
+    let raf = 0;
+    let last = performance.now();
+    let particles = [];
+    let pointerX = 0.5;
+    let pointerY = 0.5;
+    let targetX = 0.5;
+    let targetY = 0.5;
+
+    const resize = () => {
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const count = Math.min(130, Math.max(45, Math.floor(width * height / 18000)));
+        particles = Array.from({ length: count }, () => ({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            r: Math.random() * 1.5 + 0.25,
+            a: Math.random() * 0.45 + 0.08,
+            speed: Math.random() * 5 + 2,
+            drift: (Math.random() - 0.5) * 3,
+            phase: Math.random() * Math.PI * 2
+        }));
+    };
+
+    const onPointerMove = event => {
+        targetX = event.clientX / Math.max(width, 1);
+        targetY = event.clientY / Math.max(height, 1);
+    };
+
+    const frame = now => {
+        const dt = Math.min((now - last) / 1000, 0.04);
+        last = now;
+
+        pointerX += (targetX - pointerX) * Math.min(1, dt * 3);
+        pointerY += (targetY - pointerY) * Math.min(1, dt * 3);
+
+        ctx.clearRect(0, 0, width, height);
+
+        const glowX = width * (0.28 + pointerX * 0.08);
+        const glowY = height * (0.32 + pointerY * 0.06);
+        const glow = ctx.createRadialGradient(
+            glowX, glowY, 0,
+            glowX, glowY, Math.max(width, height) * 0.62
+        );
+        glow.addColorStop(0, "rgba(190,145,55,.075)");
+        glow.addColorStop(.38, "rgba(120,90,35,.028)");
+        glow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, width, height);
+
+        for (const p of particles) {
+            p.y -= p.speed * dt;
+            p.x += (p.drift + Math.sin(now * .00035 + p.phase)) * dt;
+
+            if (p.y < -10) {
+                p.y = height + 10;
+                p.x = Math.random() * width;
+            }
+            if (p.x < -10) p.x = width + 10;
+            if (p.x > width + 10) p.x = -10;
+
+            const parallax = (pointerX - .5) * 12;
+            const px = p.x + parallax;
+            const alpha = p.a * (.72 + Math.sin(now * .001 + p.phase) * .28);
+
+            ctx.beginPath();
+            ctx.arc(px, p.y + (pointerY - .5) * 7, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(218,184,104," + Math.max(.02, alpha) + ")";
+            ctx.fill();
+        }
+
+        raf = requestAnimationFrame(frame);
+    };
+
+    resize();
+    window.addEventListener("resize", resize, { passive: true });
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    raf = requestAnimationFrame(frame);
+
+    lorgusSceneCleanup = () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener("resize", resize);
+        window.removeEventListener("pointermove", onPointerMove);
+    };
 }
 
 function showLogin(initial = false) {
