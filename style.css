@@ -14529,3 +14529,352 @@ body:has(#root > #cabinet-content.character-application) #root > #cabinet-conten
     grid-template-columns:1fr !important;
   }
 }
+
+
+/* LORGUS — REAL CHARACTER CREATION SCREEN */
+#root > #cabinet-content.character-application {
+    position: relative !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: #0b0907 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: var(--text) !important;
+}
+
+#root > #cabinet-content.character-application::before,
+#root > #cabinet-content.character-application::after {
+    display: none !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-scene {
+    display: block !important;
+    min-height: 100vh !important;
+    padding: 0 0 70px !important;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(150,105,42,.10), transparent 34%),
+        #0b0907 !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    min-height: 68px;
+    padding: 0 34px;
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: rgba(11,9,7,.97) !important;
+    border-bottom: 1px solid rgba(210,170,90,.28) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar > div {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar strong {
+    color: var(--gold-light) !important;
+    font-family: var(--title-font) !important;
+    font-size: 25px !important;
+    letter-spacing: .08em;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar span {
+    color: var(--text-muted) !important;
+    font-size: 11px !important;
+    letter-spacing: .16em;
+}
+
+#root > #cabinet-content.character-application .lorgus-screen-logout {
+    padding: 9px 16px !important;
+    border: 1px solid rgba(210,170,90,.32) !important;
+    background: transparent !important;
+    color: var(--gold-light) !important;
+    cursor: pointer;
+}
+
+#root > #cabinet-content.character-application .character-creation-main {
+    width: min(1080px, calc(100% - 40px));
+    margin: 0 auto;
+    padding: 72px 0 0;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro {
+    max-width: 780px;
+    margin: 0 auto 48px;
+    text-align: center;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro > span {
+    color: var(--gold-dark) !important;
+    font-size: 11px !important;
+    letter-spacing: .24em;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro h1 {
+    margin: 12px 0 14px !important;
+    color: var(--gold-light) !important;
+    font-family: var(--title-font) !important;
+    font-size: clamp(42px, 6vw, 68px) !important;
+    line-height: .95 !important;
+    font-weight: 600 !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro p {
+    max-width: 650px;
+    margin: 0 auto;
+    color: var(--text-soft) !important;
+    font-size: 14px !important;
+    line-height: 1.7 !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-line {
+    display: flex !important;
+    align-items: center;
+    gap: 14px;
+    margin-top: 25px;
+    color: var(--text-muted) !important;
+    font-size: 10px !important;
+    letter-spacing: .16em;
+}
+
+#root > #cabinet-content.character-application .character-creation-line i {
+    flex: 1;
+    height: 1px;
+    background: rgba(210,170,90,.22);
+}
+
+#root > #cabinet-content.character-application #character-application-form {
+    display: flex !important;
+    flex-direction: column;
+    gap: 18px;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 30px !important;
+    background: #15110d !important;
+    border: 1px solid rgba(210,170,90,.24) !important;
+    box-shadow: none !important;
+    border-radius: 2px !important;
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading {
+    display: flex !important;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(210,170,90,.15);
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading > span {
+    color: var(--gold) !important;
+    font-family: var(--title-font) !important;
+    font-size: 25px !important;
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading small {
+    display: block;
+    color: var(--text-muted) !important;
+    font-size: 10px !important;
+    letter-spacing: .18em;
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading h2 {
+    margin: 2px 0 0 !important;
+    color: var(--gold-light) !important;
+    font-family: var(--title-font) !important;
+    font-size: 28px !important;
+}
+
+#root > #cabinet-content.character-application .creation-fields {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel label {
+    display: flex !important;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    color: var(--text-soft) !important;
+    font-size: 13px !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel label > span {
+    color: var(--gold-light) !important;
+    font-family: var(--title-font) !important;
+    font-size: 17px !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel label em {
+    color: var(--text-muted) !important;
+    font-size: 10px !important;
+    font-style: normal;
+}
+
+#root > #cabinet-content.character-application input,
+#root > #cabinet-content.character-application textarea {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    border: 1px solid rgba(210,170,90,.24) !important;
+    border-radius: 2px !important;
+    outline: none !important;
+    background: #0c0a08 !important;
+    color: #e2d8c5 !important;
+    font-family: var(--body-font) !important;
+    font-size: 14px !important;
+    box-shadow: none !important;
+}
+
+#root > #cabinet-content.character-application input {
+    min-height: 48px;
+    padding: 12px 14px !important;
+}
+
+#root > #cabinet-content.character-application textarea {
+    min-height: 145px;
+    padding: 13px 14px !important;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+#root > #cabinet-content.character-application input:focus,
+#root > #cabinet-content.character-application textarea:focus {
+    border-color: rgba(230,200,130,.65) !important;
+    box-shadow: 0 0 0 1px rgba(230,200,130,.10) !important;
+}
+
+#root > #cabinet-content.character-application .creation-wide-field {
+    margin-bottom: 18px;
+}
+
+#root > #cabinet-content.character-application .creation-origins {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+}
+
+#root > #cabinet-content.character-application .creation-origins button {
+    min-height: 72px;
+    padding: 10px;
+    border: 1px solid rgba(210,170,90,.20);
+    background: #0d0b09;
+    color: var(--text-soft);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease;
+}
+
+#root > #cabinet-content.character-application .creation-origins button:hover {
+    border-color: rgba(230,200,130,.55);
+    background: #19130d;
+}
+
+#root > #cabinet-content.character-application .creation-origins b,
+#root > #cabinet-content.character-application .creation-origins small {
+    display: block;
+}
+
+#root > #cabinet-content.character-application .creation-origins b {
+    color: var(--gold-light);
+    font-family: var(--title-font);
+    font-size: 15px;
+}
+
+#root > #cabinet-content.character-application .creation-origins small {
+    margin-top: 5px;
+    color: var(--text-muted);
+    font-size: 10px;
+}
+
+#root > #cabinet-content.character-application .creation-upload {
+    padding: 20px;
+    border: 1px dashed rgba(210,170,90,.28);
+    background: #0d0b09;
+}
+
+#root > #cabinet-content.character-application .creation-upload > span {
+    font-family: var(--title-font);
+    color: var(--gold-light);
+    font-size: 18px;
+}
+
+#root > #cabinet-content.character-application .creation-upload > small {
+    color: var(--text-muted);
+    font-size: 11px;
+}
+
+#root > #cabinet-content.character-application #character-message {
+    margin: 4px 0 0;
+}
+
+#root > #cabinet-content.character-application .character-creation-submit {
+    width: 100% !important;
+    min-height: 58px;
+    border: 1px solid rgba(230,200,130,.55) !important;
+    background: linear-gradient(180deg, #8d6831, #60451f) !important;
+    color: #fff4d5 !important;
+    font-family: var(--title-font) !important;
+    font-size: 20px !important;
+    letter-spacing: .08em;
+    cursor: pointer;
+}
+
+#root > #cabinet-content.character-application .character-creation-submit:hover {
+    background: linear-gradient(180deg, #a67d3c, #725326) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-submit b {
+    float: right;
+    margin-right: 18px;
+    font-size: 24px;
+}
+
+@media (max-width: 800px) {
+    #root > #cabinet-content.character-application .creation-fields {
+        grid-template-columns: 1fr;
+    }
+
+    #root > #cabinet-content.character-application .creation-origins {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #root > #cabinet-content.character-application .character-creation-main {
+        width: min(100% - 24px, 1080px);
+        padding-top: 45px;
+    }
+
+    #root > #cabinet-content.character-application .character-creation-panel {
+        padding: 22px !important;
+    }
+}
+
+@media (max-width: 520px) {
+    #root > #cabinet-content.character-application .character-creation-topbar {
+        padding: 0 15px;
+    }
+
+    #root > #cabinet-content.character-application .character-creation-topbar > div {
+        gap: 8px;
+    }
+
+    #root > #cabinet-content.character-application .character-creation-topbar span {
+        display: none;
+    }
+
+    #root > #cabinet-content.character-application .creation-origins {
+        grid-template-columns: 1fr;
+    }
+}
