@@ -10202,3 +10202,52 @@ body{
  .lorgus-command-hero h1,.lorgus-profile-hero h1{font-size:46px}
  .lorgus-command-status{position:relative;right:auto;bottom:auto;margin-top:30px;min-width:0}
 }
+
+
+/* LORGUS — RESTORED ACCOUNT CONTROL */
+.lorgus-global-account{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:16px;
+  min-width:0;
+}
+.lorgus-global-user{
+  max-width:130px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:rgba(235,226,205,.72);
+  font-family:var(--title-font);
+  font-size:14px;
+  letter-spacing:.04em;
+}
+.lorgus-global-logout{
+  flex:0 0 auto;
+  padding:9px 13px;
+  border:1px solid rgba(220,185,101,.28);
+  background:rgba(8,7,5,.55);
+  color:#dfc27a;
+  font-size:8px;
+  letter-spacing:.22em;
+  transition:.2s ease;
+}
+.lorgus-global-logout:hover{
+  border-color:rgba(235,210,150,.7);
+  background:rgba(220,185,101,.08);
+  box-shadow:0 0 22px rgba(220,185,101,.12);
+}
+@media(max-width:1100px){
+  .lorgus-global-nav{grid-template-columns:1fr;}
+  .lorgus-global-account{
+    position:absolute;
+    top:12px;
+    right:16px;
+  }
+  .lorgus-global-presence{display:none}
+  .lorgus-global-user{max-width:90px;font-size:12px}
+  .lorgus-global-logout{padding:8px 10px}
+}
+@media(max-width:680px){
+  .lorgus-global-user{display:none}
+}
