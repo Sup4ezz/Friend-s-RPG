@@ -73,7 +73,7 @@ function render(session) {
 
         if (authScene && !lorgusPortalEntering) {
             // First dissolve the interface completely, then start the physical camera flight.
-            authScene.classList.add("lorgus-auth-exit");
+            authScene.classList.add("portal-departure");
 
             window.setTimeout(() => {
                 if (!document.querySelector(".lorgus-cinematic-auth")) return;
@@ -997,8 +997,7 @@ async function renderCharacterSelection(container, applications, pendingApplicat
     container.innerHTML = "";
 
     const header = document.createElement("div");
-    header.className = "character-selection-header";
-    header.innerHTML = `
+    header.className = "character-selection-header";    header.innerHTML = `
         <div class="character-selection-eyebrow">ЛОРГУС · ВАШИ ИСТОРИИ</div>
         <div class="character-selection-title-row">
             <span class="character-selection-ornament">✦</span>
@@ -1997,8 +1996,7 @@ function findApplicationById(id) {
 
     if (!article) return null;
 
-    return window.adminApplications?.find(
-        application =>
+    return window.adminApplications?.find(        application =>
             application.id === id
     ) || null;
 }
@@ -2997,8 +2995,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
 
         if (
             presence.type !== "location" ||
-            presence.location !== locationName ||
-            presence.region !== regionName
+            presence.location !== locationName ||            presence.region !== regionName
         ) {
             renderTravelScreen(
                 presence.location,
@@ -3997,8 +3994,7 @@ function renderLorgusMapEditorRects() {
     };
 
     if (image.complete) {
-        render();
-    } else {
+        render();    } else {
         image.addEventListener("load", render, { once: true });
     }
     if (window.lorgusMapLabelResizeObserver) {
@@ -4997,8 +4993,7 @@ const openingShape = new THREE.Shape();
 
     const riftLight = new THREE.PointLight(0xff8b2c, 52, 28, 2);
     riftLight.position.set(0, 7.8, -0.4);
-    world.add(riftLight);
-    world.add(new THREE.HemisphereLight(0xc8a879, 0x17120d, 1.3));
+    world.add(riftLight);    world.add(new THREE.HemisphereLight(0xc8a879, 0x17120d, 1.3));
     world.add(new THREE.AmbientLight(0xb08f68, 0.48));
     const coolFill = new THREE.DirectionalLight(0x7898ad, 1.8);
     coolFill.position.set(18, 12, 10);
@@ -5372,4 +5367,3 @@ const openingShape = new THREE.Shape();
             world.add(base);
         }
     }
-
