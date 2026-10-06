@@ -4720,8 +4720,22 @@ const openingShape = new THREE.Shape();
     world.add(threshold);
 
     // Layered portal energy: depth, sparks and drifting motes instead of a flat glowing plane.
+    const portalDepthShape = new THREE.Shape();
+    portalDepthShape.moveTo(-5.05, 0.08);
+    portalDepthShape.lineTo(-5.05, 8.15);
+    portalDepthShape.quadraticCurveTo(0, 13.15, 5.05, 8.15);
+    portalDepthShape.lineTo(5.05, 0.08);
+    portalDepthShape.closePath();
+
+    const portalCoreShape = new THREE.Shape();
+    portalCoreShape.moveTo(-4.35, 0.08);
+    portalCoreShape.lineTo(-4.35, 7.95);
+    portalCoreShape.quadraticCurveTo(0, 12.55, 4.35, 7.95);
+    portalCoreShape.lineTo(4.35, 0.08);
+    portalCoreShape.closePath();
+
     const portalCore = new THREE.Mesh(
-        new THREE.CircleGeometry(3.9, 64),
+        new THREE.ShapeGeometry(portalCoreShape, 48),
         new THREE.MeshBasicMaterial({
             color: 0xffc46a,
             transparent: true,
@@ -4730,11 +4744,11 @@ const openingShape = new THREE.Shape();
             depthWrite: false
         })
     );
-    portalCore.position.set(0, 6.8, -0.72);
+    portalCore.position.set(0, 0, -0.78);
     world.add(portalCore);
 
     const portalMist = new THREE.Mesh(
-        new THREE.CircleGeometry(5.8, 64),
+        new THREE.ShapeGeometry(portalDepthShape, 48),
         new THREE.MeshBasicMaterial({
             color: 0xc56f25,
             transparent: true,
@@ -4743,7 +4757,7 @@ const openingShape = new THREE.Shape();
             depthWrite: false
         })
     );
-    portalMist.position.set(0, 6.8, -0.9);
+    portalMist.position.set(0, 0, -0.94);
     world.add(portalMist);
 
     const sparkMat = new THREE.MeshBasicMaterial({
