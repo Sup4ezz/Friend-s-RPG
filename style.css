@@ -13414,3 +13414,237 @@ body{
     grid-template-columns:1fr!important;
   }
 }
+
+/* =========================================================
+   LORGUS — CREATION SCREEN / MAIN MENU ART DIRECTION
+   Здесь форма является частью сцены, а не отдельной страницей.
+   ========================================================= */
+
+#root > #cabinet-content.character-application .character-creation-scene{
+  position:relative!important;
+  min-height:100svh!important;
+  overflow:hidden!important;
+  background:#020202!important;
+}
+
+/* Сцена остаётся видимой позади интерфейса */
+#root > #cabinet-content.character-application .character-creation-scene .lorgus-fantasy-stage{
+  position:fixed!important;
+  inset:0!important;
+  z-index:0!important;
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+}
+#root > #cabinet-content.character-application .character-creation-vignette{
+  position:fixed!important;
+  inset:0!important;
+  z-index:1!important;
+  display:block!important;
+  pointer-events:none!important;
+  background:
+    radial-gradient(circle at 27% 48%,rgba(188,146,63,.10),transparent 28%),
+    linear-gradient(90deg,rgba(0,0,0,.12),rgba(0,0,0,.48) 48%,rgba(0,0,0,.88) 100%)!important;
+}
+
+/* Верхняя навигация как в главном экране */
+#root > #cabinet-content.character-application .character-creation-topbar{
+  position:absolute!important;
+  top:0!important;
+  left:0!important;
+  right:0!important;
+  z-index:50!important;
+  height:92px!important;
+  padding:0 clamp(32px,6vw,110px)!important;
+  border:0!important;
+  background:linear-gradient(180deg,rgba(0,0,0,.65),transparent)!important;
+}
+
+/* Контент — именно композиция сцены */
+#root > #cabinet-content.character-application .character-creation-main{
+  position:relative!important;
+  z-index:20!important;
+  width:100%!important;
+  max-width:none!important;
+  min-height:100svh!important;
+  margin:0!important;
+  padding:120px clamp(32px,7vw,120px) 70px!important;
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:minmax(420px,1fr) minmax(520px,650px)!important;
+  gap:clamp(60px,8vw,150px)!important;
+  align-items:center!important;
+}
+
+/* Левый художественный блок — не заголовок формы */
+#root > #cabinet-content.character-application .character-creation-intro{
+  position:relative!important;
+  align-self:center!important;
+  width:min(760px,100%)!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:0 0 30px!important;
+  text-align:left!important;
+}
+#root > #cabinet-content.character-application .character-creation-intro>span{
+  display:block!important;
+  margin:0 0 28px!important;
+  color:rgba(218,184,104,.72)!important;
+  font-size:10px!important;
+  font-weight:600!important;
+  letter-spacing:.5em!important;
+}
+#root > #cabinet-content.character-application .character-creation-intro h1{
+  margin:0!important;
+  max-width:720px!important;
+  color:#eee5d3!important;
+  font-family:var(--title-font)!important;
+  font-size:clamp(78px,9vw,150px)!important;
+  font-weight:500!important;
+  line-height:.76!important;
+  letter-spacing:.01em!important;
+  text-shadow:0 25px 90px rgba(0,0,0,.85)!important;
+}
+#root > #cabinet-content.character-application .character-creation-intro p{
+  max-width:540px!important;
+  margin:42px 0 0!important;
+  color:rgba(239,233,219,.58)!important;
+  font-size:14px!important;
+  line-height:1.9!important;
+}
+#root > #cabinet-content.character-application .character-creation-line{
+  width:100%!important;
+  max-width:540px!important;
+  margin:38px 0 0!important;
+  justify-content:flex-start!important;
+}
+
+/* Правая часть — ЕДИНАЯ панель, как auth-panel */
+#root > #cabinet-content.character-application #character-application-form{
+  position:relative!important;
+  align-self:center!important;
+  width:100%!important;
+  max-height:calc(100svh - 150px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding:34px 38px 32px!important;
+  box-sizing:border-box!important;
+  display:block!important;
+  background:linear-gradient(145deg,rgba(19,17,13,.84),rgba(4,4,3,.93))!important;
+  border-left:1px solid rgba(214,179,106,.40)!important;
+  border-top:1px solid rgba(214,179,106,.16)!important;
+  box-shadow:-35px 35px 110px rgba(0,0,0,.68),inset 1px 1px 0 rgba(255,255,255,.025)!important;
+  backdrop-filter:blur(18px) saturate(.78)!important;
+  scrollbar-width:thin!important;
+  scrollbar-color:rgba(218,186,111,.25) transparent!important;
+}
+#root > #cabinet-content.character-application #character-application-form::-webkit-scrollbar{
+  width:5px;
+}
+#root > #cabinet-content.character-application #character-application-form::-webkit-scrollbar-thumb{
+  background:rgba(218,186,111,.25);
+}
+
+/* Секции внутри панели — никакой россыпи карточек */
+#root > #cabinet-content.character-application .character-creation-panel{
+  width:100%!important;
+  padding:27px 0!important;
+  border:0!important;
+  border-bottom:1px solid rgba(218,186,111,.11)!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+}
+#root > #cabinet-content.character-application .character-creation-panel:first-child{
+  padding-top:4px!important;
+}
+#root > #cabinet-content.character-application .character-creation-panel:last-of-type{
+  border-bottom:0!important;
+}
+#root > #cabinet-content.character-application .creation-panel-heading{
+  grid-template-columns:30px 1fr!important;
+  gap:12px!important;
+  margin-bottom:20px!important;
+}
+#root > #cabinet-content.character-application .creation-panel-heading>span{
+  color:rgba(218,186,111,.5)!important;
+}
+#root > #cabinet-content.character-application .creation-panel-heading small{
+  margin-bottom:5px!important;
+  color:rgba(218,186,111,.64)!important;
+  font-size:8px!important;
+  letter-spacing:.36em!important;
+}
+#root > #cabinet-content.character-application .creation-panel-heading h2{
+  color:#eee5d3!important;
+  font-size:24px!important;
+}
+
+/* Поля — тонкие элементы панели, а не формы из админки */
+#root > #cabinet-content.character-application .character-creation-panel input,
+#root > #cabinet-content.character-application .character-creation-panel textarea{
+  background:rgba(255,255,255,.025)!important;
+  border:0!important;
+  border-bottom:1px solid rgba(218,186,111,.16)!important;
+  padding:12px 10px!important;
+}
+#root > #cabinet-content.character-application .character-creation-panel input:focus,
+#root > #cabinet-content.character-application .character-creation-panel textarea:focus{
+  border-bottom-color:rgba(218,186,111,.62)!important;
+  background:rgba(218,186,111,.035)!important;
+}
+#root > #cabinet-content.character-application .creation-origins{
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:5px!important;
+}
+#root > #cabinet-content.character-application .creation-origins button{
+  min-height:55px!important;
+  text-align:left!important;
+  padding:9px 10px!important;
+  border:1px solid rgba(218,186,111,.1)!important;
+  background:rgba(255,255,255,.018)!important;
+}
+
+/* Кнопка отправки — финальная строка панели */
+#root > #cabinet-content.character-application .character-creation-submit{
+  width:100%!important;
+  margin:25px 0 0!important;
+  min-height:58px!important;
+  background:linear-gradient(180deg,rgba(94,70,31,.72),rgba(35,25,12,.94))!important;
+}
+
+/* Убираем эффект "форма поверх формы" */
+#root > #cabinet-content.character-application .character-creation-main:after{
+  display:none!important;
+}
+
+@media(max-width:1050px){
+  #root > #cabinet-content.character-application .character-creation-main{
+    grid-template-columns:1fr!important;
+    gap:30px!important;
+    align-items:start!important;
+    overflow-y:auto!important;
+    padding:115px 30px 50px!important;
+  }
+  #root > #cabinet-content.character-application .character-creation-intro{
+    width:min(760px,100%)!important;
+  }
+  #root > #cabinet-content.character-application .character-creation-intro h1{
+    font-size:clamp(62px,10vw,100px)!important;
+  }
+  #root > #cabinet-content.character-application #character-application-form{
+    max-height:none!important;
+    overflow:visible!important;
+  }
+}
+@media(max-width:620px){
+  #root > #cabinet-content.character-application .character-creation-main{
+    padding:100px 18px 35px!important;
+  }
+  #root > #cabinet-content.character-application .character-creation-intro h1{
+    font-size:54px!important;
+  }
+  #root > #cabinet-content.character-application #character-application-form{
+    padding:24px 20px!important;
+  }
+}
