@@ -3572,31 +3572,45 @@ function enableLorgusMapEditor() {
         marker.onpointerdown = active ? (event) => {
             event.stopPropagation();
             event.preventDefault();
-            const start = { x:event.clientX, y:event.clientY };
+
             const rect = viewport.getBoundingClientRect();
+            const pointerId = event.pointerId;
+            marker.setPointerCapture?.(pointerId);
+
             const move = (e) => {
+                if (e.pointerId !== pointerId) return;
+
                 const x = Math.max(1, Math.min(99, ((e.clientX - rect.left) / rect.width) * 100));
                 const y = Math.max(1, Math.min(99, ((e.clientY - rect.top) / rect.height) * 100));
+
                 marker.style.left = x + "%";
                 marker.style.top = y + "%";
                 marker.dataset.x = x.toFixed(2);
                 marker.dataset.y = y.toFixed(2);
             };
+
             const up = () => {
-                window.removeEventListener("pointermove", move);
-                window.removeEventListener("pointerup", up);
+                marker.releasePointerCapture?.(pointerId);
+                marker.removeEventListener("pointermove", move);
+                marker.removeEventListener("pointerup", up);
+
                 const x = marker.dataset.x;
                 const y = marker.dataset.y;
                 const hint = document.getElementById("lorgus-map-surface-hint");
+
                 if (hint) {
                     hint.textContent = marker.dataset.region + " · X:" + x + "% Y:" + y + "%";
                     hint.classList.add("visible");
                     clearTimeout(window.lorgusMapHintTimer);
-                    window.lorgusMapHintTimer = setTimeout(() => hint.classList.remove("visible"), 3500);
+                    window.lorgusMapHintTimer = setTimeout(
+                        () => hint.classList.remove("visible"),
+                        3500
+                    );
                 }
             };
-            window.addEventListener("pointermove", move);
-            window.addEventListener("pointerup", up, {once:true});
+
+            marker.addEventListener("pointermove", move);
+            marker.addEventListener("pointerup", up, { once:true });
         } : null;
     });
 }
@@ -3713,9 +3727,12 @@ function renderLorgusWorldMap(container, character) {
                         <span class="lorgus-map-kicker">МИР ЛОРГУСА · КАРТА</span>
                         <h2>Лоргус</h2>
                     </div>
-                    <div class="lorgus-map-header-status">
-                        <span class="lorgus-map-status-dot"></span>
-                        <span>МИР АКТИВЕН</span>
+                    <div class="lorgus-map-header-actions">
+                        <button id="lorgus-map-editor-toggle" class="lorgus-map-editor-toggle" type="button" onclick="enableLorgusMapEditor()">✎ РЕДАКТОР КАРТЫ</button>
+                        <div class="lorgus-map-header-status">
+                            <span class="lorgus-map-status-dot"></span>
+                            <span>МИР АКТИВЕН</span>
+                        </div>
                     </div>
                 </header>
 
