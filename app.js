@@ -4608,7 +4608,7 @@ function initializeLorgusWebGL() {
         new THREE.BoxGeometry(17.2, 1.25, 5.9, 3, 3, 3),
         stoneEdge
     );
-    crown.position.set(0, 15.85, 0.35);
+    crown.position.set(0, 18.35, 0.35);
     crown.rotation.z = 0.008;
     crown.castShadow = true;
     crown.receiveShadow = true;
