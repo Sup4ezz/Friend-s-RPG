@@ -4588,7 +4588,61 @@ function initializeLorgusWebGL() {
     world.add(rift);
 
     // True arched portal void — no rectangular plate behind the entrance.
-    const openingShape = new THREE.Shape();
+    
+// Decorative architectural detail: inset buttresses and carved stone bands.
+// These break the primitive-box silhouette and give the gate a deliberate medieval design.
+const addButtress = (side, x, z) => {
+    const g = new THREE.Group();
+    const base = new THREE.Mesh(
+        new RoundedBoxGeometry(3.0, 7.8, 5.0, 4, 0.28),
+        stoneDark
+    );
+    base.position.y = 3.9;
+    base.scale.x = 0.78;
+    g.add(base);
+
+    const face = new THREE.Mesh(
+        new RoundedBoxGeometry(2.15, 6.4, 0.42, 3, 0.12),
+        stoneEdge
+    );
+    face.position.set(side * 0.35, 4.15, 2.55);
+    face.rotation.z = side * 0.055;
+    g.add(face);
+
+    const crown = new THREE.Mesh(
+        new RoundedBoxGeometry(3.35, 0.55, 5.45, 3, 0.14),
+        stoneEdge
+    );
+    crown.position.set(0, 7.85, 0);
+    crown.rotation.z = side * 0.025;
+    g.add(crown);
+
+    g.position.set(x, 0, z);
+    g.rotation.y = side * 0.035;
+    g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    world.add(g);
+};
+
+addButtress(-1, -7.55, 0.75);
+addButtress(1, 7.55, 0.75);
+
+// Carved horizontal courses give the façade a designed rhythm instead of a stack of cubes.
+for (const side of [-1, 1]) {
+    for (let row = 0; row < 5; row++) {
+        const y = 3.15 + row * 2.05;
+        const band = new THREE.Mesh(
+            new RoundedBoxGeometry(6.2, 0.24, 4.95, 3, 0.08),
+            row % 2 ? stoneEdge : stoneDark
+        );
+        band.position.set(side * 9.25, y, 3.34);
+        band.rotation.z = side * 0.006;
+        band.castShadow = true;
+        band.receiveShadow = true;
+        world.add(band);
+    }
+}
+
+const openingShape = new THREE.Shape();
     openingShape.moveTo(-5.15, 0);
     openingShape.lineTo(-5.15, 8.25);
     openingShape.absarc(0, 8.25, 5.15, Math.PI, 0, false);
