@@ -102,22 +102,64 @@ function finishPortalTransition() {
     }, 850);
 }
 
-function triggerLorgusPortalFlash() {
-    const flash = document.createElement("div");
-    flash.setAttribute("aria-hidden", "true");
-    flash.style.cssText = [
+function createLorgusEyeTransition() {
+    const overlay = document.createElement("div");
+    overlay.className = "lorgus-eye-transition";
+    overlay.setAttribute("aria-hidden", "true");
+    overlay.innerHTML = `
+        <div class="lorgus-eyelid lorgus-eyelid-top"></div>
+        <div class="lorgus-eyelid lorgus-eyelid-bottom"></div>
+    `;
+    overlay.style.cssText = [
         "position:fixed",
         "inset:0",
         "z-index:2147483647",
         "pointer-events:none",
-        "opacity:0",
-        "background:radial-gradient(circle at center, rgba(255,252,235,.98) 0%, rgba(255,224,145,.82) 18%, rgba(223,175,75,.34) 42%, rgba(255,255,255,0) 72%)",
-        "transition:opacity 110ms ease-out"
+        "overflow:hidden",
+        "background:transparent"
     ].join(";");
-    document.body.appendChild(flash);
 
-    requestAnimationFrame(() => { flash.style.opacity = "1"; });
-    return flash;
+    const style = document.createElement("style");
+    style.textContent = `
+        .lorgus-eye-transition .lorgus-eyelid{
+            position:absolute;
+            left:-8vw;
+            width:116vw;
+            height:52vh;
+            background:#020201;
+            will-change:transform;
+            transition:transform 520ms cubic-bezier(.77,0,.18,1);
+            box-shadow:0 0 34px rgba(0,0,0,.55);
+        }
+        .lorgus-eye-transition .lorgus-eyelid-top{
+            top:-8vh;
+            border-radius:0 0 50% 50% / 0 0 100% 100%;
+            transform:translateY(-92%);
+        }
+        .lorgus-eye-transition .lorgus-eyelid-bottom{
+            bottom:-8vh;
+            border-radius:50% 50% 0 0 / 100% 100% 0 0;
+            transform:translateY(92%);
+        }
+        .lorgus-eye-transition.closed .lorgus-eyelid-top{
+            transform:translateY(0);
+        }
+        .lorgus-eye-transition.closed .lorgus-eyelid-bottom{
+            transform:translateY(0);
+        }
+        .lorgus-eye-transition.open .lorgus-eyelid-top{
+            transform:translateY(-92%);
+        }
+        .lorgus-eye-transition.open .lorgus-eyelid-bottom{
+            transform:translateY(92%);
+        }
+    `;
+    overlay.appendChild(style);
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => overlay.classList.add("closed"));
+
+    return overlay;
 }
 
 function render(session) {
@@ -138,14 +180,15 @@ function render(session) {
                 lorgusPortalEntering = true;
                 lorgusPortalEnterStartedAt = performance.now();
 
-                // В этот момент ворота закрывают кадр вспышкой.
-                // Кабинет уже готовится под ней, поэтому чёрного промежуточного
-                // экрана между воротами и локацией больше не возникает.
-                let flash = null;
+                // Когда портал подходит вплотную, мы не показываем "экран перехода".
+                // Игрок видит закрывающиеся веки: это буквально взгляд персонажа.
+                let eyeTransition = null;
                 window.setTimeout(async () => {
                     if (!lorgusPortalEntering) return;
 
-                    flash = triggerLorgusPortalFlash();
+                    eyeTransition = createLorgusEyeTransition();
+
+                    // Пока веки сомкнуты, кабинет спокойно готовится под ними.
                     await renderCabinet(session, true);
 
                     lorgusPortalEntering = false;
@@ -156,10 +199,11 @@ function render(session) {
                         cleanup();
                     }
 
-                    if (flash) {
-                        flash.style.opacity = "0";
-                        window.setTimeout(() => flash.remove(), 220);
-                    }
+                    // Открываем глаза уже на новой локации.
+                    eyeTransition.classList.remove("closed");
+                    eyeTransition.classList.add("open");
+
+                    window.setTimeout(() => eyeTransition.remove(), 620);
                 }, 760);
             }, 620);
 
