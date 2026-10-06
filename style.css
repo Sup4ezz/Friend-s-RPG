@@ -9525,3 +9525,30 @@ body{
 .lorgus-map-controls{
   display:none !important;
 }
+
+
+/* LORGUS 2.4 — interactive controls stay above the static map */
+.lorgus-map-sidebar,
+.lorgus-map-inspector,
+.lorgus-map-region-button,
+.lorgus-map-enter-button,
+.lorgus-map-side-button{
+  pointer-events:auto;
+}
+
+.lorgus-map-inspector{
+  position:relative;
+  z-index:10;
+}
+
+.lorgus-map-sidebar{
+  position:relative;
+  z-index:10;
+}
+
+.lorgus-map-region-button,
+.lorgus-map-enter-button,
+.lorgus-map-side-button{
+  position:relative;
+  z-index:11;
+}
