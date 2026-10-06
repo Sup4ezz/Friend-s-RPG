@@ -121,9 +121,11 @@
 - [x] Введена серверная валидация принадлежности персонажа одобренной заявке.
 - [x] Введена серверная валидация канонических локаций и прямых маршрутов.
 - [x] entered_at и started_at теперь выставляются серверной функцией.
-- [ ] Дождаться/проверить применение migrations `20261006000100_rp_schema.sql`, `20261006000200_rp_presence_security.sql` и `20261006000300_rp_presence_cleanup.sql` в production Supabase.
-- [ ] Полностью закрыть клиентские обходы чтения RP.
-- [ ] Перенести критическую авторизацию RP-доступа на сервер/RLS для rp_messages.
+- [x] Подтверждено пользователем: migrations 20261006000100_rp_schema.sql, 20261006000200_rp_presence_security.sql и 20261006000300_rp_presence_cleanup.sql прошли в production Supabase.
+- [x] rp_messages переведён на серверную RLS-проверку текущего физического RP-пространства.
+- [x] INSERT rp_messages теперь проверяет auth user, approved character application и точное совпадение с текущим rp_presence.
+- [ ] Полностью проверить production-применение migration 20261006000400_rp_messages_security.sql.
+- [ ] Проверить realtime/RLS после применения.
 - [ ] Проверить все связанные RP SQL policies.
 
 ## 3.4 Путешествия
@@ -498,7 +500,7 @@
 
 **Следующее действие:**
 
-> Проверить в Supabase, что migrations `20261006000100_rp_schema.sql` и `20261006000200_rp_presence_security.sql` применились, затем продолжить P0-аудит rp_messages и RLS.
+> Первые три RP migrations уже применены. Следующий шаг — применить/проверить 20261006000400_rp_messages_security.sql, затем проверить realtime и попытки чтения/записи из неправильного RP-пространства.
 
 CI/CD проверки выполнены; Run #44 успешно завершён.
 
@@ -540,8 +542,9 @@ CI/CD проверки выполнены; Run #44 успешно завершё
 - [x] Сервер проверяет approved character application, каноническую локацию и прямой маршрут.
 - [x] Route graph централизован в LORGUS_ROUTES.
 - [x] Перенесены RP schema/security SQL в `supabase/migrations/` для GitHub → Supabase deployment.
-- [ ] Подтвердить применение migrations в production Supabase, включая `20261006000300_rp_presence_cleanup.sql`.
-- [ ] Закрыть аналогичный обход в rp_messages.
+- [x] Подтверждено пользователем: первые три RP migrations применены в production Supabase.
+- [x] Закрыт аналогичный клиентский обход записи rp_messages: серверная RLS сверяет сообщение с текущим rp_presence.
+- [ ] Применить и проверить новую migration 20261006000400_rp_messages_security.sql в production Supabase.
 
 Изменённые файлы:
 - app.js
@@ -618,3 +621,34 @@ Commit:
 
 ### Текущая точка
 Следом нужно проверить, что все три migration применились автоматически в Supabase production. После этого — вызвать/протестировать `set_lorgus_rp_presence()` и перейти к `rp_messages` RLS.
+
+
+## 19. RP MESSAGES SECURITY — 2026-10-06
+
+- [x] Подтверждено: первые три RP migrations прошли в production Supabase.
+- [x] Найден критичный обход rp_messages: исходная RLS позволяла любому authenticated читать все сообщения через using (true).
+- [x] Найден второй обход: INSERT проверял только player_id = auth.uid(), поэтому клиент мог отправить сообщение с чужой/поддельной RP-координатой.
+- [x] Добавлена supabase/migrations/20261006000400_rp_messages_security.sql.
+- [x] SELECT теперь разрешён только если у текущего пользователя есть физическое rp_presence в том же RP-пространстве.
+- [x] INSERT теперь проверяет approved character application и точное соответствие сообщения текущему rp_presence персонажа.
+- [x] Server trigger принудительно выставляет player_id = auth.uid() и created_at = now().
+- [x] Прямые UPDATE/DELETE для authenticated закрыты.
+- [x] renderLocationChats() теперь реально загружает историю rp_messages и подписывается на Realtime; раньше location UI оставался с пустой заглушкой.
+- [x] Участники location теперь фильтруются на уровне запроса, а не после загрузки всех public presence.
+
+Новые commits:
+- a74d0be33933345a47b39a123cb6a50232189e50 — Add RP message authorization hardening
+- 353ec474ae5684081fac6f909a46fc164e9ebb20 — Fix RP message server field hardening
+- 72888489b668808b42de540b71813964d6da5378 — Connect location RP chat to protected message stream
+
+### Текущая точка
+Migration 20261006000400_rp_messages_security.sql добавлена в main, но её production application ещё не подтверждён.
+
+### Следующая задача
+1. Проверить, что 20261006000400 применился в Supabase.
+2. Тест: сообщение из текущей локации проходит.
+3. Тест: подмена region/location отклоняется RLS.
+4. Тест: чтение чужой локации без присутствия отклоняется.
+5. Тест: road message принимается только для текущей дороги.
+6. Проверить Realtime после RLS.
+7. Затем перейти к race/stale presence и reload.
