@@ -12161,3 +12161,57 @@ body{
 .creation-fields{grid-template-columns:1fr}
 .creation-origins{grid-template-columns:1fr 1fr}
 }
+
+
+/* Character creation: visible cinematic form panels */
+.character-creation-form{
+  position:relative;
+  z-index:6;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  gap:22px;
+}
+.character-creation-panel{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:relative;
+  z-index:7;
+  min-width:0;
+  padding:32px!important;
+  background:linear-gradient(145deg,rgba(8,8,7,.94),rgba(22,19,14,.9))!important;
+  border:1px solid rgba(218,186,111,.48)!important;
+  box-shadow:0 26px 80px rgba(0,0,0,.62),inset 0 1px rgba(255,255,255,.07),0 0 0 1px rgba(0,0,0,.45)!important;
+  backdrop-filter:blur(12px);
+}
+.character-creation-panel:before{
+  width:72px!important;
+  height:2px!important;
+  background:#d7b46b!important;
+}
+.character-creation-panel:after{
+  width:72px!important;
+  height:2px!important;
+  background:rgba(215,180,107,.7)!important;
+}
+.identity-panel,.origin-panel{min-height:315px!important}
+.story-panel,.portrait-panel{grid-column:1/-1}
+.creation-panel-heading{margin-bottom:28px}
+.character-creation-form input,
+.character-creation-form textarea{
+  background:rgba(0,0,0,.78)!important;
+  border-color:rgba(218,186,111,.3)!important;
+}
+.character-creation-form input::placeholder,
+.character-creation-form textarea::placeholder{color:rgba(235,226,205,.38)}
+.creation-origins button{
+  background:rgba(0,0,0,.62)!important;
+  border-color:rgba(218,186,111,.24)!important;
+}
+.creation-upload{
+  background:rgba(0,0,0,.58)!important;
+}
+@media(max-width:900px){
+  .character-creation-form{grid-template-columns:1fr}
+  .story-panel,.portrait-panel{grid-column:auto}
+}
