@@ -1,3 +1,57 @@
+import {
+    createClient
+} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+let supabase;
+let authSwitching = false;
+
+/* =========================================================
+   ИНИЦИАЛИЗАЦИЯ
+   ========================================================= */
+
+async function initialize() {
+    try {
+        const response = await fetch("/api/config");
+
+        if (!response.ok) {
+            throw new Error("Не удалось получить конфигурацию Supabase.");
+        }
+
+        const config = await response.json();
+
+        if (!config.supabaseUrl || !config.supabasePublishableKey) {
+            throw new Error("Конфигурация Supabase отсутствует.");
+        }
+
+        supabase = createClient(
+            config.supabaseUrl,
+            config.supabasePublishableKey
+        );
+
+        window.supabaseClient = supabase;
+
+        const {
+            data: {
+                session
+            }
+        } = await supabase.auth.getSession();
+
+        render(session);
+
+        supabase.auth.onAuthStateChange(
+            (_event, newSession) => render(newSession)
+        );
+
+    } catch (error) {
+        console.error(error);
+
+        document.getElementById("root").innerHTML = `
+            <main class="error-screen">
+                <div class="error-panel">
+                    <div class="error-symbol">✦</div>
+                    <h1>Ошибка соединения</h1>
+                    <p>${escapeHtml(error.message)}</p>
+                    <button onclick="location.reload()" class="gold-button">
                         Повторить
                     </button>
                 </div>
@@ -28,27 +82,6 @@ function renderAuth() {
             <canvas id="lorgus-scene" class="lorgus-scene" aria-hidden="true"></canvas>
             <div class="lorgus-vignette" aria-hidden="true"></div>
             <div class="background-glow"></div>
-
-            <div class="lorgus-portal-mark" aria-hidden="true">
-                <span class="portal-ring portal-ring-1"></span>
-                <span class="portal-ring portal-ring-2"></span>
-                <span class="portal-ring portal-ring-3"></span>
-                <span class="portal-core">✦</span>
-                <span class="portal-orbit portal-orbit-a"></span>
-                <span class="portal-orbit portal-orbit-b"></span>
-            </div>
-
-            <div class="lorgus-side-notation lorgus-side-notation-left" aria-hidden="true">
-                <span>LO / 001</span>
-                <i></i>
-                <span>THE LIVING WORLD</span>
-            </div>
-
-            <div class="lorgus-side-notation lorgus-side-notation-right" aria-hidden="true">
-                <span>ВХОД В МИР</span>
-                <i></i>
-                <span>EST. UNKNOWN</span>
-            </div>
 
             <section class="auth-container">
                 <div class="brand">
@@ -90,3 +123,4035 @@ function renderAuth() {
                 <p class="auth-footer">
                     Вход в мир предназначен только для участников игры.
                 </p>
+            </section>
+        </main>
+    `;
+
+    showLogin(true);
+    initializeLorgusScene();
+}
+
+let lorgusSceneCleanup = null;
+
+function initializeLorgusScene() {
+    if (lorgusSceneCleanup) {
+        lorgusSceneCleanup();
+        lorgusSceneCleanup = null;
+    }
+
+    const canvas = document.getElementById("lorgus-scene");
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let width = 0;
+    let height = 0;
+    let raf = 0;
+    let last = performance.now();
+    let particles = [];
+    let pointerX = 0.5;
+    let pointerY = 0.5;
+    let targetX = 0.5;
+    let targetY = 0.5;
+
+    const resize = () => {
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+        canvas.style.width = width + "px";
+        canvas.style.height = height + "px";
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+        const count = Math.min(130, Math.max(45, Math.floor(width * height / 18000)));
+        particles = Array.from({ length: count }, () => ({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            r: Math.random() * 1.5 + 0.25,
+            a: Math.random() * 0.45 + 0.08,
+            speed: Math.random() * 5 + 2,
+            drift: (Math.random() - 0.5) * 3,
+            phase: Math.random() * Math.PI * 2
+        }));
+    };
+
+    const onPointerMove = event => {
+        targetX = event.clientX / Math.max(width, 1);
+        targetY = event.clientY / Math.max(height, 1);
+    };
+
+    const frame = now => {
+        const dt = Math.min((now - last) / 1000, 0.04);
+        last = now;
+
+        pointerX += (targetX - pointerX) * Math.min(1, dt * 3);
+        pointerY += (targetY - pointerY) * Math.min(1, dt * 3);
+
+        ctx.clearRect(0, 0, width, height);
+
+        const glowX = width * (0.28 + pointerX * 0.08);
+        const glowY = height * (0.32 + pointerY * 0.06);
+        const glow = ctx.createRadialGradient(
+            glowX, glowY, 0,
+            glowX, glowY, Math.max(width, height) * 0.62
+        );
+        glow.addColorStop(0, "rgba(190,145,55,.075)");
+        glow.addColorStop(.38, "rgba(120,90,35,.028)");
+        glow.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, width, height);
+
+        for (const p of particles) {
+            p.y -= p.speed * dt;
+            p.x += (p.drift + Math.sin(now * .00035 + p.phase)) * dt;
+
+            if (p.y < -10) {
+                p.y = height + 10;
+                p.x = Math.random() * width;
+            }
+            if (p.x < -10) p.x = width + 10;
+            if (p.x > width + 10) p.x = -10;
+
+            const parallax = (pointerX - .5) * 12;
+            const px = p.x + parallax;
+            const alpha = p.a * (.72 + Math.sin(now * .001 + p.phase) * .28);
+
+            ctx.beginPath();
+            ctx.arc(px, p.y + (pointerY - .5) * 7, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = "rgba(218,184,104," + Math.max(.02, alpha) + ")";
+            ctx.fill();
+        }
+
+        raf = requestAnimationFrame(frame);
+    };
+
+    resize();
+    window.addEventListener("resize", resize, { passive: true });
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    raf = requestAnimationFrame(frame);
+
+    lorgusSceneCleanup = () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener("resize", resize);
+        window.removeEventListener("pointermove", onPointerMove);
+    };
+}
+
+function showLogin(initial = false) {
+    if (authSwitching) return;
+
+    if (initial) {
+        setActiveTab("login");
+        renderLoginForm();
+        return;
+    }
+
+    switchAuthForm("login");
+}
+
+function showRegister() {
+    if (authSwitching) return;
+    switchAuthForm("register");
+}
+
+function switchAuthForm(type) {
+    const form = document.getElementById("auth-form");
+
+    if (!form) return;
+
+    const currentType = form.dataset.formType || "login";
+
+    if (currentType === type) return;
+
+    authSwitching = true;
+    setActiveTab(type);
+
+    form.classList.add("auth-form-leaving");
+
+    setTimeout(() => {
+        if (type === "login") {
+            renderLoginForm();
+        } else {
+            renderRegisterForm();
+        }
+
+        form.classList.remove("auth-form-leaving");
+        form.classList.add("auth-form-entering");
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                form.classList.remove("auth-form-entering");
+            });
+        });
+
+        setTimeout(() => {
+            authSwitching = false;
+        }, 300);
+
+    }, 180);
+}
+
+/* =========================================================
+   ФОРМА ВХОДА
+   ========================================================= */
+
+function renderLoginForm() {
+    const form = document.getElementById("auth-form");
+
+    form.dataset.formType = "login";
+
+    form.innerHTML = `
+        <div class="form-heading">
+            <h2>Добро пожаловать</h2>
+            <p>Войди, чтобы продолжить своё путешествие.</p>
+        </div>
+
+        <form onsubmit="login(event)">
+            <label for="login-username">Логин</label>
+
+            <div class="input-wrapper">
+                <span class="input-icon">✦</span>
+                <input
+                    id="login-username"
+                    type="text"
+                    placeholder="Введите логин"
+                    autocomplete="username"
+                    minlength="3"
+                    maxlength="32"
+                    required
+                >
+            </div>
+
+            <label for="login-password">Пароль</label>
+
+            <div class="input-wrapper">
+                <span class="input-icon">◆</span>
+                <input
+                    id="login-password"
+                    type="password"
+                    placeholder="Введите пароль"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <div id="auth-message"></div>
+
+            <button
+                type="submit"
+                class="gold-button main-button"
+            >
+                Войти в мир
+            </button>
+        </form>
+    `;
+}
+
+/* =========================================================
+   ФОРМА РЕГИСТРАЦИИ
+   ========================================================= */
+
+function renderRegisterForm() {
+    const form = document.getElementById("auth-form");
+
+    form.dataset.formType = "register";
+
+    form.innerHTML = `
+        <div class="form-heading">
+            <h2>Создать аккаунт</h2>
+            <p>Начни своё путешествие в мире ЛОРГУС.</p>
+        </div>
+
+        <form onsubmit="register(event)">
+            <label for="register-username">Логин</label>
+
+            <div class="input-wrapper">
+                <span class="input-icon">✦</span>
+                <input
+                    id="register-username"
+                    type="text"
+                    placeholder="Придумай логин"
+                    autocomplete="username"
+                    minlength="3"
+                    maxlength="32"
+                    required
+                >
+            </div>
+
+            <label for="register-password">Пароль</label>
+
+            <div class="input-wrapper">
+                <span class="input-icon">◆</span>
+                <input
+                    id="register-password"
+                    type="password"
+                    placeholder="Минимум 6 символов"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                >
+            </div>
+
+            <label for="register-password-confirm">
+                Повторите пароль
+            </label>
+
+            <div class="input-wrapper">
+                <span class="input-icon">◆</span>
+                <input
+                    id="register-password-confirm"
+                    type="password"
+                    placeholder="Введите пароль ещё раз"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                >
+            </div>
+
+            <div id="auth-message"></div>
+
+            <button
+                type="submit"
+                class="gold-button main-button"
+            >
+                Создать аккаунт
+            </button>
+        </form>
+    `;
+}
+
+/* =========================================================
+   ВКЛАДКИ
+   ========================================================= */
+
+function setActiveTab(tab) {
+    const loginTab = document.getElementById("login-tab");
+    const registerTab = document.getElementById("register-tab");
+
+    if (!loginTab || !registerTab) return;
+
+    loginTab.classList.toggle("active", tab === "login");
+    registerTab.classList.toggle("active", tab === "register");
+}
+
+/* =========================================================
+   ЛОГИН → ТЕХНИЧЕСКИЙ EMAIL
+   ========================================================= */
+
+function encodeUsername(username) {
+    return btoa(encodeURIComponent(username))
+        .replaceAll("+", "-")
+        .replaceAll("/", "_")
+        .replaceAll("=", "");
+}
+
+function getAuthEmail(username) {
+    return `u_${encodeUsername(username)}@auth.lorgus.local`;
+}
+
+/* =========================================================
+   ВХОД
+   ========================================================= */
+
+async function login(event) {
+    event.preventDefault();
+
+    const username = document
+        .getElementById("login-username")
+        .value
+        .trim();
+
+    const password = document
+        .getElementById("login-password")
+        .value;
+
+    if (!username) {
+        setMessage("Введи логин.", "error");
+        return;
+    }
+
+    setMessage("Выполняется вход...", "info");
+
+    const {
+        error
+    } = await supabase.auth.signInWithPassword({
+        email: getAuthEmail(username),
+        password
+    });
+
+    if (error) {
+        setMessage("Неверный логин или пароль.", "error");
+    }
+}
+
+/* =========================================================
+   РЕГИСТРАЦИЯ
+   ========================================================= */
+
+async function register(event) {
+    event.preventDefault();
+
+    const username = document
+        .getElementById("register-username")
+        .value
+        .trim();
+
+    const password = document
+        .getElementById("register-password")
+        .value;
+
+    const confirmation = document
+        .getElementById("register-password-confirm")
+        .value;
+
+    if (username.length < 3 || username.length > 32) {
+        setMessage(
+            "Логин должен содержать от 3 до 32 символов.",
+            "error"
+        );
+        return;
+    }
+
+    if (password !== confirmation) {
+        setMessage("Пароли не совпадают.", "error");
+        return;
+    }
+
+    setMessage("Создаём аккаунт...", "info");
+
+    const {
+        data,
+        error
+    } = await supabase.auth.signUp({
+        email: getAuthEmail(username),
+        password,
+        options: {
+            data: {
+                username
+            }
+        }
+    });
+
+    if (error) {
+        console.error(error);
+
+        if (
+            error.message.includes("already registered") ||
+            error.message.includes("already been registered")
+        ) {
+            setMessage("Этот логин уже занят.", "error");
+        } else {
+            setMessage(error.message, "error");
+        }
+
+        return;
+    }
+
+    if (data.session) return;
+
+    setMessage(
+        "Аккаунт создан. Теперь можно войти.",
+        "success"
+    );
+}
+
+/* =========================================================
+   КАБИНЕТ
+   ========================================================= */
+
+async function renderCabinet(session) {
+    const username =
+        session.user.user_metadata?.username ||
+        "Игрок";
+
+    window.lorgusUsername = username;
+
+    window.lorgusCurrentUsername = username;
+
+    document.getElementById("root").innerHTML = `
+        <main class="game-page">
+            <section
+                id="cabinet-content"
+                class="welcome-panel"
+            >
+                <div class="welcome-symbol">✦</div>
+                <h1>ЛОРГУС</h1>
+                <p>Загружаем твоё путешествие...</p>
+            </section>
+        </main>
+    `;
+
+    await loadPlayerState(session);
+}
+
+/* =========================================================
+   СОСТОЯНИЕ ИГРОКА
+   ========================================================= */
+
+async function loadPlayerState(session) {
+    const container =
+        document.getElementById("cabinet-content");
+
+    if (!container) return;
+
+    const {
+        data: isAdmin,
+        error: adminError
+    } = await supabase.rpc("is_admin");
+
+    if (adminError) {
+        console.error(
+            "Ошибка проверки администратора:",
+            adminError
+        );
+    } else if (isAdmin) {
+        await loadAdminPanel(container);
+        return;
+    }
+
+    const {
+        data: applications,
+        error: applicationsError
+    } = await supabase
+        .from("character_applications")
+        .select("*")
+        .eq("player_id", session.user.id)
+        .order("id", {
+            ascending: false
+        });
+
+    if (applicationsError) {
+        console.error(applicationsError);
+        showCharacterError(
+            container,
+            applicationsError.message
+        );
+        return;
+    }
+
+    const approvedApplications = applications.filter(
+        application =>
+            application.status === "approved" &&
+            application.character_id
+    );
+
+    const pendingApplication =
+        applications.find(
+            application =>
+                application.status === "pending"
+        );
+
+    /*
+        Восстанавливаем выбранного персонажа после перезагрузки.
+        sessionStorage хранит только ID, поэтому самого персонажа
+        и его RP-присутствие нужно заново загрузить из Supabase.
+        Одновременно проверяем, что этот персонаж действительно
+        относится к одобренной заявке текущего пользователя.
+    */
+    const savedCharacterId =
+        sessionStorage.getItem("lorgus_active_character_id") ||
+        localStorage.getItem("lorgus_active_character_id");
+
+    if (savedCharacterId) {
+        const savedApplication = approvedApplications.find(
+            application =>
+                String(application.character_id) === String(savedCharacterId)
+        );
+
+        if (savedApplication) {
+            const characterResult = await supabase
+                .from("characters")
+                .select("*")
+                .eq("id", savedCharacterId)
+                .single();
+
+            const savedCharacter = characterResult.data;
+            const savedCharacterStatus =
+                String(savedCharacter?.status || "ACTIVE").toUpperCase();
+
+            if (
+                !characterResult.error &&
+                savedCharacter &&
+                savedCharacterStatus === "ACTIVE"
+            ) {
+                window.activeCharacterId = savedCharacter.id;
+                window.activeCharacter = savedCharacter;
+
+                sessionStorage.setItem(
+                    "lorgus_active_character_id",
+                    savedCharacter.id
+                );
+                localStorage.setItem(
+                    "lorgus_active_character_id",
+                    savedCharacter.id
+                );
+
+                await initializeRpPresence(savedCharacter);
+
+                /*
+                    Если игрок обновил страницу прямо внутри RP,
+                    восстанавливаем не только персонажа, но и
+                    последнее RP-пространство.
+                */
+                const restoredPresence = window.activeRpPresence;
+
+                if (restoredPresence?.type === "location") {
+                    await renderLocationChats(
+                        restoredPresence.location,
+                        restoredPresence.region,
+                        true
+                    );
+                } else if (restoredPresence?.type === "road") {
+                    renderRoadChat(restoredPresence);
+                } else {
+                    renderCharacter(container, savedCharacter);
+                }
+
+                return;
+            }
+
+            console.error(
+                "Не удалось восстановить выбранного персонажа:",
+                characterResult.error || "персонаж недоступен"
+            );
+        }
+
+        sessionStorage.removeItem("lorgus_active_character_id");
+        localStorage.removeItem("lorgus_active_character_id");
+    }
+
+    window.activeCharacterId = null;
+    window.activeCharacter = null;
+
+    if (approvedApplications.length > 0) {
+        await renderCharacterSelection(
+            container,
+            approvedApplications,
+            pendingApplication
+        );
+        return;
+    }
+
+    if (pendingApplication) {
+        renderPendingApplication(
+            container,
+            pendingApplication
+        );
+        return;
+    }
+
+    renderCharacterApplicationForm(container);
+}
+
+/* =========================================================
+   ВЫБОР ПЕРСОНАЖА
+   ========================================================= */
+
+async function renderCharacterSelection(container, applications, pendingApplication = null) {
+    container.className = "character-selection";
+    container.innerHTML = "";
+
+    const header = document.createElement("div");
+    header.className = "character-selection-header";
+    header.innerHTML = `
+        <div class="character-selection-eyebrow">ЛОРГУС · ВАШИ ИСТОРИИ</div>
+        <div class="character-selection-title-row">
+            <span class="character-selection-ornament">✦</span>
+            <div>
+                <h1>Кто продолжит историю?</h1>
+                <p>Выбери персонажа и войди в мир его глазами.</p>
+            </div>
+        </div>
+        <div class="character-selection-rule"><span></span><i>АКТИВНЫЕ ПЕРСОНАЖИ</i><span></span></div>
+    `;
+    container.appendChild(header);
+
+    const grid = document.createElement("div");
+    grid.className = "character-selection-grid";
+    container.appendChild(grid);
+
+    for (const application of applications) {
+        const result = await supabase.from("characters").select("*").eq("id", application.character_id).single();
+        if (result.error || !result.data) continue;
+
+        const character = result.data;
+        const status = String(character.status || "ACTIVE").toUpperCase();
+        const card = document.createElement("article");
+        card.className = "character-card";
+
+        const avatar = document.createElement("div");
+        avatar.className = "character-card-avatar";
+
+        if (application.photo_path) {
+            const { data: photoData, error: photoError } = await supabase
+                .storage
+                .from("character-applications")
+                .createSignedUrl(application.photo_path, 60 * 60);
+
+            if (!photoError && photoData?.signedUrl) {
+                avatar.innerHTML = "";
+                const image = document.createElement("img");
+                image.src = photoData.signedUrl;
+                image.alt = character.name || "Персонаж";
+                image.className = "character-card-photo";
+                avatar.appendChild(image);
+            } else {
+                avatar.classList.add("character-card-placeholder");
+                avatar.textContent = "✦";
+            }
+        } else {
+            avatar.classList.add("character-card-placeholder");
+            avatar.textContent = "✦";
+        }
+
+        card.appendChild(avatar);
+
+        const body = document.createElement("div");
+        body.className = "character-card-body";
+
+        if (status === "DEAD") {
+            const statusNode = document.createElement("div");
+            statusNode.className = "character-card-status dead";
+            statusNode.textContent = "Погиб";
+            body.appendChild(statusNode);
+        }
+
+        const name = document.createElement("h2");
+        name.textContent = character.name || "Без имени";
+        body.appendChild(name);
+
+        const race = document.createElement("p");
+        race.textContent = character.race || "Раса не указана";
+        body.appendChild(race);
+
+        if (status === "ACTIVE" || !character.status) {
+            const button = document.createElement("button");
+            button.className = "gold-button character-select-button";
+            button.textContent = "Играть";
+            button.addEventListener("click", () => selectCharacter(container, character.id));
+            body.appendChild(button);
+        } else {
+            const disabled = document.createElement("div");
+            disabled.className = "character-card-disabled-label";
+            disabled.textContent = "Персонаж недоступен";
+            body.appendChild(disabled);
+        }
+
+        card.appendChild(body);
+        grid.appendChild(card);
+    }
+
+    if (pendingApplication) {
+        const reviewPanel = document.createElement("div");
+        reviewPanel.className = "character-review-pending-panel";
+        reviewPanel.innerHTML = `
+            <h2>Есть заявка на проверке</h2>
+            <p>У тебя есть ещё одна анкета, ожидающая решения администрации.</p>
+            ${pendingApplication.review_notes ? `
+                <div class="character-review-notes">
+                    <h3>Правки от администрации</h3>
+                    <p>${escapeHtml(pendingApplication.review_notes)}</p>
+                </div>
+            ` : ""}
+        `;
+
+        const reviewButton = document.createElement("button");
+        reviewButton.className = "gold-button";
+        reviewButton.textContent = pendingApplication.review_notes
+            ? "Исправить анкету"
+            : "Открыть заявку";
+        reviewButton.addEventListener("click", () => {
+            renderPendingApplication(container, pendingApplication);
+        });
+        reviewPanel.appendChild(reviewButton);
+        container.appendChild(reviewPanel);
+    }
+
+    if (applications.length + (pendingApplication ? 1 : 0) < 3) {
+        const createButton = document.createElement("button");
+        createButton.className = "gold-button character-create-button";
+        createButton.textContent = "Создать нового персонажа";
+        createButton.addEventListener("click", () => renderCharacterApplicationForm(container));
+        container.appendChild(createButton);
+    }
+}
+
+async function selectCharacter(container, characterId) {
+    const result = await supabase.from("characters").select("*").eq("id", characterId).single();
+    if (result.error || !result.data) {
+        showCharacterError(container, result.error ? result.error.message : "Персонаж не найден.");
+        return;
+    }
+
+    const character = result.data;
+    const status = String(character.status || "ACTIVE").toUpperCase();
+    if (status !== "ACTIVE") {
+        showCharacterError(container, "Этот персонаж сейчас недоступен для игры.");
+        return;
+    }
+
+    window.activeCharacterId = character.id;
+    window.activeCharacter = character;
+    sessionStorage.setItem("lorgus_active_character_id", character.id);
+    localStorage.setItem("lorgus_active_character_id", character.id);
+    await initializeRpPresence(character);
+    renderCharacter(container, character);
+}
+
+/* =========================================================
+   ФОРМА СОЗДАНИЯ ПЕРСОНАЖА
+   ========================================================= */
+
+function renderCharacterApplicationForm(container) {
+    container.className = "character-application";
+
+    container.innerHTML = `
+        <div class="admin-header-row">
+            <div class="character-header">
+                <div class="welcome-symbol">✦</div>
+            <h1>Создание персонажа</h1>
+            <p>Перед анкетой ознакомься с расами и местами мира Лоргуса.</p>
+        </div>
+
+        <section class="character-lore-guide">
+            <div class="character-lore-guide-intro">
+                <h2>Сначала — выбери, кем и откуда будет твой персонаж</h2>
+                <p>
+                    Лоргус — мир для свободного RP. Здесь нет классов и уровней.
+                    В анкете важно понимать происхождение персонажа, его культуру,
+                    окружение и место, откуда он пришёл.
+                </p>
+            </div>
+
+            <div class="character-lore-section">
+                <h3>Расы</h3>
+                <div class="character-lore-cards">
+                    <article class="character-lore-card">
+                        <h4>Люди</h4>
+                        <p>
+                            Наиболее распространены в Ксандре и Морвейне.
+                            Люди также живут в других королевствах и могут
+                            свободно встречаться по всему Лоргусу.
+                        </p>
+                    </article>
+                    <article class="character-lore-card">
+                        <h4>Эльфы</h4>
+                        <p>
+                            Особенно распространены в Атэроне и Лирэне.
+                            Лесные эльфы Лирэна связаны с древними лесами,
+                            природой и магией.
+                        </p>
+                    </article>
+                    <article class="character-lore-card">
+                        <h4>Дварфы</h4>
+                        <p>
+                            Основной народ Каэлора — дварфы, известные
+                            кузнечным ремеслом, шахтами и мастерством.
+                            Другие народы также могут жить в Каэлоре.
+                        </p>
+                    </article>
+                    <article class="character-lore-card">
+                        <h4>Другие народы</h4>
+                        <p>
+                            В Спорных Землях встречаются различные народы
+                            и существа. Такие персонажи требуют соответствующего
+                            происхождения и обоснования в анкете.
+                        </p>
+                    </article>
+                </div>
+            </div>
+
+            <div class="character-lore-section">
+                <h3>Основные места</h3>
+                <div class="character-lore-location-list">
+                    <button type="button" class="character-lore-location" data-location="Примум">
+                        <strong>Примум</strong><span>Атэрон · столица · знания и древности</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Хелион">
+                        <strong>Хелион</strong><span>Каэлор · столица · кузницы и торговля металлом</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Древнее Пламя">
+                        <strong>Древнее Пламя</strong><span>Каэлор · священное место Вечного Пламени</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Арджент">
+                        <strong>Арджент</strong><span>Ксандр · столица · торговля и финансы</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Аврора">
+                        <strong>Аврора</strong><span>Лирэн · столица · лесные эльфы и плодородие</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Фин">
+                        <strong>Фин</strong><span>Морвейн · столица · память, паломничество и Последний Путь</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Святые Земли">
+                        <strong>Святые Земли</strong><span>нейтральная территория · дипломатия пяти королевств</span>
+                    </button>
+                    <button type="button" class="character-lore-location" data-location="Спорные Земли">
+                        <strong>Спорные Земли</strong><span>вне власти пяти королевств · независимые поселения</span>
+                    </button>
+                </div>
+                <p class="character-lore-note">
+                    Локация — это не «класс» персонажа. Она помогает понять,
+                    где он вырос, какую культуру знает и почему оказался в мире RP.
+                </p>
+            </div>
+        </section>
+
+        <form
+            id="character-application-form"
+            onsubmit="submitCharacterApplication(event)"
+        >
+            <div class="character-grid">
+
+                <div class="character-field">
+                    <label for="character-name">Имя персонажа</label>
+                    <input id="character-name" type="text" required>
+                </div>
+
+                <div class="character-field">
+                    <label for="character-race">Раса</label>
+                    <input
+                        id="character-race"
+                        type="text"
+                        list="character-races"
+                        placeholder="Например: человек, эльф, дварф"
+                        required
+                    >
+                    <datalist id="character-races">
+                        <option value="Человек"></option>
+                        <option value="Эльф"></option>
+                        <option value="Лесной эльф"></option>
+                        <option value="Дварф"></option>
+                    </datalist>
+                </div>
+
+                <div class="character-field">
+                    <label for="character-age">Возраст</label>
+                    <input id="character-age" type="number" min="1" max="1000" required>
+                </div>
+
+                <div class="character-field">
+                    <label for="character-homeland">Родина</label>
+                    <input
+                        id="character-homeland"
+                        type="text"
+                        list="character-homelands"
+                        placeholder="Выбери место из списка или укажи другое"
+                        required
+                    >
+                    <datalist id="character-homelands">
+                        <option value="Примум"></option>
+                        <option value="Хелион"></option>
+                        <option value="Арджент"></option>
+                        <option value="Аврора"></option>
+                        <option value="Фин"></option>
+                        <option value="Святые Земли"></option>
+                        <option value="Спорные Земли"></option>
+                    </datalist>
+                </div>
+
+                <div class="character-field full">
+                    <label for="character-personality">Характер</label>
+                    <textarea id="character-personality" required></textarea>
+                </div>
+
+                <div class="character-field full">
+                    <label for="character-backstory">Предыстория</label>
+                    <textarea id="character-backstory" required></textarea>
+                </div>
+
+                <div class="character-field full">
+                    <label for="character-skills">Особые навыки</label>
+                    <textarea id="character-skills" required></textarea>
+                </div>
+
+                <div class="character-field">
+                    <label for="character-weapon">Предпочитаемое оружие</label>
+                    <input id="character-weapon" type="text">
+                    <div class="character-hint">Поле необязательное.</div>
+                </div>
+
+                <div class="character-field">
+                    <label for="character-occupation">Род занятий</label>
+                    <input id="character-occupation" type="text" required>
+                </div>
+
+                <div class="character-field full">
+                    <label for="character-photo">Изображение персонажа</label>
+                    <input id="character-photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                    <div class="character-hint">JPG, PNG или WEBP. Максимальный размер — 5 МБ.</div>
+                </div>
+            </div>
+
+            <div id="character-message" class="character-message"></div>
+
+            <button type="submit" class="gold-button character-submit">
+                Отправить заявку
+            </button>
+        </form>
+    `;
+
+    container.querySelectorAll(".character-lore-location").forEach(button => {
+        button.addEventListener("click", () => {
+            const homeland = container.querySelector("#character-homeland");
+            if (!homeland) return;
+            homeland.value = button.dataset.location || "";
+            homeland.focus();
+            homeland.scrollIntoView({ behavior: "smooth", block: "center" });
+        });
+    });
+}
+
+/* =========================================================
+   ОТПРАВКА ЗАЯВКИ/* =========================================================
+   ОТПРАВКА ЗАЯВКИ
+   ========================================================= */
+
+async function submitCharacterApplication(event) {
+    event.preventDefault();
+
+    const {
+        data: {
+            user
+        }
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+        setCharacterMessage(
+            "Необходимо войти в аккаунт.",
+            "error"
+        );
+        return;
+    }
+
+    const { data: existingApplications, error: countError } = await supabase
+        .from("character_applications")
+        .select("id,status")
+        .eq("player_id", user.id);
+
+    if (countError) {
+        setCharacterMessage("Не удалось проверить количество персонажей: " + countError.message, "error");
+        return;
+    }
+
+    const characterCount = (existingApplications || []).filter(
+        application => application.status !== "rejected"
+    ).length;
+
+    if (characterCount >= 3) {
+        setCharacterMessage("Можно иметь не более 3 персонажей.", "error");
+        return;
+    }
+
+    const name =
+        document.getElementById("character-name").value.trim();
+
+    const race =
+        document.getElementById("character-race").value.trim();
+
+    const age =
+        Number(document.getElementById("character-age").value);
+
+    const homeland =
+        document.getElementById("character-homeland").value.trim();
+
+    const personality =
+        document.getElementById("character-personality").value.trim();
+
+    const backstory =
+        document.getElementById("character-backstory").value.trim();
+
+    const specialSkills =
+        document.getElementById("character-skills").value.trim();
+
+    const preferredWeapon =
+        document.getElementById("character-weapon").value.trim();
+
+    const occupation =
+        document.getElementById("character-occupation").value.trim();
+
+    const photoInput =
+        document.getElementById("character-photo");
+
+    if (
+        !name ||
+        !race ||
+        !age ||
+        !homeland ||
+        !personality ||
+        !backstory ||
+        !specialSkills ||
+        !occupation
+    ) {
+        setCharacterMessage(
+            "Заполни все обязательные поля.",
+            "error"
+        );
+        return;
+    }
+
+    const submitButton =
+        document.querySelector(".character-submit");
+
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Отправка...";
+    }
+
+    setCharacterMessage(
+        "Создаём заявку...",
+        "info"
+    );
+
+    const applicationId =
+        crypto.randomUUID();
+
+    let photoPath = null;
+
+    if (
+        photoInput &&
+        photoInput.files &&
+        photoInput.files.length > 0
+    ) {
+        const photo = photoInput.files[0];
+
+        if (photo.size > 5 * 1024 * 1024) {
+            setCharacterMessage(
+                "Изображение не должно превышать 5 МБ.",
+                "error"
+            );
+
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = "Отправить заявку";
+            }
+
+            return;
+        }
+
+        const extension =
+            getFileExtension(photo.name);
+
+        photoPath =
+            `${user.id}/${applicationId}/photo.${extension}`;
+
+        const {
+            error: uploadError
+        } = await supabase.storage
+            .from("character-applications")
+            .upload(
+                photoPath,
+                photo,
+                {
+                    contentType: photo.type,
+                    upsert: false
+                }
+            );
+
+        if (uploadError) {
+            console.error(uploadError);
+
+            setCharacterMessage(
+                "Не удалось загрузить изображение: " +
+                uploadError.message,
+                "error"
+            );
+
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = "Отправить заявку";
+            }
+
+            return;
+        }
+    }
+
+    const {
+        error: applicationError
+    } = await supabase
+        .from("character_applications")
+        .insert({
+            id: applicationId,
+            player_id: user.id,
+            name,
+            race,
+            age,
+            homeland,
+            personality,
+            backstory,
+            special_skills: specialSkills,
+            preferred_weapon:
+                preferredWeapon || null,
+            occupation,
+            photo_path: photoPath,
+            status: "pending",
+            character_id: null
+        });
+
+    if (applicationError) {
+        console.error(applicationError);
+
+        setCharacterMessage(
+            "Не удалось создать заявку: " +
+            applicationError.message,
+            "error"
+        );
+
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = "Отправить заявку";
+        }
+
+        return;
+    }
+
+    await loadPlayerState({
+        user
+    });
+}
+
+/* =========================================================
+   АДМИНКА
+   ========================================================= */
+
+async function loadAdminPanel(container) {
+    const {
+        data: applications,
+        error
+    } = await supabase
+        .from("character_applications")
+        .select("*")
+        .order("id", {
+            ascending: false
+        });
+
+    if (error) {
+        console.error(
+            "Ошибка загрузки заявок:",
+            error
+        );
+
+        container.className = "welcome-panel";
+
+        container.innerHTML = `
+            <div class="welcome-symbol">!</div>
+            <h1>Ошибка загрузки</h1>
+            <p>${escapeHtml(error.message)}</p>
+        `;
+
+        return;
+    }
+
+    renderAdminApplications(
+        container,
+        applications || []
+    );
+}
+
+/* =========================================================
+   ОТОБРАЖЕНИЕ ЗАЯВОК В АДМИНКЕ
+   ========================================================= */
+
+async function renderAdminApplications(
+    container,
+    applications
+) {
+    container.className = "admin-panel";
+
+    const pending =
+        applications.filter(
+            application =>
+                application.status === "pending"
+        );
+
+    const approved =
+        applications.filter(
+            application =>
+                application.status === "approved"
+        );
+
+    const rejected =
+        applications.filter(
+            application =>
+                application.status === "rejected"
+        );
+
+    window.adminApplications = applications;
+
+    for (const application of applications) {
+        if (!application.photo_path) {
+            application.photo_url = null;
+            continue;
+        }
+
+        const {
+            data,
+            error
+        } = await supabase.storage
+            .from("character-applications")
+            .createSignedUrl(
+                application.photo_path,
+                60 * 60
+            );
+
+        if (error) {
+            console.error(
+                "Ошибка получения фотографии:",
+                error
+            );
+
+            application.photo_url = null;
+        } else {
+            application.photo_url =
+                data?.signedUrl || null;
+        }
+    }
+
+    container.innerHTML = `
+        <div class="character-header">
+            <div class="welcome-symbol">✦</div>
+
+            <h1>
+                Администрация ЛОРГУСА
+            </h1>
+
+                <p>
+                    Управление заявками персонажей.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                class="logout-button admin-logout-button"
+                onclick="logout()"
+            >
+                Выйти
+            </button>
+        </div>
+
+        <div class="admin-stats">
+            <div class="admin-stat">
+                <span class="admin-stat-value">
+                    ${pending.length}
+                </span>
+                <span class="admin-stat-label">
+                    Ожидают решения
+                </span>
+            </div>
+
+            <div class="admin-stat">
+                <span class="admin-stat-value">
+                    ${approved.length}
+                </span>
+                <span class="admin-stat-label">
+                    Одобрено
+                </span>
+            </div>
+
+            <div class="admin-stat">
+                <span class="admin-stat-value">
+                    ${rejected.length}
+                </span>
+                <span class="admin-stat-label">
+                    Отклонено
+                </span>
+            </div>
+        </div>
+
+        <div class="admin-applications">
+            ${
+                pending.length === 0
+                    ? `
+                        <div class="admin-empty">
+                            <div class="welcome-symbol">✓</div>
+                            <h2>Новых заявок нет</h2>
+                            <p>Все заявки обработаны.</p>
+                        </div>
+                    `
+                    : pending.map(
+                        application =>
+                            renderAdminApplication(
+                                application
+                            )
+                    ).join("")
+            }
+        </div>
+
+        <section class="admin-character-management">
+            <div class="admin-section-heading">
+                <h2>Персонажи</h2>
+                <p>Удаление персонажей для тестирования.</p>
+            </div>
+
+            <div class="admin-applications">
+                ${
+                    approved.length === 0
+                        ? `
+                            <div class="admin-empty">
+                                <h2>Персонажей нет</h2>
+                                <p>Список одобренных персонажей пуст.</p>
+                            </div>
+                        `
+                        : approved.map(
+                            application =>
+                                renderAdminCharacterManagement(
+                                    application
+                                )
+                        ).join("")
+                }
+            </div>
+        </section>
+    `;
+
+    bindAdminButtons(container);
+}
+
+/* =========================================================
+   ОДНА ЗАЯВКА
+   ========================================================= */
+
+function renderAdminApplication(application) {
+    return `
+        <article
+            class="admin-application"
+            data-application-id="${application.id}"
+        >
+            <div class="admin-application-main">
+                <h3>
+                    ${escapeHtml(application.name)}
+                </h3>
+
+                <div class="admin-application-info">
+                    <span>
+                        <strong>Раса:</strong>
+                        ${escapeHtml(application.race)}
+                    </span>
+
+                    <span>
+                        <strong>Возраст:</strong>
+                        ${application.age} лет
+                    </span>
+
+                    <span>
+                        <strong>Родина:</strong>
+                        ${escapeHtml(application.homeland)}
+                    </span>
+
+                    <span>
+                        <strong>Род занятий:</strong>
+                        ${escapeHtml(application.occupation)}
+                    </span>
+
+                    <span>
+                        <strong>Оружие:</strong>
+                        ${
+                            application.preferred_weapon
+                                ? escapeHtml(
+                                    application.preferred_weapon
+                                )
+                                : "Не указано"
+                        }
+                    </span>
+
+                    <span>
+                        <strong>Характер:</strong>
+                        ${escapeHtml(application.personality)}
+                    </span>
+
+                    <span>
+                        <strong>Предыстория:</strong>
+                        ${escapeHtml(application.backstory)}
+                    </span>
+
+                    <span>
+                        <strong>Особые навыки:</strong>
+                        ${escapeHtml(application.special_skills)}
+                    </span>
+
+                    <span>
+                        <strong>Изображение персонажа:</strong>
+
+                        ${
+                            application.photo_url
+                                ? `
+                                    <img
+                                        class="admin-application-photo"
+                                        src="${escapeHtml(application.photo_url)}"
+                                        alt="Изображение персонажа"
+                                    >
+                                `
+                                : "Не загружено."
+                        }
+                    </span>
+                </div>
+            </div>
+
+            <div class="admin-application-actions">
+                <button
+                    class="gold-button admin-revision-button"
+                    data-application-id="${application.id}"
+                >
+                    Выписать правки
+                </button>
+
+                <button
+                    class="gold-button admin-approve-button"
+                    data-application-id="${application.id}"
+                >
+                    Одобрить
+                </button>
+
+                <button
+                    class="admin-reject-button"
+                    data-application-id="${application.id}"
+                >
+                    Отклонить
+                </button>
+            </div>
+        </article>
+    `;
+}
+
+/* =========================================================
+   КНОПКИ АДМИНКИ
+   ========================================================= */
+function renderAdminCharacterManagement(application) {
+    return `
+        <article
+            class="admin-application admin-character-management-item"
+            data-character-id="${application.character_id || ""}"
+        >
+            <div class="admin-application-main">
+                <h3>${escapeHtml(application.name)}</h3>
+                <div class="admin-application-info">
+                    <span><strong>Раса:</strong> ${escapeHtml(application.race || "—")}</span>
+                    <span><strong>Родина:</strong> ${escapeHtml(application.homeland || "—")}</span>
+                    <span><strong>Заявка:</strong> ${escapeHtml(String(application.id))}</span>
+                </div>
+            </div>
+            <div class="admin-application-actions">
+                <button
+                    class="admin-reject-button admin-delete-character-button"
+                    data-character-id="${application.character_id || ""}"
+                    data-character-name="${escapeHtml(application.name || "персонажа")}"
+                >
+                    Удалить персонажа
+                </button>
+            </div>
+        </article>
+    `;
+}
+
+function bindAdminButtons(container) {
+    container.querySelectorAll(".admin-delete-character-button").forEach(button => {
+        button.addEventListener("click", async () => {
+            const characterId = button.dataset.characterId;
+            const characterName = button.dataset.characterName || "этого персонажа";
+
+            if (!characterId) {
+                alert("У персонажа отсутствует ID.");
+                return;
+            }
+
+            if (!confirm(`Удалить персонажа «${characterName}»?\\n\\nБудут удалены его RP-присутствие, RP-сообщения и заявка. Отменить действие нельзя.`)) {
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = "Удаление...";
+
+            const { error } = await supabase.rpc("admin_delete_character", {
+                p_character_id: characterId
+            });
+
+            if (error) {
+                console.error(error);
+                alert("Не удалось удалить персонажа:\\n\\n" + error.message);
+                button.disabled = false;
+                button.textContent = "Удалить персонажа";
+                return;
+            }
+
+            await loadAdminPanel(container);
+        });
+    });
+
+    container.querySelectorAll(".admin-approve-button").forEach(button => {
+        button.addEventListener("click", async () => {
+            const applicationId = button.dataset.applicationId;
+            if (!confirm("Одобрить эту заявку и создать персонажа?")) return;
+            button.disabled = true;
+            button.textContent = "Одобрение...";
+            const { error } = await supabase.rpc("approve_character_application", { application_id: applicationId });
+            if (error) {
+                console.error(error);
+                alert("Не удалось одобрить заявку:\n\n" + error.message);
+                button.disabled = false;
+                button.textContent = "Одобрить";
+                return;
+            }
+            await loadAdminPanel(container);
+        });
+    });
+
+    container.querySelectorAll(".admin-revision-button").forEach(button => {
+        button.addEventListener("click", async () => {
+            const applicationId = button.dataset.applicationId;
+            const notes = prompt("Укажи, что игроку необходимо исправить:", "");
+            if (notes === null) return;
+            const cleanNotes = notes.trim();
+            if (!cleanNotes) {
+                alert("Укажи хотя бы одну правку.");
+                return;
+            }
+            button.disabled = true;
+            button.textContent = "Сохранение...";
+            const { error } = await supabase
+                .from("character_applications")
+                .update({ review_notes: cleanNotes, status: "pending" })
+                .eq("id", applicationId);
+            if (error) {
+                console.error(error);
+                alert("Не удалось отправить правки игроку:\n\n" + error.message);
+                button.disabled = false;
+                button.textContent = "Выписать правки";
+                return;
+            }
+            await loadAdminPanel(container);
+        });
+    });
+
+    container.querySelectorAll(".admin-reject-button").forEach(button => {
+        button.addEventListener("click", async () => {
+            const applicationId = button.dataset.applicationId;
+            const reason = prompt("Укажи причину отклонения:", "");
+            if (reason === null) return;
+            const cleanReason = reason.trim();
+            if (!cleanReason) {
+                alert("Укажи причину отклонения.");
+                return;
+            }
+            button.disabled = true;
+            button.textContent = "Отклонение...";
+            const { error } = await supabase.rpc("reject_character_application", { application_id: applicationId });
+            if (error) {
+                console.error(error);
+                alert("Не удалось отклонить заявку:\n\n" + error.message);
+                button.disabled = false;
+                button.textContent = "Отклонить";
+                return;
+            }
+            await loadAdminPanel(container);
+        });
+    });
+}
+
+function findApplicationById(id) {
+    const article =
+        document.querySelector(
+            `.admin-application[data-application-id="${id}"]`
+        );
+
+    if (!article) return null;
+
+    return window.adminApplications?.find(
+        application =>
+            application.id === id
+    ) || null;
+}
+
+/* =========================================================
+   РЕДАКТИРОВАНИЕ ЗАЯВКИ
+   ========================================================= */
+
+function renderPendingApplication(container, application) {
+    container.className = "character-application";
+    const reviewNotes = application.review_notes
+        ? `<div class="character-review-notes"><h3>Правки от администрации</h3><p>${escapeHtml(application.review_notes)}</p></div>`
+        : "";
+
+    container.innerHTML = `
+        <div class="character-header">
+            <div class="welcome-symbol">✦</div>
+            <h1>${escapeHtml(application.name)}</h1>
+            <p>Твоя анкета находится на рассмотрении.</p>
+        </div>
+        ${reviewNotes}
+        <form id="character-application-form" onsubmit="updateCharacterApplication(event, '${application.id}')">
+            <div class="character-grid">
+                <div class="character-field"><label>Имя персонажа</label><input id="character-name" type="text" value="${escapeHtml(application.name)}" required></div>
+                <div class="character-field"><label>Раса</label><input id="character-race" type="text" value="${escapeHtml(application.race)}" required></div>
+                <div class="character-field"><label>Возраст</label><input id="character-age" type="number" min="1" max="1000" value="${application.age}" required></div>
+                <div class="character-field"><label>Родина</label><input id="character-homeland" type="text" value="${escapeHtml(application.homeland)}" required></div>
+                <div class="character-field full"><label>Характер</label><textarea id="character-personality" required>${escapeHtml(application.personality)}</textarea></div>
+                <div class="character-field full"><label>Предыстория</label><textarea id="character-backstory" required>${escapeHtml(application.backstory)}</textarea></div>
+                <div class="character-field full"><label>Особые навыки</label><textarea id="character-skills" required>${escapeHtml(application.special_skills)}</textarea></div>
+                <div class="character-field"><label>Предпочитаемое оружие</label><input id="character-weapon" type="text" value="${escapeHtml(application.preferred_weapon || "")}"></div>
+                <div class="character-field"><label>Род занятий</label><input id="character-occupation" type="text" value="${escapeHtml(application.occupation)}" required></div>
+            </div>
+            <div id="character-message" class="character-message"></div>
+            <button type="submit" class="gold-button character-submit">Сохранить исправления и отправить на проверку</button>
+        </form>
+    `;
+}
+
+async function updateCharacterApplication(event, applicationId) {
+    event.preventDefault();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        setCharacterMessage("Необходимо войти в аккаунт.", "error");
+        return;
+    }
+
+    const values = {
+        name: document.getElementById("character-name").value.trim(),
+        race: document.getElementById("character-race").value.trim(),
+        age: Number(document.getElementById("character-age").value),
+        homeland: document.getElementById("character-homeland").value.trim(),
+        personality: document.getElementById("character-personality").value.trim(),
+        backstory: document.getElementById("character-backstory").value.trim(),
+        special_skills: document.getElementById("character-skills").value.trim(),
+        preferred_weapon: document.getElementById("character-weapon").value.trim() || null,
+        occupation: document.getElementById("character-occupation").value.trim(),
+        review_notes: null,
+        status: "pending"
+    };
+
+    if (!values.name || !values.race || !values.age || !values.homeland || !values.personality || !values.backstory || !values.special_skills || !values.occupation) {
+        setCharacterMessage("Заполни все обязательные поля.", "error");
+        return;
+    }
+
+    const button = document.querySelector(".character-submit");
+    if (button) {
+        button.disabled = true;
+        button.textContent = "Сохранение...";
+    }
+
+    const { error } = await supabase
+        .from("character_applications")
+        .update(values)
+        .eq("id", applicationId)
+        .eq("player_id", user.id)
+        .eq("status", "pending");
+
+    if (error) {
+        console.error(error);
+        setCharacterMessage("Не удалось сохранить исправления: " + error.message, "error");
+        if (button) {
+            button.disabled = false;
+            button.textContent = "Сохранить исправления и отправить на проверку";
+        }
+        return;
+    }
+
+    await loadPlayerState({ user });
+}
+
+async function loadCharacter(
+    container,
+    characterId
+) {
+    const {
+        data: character,
+        error
+    } = await supabase
+        .from("characters")
+        .select("*")
+        .eq("id", characterId)
+        .single();
+
+    if (error) {
+        console.error(error);
+
+        showCharacterError(
+            container,
+            error.message
+        );
+
+        return;
+    }
+
+    renderCharacter(
+        container,
+        character
+    );
+}
+
+/* =========================================================
+   ОТОБРАЖЕНИЕ ПЕРСОНАЖА — LEGACY
+   ========================================================= */
+
+function renderCharacterLegacy(
+    container,
+    character
+) {
+    container.className = "lorgus-world-page";
+
+    const name = escapeHtml(character.name || "Без имени");
+    const race = escapeHtml(character.race || "Раса не указана");
+    const homeland = escapeHtml(character.homeland || "Родина не указана");
+
+    container.innerHTML = `
+        <div class="lorgus-world-shell">
+            <aside class="lorgus-world-sidebar">
+                <div class="lorgus-world-sidebar-symbol lorgus-world-symbol lorgus-world-symbol-character" aria-hidden="true"></div>
+                <div class="lorgus-world-sidebar-label">ПЕРСОНАЖ</div>
+                <div class="lorgus-world-sidebar-name">${name}</div>
+                <div class="lorgus-world-sidebar-meta">${race}</div>
+                <div class="lorgus-world-sidebar-meta">${homeland}</div>
+
+                <button class="gold-button lorgus-world-sidebar-button" type="button" onclick="openActiveCharacterProfile()">
+                    Профиль
+                </button>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="renderWorldCharacterTracker()">
+                    Люди мира
+                </button>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="renderMail()">
+                    Письма
+                </button>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="switchCharacter()">
+                    Сменить персонажа
+                </button>
+            </aside>
+
+            <main class="lorgus-world-browser">
+                <header class="lorgus-world-header">
+                    <span class="lorgus-world-kicker">МИР ЛОРГУСА</span>
+                    <h1>Мир</h1>
+                    <p>Выбери край, в который хочешь войти. Здесь начинается навигация по миру и его RP-сценам.</p>
+                </header>
+
+                <section class="lorgus-world-section">
+                    <div class="lorgus-world-section-title">КОРОЛЕВСТВА</div>
+                    <div class="lorgus-region-grid">
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Атэрон')">
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-aetheron" aria-hidden="true"></span>
+                            <strong>Атэрон</strong>
+                            <small>Королевство Нечто</small>
+                            <p>Знания, древности, исследования и руины.</p>
+                        </button>
+
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Каэлор')">
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-kaelor" aria-hidden="true"></span>
+                            <strong>Каэлор</strong>
+                            <small>Королевство Вечного Пламени</small>
+                            <p>Горы, кузницы, шахты и древнее мастерство.</p>
+                        </button>
+
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Ксандр')">
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-xandr" aria-hidden="true"></span>
+                            <strong>Ксандр</strong>
+                            <small>Королевство Воздаяния</small>
+                            <p>Торговля, банки, дороги и большие рынки.</p>
+                        </button>
+
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Лирэн')">
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-lyren" aria-hidden="true"></span>
+                            <strong>Лирэн</strong>
+                            <small>Королевство Плодородия</small>
+                            <p>Леса, плодородные земли и древняя природа.</p>
+                        </button>
+
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Морвейн')">
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-morvein" aria-hidden="true"></span>
+                            <strong>Морвейн</strong>
+                            <small>Королевство Последнего Пути</small>
+                            <p>Паломничество, память, туманные долины и Фин.</p>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="lorgus-world-section">
+                    <div class="lorgus-world-section-title">НЕЗАВИСИМЫЕ ЗЕМЛИ</div>
+                    <div class="lorgus-region-grid lorgus-region-grid-small">
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Святые Земли')">
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-holy" aria-hidden="true"></span>
+                            <strong>Святые Земли</strong>
+                            <small>Нейтральная территория</small>
+                            <p>Место переговоров монархов и глав церквей.</p>
+                        </button>
+
+                        <button class="lorgus-region-card" type="button" onclick="renderKingdomLocations('Спорные Земли')">
+                            <span class="lorgus-region-card-symbol">◇</span>
+                            <strong>Спорные Земли</strong>
+                            <small>Вне власти пяти королевств</small>
+                            <p>Независимые поселения и земли без единого хозяина.</p>
+                        </button>
+
+                        <div class="lorgus-region-card lorgus-region-card-closed">
+                            <span class="lorgus-region-card-symbol lorgus-region-glyph lorgus-region-glyph-disputed" aria-hidden="true"></span>
+                            <strong>Геена</strong>
+                            <small>Континент закрыт для игроков</small>
+                            <p>Эта территория пока недоступна для посещения и происхождения персонажей.</p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    `;
+}
+
+const LORGUS_LOCATIONS = {
+    "Атэрон": {
+        subtitle: "Королевство Нечто",
+        description: "Земля знаний, исследований, древних руин и реликвий.",
+        locations: [
+            ["Примум", "Столица Атэрона", "Центр образования, исследований и древних знаний."]
+        ]
+    },
+    "Каэлор": {
+        subtitle: "Королевство Вечного Пламени",
+        description: "Горное королевство дварфов, кузниц, шахт и торговых путей.",
+        locations: [
+            ["Хелион", "Столица Каэлора", "Дворец, кузницы, рынки и учреждения королевства."],
+            ["Древнее Пламя", "Священное место", "Священное место Вечного Пламени."]
+        ]
+    },
+    "Ксандр": {
+        subtitle: "Королевство Воздаяния",
+        description: "Торговое и финансовое сердце континента.",
+        locations: [
+            ["Арджент", "Столица Ксандра", "Великий рынок, королевский двор и финансовые дома."],
+            ["Меридиан", "Город Ксандра", "Один из известных городов королевства."],
+            ["Валькрофт", "Город Ксандра", "Город на торговых путях."],
+            ["Солмир", "Город Ксандра", "Город торгового королевства."]
+        ]
+    },
+    "Лирэн": {
+        subtitle: "Королевство Плодородия",
+        description: "Леса, плодородные земли и владения лесных эльфов.",
+        locations: [
+            ["Аврора", "Столица Лирэна", "Город, построенный внутри огромного древнего дерева."],
+            ["Элвэйн", "Город Лирэна", "Один из городов лесного королевства."],
+            ["Таллирион", "Город Лирэна", "Город среди лесов и плодородных земель."],
+            ["Эстерваль", "Город Лирэна", "Город западного королевства."]
+        ]
+    },
+    "Морвейн": {
+        subtitle: "Королевство Последнего Пути",
+        description: "Холодная земля паломничества, памяти и Последнего Пути.",
+        locations: [
+            ["Фин", "Столица Морвейна", "Дворец, храмы, архивы и главные паломнические учреждения."]
+        ]
+    },
+    "Святые Земли": {
+        subtitle: "Нейтральная территория",
+        description: "Земли, где встречаются представители пяти королевств и церквей.",
+        locations: []
+    },
+    "Спорные Земли": {
+        subtitle: "Независимые территории",
+        description: "Земли вне власти пяти королевств.",
+        locations: []
+    }
+};
+
+async function renderWorldCharacterTracker() {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    container.className = "lorgus-world-page";
+    container.innerHTML = `
+        <div class="lorgus-world-shell">
+            <aside class="lorgus-world-sidebar">
+                <div class="lorgus-world-sidebar-symbol">✦</div>
+                <div class="lorgus-world-sidebar-label">ЛОРГУС</div>
+                <div class="lorgus-world-sidebar-name">Люди мира</div>
+                <p class="lorgus-world-sidebar-meta">Актуальное публичное местоположение персонажей.</p>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="returnToGame()">
+                    ← Вернуться к миру
+                </button>
+            </aside>
+            <main class="lorgus-world-browser">
+                <header class="lorgus-world-header">
+                    <span class="lorgus-world-kicker">ОТСЛЕЖИВАНИЕ</span>
+                    <h1>Люди мира</h1>
+                    <p>Персонажи, которые не скрывают своё местоположение.</p>
+                </header>
+                <section class="lorgus-world-section">
+                    <div class="lorgus-world-section-title">ТЕКУЩЕЕ ПОЛОЖЕНИЕ</div>
+                    <div id="lorgus-character-tracker" class="lorgus-location-grid">
+                        <div class="lorgus-empty-location"><span>✦</span><h2>Загрузка...</h2></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    `;
+
+    const tracker = document.getElementById("lorgus-character-tracker");
+    const { data, error } = await supabase
+        .from("rp_presence")
+        .select("character_id, presence_type, region, location, from_region, from_location, to_region, to_location, updated_at, characters(name, race)")
+        .eq("visibility", "public")
+        .order("updated_at", { ascending: false });
+
+    if (error) {
+        tracker.innerHTML = `<div class="lorgus-empty-location"><span>!</span><h2>Не удалось загрузить людей мира</h2><p>${escapeHtml(error.message)}</p></div>`;
+        return;
+    }
+
+    if (!data?.length) {
+        tracker.innerHTML = `<div class="lorgus-empty-location"><span>✦</span><h2>Пока никого нет</h2><p>Когда персонажи войдут в мир, они появятся здесь.</p></div>`;
+        return;
+    }
+
+    tracker.innerHTML = data.map(row => {
+        const character = row.characters || {};
+        const isSelf = row.character_id === window.activeCharacterId;
+
+        let place;
+        let status;
+
+        if (row.presence_type === "road") {
+            place = `${escapeHtml(row.from_location)} → ${escapeHtml(row.to_location)}`;
+            status = `В пути · ${escapeHtml(row.from_region)} → ${escapeHtml(row.to_region)}`;
+        } else {
+            place = escapeHtml(row.location || "Неизвестно");
+            status = escapeHtml(row.region || "Неизвестный край");
+        }
+
+        return `
+            <article class="lorgus-location-card" style="cursor:default">
+                <span class="lorgus-location-card-mark">${row.presence_type === "road" ? "→" : "✦"}</span>
+                <strong>${escapeHtml(character.name || "Без имени")}${isSelf ? " · Вы" : ""}</strong>
+                <small>${escapeHtml(character.race || "Персонаж")}</small>
+                <p>${place}<br><span>${status}</span></p>
+            </article>
+        `;
+    }).join("");
+}
+
+function renderKingdomLocations(regionName) {
+    const container = document.getElementById("cabinet-content");
+    const region = LORGUS_LOCATIONS[regionName];
+    if (!container || !region) return;
+
+    container.className = "lorgus-world-page";
+    const character = window.activeCharacter;
+    const name = escapeHtml(character?.name || "Без имени");
+
+    const currentPresence = window.activeRpPresence;
+    const hasPresence = Boolean(currentPresence);
+    const locationCards = region.locations.length
+        ? region.locations.map(([title, subtitle, description]) => {
+            const isCurrent =
+                currentPresence?.type === "location" &&
+                currentPresence.location === title &&
+                currentPresence.region === regionName;
+
+            const isOnRoad = currentPresence?.type === "road";
+
+            return `
+                <button class="lorgus-location-card ${isCurrent ? "current" : (hasPresence ? "locked" : "")}" type="button"
+                    onclick="enterLocationRp('${escapeHtml(title)}', '${escapeHtml(regionName)}')">
+                    <span class="lorgus-location-card-mark" aria-hidden="true">
+                        <span class="lorgus-location-card-glyph ${isCurrent ? "is-current" : (hasPresence ? "is-closed" : "")}"></span>
+                    </span>
+                    <strong>${escapeHtml(title)}</strong>
+                    <small>${escapeHtml(subtitle)}</small>
+                    <p>${escapeHtml(description)}</p>
+                    <span class="lorgus-location-card-access">
+                        ${isCurrent ? "Вы здесь · открыть RP-чат" : (isOnRoad ? "Персонаж в пути · чат закрыт" : (!hasPresence ? "Открыть RP-чат · первое сообщение закрепит место" : "Не здесь · перейти через дорогу"))}
+                    </span>
+                </button>
+            `;
+        }).join("")
+        : `
+            <div class="lorgus-empty-location">
+                <span>✦</span>
+                <h2>Локации ещё не добавлены</h2>
+                <p>Здесь появятся конкретные места и RP-сцены, когда они будут определены в мире ЛОРГУС.</p>
+            </div>
+        `;
+
+    container.innerHTML = `
+        <div class="lorgus-world-shell">
+            <aside class="lorgus-world-sidebar">
+                <div class="lorgus-world-sidebar-symbol">✦</div>
+                <div class="lorgus-world-sidebar-label">ПЕРСОНАЖ</div>
+                <div class="lorgus-world-sidebar-name">${name}</div>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="renderCharacter(document.getElementById('cabinet-content'), window.activeCharacter)">
+                    ← Вернуться к миру
+                </button>
+            </aside>
+
+            <main class="lorgus-world-browser">
+                <header class="lorgus-world-header">
+                    <span class="lorgus-world-kicker">РЕГИОН</span>
+                    <h1>${escapeHtml(regionName)}</h1>
+                    <p>${escapeHtml(region.description)}</p>
+                </header>
+
+                <section class="lorgus-world-section">
+                    <div class="lorgus-world-section-title">${escapeHtml(region.subtitle)}</div>
+                    <div class="lorgus-location-grid">
+                        ${locationCards}
+                    </div>
+                </section>
+            </main>
+        </div>
+    `;
+}
+
+async function getRpPresence() {
+    const characterId = window.activeCharacterId;
+    if (!characterId || !supabase) return null;
+
+    const { data, error } = await supabase
+        .from("rp_presence")
+        .select("*")
+        .eq("character_id", characterId)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Не удалось получить RP-присутствие:", error);
+        return null;
+    }
+
+    const presence = data ? mapServerPresence(data) : null;
+    window.activeRpPresence = presence;
+    return presence;
+}
+
+function mapServerPresence(row) {
+    if (!row) return null;
+
+    if (row.presence_type === "road") {
+        return {
+            type: "road",
+            fromLocation: row.from_location,
+            fromRegion: row.from_region,
+            toLocation: row.to_location,
+            toRegion: row.to_region,
+            startedAt: row.started_at,
+            visibility: row.visibility
+        };
+    }
+
+    return {
+        type: "location",
+        location: row.location,
+        region: row.region,
+        enteredAt: row.entered_at,
+        visibility: row.visibility
+    };
+}
+
+async function saveRpPresence(presence) {
+    if (!window.activeCharacterId || !supabase) return null;
+
+    const { data, error } = await supabase.rpc("set_lorgus_rp_presence", {
+        p_character_id: window.activeCharacterId,
+        p_presence_type: presence.type,
+        p_region: presence.type === "location" ? presence.region : null,
+        p_location: presence.type === "location" ? presence.location : null,
+        p_from_region: presence.type === "road" ? presence.fromRegion : null,
+        p_from_location: presence.type === "road" ? presence.fromLocation : null,
+        p_to_region: presence.type === "road" ? presence.toRegion : null,
+        p_to_location: presence.type === "road" ? presence.toLocation : null,
+        p_visibility: presence.visibility || "public"
+    });
+
+    if (error) {
+        console.error("Не удалось сохранить RP-присутствие:", error);
+        throw error;
+    }
+
+    const row = Array.isArray(data) ? data[0] : data;
+    const mapped = mapServerPresence(row);
+    window.activeRpPresence = mapped;
+    return mapped;
+}
+
+async function initializeRpPresence(character) {
+    if (!character?.id) return;
+    window.activeCharacterId = character.id;
+
+    // No automatic placement. The character becomes physically fixed only
+    // after the first RP location post.
+    if (window.rpPresenceChannel) {
+        await supabase.removeChannel(window.rpPresenceChannel);
+    }
+
+    window.rpPresenceChannel = supabase
+        .channel("lorgus-rp-presence")
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "rp_presence"
+            },
+            async () => {
+                window.activeRpPresence = await getRpPresence();
+                await renderLocationParticipantsIfVisible();
+            }
+        )
+        .subscribe();
+
+    await getRpPresence();
+}
+
+async function renderLocationParticipantsIfVisible() {
+    const presence = window.activeRpPresence;
+    if (!presence || presence.type !== "location") return;
+
+    const box = document.querySelector(".lorgus-rp-participants");
+    if (!box) return;
+
+    await renderLocationParticipants(
+        presence.location,
+        presence.region
+    );
+}
+
+async function clearRpPresence() {
+    if (!window.activeCharacterId || !supabase) return;
+
+    const { error } = await supabase.rpc("clear_lorgus_rp_presence", {
+        p_character_id: window.activeCharacterId
+    });
+
+    if (error) console.error("Не удалось очистить RP-присутствие:", error);
+    window.activeRpPresence = null;
+}
+
+const LORGUS_ROUTES = [
+    ["Каэлор", "Атэрон", "land"],
+    ["Атэрон", "Морвейн", "land"],
+    ["Атэрон", "Ксандр", "land"],
+    ["Ксандр", "Святые Земли", "land"],
+    ["Ксандр", "Морвейн", "land"],
+    ["Святые Земли", "Спорные Земли", "land"],
+    ["Святые Земли", "Лирэн", "land"],
+    ["Лирэн", "Ксандр", "sea"],
+    ["Ксандр", "Каэлор", "sea"],
+    ["Морвейн", "Спорные Земли", "sea"]
+];
+
+function getRouteBetweenRegions(fromRegion, toRegion) {
+    return LORGUS_ROUTES.find(([from, to]) =>
+        (from === fromRegion && to === toRegion) ||
+        (from === toRegion && to === fromRegion)
+    ) || null;
+}
+
+async function getAvailableTravelDestinations(regionName, locationName) {
+    const destinations = [];
+
+    for (const [region, data] of Object.entries(LORGUS_LOCATIONS)) {
+        if (region === regionName) continue;
+
+        const route = getRouteBetweenRegions(regionName, region);
+        if (!route) continue;
+
+        for (const [location] of data.locations || []) {
+            destinations.push({
+                region,
+                location,
+                travelType: route[2]
+            });
+        }
+    }
+
+    return destinations;
+}
+
+async function enterLocationRp(locationName, regionName) {
+    const presence = await getRpPresence();
+
+    if (presence?.type === "road") {
+        renderRoadChat(presence);
+        return;
+    }
+
+    if (presence?.type === "location" &&
+        presence.location === locationName &&
+        presence.region === regionName) {
+        await renderLocationChats(locationName, regionName, true);
+        return;
+    }
+
+    if (presence?.type === "road") {
+        await renderRoadChat(presence);
+        return;
+    }
+
+    if (presence?.type === "location") {
+        renderTravelScreen(presence.location, presence.region, locationName, regionName);
+        return;
+    }
+
+    // До первого RP-поста физического местоположения нет.
+    // Любую локацию можно открыть и читать; первое сообщение
+    // атомарно закрепит персонажа именно здесь через RPC.
+    await renderLocationChats(locationName, regionName, false);
+}
+
+async function startTravel(fromLocation, fromRegion, toLocation, toRegion) {
+    const presence = await getRpPresence();
+
+    if (presence?.type === "road") {
+        renderRoadChat(presence);
+        return;
+    }
+
+    if (presence?.type === "location" &&
+        (presence.location !== fromLocation || presence.region !== fromRegion)) {
+        renderTravelScreen(presence.location, presence.region, toLocation, toRegion);
+        return;
+    }
+
+    const route = getRouteBetweenRegions(fromRegion, toRegion);
+    const destinationExists = LORGUS_LOCATIONS[toRegion]?.locations
+        ?.some(([location]) => location === toLocation);
+
+    if (!route || !destinationExists) {
+        alert("Прямого канонического маршрута сюда нет.");
+        return;
+    }
+
+    const road = await saveRpPresence({
+        type: "road",
+        fromLocation,
+        fromRegion,
+        toLocation,
+        toRegion,
+        visibility: "public"
+    });
+
+    if (road) renderRoadChat(road);
+}
+
+async function arriveAtDestination() {
+    const presence = await getRpPresence();
+    if (!presence || presence.type !== "road") return;
+
+    const destination = await saveRpPresence({
+        type: "location",
+        location: presence.toLocation,
+        region: presence.toRegion,
+        enteredAt: new Date().toISOString(),
+        visibility: presence.visibility || "public"
+    });
+
+    if (destination) {
+        renderLocationChats(
+            destination.location,
+            destination.region,
+            true
+        );
+    }
+}
+
+function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    const destinations = getAvailableTravelDestinations(fromRegion, fromLocation);
+    const requested = destinations.find(item =>
+        item.location === toLocation && item.region === toRegion
+    );
+
+    const choices = requested
+        ? [requested, ...destinations.filter(item =>
+            item.location !== requested.location || item.region !== requested.region
+        )]
+        : destinations;
+
+    container.className = "lorgus-road-page";
+    container.innerHTML = `
+        <div class="lorgus-road-shell">
+            <header class="lorgus-road-header">
+                <span class="lorgus-rp-overline">ПЕРЕМЕЩЕНИЕ</span>
+                <h1>Путь начинается не в чате.</h1>
+                <p>
+                    ${escapeHtml(fromLocation)}, ${escapeHtml(fromRegion)}
+                    · выбери место, куда направляется персонаж.
+                </p>
+            </header>
+
+            <section class="lorgus-road-panel">
+                <div class="lorgus-road-current">
+                    <span>СЕЙЧАС</span>
+                    <strong>${escapeHtml(fromLocation)}</strong>
+                    <small>${escapeHtml(fromRegion)}</small>
+                </div>
+                <div class="lorgus-road-arrow">→</div>
+                <div class="lorgus-road-current">
+                    <span>НАЗНАЧЕНИЕ</span>
+                    <strong>${escapeHtml(toLocation)}</strong>
+                    <small>${escapeHtml(toRegion)}</small>
+                </div>
+            </section>
+
+            <section class="lorgus-road-destinations">
+                <div class="lorgus-world-section-title">ДОСТУПНЫЕ НАПРАВЛЕНИЯ</div>
+                <div class="lorgus-road-destination-grid">
+                    ${choices.slice(0, 12).map(item => `
+                        <button class="lorgus-road-destination ${item.location === toLocation && item.region === toRegion ? "selected" : ""}" type="button"
+                            onclick="startTravel('${escapeHtml(fromLocation)}','${escapeHtml(fromRegion)}','${escapeHtml(item.location)}','${escapeHtml(item.region)}')">
+                            <strong>${escapeHtml(item.location)}</strong>
+                            <small>${escapeHtml(item.region)}</small>
+                        </button>
+                    `).join("")}
+                </div>
+            </section>
+
+            <div class="lorgus-road-actions">
+                <button class="character-secondary-button" type="button"
+                    onclick="renderKingdomLocations('${escapeHtml(fromRegion)}')">
+                    ← Остаться здесь
+                </button>
+                <button class="gold-button" type="button"
+                    onclick="startTravel('${escapeHtml(fromLocation)}','${escapeHtml(fromRegion)}','${escapeHtml(toLocation)}','${escapeHtml(toRegion)}')">
+                    Выйти на дорогу
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+async function renderRoadChat(presence) {
+    window.activeRpChatSpace = presence;
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    const character = window.activeCharacter;
+    const name = escapeHtml(character?.name || "Без имени");
+
+    container.className = "lorgus-road-page";
+    container.innerHTML = `
+        <div class="lorgus-rp-shell lorgus-road-chat-shell">
+            <aside class="lorgus-rp-sidebar">
+                <button class="lorgus-rp-back" type="button" onclick="renderRoadChat(window.activeRpPresence)">↻ Обновить путь</button>
+                <div class="lorgus-rp-place-mark">→</div>
+                <span class="lorgus-rp-overline">ДОРОГА</span>
+                <h1>${escapeHtml(presence.fromLocation)} → ${escapeHtml(presence.toLocation)}</h1>
+                <p class="lorgus-rp-region">${escapeHtml(presence.fromRegion)} → ${escapeHtml(presence.toRegion)}</p>
+                <div class="lorgus-rp-divider"></div>
+                <div class="lorgus-rp-sidebar-label">ВАШЕ ПРИСУТСТВИЕ</div>
+                <div class="lorgus-rp-road-lock">
+                    Пока персонаж в пути, он не может писать в чатах исходной или конечной локации.
+                </div>
+                <div class="lorgus-rp-sidebar-note">
+                    <span>✧</span>
+                    <p>Дорога — самостоятельное RP-пространство. Здесь можно встретить других путников.</p>
+                </div>
+            </aside>
+
+            <main class="lorgus-rp-main">
+                <header class="lorgus-rp-header">
+                    <div>
+                        <span class="lorgus-rp-overline">RP · ДОРОГА</span>
+                        <h2>${escapeHtml(presence.fromLocation)} → ${escapeHtml(presence.toLocation)}</h2>
+                    </div>
+                    <div class="lorgus-rp-status"><i></i> ПУТЬ</div>
+                </header>
+
+                <section class="lorgus-rp-feed" id="lorgus-rp-feed">
+                    <div class="lorgus-rp-empty">
+                        <div class="lorgus-rp-symbol">→</div>
+                        <span class="lorgus-rp-stage-kicker">ДОРОЖНЫЙ ЧАТ</span>
+                        <h3>Персонаж находится в пути.</h3>
+                        <p>Пока ты здесь, другие RP-чаты для этого персонажа закрыты.</p>
+                    </div>
+                </section>
+
+                <section class="lorgus-rp-composer">
+                    <div class="lorgus-rp-composer-top">
+                        <span>РОЛЬ: <strong>${name}</strong></span>
+                        <span>ПРОСТРАНСТВО: <b>ДОРОГА</b></span>
+                    </div>
+                    <textarea id="lorgus-rp-input" placeholder="Опиши дорогу, встречу или действие персонажа..." rows="4"></textarea>
+                    <div class="lorgus-rp-composer-bottom">
+                        <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalRpMessage()">Отправить</button>
+                    </div>
+                </section>
+
+                <div class="lorgus-road-arrival">
+                    <button class="gold-button" type="button" onclick="arriveAtDestination()">
+                        Прибыть в ${escapeHtml(presence.toLocation)}
+                    </button>
+                </div>
+            </main>
+        </div>
+    `;
+    const currentPresence = await getRpPresence();
+    await loadRpMessages(currentPresence);
+    await subscribeToRpMessages(currentPresence);
+
+}
+
+function renderFloodChat() {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    const character = window.activeCharacter;
+    const name = escapeHtml(character?.name || "Без имени");
+
+    container.className = "lorgus-flood-page";
+    container.innerHTML = `
+        <div class="lorgus-flood-shell">
+            <header class="lorgus-flood-header">
+                <div>
+                    <span class="lorgus-rp-overline">ОБЩИЙ КАНАЛ</span>
+                    <h1>Флуд</h1>
+                    <p>Свободное общение игроков. Флуд не считается RP-присутствием.</p>
+                </div>
+                <button class="character-secondary-button" type="button" onclick="returnToGame()">← К миру</button>
+            </header>
+
+            <section class="lorgus-flood-feed" id="lorgus-flood-feed">
+                <div class="lorgus-rp-empty">
+                    <div class="lorgus-rp-symbol">✧</div>
+                    <span class="lorgus-rp-stage-kicker">ФЛУД</span>
+                    <h3>Общий разговор ещё пуст.</h3>
+                    <p>Здесь можно общаться вне роли, не покидая своё текущее RP-пространство.</p>
+                </div>
+            </section>
+
+            <section class="lorgus-rp-composer">
+                <div class="lorgus-rp-composer-top">
+                    <span>АККАУНТ: <strong>${name}</strong></span>
+                    <span>НЕ ВЛИЯЕТ НА ПЕРЕМЕЩЕНИЕ</span>
+                </div>
+                <textarea id="lorgus-flood-input" placeholder="Напиши сообщение во флуд..." rows="3"></textarea>
+                <div class="lorgus-rp-composer-bottom">
+                    <span class="lorgus-rp-mention">Флуд доступен независимо от RP-присутствия.</span>
+                    <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalFloodMessage()">Отправить</button>
+                </div>
+            </section>
+        </div>
+    `;
+}
+
+function renderLocationEntryLock(locationName, regionName) {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    container.className = "lorgus-world-page";
+    container.innerHTML = `
+        <div class="lorgus-world-shell">
+            <aside class="lorgus-world-sidebar">
+                <div class="lorgus-world-sidebar-symbol">🔒</div>
+                <div class="lorgus-world-sidebar-label">RP-ЧАТ ЗАКРЫТ</div>
+                <div class="lorgus-world-sidebar-name">${escapeHtml(locationName)}</div>
+                <p class="lorgus-world-sidebar-meta">${escapeHtml(regionName)}</p>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button"
+                    onclick="renderKingdomLocations('${escapeHtml(regionName)}')">
+                    ← К локациям
+                </button>
+            </aside>
+
+            <main class="lorgus-world-browser">
+                <header class="lorgus-world-header">
+                    <span class="lorgus-world-kicker">ФИЗИЧЕСКОЕ ПРИСУТСТВИЕ</span>
+                    <h1>${escapeHtml(locationName)}</h1>
+                    <p>Персонаж не находится здесь. Читать и писать в этом RP-чате нельзя.</p>
+                </header>
+
+                <section class="lorgus-world-section">
+                    <div class="lorgus-empty-location">
+                        <span>🔒</span>
+                        <h2>Чат недоступен</h2>
+                        <p>Чтобы попасть сюда, персонаж должен физически прибыть в эту локацию через систему перемещения.</p>
+                    </div>
+                </section>
+            </main>
+        </div>
+    `;
+}
+
+async function renderLocationParticipants(locationName, regionName) {
+    const box = document.querySelector(".lorgus-rp-participants");
+    if (!box) return;
+
+    const { data, error } = await supabase
+        .from("rp_presence")
+        .select("character_id, presence_type, location, region, from_location, from_region, to_location, to_region, visibility, characters(name, race)")
+        .eq("visibility", "public")
+        .eq("presence_type", "location")
+        .eq("region", regionName)
+        .eq("location", locationName);
+
+    if (error) {
+        console.error("Не удалось загрузить участников:", error);
+        return;
+    }
+
+    const participants = data || [];
+
+    if (!participants.length) {
+        box.innerHTML = '<div class="lorgus-rp-participant-empty">Здесь пока никого нет</div>';
+        return;
+    }
+
+    box.innerHTML = participants.map(row => {
+        const character = row.characters || {};
+        const isCurrent = row.character_id === window.activeCharacterId;
+        return `
+            <div class="lorgus-rp-participant ${isCurrent ? "active" : ""}">
+                <span class="lorgus-rp-avatar">✦</span>
+                <div>
+                    <strong>${escapeHtml(character.name || "Без имени")}</strong>
+                    <small>${isCurrent ? "Вы" : escapeHtml(character.race || "Персонаж")}</small>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+function sendLocalFloodMessage() {
+    const input = document.getElementById("lorgus-flood-input");
+    const feed = document.getElementById("lorgus-flood-feed");
+    const character = window.activeCharacter;
+    if (!input || !feed || !character) return;
+
+    const text = input.value.trim();
+    if (!text) return;
+
+    const presence = getRpPresence();
+    if (!presence || (presence.type !== "location" && presence.type !== "road")) {
+        alert("Персонаж не находится ни в одном RP-пространстве.");
+        return;
+    }
+
+    const empty = feed.querySelector(".lorgus-rp-empty");
+    if (empty) empty.remove();
+
+    const message = document.createElement("article");
+    message.className = "lorgus-rp-message";
+    message.innerHTML = `
+        <div class="lorgus-rp-message-avatar">✧</div>
+        <div class="lorgus-rp-message-body">
+            <div class="lorgus-rp-message-meta">
+                <strong>${escapeHtml(character.name || "Без имени")}</strong>
+                <span>флуд · сейчас</span>
+            </div>
+            <p>${escapeHtml(text)}</p>
+        </div>
+    `;
+    feed.appendChild(message);
+    input.value = "";
+    feed.scrollTop = feed.scrollHeight;
+}
+
+async function renderLocationChats(locationName, regionName, alreadyPresent = false) {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    const presence = await getRpPresence();
+    const hasPresence = Boolean(presence);
+
+    // Before the first RP post there is no physical lock:
+    // any location chat may be opened and read.
+    if (presence) {
+        if (presence.type === "road") {
+            await renderRoadChat(presence);
+            return;
+        }
+
+        if (
+            presence.type !== "location" ||
+            presence.location !== locationName ||
+            presence.region !== regionName
+        ) {
+            renderTravelScreen(
+                presence.location,
+                presence.region,
+                locationName,
+                regionName
+            );
+            return;
+        }
+    }
+
+    window.activeRpChatSpace = {
+        type: "location",
+        location: locationName,
+        region: regionName,
+        visibility: "public"
+    };
+
+    await renderLocationParticipants(locationName, regionName);
+
+    const character = window.activeCharacter;
+    const name = escapeHtml(character?.name || "Без имени");
+    const location = escapeHtml(locationName);
+    const region = escapeHtml(regionName);
+
+    container.className = "lorgus-rp-page";
+    container.innerHTML = `
+        <div class="lorgus-rp-shell">
+            <aside class="lorgus-rp-sidebar">
+                <button class="lorgus-rp-back" type="button" onclick="renderKingdomLocations('${region}')">← К локациям</button>
+
+                <div class="lorgus-rp-place-mark">✦</div>
+                <span class="lorgus-rp-overline">ЛОКАЦИЯ</span>
+                <h1>${location}</h1>
+                <p class="lorgus-rp-region">${region}</p>
+
+                <div class="lorgus-rp-divider"></div>
+
+                <div class="lorgus-rp-sidebar-label">ПРИСУТСТВИЕ</div>
+                <div class="lorgus-rp-presence-lock">
+                    ${hasPresence
+                        ? "Персонаж находится здесь. Войти в другую RP-локацию можно только через дорогу."
+                        : "Физическое местоположение ещё не закреплено. Вы можете читать эту сцену. Первое RP-сообщение закрепит персонажа здесь."}
+                </div>
+
+                <div class="lorgus-rp-sidebar-label">УЧАСТНИКИ</div>
+                <div class="lorgus-rp-participants">
+                    <div class="lorgus-rp-participant active">
+                        <span class="lorgus-rp-avatar">✦</span>
+                        <div><strong>${name}</strong><small>Вы</small></div>
+                    </div>
+                    <div class="lorgus-rp-participant-empty">Другие игроки появятся здесь</div>
+                </div>
+
+                <div class="lorgus-rp-sidebar-note">
+                    <span>✧</span>
+                    <p>Ролите свободно. Флуд можно открыть отдельно и он не меняет положение персонажа.</p>
+                </div>
+            </aside>
+
+            <main class="lorgus-rp-main">
+                <header class="lorgus-rp-header">
+                    <div>
+                        <span class="lorgus-rp-overline">RP · ${region}</span>
+                        <h2>${location}</h2>
+                    </div>
+                    <div class="lorgus-rp-status"><i></i> ЖИВАЯ СЦЕНА</div>
+                </header>
+
+                <section class="lorgus-rp-feed" id="lorgus-rp-feed">
+                    <div class="lorgus-rp-empty">
+                        <div class="lorgus-rp-symbol">✦</div>
+                        <span class="lorgus-rp-stage-kicker">НАЧАЛО ИСТОРИИ</span>
+                        <h3>Сцена ещё не началась.</h3>
+                        <p>Первое сообщение создаст начало истории. Здесь игроки будут отвечать друг другу и продолжать общий сюжет.</p>
+                    </div>
+                </section>
+
+                <section class="lorgus-rp-composer">
+                    <div class="lorgus-rp-composer-top">
+                        <span>РОЛЬ: <strong>${name}</strong></span>
+                        <span>ПРОСТРАНСТВО: <b>ЛОКАЦИЯ</b></span>
+                    </div>
+                    <textarea id="lorgus-rp-input" placeholder="Опиши действие, реплику или мысль персонажа..." rows="4"></textarea>
+                    <div class="lorgus-rp-composer-bottom">
+                        <button class="lorgus-rp-mention" type="button" disabled>@ Отметить участника</button>
+                        <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalRpMessage()">Отправить</button>
+                    </div>
+                </section>
+
+                <footer class="lorgus-rp-footer">
+                    <span>ЛОРГУС</span>
+                    <button class="lorgus-flood-link" type="button" onclick="renderFloodChat()">Открыть флуд</button>
+                </footer>
+            </main>
+        </div>
+    `;
+    const chatSpace = window.activeRpChatSpace;
+    if (chatSpace) {
+        await loadRpMessages(chatSpace);
+        await subscribeToRpMessages(chatSpace);
+    }
+}
+async function loadRpMessages(presence) {
+    const feed = document.getElementById("lorgus-rp-feed");
+    if (!feed || !presence) return;
+
+    let query = supabase
+        .from("rp_messages")
+        .select("id, character_id, body, created_at, characters(name)")
+        .eq("presence_type", presence.type)
+        .order("created_at", { ascending: true })
+        .limit(200);
+
+    if (presence.type === "location") {
+        query = query.eq("region", presence.region).eq("location", presence.location);
+    } else {
+        query = query.eq("from_region", presence.fromRegion)
+            .eq("from_location", presence.fromLocation)
+            .eq("to_region", presence.toRegion)
+            .eq("to_location", presence.toLocation);
+    }
+
+    const { data, error } = await query;
+    if (error) {
+        console.error("Не удалось загрузить RP-сообщения:", error);
+        return;
+    }
+
+    feed.innerHTML = "";
+    if (!data?.length) {
+        feed.innerHTML = '<div class="lorgus-rp-empty"><div class="lorgus-rp-symbol">✦</div><span class="lorgus-rp-stage-kicker">НАЧАЛО ИСТОРИИ</span><h3>Сцена ещё не началась.</h3><p>Первое сообщение создаст начало истории.</p></div>';
+        return;
+    }
+
+    data.forEach(appendRpMessage);
+    feed.scrollTop = feed.scrollHeight;
+}
+
+function appendRpMessage(message) {
+    const feed = document.getElementById("lorgus-rp-feed");
+    if (!feed || feed.querySelector('[data-rp-message-id="' + message.id + '"]')) return;
+
+    const empty = feed.querySelector(".lorgus-rp-empty");
+    if (empty) empty.remove();
+
+    const article = document.createElement("article");
+    article.className = "lorgus-rp-message";
+    article.dataset.rpMessageId = message.id;
+
+    const time = new Date(message.created_at).toLocaleTimeString("ru-RU", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+
+    article.innerHTML =
+        '<div class="lorgus-rp-message-avatar">✦</div>' +
+        '<div class="lorgus-rp-message-body">' +
+            '<div class="lorgus-rp-message-meta">' +
+                '<strong>' + escapeHtml(message.characters?.name || "Без имени") + '</strong>' +
+                '<span>' + escapeHtml(time) + '</span>' +
+            '</div>' +
+            '<p>' + escapeHtml(message.body) + '</p>' +
+        '</div>';
+
+    feed.appendChild(article);
+    feed.scrollTop = feed.scrollHeight;
+}
+
+async function subscribeToRpMessages(presence) {
+    if (!supabase || !presence) return;
+
+    if (window.rpMessagesChannel) {
+        await supabase.removeChannel(window.rpMessagesChannel);
+    }
+
+    window.rpMessagesChannel = supabase
+        .channel("lorgus-rp-messages-" + window.activeCharacterId)
+        .on("postgres_changes", {
+            event: "INSERT",
+            schema: "public",
+            table: "rp_messages"
+        }, async payload => {
+            const row = payload.new;
+            const sameLocation = presence.type === "location" &&
+                row.presence_type === "location" &&
+                row.region === presence.region &&
+                row.location === presence.location;
+
+            const sameRoad = presence.type === "road" &&
+                row.presence_type === "road" &&
+                row.from_region === presence.fromRegion &&
+                row.from_location === presence.fromLocation &&
+                row.to_region === presence.toRegion &&
+                row.to_location === presence.toLocation;
+
+            if (!sameLocation && !sameRoad) return;
+
+            const { data: character } = await supabase
+                .from("characters")
+                .select("name")
+                .eq("id", row.character_id)
+                .single();
+
+            appendRpMessage({ ...row, characters: character });
+        })
+        .subscribe();
+}
+
+async function sendLocalRpMessage() {
+    const input = document.getElementById("lorgus-rp-input");
+    if (!input || !window.activeCharacterId) return;
+
+    const body = input.value.trim();
+    if (!body) return;
+
+    const chat = window.activeRpChatSpace;
+    if (!chat) {
+        alert("RP-пространство не выбрано.");
+        return;
+    }
+
+    const { error } = await supabase.rpc(
+        "send_lorgus_rp_message",
+        {
+            p_character_id: window.activeCharacterId,
+            p_presence_type: chat.type,
+            p_region: chat.type === "location" ? chat.region : null,
+            p_location: chat.type === "location" ? chat.location : null,
+            p_from_region: chat.type === "road" ? chat.fromRegion : null,
+            p_from_location: chat.type === "road" ? chat.fromLocation : null,
+            p_to_region: chat.type === "road" ? chat.toRegion : null,
+            p_to_location: chat.type === "road" ? chat.toLocation : null,
+            p_body: body,
+            p_visibility: chat.visibility || "public"
+        }
+    );
+
+    if (error) {
+        console.error("Не удалось отправить RP-сообщение:", error);
+        alert("Не удалось отправить сообщение: " + error.message);
+        return;
+    }
+
+    input.value = "";
+    window.activeRpPresence = await getRpPresence();
+
+    if (window.activeRpPresence) {
+        window.activeRpChatSpace = window.activeRpPresence;
+        await loadRpMessages(window.activeRpPresence);
+        await subscribeToRpMessages(window.activeRpPresence);
+        await renderLocationParticipantsIfVisible();
+    } else {
+        await loadRpMessages(chat);
+        await subscribeToRpMessages(chat);
+    }
+}
+
+
+/* =========================================================
+   ПИСЬМА И ГОЛУБИНАЯ ПОЧТА
+   ========================================================= */
+
+async function renderMail() {
+    const container = document.getElementById("cabinet-content");
+    if (!container || !window.activeCharacter) return;
+
+    const character = window.activeCharacter;
+    const name = escapeHtml(character.name || "Без имени");
+
+    container.className = "lorgus-mail-page";
+    container.innerHTML = `
+        <div class="lorgus-world-shell">
+            <aside class="lorgus-world-sidebar">
+                <div class="lorgus-world-sidebar-symbol">✉</div>
+                <div class="lorgus-world-sidebar-label">ПЕРСОНАЖ</div>
+                <div class="lorgus-world-sidebar-name">${name}</div>
+                <p class="lorgus-world-sidebar-meta">Почта персонажа и послания, доставленные голубями.</p>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="returnToGame()">
+                    ← Вернуться к миру
+                </button>
+            </aside>
+
+            <main class="lorgus-world-browser">
+                <header class="lorgus-world-header">
+                    <span class="lorgus-world-kicker">СВЯЗЬ</span>
+                    <h1>Письма</h1>
+                    <p>Вне зависимости от расстояния персонажи могут отправлять друг другу послания. Голубь не появляется мгновенно: письмо сначала летит к адресату.</p>
+                </header>
+
+                <section class="lorgus-mail-layout">
+                    <div class="lorgus-mail-compose">
+                        <div class="lorgus-world-section-title">НОВОЕ ПОСЛАНИЕ</div>
+                        <label for="lorgus-mail-recipient">Кому</label>
+                        <select id="lorgus-mail-recipient">
+                            <option value="">Загрузка персонажей...</option>
+                        </select>
+
+                        <label for="lorgus-mail-body">Текст письма</label>
+                        <textarea id="lorgus-mail-body" rows="10" maxlength="10000" placeholder="Напиши то, что должен узнать другой персонаж..."></textarea>
+
+                        <div class="lorgus-mail-compose-footer">
+                            <span>🕊 Голубиная почта</span>
+                            <button class="gold-button" type="button" onclick="sendLorgusMail()">Отправить голубя</button>
+                        </div>
+                        <div id="lorgus-mail-status" class="lorgus-mail-status"></div>
+                    </div>
+
+                    <div class="lorgus-mail-inbox">
+                        <div class="lorgus-world-section-title">ВХОДЯЩИЕ</div>
+                        <div id="lorgus-mail-inbox-list" class="lorgus-mail-list">
+                            <div class="lorgus-empty-location">
+                                <span>✉</span>
+                                <h2>Загрузка почты...</h2>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    `;
+
+    await loadMailRecipients();
+    await loadMailInbox();
+}
+
+async function loadMailRecipients() {
+    const select = document.getElementById("lorgus-mail-recipient");
+    if (!select) return;
+
+    // Статус персонажа хранится не в characters, а в character_applications.
+    // Для почты показываем только персонажей с одобренной заявкой.
+    const { data: applications, error: applicationsError } = await supabase
+        .from("character_applications")
+        .select("character_id")
+        .eq("status", "approved")
+        .not("character_id", "is", null);
+
+    if (applicationsError) {
+        console.error("Не удалось загрузить одобренные заявки:", applicationsError);
+        select.innerHTML = `<option value="">Не удалось загрузить персонажей: ${escapeHtml(applicationsError.message)}</option>`;
+        return;
+    }
+
+    const characterIds = [...new Set(
+        (applications || [])
+            .map(application => application.character_id)
+            .filter(Boolean)
+            .filter(id => String(id) !== String(window.activeCharacterId))
+    )];
+
+    if (!characterIds.length) {
+        select.innerHTML = '<option value="">Нет доступных адресатов</option>';
+        return;
+    }
+
+    const { data: characters, error: charactersError } = await supabase
+        .from("characters")
+        .select("id, name, race")
+        .in("id", characterIds)
+        .order("name", { ascending: true });
+
+    if (charactersError) {
+        console.error("Не удалось загрузить персонажей:", charactersError);
+        select.innerHTML = `<option value="">Не удалось загрузить персонажей: ${escapeHtml(charactersError.message)}</option>`;
+        return;
+    }
+
+    if (!characters?.length) {
+        select.innerHTML = '<option value="">Нет доступных адресатов</option>';
+        return;
+    }
+
+    select.innerHTML =
+        '<option value="">Выбери персонажа</option>' +
+        characters.map(character =>
+            `<option value="${escapeHtml(character.id)}">${escapeHtml(character.name || "Без имени")} · ${escapeHtml(character.race || "персонаж")}</option>`
+        ).join("");
+}
+
+function formatMailDate(value) {
+    if (!value) return "";
+    return new Date(value).toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+async function loadMailInbox() {
+    const list = document.getElementById("lorgus-mail-inbox-list");
+    if (!list || !window.activeCharacterId) return;
+
+    const { data, error } = await supabase
+        .from("lorgus_mail")
+        .select("id, sender_character_id, recipient_character_id, body, method, sent_at, deliver_at, delivered_at, read_at, sender:characters!lorgus_mail_sender_character_id_fkey(name)")
+        .eq("recipient_character_id", window.activeCharacterId)
+        .order("sent_at", { ascending: false })
+        .limit(100);
+
+    if (error) {
+        console.error("Не удалось загрузить письма:", error);
+        list.innerHTML = `<div class="lorgus-empty-location"><span>!</span><h2>Почта пока не готова</h2><p>${escapeHtml(error.message)}</p><small>После создания таблицы lorgus_mail здесь появятся письма.</small></div>`;
+        return;
+    }
+
+    if (!data?.length) {
+        list.innerHTML = '<div class="lorgus-empty-location"><span>✉</span><h2>Почтовый ящик пуст</h2><p>Ни одного послания пока не доставлено.</p></div>';
+        return;
+    }
+
+    const now = Date.now();
+
+    list.innerHTML = data.map(mail => {
+        const delivered = mail.delivered_at || new Date(mail.deliver_at).getTime() <= now;
+        const sender = mail.sender?.name || "Неизвестный отправитель";
+        const unread = !mail.read_at && delivered;
+
+        return `
+            <article class="lorgus-mail-card ${unread ? "unread" : ""}" data-mail-id="${escapeHtml(mail.id)}">
+                <div class="lorgus-mail-card-top">
+                    <strong>${escapeHtml(sender)}</strong>
+                    <span>${delivered ? "Доставлено" : "В пути"}</span>
+                </div>
+                <div class="lorgus-mail-card-meta">
+                    ${mail.method === "pigeon" ? "🕊 Голубь" : "✉ Письмо"} · отправлено ${formatMailDate(mail.sent_at)}
+                    ${delivered ? " · доставлено " + formatMailDate(mail.delivered_at || mail.deliver_at) : " · прибудет " + formatMailDate(mail.deliver_at)}
+                </div>
+                <p>${escapeHtml(mail.body)}</p>
+                ${unread ? '<button class="character-secondary-button" type="button" onclick="markLorgusMailRead(\'' + escapeHtml(mail.id) + '\')">Прочитано</button>' : ""}
+            </article>
+        `;
+    }).join("");
+}
+
+async function sendLorgusMail() {
+    const recipient = document.getElementById("lorgus-mail-recipient")?.value;
+    const bodyInput = document.getElementById("lorgus-mail-body");
+    const status = document.getElementById("lorgus-mail-status");
+
+    if (!recipient || !bodyInput) return;
+
+    const body = bodyInput.value.trim();
+    if (!body) {
+        if (status) status.textContent = "Письмо не может быть пустым.";
+        return;
+    }
+
+    if (recipient === window.activeCharacterId) {
+        if (status) status.textContent = "Нельзя отправить письмо самому себе.";
+        return;
+    }
+
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData?.user) return;
+
+    const now = new Date();
+    const deliverAt = new Date(now.getTime() + 5 * 60 * 1000);
+
+    const { error } = await supabase
+        .from("lorgus_mail")
+        .insert({
+            sender_character_id: window.activeCharacterId,
+            sender_player_id: userData.user.id,
+            recipient_character_id: recipient,
+            body,
+            method: "pigeon",
+            sent_at: now.toISOString(),
+            deliver_at: deliverAt.toISOString()
+        });
+
+    if (error) {
+        console.error("Не удалось отправить письмо:", error);
+        if (status) status.textContent = "Не удалось отправить письмо: " + error.message;
+        return;
+    }
+
+    bodyInput.value = "";
+    if (status) status.textContent = "Голубь отправлен. Письмо прибудет позже.";
+}
+
+async function markLorgusMailRead(mailId) {
+    const { error } = await supabase
+        .from("lorgus_mail")
+        .update({ read_at: new Date().toISOString() })
+        .eq("id", mailId)
+        .eq("recipient_character_id", window.activeCharacterId);
+
+    if (error) {
+        console.error("Не удалось отметить письмо прочитанным:", error);
+        return;
+    }
+
+    await loadMailInbox();
+}
+
+/* =========================================================
+   ПРОФИЛЬ И СМЕНА ПЕРСОНАЖА
+   ========================================================= */
+
+function openActiveCharacterProfile() {
+    const character = window.activeCharacter;
+
+    if (!character) {
+        showCharacterError(
+            document.getElementById("cabinet-content"),
+            "Активный персонаж не выбран."
+        );
+        return;
+    }
+
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    container.className = "character-profile-page";
+
+    container.innerHTML = `
+        <div class="character-profile-header">
+            <div class="welcome-symbol">✦</div>
+            <h1>${escapeHtml(character.name || "Без имени")}</h1>
+            <p>${escapeHtml(character.race || "Раса не указана")}</p>
+        </div>
+
+        <div class="character-profile-grid">
+            <div class="character-profile-field">
+                <span>Возраст</span>
+                <strong>${escapeHtml(character.age ?? "Не указан")}</strong>
+            </div>
+            <div class="character-profile-field">
+                <span>Родина</span>
+                <strong>${escapeHtml(character.homeland || "Не указана")}</strong>
+            </div>
+            <div class="character-profile-field">
+                <span>Род занятий</span>
+                <strong>${escapeHtml(character.occupation || "Не указан")}</strong>
+            </div>
+            <div class="character-profile-field">
+                <span>Состояние</span>
+                <strong>Готов к игре</strong>
+            </div>
+            <div class="character-profile-field full">
+                <span>Характер</span>
+                <p>${escapeHtml(character.personality || "Не указан")}</p>
+            </div>
+            <div class="character-profile-field full">
+                <span>Предыстория</span>
+                <p>${escapeHtml(character.backstory || "Не указана")}</p>
+            </div>
+            <div class="character-profile-field full">
+                <span>Особые навыки</span>
+                <p>${escapeHtml(character.special_skills || "Не указаны")}</p>
+            </div>
+        </div>
+
+        <div class="character-game-actions">
+            <button class="gold-button" type="button" onclick="returnToGame()">
+                Вернуться к игре
+            </button>
+            <button class="character-secondary-button" type="button" onclick="switchCharacter()">
+                Сменить персонажа
+            </button>
+        </div>
+    `;
+}
+
+async function switchCharacter() {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    sessionStorage.removeItem("lorgus_active_character_id");
+    localStorage.removeItem("lorgus_active_character_id");
+    window.activeCharacterId = null;
+    window.activeCharacter = null;
+
+    await loadPlayerState({
+        user: (await supabase.auth.getUser()).data.user
+    });
+}
+
+function returnToGame() {
+    const container = document.getElementById("cabinet-content");
+    if (!container || !window.activeCharacter) return;
+    renderCharacter(container, window.activeCharacter);
+}
+
+/* =========================================================
+   ОШИБКА ПЕРСОНАЖА
+   ========================================================= */
+
+function showCharacterError(
+    container,
+    message
+) {
+    container.className = "welcome-panel";
+
+    container.innerHTML = `
+        <div class="welcome-symbol">!</div>
+
+        <h1>
+            Не удалось загрузить персонажа
+        </h1>
+
+        <p>
+            ${escapeHtml(message)}
+        </p>
+    `;
+}
+
+/* =========================================================
+   СООБЩЕНИЯ ЗАЯВКИ
+   ========================================================= */
+
+function setCharacterMessage(
+    text,
+    type
+) {
+    const element =
+        document.getElementById(
+            "character-message"
+        );
+
+    if (!element) return;
+
+    element.className =
+        `character-message ${type}`;
+
+    element.textContent = text;
+}
+
+/* =========================================================
+   ВЫХОД
+   ========================================================= */
+
+async function logout() {
+    await supabase.auth.signOut();
+}
+
+/* =========================================================
+   СООБЩЕНИЯ АВТОРИЗАЦИИ
+   ========================================================= */
+
+function setMessage(
+    text,
+    type
+) {
+    const element =
+        document.getElementById(
+            "auth-message"
+        );
+
+    if (!element) return;
+
+    element.className =
+        `auth-message ${type}`;
+
+    element.textContent = text;
+}
+
+/* =========================================================
+   РАСШИРЕНИЕ ФАЙЛА
+   ========================================================= */
+
+function getFileExtension(
+    filename
+) {
+    const parts =
+        filename.split(".");
+
+    if (parts.length < 2) {
+        return "jpg";
+    }
+
+    const extension =
+        parts.pop().toLowerCase();
+
+    if (
+        extension === "jpeg" ||
+        extension === "jpg"
+    ) {
+        return "jpg";
+    }
+
+    if (extension === "png") {
+        return "png";
+    }
+
+    if (extension === "webp") {
+        return "webp";
+    }
+
+    return "jpg";
+}
+
+/* =========================================================
+   ЭКРАНИРОВАНИЕ HTML
+   ========================================================= */
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+window.showLogin = showLogin;
+window.showRegister = showRegister;
+window.login = login;
+window.register = register;
+window.logout = logout;
+window.submitCharacterApplication =
+    submitCharacterApplication;
+window.updateCharacterApplication =
+    updateCharacterApplication;
+window.openActiveCharacterProfile = openActiveCharacterProfile;
+window.switchCharacter = switchCharacter;
+window.returnToGame = returnToGame;
+window.renderCharacter = renderCharacter;
+window.renderKingdomLocations = renderKingdomLocations;
+window.renderLocationChats = renderLocationChats;
+window.enterLocationRp = enterLocationRp;
+window.sendLocalRpMessage = sendLocalRpMessage;
+window.renderFloodChat = renderFloodChat;
+window.sendLocalFloodMessage = sendLocalFloodMessage;
+window.renderRoadChat = renderRoadChat;
+window.startTravel = startTravel;
+window.arriveAtDestination = arriveAtDestination;
+window.getRpPresence = getRpPresence;
+window.renderWorldCharacterTracker = renderWorldCharacterTracker;
+window.renderMail = renderMail;
+window.sendLorgusMail = sendLorgusMail;
+window.markLorgusMailRead = markLorgusMailRead;
+
+
+/* =========================================================
+   ЗАПУСК
+   ========================================================= */
+
+initialize();
+
+
+/* =========================================================
+   LORGUS 2.1 — CINEMATIC WORLD MAP
+   Карта остаётся исходным PNG. Игровые элементы лежат
+   отдельным слоем поверх неё.
+   ========================================================= */
+
+function selectLorgusMapRegion(region) {
+    const title = document.getElementById("lorgus-map-selection-title");
+    const text = document.getElementById("lorgus-map-selection-text");
+    const buttons = document.querySelectorAll(".lorgus-map-region-button");
+
+    buttons.forEach(button => {
+        button.classList.toggle("active", button.dataset.region === region);
+    });
+
+    const descriptions = {
+        "Атэрон": "Знания, древности, исследования и руины.",
+        "Каэлор": "Горы, кузницы, шахты и древнее мастерство.",
+        "Ксандр": "Торговля, банки, дороги и большие рынки.",
+        "Лирэн": "Леса, плодородные земли и древняя природа.",
+        "Морвейн": "Паломничество, память и туманные долины.",
+        "Святые Земли": "Нейтральная территория для переговоров монархов и глав церквей.",
+        "Спорные Земли": "Независимые поселения и территории вне власти пяти королевств."
+    };
+
+    if (title) title.textContent = region;
+    if (text) text.textContent = descriptions[region] || "Выбери край мира, чтобы узнать больше.";
+
+    const enterButton = document.getElementById("lorgus-map-enter-button");
+    if (!enterButton) return;
+
+    const openable = Object.prototype.hasOwnProperty.call(descriptions, region);
+    enterButton.disabled = !openable;
+    enterButton.textContent = openable ? "Открыть край" : "Территория закрыта";
+    enterButton.onclick = openable ? () => renderKingdomLocations(region) : null;
+}
+
+const LORGUS_MAP_MARKERS = [
+    { id:"Атэрон", x:22, y:34, type:"kingdom", description:"Знания, древности, исследования и руины." },
+    { id:"Каэлор", x:72, y:27, type:"kingdom", description:"Горы, кузницы, шахты и древнее мастерство." },
+    { id:"Ксандр", x:79, y:61, type:"kingdom", description:"Торговля, банки, дороги и большие рынки." },
+    { id:"Лирэн", x:31, y:69, type:"kingdom", description:"Леса, плодородные земли и древняя природа." },
+    { id:"Морвейн", x:51, y:82, type:"kingdom", description:"Паломничество, память и туманные долины." },
+    { id:"Святые Земли", x:52, y:50, type:"neutral", description:"Нейтральная территория для переговоров монархов и глав церквей." },
+    { id:"Спорные Земли", x:62, y:66, type:"contested", description:"Независимые поселения и территории вне власти пяти королевств." }
+];
+
+const LORGUS_MAP_EDITOR_RECTS = [
+    { id:"Атэрон", x:62.5, y:62.1, w:11.8, h:6.0, rotation:0 },
+    { id:"Каэлор", x:62.0, y:69.7, w:11.9, h:6.3, rotation:0 },
+    { id:"Ксандр", x:48.4, y:60.6, w:6.7, h:8.2, rotation:0 },
+    { id:"Лирэн", x:25.4, y:56.0, w:17.2, h:8.9, rotation:0 },
+    { id:"Морвейн", x:69.9, y:42.8, w:12.2, h:10.6, rotation:0 },
+    { id:"Святые Земли", x:51.9, y:45.2, w:3.4, h:3.4, rotation:0 },
+    { id:"Спорные Земли", x:54.6, y:31.5, w:6.1, h:5.3, rotation:0 }
+];
+function enableLorgusMapEditor() {
+    const layer = document.getElementById("lorgus-map-marker-layer");
+    const viewport = document.getElementById("lorgus-map-viewport");
+    if (!layer || !viewport) return;
+
+    layer.classList.toggle("editor-mode");
+    const active = layer.classList.contains("editor-mode");
+    const button = document.getElementById("lorgus-map-editor-toggle");
+    if (button) button.textContent = active ? "✓ РЕДАКТОР ВКЛЮЧЁН" : "✎ РЕДАКТОР КАРТЫ";
+
+    renderLorgusMapEditorRects(active);
+}
+
+function bindLorgusMapEditorInteraction(label, rectData, layer) {
+    if (!label || !rectData || !layer) return;
+
+    let drag = null;
+
+    const start = (event, mode) => {
+        if (!layer.classList.contains("editor-mode")) return;
+        event.preventDefault();
+        event.stopPropagation();
+
+        const layerRect = layer.getBoundingClientRect();
+        drag = {
+            mode,
+            startX: event.clientX,
+            startY: event.clientY,
+            x: rectData.x,
+            y: rectData.y,
+            w: rectData.w,
+            h: rectData.h,
+            layerW: layerRect.width,
+            layerH: layerRect.height,
+            moved: false
+        };
+
+        label.setPointerCapture?.(event.pointerId);
+        label.classList.add("editing");
+    };
+
+    label.addEventListener("pointerdown", event => {
+        if (event.target.closest(".lorgus-map-editor-handle")) return;
+        start(event, "move");
+    });
+
+    const handle = document.createElement("span");
+    handle.className = "lorgus-map-editor-handle";
+    handle.title = "Изменить размер";
+    label.appendChild(handle);
+
+    handle.addEventListener("pointerdown", event => {
+        start(event, "resize");
+    });
+
+    label.addEventListener("pointermove", event => {
+        if (!drag) return;
+
+        const dx = ((event.clientX - drag.startX) / drag.layerW) * 100;
+        const dy = ((event.clientY - drag.startY) / drag.layerH) * 100;
+
+        if (Math.abs(dx) + Math.abs(dy) > 0.15) drag.moved = true;
+
+        if (drag.mode === "move") {
+            rectData.x = Math.max(0, Math.min(100, drag.x + dx));
+            rectData.y = Math.max(0, Math.min(100, drag.y + dy));
+        } else {
+            rectData.w = Math.max(1, Math.min(40, drag.w + dx));
+            rectData.h = Math.max(1, Math.min(40, drag.h + dy));
+        }
+
+        label.style.left = rectData.x + "%";
+        label.style.top = rectData.y + "%";
+        label.style.width = rectData.w + "%";
+        label.style.height = rectData.h + "%";
+        fitLorgusMapLabel(label);
+        updateLorgusMapEditorReadout(rectData);
+    });
+
+    const stop = event => {
+        if (!drag) return;
+        label.classList.remove("editing");
+        label.dataset.moved = drag.moved ? "1" : "0";
+        drag = null;
+        if (event) updateLorgusMapEditorReadout(rectData);
+    };
+
+    label.addEventListener("pointerup", stop);
+    label.addEventListener("pointercancel", stop);
+
+    label.addEventListener("click", event => {
+        if (label.dataset.moved === "1") {
+            event.preventDefault();
+            event.stopPropagation();
+            label.dataset.moved = "0";
+        }
+    });
+}
+
+function updateLorgusMapEditorReadout(rectData) {
+    const readout = document.getElementById("lorgus-map-editor-readout");
+    if (!readout || !rectData) return;
+
+    readout.innerHTML =
+        "<strong>" + escapeHtml(rectData.id) + "</strong>" +
+        "<span>X " + rectData.x.toFixed(1) + " · Y " + rectData.y.toFixed(1) +
+        " · W " + rectData.w.toFixed(1) + " · H " + rectData.h.toFixed(1) + "</span>";
+}
+
+function syncLorgusMapLabelLayer() {
+    const world = document.getElementById("lorgus-map-world");
+    const image = world?.querySelector(".lorgus-map-image");
+    const layer = document.getElementById("lorgus-map-marker-layer");
+
+    if (!world || !image || !layer || !image.complete) return;
+
+    // Координаты подписей относятся именно к PNG, а не ко всему viewport.
+    // Это важно, когда object-fit: contain оставляет поля по краям.
+    layer.style.left = image.offsetLeft + "px";
+    layer.style.top = image.offsetTop + "px";
+    layer.style.width = image.offsetWidth + "px";
+    layer.style.height = image.offsetHeight + "px";
+}
+
+function fitLorgusMapLabel(label) {
+    if (!label) return;
+
+    const maxWidth = Math.max(20, label.clientWidth - 10);
+    const maxHeight = Math.max(14, label.clientHeight - 6);
+    const textLength = Math.max(1, (label.textContent || "").trim().length);
+
+    // Размер названия напрямую зависит от размеров рамки.
+    // Ширина учитывается через длину текста, а не через scrollWidth,
+    // чтобы браузерное переносы строк не ужимали шрифт до крошечного размера.
+    const heightSize = maxHeight * 0.78;
+    const widthSize = maxWidth / Math.max(3.8, textLength * 0.52);
+
+    let size = Math.min(56, Math.max(12, heightSize, widthSize));
+    label.style.fontSize = size + "px";
+
+    // Только реальный выход за границы уменьшает размер.
+    while (
+        size > 12 &&
+        (label.scrollWidth > label.clientWidth + 2 || label.scrollHeight > label.clientHeight + 2)
+    ) {
+        size -= 1;
+        label.style.fontSize = size + "px";
+    }
+}
+
+function renderLorgusMapEditorRects() {
+    const layer = document.getElementById("lorgus-map-marker-layer");
+    const image = document.querySelector("#lorgus-map-world .lorgus-map-image");
+    if (!layer || !image) return;
+
+    layer.querySelectorAll(".lorgus-map-editor-rect").forEach(el => el.remove());
+
+    const render = () => {
+        syncLorgusMapLabelLayer();
+
+        LORGUS_MAP_EDITOR_RECTS.forEach(rectData => {
+            const label = document.createElement("button");
+            label.type = "button";
+            label.className = "lorgus-map-editor-rect";
+            label.dataset.region = rectData.id;
+            label.textContent = rectData.id;
+
+            label.style.left = rectData.x + "%";
+            label.style.top = rectData.y + "%";
+            label.style.width = rectData.w + "%";
+            label.style.height = rectData.h + "%";
+            label.style.transform = "translate(-50%,-50%)";
+
+            label.onclick = event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (typeof window.selectLorgusMapRegion === "function") {
+                    window.selectLorgusMapRegion(rectData.id);
+                }
+            };
+
+            layer.appendChild(label);
+
+            if (layer.classList.contains("editor-mode")) {
+                bindLorgusMapEditorInteraction(label, rectData, layer);
+            }
+        });
+
+        requestAnimationFrame(() => {
+            syncLorgusMapLabelLayer();
+            layer.querySelectorAll(".lorgus-map-editor-rect").forEach(fitLorgusMapLabel);
+        });
+    };
+
+    if (image.complete) {
+        render();
+    } else {
+        image.addEventListener("load", render, { once: true });
+    }
+
+    if (window.lorgusMapLabelResizeObserver) {
+        window.lorgusMapLabelResizeObserver.disconnect();
+    }
+
+    const world = document.getElementById("lorgus-map-world");
+    if (!world) return;
+
+    window.lorgusMapLabelResizeObserver = new ResizeObserver(() => {
+        syncLorgusMapLabelLayer();
+        layer.querySelectorAll(".lorgus-map-editor-rect").forEach(fitLorgusMapLabel);
+    });
+
+    window.lorgusMapLabelResizeObserver.observe(image);
+    window.lorgusMapLabelResizeObserver.observe(world);
+}
+function addLorgusMapEditorUI() {
+    const controls = document.querySelector(".lorgus-map-controls");
+    if (!controls || document.getElementById("lorgus-map-editor-toggle")) return;
+
+    controls.innerHTML = "";
+
+    const button = document.createElement("button");
+    button.id = "lorgus-map-editor-toggle";
+    button.type = "button";
+    button.className = "lorgus-map-control lorgus-map-editor-toggle";
+    button.textContent = "✎ РЕДАКТОР КАРТЫ";
+    button.onclick = enableLorgusMapEditor;
+    controls.appendChild(button);
+
+    const readout = document.createElement("div");
+    readout.id = "lorgus-map-editor-readout";
+    readout.className = "lorgus-map-editor-readout";
+    readout.innerHTML = "<strong>РЕДАКТОР ВЫКЛЮЧЕН</strong><span>Нажми кнопку, затем перетаскивай названия</span>";
+    controls.appendChild(readout);
+}
+
+function renderLorgusMapMarkers() {
+    const layer = document.getElementById("lorgus-map-marker-layer");
+    if (!layer) return;
+
+    layer.innerHTML = LORGUS_MAP_MARKERS.map(marker => `
+        <button
+            type="button"
+            class="lorgus-map-marker ${marker.type}"
+            style="left:${marker.x}%;top:${marker.y}%"
+            data-region="${escapeHtml(marker.id)}"
+            onclick="selectLorgusMapMarker('${escapeHtml(marker.id)}')"
+            title="${escapeHtml(marker.id)}"
+            aria-label="Открыть ${escapeHtml(marker.id)}"
+        >
+            <span class="lorgus-map-marker-pulse"></span>
+            <span class="lorgus-map-marker-core"></span>
+            <span class="lorgus-map-marker-label">${escapeHtml(marker.id)}</span>
+        </button>
+    `).join("");
+
+    const presence = window.activeRpPresence;
+    if (presence?.type === "location" && presence.location) {
+        const current = layer.querySelector(`[data-region="${CSS.escape(presence.location)}"]`);
+        current?.classList.add("current");
+    }
+}
+
+function selectLorgusMapMarker(region) {
+    selectLorgusMapRegion(region);
+    const marker = document.querySelector(`.lorgus-map-marker[data-region="${CSS.escape(region)}"]`);
+    document.querySelectorAll(".lorgus-map-marker").forEach(item => item.classList.remove("selected"));
+    marker?.classList.add("selected");
+}
+
+function handleLorgusMapSurfaceClick(event) {
+    if (event.target.closest(".lorgus-map-marker")) return;
+    const viewport = document.getElementById("lorgus-map-viewport");
+    if (!viewport) return;
+    const rect = viewport.getBoundingClientRect();
+    const x = Math.round(((event.clientX - rect.left) / rect.width) * 100);
+    const y = Math.round(((event.clientY - rect.top) / rect.height) * 100);
+    const hint = document.getElementById("lorgus-map-surface-hint");
+    if (hint) {
+        hint.textContent = `ТОЧКА КАРТЫ · ${Math.max(0,Math.min(100,x))}% / ${Math.max(0,Math.min(100,y))}%`;
+        hint.classList.add("visible");
+        clearTimeout(window.lorgusMapHintTimer);
+        window.lorgusMapHintTimer = setTimeout(() => hint.classList.remove("visible"), 1800);
+    }
+}
+
+function renderLorgusWorldMap(container, character) {
+    if (!container || !character) return;
+
+    container.className = "lorgus-map-page";
+
+    const name = escapeHtml(character.name || "Без имени");
+    const race = escapeHtml(character.race || "Раса не указана");
+    const homeland = escapeHtml(character.homeland || "Родина не указана");
+
+    const presence = window.activeRpPresence;
+    const currentLocation =
+        presence?.type === "location"
+            ? presence.location
+            : presence?.type === "road"
+                ? "В пути"
+                : "Местоположение ещё не определено";
+
+    container.innerHTML = `
+        ${renderLorgusInterfaceNav("world")}
+        <div class="lorgus-map-shell">
+            <aside class="lorgus-map-sidebar">
+                <div class="lorgus-map-brand">
+                    <span class="lorgus-map-brand-mark">✦</span>
+                    <span>ЛОРГУС</span>
+                </div>
+
+                <div class="lorgus-map-character">
+                    <span class="lorgus-map-kicker">ПУТЬ ПЕРСОНАЖА</span>
+                    <h1>${name}</h1>
+                    <p>${race} · ${homeland}</p>
+                    <div class="lorgus-character-seal" aria-hidden="true"><span>✦</span></div>
+                </div>
+
+                <div class="lorgus-map-location-status">
+                    <span>ТЕКУЩЕЕ МЕСТОПОЛОЖЕНИЕ</span>
+                    <strong>${escapeHtml(currentLocation)}</strong>
+                    <small>Положение персонажа в мире</small>
+                </div>
+                <div class="lorgus-map-world-stats">
+                    <div><strong>07</strong><span>КРАЁВ</span></div>
+                    <div><strong>01</strong><span>ЗАКРЫТ</span></div>
+                    <div><strong>∞</strong><span>ПУТЕЙ</span></div>
+                </div>
+
+                <div class="lorgus-map-divider"></div>
+
+                <button class="gold-button lorgus-map-side-button" type="button" onclick="openActiveCharacterProfile()">Профиль</button>
+                <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="renderWorldCharacterTracker()">Люди мира</button>
+                <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="renderMail()">Письма</button>
+                <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="switchCharacter()">Сменить персонажа</button>
+            </aside>
+
+            <main class="lorgus-map-main">
+                <header class="lorgus-map-header">
+                    <div>
+                        <span class="lorgus-map-kicker">МИР ЛОРГУСА · КАРТА</span>
+                        <h2>Лоргус</h2>
+                    </div>
+                    <div class="lorgus-map-header-actions">
+                        <div class="lorgus-map-header-status">
+                            <span class="lorgus-map-status-dot"></span>
+                            <span>МИР АКТИВЕН</span>
+                        </div>
+                    </div>
+                </header>
+
+                <section class="lorgus-map-stage">
+                    <div class="lorgus-map-frame">
+                        <div class="lorgus-map-image-wrap" id="lorgus-map-viewport" >
+                            <div class="lorgus-map-atmosphere" aria-hidden="true"><i></i><i></i><i></i></div>
+                            <div class="lorgus-map-world" id="lorgus-map-world">
+                                <img class="lorgus-map-image" src="/assets/world/nerovland-map.png" alt="Карта Лоргуса" draggable="false">
+                                <div class="lorgus-map-marker-layer" id="lorgus-map-marker-layer" aria-label="Обозначения карты"></div>
+                            </div>
+                            <div class="lorgus-map-surface-hint" id="lorgus-map-surface-hint">ТОЧКА КАРТЫ</div>
+                            <div class="lorgus-map-overlay">
+                                <div class="lorgus-map-corner-mark top-left">L · 001</div>
+                                <div class="lorgus-map-corner-mark top-right">CARTA MUNDI</div>
+                                <div class="lorgus-map-corner-mark bottom-left">ЛОРГУС / WORLD</div>
+                                <div class="lorgus-map-corner-mark bottom-right">07 REGIONS</div>
+                                <div class="lorgus-map-compass" aria-hidden="true"><span>N</span><i></i></div>
+                                <div class="lorgus-map-scale"><span></span><small>МИР</small></div>
+                            </div>
+                        </div>
+
+                        <div class="lorgus-map-controls" aria-label="Управление картой">
+
+                        </div>
+
+                        <div class="lorgus-map-hint">
+                            <span>КАРТА МИРА</span>
+                            <small>Статичная карта · территории выбираются нажатием</small>
+                        </div>
+                    </div>
+
+                    <aside class="lorgus-map-inspector">
+                        <span class="lorgus-map-kicker">ВЫБРАННЫЙ КРАЙ</span>
+                        <div class="lorgus-map-selection-symbol"><span>◇</span><i></i></div>
+                        <h3 id="lorgus-map-selection-title">Атэрон</h3>
+                        <p id="lorgus-map-selection-text">Знания, древности, исследования и руины.</p>
+                        <div class="lorgus-map-inspector-meta">
+                            <span>СТАТУС</span><strong>ОТКРЫТ ДЛЯ ИССЛЕДОВАНИЯ</strong>
+                        </div>
+
+                        <button id="lorgus-map-enter-button" class="gold-button lorgus-map-enter-button" type="button" onclick="renderKingdomLocations('Атэрон')">Открыть край</button>
+
+                        <div class="lorgus-map-regions">
+                            <span class="lorgus-map-regions-title">РЕГИОНЫ</span>
+                            <button class="lorgus-map-region-button active" data-region="Атэрон" type="button" onclick="selectLorgusMapRegion('Атэрон')"><i></i><span>Атэрон</span></button>
+                            <button class="lorgus-map-region-button" data-region="Каэлор" type="button" onclick="selectLorgusMapRegion('Каэлор')"><i></i><span>Каэлор</span></button>
+                            <button class="lorgus-map-region-button" data-region="Ксандр" type="button" onclick="selectLorgusMapRegion('Ксандр')"><i></i><span>Ксандр</span></button>
+                            <button class="lorgus-map-region-button" data-region="Лирэн" type="button" onclick="selectLorgusMapRegion('Лирэн')"><i></i><span>Лирэн</span></button>
+                            <button class="lorgus-map-region-button" data-region="Морвейн" type="button" onclick="selectLorgusMapRegion('Морвейн')"><i></i><span>Морвейн</span></button>
+                            <button class="lorgus-map-region-button" data-region="Святые Земли" type="button" onclick="selectLorgusMapRegion('Святые Земли')"><i></i><span>Святые Земли</span></button>
+                            <button class="lorgus-map-region-button" data-region="Спорные Земли" type="button" onclick="selectLorgusMapRegion('Спорные Земли')"><i></i><span>Спорные Земли</span></button>
+                        </div>
+
+                        <div class="lorgus-map-closed">
+                            <span>ЗАКРЫТАЯ ТЕРРИТОРИЯ</span>
+                            <strong>Геена</strong>
+                            <p>Континент закрыт для игроков. Посещение и происхождение персонажа здесь недоступны.</p>
+                        </div>
+                    </aside>
+                </section>
+            </main>
+        </div>
+    `;
+
+    selectLorgusMapRegion("Атэрон");
+    initializeLorgusMapViewport();
+    renderLorgusMapEditorRects(false);
+    addLorgusMapEditorUI();
+}
+
+let lorgusMapScale = 1;
+let lorgusMapOffsetX = 0;
+let lorgusMapOffsetY = 0;
+let lorgusMapViewportCleanup = null;
+
+function initializeLorgusMapViewport() {
+    if (lorgusMapViewportCleanup) {
+        lorgusMapViewportCleanup();
+        lorgusMapViewportCleanup = null;
+    }
+
+    lorgusMapScale = 1;
+    lorgusMapOffsetX = 0;
+    lorgusMapOffsetY = 0;
+
+    const world = document.getElementById("lorgus-map-world");
+    if (world) {
+        world.style.transform = "translate3d(0,0,0) scale(1)";
+    }
+
+    syncLorgusMapLabelLayer();
+    requestAnimationFrame(syncLorgusMapLabelLayer);
+}
+
+function lorgusMapZoom(factor) {
+    lorgusMapScale = Math.min(3.2, Math.max(.8, lorgusMapScale * factor));
+    const world = document.querySelector(".lorgus-map-world");
+    if (world) {
+        world.style.transform = `translate3d(${lorgusMapOffsetX}px,${lorgusMapOffsetY}px,0) scale(${lorgusMapScale})`;
+    }
+}
+
+function lorgusMapReset() {
+    lorgusMapScale = 1;
+    lorgusMapOffsetX = 0;
+    lorgusMapOffsetY = 0;
+    const world = document.querySelector(".lorgus-map-world");
+    if (world) world.style.transform = "translate3d(0,0,0) scale(1)";
+}
+
+/* Последняя декларация заменяет старый экран выбора королевств. */
+function renderCharacter(container, character) {
+    renderLorgusWorldMap(container, character);
+}
+
+function renderLorgusInterfaceNav(active = "world") {
+    const items = [
+        ["overview", "⌂", "Обзор", "renderLorgusOverview()"],
+        ["world", "✦", "Мир", "renderLorgusWorldMapCurrent()"],
+        ["character", "♙", "Персонаж", "renderLorgusCharacterHub()"],
+        ["rp", "◈", "Ролевая", "renderLorgusRpHub()"],
+        ["people", "♧", "Люди", "renderWorldCharacterTracker()"],
+        ["mail", "✉", "Письма", "renderMail()"]
+    ];
+    return `
+        <nav class="lorgus-global-nav" aria-label="Разделы Лоргуса">
+            <div class="lorgus-global-brand"><span>✦</span><strong>ЛОРГУС</strong><small>ЖИВОЙ МИР</small></div>
+            <div class="lorgus-global-links">
+                ${items.map(([id, icon, label, action]) => `
+                    <button type="button" class="${id === active ? "active" : ""}" onclick="${action}">
+                        <span>${icon}</span><b>${label}</b>
+                    </button>`).join("")}
+            </div>
+            <div class="lorgus-global-account">
+                <div class="lorgus-global-presence"><i></i><span>МИР АКТИВЕН</span></div>
+                <span class="lorgus-global-user">${escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>
+                <button type="button" class="lorgus-global-logout" onclick="logout()">ВЫЙТИ</button>
+            </div>
+        </nav>
+    `;
+}
+
+function renderLorgusOverview() {
+    const container = document.getElementById("cabinet-content");
+    const character = window.activeCharacter;
+    if (!container || !character) return;
+
+    const name = escapeHtml(character.name || "Без имени");
+    const race = escapeHtml(character.race || "Раса не указана");
+    const homeland = escapeHtml(character.homeland || "Родина не указана");
+    const presence = window.activeRpPresence;
+    const place = presence?.type === "location" ? presence.location : presence?.type === "road" ? "В пути" : "Не определено";
+
+    container.className = "lorgus-command-page";
+    container.innerHTML = `
+        ${renderLorgusInterfaceNav("overview")}
+        <main class="lorgus-command-main">
+            <section class="lorgus-command-hero">
+                <div>
+                    <span class="lorgus-command-kicker">ЛОРГУС · ЛИЧНАЯ ХРОНИКА</span>
+                    <h1>${name}</h1>
+                    <p>${race} · Родина: ${homeland}</p>
+                </div>
+                <div class="lorgus-command-status"><i></i><span>МИР ПРОДОЛЖАЕТСЯ</span><small>Даже когда тебя нет</small></div>
+            </section>
+            <section class="lorgus-command-grid">
+                <article class="lorgus-command-card command-location">
+                    <span>ФИЗИЧЕСКОЕ ПОЛОЖЕНИЕ</span><strong>${escapeHtml(place)}</strong>
+                    <small>Положение персонажа фиксируется только ролевым действием.</small>
+                    <button type="button" onclick="renderLorgusWorldMapCurrent()">Открыть карту →</button>
+                </article>
+                <article class="lorgus-command-card"><span>ПЕРСОНАЖ</span><strong>История и состояние</strong><small>Характеристики, навыки, снаряжение, деньги и биография.</small><button type="button" onclick="renderLorgusCharacterHub()">Открыть досье →</button></article>
+                <article class="lorgus-command-card"><span>РОЛЕВАЯ</span><strong>Текущая сцена</strong><small>Место, участники, сообщения и последствия действий.</small><button type="button" onclick="renderLorgusRpHub()">Войти в RP →</button></article>
+                <article class="lorgus-command-card"><span>СВЯЗИ</span><strong>Люди мира</strong><small>Знакомства, отношения и персонажи, находящиеся рядом с историей.</small><button type="button" onclick="renderWorldCharacterTracker()">Люди мира →</button></article>
+                <article class="lorgus-command-card"><span>ХРОНИКА</span><strong>Мир не ждёт</strong><small>События, слухи, войны, путешествия и изменения, происходящие независимо от тебя.</small><button type="button" onclick="renderLorgusWorldMapCurrent()">Смотреть мир →</button></article>
+                <article class="lorgus-command-card command-mail"><span>ПОСЛАНИЯ</span><strong>Письма</strong><small>Связь с другими персонажами независимо от расстояния.</small><button type="button" onclick="renderMail()">Открыть почту →</button></article>
+            </section>
+            <section class="lorgus-command-bottom">
+                <div><span class="lorgus-command-kicker">ПРИНЦИП ЛОРГУСА</span><h2>Ты не главный герой этого мира.</h2><p>Королевства принимают решения, торговцы ведут дела, люди рождаются и умирают, армии двигаются, а слухи распространяются — независимо от того, смотришь ли ты на это.</p></div>
+                <div class="lorgus-command-metrics"><div><b>07</b><span>КРАЁВ</span></div><div><b>∞</b><span>ИСТОРИЙ</span></div><div><b>01</b><span>ТВОЯ ЖИЗНЬ</span></div></div>
+            </section>
+        </main>
+    `;
+}
+
+function renderLorgusWorldMapCurrent() {
+    const container = document.getElementById("cabinet-content");
+    if (container && window.activeCharacter) renderLorgusWorldMap(container, window.activeCharacter);
+}
+
+function renderLorgusCharacterHub() {
+    const container = document.getElementById("cabinet-content");
+    const c = window.activeCharacter;
+    if (!container || !c) return;
+    container.className = "lorgus-command-page";
+    container.innerHTML = `
+        ${renderLorgusInterfaceNav("character")}
+        <main class="lorgus-command-main">
+            <section class="lorgus-profile-hero">
+                <div class="lorgus-profile-sigil">✦</div>
+                <div><span class="lorgus-command-kicker">ЛИЧНОЕ ДОСЬЕ</span><h1>${escapeHtml(c.name || "Без имени")}</h1><p>${escapeHtml(c.race || "Раса")} · ${escapeHtml(c.homeland || "Родина не указана")}</p></div>
+            </section>
+            <section class="lorgus-dossier-grid">
+                <article><span>ПРОИСХОЖДЕНИЕ</span><strong>${escapeHtml(c.homeland || "Не указано")}</strong><p>Родина определяет происхождение, но не физическое положение персонажа.</p></article>
+                <article><span>СОСТОЯНИЕ</span><strong>${escapeHtml(String(c.status || "ACTIVE"))}</strong><p>Жизнь персонажа продолжается в мире Лоргуса.</p></article>
+                <article><span>НАВЫКИ</span><strong>Досье навыков</strong><p>Характеристики, способности и развитие персонажа.</p></article>
+                <article><span>СНАРЯЖЕНИЕ</span><strong>Инвентарь</strong><p>Оружие, броня, предметы и вещи, которыми владеет персонаж.</p></article>
+                <article><span>ОТНОШЕНИЯ</span><strong>Связи</strong><p>Доверие, дружба, вражда, семья, долги и обещания.</p></article>
+                <article><span>ИСТОРИЯ</span><strong>Личная хроника</strong><p>События жизни и последствия решений персонажа.</p></article>
+            </section>
+        </main>
+    `;
+}
+
+function renderLorgusRpHub() {
+    const container = document.getElementById("cabinet-content");
+    if (!container || !window.activeCharacter) return;
+    const p = window.activeRpPresence;
+    const place = p?.type === "location" ? p.location : p?.type === "road" ? "В пути" : "Свободное состояние";
+    container.className = "lorgus-command-page";
+    container.innerHTML = `
+        ${renderLorgusInterfaceNav("rp")}
+        <main class="lorgus-command-main">
+            <section class="lorgus-command-hero"><div><span class="lorgus-command-kicker">РОЛЕВАЯ ЖИЗНЬ</span><h1>Текущая сцена</h1><p>Место действия определяется поступками персонажа, а не открытием страницы.</p></div><div class="lorgus-command-status"><i></i><span>СЦЕНА</span><small>${escapeHtml(place)}</small></div></section>
+            <section class="lorgus-rp-grid">
+                <article><span>МЕСТО</span><strong>${escapeHtml(place)}</strong><p>Первое сообщение в локации фиксирует физическое положение.</p><button onclick="renderLorgusWorldMapCurrent()">Открыть мир →</button></article>
+                <article><span>УЧАСТНИКИ</span><strong>Люди рядом</strong><p>Персонажи, находящиеся в доступной сцене.</p><button onclick="renderWorldCharacterTracker()">Отследить →</button></article>
+                <article><span>ПУТЬ</span><strong>Дороги и переходы</strong><p>Путешествие требует отдельной дорожной сцены и последовательности действий.</p><button onclick="renderLorgusWorldMapCurrent()">Выбрать путь →</button></article>
+            </section>
+        </main>
+    `;
+}
+
+window.renderLorgusOverview = renderLorgusOverview;
+window.renderLorgusWorldMapCurrent = renderLorgusWorldMapCurrent;
+window.renderLorgusCharacterHub = renderLorgusCharacterHub;
+window.renderLorgusRpHub = renderLorgusRpHub;
+
+window.selectLorgusMapRegion = selectLorgusMapRegion;
+window.selectLorgusMapMarker = selectLorgusMapMarker;
+window.handleLorgusMapSurfaceClick = handleLorgusMapSurfaceClick;
+window.lorgusMapZoom = lorgusMapZoom;
+window.lorgusMapReset = lorgusMapReset;
