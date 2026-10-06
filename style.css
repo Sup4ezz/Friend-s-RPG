@@ -8535,3 +8535,41 @@ body{
     margin-top:24px;
   }
 }
+
+
+/* =========================================================
+   LORGUS — AUTH TITLE CLEANUP
+   No badge/rectangle behind the "ВХОД В ЛОРГУС" caption.
+   ========================================================= */
+
+.auth-panel{
+  overflow:visible;
+  padding-top:62px;
+}
+
+.auth-panel::before{
+  top:25px;
+  left:38px;
+  padding:0;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  color:var(--ui-gold);
+  font:600 10px var(--body-font);
+  line-height:1.2;
+  letter-spacing:.25em;
+  white-space:nowrap;
+}
+
+@media(max-width:560px){
+  .auth-panel{
+    padding-top:58px;
+  }
+
+  .auth-panel::before{
+    top:22px;
+    left:20px;
+    max-width:calc(100% - 40px);
+    white-space:normal;
+  }
+}
