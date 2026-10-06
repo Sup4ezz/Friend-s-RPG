@@ -1524,7 +1524,18 @@ function renderCharacterApplicationForm(container) {
                     <div class="character-creation-line"><i></i><b>ТВОЙ ПУТЬ НАЧИНАЕТСЯ ЗДЕСЬ</b><i></i></div>
                 </section>
 
-                <form id="character-application-form" class="character-creation-form" onsubmit="submitCharacterApplication(event)">
+                <style>
+.character-application .character-creation-form{display:grid!important;grid-template-columns:1fr 1fr!important;gap:22px!important;position:relative!important;z-index:100!important}
+.character-application .character-creation-panel{display:block!important;visibility:visible!important;opacity:1!important;min-height:0!important;padding:30px!important;background:rgba(8,8,7,.96)!important;border:1px solid rgba(218,186,111,.5)!important}
+.character-application .character-creation-panel .creation-fields{display:grid!important;grid-template-columns:1fr 1fr!important;gap:16px!important}
+.character-application .character-creation-panel label{display:flex!important;flex-direction:column!important;gap:8px!important;visibility:visible!important}
+.character-application .character-creation-panel input,.character-application .character-creation-panel textarea{display:block!important;width:100%!important;box-sizing:border-box!important;min-height:49px!important;padding:14px!important;background:#050505!important;color:#f5ead2!important;border:1px solid rgba(218,186,111,.45)!important;visibility:visible!important;opacity:1!important}
+.character-application .character-creation-panel textarea{min-height:150px!important}
+.character-application .character-creation-panel .creation-origins{display:grid!important;grid-template-columns:repeat(4,1fr)!important;gap:8px!important}
+.character-application .character-creation-submit{display:flex!important;grid-column:1/-1!important;visibility:visible!important}
+@media(max-width:900px){.character-application .character-creation-form{grid-template-columns:1fr!important}.character-application .character-creation-panel .creation-fields{grid-template-columns:1fr!important}.character-application .character-creation-panel .creation-origins{grid-template-columns:1fr 1fr!important}}
+</style>
+<form id="character-application-form" class="character-creation-form" onsubmit="submitCharacterApplication(event)">
                     <section class="character-creation-panel identity-panel">
                         <div class="creation-panel-heading"><span>01</span><div><small>ЛИЧНОСТЬ</small><h2>Кто ты?</h2></div></div>
                         <div class="creation-fields">
