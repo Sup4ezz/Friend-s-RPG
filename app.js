@@ -1322,7 +1322,15 @@ async function renderCharacterSelection(container, applications, pendingApplicat
         createButton.type = "button";
         createButton.className = "character-create-button character-create-card";
         createButton.innerHTML = "<span class=\"create-plus\">+</span><span><b>НОВАЯ ИСТОРИЯ</b><small>Создать ещё одного персонажа</small></span>";
-        createButton.addEventListener("click", () => { if (window.lorgusCharacterAudioCleanup) window.lorgusCharacterAudioCleanup(); renderCharacterApplicationForm(container); });
+        createButton.addEventListener("click", () => {
+            try {
+                if (window.lorgusCharacterAudioCleanup) window.lorgusCharacterAudioCleanup();
+            } catch (error) {
+                console.warn("Не удалось корректно остановить музыку выбора:", error);
+            } finally {
+                renderCharacterApplicationForm(container);
+            }
+        });
         grid.appendChild(createButton);
     }
 }
