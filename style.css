@@ -14517,3 +14517,446 @@ body:has(#root > #cabinet-content.character-application) #root > #cabinet-conten
         font-size:25px;
     }
 }
+
+
+/* =========================================================
+   LORGUS — CHARACTER CREATION / FINAL VISUAL PASS
+   ========================================================= */
+
+#root > #cabinet-content.character-application {
+    min-height:100vh !important;
+    width:100% !important;
+    margin:0 !important;
+    padding:0 !important;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(156,116,48,.10), transparent 34%),
+        #080706 !important;
+    color:#d8cfbd !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-scene {
+    min-height:100vh !important;
+    background:transparent !important;
+}
+
+/* Верхняя полоса */
+#root > #cabinet-content.character-application .character-creation-topbar {
+    position:sticky !important;
+    top:0 !important;
+    z-index:20 !important;
+    width:100% !important;
+    min-height:72px !important;
+    padding:0 clamp(20px,4vw,56px) !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:space-between !important;
+    background:rgba(9,8,6,.96) !important;
+    border-bottom:1px solid rgba(214,179,106,.20) !important;
+    box-shadow:0 12px 35px rgba(0,0,0,.45) !important;
+    backdrop-filter:blur(12px) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar > div {
+    display:flex !important;
+    align-items:baseline !important;
+    gap:18px !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar strong {
+    color:#d9b76c !important;
+    font-family:var(--title-font) !important;
+    font-size:25px !important;
+    font-weight:600 !important;
+    letter-spacing:.08em !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-topbar span {
+    color:#706655 !important;
+    font-family:var(--title-font) !important;
+    font-size:11px !important;
+    letter-spacing:.20em !important;
+}
+
+#root > #cabinet-content.character-application .lorgus-screen-logout {
+    padding:9px 15px !important;
+    border:1px solid rgba(214,179,106,.22) !important;
+    border-radius:2px !important;
+    background:transparent !important;
+    color:#a99a7d !important;
+    font-family:var(--title-font) !important;
+    font-size:13px !important;
+    letter-spacing:.08em !important;
+    transition:.2s ease !important;
+}
+
+#root > #cabinet-content.character-application .lorgus-screen-logout:hover {
+    color:#ead29a !important;
+    border-color:rgba(214,179,106,.55) !important;
+    background:rgba(214,179,106,.05) !important;
+}
+
+/* Заголовочная область */
+#root > #cabinet-content.character-application .character-creation-main {
+    width:min(1040px,calc(100% - 40px)) !important;
+    margin:0 auto !important;
+    padding:76px 0 90px !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro {
+    width:100% !important;
+    max-width:760px !important;
+    margin:0 auto 48px !important;
+    text-align:center !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro > span {
+    display:inline-block !important;
+    margin-bottom:14px !important;
+    color:#a98648 !important;
+    font-family:var(--title-font) !important;
+    font-size:10px !important;
+    letter-spacing:.38em !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro h1 {
+    margin:0 !important;
+    color:#ead9b5 !important;
+    font-family:var(--title-font) !important;
+    font-size:clamp(52px,7vw,82px) !important;
+    font-weight:500 !important;
+    line-height:.91 !important;
+    letter-spacing:.01em !important;
+    text-shadow:0 10px 45px rgba(0,0,0,.65) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-intro p {
+    max-width:610px !important;
+    margin:24px auto 0 !important;
+    color:#887d6b !important;
+    font-size:14px !important;
+    line-height:1.75 !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-line {
+    width:min(460px,90%) !important;
+    margin:26px auto 0 !important;
+    display:flex !important;
+    align-items:center !important;
+    gap:13px !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-line i {
+    flex:1 !important;
+    height:1px !important;
+    background:linear-gradient(90deg,transparent,rgba(214,179,106,.28)) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-line i:last-of-type {
+    background:linear-gradient(90deg,rgba(214,179,106,.28),transparent) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-line b {
+    color:#796d59 !important;
+    font-size:8px !important;
+    font-weight:600 !important;
+    letter-spacing:.22em !important;
+    white-space:nowrap !important;
+}
+
+/* Вся форма */
+#root > #cabinet-content.character-application #character-application-form {
+    width:100% !important;
+    max-width:900px !important;
+    margin:0 auto !important;
+    padding:0 !important;
+    display:flex !important;
+    flex-direction:column !important;
+    gap:16px !important;
+    background:transparent !important;
+    border:0 !important;
+    box-shadow:none !important;
+}
+
+/* Карточки разделов */
+#root > #cabinet-content.character-application .character-creation-panel {
+    position:relative !important;
+    width:100% !important;
+    margin:0 !important;
+    padding:31px 34px 34px !important;
+    overflow:hidden !important;
+    background:
+        linear-gradient(135deg,rgba(28,23,16,.98),rgba(10,9,7,.98)) !important;
+    border:1px solid rgba(214,179,106,.18) !important;
+    border-radius:2px !important;
+    box-shadow:0 20px 55px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.018) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel::before {
+    content:"" !important;
+    position:absolute !important;
+    top:0 !important;
+    left:0 !important;
+    width:100% !important;
+    height:1px !important;
+    background:linear-gradient(90deg,transparent,rgba(214,179,106,.42),transparent) !important;
+    border:0 !important;
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading {
+    display:flex !important;
+    align-items:flex-start !important;
+    gap:16px !important;
+    margin:0 0 25px !important;
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading > span {
+    flex:0 0 auto !important;
+    min-width:31px !important;
+    color:#aa8443 !important;
+    font-family:var(--title-font) !important;
+    font-size:13px !important;
+    letter-spacing:.10em !important;
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading small {
+    display:block !important;
+    margin:0 0 4px !important;
+    color:#806c4c !important;
+    font-size:9px !important;
+    letter-spacing:.26em !important;
+}
+
+#root > #cabinet-content.character-application .creation-panel-heading h2 {
+    margin:0 !important;
+    color:#e2d2b3 !important;
+    font-family:var(--title-font) !important;
+    font-size:30px !important;
+    font-weight:500 !important;
+    line-height:1 !important;
+}
+
+/* Поля */
+#root > #cabinet-content.character-application .creation-fields {
+    display:grid !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:18px 20px !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel label {
+    display:flex !important;
+    flex-direction:column !important;
+    gap:8px !important;
+    min-width:0 !important;
+    margin:0 !important;
+    color:#b7aa94 !important;
+    font-family:var(--body-font) !important;
+    font-size:13px !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel label > span {
+    color:#c7b99f !important;
+    font-family:var(--title-font) !important;
+    font-size:16px !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel label em {
+    color:#665c4e !important;
+    font-size:10px !important;
+    font-style:normal !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel input,
+#root > #cabinet-content.character-application .character-creation-panel textarea {
+    width:100% !important;
+    min-width:0 !important;
+    min-height:48px !important;
+    padding:12px 14px !important;
+    border:1px solid rgba(214,179,106,.16) !important;
+    border-radius:2px !important;
+    outline:none !important;
+    background:#080705 !important;
+    color:#ddd2bd !important;
+    font-family:var(--body-font) !important;
+    font-size:14px !important;
+    box-shadow:inset 0 1px 7px rgba(0,0,0,.32) !important;
+    transition:.2s ease !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel textarea {
+    min-height:145px !important;
+    line-height:1.65 !important;
+    resize:vertical !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel input::placeholder,
+#root > #cabinet-content.character-application .character-creation-panel textarea::placeholder {
+    color:#514b41 !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel input:focus,
+#root > #cabinet-content.character-application .character-creation-panel textarea:focus {
+    border-color:rgba(214,179,106,.58) !important;
+    box-shadow:0 0 0 1px rgba(214,179,106,.10),inset 0 1px 7px rgba(0,0,0,.32) !important;
+}
+
+/* Родина */
+#root > #cabinet-content.character-application .creation-wide-field {
+    width:100% !important;
+    margin:0 0 14px !important;
+}
+
+#root > #cabinet-content.character-application .creation-origins {
+    display:grid !important;
+    grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+    gap:9px !important;
+    margin:0 !important;
+}
+
+#root > #cabinet-content.character-application .creation-origins button {
+    min-width:0 !important;
+    min-height:72px !important;
+    padding:12px 13px !important;
+    display:flex !important;
+    flex-direction:column !important;
+    justify-content:center !important;
+    align-items:flex-start !important;
+    gap:4px !important;
+    border:1px solid rgba(214,179,106,.13) !important;
+    border-radius:2px !important;
+    background:#0c0a08 !important;
+    color:#c0b39b !important;
+    text-align:left !important;
+    transition:.18s ease !important;
+}
+
+#root > #cabinet-content.character-application .creation-origins button:hover,
+#root > #cabinet-content.character-application .creation-origins button:focus {
+    transform:translateY(-2px) !important;
+    border-color:rgba(214,179,106,.48) !important;
+    background:#151008 !important;
+    outline:none !important;
+}
+
+#root > #cabinet-content.character-application .creation-origins b {
+    color:#d9c28f !important;
+    font-family:var(--title-font) !important;
+    font-size:12px !important;
+    letter-spacing:.08em !important;
+}
+
+#root > #cabinet-content.character-application .creation-origins small {
+    color:#6f6658 !important;
+    font-size:10px !important;
+}
+
+/* Загрузка */
+#root > #cabinet-content.character-application .creation-upload {
+    display:flex !important;
+    flex-direction:column !important;
+    gap:9px !important;
+    padding:20px !important;
+    border:1px dashed rgba(214,179,106,.22) !important;
+    background:rgba(0,0,0,.16) !important;
+}
+
+#root > #cabinet-content.character-application .creation-upload input[type="file"] {
+    min-height:48px !important;
+    padding:8px !important;
+    cursor:pointer !important;
+}
+
+#root > #cabinet-content.character-application .creation-upload small {
+    color:#706758 !important;
+    font-size:10px !important;
+}
+
+/* Сообщение + кнопка */
+#root > #cabinet-content.character-application #character-message {
+    width:100% !important;
+    min-height:0 !important;
+    margin:4px 0 0 !important;
+    color:#a99b84 !important;
+    font-size:12px !important;
+    text-align:center !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-submit {
+    width:100% !important;
+    min-height:62px !important;
+    margin:0 !important;
+    padding:16px 24px !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    gap:22px !important;
+    border:1px solid rgba(214,179,106,.50) !important;
+    border-radius:2px !important;
+    background:linear-gradient(135deg,#3a2a13,#21170b) !important;
+    color:#ead39c !important;
+    font-family:var(--title-font) !important;
+    font-size:19px !important;
+    font-weight:600 !important;
+    letter-spacing:.12em !important;
+    box-shadow:0 18px 45px rgba(0,0,0,.38) !important;
+    transition:.2s ease !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-submit:hover {
+    transform:translateY(-2px) !important;
+    border-color:#e6cc91 !important;
+    background:linear-gradient(135deg,#4a3517,#291d0d) !important;
+    box-shadow:0 22px 55px rgba(0,0,0,.46),0 0 28px rgba(214,179,106,.07) !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-submit b {
+    color:#f0d9a3 !important;
+    font-size:23px !important;
+}
+
+/* Адаптив */
+@media(max-width:900px) {
+    #root > #cabinet-content.character-application .creation-origins {
+        grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    }
+}
+
+@media(max-width:650px) {
+    #root > #cabinet-content.character-application .character-creation-topbar {
+        min-height:62px !important;
+        padding:0 16px !important;
+    }
+
+    #root > #cabinet-content.character-application .character-creation-topbar > div {
+        gap:0 !important;
+    }
+
+    #root > #cabinet-content.character-application .character-creation-topbar span {
+        display:none !important;
+    }
+
+    #root > #cabinet-content.character-application .character-creation-topbar strong {
+        font-size:21px !important;
+    }
+
+    #root > #cabinet-content.character-application .character-creation-main {
+        width:calc(100% - 24px) !important;
+        padding:50px 0 60px !important;
+    }
+
+    #root > #cabinet-content.character-application .character-creation-intro {
+        margin-bottom:35px !important;
+    }
+
+    #root > #cabinet-content.character-application .character-creation-intro h1 {
+        font-size:45px !important;
+    }
+
+    #root > #cabinet-content.character-application .character-creation-panel {
+        padding:25px 20px 27px !important;
+    }
+
+    #root > #cabinet-content.character-application .creation-fields,
+    #root > #cabinet-content.character-application .creation-origins {
+        grid-template-columns:1fr !important;
+    }
+}
