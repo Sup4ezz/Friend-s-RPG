@@ -13863,3 +13863,72 @@ body{
     font-size:44px!important;
   }
 }
+
+
+/* FINAL OVERRIDE — keep the entire creation UI inside its centered block */
+#root > #cabinet-content.character-application .character-creation-scene{
+  display:flex!important;
+  width:100vw!important;
+  min-width:0!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:112px 24px 50px!important;
+  box-sizing:border-box!important;
+}
+
+#root > #cabinet-content.character-application .character-creation-main{
+  position:relative!important;
+  inset:auto!important;
+  float:none!important;
+  clear:both!important;
+  flex:0 1 1040px!important;
+  width:min(1040px,calc(100vw - 48px))!important;
+  min-width:0!important;
+  max-width:1040px!important;
+  margin:0 auto!important;
+  box-sizing:border-box!important;
+  overflow:visible!important;
+}
+
+#root > #cabinet-content.character-application #character-application-form{
+  position:static!important;
+  inset:auto!important;
+  float:none!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  transform:none!important;
+}
+
+#root > #cabinet-content.character-application .character-creation-panel{
+  position:relative!important;
+  inset:auto!important;
+  float:none!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+}
+
+#root > #cabinet-content.character-application .character-creation-submit{
+  position:static!important;
+  inset:auto!important;
+  float:none!important;
+  display:flex!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  margin:28px 0 0!important;
+  box-sizing:border-box!important;
+  transform:none!important;
+}
+
+#root > #cabinet-content.character-application .character-message{
+  position:static!important;
+  width:100%!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
