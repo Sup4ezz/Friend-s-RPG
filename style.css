@@ -10055,3 +10055,150 @@ body{
  .lorgus-command-hero,.lorgus-profile-hero{min-height:230px;padding:30px 25px}.lorgus-command-hero h1,.lorgus-profile-hero h1{font-size:44px}
  .lorgus-command-bottom{padding:28px}.lorgus-command-metrics{padding:0;gap:25px}
 }
+
+
+/* LORGUS — DIEGETIC RPG ART DIRECTION v2 */
+.lorgus-command-page{
+  background:
+    radial-gradient(ellipse at 74% 17%,rgba(231,190,99,.13),transparent 20%),
+    radial-gradient(ellipse at 22% 70%,rgba(73,80,68,.10),transparent 25%),
+    linear-gradient(120deg,#030303,#0a0907 48%,#030303);
+}
+.lorgus-command-page::before{
+  opacity:.5;
+  background:
+    linear-gradient(90deg,transparent 0 49.7%,rgba(218,183,103,.035) 50%,transparent 50.3%),
+    repeating-linear-gradient(90deg,transparent 0 119px,rgba(255,255,255,.009) 120px),
+    repeating-linear-gradient(0deg,transparent 0 79px,rgba(255,255,255,.007) 80px),
+    radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,.82) 100%);
+}
+.lorgus-global-nav{
+  min-height:96px;padding:0 42px;
+  background:linear-gradient(180deg,rgba(2,2,2,.88),rgba(5,5,4,.62));
+  backdrop-filter:blur(22px);
+  border-bottom:1px solid rgba(220,186,105,.2);
+}
+.lorgus-global-brand strong{font-size:23px}
+.lorgus-global-brand span{font-size:31px}
+.lorgus-global-links{height:96px}
+.lorgus-global-links button{height:96px;min-width:116px}
+.lorgus-global-links button.active span{animation:lorgusRune 3s ease-in-out infinite}
+.lorgus-command-main{max-width:1820px;padding:30px 42px 110px}
+
+/* cinematic hero: image-like depth without changing the existing assets */
+.lorgus-command-hero,.lorgus-profile-hero{
+  min-height:420px;padding:65px 65px;
+  border-top:0;border-bottom:1px solid rgba(222,188,109,.18);
+  background:
+    radial-gradient(ellipse at 79% 52%,rgba(226,181,78,.20),transparent 17%),
+    radial-gradient(ellipse at 72% 48%,rgba(120,93,43,.13),transparent 30%),
+    linear-gradient(90deg,rgba(2,2,2,.99) 0%,rgba(5,5,4,.91) 39%,rgba(7,6,5,.43) 68%,rgba(3,3,3,.16) 100%);
+  box-shadow:0 50px 120px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.025);
+}
+.lorgus-command-hero::before{
+  content:"";position:absolute;inset:0;
+  background:
+    linear-gradient(105deg,transparent 0 54%,rgba(218,180,91,.06) 54.1%,transparent 54.4%),
+    linear-gradient(75deg,transparent 0 73%,rgba(218,180,91,.035) 73.1%,transparent 73.3%),
+    radial-gradient(ellipse at 80% 50%,transparent 0 13%,rgba(226,185,99,.09) 13.1%,transparent 13.3%);
+  mix-blend-mode:screen;pointer-events:none;
+}
+.lorgus-command-hero::after{
+  content:"L O R G U S";right:-90px;bottom:-74px;top:auto;width:auto;height:auto;
+  font-size:205px;line-height:1;font-weight:400;letter-spacing:.14em;
+  color:transparent;-webkit-text-stroke:1px rgba(229,193,111,.055);
+  background:none;box-shadow:none;white-space:nowrap;
+}
+.lorgus-command-hero h1,.lorgus-profile-hero h1{
+  font-size:88px;letter-spacing:-.045em;line-height:.86;
+  max-width:760px;text-shadow:0 18px 70px #000,0 2px 0 rgba(255,255,255,.04)
+}
+.lorgus-command-kicker{font-size:9px;letter-spacing:.42em;color:rgba(231,197,122,.72)}
+.lorgus-command-hero p{max-width:620px;font-size:15px;line-height:1.8;color:rgba(235,226,205,.58)}
+.lorgus-command-status{
+  position:absolute;right:55px;bottom:55px;min-width:230px;
+  background:linear-gradient(135deg,rgba(20,17,12,.72),rgba(4,4,3,.38));
+  border:1px solid rgba(220,185,101,.17);border-left:2px solid rgba(220,185,101,.48);
+  padding:20px 24px;backdrop-filter:blur(12px)
+}
+.lorgus-command-status::before{content:"МИРОВОЙ КОНТУР";display:block;margin-bottom:12px;font-size:7px;letter-spacing:.35em;color:rgba(231,197,122,.45)}
+
+/* navigation markers become engraved */
+.lorgus-global-links button::before{inset:18px 5px}
+.lorgus-global-links button.active::after{height:1px;left:15%;right:15%;box-shadow:0 0 18px 2px rgba(218,182,99,.5)}
+
+/* replace dashboard grid with a monumental composition */
+.lorgus-command-grid{
+  position:relative;grid-template-columns:1.55fr .8fr .8fr;grid-template-rows:245px 245px;
+  gap:1px;margin-top:34px;background:rgba(219,184,105,.14);border:1px solid rgba(219,184,105,.14);
+  box-shadow:0 30px 80px rgba(0,0,0,.42)
+}
+.lorgus-command-card{
+  padding:34px 36px;
+  background:
+    linear-gradient(135deg,rgba(20,18,14,.97),rgba(4,4,3,.98)),
+    radial-gradient(circle at 100% 0,rgba(220,180,88,.1),transparent 40%);
+}
+.lorgus-command-card:nth-child(1){
+  position:relative;grid-row:span 2;
+  background:
+    radial-gradient(ellipse at 77% 18%,rgba(216,175,83,.19),transparent 24%),
+    linear-gradient(145deg,rgba(27,23,16,.98),rgba(4,4,3,.99));
+}
+.lorgus-command-card:nth-child(1)::after{
+  content:"✦";position:absolute;right:40px;top:28px;font-size:110px;line-height:1;
+  color:rgba(225,188,103,.045);text-shadow:0 0 70px rgba(225,188,103,.15)
+}
+.lorgus-command-card:nth-child(2),.lorgus-command-card:nth-child(3){background:linear-gradient(150deg,rgba(12,12,10,.96),rgba(4,4,3,.99))}
+.lorgus-command-card:nth-child(4){grid-column:2/span 2;background:linear-gradient(100deg,rgba(25,20,13,.94),rgba(7,7,5,.98))}
+.lorgus-command-card:hover{box-shadow:inset 0 0 0 1px rgba(226,190,110,.3),inset 0 -50px 100px rgba(210,166,72,.035),0 20px 60px rgba(0,0,0,.5)}
+.lorgus-command-card>span,.lorgus-dossier-grid article>span,.lorgus-rp-grid article>span{letter-spacing:.34em;color:rgba(227,193,113,.62)}
+.lorgus-command-card strong{font-size:29px;letter-spacing:.01em}
+.lorgus-command-card:nth-child(1) strong{font-size:42px;max-width:520px}
+.lorgus-command-card small{font-size:12px;line-height:1.85;color:rgba(232,223,203,.48)}
+.lorgus-command-card button{position:relative;margin-top:auto;color:#e1c27a;letter-spacing:.3em}
+.lorgus-command-card button::before{content:"";display:inline-block;width:28px;height:1px;background:currentColor;vertical-align:middle;margin-right:10px;box-shadow:0 0 10px currentColor}
+
+/* ornamental footer / chronicle */
+.lorgus-command-bottom{
+  margin-top:34px;padding:46px 52px;
+  background:
+    linear-gradient(90deg,rgba(27,22,14,.85),rgba(9,8,6,.72)),
+    repeating-linear-gradient(90deg,transparent 0 80px,rgba(215,175,86,.025) 81px);
+  border:1px solid rgba(220,184,103,.15);box-shadow:0 35px 80px rgba(0,0,0,.38)
+}
+.lorgus-command-bottom h2{font-size:34px;letter-spacing:.01em}
+.lorgus-command-bottom p{font-size:13px;line-height:1.9}
+.lorgus-command-metrics b{font-size:43px;text-shadow:0 0 25px rgba(221,183,98,.15)}
+
+/* profile / dossier gets character-sheet feeling */
+.lorgus-profile-hero{min-height:360px}
+.lorgus-profile-sigil{
+  width:132px;height:132px;margin-right:38px;
+  border-color:rgba(227,191,107,.48);
+  box-shadow:0 0 80px rgba(224,181,80,.12),inset 0 0 50px rgba(224,181,80,.05)
+}
+.lorgus-dossier-grid,.lorgus-rp-grid{
+  grid-template-columns:1.35fr .85fr .85fr;margin-top:34px;
+  box-shadow:0 30px 80px rgba(0,0,0,.4)
+}
+.lorgus-dossier-grid article,.lorgus-rp-grid article{min-height:240px;padding:36px;background:linear-gradient(145deg,rgba(18,17,14,.97),rgba(4,4,3,.99))}
+.lorgus-dossier-grid strong,.lorgus-rp-grid strong{font-size:27px}
+.lorgus-dossier-grid article::before,.lorgus-rp-grid article::before{
+  content:"";position:absolute;left:0;top:0;width:42px;height:42px;
+  border-left:1px solid rgba(226,190,110,.28);border-top:1px solid rgba(226,190,110,.28)
+}
+.lorgus-dossier-grid article::after,.lorgus-rp-grid article::after{
+  right:16px;bottom:14px;width:42px;height:42px;border-color:rgba(226,190,110,.18)
+}
+@keyframes lorgusRune{0%,100%{opacity:.65;text-shadow:none}50%{opacity:1;text-shadow:0 0 22px rgba(225,188,103,.75)}}
+@media(max-width:1100px){
+ .lorgus-command-hero h1,.lorgus-profile-hero h1{font-size:64px}
+ .lorgus-command-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+}
+@media(max-width:680px){
+ .lorgus-command-main{padding:20px 12px 70px}
+ .lorgus-command-hero,.lorgus-profile-hero{min-height:300px;padding:32px 24px}
+ .lorgus-command-hero h1,.lorgus-profile-hero h1{font-size:46px}
+ .lorgus-command-status{position:relative;right:auto;bottom:auto;margin-top:30px;min-width:0}
+}
