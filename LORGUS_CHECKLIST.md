@@ -712,3 +712,11 @@ The workflow is committed, but it cannot prove production deployment until the t
 3. Confirm 001-005 migration state in the workflow output.
 4. After successful run, disable Supabase Integration's Deploy to production to leave one authoritative production deployer.
 5. Keep this workflow as the authoritative machine-readable production migration status.
+
+
+### 21.1 FIX — RP messages migration delimiter
+- [x] Fixed PostgreSQL dollar-quote delimiter in `20261006000400_rp_messages_security.sql`: `as $` / `$;` → `as $$` / `$$;`.
+- [x] Root cause confirmed from GitHub Actions output: PostgreSQL stopped at the single `$` and raised SQLSTATE 42601.
+- [ ] Re-run `Deploy Supabase migrations` and confirm migrations 004 and 005 apply successfully.
+
+Commit: 49690069e8a68df14172edc540448d87c6121552 — Fix RP message trigger SQL delimiter
