@@ -773,3 +773,22 @@ CI log из последнего запуска относится к содер
 
 ### Текущая точка остановки
 Database deployment через GitHub Actions доказан рабочим. Теперь не меняем migration 004/005 вслепую: следующий шаг — подтвердить remote migration history, затем убрать второго production deployer и перейти к функциональному security-тестированию RP.
+
+### 21.6 USER CLEANUP — 2026-10-06
+- [x] Создана one-time migration `20261006000600_cleanup_users_keep_adminka_test.sql` для production-очистки `auth.users`.
+- [x] Migration исправлена после проверки: сравнение email приведено к case-insensitive виду через `lower(...)=lower(...)`.
+- [x] Пользователь подтвердил успешное применение migration 006 в production.
+- [x] После очистки production должен содержать только bootstrap-аккаунты `adminka` и `test`; migration является одноразовой и не будет удалять будущих зарегистрированных пользователей после того, как будет записана в migration history.
+
+Commit:
+- `874819586e1248e762789a6e08ab85ec33e1dbbe` — Fix production user cleanup email matching
+
+### Текущая точка остановки
+Очистка пользователей выполнена успешно. Теперь не меняем `auth.users` повторно: сначала диагностически проверяем фактическое состояние production через GitHub Actions.
+
+### Следующая задача
+1. Проверить количество и список оставшихся auth-пользователей: должны быть только `adminka` и `test`.
+2. Проверить production migration history: 001-006.
+3. Проверить RP tables/RLS/policies/triggers и Realtime.
+4. Провести функциональные P0-тесты RP: teleport, fake origin, wrong destination, normal location → road → destination, cleanup, message RLS, Realtime.
+5. После подтверждения — отключить Supabase Integration → Deploy to production, оставив GitHub Actions единственным production deployer.
