@@ -566,6 +566,8 @@ async function renderCabinet(session) {
         session.user.user_metadata?.username ||
         "Игрок";
 
+    window.lorgusCurrentUsername = username;
+
     document.getElementById("root").innerHTML = `
         <main class="game-page">
             <section
@@ -4031,7 +4033,11 @@ function renderLorgusInterfaceNav(active = "world") {
                         <span>${icon}</span><b>${label}</b>
                     </button>`).join("")}
             </div>
-            <div class="lorgus-global-presence"><i></i><span>МИР АКТИВЕН</span></div>
+            <div class="lorgus-global-account">
+                <div class="lorgus-global-presence"><i></i><span>МИР АКТИВЕН</span></div>
+                <span class="lorgus-global-user">${escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>
+                <button type="button" class="lorgus-global-logout" onclick="logout()">ВЫЙТИ</button>
+            </div>
         </nav>
     `;
 }
