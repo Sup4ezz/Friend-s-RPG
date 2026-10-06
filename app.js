@@ -3558,6 +3558,16 @@ const LORGUS_MAP_MARKERS = [
     { id:"Спорные Земли", x:62, y:66, type:"contested", description:"Независимые поселения и территории вне власти пяти королевств." }
 ];
 
+const LORGUS_MAP_EDITOR_RECTS = [
+    { id:"Атэрон", x:22, y:34, w:14, h:12, rotation:0 },
+    { id:"Каэлор", x:72, y:27, w:14, h:12, rotation:0 },
+    { id:"Ксандр", x:79, y:61, w:14, h:12, rotation:0 },
+    { id:"Лирэн", x:31, y:69, w:14, h:12, rotation:0 },
+    { id:"Морвейн", x:51, y:82, w:14, h:12, rotation:0 },
+    { id:"Святые Земли", x:52, y:50, w:12, h:10, rotation:0 },
+    { id:"Спорные Земли", x:62, y:66, w:12, h:10, rotation:0 }
+];
+
 function enableLorgusMapEditor() {
     const layer = document.getElementById("lorgus-map-marker-layer");
     const viewport = document.getElementById("lorgus-map-viewport");
@@ -3568,50 +3578,98 @@ function enableLorgusMapEditor() {
     const button = document.getElementById("lorgus-map-editor-toggle");
     if (button) button.textContent = active ? "✓ РЕДАКТОР КАРТЫ" : "✎ РЕДАКТОР КАРТЫ";
 
-    document.querySelectorAll(".lorgus-map-marker").forEach(marker => {
-        marker.onpointerdown = active ? (event) => {
-            event.stopPropagation();
+    renderLorgusMapEditorRects(active);
+}
+
+function renderLorgusMapEditorRects(active = true) {
+    const layer = document.getElementById("lorgus-map-marker-layer");
+    if (!layer) return;
+
+    layer.querySelectorAll(".lorgus-map-editor-rect").forEach(el => el.remove());
+    if (!active) return;
+
+    LORGUS_MAP_EDITOR_RECTS.forEach(rectData => {
+        const rect = document.createElement("div");
+        rect.className = "lorgus-map-editor-rect";
+        rect.dataset.region = rectData.id;
+        rect.style.left = rectData.x + "%";
+        rect.style.top = rectData.y + "%";
+        rect.style.width = rectData.w + "%";
+        rect.style.height = rectData.h + "%";
+        rect.style.transform = "translate(-50%,-50%) rotate(" + rectData.rotation + "deg)";
+        rect.innerHTML = `
+            <span class="lorgus-map-editor-handle rotate" title="Повернуть"></span>
+            <span class="lorgus-map-editor-handle nw"></span>
+            <span class="lorgus-map-editor-handle ne"></span>
+            <span class="lorgus-map-editor-handle sw"></span>
+            <span class="lorgus-map-editor-handle se"></span>
+        `;
+
+        let mode = null;
+        let pointerId = null;
+        let startX = 0;
+        let startY = 0;
+        let startData = null;
+
+        rect.onpointerdown = event => {
             event.preventDefault();
+            event.stopPropagation();
+            pointerId = event.pointerId;
+            rect.setPointerCapture?.(pointerId);
+            const box = viewport.getBoundingClientRect();
+            const isRotate = event.target.classList.contains("rotate");
+            const handle = event.target.closest(".lorgus-map-editor-handle");
+            mode = isRotate ? "rotate" : (handle ? handle.classList[1] : "move");
+            startX = event.clientX;
+            startY = event.clientY;
+            startData = {...rectData};
+        };
 
-            const rect = viewport.getBoundingClientRect();
-            const pointerId = event.pointerId;
-            marker.setPointerCapture?.(pointerId);
+        rect.onpointermove = event => {
+            if (event.pointerId !== pointerId || !startData) return;
+            const box = viewport.getBoundingClientRect();
+            const dx = (event.clientX - startX) / box.width * 100;
+            const dy = (event.clientY - startY) / box.height * 100;
 
-            const move = (e) => {
-                if (e.pointerId !== pointerId) return;
+            if (mode === "move") {
+                rectData.x = Math.max(1, Math.min(99, startData.x + dx));
+                rectData.y = Math.max(1, Math.min(99, startData.y + dy));
+            } else if (mode === "rotate") {
+                const cx = box.left + rectData.x / 100 * box.width;
+                const cy = box.top + rectData.y / 100 * box.height;
+                rectData.rotation = Math.round(
+                    Math.atan2(event.clientY - cy, event.clientX - cx) * 180 / Math.PI + 90
+                );
+            } else {
+                const sx = mode.includes("e") ? 1 : -1;
+                const sy = mode.includes("s") ? 1 : -1;
+                rectData.w = Math.max(2, startData.w + dx * sx * 2);
+                rectData.h = Math.max(2, startData.h + dy * sy * 2);
+            }
 
-                const x = Math.max(1, Math.min(99, ((e.clientX - rect.left) / rect.width) * 100));
-                const y = Math.max(1, Math.min(99, ((e.clientY - rect.top) / rect.height) * 100));
+            rect.style.left = rectData.x + "%";
+            rect.style.top = rectData.y + "%";
+            rect.style.width = rectData.w + "%";
+            rect.style.height = rectData.h + "%";
+            rect.style.transform = "translate(-50%,-50%) rotate(" + rectData.rotation + "deg)";
+        };
 
-                marker.style.left = x + "%";
-                marker.style.top = y + "%";
-                marker.dataset.x = x.toFixed(2);
-                marker.dataset.y = y.toFixed(2);
-            };
+        rect.onpointerup = event => {
+            if (event.pointerId !== pointerId) return;
+            rect.releasePointerCapture?.(pointerId);
+            pointerId = null;
+            startData = null;
 
-            const up = () => {
-                marker.releasePointerCapture?.(pointerId);
-                marker.removeEventListener("pointermove", move);
-                marker.removeEventListener("pointerup", up);
+            const hint = document.getElementById("lorgus-map-surface-hint");
+            if (hint) {
+                hint.textContent = rectData.id + " · X:" + rectData.x.toFixed(1) + "% Y:" + rectData.y.toFixed(1) + "% · " + rectData.w.toFixed(1) + "×" + rectData.h.toFixed(1) + "% · " + Math.round(rectData.rotation) + "°";
+                hint.classList.add("visible");
+                clearTimeout(window.lorgusMapHintTimer);
+                window.lorgusMapHintTimer = setTimeout(() => hint.classList.remove("visible"), 3500);
+            }
+        };
 
-                const x = marker.dataset.x;
-                const y = marker.dataset.y;
-                const hint = document.getElementById("lorgus-map-surface-hint");
-
-                if (hint) {
-                    hint.textContent = marker.dataset.region + " · X:" + x + "% Y:" + y + "%";
-                    hint.classList.add("visible");
-                    clearTimeout(window.lorgusMapHintTimer);
-                    window.lorgusMapHintTimer = setTimeout(
-                        () => hint.classList.remove("visible"),
-                        3500
-                    );
-                }
-            };
-
-            marker.addEventListener("pointermove", move);
-            marker.addEventListener("pointerup", up, { once:true });
-        } : null;
+        layer.appendChild(rect);
     });
 }
 
