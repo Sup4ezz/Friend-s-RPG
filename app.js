@@ -4999,7 +4999,6 @@ const openingShape = new THREE.Shape();
         camera.position.y += (7.2 - pointer.y * 1.5 - camera.position.y) * 0.018;
         camera.lookAt(pointer.x * 0.7, 7.5 + pointer.y * 0.55, -0.5);
 
-        rift.material.uniforms.time.value = time;
         portalCore.scale.setScalar(0.92 + Math.sin(time * 1.35) * 0.06);
         portalMist.scale.setScalar(0.96 + Math.sin(time * 0.8 + 1.2) * 0.08);
         portalSparks.forEach((spark, i) => {
