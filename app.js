@@ -2364,6 +2364,7 @@ function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
 }
 
 async function renderRoadChat(presence) {
+    window.activeRpChatSpace = presence;
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
@@ -2813,46 +2814,46 @@ async function sendLocalRpMessage() {
     const body = input.value.trim();
     if (!body) return;
 
-    const presence = await getRpPresence();
-    if (!presence) {
-        alert("Персонаж не находится в RP-пространстве.");
+    const chat = window.activeRpChatSpace;
+    if (!chat) {
+        alert("RP-пространство не выбрано.");
         return;
     }
 
-    const user = (await supabase.auth.getUser()).data.user;
-    if (!user) return;
-
-    const payload = {
-        character_id: window.activeCharacterId,
-        player_id: user.id,
-        presence_type: presence.type,
-        body
-    };
-
-    if (presence.type === "location") {
-        payload.region = presence.region;
-        payload.location = presence.location;
-    } else {
-        payload.from_region = presence.fromRegion;
-        payload.from_location = presence.fromLocation;
-        payload.to_region = presence.toRegion;
-        payload.to_location = presence.toLocation;
-    }
-
-    const { data, error } = await supabase
-        .from("rp_messages")
-        .insert(payload)
-        .select("id, character_id, body, created_at, characters(name)")
-        .single();
+    const { error } = await supabase.rpc(
+        "send_lorgus_rp_message",
+        {
+            p_character_id: window.activeCharacterId,
+            p_presence_type: chat.type,
+            p_region: chat.type === "location" ? chat.region : null,
+            p_location: chat.type === "location" ? chat.location : null,
+            p_from_region: chat.type === "road" ? chat.fromRegion : null,
+            p_from_location: chat.type === "road" ? chat.fromLocation : null,
+            p_to_region: chat.type === "road" ? chat.toRegion : null,
+            p_to_location: chat.type === "road" ? chat.toLocation : null,
+            p_body: body,
+            p_visibility: chat.visibility || "public"
+        }
+    );
 
     if (error) {
         console.error("Не удалось отправить RP-сообщение:", error);
-        alert("Не удалось отправить сообщение.");
+        alert("Не удалось отправить сообщение: " + error.message);
         return;
     }
 
     input.value = "";
-    appendRpMessage(data);
+    window.activeRpPresence = await getRpPresence();
+
+    if (window.activeRpPresence) {
+        window.activeRpChatSpace = window.activeRpPresence;
+        await loadRpMessages(window.activeRpPresence);
+        await subscribeToRpMessages(window.activeRpPresence);
+        await renderLocationParticipantsIfVisible();
+    } else {
+        await loadRpMessages(chat);
+        await subscribeToRpMessages(chat);
+    }
 }
 
 
