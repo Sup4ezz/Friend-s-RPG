@@ -4988,7 +4988,9 @@ const openingShape = new THREE.Shape();
         sizeAttenuation: true
     });
     const starField = new THREE.Points(starGeometry, starMaterial);
-    world.add(starField);\n\n    const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+    world.add(starField);
+
+    const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
     let raf = 0;
     let disposed = false;
 
