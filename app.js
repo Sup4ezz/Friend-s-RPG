@@ -5340,7 +5340,8 @@ const openingShape = new THREE.Shape();
                     startQuat,
                     targetQuat: aimCamera.quaternion.clone(),
                     portalCenter,
-                    forwardTarget
+                    forwardTarget,
+                    worldRotationY: world.rotation.y
                 };
             }
 
@@ -5394,7 +5395,11 @@ const openingShape = new THREE.Shape();
         }
         starPos.needsUpdate = true;
 
-        world.rotation.y = pointer.x * -0.025;
+        if (lorgusPortalEntering && portalFlight) {
+            world.rotation.y = portalFlight.worldRotationY;
+        } else {
+            world.rotation.y = pointer.x * -0.025;
+        }
 
         for (const mesh of debris) {
             mesh.rotation.x += mesh.userData.spin * 0.004;
