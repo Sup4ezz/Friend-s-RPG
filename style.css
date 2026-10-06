@@ -9749,3 +9749,44 @@ body{
   height:7px;
   box-shadow:0 0 16px rgba(215,174,90,.9);
 }
+
+
+/* LORGUS 3.0 — WORLD-SCALE CINEMATIC LAYER */
+.lorgus-map-shell{grid-template-columns:310px minmax(0,1fr)}
+.lorgus-map-main{position:relative;overflow:hidden}
+.lorgus-map-sidebar{overflow:hidden}
+.lorgus-map-character{position:relative}
+.lorgus-character-seal{position:absolute;right:2px;top:31px;width:58px;height:58px;border:1px solid rgba(215,174,90,.3);border-radius:50%;display:grid;place-items:center;transform:rotate(45deg);box-shadow:0 0 35px rgba(215,174,90,.08),inset 0 0 20px rgba(215,174,90,.04)}
+.lorgus-character-seal::before,.lorgus-character-seal::after{content:"";position:absolute;inset:6px;border:1px solid rgba(215,174,90,.13);border-radius:50%}
+.lorgus-character-seal::after{inset:15px;border-radius:0;transform:rotate(45deg)}
+.lorgus-character-seal span{transform:rotate(-45deg);color:var(--gold-light);font-size:18px;text-shadow:0 0 18px rgba(235,210,154,.6)}
+.lorgus-map-location-status small{display:block;margin-top:8px;color:rgba(210,200,180,.38);font-size:8px;letter-spacing:.08em}
+.lorgus-map-world-stats{display:grid;grid-template-columns:repeat(3,1fr);margin:0 0 20px;border-top:1px solid rgba(215,174,90,.1);border-bottom:1px solid rgba(215,174,90,.1)}
+.lorgus-map-world-stats div{padding:12px 4px;text-align:center;border-right:1px solid rgba(215,174,90,.08)}
+.lorgus-map-world-stats div:last-child{border-right:0}
+.lorgus-map-world-stats strong{display:block;color:var(--gold-light);font-family:var(--title-font);font-size:20px;font-weight:500;line-height:1}
+.lorgus-map-world-stats span{display:block;margin-top:5px;color:rgba(210,200,180,.38);font-size:7px;letter-spacing:.16em}
+.lorgus-map-stage{grid-template-columns:minmax(0,1fr) 330px;gap:20px;padding:20px}
+.lorgus-map-frame{border-color:rgba(215,174,90,.28);box-shadow:0 45px 100px rgba(0,0,0,.62),inset 0 0 120px rgba(0,0,0,.5),inset 0 0 0 1px rgba(255,239,193,.025)}
+.lorgus-map-image-wrap::before{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.14) 72%,rgba(0,0,0,.58) 100%)}
+.lorgus-map-image-wrap::after{content:"";position:absolute;inset:0;z-index:4;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.2),transparent 18%,transparent 82%,rgba(0,0,0,.22)),linear-gradient(0deg,rgba(0,0,0,.2),transparent 18%,transparent 82%,rgba(0,0,0,.16));mix-blend-mode:multiply}
+.lorgus-map-atmosphere{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+.lorgus-map-atmosphere i{position:absolute;width:45vw;height:45vw;border-radius:50%;background:radial-gradient(circle,rgba(224,187,102,.07),transparent 67%);filter:blur(12px);animation:lorgus-drift 18s ease-in-out infinite alternate}
+.lorgus-map-atmosphere i:nth-child(1){left:8%;top:-35%}.lorgus-map-atmosphere i:nth-child(2){right:-20%;bottom:-30%;animation-delay:-7s}.lorgus-map-atmosphere i:nth-child(3){left:38%;top:35%;width:25vw;height:25vw;animation-delay:-12s}
+@keyframes lorgus-drift{from{transform:translate3d(-2%,1%,0) scale(.92);opacity:.35}to{transform:translate3d(3%,-2%,0) scale(1.08);opacity:.75}}
+.lorgus-map-corner-mark{position:absolute;z-index:6;color:rgba(245,225,170,.42);font-size:7px;letter-spacing:.2em;pointer-events:none;text-shadow:0 1px 5px #000}
+.lorgus-map-corner-mark.top-left{top:15px;left:17px}.lorgus-map-corner-mark.top-right{top:15px;right:17px}.lorgus-map-corner-mark.bottom-left{bottom:15px;left:17px}.lorgus-map-corner-mark.bottom-right{bottom:15px;right:17px}
+.lorgus-map-inspector{padding:30px 24px;background:linear-gradient(160deg,rgba(20,17,12,.96),rgba(7,7,6,.985));border:1px solid rgba(215,174,90,.2);box-shadow:0 25px 65px rgba(0,0,0,.38),inset 0 1px rgba(255,239,193,.025);overflow:hidden}
+.lorgus-map-inspector::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 80% 10%,rgba(215,174,90,.07),transparent 34%)}
+.lorgus-map-selection-symbol{position:relative;width:64px;height:64px;margin:25px 0 12px;border:1px solid rgba(215,174,90,.28);display:grid;place-items:center;transform:rotate(45deg);box-shadow:0 0 35px rgba(215,174,90,.07)}
+.lorgus-map-selection-symbol span{transform:rotate(-45deg);font-size:28px;color:var(--gold-light);text-shadow:0 0 20px rgba(235,210,154,.5)}
+.lorgus-map-selection-symbol i{position:absolute;inset:-6px;border:1px solid rgba(215,174,90,.1)}
+.lorgus-map-inspector h3{font-size:42px;text-shadow:0 5px 25px rgba(0,0,0,.75)}
+.lorgus-map-inspector-meta{margin:22px 0;padding:13px 0;border-top:1px solid rgba(215,174,90,.11);border-bottom:1px solid rgba(215,174,90,.11)}
+.lorgus-map-inspector-meta span{display:block;color:rgba(215,174,90,.52);font-size:7px;letter-spacing:.2em}.lorgus-map-inspector-meta strong{display:block;margin-top:5px;color:rgba(220,211,192,.65);font-size:8px;letter-spacing:.08em;font-weight:500}
+.lorgus-map-enter-button{height:50px;box-shadow:0 12px 30px rgba(0,0,0,.3),0 0 22px rgba(215,174,90,.08)}
+.lorgus-map-regions{margin-top:28px}
+.lorgus-map-regions-title{display:block;margin-bottom:9px;color:rgba(215,174,90,.45);font-size:7px;letter-spacing:.24em}
+.lorgus-map-region-button{transition:background .2s ease,border-color .2s ease,transform .2s ease;padding:11px 12px}
+.lorgus-map-region-button:hover{transform:translateX(3px);background:rgba(215,174,90,.055);border-color:rgba(215,174,90,.22)}
+.lorgus-map-region-button.active{background:linear-gradient(90deg,rgba(215,174,90,.1),transparent);border-color:rgba(215,174,90,.25);box-shadow:inset 3px 0 var(--gold)}
