@@ -11856,3 +11856,18 @@ body{
     transform:translate(-50%,-50%) scale(3.8);
     opacity:0;
 }
+
+
+/* Clean arrival after entering the gate: no loading card, no grey placeholder. */
+.lorgus-cabinet-entering{
+    min-height:100vh;
+    background:#050403;
+    opacity:0;
+    transition:opacity .65s ease;
+}
+.lorgus-cabinet-entering.ready{
+    opacity:1;
+}
+.lorgus-cabinet-entering #cabinet-content{
+    min-height:100vh;
+}
