@@ -5416,6 +5416,9 @@ const openingShape = new THREE.Shape();
             );
             const flightBoost = Math.max(0, flightProgress - 0.12);
             for (const mesh of debris) {
+                if (mesh.userData.portalDrift === undefined) {
+                    mesh.userData.portalDrift = 0.12 + Math.random() * 0.22;
+                }
                 mesh.position.z += mesh.userData.portalDrift * flightBoost;
                 if (mesh.position.z > 18) mesh.position.z -= 42;
             }
