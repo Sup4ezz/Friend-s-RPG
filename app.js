@@ -3872,6 +3872,7 @@ function renderLorgusWorldMap(container, character) {
                 : "Местоположение ещё не определено";
 
     container.innerHTML = `
+        ${renderLorgusInterfaceNav("world")}
         <div class="lorgus-map-shell">
             <aside class="lorgus-map-sidebar">
                 <div class="lorgus-map-brand">
