@@ -4436,8 +4436,8 @@ function initializeLorgusWebGL() {
 
     // Long approach masonry connects the bottom of the frame to the portal.
     for (let row = 0; row < 14; row++) {
-        const z = 8.5 - row * 2.75;
-        const spread = 5.2 + row * 0.75;
+        const z = 8.5 - row * 4.4;
+        const spread = 5.0 + row * 1.15;
         const pieces = 5 + (row % 2);
         for (let col = 0; col < pieces; col++) {
             const width = (spread * 2) / pieces - 0.14;
@@ -4535,12 +4535,12 @@ function initializeLorgusWebGL() {
     }
 
     // Foreground slabs: irregular perspective lines lead the eye into the portal.
-    for (let i = 0; i < 8; i++) {
-        const width = 4.5 + i * 0.8;
+    for (let i = 0; i < 12; i++) {
+        const width = 4.5 + i * 0.95;
         const slab = makeMasonryBlock(
-            (Math.random() - 0.5) * (1.0 + i * 0.3),
+            (Math.random() - 0.5) * (1.0 + i * 0.45),
             -0.12 + Math.random() * 0.08,
-            5.5 + i * 2.9,
+            4.5 + i * 3.8,
             width,
             0.22 + Math.random() * 0.18,
             2.5 + Math.random() * 0.8,
