@@ -130,29 +130,34 @@ function render(session) {
             // Никакого отдельного transition-screen между сценами нет.
             lorgusPortalDepartureAligning = false;
             authScene.classList.add("portal-departure");
-            lorgusPortalEntering = true;
-            lorgusPortalEnterStartedAt = performance.now();
 
-            // Вспышка происходит в момент прохождения ворот. Это часть той же сцены,
-            // а не отдельный экран.
+            // Сначала даём интерфейсу заметно раствориться. Камера всё это время
+            // остаётся в исходной позиции — это один непрерывный кадр, а не склейка.
             window.setTimeout(() => {
-                if (lorgusPortalEntering) triggerLorgusPortalFlash();
-            }, 520);
+                if (!document.querySelector(".lorgus-cinematic-auth")) return;
 
-            // Кабинет появляется сразу после прохода сквозь портал, пока
-            // короткая световая вспышка закрывает сам момент смены DOM-сцены.
-            window.setTimeout(() => {
-                if (!lorgusPortalEntering) return;
-                lorgusPortalEntering = false;
+                lorgusPortalEntering = true;
+                lorgusPortalEnterStartedAt = performance.now();
 
-                if (lorgusSceneCleanup) {
-                    const cleanup = lorgusSceneCleanup;
-                    lorgusSceneCleanup = null;
-                    cleanup();
-                }
+                // Вспышка приходится на момент непосредственного прохода ворот.
+                window.setTimeout(() => {
+                    if (lorgusPortalEntering) triggerLorgusPortalFlash();
+                }, 760);
 
-                renderCabinet(session);
-            }, 760);
+                // Быстро проходим портал и сразу раскрываем кабинет.
+                window.setTimeout(() => {
+                    if (!lorgusPortalEntering) return;
+                    lorgusPortalEntering = false;
+
+                    if (lorgusSceneCleanup) {
+                        const cleanup = lorgusSceneCleanup;
+                        lorgusSceneCleanup = null;
+                        cleanup();
+                    }
+
+                    renderCabinet(session);
+                }, 1120);
+            }, 620);
 
             return;
         }
@@ -5313,8 +5318,12 @@ const openingShape = new THREE.Shape();
             camera.lookAt(pointer.x * 0.7, 7.5 + pointer.y * 0.55, -0.5);
         } else if (lorgusPortalEntering) {
             const elapsed = performance.now() - lorgusPortalEnterStartedAt;
-            const progress = Math.min(1, elapsed / 1280);
-            const ease = 1 - Math.pow(1 - progress, 3);
+            const progress = Math.min(1, elapsed / 1080);
+            // Более мягкий старт: камера сначала словно "цепляется" за взгляд,
+            // затем быстро набирает скорость к воротам.
+            const ease = progress < 0.22
+                ? 0.18 * Math.pow(progress / 0.22, 2)
+                : 0.18 + 0.82 * (1 - Math.pow(1 - ((progress - 0.22) / 0.78), 2));
 
             // Capture the camera exactly where the player was looking when the
             // transition began. The flight then stays on one straight line through
@@ -5397,6 +5406,19 @@ const openingShape = new THREE.Shape();
 
         if (lorgusPortalEntering && portalFlight) {
             world.rotation.y = portalFlight.worldRotationY;
+
+            // Пока камера летит, пространство между ней и воротами не остаётся
+            // чёрным: дальние частицы и обломки слегка ускоряются навстречу кадру,
+            // создавая ощущение реального пролёта, а не движения камеры в пустоте.
+            const flightProgress = Math.min(
+                1,
+                (performance.now() - lorgusPortalEnterStartedAt) / 1080
+            );
+            const flightBoost = Math.max(0, flightProgress - 0.12);
+            for (const mesh of debris) {
+                mesh.position.z += mesh.userData.portalDrift * flightBoost;
+                if (mesh.position.z > 18) mesh.position.z -= 42;
+            }
         } else {
             world.rotation.y = pointer.x * -0.025;
         }
@@ -5404,6 +5426,9 @@ const openingShape = new THREE.Shape();
         for (const mesh of debris) {
             mesh.rotation.x += mesh.userData.spin * 0.004;
             mesh.rotation.y += mesh.userData.spin * 0.006;
+            if (mesh.userData.portalDrift === undefined) {
+                mesh.userData.portalDrift = 0.12 + Math.random() * 0.22;
+            }
         }
 
         renderer.render(scene, camera);
