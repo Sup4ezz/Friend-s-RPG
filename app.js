@@ -3575,9 +3575,105 @@ function enableLorgusMapEditor() {
     layer.classList.toggle("editor-mode");
     const active = layer.classList.contains("editor-mode");
     const button = document.getElementById("lorgus-map-editor-toggle");
-    if (button) button.textContent = active ? "✓ РЕДАКТОР КАРТЫ" : "✎ РЕДАКТОР КАРТЫ";
+    if (button) button.textContent = active ? "✓ РЕДАКТОР ВКЛЮЧЁН" : "✎ РЕДАКТОР КАРТЫ";
 
     renderLorgusMapEditorRects(active);
+}
+
+function bindLorgusMapEditorInteraction(label, rectData, layer) {
+    if (!label || !rectData || !layer) return;
+
+    let drag = null;
+
+    const start = (event, mode) => {
+        if (!layer.classList.contains("editor-mode")) return;
+        event.preventDefault();
+        event.stopPropagation();
+
+        const layerRect = layer.getBoundingClientRect();
+        drag = {
+            mode,
+            startX: event.clientX,
+            startY: event.clientY,
+            x: rectData.x,
+            y: rectData.y,
+            w: rectData.w,
+            h: rectData.h,
+            layerW: layerRect.width,
+            layerH: layerRect.height,
+            moved: false
+        };
+
+        label.setPointerCapture?.(event.pointerId);
+        label.classList.add("editing");
+    };
+
+    label.addEventListener("pointerdown", event => {
+        if (event.target.closest(".lorgus-map-editor-handle")) return;
+        start(event, "move");
+    });
+
+    const handle = document.createElement("span");
+    handle.className = "lorgus-map-editor-handle";
+    handle.title = "Изменить размер";
+    label.appendChild(handle);
+
+    handle.addEventListener("pointerdown", event => {
+        start(event, "resize");
+    });
+
+    label.addEventListener("pointermove", event => {
+        if (!drag) return;
+
+        const dx = ((event.clientX - drag.startX) / drag.layerW) * 100;
+        const dy = ((event.clientY - drag.startY) / drag.layerH) * 100;
+
+        if (Math.abs(dx) + Math.abs(dy) > 0.15) drag.moved = true;
+
+        if (drag.mode === "move") {
+            rectData.x = Math.max(0, Math.min(100, drag.x + dx));
+            rectData.y = Math.max(0, Math.min(100, drag.y + dy));
+        } else {
+            rectData.w = Math.max(1, Math.min(40, drag.w + dx));
+            rectData.h = Math.max(1, Math.min(40, drag.h + dy));
+        }
+
+        label.style.left = rectData.x + "%";
+        label.style.top = rectData.y + "%";
+        label.style.width = rectData.w + "%";
+        label.style.height = rectData.h + "%";
+        fitLorgusMapLabel(label);
+        updateLorgusMapEditorReadout(rectData);
+    });
+
+    const stop = event => {
+        if (!drag) return;
+        label.classList.remove("editing");
+        label.dataset.moved = drag.moved ? "1" : "0";
+        drag = null;
+        if (event) updateLorgusMapEditorReadout(rectData);
+    };
+
+    label.addEventListener("pointerup", stop);
+    label.addEventListener("pointercancel", stop);
+
+    label.addEventListener("click", event => {
+        if (label.dataset.moved === "1") {
+            event.preventDefault();
+            event.stopPropagation();
+            label.dataset.moved = "0";
+        }
+    });
+}
+
+function updateLorgusMapEditorReadout(rectData) {
+    const readout = document.getElementById("lorgus-map-editor-readout");
+    if (!readout || !rectData) return;
+
+    readout.innerHTML =
+        "<strong>" + escapeHtml(rectData.id) + "</strong>" +
+        "<span>X " + rectData.x.toFixed(1) + " · Y " + rectData.y.toFixed(1) +
+        " · W " + rectData.w.toFixed(1) + " · H " + rectData.h.toFixed(1) + "</span>";
 }
 
 function syncLorgusMapLabelLayer() {
@@ -3646,6 +3742,10 @@ function renderLorgusMapEditorRects() {
             };
 
             layer.appendChild(label);
+
+            if (layer.classList.contains("editor-mode")) {
+                bindLorgusMapEditorInteraction(label, rectData, layer);
+            }
         });
 
         requestAnimationFrame(() => {
@@ -3678,6 +3778,9 @@ function renderLorgusMapEditorRects() {
 function addLorgusMapEditorUI() {
     const controls = document.querySelector(".lorgus-map-controls");
     if (!controls || document.getElementById("lorgus-map-editor-toggle")) return;
+
+    controls.innerHTML = "";
+
     const button = document.createElement("button");
     button.id = "lorgus-map-editor-toggle";
     button.type = "button";
@@ -3685,6 +3788,12 @@ function addLorgusMapEditorUI() {
     button.textContent = "✎ РЕДАКТОР КАРТЫ";
     button.onclick = enableLorgusMapEditor;
     controls.appendChild(button);
+
+    const readout = document.createElement("div");
+    readout.id = "lorgus-map-editor-readout";
+    readout.className = "lorgus-map-editor-readout";
+    readout.innerHTML = "<strong>РЕДАКТОР ВЫКЛЮЧЕН</strong><span>Нажми кнопку, затем перетаскивай названия</span>";
+    controls.appendChild(readout);
 }
 
 function renderLorgusMapMarkers() {
