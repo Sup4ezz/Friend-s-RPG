@@ -4295,16 +4295,16 @@ function initializeLorgusWebGL() {
             fragmentShader: "uniform float time; varying vec2 vUv; void main(){float edge=smoothstep(0.52,0.0,abs(vUv.x-0.5));float wave=0.55+0.45*sin(vUv.y*28.0-time*3.0);float core=pow(edge,1.8)*(0.72+wave*0.28);vec3 c=mix(vec3(0.22,0.08,0.01),vec3(0.95,0.57,0.16),edge);gl_FragColor=vec4(c,core*0.48);}"
         })
     );
-    rift.position.set(0, 7.9, 2.05);
-    rift.renderOrder = 3;
+    rift.position.set(0, 7.9, -0.65);
+    rift.renderOrder = 1;
     world.add(rift);
 
     const innerGate = new THREE.Mesh(
         new THREE.PlaneGeometry(8.6, 16.8, 1, 1),
         new THREE.MeshStandardMaterial({ color: 0x120f0b, roughness: 0.98, metalness: 0, transparent: true, opacity: 0.9 })
     );
-    innerGate.position.set(0, 7.7, 2.0);
-    innerGate.renderOrder = 2;
+    innerGate.position.set(0, 7.7, -0.9);
+    innerGate.renderOrder = 0;
     world.add(innerGate);
 
     const threshold = new THREE.Mesh(
@@ -4316,7 +4316,7 @@ function initializeLorgusWebGL() {
     world.add(threshold);
 
     const riftLight = new THREE.PointLight(0xd88b2e, 38, 24, 2);
-    riftLight.position.set(0, 7.8, 2.4);
+    riftLight.position.set(0, 7.8, -0.4);
     world.add(riftLight);
     world.add(new THREE.HemisphereLight(0xb9a17d, 0x17120d, 1.05));
     world.add(new THREE.AmbientLight(0x9a8567, 0.48));
@@ -4393,7 +4393,7 @@ function initializeLorgusWebGL() {
     }
 
     const gateInnerGlow = new THREE.PointLight(0xd9963d, 22, 24, 2);
-    gateInnerGlow.position.set(0, 5, 0);
+    gateInnerGlow.position.set(0, 5, -0.7);
     world.add(gateInnerGlow);
 
     const debris = [];
