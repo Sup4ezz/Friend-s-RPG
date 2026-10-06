@@ -4201,7 +4201,7 @@ function initializeLorgusWebGL() {
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(0x050403, 0.032);
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 180);
-    camera.position.set(0, 7.2, 31);
+    camera.position.set(0, 7.8, 34);
     const world = new THREE.Group();
     scene.add(world);
 
@@ -4223,23 +4223,23 @@ function initializeLorgusWebGL() {
     addBox(9.0, 14.8, 0, 6.0, 2.4, 4.1, stoneDark, 0.1);
 
     const arch = new THREE.Mesh(
-        new THREE.TorusGeometry(9.4, 1.65, 18, 48, Math.PI),
+        new THREE.TorusGeometry(11.8, 2.0, 20, 56, Math.PI),
         stone
     );
     arch.rotation.z = Math.PI;
-    arch.position.y = 10.4;
+    arch.position.y = 12.6;
     world.add(arch);
 
     for (let n = 0; n < 13; n++) {
         const a = Math.PI * (n / 12);
-        const block = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.95, 4.0), stoneDark);
-        block.position.set(Math.cos(a) * 9.4, 10.4 + Math.sin(a) * 9.4, (Math.random() - 0.5) * 0.8);
+        const block = new THREE.Mesh(new THREE.BoxGeometry(2.15, 2.2, 4.8), stoneDark);
+        block.position.set(Math.cos(a) * 11.8, 12.6 + Math.sin(a) * 11.8, (Math.random() - 0.5) * 0.8);
         block.rotation.z = Math.PI / 2 - a;
         world.add(block);
     }
 
     const rift = new THREE.Mesh(
-        new THREE.PlaneGeometry(11.5, 21, 40, 80),
+        new THREE.PlaneGeometry(9.4, 18.5, 40, 80),
         new THREE.ShaderMaterial({
             transparent: true,
             depthWrite: false,
@@ -4249,11 +4249,28 @@ function initializeLorgusWebGL() {
             fragmentShader: "uniform float time; varying vec2 vUv; void main(){float edge=smoothstep(0.52,0.0,abs(vUv.x-0.5));float wave=0.55+0.45*sin(vUv.y*28.0-time*3.0);float core=pow(edge,1.8)*(0.72+wave*0.28);vec3 c=mix(vec3(0.22,0.08,0.01),vec3(0.95,0.57,0.16),edge);gl_FragColor=vec4(c,core*0.48);}"
         })
     );
-    rift.position.set(0, 8.1, 1.2);
+    rift.position.set(0, 7.9, 2.05);
+    rift.renderOrder = 3;
     world.add(rift);
 
+    const innerGate = new THREE.Mesh(
+        new THREE.PlaneGeometry(8.6, 16.8, 1, 1),
+        new THREE.MeshBasicMaterial({ color: 0x080604, transparent: true, opacity: 0.92, depthWrite: true })
+    );
+    innerGate.position.set(0, 7.7, 2.0);
+    innerGate.renderOrder = 2;
+    world.add(innerGate);
+
+    const threshold = new THREE.Mesh(
+        new THREE.RingGeometry(4.4, 5.05, 64, 1, Math.PI * 0.08, Math.PI * 0.84),
+        new THREE.MeshBasicMaterial({ color: 0xd39a43, transparent: true, opacity: 0.72, side: THREE.DoubleSide })
+    );
+    threshold.rotation.x = Math.PI / 2;
+    threshold.position.set(0, 0.08, 2.2);
+    world.add(threshold);
+
     const riftLight = new THREE.PointLight(0xd88b2e, 38, 24, 2);
-    riftLight.position.set(0, 8, 2);
+    riftLight.position.set(0, 7.8, 2.4);
     world.add(riftLight);
     world.add(new THREE.AmbientLight(0x806d57, 0.28));
 
@@ -4305,7 +4322,7 @@ function initializeLorgusWebGL() {
 
         camera.position.x += (pointer.x * 1.8 - camera.position.x) * 0.018;
         camera.position.y += (7.2 - pointer.y * 1.5 - camera.position.y) * 0.018;
-        camera.lookAt(pointer.x * 0.7, 8.2 + pointer.y * 0.55, 0);
+        camera.lookAt(pointer.x * 0.7, 7.9 + pointer.y * 0.55, 1.2);
 
         rift.material.uniforms.time.value = time;
         riftLight.intensity = 32 + Math.sin(time * 2.1) * 8;
