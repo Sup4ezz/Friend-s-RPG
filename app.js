@@ -3697,7 +3697,7 @@ function fitLorgusMapLabel(label) {
     const maxWidth = Math.max(20, label.clientWidth - 8);
     const maxHeight = Math.max(12, label.clientHeight - 6);
 
-    let size = Math.min(24, Math.max(8, maxHeight * 0.42));
+    let size = Math.min(52, Math.max(11, maxHeight * 0.72));
     label.style.fontSize = size + "px";
 
     while (
