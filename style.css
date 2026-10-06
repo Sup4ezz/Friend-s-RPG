@@ -14192,3 +14192,36 @@ body{
   overflow:visible !important;
   background:#080706 !important;
 }
+
+
+/* CHARACTER APPLICATION — isolate the page from the global cinematic body layers */
+body:has(#root > #cabinet-content.character-application){
+  background:#080706 !important;
+  background-image:none !important;
+  overflow-x:hidden !important;
+}
+
+body:has(#root > #cabinet-content.character-application)::before,
+body:has(#root > #cabinet-content.character-application)::after{
+  content:none !important;
+  display:none !important;
+  background:none !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+  z-index:-1 !important;
+}
+
+body:has(#root > #cabinet-content.character-application) #root{
+  background:#080706 !important;
+  background-image:none !important;
+}
+
+body:has(#root > #cabinet-content.character-application) #root > #cabinet-content.character-application{
+  background:#080706 !important;
+  background-image:none !important;
+  box-shadow:none !important;
+  border:0 !important;
+  border-radius:0 !important;
+  overflow:visible !important;
+}
