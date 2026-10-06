@@ -130,7 +130,8 @@ function renderAuth() {
             </header>
 
             <div class="lorgus-auth-title" aria-hidden="true">
-                <span class="title-ghost">ЛОРГУС</span>
+                <span class="title-ghos            authScene.classList.add("portal-departure");
+t">ЛОРГУС</span>
                 <span class="title-main">ЛОРГУС</span>
                 <span class="title-sub">ЗА ПРЕДЕЛАМИ КАРТЫ</span>
             </div>
