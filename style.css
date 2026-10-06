@@ -9607,3 +9607,21 @@ body{
   z-index:3;
   box-shadow:0 0 8px rgba(0,0,0,.7);
 }
+
+/* LORGUS auth input readability fix */
+.lorgus-cinematic-auth .input-wrapper input,
+.lorgus-cinematic-auth .input-wrapper input:focus,
+.lorgus-cinematic-auth .input-wrapper input:active,
+.lorgus-cinematic-auth .input-wrapper input:-webkit-autofill,
+.lorgus-cinematic-auth .input-wrapper input:-webkit-autofill:hover,
+.lorgus-cinematic-auth .input-wrapper input:-webkit-autofill:focus{
+  color:var(--text) !important;
+  -webkit-text-fill-color:var(--text) !important;
+  caret-color:var(--gold-light) !important;
+  background-color:transparent !important;
+}
+
+.lorgus-cinematic-auth .input-wrapper input::placeholder{
+  color:rgba(210,200,180,.42) !important;
+  opacity:1;
+}
