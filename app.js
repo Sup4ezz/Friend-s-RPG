@@ -3548,6 +3548,66 @@ function selectLorgusMapRegion(region) {
     enterButton.onclick = openable ? () => renderKingdomLocations(region) : null;
 }
 
+const LORGUS_MAP_MARKERS = [
+    { id:"Атэрон", x:22, y:34, type:"kingdom", description:"Знания, древности, исследования и руины." },
+    { id:"Каэлор", x:72, y:27, type:"kingdom", description:"Горы, кузницы, шахты и древнее мастерство." },
+    { id:"Ксандр", x:79, y:61, type:"kingdom", description:"Торговля, банки, дороги и большие рынки." },
+    { id:"Лирэн", x:31, y:69, type:"kingdom", description:"Леса, плодородные земли и древняя природа." },
+    { id:"Морвейн", x:51, y:82, type:"kingdom", description:"Паломничество, память и туманные долины." },
+    { id:"Святые Земли", x:52, y:50, type:"neutral", description:"Нейтральная территория для переговоров монархов и глав церквей." },
+    { id:"Спорные Земли", x:62, y:66, type:"contested", description:"Независимые поселения и территории вне власти пяти королевств." }
+];
+
+function renderLorgusMapMarkers() {
+    const layer = document.getElementById("lorgus-map-marker-layer");
+    if (!layer) return;
+
+    layer.innerHTML = LORGUS_MAP_MARKERS.map(marker => `
+        <button
+            type="button"
+            class="lorgus-map-marker ${marker.type}"
+            style="left:${marker.x}%;top:${marker.y}%"
+            data-region="${escapeHtml(marker.id)}"
+            onclick="selectLorgusMapMarker('${escapeHtml(marker.id)}')"
+            title="${escapeHtml(marker.id)}"
+            aria-label="Открыть ${escapeHtml(marker.id)}"
+        >
+            <span class="lorgus-map-marker-pulse"></span>
+            <span class="lorgus-map-marker-core"></span>
+            <span class="lorgus-map-marker-label">${escapeHtml(marker.id)}</span>
+        </button>
+    `).join("");
+
+    const presence = window.activeRpPresence;
+    if (presence?.type === "location" && presence.location) {
+        const current = layer.querySelector(`[data-region="${CSS.escape(presence.location)}"]`);
+        current?.classList.add("current");
+    }
+}
+
+function selectLorgusMapMarker(region) {
+    selectLorgusMapRegion(region);
+    const marker = document.querySelector(`.lorgus-map-marker[data-region="${CSS.escape(region)}"]`);
+    document.querySelectorAll(".lorgus-map-marker").forEach(item => item.classList.remove("selected"));
+    marker?.classList.add("selected");
+}
+
+function handleLorgusMapSurfaceClick(event) {
+    if (event.target.closest(".lorgus-map-marker")) return;
+    const viewport = document.getElementById("lorgus-map-viewport");
+    if (!viewport) return;
+    const rect = viewport.getBoundingClientRect();
+    const x = Math.round(((event.clientX - rect.left) / rect.width) * 100);
+    const y = Math.round(((event.clientY - rect.top) / rect.height) * 100);
+    const hint = document.getElementById("lorgus-map-surface-hint");
+    if (hint) {
+        hint.textContent = `ТОЧКА КАРТЫ · ${Math.max(0,Math.min(100,x))}% / ${Math.max(0,Math.min(100,y))}%`;
+        hint.classList.add("visible");
+        clearTimeout(window.lorgusMapHintTimer);
+        window.lorgusMapHintTimer = setTimeout(() => hint.classList.remove("visible"), 1800);
+    }
+}
+
 function renderLorgusWorldMap(container, character) {
     if (!container || !character) return;
 
@@ -3606,8 +3666,12 @@ function renderLorgusWorldMap(container, character) {
 
                 <section class="lorgus-map-stage">
                     <div class="lorgus-map-frame">
-                        <div class="lorgus-map-image-wrap" id="lorgus-map-viewport">
-                            <img class="lorgus-map-image" src="/assets/world/nerovland-map.png" alt="Карта Неровланда" draggable="false">
+                        <div class="lorgus-map-image-wrap" id="lorgus-map-viewport" onclick="handleLorgusMapSurfaceClick(event)">
+                            <div class="lorgus-map-world" id="lorgus-map-world">
+                                <img class="lorgus-map-image" src="/assets/world/nerovland-map.png" alt="Карта Неровланда" draggable="false">
+                                <div class="lorgus-map-marker-layer" id="lorgus-map-marker-layer" aria-label="Обозначения карты"></div>
+                            </div>
+                            <div class="lorgus-map-surface-hint" id="lorgus-map-surface-hint">ТОЧКА КАРТЫ</div>
                             <div class="lorgus-map-overlay">
                                 <div class="lorgus-map-compass" aria-hidden="true"><span>N</span><i></i></div>
                                 <div class="lorgus-map-scale"><span></span><small>МИР</small></div>
@@ -3658,6 +3722,7 @@ function renderLorgusWorldMap(container, character) {
 
     selectLorgusMapRegion("Атэрон");
     initializeLorgusMapViewport();
+    renderLorgusMapMarkers();
 }
 
 let lorgusMapScale = 1;
@@ -3672,8 +3737,8 @@ function initializeLorgusMapViewport() {
     }
 
     const viewport = document.getElementById("lorgus-map-viewport");
-    const image = viewport?.querySelector(".lorgus-map-image");
-    if (!viewport || !image) return;
+    const world = viewport?.querySelector(".lorgus-map-world");
+    if (!viewport || !world) return;
 
     lorgusMapScale = 1;
     lorgusMapOffsetX = 0;
@@ -3686,7 +3751,7 @@ function initializeLorgusMapViewport() {
     let startOffsetY = 0;
 
     const apply = () => {
-        image.style.transform = `translate3d(${lorgusMapOffsetX}px,${lorgusMapOffsetY}px,0) scale(${lorgusMapScale})`;
+        world.style.transform = `translate3d(${lorgusMapOffsetX}px,${lorgusMapOffsetY}px,0) scale(${lorgusMapScale})`;
     };
 
     const onWheel = event => {
@@ -3739,9 +3804,9 @@ function initializeLorgusMapViewport() {
 
 function lorgusMapZoom(factor) {
     lorgusMapScale = Math.min(3.2, Math.max(.8, lorgusMapScale * factor));
-    const image = document.querySelector(".lorgus-map-image");
-    if (image) {
-        image.style.transform = `translate3d(${lorgusMapOffsetX}px,${lorgusMapOffsetY}px,0) scale(${lorgusMapScale})`;
+    const world = document.querySelector(".lorgus-map-world");
+    if (world) {
+        world.style.transform = `translate3d(${lorgusMapOffsetX}px,${lorgusMapOffsetY}px,0) scale(${lorgusMapScale})`;
     }
 }
 
@@ -3749,8 +3814,8 @@ function lorgusMapReset() {
     lorgusMapScale = 1;
     lorgusMapOffsetX = 0;
     lorgusMapOffsetY = 0;
-    const image = document.querySelector(".lorgus-map-image");
-    if (image) image.style.transform = "translate3d(0,0,0) scale(1)";
+    const world = document.querySelector(".lorgus-map-world");
+    if (world) world.style.transform = "translate3d(0,0,0) scale(1)";
 }
 
 /* Последняя декларация заменяет старый экран выбора королевств. */
@@ -3759,5 +3824,7 @@ function renderCharacter(container, character) {
 }
 
 window.selectLorgusMapRegion = selectLorgusMapRegion;
+window.selectLorgusMapMarker = selectLorgusMapMarker;
+window.handleLorgusMapSurfaceClick = handleLorgusMapSurfaceClick;
 window.lorgusMapZoom = lorgusMapZoom;
 window.lorgusMapReset = lorgusMapReset;
