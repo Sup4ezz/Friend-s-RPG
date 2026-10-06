@@ -1484,7 +1484,39 @@ async function selectCharacter(container, characterId) {
    ФОРМА СОЗДАНИЯ ПЕРСОНАЖА
    ========================================================= */
 
+function initializeLorgusCharacterCreationAudio() {
+    if (window.lorgusCharacterCreationAudioCleanup) window.lorgusCharacterCreationAudioCleanup();
+    const root = document.querySelector(".character-application");
+    if (!root) return;
+    let ctx=null, master=null, musicGain=null, timer=null, started=false, muted=false, volume=.48;
+    const listeners=[];
+    const on=(t,e,h,o)=>{t.addEventListener(e,h,o);listeners.push(()=>t.removeEventListener(e,h,o));};
+    const ensure=()=>{
+        if(!ctx){ctx=new(window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.gain.value=volume*.22;master.connect(ctx.destination);musicGain=ctx.createGain();musicGain.gain.value=.0001;musicGain.connect(master);}
+        if(ctx.state==="suspended")ctx.resume(); if(!started)start();
+    };
+    const start=()=>{
+        if(started||!ctx||!musicGain)return; started=true;
+        const progression=[[55,82.41,110],[49,73.42,98],[46.25,69.3,92.5],[51.91,77.78,103.83]];
+        let step=0;
+        const bar=()=>{
+            if(!ctx||!musicGain)return; const now=ctx.currentTime,ch=progression[step++%progression.length];
+            ch.forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type=i?"sine":"triangle";o.frequency.value=f;g.gain.setValueAtTime(.0001,now);g.gain.exponentialRampToValueAtTime(i?.035:.07,now+.9);g.gain.exponentialRampToValueAtTime(.0001,now+6.5);o.connect(g);g.connect(musicGain);o.start(now);o.stop(now+6.7);});
+            [220,261.63,293.66,246.94].forEach((f,i)=>{const o=ctx.createOscillator(),g=ctx.createGain(),t=now+1+i*1.05;o.type="sine";o.frequency.value=f;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.022,t+.35);g.gain.exponentialRampToValueAtTime(.0001,t+1.6);o.connect(g);g.connect(musicGain);o.start(t);o.stop(t+1.7);});
+        };
+        musicGain.gain.setValueAtTime(.0001,ctx.currentTime);musicGain.gain.exponentialRampToValueAtTime(.24,ctx.currentTime+2.8);bar();timer=setInterval(bar,5600);
+    };
+    const control=document.createElement("div");control.className="character-creation-audio";control.innerHTML='<button type="button" aria-label="Музыка">♫</button><span>МУЗЫКА</span>';root.appendChild(control);
+    const btn=control.querySelector("button"); on(root,"pointerdown",()=>{try{ensure();}catch(e){}},{once:true});
+    on(btn,"click",e=>{e.stopPropagation();try{ensure();muted=!muted;master.gain.setTargetAtTime(muted?0:volume*.22,ctx.currentTime,.06);btn.textContent=muted?"♩":"♫";}catch(e){}});
+    window.lorgusCharacterCreationAudioCleanup=()=>{listeners.forEach(f=>f());if(timer)clearInterval(timer);if(ctx)ctx.close().catch(()=>{});window.lorgusCharacterCreationAudioCleanup=null;};
+    try{ensure();}catch(e){}
+}
+
 function renderCharacterApplicationForm(container) {
+    if (lorgusAudioCleanup) { lorgusAudioCleanup(); lorgusAudioCleanup = null; }
+    if (window.lorgusCharacterAudioCleanup) { window.lorgusCharacterAudioCleanup(); }
+    initializeLorgusCharacterCreationAudio();
     container.className = "character-application";
 
     container.innerHTML = `
