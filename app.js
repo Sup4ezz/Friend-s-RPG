@@ -3694,17 +3694,25 @@ function syncLorgusMapLabelLayer() {
 function fitLorgusMapLabel(label) {
     if (!label) return;
 
-    const maxWidth = Math.max(20, label.clientWidth - 8);
-    const maxHeight = Math.max(12, label.clientHeight - 6);
+    const maxWidth = Math.max(20, label.clientWidth - 10);
+    const maxHeight = Math.max(14, label.clientHeight - 6);
+    const textLength = Math.max(1, (label.textContent || "").trim().length);
 
-    let size = Math.min(52, Math.max(11, maxHeight * 0.72));
+    // Размер названия напрямую зависит от размеров рамки.
+    // Ширина учитывается через длину текста, а не через scrollWidth,
+    // чтобы браузерное переносы строк не ужимали шрифт до крошечного размера.
+    const heightSize = maxHeight * 0.78;
+    const widthSize = maxWidth / Math.max(3.8, textLength * 0.52);
+
+    let size = Math.min(56, Math.max(12, heightSize, widthSize));
     label.style.fontSize = size + "px";
 
+    // Только реальный выход за границы уменьшает размер.
     while (
-        size > 8 &&
-        (label.scrollWidth > maxWidth || label.scrollHeight > maxHeight)
+        size > 12 &&
+        (label.scrollWidth > label.clientWidth + 2 || label.scrollHeight > label.clientHeight + 2)
     ) {
-        size -= 0.5;
+        size -= 1;
         label.style.fontSize = size + "px";
     }
 }
