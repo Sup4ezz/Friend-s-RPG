@@ -4554,7 +4554,7 @@ function initializeLorgusWebGL() {
     const archShape = new THREE.Shape();
     archShape.moveTo(-7.2, 0);
     archShape.lineTo(-7.2, 8.2);
-    archShape.absarc(0, 8.2, 7.2, Math.PI, 0, false);
+    archShape.absarc(0, 8.2, 7.2, Math.PI, 0, true);
     archShape.lineTo(7.2, 0);
     archShape.closePath();
 
