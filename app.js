@@ -2051,35 +2051,25 @@ function mapServerPresence(row) {
 async function saveRpPresence(presence) {
     if (!window.activeCharacterId || !supabase) return null;
 
-    const { data: userData } = await supabase.auth.getUser();
-    const user = userData?.user;
-    if (!user) return null;
-
-    const payload = {
-        character_id: window.activeCharacterId,
-        player_id: user.id,
-        presence_type: presence.type,
-        region: presence.type === "location" ? presence.region : null,
-        location: presence.type === "location" ? presence.location : null,
-        from_region: presence.type === "road" ? presence.fromRegion : null,
-        from_location: presence.type === "road" ? presence.fromLocation : null,
-        to_region: presence.type === "road" ? presence.toRegion : null,
-        to_location: presence.type === "road" ? presence.toLocation : null,
-        visibility: presence.visibility || "public"
-    };
-
-    const { data, error } = await supabase
-        .from("rp_presence")
-        .upsert(payload, { onConflict: "character_id" })
-        .select("*")
-        .single();
+    const { data, error } = await supabase.rpc("set_lorgus_rp_presence", {
+        p_character_id: window.activeCharacterId,
+        p_presence_type: presence.type,
+        p_region: presence.type === "location" ? presence.region : null,
+        p_location: presence.type === "location" ? presence.location : null,
+        p_from_region: presence.type === "road" ? presence.fromRegion : null,
+        p_from_location: presence.type === "road" ? presence.fromLocation : null,
+        p_to_region: presence.type === "road" ? presence.toRegion : null,
+        p_to_location: presence.type === "road" ? presence.toLocation : null,
+        p_visibility: presence.visibility || "public"
+    });
 
     if (error) {
         console.error("Не удалось сохранить RP-присутствие:", error);
         throw error;
     }
 
-    const mapped = mapServerPresence(data);
+    const row = Array.isArray(data) ? data[0] : data;
+    const mapped = mapServerPresence(row);
     window.activeRpPresence = mapped;
     return mapped;
 }
@@ -2136,14 +2126,44 @@ async function clearRpPresence() {
     window.activeRpPresence = null;
 }
 
+const LORGUS_ROUTES = [
+    ["Каэлор", "Атэрон", "land"],
+    ["Атэрон", "Морвейн", "land"],
+    ["Атэрон", "Ксандр", "land"],
+    ["Ксандр", "Святые Земли", "land"],
+    ["Ксандр", "Морвейн", "land"],
+    ["Святые Земли", "Спорные Земли", "land"],
+    ["Святые Земли", "Лирэн", "land"],
+    ["Лирэн", "Ксандр", "sea"],
+    ["Ксандр", "Каэлор", "sea"],
+    ["Морвейн", "Спорные Земли", "sea"]
+];
+
+function getRouteBetweenRegions(fromRegion, toRegion) {
+    return LORGUS_ROUTES.find(([from, to]) =>
+        (from === fromRegion && to === toRegion) ||
+        (from === toRegion && to === fromRegion)
+    ) || null;
+}
+
 async function getAvailableTravelDestinations(regionName, locationName) {
     const destinations = [];
+
     for (const [region, data] of Object.entries(LORGUS_LOCATIONS)) {
+        if (region === regionName) continue;
+
+        const route = getRouteBetweenRegions(regionName, region);
+        if (!route) continue;
+
         for (const [location] of data.locations || []) {
-            if (region === regionName && location === locationName) continue;
-            destinations.push({ region, location });
+            destinations.push({
+                region,
+                location,
+                travelType: route[2]
+            });
         }
     }
+
     return destinations;
 }
 
@@ -2191,13 +2211,21 @@ async function startTravel(fromLocation, fromRegion, toLocation, toRegion) {
         return;
     }
 
+    const route = getRouteBetweenRegions(fromRegion, toRegion);
+    const destinationExists = LORGUS_LOCATIONS[toRegion]?.locations
+        ?.some(([location]) => location === toLocation);
+
+    if (!route || !destinationExists) {
+        alert("Прямого канонического маршрута сюда нет.");
+        return;
+    }
+
     const road = await saveRpPresence({
         type: "road",
         fromLocation,
         fromRegion,
         toLocation,
         toRegion,
-        startedAt: new Date().toISOString(),
         visibility: "public"
     });
 
