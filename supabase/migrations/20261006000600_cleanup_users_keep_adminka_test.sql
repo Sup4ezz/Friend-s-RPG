@@ -11,11 +11,11 @@ declare
 begin
     select count(*) into adminka_count
     from auth.users
-    where lower(email) = 'u_YWRtaW5rYQ@auth.lorgus.local';
+    where lower(email) = lower('u_YWRtaW5rYQ@auth.lorgus.local');
 
     select count(*) into test_count
     from auth.users
-    where lower(email) = 'u_dGVzdA@auth.lorgus.local';
+    where lower(email) = lower('u_dGVzdA@auth.lorgus.local');
 
     if adminka_count <> 1 or test_count <> 1 then
         raise exception
@@ -27,6 +27,6 @@ $$;
 
 delete from auth.users
 where lower(email) not in (
-    'u_YWRtaW5rYQ@auth.lorgus.local',
-    'u_dGVzdA@auth.lorgus.local'
+    lower('u_YWRtaW5rYQ@auth.lorgus.local'),
+    lower('u_dGVzdA@auth.lorgus.local')
 );
