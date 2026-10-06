@@ -3850,7 +3850,6 @@ function renderLorgusWorldMap(container, character) {
 
     selectLorgusMapRegion("Атэрон");
     initializeLorgusMapViewport();
-    renderLorgusMapMarkers();
     addLorgusMapEditorUI();
 }
 
