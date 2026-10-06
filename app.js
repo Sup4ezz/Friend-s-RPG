@@ -83,63 +83,59 @@ function renderAuth() {
             <div class="lorgus-vignette" aria-hidden="true"></div>
             <div class="background-glow"></div>
 
-            <div class="lorgus-portal-mark" aria-hidden="true">
-                <span class="portal-ring portal-ring-1"></span>
-                <span class="portal-ring portal-ring-2"></span>
-                <span class="portal-ring portal-ring-3"></span>
-                <span class="portal-orbit portal-orbit-a"></span>
-                <span class="portal-orbit portal-orbit-b"></span>
-                <span class="portal-core">✦</span>
+            <div class="lorgus-auth-world" aria-hidden="true">
+                <div class="world-grid"></div>
+                <div class="world-horizon"></div>
+                <div class="world-arc world-arc-a"></div>
+                <div class="world-arc world-arc-b"></div>
+                <div class="world-arc world-arc-c"></div>
+                <div class="world-coordinate world-coordinate-a">43° 17' / 001</div>
+                <div class="world-coordinate world-coordinate-b">THE WORLD IS NOT EMPTY</div>
+                <div class="world-coordinate world-coordinate-c">NO RETURN // NO RECORD</div>
             </div>
 
-            <div class="lorgus-side-notation lorgus-side-notation-left" aria-hidden="true">
-                <i></i><span>LORE / ACCESS / 001</span>
+            <header class="lorgus-auth-header">
+                <span>LORE NETWORK</span>
+                <span>WORLD 001</span>
+                <span>BUILD // LORGUS</span>
+            </header>
+
+            <div class="lorgus-auth-title" aria-hidden="true">
+                <span class="title-ghost">LORGUS</span>
+                <span class="title-main">LORGUS</span>
+                <span class="title-sub">THE LIVING WORLD</span>
             </div>
-            <div class="lorgus-side-notation lorgus-side-notation-right" aria-hidden="true">
-                <span>WORLD IS WAITING</span><i></i>
+
+            <div class="lorgus-auth-side left" aria-hidden="true">
+                <b>01</b><span>OBSERVE</span><i></i><span>REMEMBER</span><b>04</b>
+            </div>
+
+            <div class="lorgus-auth-side right" aria-hidden="true">
+                <span>WORLD STATUS</span><b>ACTIVE</b><i></i><span>PLAYER ACCESS</span><b>RESTRICTED</b>
             </div>
 
             <section class="auth-container">
-                <div class="brand">
-                    <div class="brand-symbol">✦</div>
-                    <h1>ЛОРГУС</h1>
-
-                    <div class="brand-line">
-                        <span></span>
-                        <i>НЕБОЛЬШОЙ ШАГ В МИР, КОТОРЫЙ НЕ ЖДАЛ ТЕБЯ</i>
-                        <span></span>
-                    </div>
-                </div>
-
                 <div class="auth-panel">
-                    <div class="auth-tabs">
-                        <button
-                            id="login-tab"
-                            class="auth-tab active"
-                            onclick="showLogin()"
-                        >
-                            Войти
-                        </button>
-
-                        <button
-                            id="register-tab"
-                            class="auth-tab"
-                            onclick="showRegister()"
-                        >
-                            Регистрация
-                        </button>
+                    <div class="auth-panel-kicker">
+                        <span>ACCESS NODE</span>
+                        <i></i>
+                        <span>AUTHORIZED PERSONNEL ONLY</span>
                     </div>
 
-                    <div
-                        id="auth-form"
-                        class="auth-form-container"
-                    ></div>
-                </div>
+                    <div class="auth-tabs">
+                        <button id="login-tab" class="auth-tab active" onclick="showLogin()">Войти</button>
+                        <button id="register-tab" class="auth-tab" onclick="showRegister()">Создать путь</button>
+                    </div>
 
-                <p class="auth-footer">
-                    Вход в мир предназначен только для участников игры.
-                </p>
+                    <div id="auth-form" class="auth-form-container"></div>
+                </div>
             </section>
+
+            <footer class="lorgus-auth-footer">
+                <span>LORE / ACCESS / 001</span>
+                <span>Вход открывает доступ к миру. Не к сайту.</span>
+                <span>© LORGUS</span>
+            </footer>
         </main>
     `;
 
