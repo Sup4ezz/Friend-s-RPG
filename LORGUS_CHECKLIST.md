@@ -680,3 +680,35 @@ Migration 20261006000500_rp_presence_transitions.sql is in main and must be appl
 5. Test normal location → road → destination flow — must pass.
 6. Test protected presence cleanup — must pass.
 7. Then audit stale presence/reload and Realtime edge cases.
+
+
+## 21. SUPABASE DEPLOYMENT CI — 2026-10-06
+
+- [x] Root cause established: Supabase GitHub Integration deploys production migrations, but its production result is not exposed to us through the repository's GitHub Actions status API in a reliable machine-readable check.
+- [x] Added explicit GitHub Actions workflow: .github/workflows/deploy-supabase.yml.
+- [x] Workflow triggers only when supabase/migrations/** or supabase/config.toml changes on main.
+- [x] Workflow uses the official Supabase CLI setup action.
+- [x] Workflow validates SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_ID, and SUPABASE_DB_PASSWORD secrets.
+- [x] Workflow links the production project, runs supabase db push --linked, then runs supabase migration list --linked.
+- [x] GitHub now has an explicit job named "Supabase Production" whose conclusion is directly machine-readable.
+
+Commit: 55da739247b9f0718a0c10b4071737e9fda25521 — Add explicit Supabase production deployment check
+
+### IMPORTANT MIGRATION OF DEPLOYMENT OWNERSHIP
+The repository now contains an explicit Supabase deployment workflow. To avoid two independent deployers racing on the same production database, disable Supabase Dashboard -> GitHub Integration -> Deploy to production after the new workflow is configured and confirmed working. Keep the GitHub repository connection if preview/branch features are desired.
+
+### Required one-time GitHub configuration
+Repository Settings -> Secrets and variables -> Actions -> Secrets:
+- SUPABASE_ACCESS_TOKEN
+- SUPABASE_PROJECT_ID
+- SUPABASE_DB_PASSWORD
+
+### Current stopping point
+The workflow is committed, but it cannot prove production deployment until the three GitHub Actions secrets exist. The first run will intentionally fail fast and visibly if any secret is missing.
+
+### Next task
+1. Add the three GitHub Actions secrets.
+2. Run/trigger the Supabase Production workflow.
+3. Confirm 001-005 migration state in the workflow output.
+4. After successful run, disable Supabase Integration's Deploy to production to leave one authoritative production deployer.
+5. Keep this workflow as the authoritative machine-readable production migration status.
