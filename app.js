@@ -4542,7 +4542,7 @@ function initializeLorgusWebGL() {
     }
 
     const addBox = (x, y, z, sx, sy, sz, material = stone, rot = 0) => {
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz, 2, 2)), material);
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz, 2, 2, 2), material);
         mesh.position.set(x, y, z);
         mesh.rotation.z = rot;
         mesh.castShadow = true;
