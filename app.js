@@ -1372,6 +1372,31 @@ async function renderAdminApplications(
                     ).join("")
             }
         </div>
+
+        <section class="admin-character-management">
+            <div class="admin-section-heading">
+                <h2>Персонажи</h2>
+                <p>Удаление персонажей для тестирования.</p>
+            </div>
+
+            <div class="admin-applications">
+                ${
+                    approved.length === 0
+                        ? `
+                            <div class="admin-empty">
+                                <h2>Персонажей нет</h2>
+                                <p>Список одобренных персонажей пуст.</p>
+                            </div>
+                        `
+                        : approved.map(
+                            application =>
+                                renderAdminCharacterManagement(
+                                    application
+                                )
+                        ).join("")
+                }
+            </div>
+        </section>
     `;
 
     bindAdminButtons(container);
@@ -1486,7 +1511,67 @@ function renderAdminApplication(application) {
 /* =========================================================
    КНОПКИ АДМИНКИ
    ========================================================= */
+function renderAdminCharacterManagement(application) {
+    return `
+        <article
+            class="admin-application admin-character-management-item"
+            data-character-id="${application.character_id || ""}"
+        >
+            <div class="admin-application-main">
+                <h3>${escapeHtml(application.name)}</h3>
+                <div class="admin-application-info">
+                    <span><strong>Раса:</strong> ${escapeHtml(application.race || "—")}</span>
+                    <span><strong>Родина:</strong> ${escapeHtml(application.homeland || "—")}</span>
+                    <span><strong>Заявка:</strong> ${escapeHtml(String(application.id))}</span>
+                </div>
+            </div>
+            <div class="admin-application-actions">
+                <button
+                    class="admin-reject-button admin-delete-character-button"
+                    data-character-id="${application.character_id || ""}"
+                    data-character-name="${escapeHtml(application.name || "персонажа")}"
+                >
+                    Удалить персонажа
+                </button>
+            </div>
+        </article>
+    `;
+}
+
 function bindAdminButtons(container) {
+    container.querySelectorAll(".admin-delete-character-button").forEach(button => {
+        button.addEventListener("click", async () => {
+            const characterId = button.dataset.characterId;
+            const characterName = button.dataset.characterName || "этого персонажа";
+
+            if (!characterId) {
+                alert("У персонажа отсутствует ID.");
+                return;
+            }
+
+            if (!confirm(`Удалить персонажа «${characterName}»?\\n\\nБудут удалены его RP-присутствие, RP-сообщения и заявка. Отменить действие нельзя.`)) {
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = "Удаление...";
+
+            const { error } = await supabase.rpc("admin_delete_character", {
+                p_character_id: characterId
+            });
+
+            if (error) {
+                console.error(error);
+                alert("Не удалось удалить персонажа:\\n\\n" + error.message);
+                button.disabled = false;
+                button.textContent = "Удалить персонажа";
+                return;
+            }
+
+            await loadAdminPanel(container);
+        });
+    });
+
     container.querySelectorAll(".admin-approve-button").forEach(button => {
         button.addEventListener("click", async () => {
             const applicationId = button.dataset.applicationId;
