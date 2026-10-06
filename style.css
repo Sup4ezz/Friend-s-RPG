@@ -8626,3 +8626,14 @@ body{
   content:none !important;
   display:none !important;
 }
+
+/* Final auth panel sizing cleanup: no reserved space for removed caption */
+.auth-panel{
+  padding-top:38px !important;
+}
+
+@media(max-width:560px){
+  .auth-panel{
+    padding-top:38px !important;
+  }
+}
