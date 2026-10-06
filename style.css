@@ -9575,8 +9575,8 @@ body{
   justify-content:center;
   box-sizing:border-box;
   padding:4px 12px;
-  border:1px dashed rgba(245,225,170,.8);
-  background:rgba(20,15,8,.35);
+  border:0;
+  background:transparent;
   color:rgba(255,239,193,1);
   font-family:var(--title-font);
   font-size:18px;
@@ -9584,17 +9584,23 @@ body{
   letter-spacing:.08em;
   text-transform:uppercase;
   white-space:nowrap;
-  text-shadow:0 2px 8px rgba(0,0,0,.95);
-  cursor:move;
+  text-shadow:0 2px 8px rgba(0,0,0,.98);
+  cursor:default;
   user-select:none;
   touch-action:none;
   pointer-events:auto;
 }
-.lorgus-map-editor-rect:hover{
+.lorgus-map-marker-layer.editor-mode .lorgus-map-editor-rect{
+  border:1px dashed rgba(245,225,170,.8);
+  background:rgba(20,15,8,.35);
+  cursor:move;
+}
+.lorgus-map-marker-layer.editor-mode .lorgus-map-editor-rect:hover{
   background:rgba(210,170,70,.16);
   box-shadow:0 0 22px rgba(210,170,70,.22);
 }
 .lorgus-map-editor-handle{
+  display:none;
   position:absolute;
   width:14px;
   height:14px;
@@ -9606,6 +9612,9 @@ body{
   cursor:nwse-resize;
   z-index:3;
   box-shadow:0 0 8px rgba(0,0,0,.7);
+}
+.lorgus-map-marker-layer.editor-mode .lorgus-map-editor-handle{
+  display:block;
 }
 
 /* LORGUS auth input readability fix */
