@@ -3558,6 +3558,61 @@ const LORGUS_MAP_MARKERS = [
     { id:"Спорные Земли", x:62, y:66, type:"contested", description:"Независимые поселения и территории вне власти пяти королевств." }
 ];
 
+function enableLorgusMapEditor() {
+    const layer = document.getElementById("lorgus-map-marker-layer");
+    const viewport = document.getElementById("lorgus-map-viewport");
+    if (!layer || !viewport) return;
+
+    layer.classList.toggle("editor-mode");
+    const active = layer.classList.contains("editor-mode");
+    const button = document.getElementById("lorgus-map-editor-toggle");
+    if (button) button.textContent = active ? "✓ РЕДАКТОР КАРТЫ" : "✎ РЕДАКТОР КАРТЫ";
+
+    document.querySelectorAll(".lorgus-map-marker").forEach(marker => {
+        marker.onpointerdown = active ? (event) => {
+            event.stopPropagation();
+            event.preventDefault();
+            const start = { x:event.clientX, y:event.clientY };
+            const rect = viewport.getBoundingClientRect();
+            const move = (e) => {
+                const x = Math.max(1, Math.min(99, ((e.clientX - rect.left) / rect.width) * 100));
+                const y = Math.max(1, Math.min(99, ((e.clientY - rect.top) / rect.height) * 100));
+                marker.style.left = x + "%";
+                marker.style.top = y + "%";
+                marker.dataset.x = x.toFixed(2);
+                marker.dataset.y = y.toFixed(2);
+            };
+            const up = () => {
+                window.removeEventListener("pointermove", move);
+                window.removeEventListener("pointerup", up);
+                const x = marker.dataset.x;
+                const y = marker.dataset.y;
+                const hint = document.getElementById("lorgus-map-surface-hint");
+                if (hint) {
+                    hint.textContent = marker.dataset.region + " · X:" + x + "% Y:" + y + "%";
+                    hint.classList.add("visible");
+                    clearTimeout(window.lorgusMapHintTimer);
+                    window.lorgusMapHintTimer = setTimeout(() => hint.classList.remove("visible"), 3500);
+                }
+            };
+            window.addEventListener("pointermove", move);
+            window.addEventListener("pointerup", up, {once:true});
+        } : null;
+    });
+}
+
+function addLorgusMapEditorUI() {
+    const controls = document.querySelector(".lorgus-map-controls");
+    if (!controls || document.getElementById("lorgus-map-editor-toggle")) return;
+    const button = document.createElement("button");
+    button.id = "lorgus-map-editor-toggle";
+    button.type = "button";
+    button.className = "lorgus-map-control lorgus-map-editor-toggle";
+    button.textContent = "✎ РЕДАКТОР КАРТЫ";
+    button.onclick = enableLorgusMapEditor;
+    controls.appendChild(button);
+}
+
 function renderLorgusMapMarkers() {
     const layer = document.getElementById("lorgus-map-marker-layer");
     if (!layer) return;
@@ -3723,6 +3778,7 @@ function renderLorgusWorldMap(container, character) {
     selectLorgusMapRegion("Атэрон");
     initializeLorgusMapViewport();
     renderLorgusMapMarkers();
+    addLorgusMapEditorUI();
 }
 
 let lorgusMapScale = 1;
@@ -3826,5 +3882,6 @@ function renderCharacter(container, character) {
 window.selectLorgusMapRegion = selectLorgusMapRegion;
 window.selectLorgusMapMarker = selectLorgusMapMarker;
 window.handleLorgusMapSurfaceClick = handleLorgusMapSurfaceClick;
+window.enableLorgusMapEditor = enableLorgusMapEditor;
 window.lorgusMapZoom = lorgusMapZoom;
 window.lorgusMapReset = lorgusMapReset;
