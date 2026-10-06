@@ -226,7 +226,7 @@ function render(session) {
                     eyeTransition = createLorgusEyeTransition();
 
                     // Пока веки сомкнуты, кабинет спокойно готовится под ними.
-                    await renderCabinet(session, true);
+                    await renderCabinet(session, true, true);
 
                     lorgusPortalEntering = false;
 
@@ -965,7 +965,7 @@ async function register(event) {
    КАБИНЕТ
    ========================================================= */
 
-async function renderCabinet(session, preserveCurrentScene = false) {
+async function renderCabinet(session, preserveCurrentScene = false, forceCharacterSelection = false) {
     const username =
         session.user.user_metadata?.username ||
         "Игрок";
@@ -1003,7 +1003,7 @@ async function renderCabinet(session, preserveCurrentScene = false) {
         root.appendChild(cabinet);
     }
 
-    await loadPlayerState(session);
+    await loadPlayerState(session, forceCharacterSelection);
 
     if (previousScene && previousScene.parentNode === root) {
         previousScene.remove();
@@ -1015,6 +1015,7 @@ async function renderCabinet(session, preserveCurrentScene = false) {
     cabinet.style.inset = "";
     cabinet.style.zIndex = "";
 
+    cabinet.classList.remove("preparing");
     requestAnimationFrame(() => cabinet.classList.add("ready"));
 
     return cabinet;
@@ -1024,7 +1025,7 @@ async function renderCabinet(session, preserveCurrentScene = false) {
    СОСТОЯНИЕ ИГРОКА
    ========================================================= */
 
-async function loadPlayerState(session) {
+async function loadPlayerState(session, forceCharacterSelection = false) {
     const container =
         document.getElementById("cabinet-content");
 
@@ -1088,7 +1089,7 @@ async function loadPlayerState(session) {
         sessionStorage.getItem("lorgus_active_character_id") ||
         localStorage.getItem("lorgus_active_character_id");
 
-    if (savedCharacterId) {
+    if (!forceCharacterSelection && savedCharacterId) {
         const savedApplication = approvedApplications.find(
             application =>
                 String(application.character_id) === String(savedCharacterId)
