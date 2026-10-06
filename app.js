@@ -107,8 +107,55 @@ function createLorgusEyeTransition() {
     overlay.className = "lorgus-eye-transition";
     overlay.setAttribute("aria-hidden", "true");
     overlay.innerHTML = `
-        <div class="lorgus-eyelid lorgus-eyelid-top"></div>
-        <div class="lorgus-eyelid lorgus-eyelid-bottom"></div>
+        <svg class="lorgus-eye-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="lorgus-lid-top" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#090706"/>
+                    <stop offset="0.72" stop-color="#17110d"/>
+                    <stop offset="1" stop-color="#080605"/>
+                </linearGradient>
+                <linearGradient id="lorgus-lid-bottom" x1="0" y1="1" x2="0" y2="0">
+                    <stop offset="0" stop-color="#090706"/>
+                    <stop offset="0.72" stop-color="#17110d"/>
+                    <stop offset="1" stop-color="#080605"/>
+                </linearGradient>
+                <filter id="lorgus-lid-shadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="0.65"/>
+                </filter>
+            </defs>
+
+            <g class="lorgus-lid-group lorgus-lid-group-top">
+                <path class="lorgus-lid-shadow"
+                      d="M-10 0H110V55C87 45 67 41 50 41C33 41 13 45-10 55Z"
+                      fill="#000" opacity=".72" filter="url(#lorgus-lid-shadow)"/>
+                <path class="lorgus-lid-surface"
+                      d="M-10 0H110V53C87 43 67 39 50 39C33 39 13 43-10 53Z"
+                      fill="url(#lorgus-lid-top)"/>
+                <path class="lorgus-lash-line"
+                      d="M-2 52C17 44 34 40 50 40C66 40 83 44 102 52"
+                      fill="none" stroke="#020201" stroke-width="1.05" stroke-linecap="round"/>
+                <g class="lorgus-lashes">
+                    <path d="M4 49L1 44M9 47L7 41M14 45L12 39M19 44L17 38M24 42L22 36M29 41L28 35M34 40L33 34M39 39L38 33M44 39L43 33M50 39L50 32M56 39L57 33M61 40L62 34M66 41L67 35M71 42L73 36M76 44L78 38M81 45L84 39M86 47L89 41M91 49L94 44"
+                          fill="none" stroke="#020201" stroke-width=".72" stroke-linecap="round"/>
+                </g>
+            </g>
+
+            <g class="lorgus-lid-group lorgus-lid-group-bottom">
+                <path class="lorgus-lid-shadow"
+                      d="M-10 100H110V45C87 55 67 59 50 59C33 59 13 55-10 45Z"
+                      fill="#000" opacity=".72" filter="url(#lorgus-lid-shadow)"/>
+                <path class="lorgus-lid-surface"
+                      d="M-10 100H110V47C87 57 67 61 50 61C33 61 13 57-10 47Z"
+                      fill="url(#lorgus-lid-bottom)"/>
+                <path class="lorgus-lash-line"
+                      d="M-2 48C17 56 34 60 50 60C66 60 83 56 102 48"
+                      fill="none" stroke="#020201" stroke-width="1.05" stroke-linecap="round"/>
+                <g class="lorgus-lashes">
+                    <path d="M4 51L1 56M9 53L7 59M14 55L12 61M19 56L17 62M24 58L22 64M29 59L28 65M34 60L33 66M39 61L38 67M44 61L43 67M50 61L50 68M56 61L57 67M61 60L62 66M66 59L67 65M71 58L73 64M76 56L78 62M81 55L84 61M86 53L89 59M91 51L94 56"
+                          fill="none" stroke="#020201" stroke-width=".72" stroke-linecap="round"/>
+                </g>
+            </g>
+        </svg>
     `;
     overlay.style.cssText = [
         "position:fixed",
@@ -124,47 +171,48 @@ function createLorgusEyeTransition() {
         .lorgus-eye-transition{
             isolation:isolate;
         }
-        .lorgus-eye-transition .lorgus-eyelid{
+
+        .lorgus-eye-svg{
             position:absolute;
-            left:-10vw;
-            width:120vw;
-            height:62vh;
-            background:#020201;
+            inset:0;
+            width:100%;
+            height:100%;
+            display:block;
+            overflow:hidden;
+        }
+
+        .lorgus-lid-group{
+            transform-box:fill-box;
+            transform-origin:center;
             will-change:transform;
-            transition:transform 620ms cubic-bezier(.76,0,.2,1);
+            transition:transform 1120ms cubic-bezier(.65,0,.18,1);
         }
 
-        /* Верхнее веко идёт от самого верхнего края к центру. */
-        .lorgus-eye-transition .lorgus-eyelid-top{
-            top:-12vh;
-            border-radius:0 0 50% 50% / 0 0 100% 100%;
-            transform:translateY(-100%);
-            box-shadow:0 10px 35px rgba(0,0,0,.42);
+        /* Открытый глаз: веки находятся за пределами кадра. */
+        .lorgus-lid-group-top{
+            transform:translateY(-58%);
         }
 
-        /* Нижнее веко идёт от самого нижнего края к центру. */
-        .lorgus-eye-transition .lorgus-eyelid-bottom{
-            bottom:-12vh;
-            border-radius:50% 50% 0 0 / 100% 100% 0 0;
-            transform:translateY(100%);
-            box-shadow:0 -10px 35px rgba(0,0,0,.42);
+        .lorgus-lid-group-bottom{
+            transform:translateY(58%);
         }
 
-        /* Смыкание: края век движутся навстречу друг другу,
-           пока полностью не перекрывают весь кадр. */
-        .lorgus-eye-transition.closed .lorgus-eyelid-top{
-            transform:translateY(0);
-        }
-        .lorgus-eye-transition.closed .lorgus-eyelid-bottom{
+        /* Закрытие: верхнее и нижнее веко медленно сходятся к центру. */
+        .lorgus-eye-transition.closed .lorgus-lid-group-top{
             transform:translateY(0);
         }
 
-        /* Открытие: из центра обратно к краям. */
-        .lorgus-eye-transition.open .lorgus-eyelid-top{
-            transform:translateY(-100%);
+        .lorgus-eye-transition.closed .lorgus-lid-group-bottom{
+            transform:translateY(0);
         }
-        .lorgus-eye-transition.open .lorgus-eyelid-bottom{
-            transform:translateY(100%);
+
+        /* Открытие: движение полностью разворачивается обратно. */
+        .lorgus-eye-transition.open .lorgus-lid-group-top{
+            transform:translateY(-58%);
+        }
+
+        .lorgus-eye-transition.open .lorgus-lid-group-bottom{
+            transform:translateY(58%);
         }
     `;
     overlay.appendChild(style);
