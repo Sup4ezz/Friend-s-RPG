@@ -4244,19 +4244,19 @@ function initializeLorgusWebGL() {
     const groundTexture = makeStoneTexture("#39332c", true);
 
     const stone = new THREE.MeshStandardMaterial({
-        map: stoneTexture, color: 0xb8a68c, roughness: 0.91, metalness: 0,
+        map: stoneTexture, color: 0x9f8060, roughness: 0.91, metalness: 0,
         bumpMap: stoneTexture, bumpScale: 0.16
     });
     const stoneDark = new THREE.MeshStandardMaterial({
-        map: darkStoneTexture, color: 0xaaa092, roughness: 0.96, metalness: 0,
+        map: darkStoneTexture, color: 0x5d6260, roughness: 0.96, metalness: 0,
         bumpMap: darkStoneTexture, bumpScale: 0.12
     });
     const stoneEdge = new THREE.MeshStandardMaterial({
-        map: stoneTexture, color: 0xc5b39a, roughness: 0.84, metalness: 0,
+        map: stoneTexture, color: 0xb99a70, roughness: 0.84, metalness: 0,
         bumpMap: stoneTexture, bumpScale: 0.18
     });
     const groundStone = new THREE.MeshStandardMaterial({
-        map: groundTexture, color: 0xb0a18e, roughness: 0.98, metalness: 0,
+        map: groundTexture, color: 0x6d6658, roughness: 0.98, metalness: 0,
         bumpMap: groundTexture, bumpScale: 0.08
     });
     const rune = new THREE.MeshStandardMaterial({ color: 0x8c6827, emissive: 0x8c6827, emissiveIntensity: 4.2, transparent: true, opacity: 0.82 });
@@ -4367,6 +4367,27 @@ function initializeLorgusWebGL() {
         }
     }
 
+    // Individual stone color variation: old masonry should have age and mineral differences.
+    const masonryTints = [0x9a795b, 0xa68764, 0x8c7057, 0xb0926e, 0x7e6a55];
+    for (const side of [-1, 1]) {
+        for (let row = 0; row < 6; row++) {
+            for (let col = 0; col < (row % 2 ? 3 : 2); col++) {
+                const x = side * (7.85 + col * (5.1 / (row % 2 ? 3 : 2)));
+                const y = 2.9 + row * 1.95;
+                const tint = new THREE.MeshStandardMaterial({
+                    map: stoneTexture,
+                    color: masonryTints[(row * 3 + col) % masonryTints.length],
+                    roughness: 0.88,
+                    bumpMap: stoneTexture,
+                    bumpScale: 0.14
+                });
+                const wash = new THREE.Mesh(new THREE.BoxGeometry(1.25, 1.05, 0.035), tint);
+                wash.position.set(x + (Math.random() - 0.5) * 0.35, y + (Math.random() - 0.5) * 0.25, 3.40);
+                world.add(wash);
+            }
+        }
+    }
+
     // Deep carved seams on the front face.
     const seamMat = new THREE.MeshBasicMaterial({
         color: 0x15110e,
@@ -4427,9 +4448,9 @@ function initializeLorgusWebGL() {
 
     // World-life pass: distant ruins, dead trees and scattered structures give the landscape scale.
     const ruinMat = new THREE.MeshStandardMaterial({
-        map: darkStoneTexture, color: 0x71675b, roughness: 0.98, bumpMap: darkStoneTexture, bumpScale: 0.1
+        map: darkStoneTexture, color: 0x4d5148, roughness: 0.98, bumpMap: darkStoneTexture, bumpScale: 0.1
     });
-    const woodMat = new THREE.MeshStandardMaterial({ color: 0x211710, roughness: 1 });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x241c16, roughness: 1 });
 
     // Distant ruined walls flank the horizon.
     for (const side of [-1, 1]) {
@@ -4603,6 +4624,10 @@ function initializeLorgusWebGL() {
     world.add(new THREE.HemisphereLight(0xb9a17d, 0x17120d, 1.05));
     world.add(new THREE.AmbientLight(0x9a8567, 0.48));
 
+    const coolFill = new THREE.DirectionalLight(0x6f8790, 1.35);
+    coolFill.position.set(18, 12, 10);
+    world.add(coolFill);
+
     const directional = new THREE.DirectionalLight(0xc8b99f, 4.6);
     directional.castShadow = true;
     directional.shadow.mapSize.set(1024, 1024);
@@ -4628,7 +4653,7 @@ function initializeLorgusWebGL() {
     // Full cinematic environment: eliminate the empty black frame around the monument.
     // Distant mountain silhouettes give the scene a horizon and scale.
     const mountainMat = new THREE.MeshStandardMaterial({
-        color: 0x211d1a, roughness: 1, metalness: 0
+        color: 0x252d2b, roughness: 1, metalness: 0
     });
     const mountainGroup = new THREE.Group();
     for (let i = 0; i < 11; i++) {
@@ -4646,7 +4671,7 @@ function initializeLorgusWebGL() {
 
     // Giant side monoliths frame the gate instead of leaving empty black corners.
     const monolithMat = new THREE.MeshStandardMaterial({
-        map: darkStoneTexture, color: 0x81776a, roughness: 0.98
+        map: darkStoneTexture, color: 0x4b514f, roughness: 0.98
     });
     for (const side of [-1, 1]) {
         for (let i = 0; i < 4; i++) {
@@ -4674,7 +4699,7 @@ function initializeLorgusWebGL() {
 
     // Elevated cliffs behind the gate connect the architecture to the horizon.
     const cliffMat = new THREE.MeshStandardMaterial({
-        map: darkStoneTexture, color: 0x62594f, roughness: 1
+        map: darkStoneTexture, color: 0x343a38, roughness: 1
     });
     for (const side of [-1, 1]) {
         const cliff = new THREE.Mesh(
