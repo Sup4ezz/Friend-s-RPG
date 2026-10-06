@@ -124,38 +124,30 @@ function createLorgusEyeTransition() {
                 </filter>
             </defs>
 
-            <!-- Верхнее веко: основное движение вниз, как при настоящем моргании. -->
+            <!-- Верхнее веко. При закрытии оно опускается до центра. -->
             <g class="lorgus-lid-group lorgus-lid-group-top">
                 <path class="lorgus-lid-shadow"
-                      d="M-10 0H110V55C88 45 68 40 50 39C32 40 12 45-10 55Z"
-                      fill="#000" opacity=".72" filter="url(#lorgus-lid-shadow)"/>
+                      d="M-10 0H110V58C87 48 68 43 50 42C32 43 13 48-10 58Z"
+                      fill="#000" opacity=".75" filter="url(#lorgus-lid-shadow)"/>
                 <path class="lorgus-lid-surface"
-                      d="M-10 0H110V53C88 43 68 38 50 37C32 38 12 43-10 53Z"
+                      d="M-10 0H110V56C87 46 68 41 50 40C32 41 13 46-10 56Z"
                       fill="url(#lorgus-lid-top)"/>
-                <path class="lorgus-lash-line"
-                      d="M-2 52C17 44 34 38 50 38C66 38 83 44 102 52"
-                      fill="none" stroke="#020201" stroke-width="1.05" stroke-linecap="round"/>
-                <g class="lorgus-lashes">
-                    <path d="M5 49L1 42M10 47L6 40M15 45L11 38M20 43L16 36M25 42L21 35M30 41L26 34M35 40L31 33M40 39L36 32M45 38L41 31M50 38L50 30M55 38L59 31M60 39L64 32M65 40L69 33M70 41L74 34M75 42L79 35M80 43L84 36M85 45L89 38M90 47L94 40"
-                          fill="none" stroke="#020201" stroke-width=".82" stroke-linecap="round"/>
-                </g>
+                <path class="lorgus-lid-edge"
+                      d="M-2 55C17 46 34 40 50 40C66 40 83 46 102 55"
+                      fill="none" stroke="#020201" stroke-width="1.15" stroke-linecap="round"/>
             </g>
 
-            <!-- Нижнее веко: поднимается навстречу, но меньше верхнего. -->
+            <!-- Нижнее веко. При закрытии оно поднимается до центра. -->
             <g class="lorgus-lid-group lorgus-lid-group-bottom">
                 <path class="lorgus-lid-shadow"
-                      d="M-10 100H110V45C88 54 68 59 50 60C32 59 12 54-10 45Z"
-                      fill="#000" opacity=".72" filter="url(#lorgus-lid-shadow)"/>
+                      d="M-10 100H110V42C87 52 68 57 50 58C32 57 13 52-10 42Z"
+                      fill="#000" opacity=".75" filter="url(#lorgus-lid-shadow)"/>
                 <path class="lorgus-lid-surface"
-                      d="M-10 100H110V47C88 56 68 61 50 62C32 61 12 56-10 47Z"
+                      d="M-10 100H110V44C87 54 68 59 50 60C32 59 13 54-10 44Z"
                       fill="url(#lorgus-lid-bottom)"/>
-                <path class="lorgus-lash-line"
-                      d="M-2 48C17 56 34 61 50 62C66 61 83 56 102 48"
-                      fill="none" stroke="#020201" stroke-width="1.05" stroke-linecap="round"/>
-                <g class="lorgus-lashes">
-                    <path d="M5 51L1 58M10 53L6 60M15 55L11 62M20 57L16 64M25 59L21 66M30 60L26 67M35 61L31 68M40 62L36 69M45 62L41 69M50 62L50 70M55 62L59 69M60 62L64 69M65 61L69 68M70 60L74 67M75 59L79 66M80 57L84 64M85 55L89 62M90 53L94 60"
-                          fill="none" stroke="#020201" stroke-width=".82" stroke-linecap="round"/>
-                </g>
+                <path class="lorgus-lid-edge"
+                      d="M-2 45C17 54 34 60 50 60C66 60 83 54 102 45"
+                      fill="none" stroke="#020201" stroke-width="1.15" stroke-linecap="round"/>
             </g>
         </svg>
     `;
@@ -166,7 +158,7 @@ function createLorgusEyeTransition() {
         "z-index:2147483647",
         "pointer-events:none",
         "overflow:hidden",
-        "background:transparent"
+        "background:#020201"
     ].join(";");
 
     const style = document.createElement("style");
@@ -187,7 +179,6 @@ function createLorgusEyeTransition() {
             transition:transform 1180ms cubic-bezier(.7,0,.2,1);
         }
 
-        /* Открытый глаз: веки находятся за пределами кадра. */
         .lorgus-lid-group-top{
             transform:translateY(-58%);
         }
@@ -195,16 +186,11 @@ function createLorgusEyeTransition() {
             transform:translateY(58%);
         }
 
-        /* Закрытие: верхнее веко делает основной ход вниз,
-           нижнее поднимается навстречу ему. */
-        .lorgus-eye-transition.closed .lorgus-lid-group-top{
-            transform:translateY(0);
-        }
+        .lorgus-eye-transition.closed .lorgus-lid-group-top,
         .lorgus-eye-transition.closed .lorgus-lid-group-bottom{
             transform:translateY(0);
         }
 
-        /* Открытие: обратное движение от центра к краям. */
         .lorgus-eye-transition.open .lorgus-lid-group-top{
             transform:translateY(-58%);
         }
