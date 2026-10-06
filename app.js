@@ -5282,6 +5282,75 @@ const openingShape = new THREE.Shape();
     const starField = new THREE.Points(starGeometry, starMaterial);
     world.add(starField);
 
+    // Gate-side architecture: stepped buttresses sit beside the arch without swallowing it.
+    for (const side of [-1, 1]) {
+        const pier = new THREE.Group();
+
+        const main = new THREE.Mesh(
+            new THREE.BoxGeometry(3.55, 11.3, 5.15, 3, 3, 3),
+            stone
+        );
+        main.position.set(0, 5.65, 0.15);
+        main.castShadow = true;
+        main.receiveShadow = true;
+        pier.add(main);
+
+        // Three projecting courses give the masonry a real load-bearing rhythm.
+        const courses = [
+            [4.15, 1.05, 5.7, 0.52],
+            [3.85, 0.72, 5.5, 4.15],
+            [4.05, 0.86, 5.65, 7.85],
+            [4.3, 1.05, 5.8, 11.15]
+        ];
+        for (const [w, h, d, y] of courses) {
+            const block = new THREE.Mesh(
+                new THREE.BoxGeometry(w, h, d, 3, 2, 3),
+                y === 0.52 || y === 11.15 ? stoneEdge : stone
+            );
+            block.position.set(0, y, 0.12);
+            block.rotation.z = (Math.random() - 0.5) * 0.018;
+            block.castShadow = true;
+            block.receiveShadow = true;
+            pier.add(block);
+        }
+
+        // Recessed vertical face: darker stone makes the pier read as carved masonry.
+        const inset = new THREE.Mesh(
+            new THREE.BoxGeometry(2.15, 7.5, 0.28, 2, 2, 2),
+            stoneDark
+        );
+        inset.position.set(0, 5.9, 2.73);
+        inset.castShadow = true;
+        inset.receiveShadow = true;
+        pier.add(inset);
+
+        // Narrow projecting shoulder toward the gate, visually tying the pier to the arch jamb.
+        const shoulder = new THREE.Mesh(
+            new THREE.BoxGeometry(0.72, 9.2, 5.45, 2, 3, 2),
+            stoneEdge
+        );
+        shoulder.position.set(-side * 1.38, 5.0, 0.18);
+        shoulder.castShadow = true;
+        shoulder.receiveShadow = true;
+        pier.add(shoulder);
+
+        pier.position.set(side * 10.05, 0, 0.78);
+        world.add(pier);
+
+        // Separate foundation stones ground the structure instead of letting it read as a cube.
+        for (let i = 0; i < 3; i++) {
+            const base = new THREE.Mesh(
+                new THREE.BoxGeometry(2.7 + i * 0.55, 0.55 + i * 0.12, 5.95 + i * 0.22, 2, 2, 2),
+                i === 0 ? stoneEdge : stone
+            );
+            base.position.set(side * (10.05 - i * 0.04), 0.3 + i * 0.56, 0.78);
+            base.rotation.z = (Math.random() - 0.5) * 0.012;
+            base.castShadow = true;
+            base.receiveShadow = true;
+            world.add(base);
+        }
+    }
+
     const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
     let raf = 0;
     let disposed = false;
@@ -5447,71 +5516,4 @@ const openingShape = new THREE.Shape();
         renderer.dispose();
         if (previousCleanup) previousCleanup();
     };
-}    // Gate-side architecture: stepped buttresses sit beside the arch without swallowing it.
-    for (const side of [-1, 1]) {
-        const pier = new THREE.Group();
-
-        const main = new THREE.Mesh(
-            new THREE.BoxGeometry(3.55, 11.3, 5.15, 3, 3, 3),
-            stone
-        );
-        main.position.set(0, 5.65, 0.15);
-        main.castShadow = true;
-        main.receiveShadow = true;
-        pier.add(main);
-
-        // Three projecting courses give the masonry a real load-bearing rhythm.
-        const courses = [
-            [4.15, 1.05, 5.7, 0.52],
-            [3.85, 0.72, 5.5, 4.15],
-            [4.05, 0.86, 5.65, 7.85],
-            [4.3, 1.05, 5.8, 11.15]
-        ];
-        for (const [w, h, d, y] of courses) {
-            const block = new THREE.Mesh(
-                new THREE.BoxGeometry(w, h, d, 3, 2, 3),
-                y === 0.52 || y === 11.15 ? stoneEdge : stone
-            );
-            block.position.set(0, y, 0.12);
-            block.rotation.z = (Math.random() - 0.5) * 0.018;
-            block.castShadow = true;
-            block.receiveShadow = true;
-            pier.add(block);
-        }
-
-        // Recessed vertical face: darker stone makes the pier read as carved masonry.
-        const inset = new THREE.Mesh(
-            new THREE.BoxGeometry(2.15, 7.5, 0.28, 2, 2, 2),
-            stoneDark
-        );
-        inset.position.set(0, 5.9, 2.73);
-        inset.castShadow = true;
-        inset.receiveShadow = true;
-        pier.add(inset);
-
-        // Narrow projecting shoulder toward the gate, visually tying the pier to the arch jamb.
-        const shoulder = new THREE.Mesh(
-            new THREE.BoxGeometry(0.72, 9.2, 5.45, 2, 3, 2),
-            stoneEdge
-        );
-        shoulder.position.set(-side * 1.38, 5.0, 0.18);
-        shoulder.castShadow = true;
-        shoulder.receiveShadow = true;
-        pier.add(shoulder);
-
-        pier.position.set(side * 10.05, 0, 0.78);
-        world.add(pier);
-
-        // Separate foundation stones ground the structure instead of letting it read as a cube.
-        for (let i = 0; i < 3; i++) {
-            const base = new THREE.Mesh(
-                new THREE.BoxGeometry(2.7 + i * 0.55, 0.55 + i * 0.12, 5.95 + i * 0.22, 2, 2, 2),
-                i === 0 ? stoneEdge : stone
-            );
-            base.position.set(side * (10.05 - i * 0.04), 0.3 + i * 0.56, 0.78);
-            base.rotation.z = (Math.random() - 0.5) * 0.012;
-            base.castShadow = true;
-            base.receiveShadow = true;
-            world.add(base);
-        }
-    }
+}
