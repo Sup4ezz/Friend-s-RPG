@@ -2,6 +2,7 @@ import {
     createClient
 } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js";
+import { RoundedBoxGeometry } from "https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/geometries/RoundedBoxGeometry.js";
 
 let supabase;
 let authSwitching = false;
@@ -4263,7 +4264,8 @@ function initializeLorgusWebGL() {
     const ember = new THREE.MeshBasicMaterial({ color: 0xe2a33d, transparent: true, opacity: 0.8 });
 
     const bevelStone = (sx, sy, sz, material = stone, bevel = 0.16) => {
-        const geometry = new THREE.BoxGeometry(sx, sy, sz, 2, 2, 2);
+        const radius = Math.min(bevel, sx * 0.14, sy * 0.14, sz * 0.14);
+        const geometry = new RoundedBoxGeometry(sx, sy, sz, 3, radius);
         geometry.computeVertexNormals();
         return new THREE.Mesh(geometry, material);
     };
@@ -4310,7 +4312,7 @@ function initializeLorgusWebGL() {
     for (const side of [-1, 1]) {
         for (let i = 0; i < 4; i++) {
             const cap = new THREE.Mesh(
-                new THREE.BoxGeometry(2.4 + Math.random() * 0.7, 1.0 + Math.random() * 0.35, 5.5),
+                new RoundedBoxGeometry(2.4 + Math.random() * 0.7, 1.0 + Math.random() * 0.35, 5.5, 2, 0.14),
                 i === 3 ? stoneEdge : stone
             );
             cap.position.set(
@@ -4381,8 +4383,9 @@ function initializeLorgusWebGL() {
                     bumpMap: stoneTexture,
                     bumpScale: 0.14
                 });
-                const wash = new THREE.Mesh(new THREE.BoxGeometry(1.25, 1.05, 0.035), tint);
+                const wash = new THREE.Mesh(new RoundedBoxGeometry(1.15, 0.92, 0.045, 2, 0.12), tint);
                 wash.position.set(x + (Math.random() - 0.5) * 0.35, y + (Math.random() - 0.5) * 0.25, 3.40);
+                wash.rotation.z = (Math.random() - 0.5) * 0.025;
                 world.add(wash);
             }
         }
@@ -4540,7 +4543,7 @@ function initializeLorgusWebGL() {
     }
 
     const addBox = (x, y, z, sx, sy, sz, material = stone, rot = 0) => {
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz), material);
+        const mesh = new THREE.Mesh(new RoundedBoxGeometry(sx, sy, sz, 2, Math.min(0.18, sx * 0.08, sy * 0.08, sz * 0.08)), material);
         mesh.position.set(x, y, z);
         mesh.rotation.z = rot;
         mesh.castShadow = true;
@@ -4563,7 +4566,7 @@ function initializeLorgusWebGL() {
 
     for (let n = 0; n < 13; n++) {
         const a = Math.PI * (n / 12);
-        const block = new THREE.Mesh(new THREE.BoxGeometry(2.15, 2.2, 4.8), stoneEdge);
+        const block = new THREE.Mesh(new RoundedBoxGeometry(2.15, 2.2, 4.8, 2, 0.16), stoneEdge);
         block.position.set(Math.cos(a) * 11.8, 12.6 + Math.sin(a) * 11.8, (Math.random() - 0.5) * 0.8);
         block.rotation.z = Math.PI / 2 - a;
         world.add(block);
