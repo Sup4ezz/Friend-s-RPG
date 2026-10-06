@@ -4425,6 +4425,83 @@ function initializeLorgusWebGL() {
         }
     }
 
+    // World-life pass: distant ruins, dead trees and scattered structures give the landscape scale.
+    const ruinMat = new THREE.MeshStandardMaterial({
+        map: darkStoneTexture, color: 0x71675b, roughness: 0.98, bumpMap: darkStoneTexture, bumpScale: 0.1
+    });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x211710, roughness: 1 });
+
+    // Distant ruined walls flank the horizon.
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 6; i++) {
+            const w = 2.5 + Math.random() * 3.5;
+            const h = 2.5 + Math.random() * 5.5;
+            const ruin = new THREE.Mesh(
+                new THREE.BoxGeometry(w, h, 1.2 + Math.random() * 1.4),
+                ruinMat
+            );
+            ruin.position.set(
+                side * (15 + i * 4.5 + Math.random() * 2),
+                h * 0.5 - 0.1,
+                -10 - Math.random() * 8
+            );
+            ruin.rotation.y = (Math.random() - 0.5) * 0.12;
+            ruin.rotation.z = (Math.random() - 0.5) * 0.08;
+            ruin.castShadow = true;
+            ruin.receiveShadow = true;
+            world.add(ruin);
+        }
+    }
+
+    // Broken towers create recognizable silhouettes in the distance.
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 2; i++) {
+            const tower = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.4 + Math.random() * 0.6, 1.9 + Math.random() * 0.6, 8 + Math.random() * 5, 8),
+                ruinMat
+            );
+            tower.position.set(side * (25 + i * 8), 3.5, -18 - i * 4);
+            tower.rotation.y = Math.random();
+            tower.castShadow = true;
+            tower.receiveShadow = true;
+            world.add(tower);
+        }
+    }
+
+    // Dead trees break the silhouette without turning the gate into a forest.
+    const addDeadTree = (x, z, scale) => {
+        const tree = new THREE.Group();
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.34, 3.8, 6), woodMat);
+        trunk.position.y = 1.9;
+        trunk.rotation.z = (Math.random() - 0.5) * 0.12;
+        tree.add(trunk);
+        for (let b = 0; b < 4; b++) {
+            const branch = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.13, 1.8 + Math.random(), 5), woodMat);
+            branch.position.set((Math.random() - 0.5) * 0.9, 2.5 + b * 0.38, 0);
+            branch.rotation.z = (Math.random() - 0.5) * 1.5;
+            branch.rotation.x = (Math.random() - 0.5) * 0.35;
+            tree.add(branch);
+        }
+        tree.position.set(x, 0, z);
+        tree.scale.setScalar(scale);
+        tree.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+        world.add(tree);
+    };
+    addDeadTree(-17, -1, 1.5);
+    addDeadTree(17, -2, 1.35);
+    addDeadTree(-24, -9, 2.0);
+    addDeadTree(23, -11, 1.8);
+
+    // Small warm points in the distance imply settlements or fires beyond the gate.
+    const distantFire = new THREE.MeshBasicMaterial({
+        color: 0xd98a32, transparent: true, opacity: 0.72, blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    for (let i = 0; i < 14; i++) {
+        const ember = new THREE.Mesh(new THREE.SphereGeometry(0.08 + Math.random() * 0.09, 8, 8), distantFire);
+        ember.position.set((Math.random() - 0.5) * 38, 0.8 + Math.random() * 3.5, -13 - Math.random() * 12);
+        world.add(ember);
+    }
+
     // Foreground slabs: irregular perspective lines lead the eye into the portal.
     for (let i = 0; i < 8; i++) {
         const width = 4.5 + i * 0.8;
