@@ -11697,3 +11697,24 @@ body{
 .lorgus-webgl{
     opacity:1;
 }
+
+
+/* LORGUS // LET WEBGL OWN THE GATE */
+.lorgus-fantasy-stage .ancient-gate,
+.lorgus-fantasy-stage .world-rift,
+.lorgus-fantasy-stage .rift-glow{
+    display:none;
+}
+.lorgus-fantasy-stage .colossus{
+    opacity:.72;
+}
+.lorgus-fantasy-stage .ground-mist{
+    opacity:.28;
+    mix-blend-mode:screen;
+}
+.lorgus-webgl{
+    z-index:3!important;
+}
+.lorgus-fantasy-stage{
+    z-index:2!important;
+}
