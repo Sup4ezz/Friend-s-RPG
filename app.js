@@ -1322,15 +1322,7 @@ async function renderCharacterSelection(container, applications, pendingApplicat
         createButton.type = "button";
         createButton.className = "character-create-button character-create-card";
         createButton.innerHTML = "<span class=\"create-plus\">+</span><span><b>НОВАЯ ИСТОРИЯ</b><small>Создать ещё одного персонажа</small></span>";
-        createButton.addEventListener("click", () => {
-            try {
-                if (window.lorgusCharacterAudioCleanup) window.lorgusCharacterAudioCleanup();
-            } catch (error) {
-                console.warn("Не удалось корректно остановить музыку выбора:", error);
-            } finally {
-                renderCharacterApplicationForm(container);
-            }
-        });
+        createButton.onclick = () => renderCharacterApplicationForm(container);
         grid.appendChild(createButton);
     }
 }
@@ -1522,9 +1514,7 @@ function initializeLorgusCharacterCreationAudio() {
 }
 
 function renderCharacterApplicationForm(container) {
-    if (lorgusAudioCleanup) { lorgusAudioCleanup(); lorgusAudioCleanup = null; }
-    if (window.lorgusCharacterAudioCleanup) { window.lorgusCharacterAudioCleanup(); }
-    initializeLorgusCharacterCreationAudio();
+    // Музыка здесь вообще не участвует: экран создания должен открываться независимо от AudioContext.
 
     // СОЗДАНИЕ ПЕРСОНАЖА — отдельный экран, не дочерний слой кабинета.
     // Убираем старый game-page целиком: он мог скрывать/обрезать форму
