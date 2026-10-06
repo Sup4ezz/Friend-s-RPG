@@ -652,3 +652,31 @@ Migration 20261006000400_rp_messages_security.sql добавлена в main, н
 5. Тест: road message принимается только для текущей дороги.
 6. Проверить Realtime после RLS.
 7. Затем перейти к race/stale presence и reload.
+
+
+## 20. RP PRESENCE TRANSITIONS — 2026-10-06
+
+- [x] Production confirmed by user: migration 20261006000400_rp_messages_security.sql applied.
+- [x] Found next P0 issue: protected presence RPC still allowed an authenticated player to set any canonical location directly, bypassing travel.
+- [x] Found second transition issue: road creation did not require the supplied origin to equal the character's current location.
+- [x] Added migration 20261006000500_rp_presence_transitions.sql.
+- [x] Location entry now requires an existing current road and its exact destination.
+- [x] Road creation now requires an existing current location matching the supplied origin.
+- [x] Added protected clear_lorgus_rp_presence() RPC.
+- [x] Client clearRpPresence() now uses the protected RPC instead of a direct DELETE.
+
+New commits:
+- 30366940592e9851b66b845f4fc214a4fbf3bfe5 — Harden RP presence transitions and cleanup
+- 8be72d0d2828e6154f6d079f6b86f2e8f1b420f3 — Use protected RP presence cleanup RPC
+
+### Current stopping point
+Migration 20261006000500_rp_presence_transitions.sql is in main and must be applied/confirmed in Supabase.
+
+### Next task
+1. Apply/confirm 005 in Supabase.
+2. Test teleport attempt to arbitrary canonical location — must fail.
+3. Test starting road from a fake origin — must fail.
+4. Test arrival to a different destination than current road — must fail.
+5. Test normal location → road → destination flow — must pass.
+6. Test protected presence cleanup — must pass.
+7. Then audit stale presence/reload and Realtime edge cases.
