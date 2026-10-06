@@ -111,12 +111,12 @@ function createLorgusEyeTransition() {
             <defs>
                 <linearGradient id="lorgus-lid-top" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0" stop-color="#080605"/>
-                    <stop offset="0.78" stop-color="#19120e"/>
+                    <stop offset="0.76" stop-color="#19120e"/>
                     <stop offset="1" stop-color="#090706"/>
                 </linearGradient>
                 <linearGradient id="lorgus-lid-bottom" x1="0" y1="1" x2="0" y2="0">
                     <stop offset="0" stop-color="#080605"/>
-                    <stop offset="0.78" stop-color="#19120e"/>
+                    <stop offset="0.76" stop-color="#19120e"/>
                     <stop offset="1" stop-color="#090706"/>
                 </linearGradient>
                 <filter id="lorgus-lid-shadow" x="-20%" y="-20%" width="140%" height="140%">
@@ -124,48 +124,49 @@ function createLorgusEyeTransition() {
                 </filter>
             </defs>
 
+            <!-- Верхнее веко: основное движение вниз, как при настоящем моргании. -->
             <g class="lorgus-lid-group lorgus-lid-group-top">
                 <path class="lorgus-lid-shadow"
-                      d="M-10 0H110V55C87 45 67 41 50 41C33 41 13 45-10 55Z"
+                      d="M-10 0H110V55C88 45 68 40 50 39C32 40 12 45-10 55Z"
                       fill="#000" opacity=".72" filter="url(#lorgus-lid-shadow)"/>
                 <path class="lorgus-lid-surface"
-                      d="M-10 0H110V53C87 43 67 39 50 39C33 39 13 43-10 53Z"
+                      d="M-10 0H110V53C88 43 68 38 50 37C32 38 12 43-10 53Z"
                       fill="url(#lorgus-lid-top)"/>
                 <path class="lorgus-lash-line"
-                      d="M-2 52C17 44 34 40 50 40C66 40 83 44 102 52"
+                      d="M-2 52C17 44 34 38 50 38C66 38 83 44 102 52"
                       fill="none" stroke="#020201" stroke-width="1.05" stroke-linecap="round"/>
                 <g class="lorgus-lashes">
-                    <!-- Верхние ресницы смотрят НАРУЖУ: от линии века вверх. -->
-                    <path d="M4 49L1 43M9 47L6 41M14 45L11 39M19 44L16 38M24 42L21 36M29 41L26 35M34 40L31 34M39 39L36 33M44 39L41 33M50 39L50 32M56 39L59 33M61 40L64 34M66 41L69 35M71 42L74 36M76 44L79 38M81 45L84 39M86 47L89 41M91 49L94 43"
+                    <path d="M5 49L1 42M10 47L6 40M15 45L11 38M20 43L16 36M25 42L21 35M30 41L26 34M35 40L31 33M40 39L36 32M45 38L41 31M50 38L50 30M55 38L59 31M60 39L64 32M65 40L69 33M70 41L74 34M75 42L79 35M80 43L84 36M85 45L89 38M90 47L94 40"
                           fill="none" stroke="#020201" stroke-width=".82" stroke-linecap="round"/>
                 </g>
             </g>
 
+            <!-- Нижнее веко: поднимается навстречу, но меньше верхнего. -->
             <g class="lorgus-lid-group lorgus-lid-group-bottom">
                 <path class="lorgus-lid-shadow"
-                      d="M-10 100H110V45C87 55 67 59 50 59C33 59 13 55-10 45Z"
+                      d="M-10 100H110V45C88 54 68 59 50 60C32 59 12 54-10 45Z"
                       fill="#000" opacity=".72" filter="url(#lorgus-lid-shadow)"/>
                 <path class="lorgus-lid-surface"
-                      d="M-10 100H110V47C87 57 67 61 50 61C33 61 13 57-10 47Z"
+                      d="M-10 100H110V47C88 56 68 61 50 62C32 61 12 56-10 47Z"
                       fill="url(#lorgus-lid-bottom)"/>
                 <path class="lorgus-lash-line"
-                      d="M-2 48C17 56 34 60 50 60C66 60 83 56 102 48"
+                      d="M-2 48C17 56 34 61 50 62C66 61 83 56 102 48"
                       fill="none" stroke="#020201" stroke-width="1.05" stroke-linecap="round"/>
                 <g class="lorgus-lashes">
-                    <!-- Нижние ресницы тоже смотрят НАРУЖУ: от линии века вниз. -->
-                    <path d="M4 51L1 57M9 53L6 59M14 55L11 61M19 56L16 62M24 58L21 64M29 59L26 65M34 60L31 66M39 61L36 67M44 61L41 67M50 61L50 68M56 61L59 67M61 60L64 66M66 59L69 65M71 58L74 64M76 56L79 62M81 55L84 61M86 53L89 59M91 51L94 57"
+                    <path d="M5 51L1 58M10 53L6 60M15 55L11 62M20 57L16 64M25 59L21 66M30 60L26 67M35 61L31 68M40 62L36 69M45 62L41 69M50 62L50 70M55 62L59 69M60 62L64 69M65 61L69 68M70 60L74 67M75 59L79 66M80 57L84 64M85 55L89 62M90 53L94 60"
                           fill="none" stroke="#020201" stroke-width=".82" stroke-linecap="round"/>
                 </g>
             </g>
         </svg>
     `;
+
     overlay.style.cssText = [
         "position:fixed",
         "inset:0",
         "z-index:2147483647",
         "pointer-events:none",
         "overflow:hidden",
-        "background:#020201"
+        "background:transparent"
     ].join(";");
 
     const style = document.createElement("style");
@@ -183,14 +184,27 @@ function createLorgusEyeTransition() {
             transform-box:fill-box;
             transform-origin:center;
             will-change:transform;
-            transition:transform 1120ms cubic-bezier(.65,0,.18,1);
+            transition:transform 1180ms cubic-bezier(.7,0,.2,1);
         }
-        .lorgus-lid-group-top{transform:translateY(-58%);}
-        .lorgus-lid-group-bottom{transform:translateY(58%);}
-        .lorgus-eye-transition.closed .lorgus-lid-group-top,
+
+        /* Открытый глаз: веки находятся за пределами кадра. */
+        .lorgus-lid-group-top{
+            transform:translateY(-58%);
+        }
+        .lorgus-lid-group-bottom{
+            transform:translateY(58%);
+        }
+
+        /* Закрытие: верхнее веко делает основной ход вниз,
+           нижнее поднимается навстречу ему. */
+        .lorgus-eye-transition.closed .lorgus-lid-group-top{
+            transform:translateY(0);
+        }
         .lorgus-eye-transition.closed .lorgus-lid-group-bottom{
             transform:translateY(0);
         }
+
+        /* Открытие: обратное движение от центра к краям. */
         .lorgus-eye-transition.open .lorgus-lid-group-top{
             transform:translateY(-58%);
         }
@@ -200,6 +214,7 @@ function createLorgusEyeTransition() {
     `;
     overlay.appendChild(style);
     document.body.appendChild(overlay);
+
     requestAnimationFrame(() => overlay.classList.add("closed"));
     return overlay;
 }
