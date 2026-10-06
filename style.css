@@ -9342,3 +9342,154 @@ body{
     font-size:34px;
   }
 }
+
+
+/* =========================================================
+   LORGUS 2.2 — INTERACTIVE WORLD MAP
+   Markers are a separate layer; the source PNG remains intact.
+   ========================================================= */
+
+.lorgus-map-world{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  transform:translate3d(0,0,0) scale(1);
+  transform-origin:center center;
+  will-change:transform;
+}
+
+.lorgus-map-marker-layer{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  pointer-events:none;
+}
+
+.lorgus-map-marker{
+  position:absolute;
+  width:18px;
+  height:18px;
+  padding:0;
+  border:1px solid rgba(238,213,153,.72);
+  border-radius:50%;
+  transform:translate(-50%,-50%);
+  background:rgba(19,14,8,.82);
+  box-shadow:0 0 0 4px rgba(0,0,0,.18),0 0 18px rgba(215,174,90,.3);
+  cursor:pointer;
+  pointer-events:auto;
+  transition:transform .2s ease,box-shadow .2s ease,filter .2s ease;
+}
+
+.lorgus-map-marker-core{
+  position:absolute;
+  inset:4px;
+  border-radius:50%;
+  background:var(--gold);
+  box-shadow:0 0 12px rgba(235,210,154,.7);
+}
+
+.lorgus-map-marker-pulse{
+  position:absolute;
+  inset:-7px;
+  border:1px solid rgba(215,174,90,.42);
+  border-radius:50%;
+  animation:lorgus-marker-pulse 2.1s ease-out infinite;
+}
+
+@keyframes lorgus-marker-pulse{
+  0%{opacity:.75;transform:scale(.45)}
+  75%,100%{opacity:0;transform:scale(1.35)}
+}
+
+.lorgus-map-marker-label{
+  position:absolute;
+  left:50%;
+  bottom:22px;
+  transform:translateX(-50%);
+  white-space:nowrap;
+  padding:4px 7px;
+  border:1px solid rgba(215,174,90,.2);
+  background:rgba(7,7,6,.84);
+  color:var(--gold-light);
+  font-family:var(--title-font);
+  font-size:12px;
+  line-height:1;
+  letter-spacing:.04em;
+  opacity:.82;
+  box-shadow:0 8px 18px rgba(0,0,0,.28);
+  pointer-events:none;
+}
+
+.lorgus-map-marker:hover,
+.lorgus-map-marker.selected{
+  z-index:10;
+  transform:translate(-50%,-50%) scale(1.3);
+  box-shadow:0 0 0 5px rgba(215,174,90,.08),0 0 28px rgba(235,210,154,.62);
+}
+
+.lorgus-map-marker:hover .lorgus-map-marker-label,
+.lorgus-map-marker.selected .lorgus-map-marker-label{
+  opacity:1;
+  border-color:rgba(235,210,154,.45);
+}
+
+.lorgus-map-marker.neutral{
+  border-color:rgba(200,190,160,.62);
+}
+
+.lorgus-map-marker.neutral .lorgus-map-marker-core{
+  background:#c9c0a5;
+}
+
+.lorgus-map-marker.contested{
+  border-color:rgba(173,116,91,.75);
+}
+
+.lorgus-map-marker.contested .lorgus-map-marker-core{
+  background:#aa705b;
+}
+
+.lorgus-map-marker.current{
+  border-color:#fff0bd;
+  box-shadow:0 0 0 5px rgba(255,224,150,.1),0 0 35px rgba(255,224,150,.7);
+}
+
+.lorgus-map-surface-hint{
+  position:absolute;
+  left:50%;
+  bottom:22px;
+  z-index:5;
+  transform:translate(-50%,12px);
+  padding:7px 12px;
+  border:1px solid rgba(215,174,90,.25);
+  background:rgba(7,7,6,.88);
+  color:var(--gold-light);
+  font-size:8px;
+  letter-spacing:.16em;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .2s ease,transform .2s ease;
+}
+
+.lorgus-map-surface-hint.visible{
+  opacity:1;
+  transform:translate(-50%,0);
+}
+
+.lorgus-map-image-wrap{
+  user-select:none;
+}
+
+@media(max-width:700px){
+  .lorgus-map-marker-label{
+    font-size:10px;
+    padding:3px 5px;
+  }
+
+  .lorgus-map-marker{
+    width:16px;
+    height:16px;
+  }
+}
