@@ -8637,3 +8637,101 @@ body{
     padding-top:38px !important;
   }
 }
+
+/* =========================================================
+   LORGUS 2.0 — CINEMATIC SCENE ENGINE
+   ========================================================= */
+
+.lorgus-cinematic-auth{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 18% 48%,rgba(150,112,45,.08),transparent 34%),
+    radial-gradient(circle at 82% 50%,rgba(92,70,35,.07),transparent 38%),
+    #070706;
+}
+
+.lorgus-scene{
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:-3;
+  pointer-events:none;
+  opacity:.9;
+}
+
+.lorgus-vignette{
+  position:fixed;
+  inset:0;
+  z-index:-2;
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse at center,transparent 28%,rgba(0,0,0,.18) 62%,rgba(0,0,0,.72) 100%),
+    linear-gradient(90deg,rgba(0,0,0,.32),transparent 34%,transparent 66%,rgba(0,0,0,.32));
+}
+
+.lorgus-cinematic-auth .background-glow{
+  opacity:.42;
+  filter:blur(10px);
+  transform:scale(1.08);
+  transition:transform 1.2s ease,opacity 1.2s ease;
+}
+
+.lorgus-cinematic-auth .brand{
+  animation:lorgus-brand-arrive .9s cubic-bezier(.2,.75,.2,1) both;
+}
+
+.lorgus-cinematic-auth .auth-panel{
+  animation:lorgus-panel-arrive 1s .12s cubic-bezier(.2,.75,.2,1) both;
+  box-shadow:
+    0 45px 120px rgba(0,0,0,.72),
+    inset 0 1px rgba(255,255,255,.055),
+    inset 0 0 55px rgba(215,174,90,.018),
+    0 0 90px rgba(215,174,90,.045);
+}
+
+.lorgus-cinematic-auth .auth-tab{
+  transition:color .25s ease,background .25s ease,border-color .25s ease,transform .25s ease;
+}
+
+.lorgus-cinematic-auth .input-wrapper{
+  transition:border-color .25s ease,box-shadow .25s ease,transform .25s ease;
+}
+
+.lorgus-cinematic-auth .input-wrapper:focus-within{
+  transform:translateY(-1px);
+  box-shadow:0 0 0 1px rgba(215,174,90,.1),0 12px 30px rgba(0,0,0,.22);
+}
+
+@keyframes lorgus-brand-arrive{
+  from{opacity:0;transform:translate3d(-24px,10px,0);filter:blur(6px)}
+  to{opacity:1;transform:translate3d(0,0,0);filter:blur(0)}
+}
+
+@keyframes lorgus-panel-arrive{
+  from{opacity:0;transform:translate3d(28px,0,0);filter:blur(5px)}
+  to{opacity:1;transform:translate3d(0,0,0);filter:blur(0)}
+}
+
+@media(max-width:1050px){
+  .lorgus-cinematic-auth .brand{
+    animation:lorgus-brand-arrive .8s cubic-bezier(.2,.75,.2,1) both;
+  }
+
+  .lorgus-cinematic-auth .auth-panel{
+    animation:lorgus-panel-arrive .8s .08s cubic-bezier(.2,.75,.2,1) both;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .lorgus-cinematic-auth .brand,
+  .lorgus-cinematic-auth .auth-panel{
+    animation:none;
+  }
+
+  .lorgus-scene{
+    display:none;
+  }
+}
