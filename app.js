@@ -4201,7 +4201,7 @@ function initializeLorgusWebGL() {
         return;
     }
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x171511, 0.0105);
+    scene.fog = new THREE.FogExp2(0x171511, 0.0075);
     const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 220);
     camera.position.set(0, 8.2, 36);
     const world = new THREE.Group();
@@ -4244,19 +4244,19 @@ function initializeLorgusWebGL() {
     const groundTexture = makeStoneTexture("#39332c", true);
 
     const stone = new THREE.MeshStandardMaterial({
-        map: stoneTexture, color: 0x9f8060, roughness: 0.91, metalness: 0,
+        map: stoneTexture, color: 0xb28a62, roughness: 0.88, metalness: 0,
         bumpMap: stoneTexture, bumpScale: 0.16
     });
     const stoneDark = new THREE.MeshStandardMaterial({
-        map: darkStoneTexture, color: 0x5d6260, roughness: 0.96, metalness: 0,
+        map: darkStoneTexture, color: 0x626864, roughness: 0.93, metalness: 0,
         bumpMap: darkStoneTexture, bumpScale: 0.12
     });
     const stoneEdge = new THREE.MeshStandardMaterial({
-        map: stoneTexture, color: 0xb99a70, roughness: 0.84, metalness: 0,
+        map: stoneTexture, color: 0xc39a68, roughness: 0.80, metalness: 0,
         bumpMap: stoneTexture, bumpScale: 0.18
     });
     const groundStone = new THREE.MeshStandardMaterial({
-        map: groundTexture, color: 0x6d6658, roughness: 0.98, metalness: 0,
+        map: groundTexture, color: 0x81745e, roughness: 0.94, metalness: 0,
         bumpMap: groundTexture, bumpScale: 0.08
     });
     const rune = new THREE.MeshStandardMaterial({ color: 0x8c6827, emissive: 0x8c6827, emissiveIntensity: 4.2, transparent: true, opacity: 0.82 });
@@ -4770,17 +4770,17 @@ const openingShape = new THREE.Shape();
         world.add(spark);
     }
 
-    const riftLight = new THREE.PointLight(0xd88b2e, 38, 24, 2);
+    const riftLight = new THREE.PointLight(0xff8b2c, 52, 28, 2);
     riftLight.position.set(0, 7.8, -0.4);
     world.add(riftLight);
-    world.add(new THREE.HemisphereLight(0xb9a17d, 0x17120d, 1.05));
-    world.add(new THREE.AmbientLight(0x9a8567, 0.34));
+    world.add(new THREE.HemisphereLight(0xc8a879, 0x17120d, 1.3));
+    world.add(new THREE.AmbientLight(0xb08f68, 0.48));
 
-    const coolFill = new THREE.DirectionalLight(0x6f8790, 1.35);
+    const coolFill = new THREE.DirectionalLight(0x7898ad, 1.8);
     coolFill.position.set(18, 12, 10);
     world.add(coolFill);
 
-    const directional = new THREE.DirectionalLight(0xd7c5a4, 5.2);
+    const directional = new THREE.DirectionalLight(0xe6c995, 6.4);
     directional.castShadow = true;
     directional.shadow.mapSize.set(1024, 1024);
     directional.shadow.camera.left = -28;
@@ -4949,7 +4949,7 @@ const openingShape = new THREE.Shape();
         }
     }
 
-    const gateInnerGlow = new THREE.PointLight(0xffb24b, 30, 28, 2);
+    const gateInnerGlow = new THREE.PointLight(0xff9b3d, 44, 32, 2);
     gateInnerGlow.position.set(0, 5, -0.7);
     world.add(gateInnerGlow);
 
@@ -4966,7 +4966,29 @@ const openingShape = new THREE.Shape();
         debris.push(mesh);
     }
 
-    const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+    // Living night sky: many bright moving stars, not a static handful of dots.
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 260;
+    const starPositions = new Float32Array(starCount * 3);
+    const starSpeeds = new Float32Array(starCount);
+    for (let i = 0; i < starCount; i++) {
+        starPositions[i * 3] = (Math.random() - 0.5) * 105;
+        starPositions[i * 3 + 1] = 8 + Math.random() * 42;
+        starPositions[i * 3 + 2] = -32 - Math.random() * 38;
+        starSpeeds[i] = 0.008 + Math.random() * 0.028;
+    }
+    starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+    const starMaterial = new THREE.PointsMaterial({
+        color: 0xffe3a8,
+        size: 0.11,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true
+    });
+    const starField = new THREE.Points(starGeometry, starMaterial);
+    world.add(starField);\n\n    const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
     let raf = 0;
     let disposed = false;
 
@@ -5009,6 +5031,18 @@ const openingShape = new THREE.Shape();
         riftLight.intensity = 26 + Math.sin(time * 2.1) * 6;
         gateInnerGlow.intensity = 12 + Math.sin(time * 1.7) * 3;
         floorGlow.material.opacity = 0.11 + Math.sin(time * 1.9) * 0.025;
+        const starPos = starGeometry.attributes.position;
+        for (let i = 0; i < starCount; i++) {
+            const idx = i * 3;
+            starPos.array[idx + 1] -= starSpeeds[i];
+            starPos.array[idx] += Math.sin(time * 0.22 + i) * 0.0009;
+            if (starPos.array[idx + 1] < 5) {
+                starPos.array[idx + 1] = 48 + Math.random() * 5;
+                starPos.array[idx] = (Math.random() - 0.5) * 105;
+            }
+        }
+        starPos.needsUpdate = true;
+
         world.rotation.y = pointer.x * -0.025;
 
         for (const mesh of debris) {
