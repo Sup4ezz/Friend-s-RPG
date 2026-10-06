@@ -4199,14 +4199,16 @@ function initializeLorgusWebGL() {
         return;
     }
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x050403, 0.032);
+    scene.fog = new THREE.FogExp2(0x18130d, 0.014);
     const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 180);
     camera.position.set(0, 7.8, 34);
     const world = new THREE.Group();
     scene.add(world);
 
-    const stone = new THREE.MeshStandardMaterial({ color: 0x171412, roughness: 0.92, metalness: 0.04 });
-    const stoneDark = new THREE.MeshStandardMaterial({ color: 0x0b0908, roughness: 1 });
+    const stone = new THREE.MeshStandardMaterial({ color: 0x4a4035, roughness: 0.86, metalness: 0.02 });
+    const stoneDark = new THREE.MeshStandardMaterial({ color: 0x29241f, roughness: 0.94, metalness: 0.01 });
+    const stoneEdge = new THREE.MeshStandardMaterial({ color: 0x6a5b48, roughness: 0.78, metalness: 0.01 });
+    const groundStone = new THREE.MeshStandardMaterial({ color: 0x312b25, roughness: 0.98, metalness: 0 });
     const rune = new THREE.MeshStandardMaterial({ color: 0x8c6827, emissive: 0x8c6827, emissiveIntensity: 4.2, transparent: true, opacity: 0.82 });
     const ember = new THREE.MeshBasicMaterial({ color: 0xe2a33d, transparent: true, opacity: 0.8 });
 
@@ -4217,14 +4219,14 @@ function initializeLorgusWebGL() {
         world.add(mesh);
     };
 
-    addBox(-10.2, 6.2, 0, 4.3, 14.8, 3.8);
-    addBox(10.2, 6.6, 0, 4.5, 15.6, 3.8);
-    addBox(-9.3, 13.8, 0, 5.4, 2.3, 4.1, stoneDark, -0.07);
-    addBox(9.0, 14.8, 0, 6.0, 2.4, 4.1, stoneDark, 0.1);
+    addBox(-10.2, 6.2, 0, 4.3, 14.8, 3.8, stone);
+    addBox(10.2, 6.6, 0, 4.5, 15.6, 3.8, stone);
+    addBox(-9.3, 13.8, 0, 5.4, 2.3, 4.1, stoneEdge, -0.07);
+    addBox(9.0, 14.8, 0, 6.0, 2.4, 4.1, stoneEdge, 0.1);
 
     const arch = new THREE.Mesh(
         new THREE.TorusGeometry(11.8, 2.0, 20, 56, Math.PI),
-        stone
+        stoneEdge
     );
     arch.rotation.z = Math.PI;
     arch.position.y = 12.6;
@@ -4232,7 +4234,7 @@ function initializeLorgusWebGL() {
 
     for (let n = 0; n < 13; n++) {
         const a = Math.PI * (n / 12);
-        const block = new THREE.Mesh(new THREE.BoxGeometry(2.15, 2.2, 4.8), stoneDark);
+        const block = new THREE.Mesh(new THREE.BoxGeometry(2.15, 2.2, 4.8), stoneEdge);
         block.position.set(Math.cos(a) * 11.8, 12.6 + Math.sin(a) * 11.8, (Math.random() - 0.5) * 0.8);
         block.rotation.z = Math.PI / 2 - a;
         world.add(block);
@@ -4255,7 +4257,7 @@ function initializeLorgusWebGL() {
 
     const innerGate = new THREE.Mesh(
         new THREE.PlaneGeometry(8.6, 16.8, 1, 1),
-        new THREE.MeshBasicMaterial({ color: 0x080604, transparent: true, opacity: 0.92, depthWrite: true })
+        new THREE.MeshStandardMaterial({ color: 0x120f0b, roughness: 0.98, metalness: 0, transparent: true, opacity: 0.9 })
     );
     innerGate.position.set(0, 7.7, 2.0);
     innerGate.renderOrder = 2;
@@ -4272,19 +4274,50 @@ function initializeLorgusWebGL() {
     const riftLight = new THREE.PointLight(0xd88b2e, 38, 24, 2);
     riftLight.position.set(0, 7.8, 2.4);
     world.add(riftLight);
-    world.add(new THREE.AmbientLight(0x806d57, 0.28));
+    world.add(new THREE.HemisphereLight(0xb9a17d, 0x17120d, 1.05));
+    world.add(new THREE.AmbientLight(0x9a8567, 0.48));
 
-    const directional = new THREE.DirectionalLight(0x756a58, 1.4);
+    const directional = new THREE.DirectionalLight(0xb29a73, 2.2);
     directional.position.set(-8, 12, 18);
     world.add(directional);
 
     const floor = new THREE.Mesh(
         new THREE.PlaneGeometry(80, 70),
-        new THREE.MeshStandardMaterial({ color: 0x090806, roughness: 1, metalness: 0 })
+        groundStone
     );
     floor.rotation.x = -Math.PI / 2;
     floor.position.set(0, -0.15, -8);
     world.add(floor);
+
+    const pathStone = new THREE.Group();
+    world.add(pathStone);
+    for (let row = 0; row < 9; row++) {
+        const z = 2.5 - row * 4.2;
+        const halfWidth = 5.5 + row * 0.75;
+        const pieces = row % 2 === 0 ? 5 : 6;
+        for (let col = 0; col < pieces; col++) {
+            const gap = 0.18;
+            const width = (halfWidth * 2) / pieces - gap;
+            const slab = new THREE.Mesh(
+                new THREE.BoxGeometry(width, 0.22 + Math.random() * 0.12, 3.25 + Math.random() * 0.5),
+                row < 2 ? stoneEdge : groundStone
+            );
+            slab.position.set(
+                -halfWidth + width * 0.5 + col * (width + gap) + (Math.random() - 0.5) * 0.18,
+                -0.02 + Math.random() * 0.05,
+                z + (Math.random() - 0.5) * 0.3
+            );
+            slab.rotation.y = (Math.random() - 0.5) * 0.035;
+            pathStone.add(slab);
+        }
+    }
+
+    const rearWall = new THREE.Mesh(
+        new THREE.BoxGeometry(42, 23, 2.4),
+        new THREE.MeshStandardMaterial({ color: 0x211c17, roughness: 1 })
+    );
+    rearWall.position.set(0, 8, -8);
+    world.add(rearWall);
 
     const floorGlow = new THREE.Mesh(
         new THREE.CircleGeometry(5.8, 64),
@@ -4301,7 +4334,7 @@ function initializeLorgusWebGL() {
             const h = 0.7 + Math.random() * 1.7;
             const stoneBlock = new THREE.Mesh(
                 new THREE.BoxGeometry(w, h, 1.8 + Math.random() * 1.4),
-                stoneDark
+                stone
             );
             stoneBlock.position.set(
                 side * (12.5 + Math.random() * 4.5),
@@ -4315,7 +4348,7 @@ function initializeLorgusWebGL() {
         }
     }
 
-    const gateInnerGlow = new THREE.PointLight(0xc97826, 16, 20, 2);
+    const gateInnerGlow = new THREE.PointLight(0xd9963d, 22, 24, 2);
     gateInnerGlow.position.set(0, 5, 0);
     world.add(gateInnerGlow);
 
