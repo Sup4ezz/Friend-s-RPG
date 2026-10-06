@@ -3776,7 +3776,6 @@ function renderLorgusWorldMap(container, character) {
                         <h2>Лоргус</h2>
                     </div>
                     <div class="lorgus-map-header-actions">
-                        <button id="lorgus-map-editor-toggle" class="lorgus-map-editor-toggle" type="button" onclick="enableLorgusMapEditor()">✎ РЕДАКТОР КАРТЫ</button>
                         <div class="lorgus-map-header-status">
                             <span class="lorgus-map-status-dot"></span>
                             <span>МИР АКТИВЕН</span>
@@ -3840,8 +3839,7 @@ function renderLorgusWorldMap(container, character) {
 
     selectLorgusMapRegion("Атэрон");
     initializeLorgusMapViewport();
-    renderLorgusMapEditorRects(false);
-    addLorgusMapEditorUI();
+    renderLorgusMapEditorRects(true);
 }
 
 let lorgusMapScale = 1;
