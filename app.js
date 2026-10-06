@@ -116,42 +116,55 @@ function createLorgusEyeTransition() {
         "z-index:2147483647",
         "pointer-events:none",
         "overflow:hidden",
-        "background:transparent"
+        "background:#020201"
     ].join(";");
 
     const style = document.createElement("style");
     style.textContent = `
+        .lorgus-eye-transition{
+            isolation:isolate;
+        }
         .lorgus-eye-transition .lorgus-eyelid{
             position:absolute;
-            left:-8vw;
-            width:116vw;
-            height:52vh;
+            left:-10vw;
+            width:120vw;
+            height:62vh;
             background:#020201;
             will-change:transform;
-            transition:transform 520ms cubic-bezier(.77,0,.18,1);
-            box-shadow:0 0 34px rgba(0,0,0,.55);
+            transition:transform 620ms cubic-bezier(.76,0,.2,1);
         }
+
+        /* Верхнее веко идёт от самого верхнего края к центру. */
         .lorgus-eye-transition .lorgus-eyelid-top{
-            top:-8vh;
+            top:-12vh;
             border-radius:0 0 50% 50% / 0 0 100% 100%;
-            transform:translateY(-92%);
+            transform:translateY(-100%);
+            box-shadow:0 10px 35px rgba(0,0,0,.42);
         }
+
+        /* Нижнее веко идёт от самого нижнего края к центру. */
         .lorgus-eye-transition .lorgus-eyelid-bottom{
-            bottom:-8vh;
+            bottom:-12vh;
             border-radius:50% 50% 0 0 / 100% 100% 0 0;
-            transform:translateY(92%);
+            transform:translateY(100%);
+            box-shadow:0 -10px 35px rgba(0,0,0,.42);
         }
+
+        /* Смыкание: края век движутся навстречу друг другу,
+           пока полностью не перекрывают весь кадр. */
         .lorgus-eye-transition.closed .lorgus-eyelid-top{
             transform:translateY(0);
         }
         .lorgus-eye-transition.closed .lorgus-eyelid-bottom{
             transform:translateY(0);
         }
+
+        /* Открытие: из центра обратно к краям. */
         .lorgus-eye-transition.open .lorgus-eyelid-top{
-            transform:translateY(-92%);
+            transform:translateY(-100%);
         }
         .lorgus-eye-transition.open .lorgus-eyelid-bottom{
-            transform:translateY(92%);
+            transform:translateY(100%);
         }
     `;
     overlay.appendChild(style);
@@ -161,7 +174,6 @@ function createLorgusEyeTransition() {
 
     return overlay;
 }
-
 function render(session) {
     if (session) {
         const authScene = document.querySelector(".lorgus-cinematic-auth");
