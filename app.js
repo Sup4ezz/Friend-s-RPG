@@ -4352,7 +4352,7 @@ function initializeLorgusWebGL() {
     }
 
     const rift = new THREE.Mesh(
-        new THREE.PlaneGeometry(9.4, 18.5, 40, 80),
+        new THREE.PlaneGeometry(8.9, 15.9, 40, 80),
         new THREE.ShaderMaterial({
             transparent: true,
             depthWrite: false,
@@ -4362,24 +4362,43 @@ function initializeLorgusWebGL() {
             fragmentShader: "uniform float time; varying vec2 vUv; void main(){float edge=smoothstep(0.52,0.0,abs(vUv.x-0.5));float wave=0.55+0.45*sin(vUv.y*28.0-time*3.0);float core=pow(edge,1.8)*(0.72+wave*0.28);vec3 c=mix(vec3(0.22,0.08,0.01),vec3(0.95,0.57,0.16),edge);gl_FragColor=vec4(c,core*0.48);}"
         })
     );
-    rift.position.set(0, 7.9, -0.65);
+    rift.position.set(0, 7.7, -0.35);
     rift.renderOrder = 1;
     world.add(rift);
 
+    // True arched portal void — no rectangular plate behind the entrance.
+    const openingShape = new THREE.Shape();
+    openingShape.moveTo(-5.15, 0);
+    openingShape.lineTo(-5.15, 8.25);
+    openingShape.absarc(0, 8.25, 5.15, Math.PI, 0, false);
+    openingShape.lineTo(5.15, 0);
+    openingShape.closePath();
     const innerGate = new THREE.Mesh(
-        new THREE.PlaneGeometry(8.6, 16.8, 1, 1),
-        new THREE.MeshStandardMaterial({ color: 0x120f0b, roughness: 0.98, metalness: 0, transparent: true, opacity: 0.9 })
+        new THREE.ShapeGeometry(openingShape, 48),
+        new THREE.MeshBasicMaterial({
+            color: 0x070605,
+            transparent: true,
+            opacity: 0.72,
+            depthWrite: false
+        })
     );
-    innerGate.position.set(0, 7.7, -0.9);
+    innerGate.position.set(0, 0, -0.9);
     innerGate.renderOrder = 0;
     world.add(innerGate);
 
     const threshold = new THREE.Mesh(
-        new THREE.RingGeometry(4.4, 5.05, 64, 1, Math.PI * 0.08, Math.PI * 0.84),
-        new THREE.MeshBasicMaterial({ color: 0xd39a43, transparent: true, opacity: 0.72, side: THREE.DoubleSide })
+        new THREE.RingGeometry(4.35, 4.75, 64),
+        new THREE.MeshBasicMaterial({
+            color: 0xd39a43,
+            transparent: true,
+            opacity: 0.22,
+            side: THREE.DoubleSide,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        })
     );
     threshold.rotation.x = Math.PI / 2;
-    threshold.position.set(0, 0.08, 2.2);
+    threshold.position.set(0, 0.05, 0.65);
     world.add(threshold);
 
     const riftLight = new THREE.PointLight(0xd88b2e, 38, 24, 2);
@@ -4513,12 +4532,12 @@ function initializeLorgusWebGL() {
         new THREE.MeshBasicMaterial({
             color: 0xa35e24,
             transparent: true,
-            opacity: 0.14,
+            opacity: 0.075,
             blending: THREE.AdditiveBlending,
             depthWrite: false
         })
     );
-    horizonGlow.position.set(0, 5, -6.5);
+    horizonGlow.position.set(0, 5, -11);
     world.add(horizonGlow);
 
     const floor = new THREE.Mesh(
