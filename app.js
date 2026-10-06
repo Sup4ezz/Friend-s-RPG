@@ -4449,17 +4449,17 @@ function initializeLorgusWebGL() {
     }
 
     const rift = new THREE.Mesh(
-        new THREE.PlaneGeometry(8.9, 15.9, 40, 80),
+        new THREE.PlaneGeometry(10.0, 18.0, 40, 80),
         new THREE.ShaderMaterial({
             transparent: true,
             depthWrite: false,
             blending: THREE.AdditiveBlending,
             uniforms: { time: { value: 0 } },
             vertexShader: "uniform float time; varying vec2 vUv; void main(){vUv=uv;vec3 p=position;p.x+=sin(uv.y*18.0+time*1.4)*0.13;p.x+=sin(uv.y*43.0-time*2.1)*0.045;gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.0);}",
-            fragmentShader: "uniform float time; varying vec2 vUv; void main(){float edge=smoothstep(0.52,0.0,abs(vUv.x-0.5));float wave=0.55+0.45*sin(vUv.y*28.0-time*3.0);float core=pow(edge,1.8)*(0.72+wave*0.28);vec3 c=mix(vec3(0.22,0.08,0.01),vec3(0.95,0.57,0.16),edge);gl_FragColor=vec4(c,core*0.48);}"
+            fragmentShader: "uniform float time; varying vec2 vUv; void main(){float edge=1.0-smoothstep(0.40,0.50,abs(vUv.x-0.5));float vertical=smoothstep(0.015,0.09,vUv.y)*smoothstep(0.015,0.09,1.0-vUv.y);float wave=0.55+0.45*sin(vUv.y*28.0-time*3.0);float core=pow(edge,1.25)*vertical*(0.72+wave*0.28);vec3 c=mix(vec3(0.20,0.045,0.006),vec3(0.95,0.52,0.11),edge);gl_FragColor=vec4(c,core*0.62);}"
         })
     );
-    rift.position.set(0, 7.7, -0.35);
+    rift.position.set(0, 8.0, -0.28);
     rift.renderOrder = 1;
     world.add(rift);
 
@@ -4484,18 +4484,17 @@ function initializeLorgusWebGL() {
     world.add(innerGate);
 
     const threshold = new THREE.Mesh(
-        new THREE.RingGeometry(4.35, 4.75, 64),
+        new THREE.CircleGeometry(4.8, 64),
         new THREE.MeshBasicMaterial({
-            color: 0xd39a43,
+            color: 0xb56f27,
             transparent: true,
-            opacity: 0.22,
-            side: THREE.DoubleSide,
+            opacity: 0.10,
             blending: THREE.AdditiveBlending,
             depthWrite: false
         })
     );
-    threshold.rotation.x = Math.PI / 2;
-    threshold.position.set(0, 0.05, 0.65);
+    threshold.rotation.x = -Math.PI / 2;
+    threshold.position.set(0, 0.025, 0.45);
     world.add(threshold);
 
     const riftLight = new THREE.PointLight(0xd88b2e, 38, 24, 2);
