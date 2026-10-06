@@ -4604,17 +4604,7 @@ function initializeLorgusWebGL() {
     // Clean outer arch: no oversized floating voussoirs.
     // The extruded arch itself is the masonry silhouette.
     // Crown stone gives the gate a strong readable silhouette.
-    const crown = new THREE.Mesh(
-        new THREE.BoxGeometry(17.2, 1.25, 5.9, 3, 3, 3),
-        stoneEdge
-    );
-    crown.position.set(0, 18.35, 0.35);
-    crown.rotation.z = 0.008;
-    crown.castShadow = true;
-    crown.receiveShadow = true;
-    world.add(crown);
-
-    // No floating halo above the gate: the crown remains purely architectural.
+    // No horizontal crown: the arch itself forms the complete central silhouette.
 
     const rift = new THREE.Mesh(
         new THREE.PlaneGeometry(10.0, 11.4, 40, 80),
