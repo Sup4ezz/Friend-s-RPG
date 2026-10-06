@@ -901,6 +901,9 @@ async function renderCabinet(session, preserveCurrentScene = false) {
 
     const cabinet = document.createElement("main");
     cabinet.className = "game-page lorgus-cabinet-entering";
+    if (preserveCurrentScene) {
+        cabinet.classList.add("preparing");
+    }
     cabinet.style.opacity = "0";
     cabinet.style.pointerEvents = "none";
     cabinet.innerHTML = `
