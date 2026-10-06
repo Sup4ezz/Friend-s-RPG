@@ -13343,3 +13343,129 @@ body:has(#root > #cabinet-content.character-application){
 @keyframes creation-core{0%,100%{opacity:.55;transform:translate(-50%,-50%) scale(.94)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}}
 @keyframes creation-title-arrive{from{opacity:0;transform:translateY(28px) scale(.97);filter:blur(8px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
 @media(max-width:700px){#root > #cabinet-content.character-application .creation-rift{width:110vw!important;height:110vw!important}#root > #cabinet-content.character-application .creation-rift-core{width:55vw!important;height:55vw!important}#root > #cabinet-content.character-application .character-creation-main{width:calc(100% - 28px)!important}}
+
+
+/* =========================================================
+   CHARACTER CREATION — DENSITY + PORTRAIT CROP
+   ========================================================= */
+#root > #cabinet-content.character-application .identity-panel{
+    padding:30px 34px!important;
+}
+#root > #cabinet-content.character-application .identity-panel .creation-panel-heading{
+    margin-bottom:20px!important;
+}
+#root > #cabinet-content.character-application .identity-panel .creation-fields{
+    gap:14px 18px!important;
+}
+#root > #cabinet-content.character-application .identity-panel label{
+    min-height:0!important;
+}
+#root > #cabinet-content.character-application .identity-panel input{
+    height:48px!important;
+}
+#root > #cabinet-content.character-application .portrait-panel{
+    padding:34px!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-editor{
+    display:grid!important;
+    grid-template-columns:minmax(280px,420px) 1fr!important;
+    gap:46px!important;
+    align-items:center!important;
+    margin-top:26px!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-stage{
+    position:relative!important;
+    width:min(100%,420px)!important;
+    aspect-ratio:1!important;
+    border-radius:50%!important;
+    overflow:hidden!important;
+    background:radial-gradient(circle,#17120b,#050403 65%,#000)!important;
+    border:1px solid rgba(220,184,102,.32)!important;
+    box-shadow:0 0 0 1px rgba(220,184,102,.06),0 0 55px rgba(194,137,47,.13),inset 0 0 55px rgba(0,0,0,.85)!important;
+    cursor:grab!important;
+    touch-action:none!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-stage:active{cursor:grabbing!important}
+#root > #cabinet-content.character-application #portrait-crop-canvas{
+    position:absolute!important;
+    inset:0!important;
+    width:100%!important;
+    height:100%!important;
+    display:block!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-ring{
+    position:absolute!important;
+    inset:8px!important;
+    border:1px solid rgba(238,207,137,.55)!important;
+    border-radius:50%!important;
+    pointer-events:none!important;
+    box-shadow:inset 0 0 35px rgba(0,0,0,.65),0 0 20px rgba(220,184,102,.08)!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-ring:before,
+#root > #cabinet-content.character-application .portrait-crop-ring:after{
+    content:""!important;
+    position:absolute!important;
+    background:rgba(231,202,137,.4)!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-ring:before{
+    width:1px!important;height:100%!important;left:50%!important;top:0!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-ring:after{
+    height:1px!important;width:100%!important;top:50%!important;left:0!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-empty{
+    position:absolute!important;
+    inset:0!important;
+    display:grid!important;
+    place-items:center!important;
+    text-align:center!important;
+    color:rgba(222,190,116,.48)!important;
+    font:10px/1.8 var(--body-font)!important;
+    letter-spacing:.35em!important;
+    pointer-events:none!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-controls{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:26px!important;
+    max-width:520px!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-controls .creation-upload{
+    display:flex!important;
+    flex-direction:column!important;
+    gap:10px!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-controls .creation-upload input{
+    padding:12px!important;
+    height:auto!important;
+}
+#root > #cabinet-content.character-application .portrait-zoom{
+    display:grid!important;
+    grid-template-columns:90px 1fr!important;
+    gap:18px!important;
+    align-items:center!important;
+}
+#root > #cabinet-content.character-application .portrait-zoom span{
+    color:#c9aa6b!important;
+    font-size:9px!important;
+    letter-spacing:.25em!important;
+}
+#root > #cabinet-content.character-application #portrait-zoom{
+    width:100%!important;
+    accent-color:#c9a45b!important;
+}
+#root > #cabinet-content.character-application .portrait-crop-hint{
+    color:rgba(220,207,184,.46)!important;
+    font-size:11px!important;
+    line-height:1.8!important;
+    max-width:430px!important;
+}
+@media(max-width:760px){
+    #root > #cabinet-content.character-application .portrait-crop-editor{
+        grid-template-columns:1fr!important;
+        gap:28px!important;
+    }
+    #root > #cabinet-content.character-application .portrait-crop-stage{
+        margin:0 auto!important;
+    }
+}
