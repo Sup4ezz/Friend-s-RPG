@@ -14161,3 +14161,34 @@ body{
     padding:18px 14px !important;
   }
 }
+
+
+/* FINAL RESET — character creation must contain no legacy cinematic overlays */
+#root > #cabinet-content.character-application .character-creation-scene::before,
+#root > #cabinet-content.character-application .character-creation-scene::after,
+#root > #cabinet-content.character-application::before,
+#root > #cabinet-content.character-application::after{
+  content:none !important;
+  display:none !important;
+  position:static !important;
+  background:none !important;
+  box-shadow:none !important;
+  filter:none !important;
+  opacity:0 !important;
+  visibility:hidden !important;
+  pointer-events:none !important;
+}
+
+#root > #cabinet-content.character-application .lorgus-fantasy-stage,
+#root > #cabinet-content.character-application .character-creation-vignette,
+#root > #cabinet-content.character-application .lorgus-webgl{
+  display:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+
+#root > #cabinet-content.character-application .character-creation-scene{
+  overflow:visible !important;
+  background:#080706 !important;
+}
