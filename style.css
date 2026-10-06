@@ -12490,3 +12490,27 @@ body{
   .character-application .creation-upload{display:flex!important;flex-direction:column!important;align-items:stretch}
   .character-application .creation-upload input{width:100%!important}
 }
+
+
+/* LORGUS — creation form must sit clearly above the cinematic background */
+.character-application .character-creation-scene .character-creation-vignette{z-index:1!important}
+.character-application .character-creation-scene .character-creation-topbar{z-index:100!important}
+.character-application .character-creation-scene .character-creation-main{z-index:100!important}
+.character-application .character-creation-scene .character-creation-intro{position:relative;z-index:101!important}
+.character-application .character-creation-scene #character-application-form{position:relative!important;z-index:102!important}
+.character-application .character-creation-scene #character-application-form .character-creation-panel{
+  position:relative!important;
+  z-index:103!important;
+  isolation:isolate;
+  background:linear-gradient(135deg,rgba(12,10,7,.92),rgba(3,3,3,.88))!important;
+  box-shadow:0 24px 70px rgba(0,0,0,.7),inset 0 1px rgba(255,255,255,.05)!important;
+  backdrop-filter:blur(12px);
+}
+.character-application .character-creation-scene #character-application-form .character-creation-submit,
+.character-application .character-creation-scene #character-application-form .character-message{position:relative;z-index:104!important}
+.character-application .character-creation-scene #character-application-form input,
+.character-application .character-creation-scene #character-application-form textarea,
+.character-application .character-creation-scene #character-application-form button{
+  position:relative;
+  z-index:105;
+}
