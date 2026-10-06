@@ -6246,3 +6246,716 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 @keyframes lorgus-pulse{0%,100%{opacity:.45;transform:scale(.96)}50%{opacity:1;transform:scale(1.04)}}
 @media (max-width:950px){.lorgus-world-shell{grid-template-columns:1fr}.lorgus-world-sidebar{position:relative;top:auto}.lorgus-world-browser{padding:30px}.lorgus-location-grid{grid-template-columns:1fr}.lorgus-player-panel{position:relative;top:auto}}
 @media (max-width:650px){.auth-page{padding:28px 12px}.auth-panel{padding:27px 20px}.character-selection,.character-application,.admin-panel{padding:30px 20px}.lorgus-game-page,.lorgus-world-page{width:calc(100% - 24px)}.lorgus-world-browser{padding:24px 18px}.lorgus-world-header h1{font-size:46px}.lorgus-location-card{min-height:190px;padding:21px}.character-card-avatar{height:230px}}
+
+
+/* =========================================================
+   LORGUS — SECOND PASS / TRUE UI REDESIGN
+   2026-10-06
+   Visual only. Existing gameplay/auth logic untouched.
+   ========================================================= */
+
+:root{
+  --ui-bg:#050505;
+  --ui-ink:#f2ead8;
+  --ui-muted:#8e8575;
+  --ui-gold:#d7ae5a;
+  --ui-gold-hi:#ffe3a1;
+  --ui-line:rgba(215,174,90,.22);
+  --ui-glass:rgba(15,13,10,.78);
+  --ui-red:#9d5d50;
+}
+
+body{
+  color:var(--ui-ink);
+  background:
+    radial-gradient(ellipse at 50% -20%,rgba(255,202,94,.16),transparent 38%),
+    radial-gradient(ellipse at 0% 45%,rgba(109,73,25,.10),transparent 30%),
+    radial-gradient(ellipse at 100% 70%,rgba(109,73,25,.08),transparent 30%),
+    #050505;
+}
+
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:100;
+  opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.7'/%3E%3C/svg%3E");
+  mix-blend-mode:screen;
+}
+
+/* ---------- AUTH: completely different composition ---------- */
+
+.auth-page{
+  position:relative;
+  align-items:stretch;
+  padding:0;
+  min-height:100vh;
+  overflow:hidden;
+}
+
+.auth-page::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.96) 0%,rgba(0,0,0,.76) 34%,rgba(0,0,0,.30) 66%,rgba(0,0,0,.88) 100%),
+    radial-gradient(circle at 72% 45%,rgba(214,170,75,.16),transparent 27%),
+    linear-gradient(135deg,#0b0906,#050505 60%);
+}
+
+.auth-page::after{
+  content:"ЛОРГУС";
+  position:absolute;
+  left:-3vw;
+  bottom:-5vw;
+  font-family:var(--title-font);
+  font-size:clamp(150px,25vw,430px);
+  line-height:.7;
+  font-weight:700;
+  letter-spacing:.04em;
+  color:transparent;
+  -webkit-text-stroke:1px rgba(215,174,90,.055);
+  pointer-events:none;
+}
+
+.background-glow{
+  width:70vw;height:70vw;
+  left:72%;top:48%;
+  background:radial-gradient(circle,rgba(225,177,70,.20),rgba(225,177,70,.035) 25%,transparent 68%);
+  filter:blur(12px);
+}
+
+.auth-container{
+  width:min(1180px,100%);
+  margin:auto;
+  padding:52px;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 500px;
+  grid-template-rows:auto 1fr auto;
+  column-gap:80px;
+  align-items:center;
+  position:relative;
+  z-index:2;
+}
+
+.brand{
+  grid-column:1;
+  grid-row:1 / span 2;
+  text-align:left;
+  margin:0;
+  align-self:center;
+}
+
+.brand-symbol{
+  font-size:18px;
+  color:var(--ui-gold-hi);
+  margin-bottom:18px;
+}
+
+.brand h1{
+  font-size:clamp(90px,13vw,190px);
+  line-height:.72;
+  letter-spacing:.055em;
+  text-align:left;
+  text-shadow:0 0 70px rgba(215,174,90,.12);
+}
+
+.brand-line{
+  width:min(570px,100%);
+  margin:36px 0 0;
+  justify-content:flex-start;
+}
+
+.brand-line span{flex:0 0 70px}
+.brand-line i{
+  color:#b9a988;
+  font-size:11px;
+  letter-spacing:.22em;
+}
+
+.brand::after{
+  content:"Хроники живого мира · персонажи · история · свободное RP";
+  display:block;
+  margin-top:24px;
+  max-width:540px;
+  color:var(--ui-muted);
+  font-family:var(--body-font);
+  font-size:14px;
+  line-height:1.8;
+}
+
+.auth-panel{
+  grid-column:2;
+  grid-row:1 / span 2;
+  width:100%;
+  padding:38px;
+  border:1px solid rgba(215,174,90,.28);
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(25,22,17,.92),rgba(5,5,4,.91));
+  box-shadow:0 45px 120px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.05),0 0 90px rgba(215,174,90,.045);
+  backdrop-filter:blur(22px);
+}
+
+.auth-panel::before{
+  content:"ВХОД В ЛОРГУС";
+  position:absolute;
+  top:-12px;
+  left:28px;
+  padding:3px 12px;
+  background:#090806;
+  color:var(--ui-gold);
+  font:600 10px var(--body-font);
+  letter-spacing:.25em;
+}
+
+.auth-tabs{
+  border:0;
+  border-bottom:1px solid rgba(215,174,90,.15);
+  border-radius:0;
+  padding:0;
+  margin:0 0 36px;
+  gap:0;
+  background:transparent;
+}
+
+.auth-tab{
+  padding:14px 8px 17px;
+  color:#716a5e;
+  font-size:17px;
+  border-bottom:1px solid transparent;
+}
+.auth-tab.active{
+  color:var(--ui-gold-hi);
+  border-bottom:2px solid var(--ui-gold);
+  background:linear-gradient(180deg,transparent,rgba(215,174,90,.055));
+}
+
+.form-heading{text-align:left;margin-bottom:28px}
+.form-heading h2{
+  font-size:38px;
+  color:#f5e7c6;
+  letter-spacing:-.02em;
+}
+.form-heading p{font-size:12px;color:#7f7769}
+
+.auth-form-container label{
+  color:#bcae93;
+  font-size:14px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.input-wrapper{margin-bottom:19px}
+.input-wrapper input{
+  min-height:54px;
+  padding:14px 16px 14px 46px;
+  border-radius:9px;
+  border-color:rgba(215,174,90,.16);
+  background:rgba(0,0,0,.36);
+}
+.input-icon{color:#8d6a2e}
+.main-button{
+  min-height:56px;
+  margin-top:12px;
+  font-size:19px;
+}
+.auth-footer{
+  grid-column:2;
+  grid-row:3;
+  margin:20px 0 0;
+  text-align:center;
+  color:#635d52;
+}
+
+/* ---------- TOP BAR ---------- */
+
+.topbar{
+  min-height:82px;
+  padding:0 clamp(22px,5vw,72px);
+  background:rgba(5,5,4,.84);
+  border-bottom:1px solid rgba(215,174,90,.18);
+  backdrop-filter:blur(20px);
+}
+.topbar-brand{
+  font-size:30px;
+  letter-spacing:.12em;
+}
+.player-area{
+  gap:20px;
+}
+.player-email{
+  padding:9px 14px;
+  border-left:1px solid var(--ui-line);
+  color:#b7aa91;
+}
+.logout-button{
+  padding:10px 18px;
+  border-radius:6px;
+}
+
+/* ---------- CHARACTER SELECTION ---------- */
+
+.character-selection{
+  width:min(1420px,calc(100% - 64px));
+  margin:55px auto 90px;
+  padding:64px;
+  border-radius:20px;
+  background:
+    linear-gradient(135deg,rgba(22,19,14,.96),rgba(6,6,5,.98)),
+    radial-gradient(circle at 10% 0%,rgba(215,174,90,.10),transparent 35%);
+}
+
+.character-selection-header{
+  position:relative;
+  margin-bottom:46px;
+  padding:0 0 30px;
+  border-bottom:1px solid rgba(215,174,90,.13);
+}
+.character-selection-eyebrow{
+  color:#80632d;
+  font:600 10px var(--body-font);
+  letter-spacing:.3em;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+.character-selection-title-row{
+  display:flex;
+  gap:20px;
+  align-items:flex-start;
+}
+.character-selection-ornament{
+  flex:0 0 54px;
+  height:54px;
+  display:grid;
+  place-items:center;
+  border:1px solid rgba(215,174,90,.34);
+  color:var(--ui-gold-hi);
+  border-radius:50%;
+  box-shadow:0 0 35px rgba(215,174,90,.08);
+}
+.character-selection-header h1{
+  margin:0;
+  font:600 clamp(42px,6vw,76px)/.95 var(--title-font);
+  color:#f0dfbb;
+}
+.character-selection-header p{
+  margin:12px 0 0;
+  color:#827968;
+}
+.character-selection-rule{display:none}
+
+.character-selection-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:26px;
+}
+
+.character-card{
+  min-height:470px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  border:1px solid rgba(215,174,90,.15);
+  border-radius:15px;
+  background:#090908;
+  box-shadow:0 20px 55px rgba(0,0,0,.42);
+}
+.character-card-avatar{
+  height:310px;
+  flex:0 0 310px;
+  background:linear-gradient(135deg,#17130e,#050505);
+}
+.character-card-photo{
+  width:100%;height:100%;object-fit:cover;
+  filter:saturate(.82) contrast(1.08);
+  transition:.6s ease;
+}
+.character-card:hover .character-card-photo{transform:scale(1.045);filter:saturate(1) contrast(1.08)}
+.character-card-avatar::before{
+  content:"";
+  position:absolute;
+  inset:16px;
+  border:1px solid rgba(255,224,155,.13);
+  z-index:2;
+  pointer-events:none;
+}
+.character-card-body{
+  flex:1;
+  padding:27px 28px 30px;
+  display:flex;
+  flex-direction:column;
+}
+.character-card-body h2{
+  margin:4px 0 5px;
+  font-size:34px;
+  color:#f2dfb9;
+}
+.character-card-body p{color:#8d8475}
+.character-select-button{margin-top:auto}
+.character-create-button{
+  display:block;
+  width:min(420px,100%);
+  margin:35px auto 0;
+}
+
+/* ---------- PROFILE / CABINET ---------- */
+
+.character-profile-page{
+  width:min(1180px,calc(100% - 64px));
+  margin:55px auto 90px;
+  padding:0;
+  overflow:hidden;
+  border-radius:20px;
+  background:#080807;
+}
+.character-profile-header{
+  position:relative;
+  min-height:300px;
+  padding:70px 70px 55px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  background:
+    radial-gradient(circle at 82% 25%,rgba(215,174,90,.14),transparent 25%),
+    linear-gradient(135deg,#1b1710,#080807 62%);
+  border-bottom:1px solid rgba(215,174,90,.18);
+}
+.character-profile-header::after{
+  content:"ПЕРСОНАЛЬНОЕ ДОСЬЕ";
+  position:absolute;
+  right:40px;
+  top:38px;
+  color:rgba(215,174,90,.34);
+  font:10px var(--body-font);
+  letter-spacing:.3em;
+}
+.character-profile-header h1{
+  font-size:clamp(54px,7vw,92px);
+  line-height:.8;
+  margin:12px 0;
+}
+.character-profile-header p{color:#a7977c}
+.character-profile-grid{
+  padding:44px 55px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:1px;
+  background:rgba(215,174,90,.09);
+}
+.character-profile-field{
+  min-height:130px;
+  padding:25px;
+  background:#0b0a08;
+}
+.character-profile-field.full{grid-column:1/-1;min-height:auto}
+.character-profile-field span{
+  display:block;
+  color:#776d5e;
+  font:10px var(--body-font);
+  letter-spacing:.2em;
+  text-transform:uppercase;
+  margin-bottom:12px;
+}
+.character-profile-field strong{
+  color:#ead8b3;
+  font:600 24px var(--title-font);
+}
+.character-profile-field p{color:#aaa08f;line-height:1.8;margin:0}
+.character-game-actions{
+  padding:30px 55px 42px;
+  display:flex;
+  gap:12px;
+  background:#090908;
+}
+
+/* ---------- GAME WORLD ---------- */
+
+.lorgus-world-page{
+  width:min(1540px,calc(100% - 64px));
+  margin:42px auto 90px;
+}
+.lorgus-world-shell{
+  grid-template-columns:300px minmax(0,1fr);
+  gap:18px;
+}
+.lorgus-world-sidebar{
+  min-height:calc(100vh - 150px);
+  padding:35px 28px;
+  border-radius:16px;
+  background:linear-gradient(170deg,#17130d,#070706);
+}
+.lorgus-world-sidebar-name{
+  font-size:36px;
+  line-height:1;
+}
+.lorgus-world-sidebar-button{
+  min-height:46px;
+}
+.lorgus-world-browser{
+  padding:48px;
+  border-radius:16px;
+  background:linear-gradient(145deg,#15120d,#070706);
+}
+.lorgus-world-header h1{
+  font-size:clamp(60px,7vw,96px);
+}
+.lorgus-world-header p{max-width:850px}
+.lorgus-region-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
+.lorgus-region-card{
+  min-height:220px;
+  padding:30px;
+  text-align:left;
+  border:1px solid rgba(215,174,90,.13);
+  border-radius:14px;
+  background:
+    radial-gradient(circle at 100% 0,rgba(215,174,90,.09),transparent 35%),
+    linear-gradient(145deg,#17130e,#090908);
+  color:#eee4d1;
+  transition:.35s cubic-bezier(.2,.8,.2,1);
+}
+.lorgus-region-card:hover{
+  transform:translateY(-7px) scale(1.01);
+  border-color:rgba(255,223,153,.46);
+  box-shadow:0 28px 60px rgba(0,0,0,.48),0 0 35px rgba(215,174,90,.07);
+}
+.lorgus-region-card-symbol{
+  width:58px;height:58px;
+  margin-bottom:35px;
+}
+.lorgus-region-card strong{font:600 31px var(--title-font)}
+.lorgus-region-card small{display:block;margin-top:5px}
+.lorgus-region-card p{margin-top:16px}
+
+/* ---------- RP CHAT: make it feel like a game scene ---------- */
+
+.lorgus-rp-page{
+  width:min(1500px,calc(100% - 48px));
+  margin:30px auto 70px;
+}
+.lorgus-rp-shell{
+  min-height:calc(100vh - 145px);
+  display:grid;
+  grid-template-columns:330px minmax(0,1fr);
+  border:1px solid rgba(215,174,90,.18);
+  border-radius:18px;
+  background:#070706;
+}
+.lorgus-rp-sidebar{
+  padding:30px;
+  background:
+    radial-gradient(circle at 20% 0,rgba(215,174,90,.10),transparent 35%),
+    linear-gradient(180deg,#18130c,#080807);
+  border-right:1px solid rgba(215,174,90,.15);
+}
+.lorgus-rp-main{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  background:
+    radial-gradient(circle at 50% 0,rgba(215,174,90,.05),transparent 35%),
+    #080807;
+}
+.lorgus-rp-header{
+  padding:27px 35px;
+  border-bottom:1px solid rgba(215,174,90,.14);
+}
+.lorgus-rp-header h2{
+  margin:4px 0 0;
+  font:600 39px var(--title-font);
+  color:#f0dfbc;
+}
+.lorgus-rp-feed{
+  flex:1;
+  min-height:500px;
+  padding:32px 35px;
+  background-image:linear-gradient(rgba(255,255,255,.012) 1px,transparent 1px);
+  background-size:100% 46px;
+}
+.lorgus-rp-message{
+  max-width:900px;
+  margin:0 auto 15px;
+  padding:20px 22px;
+  border:1px solid rgba(215,174,90,.11);
+  border-left:2px solid rgba(215,174,90,.55);
+  background:rgba(18,15,11,.72);
+  box-shadow:0 12px 35px rgba(0,0,0,.22);
+}
+.lorgus-rp-message-meta strong{color:#e9d4aa;font-size:16px}
+.lorgus-rp-message-body p{
+  color:#c4baa8;
+  font-size:15px;
+  line-height:1.85;
+}
+.lorgus-rp-composer{
+  margin:0 24px 24px;
+  padding:18px;
+  border:1px solid rgba(215,174,90,.20);
+  background:#0e0c09;
+}
+.lorgus-rp-composer textarea{
+  min-height:110px;
+  border:0;
+  background:#080807;
+  color:#eee4d1;
+}
+.lorgus-rp-composer-bottom{padding-top:12px}
+
+/* ---------- ADMIN ---------- */
+
+.admin-panel{
+  width:min(1500px,calc(100% - 64px));
+  margin:45px auto 90px;
+  padding:55px;
+  border-radius:20px;
+  background:
+    linear-gradient(135deg,#17130e,#080807);
+}
+.admin-panel .character-header{
+  text-align:left;
+  padding-bottom:30px;
+  border-bottom:1px solid rgba(215,174,90,.14);
+}
+.admin-panel .character-header::after{display:none}
+.admin-panel .character-header h1{font-size:clamp(48px,6vw,82px)}
+.admin-stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin:30px 0 45px;
+}
+.admin-stat{
+  min-height:150px;
+  padding:28px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  border:1px solid rgba(215,174,90,.14);
+  border-radius:12px;
+  background:linear-gradient(145deg,#17130e,#090908);
+}
+.admin-stat-value{
+  font:600 58px/1 var(--title-font);
+  color:#f2d68e;
+}
+.admin-stat-label{
+  margin-top:8px;
+  color:#817767;
+  font-size:11px;
+  letter-spacing:.16em;
+  text-transform:uppercase;
+}
+.admin-application{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 210px;
+  gap:25px;
+  padding:30px;
+  margin-bottom:14px;
+  border:1px solid rgba(215,174,90,.14);
+  border-radius:13px;
+  background:rgba(7,7,6,.72);
+}
+.admin-application h3{
+  margin:0 0 20px;
+  color:#eed9b0;
+  font:600 34px var(--title-font);
+}
+.admin-application-info{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.admin-application-info span{
+  padding:13px 15px;
+  background:rgba(255,255,255,.018);
+  border:1px solid rgba(215,174,90,.07);
+  color:#a99e8b;
+  line-height:1.5;
+}
+.admin-application-info strong{color:#d8c49f}
+.admin-application-photo{
+  width:100%;
+  max-height:280px;
+  object-fit:cover;
+  border:1px solid rgba(215,174,90,.22);
+}
+.admin-application-actions{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  justify-content:center;
+}
+.admin-approve-button,.admin-reject-button{min-height:48px}
+
+/* ---------- COMMON ---------- */
+
+.gold-button{
+  border-radius:7px;
+  background:linear-gradient(135deg,#b88735,#6e4d20);
+  color:#fff0c9;
+  box-shadow:0 12px 28px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.14);
+}
+.gold-button:hover{
+  background:linear-gradient(135deg,#d4aa5b,#8c6328);
+  box-shadow:0 16px 38px rgba(0,0,0,.42),0 0 28px rgba(215,174,90,.12);
+}
+.character-secondary-button{
+  border-radius:7px;
+  border:1px solid rgba(215,174,90,.18);
+  background:rgba(255,255,255,.025);
+  color:#bcae95;
+  transition:.25s ease;
+}
+.character-secondary-button:hover{
+  border-color:rgba(215,174,90,.48);
+  background:rgba(215,174,90,.06);
+  color:#f0d9a9;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media(max-width:1050px){
+  .auth-container{
+    grid-template-columns:1fr;
+    max-width:620px;
+    padding:40px 24px;
+  }
+  .brand{grid-column:1;grid-row:1;text-align:center}
+  .brand h1{text-align:center;font-size:clamp(80px,18vw,130px)}
+  .brand-line{margin:28px auto 0}
+  .brand::after{margin:20px auto 0;text-align:center}
+  .auth-panel{grid-column:1;grid-row:2}
+  .auth-footer{grid-column:1;grid-row:3}
+  .lorgus-region-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:800px){
+  .character-selection,.admin-panel,.character-profile-page,.lorgus-world-page{width:calc(100% - 24px)}
+  .character-selection,.admin-panel{padding:28px 20px}
+  .character-profile-grid{grid-template-columns:repeat(2,1fr);padding:20px}
+  .character-profile-header{padding:45px 28px}
+  .character-game-actions{padding:22px;flex-direction:column}
+  .lorgus-world-browser{padding:28px 20px}
+  .lorgus-region-grid{grid-template-columns:1fr}
+  .lorgus-rp-shell{grid-template-columns:1fr}
+  .lorgus-rp-sidebar{border-right:0;border-bottom:1px solid rgba(215,174,90,.15)}
+  .admin-application{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .auth-container{padding:25px 14px}
+  .auth-panel{padding:25px 20px}
+  .brand h1{font-size:72px}
+  .character-selection-title-row{gap:12px}
+  .character-selection-ornament{flex-basis:40px;height:40px}
+  .character-selection-header h1{font-size:42px}
+  .character-selection-grid{grid-template-columns:1fr}
+  .character-card-avatar{height:260px;flex-basis:260px}
+  .character-profile-grid{grid-template-columns:1fr}
+  .character-profile-field.full{grid-column:auto}
+  .admin-stats{grid-template-columns:1fr}
+  .admin-application-info{grid-template-columns:1fr}
+  .lorgus-rp-feed{padding:22px 15px}
+}
