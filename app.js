@@ -566,6 +566,8 @@ async function renderCabinet(session) {
         session.user.user_metadata?.username ||
         "Игрок";
 
+    window.lorgusUsername = username;
+
     window.lorgusCurrentUsername = username;
 
     document.getElementById("root").innerHTML = `
