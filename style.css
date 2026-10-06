@@ -13196,3 +13196,116 @@ body:has(#root > #cabinet-content.character-application){
 #root > #cabinet-content.character-application .creation-origins button.active span{color:#d9b96f!important}
 @media(max-width:900px){#root > #cabinet-content.character-application .creation-origins button,#root > #cabinet-content.character-application .creation-origins button:nth-child(5),#root > #cabinet-content.character-application .creation-origins button:nth-child(6),#root > #cabinet-content.character-application .creation-origins button:nth-child(7){grid-column:span 6!important}}
 @media(max-width:600px){#root > #cabinet-content.character-application .origin-panel::after{display:none!important}#root > #cabinet-content.character-application .creation-origins button,#root > #cabinet-content.character-application .creation-origins button:nth-child(5),#root > #cabinet-content.character-application .creation-origins button:nth-child(6),#root > #cabinet-content.character-application .creation-origins button:nth-child(7){grid-column:span 12!important}}
+
+/* =========================================================
+   LORGUS — ORIGIN SELECT / REMOVE BOXES
+   ========================================================= */
+#root > #cabinet-content.character-application .creation-origins{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:0!important;
+  background:transparent!important;
+  border:0!important;
+  overflow:visible!important;
+}
+#root > #cabinet-content.character-application .creation-origins button,
+#root > #cabinet-content.character-application .creation-origins button:nth-child(5),
+#root > #cabinet-content.character-application .creation-origins button:nth-child(6),
+#root > #cabinet-content.character-application .creation-origins button:nth-child(7){
+  grid-column:auto!important;
+  width:100%!important;
+  min-height:86px!important;
+  height:86px!important;
+  padding:0 28px!important;
+  display:grid!important;
+  grid-template-columns:58px 1fr auto!important;
+  align-items:center!important;
+  gap:18px!important;
+  position:relative!important;
+  border:0!important;
+  border-bottom:1px solid rgba(220,184,102,.10)!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  transform:none!important;
+  text-align:left!important;
+  color:#d8cdb8!important;
+  overflow:hidden!important;
+  transition:background .3s ease,padding .3s ease!important;
+}
+#root > #cabinet-content.character-application .creation-origins button::before{
+  content:""!important;
+  position:absolute!important;
+  inset:0!important;
+  background:linear-gradient(90deg,rgba(220,184,102,.075),transparent 48%,rgba(220,184,102,.025))!important;
+  opacity:0!important;
+  transition:opacity .3s ease!important;
+}
+#root > #cabinet-content.character-application .creation-origins button::after{
+  content:""!important;
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  bottom:0!important;
+  width:2px!important;
+  height:auto!important;
+  background:#d5ad5c!important;
+  transform:scaleY(0)!important;
+  transform-origin:center!important;
+  transition:transform .3s ease!important;
+}
+#root > #cabinet-content.character-application .creation-origins button i{
+  position:relative!important;
+  inset:auto!important;
+  color:rgba(220,184,102,.34)!important;
+  font:10px var(--body-font)!important;
+  letter-spacing:.22em!important;
+}
+#root > #cabinet-content.character-application .creation-origins button b{
+  position:relative!important;
+  font-family:var(--title-font)!important;
+  font-size:28px!important;
+  font-weight:500!important;
+  letter-spacing:.02em!important;
+  color:#ddd2bd!important;
+  transition:color .3s ease!important;
+}
+#root > #cabinet-content.character-application .creation-origins button small{
+  position:absolute!important;
+  left:105px!important;
+  bottom:20px!important;
+  font:7px var(--body-font)!important;
+  letter-spacing:.22em!important;
+  color:rgba(211,194,160,.32)!important;
+}
+#root > #cabinet-content.character-application .creation-origins button span{
+  position:relative!important;
+  right:auto!important;
+  bottom:auto!important;
+  color:rgba(220,184,102,.18)!important;
+  font-size:9px!important;
+  transition:color .3s ease,transform .3s ease!important;
+}
+#root > #cabinet-content.character-application .creation-origins button:hover,
+#root > #cabinet-content.character-application .creation-origins button.active{
+  padding-left:36px!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+#root > #cabinet-content.character-application .creation-origins button:hover::before,
+#root > #cabinet-content.character-application .creation-origins button.active::before{
+  opacity:1!important;
+}
+#root > #cabinet-content.character-application .creation-origins button:hover::after,
+#root > #cabinet-content.character-application .creation-origins button.active::after{
+  transform:scaleY(1)!important;
+}
+#root > #cabinet-content.character-application .creation-origins button:hover b,
+#root > #cabinet-content.character-application .creation-origins button.active b{
+  color:#ecd49c!important;
+}
+#root > #cabinet-content.character-application .creation-origins button:hover span,
+#root > #cabinet-content.character-application .creation-origins button.active span{
+  color:#d8b76b!important;
+  transform:translateX(-5px)!important;
+}
