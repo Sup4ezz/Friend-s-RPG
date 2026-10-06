@@ -167,11 +167,33 @@ function initializeLorgusAudio() {
     const root = document.querySelector(".lorgus-cinematic-auth");
     if (!root) return;
 
-    let audioContext = null;
+    let audioContext = null;    const style = document.createElement("style");
+    style.textContent = `
+        .lorgus-audio-control{position:fixed;left:28px;bottom:28px;z-index:30;display:flex;align-items:center;gap:10px;padding:7px 10px;border:1px solid rgba(220,185,101,.22);background:rgba(8,7,5,.62);backdrop-filter:blur(8px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+        .lorgus-audio-button{width:28px;height:28px;border:0;background:transparent;color:#dfc27a;font-size:16px;cursor:pointer}
+        .lorgus-audio-slider{width:92px;accent-color:#c99b4e;cursor:pointer}
+        .lorgus-audio-control:hover{border-color:rgba(220,185,101,.45)}
+        @media(max-width:720px){.lorgus-audio-control{left:14px;bottom:14px}.lorgus-audio-slider{width:72px}}
+    `;
+    root.appendChild(style);
+
+    const volumeControl = document.createElement("div");
+    volumeControl.className = "lorgus-audio-control";
+    volumeControl.innerHTML = `
+        <button type="button" class="lorgus-audio-button" aria-label="Включить или выключить звук" aria-pressed="false">♫</button>
+        <input class="lorgus-audio-slider" type="range" min="0" max="100" value="55" aria-label="Громкость">
+    `;
+    root.appendChild(volumeControl);
+
+    const volumeButton = volumeControl.querySelector(".lorgus-audio-button");
+    const volumeSlider = volumeControl.querySelector(".lorgus-audio-slider");
+
     let master = null;
     let musicGain = null;
     let started = false;
     let musicTimer = null;
+    let volume = 0.55;
+    let muted = false;
     const listeners = [];
 
     const on = (target, event, handler, options) => {
@@ -183,7 +205,7 @@ function initializeLorgusAudio() {
         if (!audioContext) {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             master = audioContext.createGain();
-            master.gain.value = 0.16;
+            master.gain.value = volume * 0.29;
             master.connect(audioContext.destination);
 
             musicGain = audioContext.createGain();
@@ -192,6 +214,14 @@ function initializeLorgusAudio() {
         }
         if (audioContext.state === "suspended") audioContext.resume();
         if (!started) startMusic();
+    };
+
+    const applyVolume = () => {
+        if (!master) return;
+        const target = muted ? 0 : volume * 0.29;
+        master.gain.setTargetAtTime(target, audioContext.currentTime, 0.035);
+        volumeButton.textContent = muted ? "♩" : "♫";
+        volumeButton.setAttribute("aria-pressed", String(muted));
     };
 
     const tone = (frequency, duration, volume, type = "sine", glide = 0) => {
@@ -260,6 +290,17 @@ function initializeLorgusAudio() {
     const activate = () => {
         try { ensureAudio(); } catch (error) { console.warn("LORGUS audio unavailable:", error); }
     };
+
+    on(volumeSlider, "input", event => {
+        volume = Number(event.target.value) / 100;
+        muted = volume <= 0;
+        try { ensureAudio(); applyVolume(); } catch (error) {}
+    });
+    on(volumeButton, "click", event => {
+        event.stopPropagation();
+        muted = !muted;
+        try { ensureAudio(); applyVolume(); } catch (error) {}
+    });
 
     on(root, "pointerdown", activate, { passive: true });
     on(root, "mouseover", event => {
