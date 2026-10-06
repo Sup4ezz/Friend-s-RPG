@@ -4626,19 +4626,6 @@ function initializeLorgusWebGL() {
     floorPositions.needsUpdate = true;
     floorGeometry.computeVertexNormals();
     // Full cinematic environment: eliminate the empty black frame around the monument.
-    const skyGradient = new THREE.Mesh(
-        new THREE.PlaneGeometry(150, 90),
-        new THREE.ShaderMaterial({
-            transparent: false,
-            depthWrite: false,
-            uniforms: {},
-            vertexShader: "varying vec2 vUv; void main(){vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}",
-            fragmentShader: "varying vec2 vUv; void main(){vec3 top=vec3(0.045,0.055,0.075); vec3 mid=vec3(0.16,0.105,0.055); vec3 low=vec3(0.025,0.018,0.014); float h=smoothstep(0.0,1.0,vUv.y); vec3 c=mix(low,mid,smoothstep(0.05,0.58,h)); c=mix(c,top,smoothstep(0.55,1.0,h)); float horizon=exp(-pow((vUv.y-0.34)*5.5,2.0)); c+=vec3(0.18,0.075,0.02)*horizon; gl_FragColor=vec4(c,1.0);}"
-        })
-    );
-    skyGradient.position.set(0, 25, -18);
-    world.add(skyGradient);
-
     // Distant mountain silhouettes give the scene a horizon and scale.
     const mountainMat = new THREE.MeshStandardMaterial({
         color: 0x211d1a, roughness: 1, metalness: 0
