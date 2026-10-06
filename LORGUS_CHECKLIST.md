@@ -792,3 +792,27 @@ Commit:
 3. Проверить RP tables/RLS/policies/triggers и Realtime.
 4. Провести функциональные P0-тесты RP: teleport, fake origin, wrong destination, normal location → road → destination, cleanup, message RLS, Realtime.
 5. После подтверждения — отключить Supabase Integration → Deploy to production, оставив GitHub Actions единственным production deployer.
+
+### 21.7 REGRESSION — INITIAL RP ENTRY BROKEN BY TRANSITION HARDENING — 2026-10-06
+
+- [x] Пользователь обнаружил регрессию: после защиты переходов нельзя было открыть RP-чат ни одной локации для персонажа без существующего `rp_presence`.
+- [x] Причина найдена в связке `enterLocationRp()` + migration 005: без текущего presence UI специально показывает закрытый чат, а защищённый RPC теперь запрещает прямой вход в location без текущей дороги.
+- [x] Подтверждено, что при выборе персонажа старого initial placement вообще не было: `initializeRpPresence()` только читала presence и подписывалась на Realtime.
+- [x] Добавлена migration `20261006000700_rp_initial_presence.sql` с отдельным серверным RPC `initialize_lorgus_rp_presence()`.
+- [x] Initial placement разрешён только владельцу approved character и только в каноническую локацию.
+- [x] Повторный вызов не телепортирует персонажа: если presence уже существует, RPC возвращает текущее состояние.
+- [x] Клиент теперь при первом выборе персонажа устанавливает начальное RP-присутствие по `character.homeland`, после чего обычное движение снова идёт только через защищённый location → road → destination flow.
+
+Commits:
+- `fbf8f2214e968f9044fbcb8b4e0d4bdcca953d6b` — Restore initial RP location placement after transition hardening
+- `191e3f9c4abd414d3d08cbf338ad66529b99cee7` — Allow approved characters to enter the world at their homeland
+
+### Текущая точка остановки
+Клиентский фикс и migration 007 добавлены в `main`. Production migration 007 ещё нужно применить через GitHub Actions. До применения 007 текущая production-версия backend всё ещё будет закрывать RP-чат персонажам без existing presence.
+
+### Следующая задача
+1. Применить migration 007 через GitHub Actions.
+2. Проверить, что персонаж после выбора получает RP presence в своей канонической родной локации.
+3. Проверить открытие RP-чата.
+4. После этого повторить P0-тесты transition security.
+5. Затем вернуться к общей проверке migration history 001-007 и отключению второго production deployer.
