@@ -3607,7 +3607,7 @@ function renderLorgusWorldMap(container, character) {
                 <section class="lorgus-map-stage">
                     <div class="lorgus-map-frame">
                         <div class="lorgus-map-image-wrap" id="lorgus-map-viewport">
-                            <img class="lorgus-map-image" src="/assets/world/nerovland-map.png.png" alt="Карта Неровланда" draggable="false">
+                            <img class="lorgus-map-image" src="/assets/world/nerovland-map.png" alt="Карта Неровланда" draggable="false">
                             <div class="lorgus-map-overlay">
                                 <div class="lorgus-map-compass" aria-hidden="true"><span>N</span><i></i></div>
                                 <div class="lorgus-map-scale"><span></span><small>МИР</small></div>
