@@ -7531,3 +7531,54 @@ body::before{
   .lorgus-world-header h1{font-size:70px}
   .lorgus-world-header::after{display:none}
 }
+
+
+/* =========================================================
+   LORGUS — AUTH OVERLAP HOTFIX
+   Keep the cinematic title safely outside the auth panel.
+   ========================================================= */
+.auth-container{
+  position:relative;
+  z-index:2;
+  grid-template-columns:minmax(0,1fr) minmax(400px,500px);
+  column-gap:clamp(50px,7vw,110px);
+}
+
+.auth-page .brand{
+  min-width:0;
+  max-width:620px;
+  padding-right:20px;
+  overflow:visible;
+}
+
+.auth-page .brand h1{
+  font-size:clamp(72px,9.5vw,150px);
+  white-space:nowrap;
+  max-width:100%;
+  letter-spacing:.035em;
+}
+
+.auth-page .brand::after{
+  max-width:500px;
+}
+
+@media(max-width:1050px){
+  .auth-container{
+    grid-template-columns:1fr;
+    column-gap:0;
+  }
+  .auth-page .brand{
+    max-width:none;
+    padding-right:0;
+  }
+  .auth-page .brand h1{
+    font-size:clamp(72px,16vw,130px);
+    white-space:normal;
+  }
+}
+
+@media(max-width:560px){
+  .auth-page .brand h1{
+    font-size:68px;
+  }
+}
