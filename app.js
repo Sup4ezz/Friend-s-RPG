@@ -3580,47 +3580,97 @@ function enableLorgusMapEditor() {
     renderLorgusMapEditorRects(active);
 }
 
+function syncLorgusMapLabelLayer() {
+    const world = document.getElementById("lorgus-map-world");
+    const image = world?.querySelector(".lorgus-map-image");
+    const layer = document.getElementById("lorgus-map-marker-layer");
+
+    if (!world || !image || !layer || !image.complete) return;
+
+    // Координаты подписей относятся именно к PNG, а не ко всему viewport.
+    // Это важно, когда object-fit: contain оставляет поля по краям.
+    layer.style.left = image.offsetLeft + "px";
+    layer.style.top = image.offsetTop + "px";
+    layer.style.width = image.offsetWidth + "px";
+    layer.style.height = image.offsetHeight + "px";
+}
+
+function fitLorgusMapLabel(label) {
+    if (!label) return;
+
+    const maxWidth = Math.max(20, label.clientWidth - 8);
+    const maxHeight = Math.max(12, label.clientHeight - 6);
+
+    let size = Math.min(24, Math.max(8, maxHeight * 0.42));
+    label.style.fontSize = size + "px";
+
+    while (
+        size > 8 &&
+        (label.scrollWidth > maxWidth || label.scrollHeight > maxHeight)
+    ) {
+        size -= 0.5;
+        label.style.fontSize = size + "px";
+    }
+}
+
 function renderLorgusMapEditorRects() {
     const layer = document.getElementById("lorgus-map-marker-layer");
-    if (!layer) return;
+    const image = document.querySelector("#lorgus-map-world .lorgus-map-image");
+    if (!layer || !image) return;
 
     layer.querySelectorAll(".lorgus-map-editor-rect").forEach(el => el.remove());
 
-    LORGUS_MAP_EDITOR_RECTS.forEach(rectData => {
-        const label = document.createElement("button");
-        label.type = "button";
-        label.className = "lorgus-map-editor-rect";
-        label.dataset.region = rectData.id;
-        label.textContent = rectData.id;
-        label.style.left = rectData.x + "%";
-        label.style.top = rectData.y + "%";
-        label.style.width = rectData.w + "%";
-        label.style.height = rectData.h + "%";
-        label.style.transform = "translate(-50%,-50%)";
+    const render = () => {
+        syncLorgusMapLabelLayer();
 
-        if (rectData.id === "Ксандр" || rectData.id === "Спорные Земли") {
-            label.classList.add("dark-label");
-        }
+        LORGUS_MAP_EDITOR_RECTS.forEach(rectData => {
+            const label = document.createElement("button");
+            label.type = "button";
+            label.className = "lorgus-map-editor-rect";
+            label.dataset.region = rectData.id;
+            label.textContent = rectData.id;
 
-        label.onclick = event => {
-            event.preventDefault();
-            event.stopPropagation();
-            if (typeof window.selectLorgusMapRegion === "function") {
-                window.selectLorgusMapRegion(rectData.id);
-            }
-        };
+            label.style.left = rectData.x + "%";
+            label.style.top = rectData.y + "%";
+            label.style.width = rectData.w + "%";
+            label.style.height = rectData.h + "%";
+            label.style.transform = "translate(-50%,-50%)";
 
-        layer.appendChild(label);
+            label.onclick = event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (typeof window.selectLorgusMapRegion === "function") {
+                    window.selectLorgusMapRegion(rectData.id);
+                }
+            };
+
+            layer.appendChild(label);
+        });
 
         requestAnimationFrame(() => {
-            let size = Math.min(24, Math.max(7, label.clientHeight * 0.42));
-            label.style.fontSize = size + "px";
-            while (size > 7 && (label.scrollWidth > label.clientWidth || label.scrollHeight > label.clientHeight)) {
-                size -= 0.5;
-                label.style.fontSize = size + "px";
-            }
+            syncLorgusMapLabelLayer();
+            layer.querySelectorAll(".lorgus-map-editor-rect").forEach(fitLorgusMapLabel);
         });
+    };
+
+    if (image.complete) {
+        render();
+    } else {
+        image.addEventListener("load", render, { once: true });
+    }
+
+    if (window.lorgusMapLabelResizeObserver) {
+        window.lorgusMapLabelResizeObserver.disconnect();
+    }
+
+    window.lorgusMapLabelResizeObserver = new ResizeObserver(() => {
+        syncLorgusMapLabelLayer();
+        layer.querySelectorAll(".lorgus-map-editor-rect").forEach(fitLorgusMapLabel);
     });
+
+    window.lorgusMapLabelResizeObserver.observe(image);
+    window.lorgusMapLabelResizeObserver.observe(world);
 }
 function addLorgusMapEditorUI() {
     const controls = document.querySelector(".lorgus-map-controls");
@@ -3754,7 +3804,7 @@ function renderLorgusWorldMap(container, character) {
                         <div class="lorgus-map-image-wrap" id="lorgus-map-viewport" >
                             <div class="lorgus-map-atmosphere" aria-hidden="true"><i></i><i></i><i></i></div>
                             <div class="lorgus-map-world" id="lorgus-map-world">
-                                <img class="lorgus-map-image" src="/assets/world/nerovland-map.png" alt="Карта Неровланда" draggable="false">
+                                <img class="lorgus-map-image" src="/assets/world/nerovland-map.png" alt="Карта Лоргуса" draggable="false">
                                 <div class="lorgus-map-marker-layer" id="lorgus-map-marker-layer" aria-label="Обозначения карты"></div>
                             </div>
                             <div class="lorgus-map-surface-hint" id="lorgus-map-surface-hint">ТОЧКА КАРТЫ</div>
@@ -3835,7 +3885,9 @@ function initializeLorgusMapViewport() {
     if (world) {
         world.style.transform = "translate3d(0,0,0) scale(1)";
     }
-}
+
+    syncLorgusMapLabelLayer();
+    requestAnimationFrame(syncLorgusMapLabelLayer);
 
 function lorgusMapZoom(factor) {
     lorgusMapScale = Math.min(3.2, Math.max(.8, lorgusMapScale * factor));
