@@ -9493,3 +9493,15 @@ body{
     height:16px;
   }
 }
+
+.lorgus-map-marker-layer.editor-mode .lorgus-map-marker{
+  cursor:grab;
+  outline:1px dashed rgba(235,210,154,.28);
+}
+.lorgus-map-marker-layer.editor-mode .lorgus-map-marker:active{
+  cursor:grabbing;
+  transform:translate(-50%,-50%) scale(1.45);
+}
+.lorgus-map-editor-toggle{
+  min-width:145px;
+}
