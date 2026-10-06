@@ -2028,6 +2028,7 @@ function renderKingdomLocations(regionName) {
     const name = escapeHtml(character?.name || "Без имени");
 
     const currentPresence = window.activeRpPresence;
+    const hasPresence = Boolean(currentPresence);
     const locationCards = region.locations.length
         ? region.locations.map(([title, subtitle, description]) => {
             const isCurrent =
@@ -2047,7 +2048,7 @@ function renderKingdomLocations(regionName) {
                     <small>${escapeHtml(subtitle)}</small>
                     <p>${escapeHtml(description)}</p>
                     <span class="lorgus-location-card-access">
-                        ${isCurrent ? "Вы здесь · открыть RP-чат" : (isOnRoad ? "Персонаж в пути · чат закрыт" : "Не здесь · RP-чат закрыт")}
+                        ${isCurrent ? "Вы здесь · открыть RP-чат" : (isOnRoad ? "Персонаж в пути · чат закрыт" : (!hasPresence ? "Открыть RP-чат · первое сообщение закрепит место" : "Не здесь · перейти через дорогу"))}
                     </span>
                 </button>
             `;
@@ -2278,9 +2279,10 @@ async function enterLocationRp(locationName, regionName) {
         return;
     }
 
-    // Открытие локации НЕ считается прибытием.
-    // При отсутствии присутствия показываем закрытый RP-чат.
-    renderLocationEntryLock(locationName, regionName);
+    // До первого RP-поста физического местоположения нет.
+    // Любую локацию можно открыть и читать; первое сообщение
+    // атомарно закрепит персонажа именно здесь через RPC.
+    await renderLocationChats(locationName, regionName, false);
 }
 
 async function startTravel(fromLocation, fromRegion, toLocation, toRegion) {
@@ -2637,6 +2639,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
     if (!container) return;
 
     const presence = await getRpPresence();
+    const hasPresence = Boolean(presence);
 
     // Before the first RP post there is no physical lock:
     // any location chat may be opened and read.
@@ -2690,7 +2693,9 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
 
                 <div class="lorgus-rp-sidebar-label">ПРИСУТСТВИЕ</div>
                 <div class="lorgus-rp-presence-lock">
-                    Персонаж находится здесь. Войти в другую RP-локацию можно только через дорогу.
+                    ${hasPresence
+                        ? "Персонаж находится здесь. Войти в другую RP-локацию можно только через дорогу."
+                        : "Физическое местоположение ещё не закреплено. Вы можете читать эту сцену. Первое RP-сообщение закрепит персонажа здесь."}
                 </div>
 
                 <div class="lorgus-rp-sidebar-label">УЧАСТНИКИ</div>
@@ -2745,8 +2750,11 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
             </main>
         </div>
     `;
-    await loadRpMessages(presence);
-    await subscribeToRpMessages(presence);
+    const chatSpace = window.activeRpChatSpace;
+    if (chatSpace) {
+        await loadRpMessages(chatSpace);
+        await subscribeToRpMessages(chatSpace);
+    }
 }
 async function loadRpMessages(presence) {
     const feed = document.getElementById("lorgus-rp-feed");
