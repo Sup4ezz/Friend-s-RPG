@@ -764,7 +764,7 @@ function renderRegisterForm() {
             <p>Начни своё путешествие в мире ЛОРГУС.</p>
         </div>
 
-        <form onsubmit="register(event)">
+        <form class="register-auth-form" onsubmit="register(event)">
             <label for="register-username">Логин</label>
 
             <div class="input-wrapper">
