@@ -11744,3 +11744,115 @@ body{
     filter:brightness(1.08) saturate(1.12);
     transition:filter 1.35s ease;
 }
+
+/* The journey is staged: first the interface leaves, then the camera enters the gate,
+   and only after the portal fills the frame does the new world appear. */
+.lorgus-cinematic-auth.portal-departure .lorgus-webgl{
+    transition:filter 1.6s ease,opacity 1.2s ease;
+    filter:brightness(1.12) saturate(1.18) contrast(1.06);
+}
+.lorgus-cinematic-auth.portal-departure .lorgus-vignette{
+    opacity:.92;
+    transition:opacity 1.2s ease;
+}
+
+.lorgus-portal-transition{
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    pointer-events:none;
+    overflow:hidden;
+    opacity:0;
+    background:
+        radial-gradient(ellipse at 50% 51%,
+            rgba(255,219,145,0) 0%,
+            rgba(255,157,55,0) 18%,
+            rgba(5,3,2,.18) 44%,
+            rgba(0,0,0,.94) 100%);
+    transition:opacity .55s ease;
+}
+.lorgus-portal-transition.active{
+    opacity:1;
+}
+.lorgus-portal-transition-veil{
+    position:absolute;
+    inset:-15%;
+    background:
+        radial-gradient(ellipse at 50% 52%,
+            rgba(255,244,198,.02) 0%,
+            rgba(255,157,45,.05) 22%,
+            rgba(0,0,0,.78) 58%,
+            #000 78%);
+    transform:scale(1.08);
+    transition:transform 1.78s cubic-bezier(.2,.72,.2,1),opacity 1.78s ease;
+}
+.lorgus-portal-transition-core{
+    position:absolute;
+    left:50%;
+    top:51%;
+    width:18vw;
+    height:48vh;
+    min-width:170px;
+    min-height:280px;
+    transform:translate(-50%,-50%) scale(.16);
+    border-radius:50% 50% 44% 44% / 45% 45% 38% 38%;
+    background:
+        radial-gradient(ellipse at center,
+            rgba(255,250,218,.98) 0%,
+            rgba(255,191,82,.88) 13%,
+            rgba(232,105,25,.45) 31%,
+            rgba(110,42,10,.16) 52%,
+            transparent 73%);
+    filter:blur(8px);
+    mix-blend-mode:screen;
+    opacity:.7;
+    transition:transform 1.78s cubic-bezier(.12,.72,.12,1),
+               filter 1.78s ease,
+               opacity 1.78s ease;
+}
+.lorgus-portal-transition-ring{
+    position:absolute;
+    left:50%;
+    top:51%;
+    width:22vw;
+    height:54vh;
+    min-width:210px;
+    min-height:320px;
+    transform:translate(-50%,-50%) scale(.08);
+    border:1px solid rgba(255,211,125,.55);
+    border-radius:50% 50% 44% 44% / 45% 45% 38% 38%;
+    box-shadow:
+        0 0 35px rgba(255,170,54,.28),
+        0 0 110px rgba(255,113,22,.2),
+        inset 0 0 40px rgba(255,207,121,.2);
+    opacity:0;
+    transition:transform 1.65s cubic-bezier(.12,.72,.12,1),
+               opacity .45s ease,
+               box-shadow 1.65s ease;
+}
+.lorgus-portal-transition.active .lorgus-portal-transition-veil{
+    transform:scale(.22);
+    opacity:.86;
+}
+.lorgus-portal-transition.active .lorgus-portal-transition-core{
+    transform:translate(-50%,-50%) scale(1.15);
+    filter:blur(3px);
+    opacity:1;
+}
+.lorgus-portal-transition.active .lorgus-portal-transition-ring{
+    transform:translate(-50%,-50%) scale(1.7);
+    opacity:.7;
+}
+.lorgus-portal-transition.release{
+    opacity:0;
+    transition:opacity .8s ease;
+}
+.lorgus-portal-transition.release .lorgus-portal-transition-core{
+    transform:translate(-50%,-50%) scale(2.9);
+    opacity:1;
+    filter:blur(18px);
+}
+.lorgus-portal-transition.release .lorgus-portal-transition-ring{
+    transform:translate(-50%,-50%) scale(3.8);
+    opacity:0;
+}
