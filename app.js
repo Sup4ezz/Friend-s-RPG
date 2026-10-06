@@ -1599,7 +1599,25 @@ function renderCharacterApplicationForm(container) {
 
                     <section class="character-creation-panel portrait-panel">
                         <div class="creation-panel-heading"><span>04</span><div><small>ОБРАЗ</small><h2>Как тебя запомнят?</h2></div></div>
-                        <label class="creation-upload"><span>Изображение персонажа</span><input id="character-photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"><small>JPG, PNG или WEBP · до 5 МБ</small></label>
+                        <div class="portrait-crop-editor">
+                            <div class="portrait-crop-stage" id="portrait-crop-stage">
+                                <canvas id="portrait-crop-canvas" width="520" height="520"></canvas>
+                                <div class="portrait-crop-ring"></div>
+                                <div class="portrait-crop-empty" id="portrait-crop-empty">ЗАГРУЗИ<br>ОБРАЗ</div>
+                            </div>
+                            <div class="portrait-crop-controls">
+                                <label class="creation-upload">
+                                    <span>Выбери изображение</span>
+                                    <input id="character-photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+                                    <small>JPG, PNG или WEBP · до 5 МБ</small>
+                                </label>
+                                <label class="portrait-zoom">
+                                    <span>МАСШТАБ</span>
+                                    <input id="portrait-zoom" type="range" min="1" max="3" step="0.01" value="1">
+                                </label>
+                                <small class="portrait-crop-hint">Перетащи изображение внутри круга. Масштабируй так, чтобы персонаж оказался ровно в рамке. Этот круг станет портретом персонажа в игре.</small>
+                            </div>
+                        </div>
                     </section>
 
                     <div id="character-message" class="character-message"></div>
@@ -1609,6 +1627,8 @@ function renderCharacterApplicationForm(container) {
         </div>
     `;
 
+    initializeCharacterPortraitCrop();
+
     container.querySelectorAll(".creation-origins button").forEach(button => {
         button.addEventListener("click", () => {
             const homeland = container.querySelector("#character-homeland");
@@ -1617,6 +1637,141 @@ function renderCharacterApplicationForm(container) {
             homeland.focus();
         });
     });
+}
+
+function initializeCharacterPortraitCrop() {
+    const input = document.getElementById("character-photo");
+    const canvas = document.getElementById("portrait-crop-canvas");
+    const stage = document.getElementById("portrait-crop-stage");
+    const empty = document.getElementById("portrait-crop-empty");
+    const zoomInput = document.getElementById("portrait-zoom");
+    if (!input || !canvas || !stage || !zoomInput) return;
+
+    window.characterPortraitBlob = null;
+    const ctx = canvas.getContext("2d");
+    const state = { image: null, zoom: 1, x: 0, y: 0, dragging: false, sx: 0, sy: 0, ox: 0, oy: 0 };
+
+    const draw = () => {
+        const size = canvas.width;
+        ctx.clearRect(0, 0, size, size);
+        ctx.fillStyle = "#050403";
+        ctx.fillRect(0, 0, size, size);
+        if (!state.image) return;
+
+        const image = state.image;
+        const base = Math.max(size / image.naturalWidth, size / image.naturalHeight);
+        const scale = base * state.zoom;
+        const w = image.naturalWidth * scale;
+        const h = image.naturalHeight * scale;
+        const x = (size - w) / 2 + state.x;
+        const y = (size - h) / 2 + state.y;
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2 - 7, 0, Math.PI * 2);
+        ctx.clip();
+        ctx.drawImage(image, x, y, w, h);
+        ctx.restore();
+
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, size / 2 - 7, 0, Math.PI * 2);
+        ctx.strokeStyle = "rgba(222,190,116,.72)";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+    };
+
+    const clamp = () => {
+        if (!state.image) return;
+        const size = canvas.width;
+        const base = Math.max(size / state.image.naturalWidth, size / state.image.naturalHeight);
+        const scale = base * state.zoom;
+        const w = state.image.naturalWidth * scale;
+        const h = state.image.naturalHeight * scale;
+        const maxX = Math.max(0, (w - size) / 2 + 80);
+        const maxY = Math.max(0, (h - size) / 2 + 80);
+        state.x = Math.max(-maxX, Math.min(maxX, state.x));
+        state.y = Math.max(-maxY, Math.min(maxY, state.y));
+    };
+
+    const exportCrop = () => new Promise(resolve => {
+        const output = document.createElement("canvas");
+        output.width = 800;
+        output.height = 800;
+        const octx = output.getContext("2d");
+        const scale = output.width / canvas.width;
+        octx.save();
+        octx.beginPath();
+        octx.arc(400, 400, 392, 0, Math.PI * 2);
+        octx.clip();
+        octx.fillStyle = "#050403";
+        octx.fillRect(0, 0, 800, 800);
+        octx.drawImage(canvas, 0, 0, 800, 800);
+        octx.restore();
+        output.toBlob(blob => resolve(blob), "image/jpeg", 0.92);
+    });
+
+    const loadFile = file => {
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) {
+            setCharacterMessage("Изображение не должно превышать 5 МБ.", "error");
+            input.value = "";
+            return;
+        }
+        const url = URL.createObjectURL(file);
+        const image = new Image();
+        image.onload = () => {
+            URL.revokeObjectURL(url);
+            state.image = image;
+            state.zoom = 1;
+            state.x = 0;
+            state.y = 0;
+            zoomInput.value = "1";
+            if (empty) empty.style.display = "none";
+            stage.classList.add("has-image");
+            draw();
+        };
+        image.onerror = () => {
+            URL.revokeObjectURL(url);
+            setCharacterMessage("Не удалось открыть изображение.", "error");
+        };
+        image.src = url;
+    };
+
+    input.addEventListener("change", () => loadFile(input.files?.[0]));
+    zoomInput.addEventListener("input", () => {
+        state.zoom = Number(zoomInput.value);
+        clamp();
+        draw();
+    });
+
+    stage.addEventListener("pointerdown", event => {
+        if (!state.image) return;
+        state.dragging = true;
+        stage.setPointerCapture(event.pointerId);
+        state.sx = event.clientX;
+        state.sy = event.clientY;
+        state.ox = state.x;
+        state.oy = state.y;
+    });
+    stage.addEventListener("pointermove", event => {
+        if (!state.dragging) return;
+        const rect = stage.getBoundingClientRect();
+        const factor = canvas.width / rect.width;
+        state.x = state.ox + (event.clientX - state.sx) * factor;
+        state.y = state.oy + (event.clientY - state.sy) * factor;
+        clamp();
+        draw();
+    });
+    const stop = () => { state.dragging = false; };
+    stage.addEventListener("pointerup", stop);
+    stage.addEventListener("pointercancel", stop);
+    stage.addEventListener("pointerleave", stop);
+
+    window.characterPortraitPrepare = async () => {
+        if (!state.image) return null;
+        draw();
+        return await exportCrop();
+    };
 }
 
 /* =========================================================
