@@ -3583,7 +3583,8 @@ function enableLorgusMapEditor() {
 
 function renderLorgusMapEditorRects(active = true) {
     const layer = document.getElementById("lorgus-map-marker-layer");
-    if (!layer) return;
+    const viewport = document.getElementById("lorgus-map-viewport");
+    if (!layer || !viewport) return;
 
     layer.querySelectorAll(".lorgus-map-editor-rect").forEach(el => el.remove());
     if (!active) return;
