@@ -8,6 +8,8 @@ language plpgsql
 security definer
 set search_path = public
 as $$
+declare
+    application_ids uuid[];
 begin
     if not coalesce(public.is_admin(), false) then
         raise exception 'ADMIN_REQUIRED';
@@ -21,25 +23,20 @@ begin
         raise exception 'CHARACTER_NOT_FOUND';
     end if;
 
-    -- Break the application -> character reference first.
-    -- This also lets the character be deleted even if the FK is not cascading.
+    select coalesce(array_agg(ca.id), '{}'::uuid[])
+    into application_ids
+    from public.character_applications ca
+    where ca.character_id = p_character_id;
+
     update public.character_applications
     set character_id = null
-    where character_id = p_character_id;
+    where id = any(application_ids);
 
     delete from public.characters
     where id = p_character_id;
 
-    -- Remove the corresponding application(s), so the test account
-    -- can immediately create a fresh character.
     delete from public.character_applications
-    where character_id is null
-      and status = 'approved'
-      and not exists (
-          select 1
-          from public.characters c
-          where c.id = public.character_applications.character_id
-      );
+    where id = any(application_ids);
 end;
 $$;
 
