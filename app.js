@@ -107,38 +107,24 @@ function render(session) {
         const authScene = document.querySelector(".lorgus-cinematic-auth");
 
         if (authScene && !lorgusPortalEntering && !lorgusPortalDepartureAligning) {
-            // Phase 1: ONLY the interface disappears. The camera stays completely still.
+            // Сначала интерфейс полностью уходит. Камера в этот момент неподвижна.
             lorgusPortalDepartureAligning = true;
             authScene.classList.add("portal-departure");
 
             window.setTimeout(() => {
                 if (!document.querySelector(".lorgus-cinematic-auth")) return;
 
-                // Phase 2: hide the scene for a fraction of a second and reset the camera
-                // to the exact centered establishing shot. This removes the visible splice
-                // caused by pointer/parallax movement before the flight.
-                const overlay = createPortalTransitionOverlay();
-                overlay.classList.add("blackout");
-
+                // Никаких промежуточных окон и заглушек: после исчезновения UI
+                // камера одним непрерывным движением летит строго по оси портала.
                 lorgusPortalDepartureAligning = false;
                 lorgusPortalEntering = true;
                 lorgusPortalEnterStartedAt = performance.now();
 
                 window.setTimeout(() => {
-                    const canvas = document.getElementById("lorgus-webgl");
-                    if (canvas) canvas.classList.add("portal-flight-ready");
-                    overlay.classList.remove("blackout");
-                }, 260);
-
-                // The portal reaches the camera, the frame becomes light, then the new
-                // cabinet is mounted underneath a fully closed veil. Only after that veil
-                // starts opening do we reveal the cabinet.
-                window.setTimeout(() => {
                     if (!lorgusPortalEntering) return;
                     lorgusPortalEntering = false;
                     renderCabinet(session);
-                    window.setTimeout(finishPortalTransition, 220);
-                }, 2020);
+                }, 2100);
             }, 900);
 
             return;
@@ -872,19 +858,16 @@ async function renderCabinet(session) {
     window.lorgusCurrentUsername = username;
 
     document.getElementById("root").innerHTML = `
-        <main class="game-page">
-            <section
-                id="cabinet-content"
-                class="welcome-panel"
-            >
-                <div class="welcome-symbol">✦</div>
-                <h1>ЛОРГУС</h1>
-                <p>Загружаем твоё путешествие...</p>
-            </section>
+        <main class="game-page lorgus-cabinet-entering">
+            <section id="cabinet-content"></section>
         </main>
     `;
 
     await loadPlayerState(session);
+    const cabinet = document.querySelector(".lorgus-cabinet-entering");
+    if (cabinet) {
+        requestAnimationFrame(() => cabinet.classList.add("ready"));
+    }
 }
 
 /* =========================================================
