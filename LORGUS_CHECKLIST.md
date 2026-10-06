@@ -121,7 +121,7 @@
 - [x] Введена серверная валидация принадлежности персонажа одобренной заявке.
 - [x] Введена серверная валидация канонических локаций и прямых маршрутов.
 - [x] entered_at и started_at теперь выставляются серверной функцией.
-- [ ] Применить sql/rp_security.sql в production Supabase.
+- [ ] Дождаться/проверить применение migrations `20261006000100_rp_schema.sql` и `20261006000200_rp_presence_security.sql` в production Supabase.
 - [ ] Полностью закрыть клиентские обходы чтения RP.
 - [ ] Перенести критическую авторизацию RP-доступа на сервер/RLS для rp_messages.
 - [ ] Проверить все связанные RP SQL policies.
@@ -456,9 +456,10 @@
 
 - `sql/lorgus_mail.sql` не полностью синхронизирован с фактической production-моделью characters/applications.
 - Критические проверки чтения/отправки rp_messages пока частично живут на клиенте.
-- sql/rp_security.sql добавлен в repo, но ещё требует применения в production Supabase.
+- supabase/migrations/20261006000100_rp_schema.sql
+- supabase/migrations/20261006000200_rp_presence_security.sql добавлен в repo, но ещё требует применения в production Supabase.
 - Realtime/RLS для RP нужно проверить после перевода presence на RPC.
-- saveRpPresence() теперь использует серверную функцию, но production migration ещё не применена.
+- saveRpPresence() теперь использует серверную функцию; две production migrations отправлены в `main`, применение нужно подтвердить.
 - Возможны оставшиеся async/await ошибки в flood/RP.
 - Есть остаточные emoji/text-symbol элементы UI.
 - Граф маршрутов нужно централизовать.
@@ -497,7 +498,7 @@
 
 **Следующее действие:**
 
-> Применить sql/rp_security.sql в production Supabase, затем продолжить P0-аудит rp_messages и RLS.
+> Проверить в Supabase, что migrations `20261006000100_rp_schema.sql` и `20261006000200_rp_presence_security.sql` применились, затем продолжить P0-аудит rp_messages и RLS.
 
 CI/CD проверки выполнены; Run #44 успешно завершён.
 
@@ -538,7 +539,8 @@ CI/CD проверки выполнены; Run #44 успешно завершё
 - [x] Клиент переведён на RPC.
 - [x] Сервер проверяет approved character application, каноническую локацию и прямой маршрут.
 - [x] Route graph централизован в LORGUS_ROUTES.
-- [ ] Выполнить migration в production Supabase.
+- [x] Перенесены RP schema/security SQL в `supabase/migrations/` для GitHub → Supabase deployment.
+- [ ] Подтвердить применение migrations в production Supabase.
 - [ ] Закрыть аналогичный обход в rp_messages.
 
 Изменённые файлы:
@@ -574,3 +576,26 @@ Commits:
 - [ ] Проверить, что новый чат сможет продолжить работу только по GitHub.
 
 **Если этого не сделано — работа по LORGUS считается не полностью завершённой.**
+
+
+## 17. GITHUB → SUPABASE MIGRATION SETUP — 2026-10-06
+
+- [x] Проверена структура `supabase/`: ранее SQL лежал напрямую в `supabase/`, а не в `supabase/migrations/`.
+- [x] GitHub → Supabase Integration настроена на `Sup4ezz/Friend-s-RPG`, working directory `.` и production branch `main`.
+- [x] Создана canonical migration `supabase/migrations/20261006000100_rp_schema.sql` с RP presence/messages schema.
+- [x] Создана `supabase/migrations/20261006000200_rp_presence_security.sql` с server-side presence authority.
+- [x] Старые `supabase/rp_presence.sql` и `supabase/rp_messages.sql` удалены как отдельные schema-файлы, чтобы не было двух источников истины.
+- [x] Старый `sql/rp_security.sql` удалён; security SQL теперь живёт в migration.
+- [ ] Проверить результат автоматического применения migrations в Supabase production.
+
+### Последняя работа
+Приведён database deployment workflow LORGUS к migration-based структуре. Репозиторий теперь готов отдавать RP SQL через `supabase/migrations/`, а не через произвольные SQL-файлы. Supabase применяет миграции по истории/порядку; прямые изменения remote DB после перехода на migrations следует избегать.
+
+### Точка остановки
+Остановились сразу после push migration-файлов в `main`. Следующий шаг — открыть Supabase и проверить, что обе migrations применились без ошибки.
+
+### Следующая задача
+1. Проверить migration history в Supabase.
+2. Если обе применились — проверить RPC `set_lorgus_rp_presence` и запись presence.
+3. Если нет — не делать повторный SQL вслепую; сначала разобраться с migration history.
+4. После этого продолжить P0-аудит `rp_messages` RLS.
