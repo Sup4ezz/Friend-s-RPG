@@ -1525,8 +1525,21 @@ function renderCharacterApplicationForm(container) {
     if (lorgusAudioCleanup) { lorgusAudioCleanup(); lorgusAudioCleanup = null; }
     if (window.lorgusCharacterAudioCleanup) { window.lorgusCharacterAudioCleanup(); }
     initializeLorgusCharacterCreationAudio();
+
+    // СОЗДАНИЕ ПЕРСОНАЖА — отдельный экран, не дочерний слой кабинета.
+    // Убираем старый game-page целиком: он мог скрывать/обрезать форму
+    // независимо от её собственного z-index.
+    const root = document.getElementById("root");
+    if (root && container.parentNode !== root) {
+        root.innerHTML = "";
+        container.id = "cabinet-content";
+        root.appendChild(container);
+    }
+
     container.className = "character-application";
     container.style.display = "block";
+    container.style.visibility = "visible";
+    container.style.opacity = "1";
     container.style.visibility = "visible";
     container.style.opacity = "1";
 
