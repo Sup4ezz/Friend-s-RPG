@@ -760,3 +760,16 @@ Workflow снова можно пнуть вручную. Ожидаемый р�
 
 ### Текущая точка остановки
 CI log из последнего запуска относится к содержимому `main` до commit `6653a0609d1f4037a1f8c08d62847827735cfdee`. Следующий запуск должен проверять уже исправленный файл. Если ошибка повторится с `as $`, нужно сначала проверить commit/ref, который реально использует workflow, а не менять SQL вслепую.
+
+
+### 21.5 SUCCESS — RP migrations deployed by GitHub Actions
+- [x] Повторный `Deploy Supabase migrations` успешно прошёл после commit `6653a0609d1f4037a1f8c08d62847827735cfdee`.
+- [x] Migration 20261006000400_rp_messages_security.sql успешно применена.
+- [x] Migration 20261006000500_rp_presence_transitions.sql успешно применена в том же production push.
+- [x] Исправление dollar-quote delimiter подтверждено фактическим успешным применением.
+- [ ] Проверить вывод финального `supabase migration list --linked` и убедиться, что remote history содержит 001-005.
+- [ ] Отключить Supabase Integration → Deploy to production после подтверждения migration list, чтобы оставить один production deployer — GitHub Actions.
+- [ ] Провести функциональные P0-тесты RP: teleport, fake origin, wrong destination, нормальный location → road → destination, cleanup, message RLS и Realtime.
+
+### Текущая точка остановки
+Database deployment через GitHub Actions доказан рабочим. Теперь не меняем migration 004/005 вслепую: следующий шаг — подтвердить remote migration history, затем убрать второго production deployer и перейти к функциональному security-тестированию RP.
