@@ -12253,3 +12253,68 @@ body{
     grid-template-columns:1fr 1fr!important;
   }
 }
+
+
+/* FINAL FIX: character creation inputs must be visible when opening "NEW STORY" */
+.character-application,
+.character-application .character-creation-scene{
+  position:relative!important;
+  display:block!important;
+  width:100%!important;
+  min-height:100vh!important;
+  overflow:visible!important;
+}
+.character-application .character-creation-main{
+  position:relative!important;
+  z-index:20!important;
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+.character-application #character-application-form{
+  position:relative!important;
+  z-index:30!important;
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+.character-application #character-application-form .character-creation-panel{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+.character-application #character-application-form label,
+.character-application #character-application-form input,
+.character-application #character-application-form textarea,
+.character-application #character-application-form button{
+  visibility:visible!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+}
+.character-application #character-application-form input,
+.character-application #character-application-form textarea{
+  display:block!important;
+  color:#f4ead2!important;
+  background:#090807!important;
+}
+.character-application #character-application-form .creation-fields{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+}
+.character-application #character-application-form .creation-origins{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+}
+.character-application #character-application-form .character-creation-submit{
+  display:flex!important;
+}
+@media(max-width:900px){
+  .character-application #character-application-form .creation-fields{
+    grid-template-columns:1fr!important;
+  }
+  .character-application #character-application-form .creation-origins{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
