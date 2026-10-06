@@ -11741,37 +11741,16 @@ body{
     transition:filter 1.2s ease!important;
 }
 
+/* Вся кинематографическая камера теперь управляется Three.js.
+   Не масштабируем WebGL отдельной CSS-анимацией: она конфликтовала
+   с реальным движением камеры и визуально проталкивала её сквозь ворота. */
 .lorgus-cinematic-auth.portal-departure .lorgus-webgl{
-    transform-origin:50% 50%!important;
-    animation:lorgusPortalPush 2.02s cubic-bezier(.12,.7,.18,1) both!important;
+    transform:none!important;
     filter:brightness(1.04) saturate(1.08) contrast(1.04)!important;
 }
 
-.lorgus-cinematic-auth.portal-departure::after{
-    content:"";
-    position:fixed;
-    inset:0;
-    z-index:99990;
-    pointer-events:none;
-    background:radial-gradient(ellipse at 50% 52%,rgba(255,228,163,0) 0%,rgba(255,166,55,.02) 28%,rgba(255,215,135,.92) 78%,rgba(255,241,199,1) 100%);
-    opacity:0;
-    animation:lorgusPortalPass 2.02s ease-in-out both;
-}
-
-@keyframes lorgusPortalPush{
-    0%{transform:scale(1)}
-    68%{transform:scale(1.08)}
-    88%{transform:scale(1.24)}
-    100%{transform:scale(1.42)}
-}
-
-@keyframes lorgusPortalPass{
-    0%,72%{opacity:0}
-    86%{opacity:.06}
-    93%{opacity:.34}
-    98%{opacity:.82}
-    100%{opacity:1}
-}
+/* Момент перехода закрывает только реальная JS-вспышка,
+   без второго псевдоэкрана поверх сцены. */
 
 /* The old artificial portal overlay is intentionally disabled: the real WebGL gate is the transition. */
 .lorgus-portal-transition{
