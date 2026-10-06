@@ -1185,25 +1185,37 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
    ========================================================= */
 
 async function renderCharacterSelection(container, applications, pendingApplication = null) {
+    initializeLorgusCharacterSelectionAudio();
+
     container.className = "character-selection";
-    container.innerHTML = "";
-
-    const header = document.createElement("div");
-    header.className = "character-selection-header";    header.innerHTML = `
-        <div class="character-selection-eyebrow">ЛОРГУС · ВАШИ ИСТОРИИ</div>
-        <div class="character-selection-title-row">
-            <span class="character-selection-ornament">✦</span>
-            <div>
-                <h1>Кто продолжит историю?</h1>
-                <p>Выбери персонажа и войди в мир его глазами.</p>            </div>
+    container.innerHTML = `
+        <div class="character-selection-backdrop" aria-hidden="true">
+            <div class="character-selection-glow glow-one"></div>
+            <div class="character-selection-glow glow-two"></div>
+            <div class="character-selection-stars"></div>
         </div>
-        <div class="character-selection-rule"><span></span><i>АКТИВНЫЕ ПЕРСОНАЖИ</i><span></span></div>
-    `;
-    container.appendChild(header);
 
-    const grid = document.createElement("div");
-    grid.className = "character-selection-grid";
-    container.appendChild(grid);
+        <header class="character-selection-header">
+            <div class="character-selection-brand">
+                <span class="character-selection-mark">✦</span>
+                <span>ЛОРГУС</span>
+            </div>
+            <div class="character-selection-kicker">ЛИЧНЫЕ ИСТОРИИ · ВЫБОР ПУТИ</div>
+            <h1>Кто продолжит историю?</h1>
+            <p>Каждая жизнь уже оставила след в мире. Выбери ту, которой хочешь дать следующий шаг.</p>
+            <div class="character-selection-divider"><i></i><span>ВАШИ ПЕРСОНАЖИ</span><i></i></div>
+        </header>
+
+        <section class="character-selection-stage">
+            <div class="character-selection-grid"></div>
+        </section>
+
+        <div class="character-selection-footer">
+            <span>МИР ПРОДОЛЖАЕТСЯ · ТВОЯ ИСТОРИЯ ЖДЁТ</span>
+        </div>
+    `;
+
+    const grid = container.querySelector(".character-selection-grid");
 
     for (const application of applications) {
         const result = await supabase.from("characters").select("*").eq("id", application.character_id).single();
@@ -1224,7 +1236,6 @@ async function renderCharacterSelection(container, applications, pendingApplicat
                 .createSignedUrl(application.photo_path, 60 * 60);
 
             if (!photoError && photoData?.signedUrl) {
-                avatar.innerHTML = "";
                 const image = document.createElement("img");
                 image.src = photoData.signedUrl;
                 image.alt = character.name || "Персонаж";
@@ -1232,11 +1243,11 @@ async function renderCharacterSelection(container, applications, pendingApplicat
                 avatar.appendChild(image);
             } else {
                 avatar.classList.add("character-card-placeholder");
-                avatar.textContent = "✦";
+                avatar.innerHTML = "<span>✦</span>";
             }
         } else {
             avatar.classList.add("character-card-placeholder");
-            avatar.textContent = "✦";
+            avatar.innerHTML = "<span>✦</span>";
         }
 
         card.appendChild(avatar);
@@ -1244,12 +1255,12 @@ async function renderCharacterSelection(container, applications, pendingApplicat
         const body = document.createElement("div");
         body.className = "character-card-body";
 
-        if (status === "DEAD") {
-            const statusNode = document.createElement("div");
-            statusNode.className = "character-card-status dead";
-            statusNode.textContent = "Погиб";
-            body.appendChild(statusNode);
-        }
+        const statusNode = document.createElement("div");
+        statusNode.className = "character-card-status" + (status === "DEAD" ? " dead" : "");
+        statusNode.innerHTML = status === "DEAD"
+            ? "<span></span> ИСТОРИЯ ЗАВЕРШЕНА"
+            : "<span></span> ИСТОРИЯ ПРОДОЛЖАЕТСЯ";
+        body.appendChild(statusNode);
 
         const name = document.createElement("h2");
         name.textContent = character.name || "Без имени";
@@ -1259,16 +1270,21 @@ async function renderCharacterSelection(container, applications, pendingApplicat
         race.textContent = character.race || "Раса не указана";
         body.appendChild(race);
 
+        const homeland = document.createElement("small");
+        homeland.textContent = character.homeland || "Происхождение не указано";
+        body.appendChild(homeland);
+
         if (status === "ACTIVE" || !character.status) {
             const button = document.createElement("button");
-            button.className = "gold-button character-select-button";
-            button.textContent = "Играть";
+            button.type = "button";
+            button.className = "character-select-button";
+            button.innerHTML = "<span>ВОЙТИ В ИСТОРИЮ</span><b>→</b>";
             button.addEventListener("click", () => selectCharacter(container, character.id));
             body.appendChild(button);
         } else {
             const disabled = document.createElement("div");
             disabled.className = "character-card-disabled-label";
-            disabled.textContent = "Персонаж недоступен";
+            disabled.textContent = "ИСТОРИЯ НЕДОСТУПНА";
             body.appendChild(disabled);
         }
 
@@ -1277,38 +1293,165 @@ async function renderCharacterSelection(container, applications, pendingApplicat
     }
 
     if (pendingApplication) {
-        const reviewPanel = document.createElement("div");
+        const reviewPanel = document.createElement("article");
         reviewPanel.className = "character-review-pending-panel";
         reviewPanel.innerHTML = `
-            <h2>Есть заявка на проверке</h2>
-            <p>У тебя есть ещё одна анкета, ожидающая решения администрации.</p>
-            ${pendingApplication.review_notes ? `
-                <div class="character-review-notes">
-                    <h3>Правки от администрации</h3>
-                    <p>${escapeHtml(pendingApplication.review_notes)}</p>
-                </div>
-            ` : ""}
+            <div class="review-panel-mark">✦</div>
+            <div>
+                <span>НОВАЯ ИСТОРИЯ</span>
+                <h2>Есть заявка на проверке</h2>
+                <p>Ещё одна история ждёт решения администрации.</p>
+                ${pendingApplication.review_notes ? `<div class="character-review-notes"><strong>Правки</strong><p>${escapeHtml(pendingApplication.review_notes)}</p></div>` : ""}
+            </div>
         `;
 
         const reviewButton = document.createElement("button");
-        reviewButton.className = "gold-button";
-        reviewButton.textContent = pendingApplication.review_notes
-            ? "Исправить анкету"
-            : "Открыть заявку";
-        reviewButton.addEventListener("click", () => {
-            renderPendingApplication(container, pendingApplication);
-        });
+        reviewButton.type = "button";
+        reviewButton.className = "character-create-button";
+        reviewButton.textContent = pendingApplication.review_notes ? "ИСПРАВИТЬ АНКЕТУ" : "ОТКРЫТЬ ЗАЯВКУ";
+        reviewButton.addEventListener("click", () => renderPendingApplication(container, pendingApplication));
         reviewPanel.appendChild(reviewButton);
-        container.appendChild(reviewPanel);
+        grid.appendChild(reviewPanel);
     }
 
     if (applications.length + (pendingApplication ? 1 : 0) < 3) {
         const createButton = document.createElement("button");
-        createButton.className = "gold-button character-create-button";
-        createButton.textContent = "Создать нового персонажа";
+        createButton.type = "button";
+        createButton.className = "character-create-button character-create-card";
+        createButton.innerHTML = "<span class=\"create-plus\">+</span><span><b>НОВАЯ ИСТОРИЯ</b><small>Создать ещё одного персонажа</small></span>";
         createButton.addEventListener("click", () => renderCharacterApplicationForm(container));
-        container.appendChild(createButton);
+        grid.appendChild(createButton);
     }
+}
+
+function initializeLorgusCharacterSelectionAudio() {
+    if (window.lorgusCharacterAudioCleanup) window.lorgusCharacterAudioCleanup();
+
+    const root = document.querySelector(".character-selection");
+    if (!root) return;
+
+    let ctx = null;
+    let master = null;
+    let musicGain = null;
+    let timer = null;
+    let started = false;
+    let muted = false;
+    let volume = 0.48;
+    const listeners = [];
+
+    const on = (target, event, handler, options) => {
+        target.addEventListener(event, handler, options);
+        listeners.push(() => target.removeEventListener(event, handler, options));
+    };
+
+    const ensure = () => {
+        if (!ctx) {
+            ctx = new (window.AudioContext || window.webkitAudioContext)();
+            master = ctx.createGain();
+            master.gain.value = volume * 0.22;
+            master.connect(ctx.destination);
+            musicGain = ctx.createGain();
+            musicGain.gain.value = 0.0001;
+            musicGain.connect(master);
+        }
+        if (ctx.state === "suspended") ctx.resume();
+        if (!started) start();
+    };
+
+    const tone = (freq, duration, gainValue, type = "sine") => {
+        if (!ctx || !master) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(gainValue, now + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(now);
+        osc.stop(now + duration + 0.03);
+    };
+
+    const start = () => {
+        if (started || !ctx || !musicGain) return;
+        started = true;
+        const progression = [
+            [73.42, 110, 146.83],
+            [65.41, 98, 130.81],
+            [61.74, 92.5, 123.47],
+            [55, 82.41, 110]
+        ];
+        let step = 0;
+        const bar = () => {
+            if (!ctx || !musicGain) return;
+            const now = ctx.currentTime;
+            const chord = progression[step % progression.length];
+
+            chord.forEach((freq, index) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = index === 0 ? "triangle" : "sine";
+                osc.frequency.setValueAtTime(freq, now);
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.exponentialRampToValueAtTime(index === 0 ? 0.075 : 0.034, now + 0.8);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 6.2);
+                osc.connect(gain);
+                gain.connect(musicGain);
+                osc.start(now);
+                osc.stop(now + 6.4);
+            });
+
+            const notes = [293.66, 329.63, 392, 329.63, 246.94, 293.66];
+            [0, 1, 2].forEach((n, index) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = "sine";
+                osc.frequency.setValueAtTime(notes[(step + n) % notes.length], now + 0.7 + index * 0.75);
+                gain.gain.setValueAtTime(0.0001, now);
+                gain.gain.exponentialRampToValueAtTime(0.028, now + 0.9 + index * 0.75);
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.0 + index * 0.75);
+                osc.connect(gain);
+                gain.connect(musicGain);
+                osc.start(now + 0.7 + index * 0.75);
+                osc.stop(now + 2.1 + index * 0.75);
+            });
+
+            step++;
+        };
+
+        musicGain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        musicGain.gain.exponentialRampToValueAtTime(0.24, ctx.currentTime + 2.5);
+        bar();
+        timer = window.setInterval(bar, 5200);
+    };
+
+    const control = document.createElement("div");
+    control.className = "character-selection-audio";
+    control.innerHTML = `<button type="button" aria-label="Музыка">♫</button><span>МУЗЫКА</span>`;
+    root.appendChild(control);
+
+    const button = control.querySelector("button");
+    on(root, "pointerdown", () => { try { ensure(); } catch (error) {} }, { once: true });
+    on(button, "click", event => {
+        event.stopPropagation();
+        muted = !muted;
+        try {
+            ensure();
+            master.gain.setTargetAtTime(muted ? 0 : volume * 0.22, ctx.currentTime, 0.06);
+            button.textContent = muted ? "♩" : "♫";
+        } catch (error) {}
+    });
+
+    window.lorgusCharacterAudioCleanup = () => {
+        listeners.forEach(remove => remove());
+        if (timer) clearInterval(timer);
+        if (ctx) ctx.close().catch(() => {});
+        window.lorgusCharacterAudioCleanup = null;
+    };
+
+    try { ensure(); } catch (error) {}
 }
 
 async function selectCharacter(container, characterId) {
