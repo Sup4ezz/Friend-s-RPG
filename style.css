@@ -7582,3 +7582,694 @@ body::before{
     font-size:68px;
   }
 }
+
+
+/* =========================================================
+   LORGUS — RESPONSIVE MASTER LAYOUT
+   Mobile → tablet → desktop → ultrawide.
+   Layout constraints only; gameplay logic untouched.
+   ========================================================= */
+
+/* ---------- SAFE VIEWPORT + TYPE ---------- */
+
+html{
+  min-width:320px;
+  overflow-x:hidden;
+}
+body{
+  min-width:320px;
+  overflow-x:hidden;
+}
+#root{
+  width:100%;
+  min-width:0;
+}
+.auth-page,
+.game-page{
+  width:100%;
+  min-width:0;
+}
+
+/* ---------- ULTRAWIDE: use the space, don't stretch the UI ---------- */
+
+@media(min-width:1800px){
+  .auth-container{
+    width:min(1540px,calc(100vw - 120px));
+    grid-template-columns:minmax(0,1fr) minmax(440px,520px);
+    gap:clamp(80px,7vw,150px);
+  }
+
+  .topbar{
+    padding-inline:max(38px,calc((100vw - 1800px)/2 + 38px));
+  }
+
+  .character-selection,
+  .character-application,
+  .admin-panel,
+  .character-profile-page,
+  .lorgus-world-page{
+    max-width:1680px;
+    width:calc(100% - 80px);
+  }
+
+  .character-selection-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .lorgus-region-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  .lorgus-world-shell{
+    grid-template-columns:minmax(260px,330px) minmax(0,1fr);
+  }
+
+  .lorgus-rp-shell{
+    grid-template-columns:minmax(260px,330px) minmax(0,1fr);
+  }
+
+  .lorgus-rp-feed{
+    padding-inline:clamp(40px,5vw,90px);
+  }
+}
+
+@media(min-width:2400px){
+  .auth-container{
+    max-width:1700px;
+    grid-template-columns:minmax(0,1fr) 540px;
+  }
+
+  .character-selection,
+  .character-application,
+  .admin-panel,
+  .character-profile-page,
+  .lorgus-world-page{
+    max-width:1840px;
+  }
+
+  .character-selection-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+
+  .lorgus-region-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+}
+
+/* ---------- DESKTOP: explicit content ceilings ---------- */
+
+@media(min-width:1051px){
+  .auth-page{
+    padding:clamp(40px,5vh,80px) 32px;
+  }
+
+  .auth-container{
+    width:min(1500px,calc(100vw - 64px));
+    min-height:min(760px,calc(100vh - 80px));
+    display:grid;
+    align-items:center;
+  }
+
+  .auth-page .brand{
+    align-self:center;
+  }
+
+  .auth-page .brand h1{
+    font-size:clamp(90px,8vw,150px);
+  }
+
+  .auth-panel{
+    width:100%;
+    max-width:520px;
+    justify-self:end;
+  }
+
+  .character-selection{
+    width:min(1500px,calc(100% - 64px));
+    margin-inline:auto;
+  }
+
+  .character-selection-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .character-application{
+    width:min(1200px,calc(100% - 64px));
+  }
+
+  .admin-panel,
+  .character-profile-page,
+  .lorgus-world-page{
+    width:min(1500px,calc(100% - 64px));
+    margin-inline:auto;
+  }
+}
+
+/* ---------- TABLET ---------- */
+
+@media(max-width:1050px) and (min-width:801px){
+  .auth-page{
+    padding:42px 28px 55px;
+    align-items:flex-start;
+  }
+
+  .auth-container{
+    width:min(720px,100%);
+    display:grid;
+    grid-template-columns:1fr;
+    gap:28px;
+    margin-inline:auto;
+  }
+
+  .auth-page .brand{
+    text-align:center;
+  }
+
+  .auth-page .brand h1{
+    font-size:clamp(76px,13vw,118px);
+  }
+
+  .auth-panel{
+    width:100%;
+    transform:none;
+  }
+
+  .character-selection,
+  .character-application,
+  .admin-panel,
+  .character-profile-page,
+  .lorgus-world-page{
+    width:calc(100% - 40px);
+  }
+
+  .character-selection-grid,
+  .character-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .lorgus-region-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+
+  .topbar{
+    padding-inline:24px;
+  }
+
+  .player-area{
+    min-width:0;
+  }
+
+  .player-email{
+    max-width:260px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+}
+
+/* ---------- PHONE LANDSCAPE / SMALL TABLET ---------- */
+
+@media(max-width:800px){
+  .auth-page{
+    min-height:100svh;
+    padding:28px 14px 40px;
+    align-items:flex-start;
+  }
+
+  .auth-container{
+    width:min(620px,100%);
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+    padding:0;
+  }
+
+  .auth-page .brand{
+    width:100%;
+    padding:0;
+    margin-bottom:0;
+    text-align:center;
+  }
+
+  .auth-page .brand h1{
+    max-width:100%;
+    font-size:clamp(62px,15vw,100px);
+    line-height:.88;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+
+  .auth-page .brand h1::after{
+    left:50%;
+    transform:translateX(-50%);
+  }
+
+  .brand-line{
+    max-width:100%;
+    gap:8px;
+  }
+
+  .brand-line i{
+    max-width:75%;
+    font-size:8px;
+  }
+
+  .auth-panel{
+    width:100%;
+    max-width:none;
+    transform:none;
+  }
+
+  .auth-panel:hover{
+    transform:none;
+  }
+
+  .auth-form-container{
+    min-width:0;
+  }
+
+  .topbar{
+    min-height:64px;
+    padding:12px 16px;
+    gap:12px;
+  }
+
+  .topbar-brand{
+    font-size:23px;
+    flex:0 0 auto;
+  }
+
+  .player-area{
+    gap:8px;
+    min-width:0;
+    justify-content:flex-end;
+  }
+
+  .player-email{
+    display:none;
+  }
+
+  .logout-button{
+    min-height:40px;
+    padding:8px 12px;
+  }
+
+  .welcome-panel{
+    width:calc(100% - 24px);
+    margin:36px auto;
+    padding:38px 22px;
+  }
+
+  .character-selection,
+  .character-application,
+  .admin-panel,
+  .character-profile-page,
+  .lorgus-world-page{
+    width:calc(100% - 24px);
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  .character-selection,
+  .character-application,
+  .admin-panel{
+    padding:28px 20px;
+  }
+
+  .character-selection-header{
+    display:block;
+  }
+
+  .character-selection-grid,
+  .character-grid{
+    grid-template-columns:1fr;
+  }
+
+  .character-card{
+    min-height:0;
+  }
+
+  .character-card-avatar{
+    height:clamp(250px,68vw,360px);
+    flex-basis:auto;
+  }
+
+  .character-profile-header{
+    min-height:330px;
+    padding:50px 24px;
+  }
+
+  .character-profile-header h1{
+    font-size:clamp(48px,13vw,86px);
+    overflow-wrap:anywhere;
+  }
+
+  .character-profile-grid{
+    grid-template-columns:1fr;
+  }
+
+  .character-profile-field.full{
+    grid-column:auto;
+  }
+
+  .character-game-actions{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .character-game-actions button{
+    width:100%;
+  }
+
+  .lorgus-world-shell,
+  .lorgus-rp-shell{
+    grid-template-columns:1fr;
+  }
+
+  .lorgus-world-sidebar{
+    border-right:0;
+    border-bottom:1px solid rgba(215,174,90,.15);
+  }
+
+  .lorgus-world-browser{
+    padding:26px 20px;
+  }
+
+  .lorgus-world-header{
+    min-height:210px;
+  }
+
+  .lorgus-world-header h1{
+    font-size:clamp(52px,13vw,82px);
+    overflow-wrap:anywhere;
+  }
+
+  .lorgus-region-grid{
+    grid-template-columns:1fr;
+  }
+
+  .lorgus-region-card{
+    min-height:230px;
+  }
+
+  .lorgus-rp-sidebar{
+    max-height:280px;
+    border-right:0;
+    border-bottom:1px solid rgba(215,174,90,.15);
+  }
+
+  .lorgus-rp-header{
+    padding:22px 20px;
+  }
+
+  .lorgus-rp-header h2{
+    font-size:clamp(30px,8vw,42px);
+  }
+
+  .lorgus-rp-feed{
+    min-height:420px;
+    padding:22px 14px;
+  }
+
+  .lorgus-rp-message{
+    padding:16px;
+  }
+
+  .lorgus-rp-message:hover{
+    transform:none;
+  }
+
+  .lorgus-rp-composer{
+    margin:0 12px 12px;
+    padding:13px;
+  }
+
+  .admin-stats{
+    grid-template-columns:1fr;
+  }
+
+  .admin-application{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+
+  .admin-application-actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+  }
+
+  .admin-application-photo{
+    max-height:360px;
+  }
+}
+
+/* ---------- PHONE PORTRAIT ---------- */
+
+@media(max-width:560px){
+  html{
+    font-size:15px;
+  }
+
+  .auth-page{
+    padding:20px 10px 30px;
+  }
+
+  .auth-container{
+    gap:18px;
+  }
+
+  .auth-page .brand h1{
+    font-size:clamp(54px,18vw,74px);
+    letter-spacing:.02em;
+  }
+
+  .brand-symbol{
+    font-size:24px;
+  }
+
+  .brand-line{
+    margin-top:17px;
+  }
+
+  .brand-line i{
+    font-size:7px;
+    letter-spacing:.08em;
+  }
+
+  .auth-panel{
+    padding:22px 16px;
+  }
+
+  .auth-tabs{
+    margin-bottom:22px;
+  }
+
+  .auth-tab{
+    min-height:46px;
+    font-size:17px;
+  }
+
+  .form-heading h2{
+    font-size:26px;
+  }
+
+  .auth-form-container label{
+    font-size:16px;
+  }
+
+  .lorgus-input,
+  .input-wrapper input,
+  .character-field input,
+  .character-field textarea,
+  .character-field select{
+    min-height:48px;
+    font-size:16px;
+  }
+
+  .gold-button{
+    min-height:48px;
+  }
+
+  .character-selection,
+  .character-application,
+  .admin-panel{
+    width:calc(100% - 16px);
+    padding:22px 14px;
+  }
+
+  .character-selection-header h1,
+  .character-header h1{
+    font-size:clamp(34px,11vw,48px);
+  }
+
+  .character-card-body h2{
+    font-size:31px;
+  }
+
+  .character-card-avatar{
+    height:260px;
+  }
+
+  .character-profile-header{
+    min-height:280px;
+    padding:38px 18px;
+  }
+
+  .character-profile-header h1{
+    font-size:clamp(42px,14vw,68px);
+  }
+
+  .character-profile-grid{
+    padding:14px;
+  }
+
+  .character-profile-field strong{
+    font-size:23px;
+  }
+
+  .lorgus-world-sidebar{
+    padding:24px 18px;
+  }
+
+  .lorgus-world-sidebar-name{
+    font-size:34px;
+  }
+
+  .lorgus-world-browser{
+    padding:22px 14px;
+  }
+
+  .lorgus-world-header{
+    min-height:180px;
+  }
+
+  .lorgus-world-header h1{
+    font-size:clamp(44px,14vw,68px);
+  }
+
+  .lorgus-region-card{
+    min-height:210px;
+  }
+
+  .lorgus-rp-header{
+    padding:18px 15px;
+  }
+
+  .lorgus-rp-feed{
+    padding:18px 10px;
+  }
+
+  .lorgus-rp-message{
+    padding:14px;
+    margin-bottom:10px;
+  }
+
+  .lorgus-rp-message-body p{
+    font-size:14px;
+    line-height:1.7;
+  }
+
+  .lorgus-rp-composer{
+    margin:0 8px 8px;
+  }
+
+  .admin-panel .character-header{
+    padding-bottom:22px;
+  }
+
+  .admin-stat{
+    min-height:115px;
+    padding:20px;
+  }
+
+  .admin-stat-value{
+    font-size:48px;
+  }
+
+  .admin-application{
+    padding:18px;
+  }
+
+  .admin-application h3{
+    font-size:28px;
+  }
+
+  .admin-application-actions{
+    grid-template-columns:1fr;
+  }
+}
+
+/* ---------- VERY SMALL PHONES ---------- */
+
+@media(max-width:380px){
+  .auth-page .brand h1{
+    font-size:52px;
+  }
+
+  .auth-panel{
+    padding:20px 13px;
+  }
+
+  .auth-tab{
+    font-size:15px;
+  }
+
+  .topbar{
+    padding-inline:11px;
+  }
+
+  .topbar-brand{
+    font-size:20px;
+  }
+
+  .logout-button{
+    font-size:13px;
+    padding-inline:10px;
+  }
+
+  .character-card-avatar{
+    height:230px;
+  }
+
+  .lorgus-world-header h1{
+    font-size:43px;
+  }
+}
+
+/* ---------- TOUCH + ACCESSIBILITY ---------- */
+
+@media(hover:none){
+  .character-card:hover,
+  .lorgus-region-card:hover,
+  .admin-stat:hover,
+  .admin-application:hover{
+    transform:none;
+  }
+
+  .gold-button:hover,
+  .character-secondary-button:hover{
+    transform:none;
+    filter:none;
+  }
+}
+
+@media(pointer:coarse){
+  button,
+  .gold-button,
+  .character-secondary-button,
+  .auth-tab,
+  .logout-button{
+    min-height:44px;
+  }
+}
+
+/* Prevent long player/content strings from blowing out grids. */
+.character-selection *,
+.character-application *,
+.character-profile-page *,
+.lorgus-world-page *,
+.lorgus-rp-shell *,
+.admin-panel *{
+  min-width:0;
+  overflow-wrap:anywhere;
+}
