@@ -4709,20 +4709,6 @@ function initializeLorgusWebGL() {
         }
     }
 
-    // A broad warm horizon haze physically sits behind the gate.
-    const horizonGlow = new THREE.Mesh(
-        new THREE.PlaneGeometry(72, 26),
-        new THREE.MeshBasicMaterial({
-            color: 0xa35e24,
-            transparent: true,
-            opacity: 0.075,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false
-        })
-    );
-    horizonGlow.position.set(0, 5, -11);
-    world.add(horizonGlow);
-
     const floor = new THREE.Mesh(
         floorGeometry,
         groundStone
@@ -4754,13 +4740,6 @@ function initializeLorgusWebGL() {
             pathStone.add(slab);
         }
     }
-
-    const rearWall = new THREE.Mesh(
-        new THREE.BoxGeometry(42, 23, 2.4),
-        new THREE.MeshStandardMaterial({ map: darkStoneTexture, color: 0x8d8172, roughness: 1 })
-    );
-    rearWall.position.set(0, 8, -8);
-    world.add(rearWall);
 
     const floorGlow = new THREE.Mesh(
         new THREE.CircleGeometry(5.8, 64),
