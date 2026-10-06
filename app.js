@@ -1717,7 +1717,7 @@ async function submitCharacterApplication(event) {
     }
 
     const submitButton =
-        document.querySelector(".character-submit");
+        document.querySelector(".character-creation-submit");
 
     if (submitButton) {
         submitButton.disabled = true;
