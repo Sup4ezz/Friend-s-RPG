@@ -121,7 +121,7 @@
 - [x] Введена серверная валидация принадлежности персонажа одобренной заявке.
 - [x] Введена серверная валидация канонических локаций и прямых маршрутов.
 - [x] entered_at и started_at теперь выставляются серверной функцией.
-- [ ] Дождаться/проверить применение migrations `20261006000100_rp_schema.sql` и `20261006000200_rp_presence_security.sql` в production Supabase.
+- [ ] Дождаться/проверить применение migrations `20261006000100_rp_schema.sql`, `20261006000200_rp_presence_security.sql` и `20261006000300_rp_presence_cleanup.sql` в production Supabase.
 - [ ] Полностью закрыть клиентские обходы чтения RP.
 - [ ] Перенести критическую авторизацию RP-доступа на сервер/RLS для rp_messages.
 - [ ] Проверить все связанные RP SQL policies.
@@ -503,8 +503,8 @@
 CI/CD проверки выполнены; Run #44 успешно завершён.
 
 Порядок:
-1. Применить sql/rp_security.sql в Supabase.
-2. Проверить запись presence через RPC.
+1. Проверить автоматическое применение migrations через GitHub → Supabase.
+2. Проверить запись presence через `set_lorgus_rp_presence()`.
 3. Найти обходы чтения/отправки rp_messages.
 4. Перенести критические RP message checks на сервер.
 5. Проверить RLS/realtime и race conditions.
@@ -540,7 +540,7 @@ CI/CD проверки выполнены; Run #44 успешно завершё
 - [x] Сервер проверяет approved character application, каноническую локацию и прямой маршрут.
 - [x] Route graph централизован в LORGUS_ROUTES.
 - [x] Перенесены RP schema/security SQL в `supabase/migrations/` для GitHub → Supabase deployment.
-- [ ] Подтвердить применение migrations в production Supabase.
+- [ ] Подтвердить применение migrations в production Supabase, включая `20261006000300_rp_presence_cleanup.sql`.
 - [ ] Закрыть аналогичный обход в rp_messages.
 
 Изменённые файлы:
@@ -599,3 +599,22 @@ Commits:
 2. Если обе применились — проверить RPC `set_lorgus_rp_presence` и запись presence.
 3. Если нет — не делать повторный SQL вслепую; сначала разобраться с migration history.
 4. После этого продолжить P0-аудит `rp_messages` RLS.
+
+
+## 18. RP PRESENCE API CLEANUP — 2026-10-06
+
+- [x] Проверен `20261006000200_rp_presence_security.sql`.
+- [x] Подтверждено, что клиент использует новый `set_lorgus_rp_presence()`.
+- [x] Поиск по репозиторию не обнаружил вызовов старого `clear_rp_presence()`.
+- [x] Создана новая migration `supabase/migrations/20261006000300_rp_presence_cleanup.sql`.
+- [x] Старый публичный RPC `set_rp_presence()` удаляется через migration.
+- [x] Старый `clear_rp_presence()` удаляется через migration.
+- [x] Для `authenticated` убраны все прямые права на таблицу `rp_presence`, после чего явно оставлено только `SELECT`.
+- [x] Для защищённого `set_lorgus_rp_presence()` оставлен `EXECUTE` только для `authenticated`.
+- [x] Production migrations не переписывались задним числом: cleanup оформлен отдельной migration.
+
+Commit:
+- 62f9c48bc11eafd044242e26ffd992005adbb273 — Harden RP presence API surface
+
+### Текущая точка
+Следом нужно проверить, что все три migration применились автоматически в Supabase production. После этого — вызвать/протестировать `set_lorgus_rp_presence()` и перейти к `rp_messages` RLS.
