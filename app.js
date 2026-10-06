@@ -81,25 +81,32 @@ function renderAuth() {
         <main class="auth-page lorgus-cinematic-auth">
             <canvas id="lorgus-scene" class="lorgus-scene" aria-hidden="true"></canvas>
             <div class="lorgus-vignette" aria-hidden="true"></div>
-            <div class="background-glow"></div>
 
-            <div class="lorgus-epic-world" aria-hidden="true">
-                <div class="epic-sky"></div>
-                <div class="epic-moon"></div>
-                <div class="epic-halo"></div>
-                <div class="epic-mountains"></div>
-                <div class="epic-ruins"></div>
-                <div class="epic-mist epic-mist-a"></div>
-                <div class="epic-mist epic-mist-b"></div>
-                <div class="epic-rune epic-rune-a">✦</div>
-                <div class="epic-rune epic-rune-b">◇</div>
-                <div class="epic-rune epic-rune-c">✧</div>
+            <div class="lorgus-fantasy-stage" aria-hidden="true">
+                <div class="void-sky"></div>
+                <div class="world-rift"></div>
+                <div class="rift-glow"></div>
+                <div class="rift-shard shard-a"></div>
+                <div class="rift-shard shard-b"></div>
+                <div class="rift-shard shard-c"></div>
+                <div class="rift-shard shard-d"></div>
+                <div class="colossus colossus-a"></div>
+                <div class="colossus colossus-b"></div>
+                <div class="ancient-gate">
+                    <div class="gate-crown"></div>
+                    <div class="gate-pillar gate-pillar-left"></div>
+                    <div class="gate-pillar gate-pillar-right"></div>
+                    <div class="gate-fire"></div>
+                </div>
+                <div class="ground-mist mist-one"></div>
+                <div class="ground-mist mist-two"></div>
+                <div class="ember-field"></div>
             </div>
 
             <header class="lorgus-auth-header">
                 <span>ЛОРГУС</span>
-                <span>МИР ЖИВ</span>
-                <span>ПУТЬ ОТКРЫТ</span>
+                <span>Мир жив</span>
+                <span>Путь открыт</span>
             </header>
 
             <div class="lorgus-auth-title" aria-hidden="true">
@@ -108,12 +115,16 @@ function renderAuth() {
                 <span class="title-sub">ЗА ПРЕДЕЛАМИ КАРТЫ</span>
             </div>
 
-            <div class="lorgus-auth-side left" aria-hidden="true">
-                <b>✦</b><span>ДРЕВНИЙ ПУТЬ</span><i></i><span>ЗЕМЛИ НЕ СПЯТ</span><b>✦</b>
+            <div class="lorgus-auth-whisper whisper-left" aria-hidden="true">
+                <span>Там, где кончаются дороги</span>
+                <i></i>
+                <span>начинаются земли ЛОРГУСА</span>
             </div>
 
-            <div class="lorgus-auth-side right" aria-hidden="true">
-                <span>СОСТОЯНИЕ МИРА</span><b>АКТИВЕН</b><i></i><span>ДОРОГА</span><b>ОТКРЫТА</b>
+            <div class="lorgus-auth-whisper whisper-right" aria-hidden="true">
+                <span>Старые врата ещё помнят</span>
+                <i></i>
+                <span>имя каждого пришедшего</span>
             </div>
 
             <section class="auth-container">
@@ -136,7 +147,7 @@ function renderAuth() {
             <footer class="lorgus-auth-footer">
                 <span>✦ ЛОРГУС</span>
                 <span>Там, где заканчивается карта, начинается история.</span>
-                <span>ПУТЬ ЖДЁТ</span>
+                <span>Путь ждёт</span>
             </footer>
         </main>
     `;
