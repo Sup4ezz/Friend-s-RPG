@@ -3567,7 +3567,6 @@ const LORGUS_MAP_EDITOR_RECTS = [
     { id:"Святые Земли", x:52, y:50, w:12, h:10, rotation:0 },
     { id:"Спорные Земли", x:62, y:66, w:12, h:10, rotation:0 }
 ];
-
 function enableLorgusMapEditor() {
     const layer = document.getElementById("lorgus-map-marker-layer");
     const viewport = document.getElementById("lorgus-map-viewport");
@@ -3590,44 +3589,39 @@ function renderLorgusMapEditorRects(active = true) {
     if (!active) return;
 
     LORGUS_MAP_EDITOR_RECTS.forEach(rectData => {
-        const rect = document.createElement("div");
-        rect.className = "lorgus-map-editor-rect";
-        rect.dataset.region = rectData.id;
-        rect.style.left = rectData.x + "%";
-        rect.style.top = rectData.y + "%";
-        rect.style.width = rectData.w + "%";
-        rect.style.height = rectData.h + "%";
-        rect.style.transform = "translate(-50%,-50%) rotate(" + rectData.rotation + "deg)";
-        rect.innerHTML = `
-            <span class="lorgus-map-editor-handle rotate" title="Повернуть"></span>
-            <span class="lorgus-map-editor-handle nw"></span>
-            <span class="lorgus-map-editor-handle ne"></span>
-            <span class="lorgus-map-editor-handle sw"></span>
-            <span class="lorgus-map-editor-handle se"></span>
-        `;
+        const label = document.createElement("div");
+        label.className = "lorgus-map-editor-rect";
+        label.dataset.region = rectData.id;
+        label.textContent = rectData.id;
+        label.style.left = rectData.x + "%";
+        label.style.top = rectData.y + "%";
+        label.style.width = rectData.w + "%";
+        label.style.height = rectData.h + "%";
+        label.style.transform = "translate(-50%,-50%) rotate(" + rectData.rotation + "deg)";
 
-        let mode = null;
         let pointerId = null;
+        let mode = null;
         let startX = 0;
         let startY = 0;
         let startData = null;
 
-        rect.onpointerdown = event => {
+        label.onpointerdown = event => {
             event.preventDefault();
             event.stopPropagation();
+
             pointerId = event.pointerId;
-            rect.setPointerCapture?.(pointerId);
-            const box = viewport.getBoundingClientRect();
-            const isRotate = event.target.classList.contains("rotate");
+            label.setPointerCapture?.(pointerId);
+
             const handle = event.target.closest(".lorgus-map-editor-handle");
-            mode = isRotate ? "rotate" : (handle ? handle.classList[1] : "move");
+            mode = handle ? handle.dataset.mode : "move";
             startX = event.clientX;
             startY = event.clientY;
             startData = {...rectData};
         };
 
-        rect.onpointermove = event => {
+        label.onpointermove = event => {
             if (event.pointerId !== pointerId || !startData) return;
+
             const box = viewport.getBoundingClientRect();
             const dx = (event.clientX - startX) / box.width * 100;
             const dy = (event.clientY - startY) / box.height * 100;
@@ -3635,72 +3629,45 @@ function renderLorgusMapEditorRects(active = true) {
             if (mode === "move") {
                 rectData.x = Math.max(1, Math.min(99, startData.x + dx));
                 rectData.y = Math.max(1, Math.min(99, startData.y + dy));
-            } else if (mode === "rotate") {
-                const cx = box.left + rectData.x / 100 * box.width;
-                const cy = box.top + rectData.y / 100 * box.height;
-                rectData.rotation = Math.round(
-                    Math.atan2(event.clientY - cy, event.clientX - cx) * 180 / Math.PI + 90
-                );
-            } else {
-                // Resize in the rectangle's own rotated coordinate system.
-                const angle = -startData.rotation * Math.PI / 180;
-                const localDx = dx * Math.cos(angle) - dy * Math.sin(angle);
-                const localDy = dx * Math.sin(angle) + dy * Math.cos(angle);
-
-                const fromWest = mode.includes("w");
-                const fromNorth = mode.includes("n");
-                const fromEast = mode.includes("e");
-                const fromSouth = mode.includes("s");
-
-                const minSize = 2;
-                const newW = Math.max(minSize, startData.w + localDx * (fromEast ? 2 : fromWest ? -2 : 0));
-                const newH = Math.max(minSize, startData.h + localDy * (fromSouth ? 2 : fromNorth ? -2 : 0));
-
-                const dw = newW - startData.w;
-                const dh = newH - startData.h;
-
-                rectData.w = newW;
-                rectData.h = newH;
-
-                // Keep the opposite edge fixed while resizing.
-                const anchorX = fromWest ? 1 : fromEast ? -1 : 0;
-                const anchorY = fromNorth ? 1 : fromSouth ? -1 : 0;
-                const angleForward = startData.rotation * Math.PI / 180;
-                const shiftX = (dw * anchorX * Math.cos(angleForward) - dh * anchorY * Math.sin(angleForward)) / 2;
-                const shiftY = (dw * anchorX * Math.sin(angleForward) + dh * anchorY * Math.cos(angleForward)) / 2;
-
-                rectData.x = Math.max(1, Math.min(99, startData.x + shiftX));
-                rectData.y = Math.max(1, Math.min(99, startData.y + shiftY));
+            } else if (mode === "resize") {
+                rectData.w = Math.max(3, startData.w + dx * 2);
+                rectData.h = Math.max(3, startData.h + dy * 2);
             }
 
-            rect.style.left = rectData.x + "%";
-            rect.style.top = rectData.y + "%";
-            rect.style.width = rectData.w + "%";
-            rect.style.height = rectData.h + "%";
-            rect.style.transform = "translate(-50%,-50%) rotate(" + rectData.rotation + "deg)";
+            label.style.left = rectData.x + "%";
+            label.style.top = rectData.y + "%";
+            label.style.width = rectData.w + "%";
+            label.style.height = rectData.h + "%";
+            label.style.transform = "translate(-50%,-50%) rotate(" + rectData.rotation + "deg)";
         };
 
-        const finishPointer = event => {
+        const finish = event => {
             if (event.pointerId !== pointerId) return;
-            rect.releasePointerCapture?.(pointerId);
+            label.releasePointerCapture?.(pointerId);
             pointerId = null;
             startData = null;
 
             const hint = document.getElementById("lorgus-map-surface-hint");
             if (hint) {
-                hint.textContent = rectData.id + " · X:" + rectData.x.toFixed(1) + "% Y:" + rectData.y.toFixed(1) + "% · " + rectData.w.toFixed(1) + "×" + rectData.h.toFixed(1) + "% · " + Math.round(rectData.rotation) + "°";
+                hint.textContent = rectData.id + " · X:" + rectData.x.toFixed(1) + "% Y:" + rectData.y.toFixed(1) + "% · размер:" + rectData.w.toFixed(1) + "×" + rectData.h.toFixed(1) + "%";
                 hint.classList.add("visible");
                 clearTimeout(window.lorgusMapHintTimer);
-                window.lorgusMapHintTimer = setTimeout(() => hint.classList.remove("visible"), 3500);
+                window.lorgusMapHintTimer = setTimeout(() => hint.classList.remove("visible"), 4000);
             }
         };
 
-        rect.onpointercancel = finishPointer;
+        label.onpointerup = finish;
+        label.onpointercancel = finish;
 
-        layer.appendChild(rect);
+        const resize = document.createElement("span");
+        resize.className = "lorgus-map-editor-handle";
+        resize.dataset.mode = "resize";
+        resize.title = "Изменить размер области названия";
+        label.appendChild(resize);
+
+        layer.appendChild(label);
     });
 }
-
 function addLorgusMapEditorUI() {
     const controls = document.querySelector(".lorgus-map-controls");
     if (!controls || document.getElementById("lorgus-map-editor-toggle")) return;
