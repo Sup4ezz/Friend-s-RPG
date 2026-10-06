@@ -4567,7 +4567,7 @@ function initializeLorgusWebGL() {
         curveSegments: 40
     });
     const arch = new THREE.Mesh(archGeo, stoneEdge);
-    arch.position.set(0, 2.2, 0.25);
+    arch.position.set(0, 0, 0.25);
     arch.castShadow = true;
     arch.receiveShadow = true;
     world.add(arch);
@@ -4617,20 +4617,13 @@ function initializeLorgusWebGL() {
         new THREE.BoxGeometry(17.2, 1.25, 5.9, 3, 3, 3),
         stoneEdge
     );
-    crown.position.set(0, 18.0, 0.35);
+    crown.position.set(0, 15.85, 0.35);
     crown.rotation.z = 0.008;
     crown.castShadow = true;
     crown.receiveShadow = true;
     world.add(crown);
 
-    // Carved central crest, deliberately abstract and non-modern.
-    const crest = new THREE.Mesh(
-        new THREE.TorusGeometry(1.35, 0.16, 10, 32),
-        rune
-    );
-    crest.position.set(0, 17.95, 3.15);
-    crest.rotation.x = Math.PI / 2;
-    world.add(crest);
+    // No floating halo above the gate: the crown remains purely architectural.
 
     const rift = new THREE.Mesh(
         new THREE.PlaneGeometry(11.8, 21.5, 40, 80),
