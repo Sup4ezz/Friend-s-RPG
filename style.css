@@ -10209,7 +10209,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:flex-end;
-  gap:16px;
+  gap:30px;
   min-width:0;
 }
 .lorgus-global-user{
