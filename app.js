@@ -5334,13 +5334,14 @@ const openingShape = new THREE.Shape();
 
                 const start = camera.position.clone();
                 const travelDirection = portalCenter.clone().sub(start).normalize();
-                const end = portalCenter.clone().addScaledVector(travelDirection, 9.0);
+                // Останавливаемся ПЕРЕД плоскостью ворот. Никакого полёта
+                // сквозь портал: последний кадр — камера у самого входа,
+                // после чего свет закрывает проход и открывается кабинет.
+                const end = portalCenter.clone().addScaledVector(travelDirection, -6.5);
 
                 const startQuat = camera.quaternion.clone();
                 const aimCamera = camera.clone();
                 aimCamera.lookAt(portalCenter);
-
-                const forwardTarget = end.clone().addScaledVector(travelDirection, 20);
 
                 portalFlight = {
                     start,
@@ -5349,7 +5350,6 @@ const openingShape = new THREE.Shape();
                     startQuat,
                     targetQuat: aimCamera.quaternion.clone(),
                     portalCenter,
-                    forwardTarget,
                     worldRotationY: world.rotation.y
                 };
             }
@@ -5357,12 +5357,10 @@ const openingShape = new THREE.Shape();
             const flight = portalFlight;
             camera.position.lerpVectors(flight.start, flight.end, ease);
 
-            // During the first part of the shot the camera smoothly turns toward
-            // the portal centre; after crossing, it keeps looking forward.
+            // Весь финальный кадр смотрит именно В портал. После выхода
+            // из траектории нет "пролёта" дальше ворот.
             const aimBlend = Math.min(1, progress / 0.24);
-            const forwardBlend = Math.max(0, (progress - 0.58) / 0.42);
-            const aimPoint = flight.portalCenter.clone().lerp(flight.forwardTarget, forwardBlend);
-            camera.lookAt(aimPoint);
+            camera.lookAt(flight.portalCenter);
 
             // Preserve continuity from the exact original orientation instead of
             // snapping the camera to a new canned starting angle.
@@ -5371,7 +5369,9 @@ const openingShape = new THREE.Shape();
                 camera.quaternion.copy(blended);
             }
 
-            camera.fov = 46 + (31 - 46) * ease;
+            // К финалу портал должен стать главным объектом кадра,
+            // но камера не входит внутрь его геометрии.
+            camera.fov = 46 + (34 - 46) * ease;
             camera.updateProjectionMatrix();
         } else {
             portalFlight = null;
@@ -5516,6 +5516,3 @@ const openingShape = new THREE.Shape();
             base.rotation.z = (Math.random() - 0.5) * 0.012;
             base.castShadow = true;
             base.receiveShadow = true;
-            world.add(base);
-        }
-    }
