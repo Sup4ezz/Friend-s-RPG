@@ -3713,11 +3713,18 @@ function renderLorgusWorldMap(container, character) {
                     <span class="lorgus-map-kicker">ПУТЬ ПЕРСОНАЖА</span>
                     <h1>${name}</h1>
                     <p>${race} · ${homeland}</p>
+                    <div class="lorgus-character-seal" aria-hidden="true"><span>✦</span></div>
                 </div>
 
                 <div class="lorgus-map-location-status">
                     <span>ТЕКУЩЕЕ МЕСТОПОЛОЖЕНИЕ</span>
                     <strong>${escapeHtml(currentLocation)}</strong>
+                    <small>Положение персонажа в мире</small>
+                </div>
+                <div class="lorgus-map-world-stats">
+                    <div><strong>07</strong><span>КРАЁВ</span></div>
+                    <div><strong>01</strong><span>ЗАКРЫТ</span></div>
+                    <div><strong>∞</strong><span>ПУТЕЙ</span></div>
                 </div>
 
                 <div class="lorgus-map-divider"></div>
@@ -3745,12 +3752,17 @@ function renderLorgusWorldMap(container, character) {
                 <section class="lorgus-map-stage">
                     <div class="lorgus-map-frame">
                         <div class="lorgus-map-image-wrap" id="lorgus-map-viewport" >
+                            <div class="lorgus-map-atmosphere" aria-hidden="true"><i></i><i></i><i></i></div>
                             <div class="lorgus-map-world" id="lorgus-map-world">
                                 <img class="lorgus-map-image" src="/assets/world/nerovland-map.png" alt="Карта Неровланда" draggable="false">
                                 <div class="lorgus-map-marker-layer" id="lorgus-map-marker-layer" aria-label="Обозначения карты"></div>
                             </div>
                             <div class="lorgus-map-surface-hint" id="lorgus-map-surface-hint">ТОЧКА КАРТЫ</div>
                             <div class="lorgus-map-overlay">
+                                <div class="lorgus-map-corner-mark top-left">L · 001</div>
+                                <div class="lorgus-map-corner-mark top-right">CARTA MUNDI</div>
+                                <div class="lorgus-map-corner-mark bottom-left">ЛОРГУС / WORLD</div>
+                                <div class="lorgus-map-corner-mark bottom-right">07 REGIONS</div>
                                 <div class="lorgus-map-compass" aria-hidden="true"><span>N</span><i></i></div>
                                 <div class="lorgus-map-scale"><span></span><small>МИР</small></div>
                             </div>
@@ -3768,9 +3780,12 @@ function renderLorgusWorldMap(container, character) {
 
                     <aside class="lorgus-map-inspector">
                         <span class="lorgus-map-kicker">ВЫБРАННЫЙ КРАЙ</span>
-                        <div class="lorgus-map-selection-symbol">◇</div>
+                        <div class="lorgus-map-selection-symbol"><span>◇</span><i></i></div>
                         <h3 id="lorgus-map-selection-title">Атэрон</h3>
                         <p id="lorgus-map-selection-text">Знания, древности, исследования и руины.</p>
+                        <div class="lorgus-map-inspector-meta">
+                            <span>СТАТУС</span><strong>ОТКРЫТ ДЛЯ ИССЛЕДОВАНИЯ</strong>
+                        </div>
 
                         <button id="lorgus-map-enter-button" class="gold-button lorgus-map-enter-button" type="button" onclick="renderKingdomLocations('Атэрон')">Открыть край</button>
 
