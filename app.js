@@ -102,30 +102,42 @@ function finishPortalTransition() {
     }, 850);
 }
 
+function triggerLorgusPortalFlash(authScene) {
+    if (!authScene) return;
+
+    authScene.classList.remove("portal-flash");
+    void authScene.offsetWidth;
+    authScene.classList.add("portal-flash");
+
+    window.setTimeout(() => {
+        authScene.classList.remove("portal-flash");
+    }, 360);
+}
+
 function render(session) {
     if (session) {
         const authScene = document.querySelector(".lorgus-cinematic-auth");
 
         if (authScene && !lorgusPortalEntering && !lorgusPortalDepartureAligning) {
-            // Сначала интерфейс полностью уходит. Камера в этот момент неподвижна.
-            lorgusPortalDepartureAligning = true;
+            // UI уходит и камера начинает полёт из ЕЁ текущего положения.
+            // Никакого отдельного transition-screen между сценами нет.
+            lorgusPortalDepartureAligning = false;
             authScene.classList.add("portal-departure");
+            lorgusPortalEntering = true;
+            lorgusPortalEnterStartedAt = performance.now();
 
+            // Вспышка происходит в момент прохождения ворот. Это часть той же сцены,
+            // а не отдельный экран.
             window.setTimeout(() => {
-                if (!document.querySelector(".lorgus-cinematic-auth")) return;
+                if (lorgusPortalEntering) triggerLorgusPortalFlash(authScene);
+            }, 860);
 
-                // Никаких промежуточных окон и заглушек: после исчезновения UI
-                // камера одним непрерывным движением летит строго по оси портала.
-                lorgusPortalDepartureAligning = false;
-                lorgusPortalEntering = true;
-                lorgusPortalEnterStartedAt = performance.now();
-
-                window.setTimeout(() => {
-                    if (!lorgusPortalEntering) return;
-                    lorgusPortalEntering = false;
-                    renderCabinet(session);
-                }, 2100);
-            }, 900);
+            // Камера проходит ворота быстро; кабинет появляется сразу после прохода.
+            window.setTimeout(() => {
+                if (!lorgusPortalEntering) return;
+                lorgusPortalEntering = false;
+                renderCabinet(session);
+            }, 1320);
 
             return;
         }
@@ -5253,6 +5265,7 @@ const openingShape = new THREE.Shape();
     const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
     let raf = 0;
     let disposed = false;
+    let portalFlight = null;
 
     const onPointer = event => {
         pointer.tx = event.clientX / window.innerWidth - 0.5;
@@ -5280,24 +5293,63 @@ const openingShape = new THREE.Shape();
         pointer.y += (pointer.ty - pointer.y) * 0.035;
 
         if (lorgusPortalDepartureAligning) {
-            // The interface is leaving. The camera MUST NOT move yet.
             camera.fov += (46 - camera.fov) * 0.08;
             camera.updateProjectionMatrix();
             camera.lookAt(pointer.x * 0.7, 7.5 + pointer.y * 0.55, -0.5);
         } else if (lorgusPortalEntering) {
             const elapsed = performance.now() - lorgusPortalEnterStartedAt;
-            const progress = Math.min(1, elapsed / 2020);
+            const progress = Math.min(1, elapsed / 1280);
             const ease = 1 - Math.pow(1 - progress, 3);
 
-            // One clean, centered shot: no pointer influence, no lateral correction,
-            // no sudden change of direction.
-            camera.position.x = 0;
-            camera.position.y = 8.2 + (6.35 - 8.2) * ease;
-            camera.position.z = 36 + (0.85 - 36) * ease;
-            camera.fov = 46 + (34 - 46) * ease;
+            // Capture the camera exactly where the player was looking when the
+            // transition began. The flight then stays on one straight line through
+            // the portal instead of spawning a second "video camera".
+            if (!portalFlight) {
+                const portalCenter = new THREE.Vector3(0, 6.9, -0.85);
+                world.localToWorld(portalCenter);
+
+                const start = camera.position.clone();
+                const travelDirection = portalCenter.clone().sub(start).normalize();
+                const end = portalCenter.clone().addScaledVector(travelDirection, 9.0);
+
+                const startQuat = camera.quaternion.clone();
+                const aimCamera = camera.clone();
+                aimCamera.lookAt(portalCenter);
+
+                const forwardTarget = end.clone().addScaledVector(travelDirection, 20);
+
+                portalFlight = {
+                    start,
+                    end,
+                    travelDirection,
+                    startQuat,
+                    targetQuat: aimCamera.quaternion.clone(),
+                    portalCenter,
+                    forwardTarget
+                };
+            }
+
+            const flight = portalFlight;
+            camera.position.lerpVectors(flight.start, flight.end, ease);
+
+            // During the first part of the shot the camera smoothly turns toward
+            // the portal centre; after crossing, it keeps looking forward.
+            const aimBlend = Math.min(1, progress / 0.24);
+            const forwardBlend = Math.max(0, (progress - 0.58) / 0.42);
+            const aimPoint = flight.portalCenter.clone().lerp(flight.forwardTarget, forwardBlend);
+            camera.lookAt(aimPoint);
+
+            // Preserve continuity from the exact original orientation instead of
+            // snapping the camera to a new canned starting angle.
+            if (aimBlend < 1) {
+                const blended = flight.startQuat.clone().slerp(flight.targetQuat, aimBlend);
+                camera.quaternion.copy(blended);
+            }
+
+            camera.fov = 46 + (31 - 46) * ease;
             camera.updateProjectionMatrix();
-            camera.lookAt(0, 6.9, -0.85);
         } else {
+            portalFlight = null;
             camera.fov += (46 - camera.fov) * 0.06;
             camera.updateProjectionMatrix();
             camera.position.x += (pointer.x * 1.8 - camera.position.x) * 0.018;
