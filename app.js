@@ -83,48 +83,50 @@ function renderAuth() {
             <div class="lorgus-vignette" aria-hidden="true"></div>
             <div class="background-glow"></div>
 
-            <div class="lorgus-auth-world" aria-hidden="true">
-                <div class="world-grid"></div>
-                <div class="world-horizon"></div>
-                <div class="world-arc world-arc-a"></div>
-                <div class="world-arc world-arc-b"></div>
-                <div class="world-arc world-arc-c"></div>
-                <div class="world-coordinate world-coordinate-a">43° 17'</div>
-                <div class="world-coordinate world-coordinate-b">МИР ЖИВ</div>
-                <div class="world-coordinate world-coordinate-c">ПУТЬ НАЗАД ЗАКРЫТ</div>
+            <div class="lorgus-epic-world" aria-hidden="true">
+                <div class="epic-sky"></div>
+                <div class="epic-moon"></div>
+                <div class="epic-halo"></div>
+                <div class="epic-mountains"></div>
+                <div class="epic-ruins"></div>
+                <div class="epic-mist epic-mist-a"></div>
+                <div class="epic-mist epic-mist-b"></div>
+                <div class="epic-rune epic-rune-a">✦</div>
+                <div class="epic-rune epic-rune-b">◇</div>
+                <div class="epic-rune epic-rune-c">✧</div>
             </div>
 
             <header class="lorgus-auth-header">
-                <span>МИР ЛОРГУС</span>
                 <span>ЛОРГУС</span>
+                <span>МИР ЖИВ</span>
                 <span>ПУТЬ ОТКРЫТ</span>
             </header>
 
             <div class="lorgus-auth-title" aria-hidden="true">
-                <span class="title-ghost">LORGUS</span>
-                <span class="title-main">LORGUS</span>
-                <span class="title-sub">THE LIVING WORLD</span>
+                <span class="title-ghost">ЛОРГУС</span>
+                <span class="title-main">ЛОРГУС</span>
+                <span class="title-sub">ЗА ПРЕДЕЛАМИ КАРТЫ</span>
             </div>
 
             <div class="lorgus-auth-side left" aria-hidden="true">
-                <b>01</b><span>OBSERVE</span><i></i><span>REMEMBER</span><b>04</b>
+                <b>✦</b><span>ДРЕВНИЙ ПУТЬ</span><i></i><span>ЗЕМЛИ НЕ СПЯТ</span><b>✦</b>
             </div>
 
             <div class="lorgus-auth-side right" aria-hidden="true">
-                <span>СОСТОЯНИЕ МИРА</span><b>АКТИВЕН</b><i></i><span>ДОСТУП ПУТЕШЕСТВЕННИКА</span><b>ЗАКРЫТ</b>
+                <span>СОСТОЯНИЕ МИРА</span><b>АКТИВЕН</b><i></i><span>ДОРОГА</span><b>ОТКРЫТА</b>
             </div>
 
             <section class="auth-container">
                 <div class="auth-panel">
                     <div class="auth-panel-kicker">
-                        <span>ВРАТА</span>
+                        <span>ВОРОТА ЛОРГУСА</span>
                         <i></i>
-                        <span>ТОЛЬКО ДЛЯ ПУТЕШЕСТВЕННИКОВ</span>
+                        <span>ВХОД ПУТЕШЕСТВЕННИКА</span>
                     </div>
 
                     <div class="auth-tabs">
                         <button id="login-tab" class="auth-tab active" onclick="showLogin()">Войти</button>
-                        <button id="register-tab" class="auth-tab" onclick="showRegister()">Создать путь</button>
+                        <button id="register-tab" class="auth-tab" onclick="showRegister()">Начать путь</button>
                     </div>
 
                     <div id="auth-form" class="auth-form-container"></div>
@@ -132,9 +134,9 @@ function renderAuth() {
             </section>
 
             <footer class="lorgus-auth-footer">
-                <span>ЛОРГУС</span>
-                <span>Вход открывает путь в мир.</span>
-                <span>ЛОРГУС</span>
+                <span>✦ ЛОРГУС</span>
+                <span>Там, где заканчивается карта, начинается история.</span>
+                <span>ПУТЬ ЖДЁТ</span>
             </footer>
         </main>
     `;
