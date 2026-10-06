@@ -1518,9 +1518,27 @@ function renderCharacterApplicationForm(container) {
     if (window.lorgusCharacterAudioCleanup) { window.lorgusCharacterAudioCleanup(); }
     initializeLorgusCharacterCreationAudio();
     container.className = "character-application";
+    container.style.display = "block";
+    container.style.visibility = "visible";
+    container.style.opacity = "1";
+
+    // Экран создания должен быть самостоятельным полноэкранным слоем.
+    // Снимаем возможное скрытие кабинета прямо в момент его открытия.
+    const cabinet = container.closest(".game-page");
+    if (cabinet) {
+        cabinet.classList.remove("preparing");
+        cabinet.classList.add("ready");
+        cabinet.style.display = "block";
+        cabinet.style.visibility = "visible";
+        cabinet.style.opacity = "1";
+        cabinet.style.pointerEvents = "auto";
+        cabinet.style.position = "relative";
+        cabinet.style.inset = "auto";
+        cabinet.style.zIndex = "1";
+    }
 
     container.innerHTML = `
-        <div class="character-creation-scene">
+        <div class="character-creation-scene" style="display:block;visibility:visible;opacity:1;">
             <div class="lorgus-fantasy-stage" aria-hidden="true">
                 <div class="void-sky"></div>
                 <div class="world-rift"></div>
@@ -1617,6 +1635,19 @@ function renderCharacterApplicationForm(container) {
             </main>
         </div>
     `;
+
+    const creationScene = container.querySelector(".character-creation-scene");
+    const creationForm = container.querySelector("#character-application-form");
+    if (creationScene) {
+        creationScene.style.display = "block";
+        creationScene.style.visibility = "visible";
+        creationScene.style.opacity = "1";
+    }
+    if (creationForm) {
+        creationForm.style.display = "grid";
+        creationForm.style.visibility = "visible";
+        creationForm.style.opacity = "1";
+    }
 
     container.querySelectorAll(".creation-origins button").forEach(button => {
         button.addEventListener("click", () => {
