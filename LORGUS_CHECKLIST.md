@@ -745,3 +745,18 @@ Workflow снова можно пнуть вручную. Ожидаемый р�
 - [x] Commit: b7d63b44e5954dfe57ee62a143db702e05481527 — Fix RP message trigger delimiter correctly
 - [ ] Повторно запустить `Deploy Supabase migrations` вручную.
 - [ ] Подтвердить применение 004 и 005.
+
+
+### 21.4 FIX — CI still executed the old 004 file; main corrected directly
+- [x] Получен новый CI log: `20261006000400_rp_messages_security.sql` снова завершился на `as $` (SQLSTATE 42601), поэтому production ещё выполнял старое содержимое migration.
+- [x] Файл `supabase/migrations/20261006000400_rp_messages_security.sql` повторно прочитан непосредственно из `main`; GitHub подтвердил, что в нём действительно оставался `as $ ... $;`.
+- [x] Файл исправлен непосредственно в `main`: `as $$ ... $$;`.
+- [x] Новый commit: `6653a0609d1f4037a1f8c08d62847827735cfdee` — Fix RP message trigger delimiter on main.
+- [x] Это исправление проверено по фактическому содержимому файла после предыдущей неудачной попытки.
+- [ ] Повторно запустить `Deploy Supabase migrations` вручную на `main`.
+- [ ] Подтвердить успешное применение 004 и 005.
+- [ ] После успешного CI проверить `supabase migration list --linked`.
+- [ ] Затем отключить Supabase Integration → Deploy to production, чтобы оставить один authoritative production deployer.
+
+### Текущая точка остановки
+CI log из последнего запуска относится к содержимому `main` до commit `6653a0609d1f4037a1f8c08d62847827735cfdee`. Следующий запуск должен проверять уже исправленный файл. Если ошибка повторится с `as $`, нужно сначала проверить commit/ref, который реально использует workflow, а не менять SQL вслепую.
