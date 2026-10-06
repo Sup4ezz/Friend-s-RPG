@@ -88,13 +88,13 @@ returns trigger
 language plpgsql
 security invoker
 set search_path = public
-as $
+as $$
 begin
     new.player_id := auth.uid();
     new.created_at := now();
     return new;
 end;
-$;
+$$;
 
 drop trigger if exists trg_rp_messages_server_fields on public.rp_messages;
 create trigger trg_rp_messages_server_fields
