@@ -11241,3 +11241,162 @@ body{
     .lorgus-cinematic-auth .auth-panel{padding:24px 22px 28px}
     .world-grid{left:-30%;width:220vw}
 }
+
+
+/* =========================================================
+   LORGUS // EPIC FANTASY GATE
+   ========================================================= */
+.lorgus-cinematic-auth{
+    background:#030303;
+}
+.lorgus-epic-world{
+    position:absolute;
+    inset:0;
+    z-index:1;
+    overflow:hidden;
+    pointer-events:none;
+}
+.epic-sky{
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(ellipse at 63% 34%,rgba(217,179,93,.14),transparent 10%),
+      radial-gradient(ellipse at 62% 35%,rgba(153,115,51,.07),transparent 27%),
+      linear-gradient(180deg,#080808 0%,#090807 42%,#030303 100%);
+}
+.epic-moon{
+    position:absolute;
+    width:min(34vw,520px);
+    aspect-ratio:1;
+    right:17%;
+    top:9%;
+    border-radius:50%;
+    background:
+      radial-gradient(circle at 38% 34%,rgba(255,247,216,.92) 0 5%,rgba(225,202,151,.82) 24%,rgba(120,92,50,.48) 57%,rgba(24,20,14,.08) 72%,transparent 74%);
+    box-shadow:0 0 45px rgba(226,196,127,.12),0 0 180px rgba(191,147,65,.08);
+    filter:saturate(.7);
+    opacity:.78;
+}
+.epic-halo{
+    position:absolute;
+    width:65vw;
+    height:65vw;
+    max-width:980px;
+    max-height:980px;
+    right:-5%;
+    top:-22%;
+    border:1px solid rgba(222,190,119,.09);
+    border-radius:50%;
+    box-shadow:inset 0 0 100px rgba(214,174,91,.025);
+    transform:rotate(-13deg);
+}
+.epic-halo:before,.epic-halo:after{
+    content:"";
+    position:absolute;
+    inset:8%;
+    border:1px solid rgba(222,190,119,.045);
+    border-radius:50%;
+}
+.epic-halo:after{
+    inset:18%;
+    border-style:dashed;
+    animation:lorgus-orbit 65s linear infinite;
+}
+.epic-mountains{
+    position:absolute;
+    left:-5%;
+    right:-5%;
+    bottom:16%;
+    height:34%;
+    opacity:.72;
+    background:
+      linear-gradient(145deg,transparent 0 25%,#050505 25.2% 36%,transparent 36.2%),
+      linear-gradient(205deg,transparent 0 31%,#070707 31.2% 47%,transparent 47.2%),
+      linear-gradient(165deg,transparent 0 42%,#040404 42.2% 58%,transparent 58.2%);
+    filter:drop-shadow(0 -8px 20px rgba(0,0,0,.8));
+}
+.epic-ruins{
+    position:absolute;
+    left:5%;
+    right:8%;
+    bottom:14%;
+    height:31%;
+    opacity:.78;
+    background:
+      linear-gradient(90deg,transparent 0 7%,#050505 7.2% 8.5%,transparent 8.7% 15%,#050505 15.2% 16.2%,transparent 16.4% 23%,#050505 23.2% 24%,transparent 24.2% 100%),
+      linear-gradient(180deg,transparent 0 47%,#050505 47.5% 100%);
+    clip-path:polygon(0 100%,0 64%,7% 61%,7% 38%,11% 42%,11% 72%,15% 72%,15% 28%,18% 32%,18% 68%,22% 68%,22% 49%,25% 45%,28% 57%,31% 57%,31% 35%,35% 38%,35% 71%,40% 71%,40% 53%,44% 53%,44% 65%,50% 65%,50% 41%,54% 35%,58% 45%,58% 66%,64% 66%,64% 50%,68% 48%,71% 60%,76% 60%,76% 33%,79% 27%,82% 39%,82% 67%,88% 67%,88% 48%,92% 44%,96% 55%,100% 55%,100% 100%);
+}
+.epic-mist{
+    position:absolute;
+    left:-15%;
+    width:130%;
+    height:22%;
+    bottom:13%;
+    background:radial-gradient(ellipse at center,rgba(174,145,92,.09),transparent 68%);
+    filter:blur(18px);
+    animation:lorgus-mist 16s ease-in-out infinite alternate;
+}
+.epic-mist-b{bottom:25%;opacity:.5;animation-duration:23s;animation-direction:alternate-reverse}
+.epic-rune{
+    position:absolute;
+    color:rgba(225,190,111,.2);
+    font-family:serif;
+    text-shadow:0 0 30px rgba(220,180,88,.15);
+    animation:lorgus-rune-float 8s ease-in-out infinite;
+}
+.epic-rune-a{left:38%;top:27%;font-size:30px}
+.epic-rune-b{left:47%;top:62%;font-size:22px;animation-delay:-3s}
+.epic-rune-c{right:28%;top:49%;font-size:16px;animation-delay:-5s}
+.lorgus-cinematic-auth .auth-container{
+    right:10vw;
+    top:54%;
+    width:min(410px,31vw);
+}
+.lorgus-cinematic-auth .auth-panel{
+    background:linear-gradient(145deg,rgba(10,9,7,.9),rgba(4,4,4,.72));
+    border-left:1px solid rgba(221,185,99,.4);
+    border-top:1px solid rgba(221,185,99,.16);
+    box-shadow:0 35px 100px rgba(0,0,0,.78),-18px 0 70px rgba(210,170,83,.025);
+}
+.lorgus-auth-title{
+    left:4vw;
+    top:35vh;
+}
+.lorgus-auth-title .title-main{
+    font-size:clamp(140px,20vw,360px);
+    letter-spacing:-.075em;
+    text-shadow:0 8px 100px rgba(0,0,0,.95),0 0 55px rgba(221,184,100,.035);
+}
+.lorgus-auth-title .title-ghost{
+    transform:translate(18px,18px);
+}
+.lorgus-auth-title .title-sub{
+    letter-spacing:.56em;
+    margin-left:14px;
+}
+.lorgus-auth-side{
+    top:39%;
+}
+.lorgus-auth-footer{
+    bottom:25px;
+}
+@keyframes lorgus-mist{
+    from{transform:translateX(-3%) scaleY(.9)}
+    to{transform:translateX(4%) scaleY(1.1)}
+}
+@keyframes lorgus-rune-float{
+    0%,100%{transform:translateY(0) rotate(0);opacity:.12}
+    50%{transform:translateY(-12px) rotate(8deg);opacity:.3}
+}
+@media(max-width:1050px){
+    .epic-moon{right:5%;top:8%;width:45vw}
+    .lorgus-auth-title{top:21vh;opacity:.38}
+    .lorgus-cinematic-auth .auth-container{right:5vw;width:min(410px,45vw)}
+}
+@media(max-width:720px){
+    .epic-moon{right:-12%;top:7%;width:72vw;opacity:.45}
+    .epic-ruins{bottom:18%}
+    .lorgus-auth-title{top:15vh;opacity:.22}
+    .lorgus-cinematic-auth .auth-container{left:18px;right:18px;width:auto;top:57%}
+}
