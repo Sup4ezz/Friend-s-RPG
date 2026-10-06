@@ -243,8 +243,18 @@ function initializeLorgusAudio() {
 
     const hover = () => {
         ensureAudio();
-        tone(880, 0.075, 0.018, "sine", 55);
+        tone(880, 0.075, 0.026, "sine", 55);
     };
+
+    const authError = () => {
+        try {
+            ensureAudio();
+            tone(155, 0.12, 0.09, "sawtooth", -22);
+            window.setTimeout(() => tone(116, 0.18, 0.075, "triangle", -18), 90);
+            window.setTimeout(() => tone(82, 0.24, 0.055, "sine", -12), 190);
+        } catch (error) {}
+    };
+    window.lorgusAuthErrorSound = authError;
 
     const click = () => {
         ensureAudio();
@@ -329,6 +339,7 @@ function initializeLorgusAudio() {
         listeners.forEach(remove => remove());
         if (musicTimer) window.clearInterval(musicTimer);
         if (audioContext) audioContext.close().catch(() => {});
+        if (window.lorgusAuthErrorSound === authError) delete window.lorgusAuthErrorSound;
         lorgusAudioCleanup = null;
     };
 }
@@ -685,8 +696,10 @@ async function login(event) {
 
     if (error) {
         setMessage("Неверный логин или пароль.", "error");
+        if (typeof window.lorgusAuthErrorSound === "function") {
+            window.lorgusAuthErrorSound();
+        }
     }
-}
 
 /* =========================================================
    РЕГИСТРАЦИЯ
