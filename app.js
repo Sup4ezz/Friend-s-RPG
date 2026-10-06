@@ -102,16 +102,23 @@ function finishPortalTransition() {
     }, 850);
 }
 
-function triggerLorgusPortalFlash(authScene) {
-    if (!authScene) return;
+function triggerLorgusPortalFlash() {
+    const flash = document.createElement("div");
+    flash.setAttribute("aria-hidden", "true");
+    flash.style.cssText = [
+        "position:fixed",
+        "inset:0",
+        "z-index:2147483647",
+        "pointer-events:none",
+        "opacity:0",
+        "background:radial-gradient(circle at center, rgba(255,252,235,.98) 0%, rgba(255,224,145,.82) 18%, rgba(223,175,75,.34) 42%, rgba(255,255,255,0) 72%)",
+        "transition:opacity 110ms ease-out"
+    ].join(";");
+    document.body.appendChild(flash);
 
-    authScene.classList.remove("portal-flash");
-    void authScene.offsetWidth;
-    authScene.classList.add("portal-flash");
-
-    window.setTimeout(() => {
-        authScene.classList.remove("portal-flash");
-    }, 360);
+    requestAnimationFrame(() => { flash.style.opacity = "1"; });
+    window.setTimeout(() => { flash.style.opacity = "0"; }, 120);
+    window.setTimeout(() => { flash.remove(); }, 320);
 }
 
 function render(session) {
@@ -129,15 +136,23 @@ function render(session) {
             // Вспышка происходит в момент прохождения ворот. Это часть той же сцены,
             // а не отдельный экран.
             window.setTimeout(() => {
-                if (lorgusPortalEntering) triggerLorgusPortalFlash(authScene);
-            }, 860);
+                if (lorgusPortalEntering) triggerLorgusPortalFlash();
+            }, 520);
 
-            // Камера проходит ворота быстро; кабинет появляется сразу после прохода.
+            // Кабинет появляется сразу после прохода сквозь портал, пока
+            // короткая световая вспышка закрывает сам момент смены DOM-сцены.
             window.setTimeout(() => {
                 if (!lorgusPortalEntering) return;
                 lorgusPortalEntering = false;
+
+                if (lorgusSceneCleanup) {
+                    const cleanup = lorgusSceneCleanup;
+                    lorgusSceneCleanup = null;
+                    cleanup();
+                }
+
                 renderCabinet(session);
-            }, 1320);
+            }, 760);
 
             return;
         }
