@@ -3586,7 +3586,6 @@ function renderLorgusMapEditorRects(active = true) {
     if (!layer || !viewport) return;
 
     layer.querySelectorAll(".lorgus-map-editor-rect").forEach(el => el.remove());
-    if (!active) return;
 
     LORGUS_MAP_EDITOR_RECTS.forEach(rectData => {
         const label = document.createElement("div");
@@ -3841,6 +3840,7 @@ function renderLorgusWorldMap(container, character) {
 
     selectLorgusMapRegion("Атэрон");
     initializeLorgusMapViewport();
+    renderLorgusMapEditorRects(false);
     addLorgusMapEditorUI();
 }
 
