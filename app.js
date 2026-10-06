@@ -3597,7 +3597,7 @@ function renderLorgusMapEditorRects(active = true) {
         label.style.top = rectData.y + "%";
         label.style.width = rectData.w + "%";
         label.style.height = rectData.h + "%";
-        label.style.transform = "translate(-50%,-50%) rotate(" + rectData.rotation + "deg)";
+        label.style.transform = "translate(-50%,-50%)";
 
         let pointerId = null;
         let mode = null;
@@ -3608,12 +3608,10 @@ function renderLorgusMapEditorRects(active = true) {
         label.onpointerdown = event => {
             event.preventDefault();
             event.stopPropagation();
-
             pointerId = event.pointerId;
             label.setPointerCapture?.(pointerId);
-
             const handle = event.target.closest(".lorgus-map-editor-handle");
-            mode = handle ? handle.dataset.mode : "move";
+            mode = handle ? "resize" : "move";
             startX = event.clientX;
             startY = event.clientY;
             startData = {...rectData};
@@ -3621,7 +3619,6 @@ function renderLorgusMapEditorRects(active = true) {
 
         label.onpointermove = event => {
             if (event.pointerId !== pointerId || !startData) return;
-
             const box = viewport.getBoundingClientRect();
             const dx = (event.clientX - startX) / box.width * 100;
             const dy = (event.clientY - startY) / box.height * 100;
@@ -3629,7 +3626,7 @@ function renderLorgusMapEditorRects(active = true) {
             if (mode === "move") {
                 rectData.x = Math.max(1, Math.min(99, startData.x + dx));
                 rectData.y = Math.max(1, Math.min(99, startData.y + dy));
-            } else if (mode === "resize") {
+            } else {
                 rectData.w = Math.max(3, startData.w + dx * 2);
                 rectData.h = Math.max(3, startData.h + dy * 2);
             }
@@ -3638,7 +3635,6 @@ function renderLorgusMapEditorRects(active = true) {
             label.style.top = rectData.y + "%";
             label.style.width = rectData.w + "%";
             label.style.height = rectData.h + "%";
-            label.style.transform = "translate(-50%,-50%) rotate(" + rectData.rotation + "deg)";
         };
 
         const finish = event => {
@@ -3662,7 +3658,7 @@ function renderLorgusMapEditorRects(active = true) {
         const resize = document.createElement("span");
         resize.className = "lorgus-map-editor-handle";
         resize.dataset.mode = "resize";
-        resize.title = "Изменить размер области названия";
+        resize.title = "Изменить размер";
         label.appendChild(resize);
 
         layer.appendChild(label);
