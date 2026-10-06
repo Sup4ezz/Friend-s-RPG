@@ -261,30 +261,45 @@ function initializeLorgusAudio() {
         musicGain.gain.exponentialRampToValueAtTime(0.32, now + 2.8);
 
         const roots = [55, 65.41, 49, 58.27];
+        const melody = [220, 246.94, 293.66, 246.94, 196, 220, 261.63, 220];
         let step = 0;
 
-        const playPad = () => {
+        const playMusicBar = () => {
             if (!audioContext || !musicGain) return;
             const t = audioContext.currentTime;
             const rootFreq = roots[step % roots.length];
+
             [rootFreq, rootFreq * 1.498, rootFreq * 2].forEach((freq, index) => {
                 const osc = audioContext.createOscillator();
                 const gain = audioContext.createGain();
                 osc.type = index === 0 ? "triangle" : "sine";
                 osc.frequency.setValueAtTime(freq, t);
                 gain.gain.setValueAtTime(0.0001, t);
-                gain.gain.exponentialRampToValueAtTime(index === 0 ? 0.08 : 0.035, t + 0.9);
-                gain.gain.exponentialRampToValueAtTime(0.0001, t + 5.2);
+                gain.gain.exponentialRampToValueAtTime(index === 0 ? 0.16 : 0.07, t + 0.55);
+                gain.gain.exponentialRampToValueAtTime(0.0001, t + 5.0);
                 osc.connect(gain);
                 gain.connect(musicGain);
                 osc.start(t);
-                osc.stop(t + 5.4);
+                osc.stop(t + 5.2);
             });
+
+            const note = audioContext.createOscillator();
+            const noteGain = audioContext.createGain();
+            note.type = "sine";
+            note.frequency.setValueAtTime(melody[step % melody.length], t + 0.35);
+            noteGain.gain.setValueAtTime(0.0001, t);
+            noteGain.gain.exponentialRampToValueAtTime(0.075, t + 0.42);
+            noteGain.gain.exponentialRampToValueAtTime(0.0001, t + 1.7);
+            note.connect(noteGain);
+            noteGain.connect(musicGain);
+            note.start(t + 0.35);
+            note.stop(t + 1.75);
+
             step++;
         };
 
-        playPad();
-        musicTimer = window.setInterval(playPad, 5200);
+        playMusicBar();
+        musicTimer = window.setInterval(playMusicBar, 2600);
     };
 
     const activate = () => {
