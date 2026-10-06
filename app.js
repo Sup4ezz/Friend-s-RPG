@@ -2155,29 +2155,8 @@ async function loadAdminPanel(container) {
    ОТОБРАЖЕНИЕ ЗАЯВОК В АДМИНКЕ
    ========================================================= */
 
-async function renderAdminApplications(
-    container,
-    applications
-) {
+async function renderAdminApplications(container, applications) {
     container.className = "admin-panel";
-
-    const pending =
-        applications.filter(
-            application =>
-                application.status === "pending"
-        );
-
-    const approved =
-        applications.filter(
-            application =>
-                application.status === "approved"
-        );
-
-    const rejected =
-        applications.filter(
-            application =>
-                application.status === "rejected"
-        );
 
     window.adminApplications = applications;
 
@@ -2187,126 +2166,121 @@ async function renderAdminApplications(
             continue;
         }
 
-        const {
-            data,
-            error
-        } = await supabase.storage
+        const { data, error } = await supabase.storage
             .from("character-applications")
-            .createSignedUrl(
-                application.photo_path,
-                60 * 60
-            );
+            .createSignedUrl(application.photo_path, 60 * 60);
 
-        if (error) {
-            console.error(
-                "Ошибка получения фотографии:",
-                error
-            );
-
-            application.photo_url = null;
-        } else {
-            application.photo_url =
-                data?.signedUrl || null;
-        }
+        application.photo_url = error ? null : (data?.signedUrl || null);
     }
 
+    const pending = applications.filter(a => a.status === "pending");
+    const approved = applications.filter(a => a.status === "approved");
+    const rejected = applications.filter(a => a.status === "rejected");
+
     container.innerHTML = `
-        <div class="character-header">
-            <div class="welcome-symbol">✦</div>
-
-            <h1>
-                Администрация ЛОРГУСА
-            </h1>
-
-                <p>
-                    Управление заявками персонажей.
-                </p>
+        <div class="admin-dashboard-head">
+            <div>
+                <div class="admin-kicker">✦ ЛОРГУС · ПАНЕЛЬ УПРАВЛЕНИЯ</div>
+                <h1>Администрация</h1>
+                <p>Заявки, персонажи и модерация мира.</p>
             </div>
-
-            <button
-                type="button"
-                class="logout-button admin-logout-button"
-                onclick="logout()"
-            >
-                Выйти
-            </button>
+            <div class="admin-head-actions">
+                <button type="button" class="admin-tool-button" id="admin-refresh-button">↻ Обновить</button>
+                <button type="button" class="logout-button admin-logout-button" onclick="logout()">Выйти</button>
+            </div>
         </div>
 
         <div class="admin-stats">
-            <div class="admin-stat">
-                <span class="admin-stat-value">
-                    ${pending.length}
-                </span>
-                <span class="admin-stat-label">
-                    Ожидают решения
-                </span>
-            </div>
-
-            <div class="admin-stat">
-                <span class="admin-stat-value">
-                    ${approved.length}
-                </span>
-                <span class="admin-stat-label">
-                    Одобрено
-                </span>
-            </div>
-
-            <div class="admin-stat">
-                <span class="admin-stat-value">
-                    ${rejected.length}
-                </span>
-                <span class="admin-stat-label">
-                    Отклонено
-                </span>
-            </div>
+            <button class="admin-stat admin-filter-stat active" data-admin-filter="pending">
+                <span class="admin-stat-value">${pending.length}</span><span class="admin-stat-label">На рассмотрении</span>
+            </button>
+            <button class="admin-stat admin-filter-stat" data-admin-filter="approved">
+                <span class="admin-stat-value">${approved.length}</span><span class="admin-stat-label">Одобрено</span>
+            </button>
+            <button class="admin-stat admin-filter-stat" data-admin-filter="rejected">
+                <span class="admin-stat-value">${rejected.length}</span><span class="admin-stat-label">Отклонено</span>
+            </button>
+            <button class="admin-stat admin-filter-stat" data-admin-filter="all">
+                <span class="admin-stat-value">${applications.length}</span><span class="admin-stat-label">Все заявки</span>
+            </button>
         </div>
 
-        <div class="admin-applications">
-            ${
-                pending.length === 0
-                    ? `
-                        <div class="admin-empty">
-                            <div class="welcome-symbol">✓</div>
-                            <h2>Новых заявок нет</h2>
-                            <p>Все заявки обработаны.</p>
-                        </div>
-                    `
-                    : pending.map(
-                        application =>
-                            renderAdminApplication(
-                                application
-                            )
-                    ).join("")
-            }
+        <div class="admin-toolbar">
+            <input id="admin-search" type="search" placeholder="Поиск по имени, расе, родине или занятию...">
+            <select id="admin-status-filter">
+                <option value="pending">На рассмотрении</option>
+                <option value="approved">Одобрено</option>
+                <option value="rejected">Отклонено</option>
+                <option value="all">Все статусы</option>
+            </select>
         </div>
 
-        <section class="admin-character-management">
+        <section class="admin-section">
             <div class="admin-section-heading">
-                <h2>Персонажи</h2>
-                <p>Удаление персонажей для тестирования.</p>
+                <div><h2>Заявки персонажей</h2><p id="admin-results-count"></p></div>
             </div>
+            <div id="admin-application-list" class="admin-applications"></div>
+        </section>
 
+        <section class="admin-section admin-character-management">
+            <div class="admin-section-heading">
+                <div><h2>Персонажи мира</h2><p>Активные персонажи, созданные после одобрения заявок.</p></div>
+            </div>
             <div class="admin-applications">
-                ${
-                    approved.length === 0
-                        ? `
-                            <div class="admin-empty">
-                                <h2>Персонажей нет</h2>
-                                <p>Список одобренных персонажей пуст.</p>
-                            </div>
-                        `
-                        : approved.map(
-                            application =>
-                                renderAdminCharacterManagement(
-                                    application
-                                )
-                        ).join("")
-                }
+                ${approved.length ? approved.map(renderAdminCharacterManagement).join("") : '<div class="admin-empty"><h2>Персонажей нет</h2><p>Список пуст.</p></div>'}
             </div>
         </section>
     `;
 
-    bindAdminButtons(container);
+    const list = container.querySelector("#admin-application-list");
+    const search = container.querySelector("#admin-search");
+    const status = container.querySelector("#admin-status-filter");
+    const count = container.querySelector("#admin-results-count");
+
+    const renderList = () => {
+        const query = search.value.trim().toLowerCase();
+        const filter = status.value;
+        const filtered = applications.filter(a => {
+            const haystack = [
+                a.name, a.race, a.homeland, a.occupation,
+                a.personality, a.backstory, a.special_skills
+            ].filter(Boolean).join(" ").toLowerCase();
+            return (filter === "all" || a.status === filter) && (!query || haystack.includes(query));
+        });
+
+        count.textContent = `Показано: ${filtered.length} из ${applications.length}`;
+        list.innerHTML = filtered.length
+            ? filtered.map(renderAdminApplication).join("")
+            : '<div class="admin-empty"><h2>Ничего не найдено</h2><p>Измени поиск или фильтр.</p></div>';
+
+        bindAdminButtons(container);
+    };
+
+    container.querySelectorAll(".admin-filter-stat").forEach(button => {
+        button.addEventListener("click", () => {
+            container.querySelectorAll(".admin-filter-stat").forEach(b => b.classList.remove("active"));
+            button.classList.add("active");
+            status.value = button.dataset.adminFilter;
+            renderList();
+        });
+    });
+
+    search.addEventListener("input", renderList);
+    status.addEventListener("change", () => {
+        container.querySelectorAll(".admin-filter-stat").forEach(b =>
+            b.classList.toggle("active", b.dataset.adminFilter === status.value)
+        );
+        renderList();
+    });
+
+    container.querySelector("#admin-refresh-button").addEventListener("click", async event => {
+        const button = event.currentTarget;
+        button.disabled = true;
+        button.textContent = "↻ Обновление...";
+        await loadAdminPanel(container);
+    });
+
+    renderList();
 }
 
 /* =========================================================
