@@ -4264,7 +4264,16 @@ function initializeLorgusWebGL() {
 
     const bevelStone = (sx, sy, sz, material = stone, bevel = 0.16) => {
         const radius = Math.min(bevel, sx * 0.14, sy * 0.14, sz * 0.14);
-        const geometry = new THREE.BoxGeometry(sx, sy, sz, 2, 2);
+        const geometry = new THREE.BoxGeometry(sx, sy, sz, 3, 3, 3);
+        const pos = geometry.attributes.position;
+        const inset = Math.min(bevel, sx * 0.08, sy * 0.08, sz * 0.08);
+        for (let i = 0; i < pos.count; i++) {
+            const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+            if (Math.abs(x) > sx * 0.48) pos.setX(i, x - Math.sign(x) * inset * 0.12);
+            if (Math.abs(y) > sy * 0.48) pos.setY(i, y - Math.sign(y) * inset * 0.12);
+            if (Math.abs(z) > sz * 0.48) pos.setZ(i, z - Math.sign(z) * inset * 0.12);
+        }
+        pos.needsUpdate = true;
         geometry.computeVertexNormals();
         return new THREE.Mesh(geometry, material);
     };
@@ -4541,35 +4550,87 @@ function initializeLorgusWebGL() {
         slab.scale.x *= 0.8 + Math.random() * 0.35;
     }
 
-    const addBox = (x, y, z, sx, sy, sz, material = stone, rot = 0) => {
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(sx, sy, sz, 2, 2, 2), material);
-        mesh.position.set(x, y, z);
-        mesh.rotation.z = rot;
-        mesh.castShadow = true;
-        mesh.receiveShadow = true;
-        world.add(mesh);
-    };
+    // Monumental portal frame: a single carved arch, deep jambs and individual voussoirs.
+    const archShape = new THREE.Shape();
+    archShape.moveTo(-7.2, 0);
+    archShape.lineTo(-7.2, 8.2);
+    archShape.absarc(0, 8.2, 7.2, Math.PI, 0, false);
+    archShape.lineTo(7.2, 0);
+    archShape.closePath();
 
-    addBox(-10.2, 6.2, 0, 4.3, 14.8, 3.8, stone);
-    addBox(10.2, 6.6, 0, 4.5, 15.6, 3.8, stone);
-    addBox(-9.3, 13.8, 0, 5.4, 2.3, 4.1, stoneEdge, -0.07);
-    addBox(9.0, 14.8, 0, 6.0, 2.4, 4.1, stoneEdge, 0.1);
-
-    const arch = new THREE.Mesh(
-        new THREE.TorusGeometry(11.8, 2.0, 20, 56, Math.PI),
-        stoneEdge
-    );
-    arch.rotation.z = 0;
-    arch.position.y = 12.6;
+    const archGeo = new THREE.ExtrudeGeometry(archShape, {
+        depth: 5.2,
+        bevelEnabled: true,
+        bevelSegments: 4,
+        bevelSize: 0.16,
+        bevelThickness: 0.18,
+        curveSegments: 40
+    });
+    const arch = new THREE.Mesh(archGeo, stoneEdge);
+    arch.position.set(0, 2.2, 0.25);
+    arch.castShadow = true;
+    arch.receiveShadow = true;
     world.add(arch);
 
-    for (let n = 0; n < 13; n++) {
-        const a = Math.PI * (n / 12);
-        const block = new THREE.Mesh(new THREE.BoxGeometry(2.15, 2.2, 4.8, 2, 2), stoneEdge);
-        block.position.set(Math.cos(a) * 11.8, 12.6 + Math.sin(a) * 11.8, (Math.random() - 0.5) * 0.8);
+    for (const side of [-1, 1]) {
+        const jamb = new THREE.Mesh(
+            new THREE.BoxGeometry(2.0, 10.4, 5.3, 3, 3, 3),
+            stone
+        );
+        jamb.position.set(side * 6.65, 5.25, 0.25);
+        jamb.castShadow = true;
+        jamb.receiveShadow = true;
+        world.add(jamb);
+
+        const innerJamb = new THREE.Mesh(
+            new THREE.BoxGeometry(0.62, 9.6, 5.55, 2, 2, 2),
+            stoneDark
+        );
+        innerJamb.position.set(side * 5.45, 4.9, -0.05);
+        innerJamb.castShadow = true;
+        innerJamb.receiveShadow = true;
+        world.add(innerJamb);
+    }
+
+    // Individual voussoirs make the arch read as hand-built masonry.
+    for (let n = 0; n < 17; n++) {
+        const a = Math.PI * (n / 16);
+        const radius = 7.45;
+        const block = new THREE.Mesh(
+            new THREE.BoxGeometry(1.55, 2.05, 5.65, 2, 2, 2),
+            n % 4 === 0 ? stoneEdge : stone
+        );
+        block.position.set(
+            Math.cos(a) * radius,
+            10.25 + Math.sin(a) * radius,
+            0.45 + Math.sin(a * 3.0) * 0.05
+        );
         block.rotation.z = Math.PI / 2 - a;
+        block.rotation.y = (Math.random() - 0.5) * 0.025;
+        block.castShadow = true;
+        block.receiveShadow = true;
         world.add(block);
     }
+
+    // Crown stone gives the gate a strong readable silhouette.
+    const crown = new THREE.Mesh(
+        new THREE.BoxGeometry(17.2, 1.25, 5.9, 3, 3, 3),
+        stoneEdge
+    );
+    crown.position.set(0, 18.0, 0.35);
+    crown.rotation.z = 0.008;
+    crown.castShadow = true;
+    crown.receiveShadow = true;
+    world.add(crown);
+
+    // Carved central crest, deliberately abstract and non-modern.
+    const crest = new THREE.Mesh(
+        new THREE.TorusGeometry(1.35, 0.16, 10, 32),
+        rune
+    );
+    crest.position.set(0, 17.95, 3.15);
+    crest.rotation.x = Math.PI / 2;
+    world.add(crest);
 
     const rift = new THREE.Mesh(
         new THREE.PlaneGeometry(11.8, 21.5, 40, 80),
@@ -4674,17 +4735,68 @@ const openingShape = new THREE.Shape();
     threshold.position.set(0, 0.025, 0.45);
     world.add(threshold);
 
+    // Layered portal energy: depth, sparks and drifting motes instead of a flat glowing plane.
+    const portalCore = new THREE.Mesh(
+        new THREE.CircleGeometry(3.9, 64),
+        new THREE.MeshBasicMaterial({
+            color: 0xffc46a,
+            transparent: true,
+            opacity: 0.075,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        })
+    );
+    portalCore.position.set(0, 6.8, -0.72);
+    world.add(portalCore);
+
+    const portalMist = new THREE.Mesh(
+        new THREE.CircleGeometry(5.8, 64),
+        new THREE.MeshBasicMaterial({
+            color: 0xc56f25,
+            transparent: true,
+            opacity: 0.045,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        })
+    );
+    portalMist.position.set(0, 6.8, -0.9);
+    world.add(portalMist);
+
+    const sparkMat = new THREE.MeshBasicMaterial({
+        color: 0xffc66a,
+        transparent: true,
+        opacity: 0.78,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+    const portalSparks = [];
+    for (let i = 0; i < 70; i++) {
+        const spark = new THREE.Mesh(
+            new THREE.SphereGeometry(0.025 + Math.random() * 0.055, 6, 6),
+            sparkMat
+        );
+        spark.position.set(
+            (Math.random() - 0.5) * 11.0,
+            1.0 + Math.random() * 14.5,
+            -0.5 + (Math.random() - 0.5) * 1.8
+        );
+        spark.userData.phase = Math.random() * Math.PI * 2;
+        spark.userData.speed = 0.25 + Math.random() * 0.7;
+        portalSparks.push(spark);
+        world.add(spark);
+    }
+
     const riftLight = new THREE.PointLight(0xd88b2e, 38, 24, 2);
     riftLight.position.set(0, 7.8, -0.4);
     world.add(riftLight);
     world.add(new THREE.HemisphereLight(0xb9a17d, 0x17120d, 1.05));
-    world.add(new THREE.AmbientLight(0x9a8567, 0.48));
+    world.add(new THREE.AmbientLight(0x9a8567, 0.34));
 
     const coolFill = new THREE.DirectionalLight(0x6f8790, 1.35);
     coolFill.position.set(18, 12, 10);
     world.add(coolFill);
 
-    const directional = new THREE.DirectionalLight(0xc8b99f, 4.6);
+    const directional = new THREE.DirectionalLight(0xd7c5a4, 5.2);
     directional.castShadow = true;
     directional.shadow.mapSize.set(1024, 1024);
     directional.shadow.camera.left = -28;
@@ -4853,7 +4965,7 @@ const openingShape = new THREE.Shape();
         }
     }
 
-    const gateInnerGlow = new THREE.PointLight(0xd9963d, 22, 24, 2);
+    const gateInnerGlow = new THREE.PointLight(0xffb24b, 30, 28, 2);
     gateInnerGlow.position.set(0, 5, -0.7);
     world.add(gateInnerGlow);
 
@@ -4904,6 +5016,13 @@ const openingShape = new THREE.Shape();
         camera.lookAt(pointer.x * 0.7, 7.5 + pointer.y * 0.55, -0.5);
 
         rift.material.uniforms.time.value = time;
+        portalCore.scale.setScalar(0.92 + Math.sin(time * 1.35) * 0.06);
+        portalMist.scale.setScalar(0.96 + Math.sin(time * 0.8 + 1.2) * 0.08);
+        portalSparks.forEach((spark, i) => {
+            spark.position.y += Math.sin(time * spark.userData.speed + spark.userData.phase) * 0.0025 + 0.004;
+            if (spark.position.y > 16.2) spark.position.y = 0.8 + (i % 9) * 0.7;
+            spark.position.x += Math.sin(time * 0.7 + spark.userData.phase) * 0.0018;
+        });
         riftLight.intensity = 26 + Math.sin(time * 2.1) * 6;
         gateInnerGlow.intensity = 12 + Math.sin(time * 1.7) * 3;
         floorGlow.material.opacity = 0.11 + Math.sin(time * 1.9) * 0.025;
