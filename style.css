@@ -11723,150 +11723,69 @@ body{
 /* =========================================================
    CINEMATIC PORTAL DEPARTURE
    ========================================================= */
+
 .lorgus-cinematic-auth.portal-departure .lorgus-auth-header,
 .lorgus-cinematic-auth.portal-departure .lorgus-auth-title,
 .lorgus-cinematic-auth.portal-departure .lorgus-auth-whisper,
 .lorgus-cinematic-auth.portal-departure .auth-container,
 .lorgus-cinematic-auth.portal-departure .lorgus-auth-footer{
-    opacity:0;
-    filter:blur(7px);
-    transform:translateY(10px) scale(.985);
-    transition:opacity .85s ease,filter .85s ease,transform .85s ease;
-    pointer-events:none;
+    opacity:0!important;
+    filter:blur(8px)!important;
+    transform:translateY(6px) scale(.985)!important;
+    transition:opacity .62s ease,filter .62s ease,transform .62s ease!important;
+    pointer-events:none!important;
 }
-.lorgus-cinematic-auth.portal-departure .lorgus-auth-title{
-    transform:translateY(6px) scale(.97);
-}
-.lorgus-cinematic-auth.portal-departure .auth-container{
-    transform:translateY(calc(-50% + 14px)) scale(.965);
-}
+
 .lorgus-cinematic-auth.portal-departure .lorgus-fantasy-stage{
-    filter:brightness(1.08) saturate(1.12);
-    transition:filter 1.35s ease;
+    filter:brightness(1.06) saturate(1.08)!important;
+    transition:filter 1.2s ease!important;
 }
 
-/* The journey is staged: first the interface leaves, then the camera enters the gate,
-   and only after the portal fills the frame does the new world appear. */
 .lorgus-cinematic-auth.portal-departure .lorgus-webgl{
-    transition:filter 1.6s ease,opacity 1.2s ease;
-    filter:brightness(1.12) saturate(1.18) contrast(1.06);
-}
-.lorgus-cinematic-auth.portal-departure .lorgus-vignette{
-    opacity:.92;
-    transition:opacity 1.2s ease;
+    transform-origin:50% 50%!important;
+    animation:lorgusPortalPush 2.02s cubic-bezier(.12,.7,.18,1) both!important;
+    filter:brightness(1.04) saturate(1.08) contrast(1.04)!important;
 }
 
-.lorgus-portal-transition{
+.lorgus-cinematic-auth.portal-departure::after{
+    content:"";
     position:fixed;
     inset:0;
-    z-index:99999;
+    z-index:99990;
     pointer-events:none;
-    overflow:hidden;
+    background:radial-gradient(ellipse at 50% 52%,rgba(255,228,163,0) 0%,rgba(255,166,55,0) 24%,rgba(255,215,135,.78) 72%,rgba(7,4,2,.98) 100%);
     opacity:0;
-    background:
-        radial-gradient(ellipse at 50% 51%,
-            rgba(255,219,145,0) 0%,
-            rgba(255,157,55,0) 18%,
-            rgba(5,3,2,.18) 44%,
-            rgba(0,0,0,.94) 100%);
-    transition:opacity .55s ease;
-}
-.lorgus-portal-transition.active{
-    opacity:1;
-}
-.lorgus-portal-transition-veil{
-    position:absolute;
-    inset:-15%;
-    background:
-        radial-gradient(ellipse at 50% 52%,
-            rgba(255,244,198,.02) 0%,
-            rgba(255,157,45,.05) 22%,
-            rgba(0,0,0,.78) 58%,
-            #000 78%);
-    transform:scale(1.08);
-    transition:transform 1.78s cubic-bezier(.2,.72,.2,1),opacity 1.78s ease;
-}
-.lorgus-portal-transition-core{
-    position:absolute;
-    left:50%;
-    top:51%;
-    width:18vw;
-    height:48vh;
-    min-width:170px;
-    min-height:280px;
-    transform:translate(-50%,-50%) scale(.16);
-    border-radius:50% 50% 44% 44% / 45% 45% 38% 38%;
-    background:
-        radial-gradient(ellipse at center,
-            rgba(255,250,218,.98) 0%,
-            rgba(255,191,82,.88) 13%,
-            rgba(232,105,25,.45) 31%,
-            rgba(110,42,10,.16) 52%,
-            transparent 73%);
-    filter:blur(8px);
-    mix-blend-mode:screen;
-    opacity:.7;
-    transition:transform 1.78s cubic-bezier(.12,.72,.12,1),
-               filter 1.78s ease,
-               opacity 1.78s ease;
-}
-.lorgus-portal-transition-ring{
-    position:absolute;
-    left:50%;
-    top:51%;
-    width:22vw;
-    height:54vh;
-    min-width:210px;
-    min-height:320px;
-    transform:translate(-50%,-50%) scale(.08);
-    border:1px solid rgba(255,211,125,.55);
-    border-radius:50% 50% 44% 44% / 45% 45% 38% 38%;
-    box-shadow:
-        0 0 35px rgba(255,170,54,.28),
-        0 0 110px rgba(255,113,22,.2),
-        inset 0 0 40px rgba(255,207,121,.2);
-    opacity:0;
-    transition:transform 1.65s cubic-bezier(.12,.72,.12,1),
-               opacity .45s ease,
-               box-shadow 1.65s ease;
-}
-.lorgus-portal-transition.active .lorgus-portal-transition-veil{
-    transform:scale(.22);
-    opacity:.86;
-}
-.lorgus-portal-transition.active .lorgus-portal-transition-core{
-    transform:translate(-50%,-50%) scale(1.15);
-    filter:blur(3px);
-    opacity:1;
-}
-.lorgus-portal-transition.active .lorgus-portal-transition-ring{
-    transform:translate(-50%,-50%) scale(1.7);
-    opacity:.7;
-}
-.lorgus-portal-transition.release{
-    opacity:0;
-    transition:opacity .8s ease;
-}
-.lorgus-portal-transition.release .lorgus-portal-transition-core{
-    transform:translate(-50%,-50%) scale(2.9);
-    opacity:1;
-    filter:blur(18px);
-}
-.lorgus-portal-transition.release .lorgus-portal-transition-ring{
-    transform:translate(-50%,-50%) scale(3.8);
-    opacity:0;
+    animation:lorgusPortalPass 2.02s ease-in-out both;
 }
 
+@keyframes lorgusPortalPush{
+    0%{transform:scale(1)}
+    68%{transform:scale(1.08)}
+    88%{transform:scale(1.24)}
+    100%{transform:scale(1.42)}
+}
 
-/* Clean arrival after entering the gate: no loading card, no grey placeholder. */
+@keyframes lorgusPortalPass{
+    0%,66%{opacity:0}
+    82%{opacity:.18}
+    91%{opacity:.86}
+    96%{opacity:1}
+    100%{opacity:1}
+}
+
+/* The old artificial portal overlay is intentionally disabled: the real WebGL gate is the transition. */
+.lorgus-portal-transition{
+    display:none!important;
+}
+
 .lorgus-cabinet-entering{
-    min-height:100vh;
-    background:#050403;
-    opacity:0;
-    transition:opacity .65s ease;
+    min-height:100vh!important;
+    background:#050403!important;
+    opacity:0!important;
+    transition:opacity .42s ease!important;
 }
 .lorgus-cabinet-entering.ready{
-    opacity:1;
+    opacity:1!important;
 }
 .lorgus-cabinet-entering #cabinet-content{
     min-height:100vh;
