@@ -3711,7 +3711,7 @@ function renderLorgusWorldMap(container, character) {
                 <header class="lorgus-map-header">
                     <div>
                         <span class="lorgus-map-kicker">МИР ЛОРГУСА · КАРТА</span>
-                        <h2>Неровланд</h2>
+                        <h2>Лоргус</h2>
                     </div>
                     <div class="lorgus-map-header-status">
                         <span class="lorgus-map-status-dot"></span>
@@ -3721,7 +3721,7 @@ function renderLorgusWorldMap(container, character) {
 
                 <section class="lorgus-map-stage">
                     <div class="lorgus-map-frame">
-                        <div class="lorgus-map-image-wrap" id="lorgus-map-viewport" onclick="handleLorgusMapSurfaceClick(event)">
+                        <div class="lorgus-map-image-wrap" id="lorgus-map-viewport" >
                             <div class="lorgus-map-world" id="lorgus-map-world">
                                 <img class="lorgus-map-image" src="/assets/world/nerovland-map.png" alt="Карта Неровланда" draggable="false">
                                 <div class="lorgus-map-marker-layer" id="lorgus-map-marker-layer" aria-label="Обозначения карты"></div>
