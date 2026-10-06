@@ -1533,6 +1533,16 @@ function renderCharacterApplicationForm(container) {
     root.replaceChildren(container);
     container.innerHTML = `
         <div class="character-creation-scene" style="display:block;visibility:visible;opacity:1;">
+            <div class="character-creation-atmosphere" aria-hidden="true">
+                <div class="creation-void"></div>
+                <div class="creation-rift"><i></i><b></b></div>
+                <div class="creation-rift-core"></div>
+                <div class="creation-horizon"></div>
+                <div class="creation-stars"></div>
+                <div class="creation-dust"></div>
+                <div class="creation-arch arch-left"></div>
+                <div class="creation-arch arch-right"></div>
+            </div>
             <header class="character-creation-topbar">
                 <div><strong>✦ ЛОРГУС</strong><span>СОЗДАНИЕ ПЕРСОНАЖА</span></div>
                 <button type="button" class="lorgus-screen-logout" onclick="logout()">ВЫХОД</button>
