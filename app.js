@@ -3734,14 +3734,12 @@ function renderLorgusWorldMap(container, character) {
                         </div>
 
                         <div class="lorgus-map-controls" aria-label="Управление картой">
-                            <button type="button" onclick="lorgusMapZoom(1.12)" aria-label="Увеличить">+</button>
-                            <button type="button" onclick="lorgusMapZoom(.89)" aria-label="Уменьшить">−</button>
-                            <button type="button" onclick="lorgusMapReset()" aria-label="Сбросить масштаб">↺</button>
+
                         </div>
 
                         <div class="lorgus-map-hint">
                             <span>КАРТА МИРА</span>
-                            <small>Колесо мыши — масштаб · перетаскивание — обзор</small>
+                            <small>Статичная карта · территории выбираются нажатием</small>
                         </div>
                     </div>
 
@@ -3792,70 +3790,14 @@ function initializeLorgusMapViewport() {
         lorgusMapViewportCleanup = null;
     }
 
-    const viewport = document.getElementById("lorgus-map-viewport");
-    const world = viewport?.querySelector(".lorgus-map-world");
-    if (!viewport || !world) return;
-
     lorgusMapScale = 1;
     lorgusMapOffsetX = 0;
     lorgusMapOffsetY = 0;
 
-    let dragging = false;
-    let startX = 0;
-    let startY = 0;
-    let startOffsetX = 0;
-    let startOffsetY = 0;
-
-    const apply = () => {
-        world.style.transform = `translate3d(${lorgusMapOffsetX}px,${lorgusMapOffsetY}px,0) scale(${lorgusMapScale})`;
-    };
-
-    const onWheel = event => {
-        event.preventDefault();
-        const factor = event.deltaY < 0 ? 1.08 : .925;
-        lorgusMapScale = Math.min(3.2, Math.max(.8, lorgusMapScale * factor));
-        apply();
-    };
-
-    const onPointerDown = event => {
-        dragging = true;
-        startX = event.clientX;
-        startY = event.clientY;
-        startOffsetX = lorgusMapOffsetX;
-        startOffsetY = lorgusMapOffsetY;
-        viewport.classList.add("dragging");
-        viewport.setPointerCapture?.(event.pointerId);
-    };
-
-    const onPointerMove = event => {
-        if (!dragging) return;
-        lorgusMapOffsetX = startOffsetX + event.clientX - startX;
-        lorgusMapOffsetY = startOffsetY + event.clientY - startY;
-        apply();
-    };
-
-    const stopDragging = () => {
-        dragging = false;
-        viewport.classList.remove("dragging");
-    };
-
-    viewport.addEventListener("wheel", onWheel, { passive: false });
-    viewport.addEventListener("pointerdown", onPointerDown);
-    viewport.addEventListener("pointermove", onPointerMove);
-    viewport.addEventListener("pointerup", stopDragging);
-    viewport.addEventListener("pointercancel", stopDragging);
-    viewport.addEventListener("pointerleave", stopDragging);
-
-    lorgusMapViewportCleanup = () => {
-        viewport.removeEventListener("wheel", onWheel);
-        viewport.removeEventListener("pointerdown", onPointerDown);
-        viewport.removeEventListener("pointermove", onPointerMove);
-        viewport.removeEventListener("pointerup", stopDragging);
-        viewport.removeEventListener("pointercancel", stopDragging);
-        viewport.removeEventListener("pointerleave", stopDragging);
-    };
-
-    apply();
+    const world = document.getElementById("lorgus-map-world");
+    if (world) {
+        world.style.transform = "translate3d(0,0,0) scale(1)";
+    }
 }
 
 function lorgusMapZoom(factor) {
