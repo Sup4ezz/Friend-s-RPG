@@ -2478,18 +2478,17 @@ async function renderLocationParticipants(locationName, regionName) {
     const { data, error } = await supabase
         .from("rp_presence")
         .select("character_id, presence_type, location, region, from_location, from_region, to_location, to_region, visibility, characters(name, race)")
-        .eq("visibility", "public");
+        .eq("visibility", "public")
+        .eq("presence_type", "location")
+        .eq("region", regionName)
+        .eq("location", locationName);
 
     if (error) {
         console.error("Не удалось загрузить участников:", error);
         return;
     }
 
-    const participants = (data || []).filter(row =>
-        row.presence_type === "location" &&
-        row.region === regionName &&
-        row.location === locationName
-    );
+    const participants = data || [];
 
     if (!participants.length) {
         box.innerHTML = '<div class="lorgus-rp-participant-empty">Здесь пока никого нет</div>';
@@ -2656,6 +2655,8 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
             </main>
         </div>
     `;
+    await loadRpMessages(presence);
+    await subscribeToRpMessages(presence);
 }
 async function loadRpMessages(presence) {
     const feed = document.getElementById("lorgus-rp-feed");
