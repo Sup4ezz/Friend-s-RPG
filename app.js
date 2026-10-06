@@ -1514,40 +1514,23 @@ function initializeLorgusCharacterCreationAudio() {
 }
 
 function renderCharacterApplicationForm(container) {
-    // Музыка здесь вообще не участвует: экран создания должен открываться независимо от AudioContext.
-
-    // СОЗДАНИЕ ПЕРСОНАЖА — отдельный экран, не дочерний слой кабинета.
-    // Убираем старый game-page целиком: он мог скрывать/обрезать форму
-    // независимо от её собственного z-index.
+    // Новый аккаунт без персонажей получает полностью самостоятельный экран.
+    // Не переиспользуем старый #cabinet-content из game-page: после await
+    // renderCabinet() продолжает выполняться, поэтому чистый root здесь надёжнее.
     const root = document.getElementById("root");
-    if (root && container.parentNode !== root) {
-        root.innerHTML = "";
-        container.id = "cabinet-content";
-        root.appendChild(container);
-    }
+    if (!root) return;
 
+    container = document.createElement("main");
+    container.id = "cabinet-content";
     container.className = "character-application";
     container.style.display = "block";
     container.style.visibility = "visible";
     container.style.opacity = "1";
-    container.style.visibility = "visible";
-    container.style.opacity = "1";
+    container.style.pointerEvents = "auto";
+    container.style.position = "relative";
+    container.style.zIndex = "1";
 
-    // Экран создания должен быть самостоятельным полноэкранным слоем.
-    // Снимаем возможное скрытие кабинета прямо в момент его открытия.
-    const cabinet = container.closest(".game-page");
-    if (cabinet) {
-        cabinet.classList.remove("preparing");
-        cabinet.classList.add("ready");
-        cabinet.style.display = "block";
-        cabinet.style.visibility = "visible";
-        cabinet.style.opacity = "1";
-        cabinet.style.pointerEvents = "auto";
-        cabinet.style.position = "relative";
-        cabinet.style.inset = "auto";
-        cabinet.style.zIndex = "1";
-    }
-
+    root.replaceChildren(container);
     container.innerHTML = `
         <div class="character-creation-scene" style="display:block;visibility:visible;opacity:1;">
             <div class="lorgus-fantasy-stage" aria-hidden="true">
