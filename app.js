@@ -83,6 +83,22 @@ function renderAuth() {
             <div class="lorgus-vignette" aria-hidden="true"></div>
             <div class="background-glow"></div>
 
+            <div class="lorgus-portal-mark" aria-hidden="true">
+                <span class="portal-ring portal-ring-1"></span>
+                <span class="portal-ring portal-ring-2"></span>
+                <span class="portal-ring portal-ring-3"></span>
+                <span class="portal-orbit portal-orbit-a"></span>
+                <span class="portal-orbit portal-orbit-b"></span>
+                <span class="portal-core">✦</span>
+            </div>
+
+            <div class="lorgus-side-notation lorgus-side-notation-left" aria-hidden="true">
+                <i></i><span>LORE / ACCESS / 001</span>
+            </div>
+            <div class="lorgus-side-notation lorgus-side-notation-right" aria-hidden="true">
+                <span>WORLD IS WAITING</span><i></i>
+            </div>
+
             <section class="auth-container">
                 <div class="brand">
                     <div class="brand-symbol">✦</div>
@@ -90,7 +106,7 @@ function renderAuth() {
 
                     <div class="brand-line">
                         <span></span>
-                        <i>СМЕЛЫЕ ИДЕИ НАЧИНАЮТСЯ С ПЕРВОГО ШАГА</i>
+                        <i>НЕБОЛЬШОЙ ШАГ В МИР, КОТОРЫЙ НЕ ЖДАЛ ТЕБЯ</i>
                         <span></span>
                     </div>
                 </div>
