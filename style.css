@@ -11718,3 +11718,29 @@ body{
 .lorgus-fantasy-stage{
     z-index:2!important;
 }
+
+
+/* =========================================================
+   CINEMATIC PORTAL DEPARTURE
+   ========================================================= */
+.lorgus-cinematic-auth.portal-departure .lorgus-auth-header,
+.lorgus-cinematic-auth.portal-departure .lorgus-auth-title,
+.lorgus-cinematic-auth.portal-departure .lorgus-auth-whisper,
+.lorgus-cinematic-auth.portal-departure .auth-container,
+.lorgus-cinematic-auth.portal-departure .lorgus-auth-footer{
+    opacity:0;
+    filter:blur(7px);
+    transform:translateY(10px) scale(.985);
+    transition:opacity .85s ease,filter .85s ease,transform .85s ease;
+    pointer-events:none;
+}
+.lorgus-cinematic-auth.portal-departure .lorgus-auth-title{
+    transform:translateY(6px) scale(.97);
+}
+.lorgus-cinematic-auth.portal-departure .auth-container{
+    transform:translateY(calc(-50% + 14px)) scale(.965);
+}
+.lorgus-cinematic-auth.portal-departure .lorgus-fantasy-stage{
+    filter:brightness(1.08) saturate(1.12);
+    transition:filter 1.35s ease;
+}
