@@ -117,8 +117,7 @@ function triggerLorgusPortalFlash() {
     document.body.appendChild(flash);
 
     requestAnimationFrame(() => { flash.style.opacity = "1"; });
-    window.setTimeout(() => { flash.style.opacity = "0"; }, 120);
-    window.setTimeout(() => { flash.remove(); }, 320);
+    return flash;
 }
 
 function render(session) {
@@ -139,14 +138,16 @@ function render(session) {
                 lorgusPortalEntering = true;
                 lorgusPortalEnterStartedAt = performance.now();
 
-                // Вспышка приходится на момент непосредственного прохода ворот.
-                window.setTimeout(() => {
-                    if (lorgusPortalEntering) triggerLorgusPortalFlash();
-                }, 760);
-
-                // Быстро проходим портал и сразу раскрываем кабинет.
-                window.setTimeout(() => {
+                // В этот момент ворота закрывают кадр вспышкой.
+                // Кабинет уже готовится под ней, поэтому чёрного промежуточного
+                // экрана между воротами и локацией больше не возникает.
+                let flash = null;
+                window.setTimeout(async () => {
                     if (!lorgusPortalEntering) return;
+
+                    flash = triggerLorgusPortalFlash();
+                    await renderCabinet(session, true);
+
                     lorgusPortalEntering = false;
 
                     if (lorgusSceneCleanup) {
@@ -155,8 +156,11 @@ function render(session) {
                         cleanup();
                     }
 
-                    renderCabinet(session);
-                }, 1120);
+                    if (flash) {
+                        flash.style.opacity = "0";
+                        window.setTimeout(() => flash.remove(), 220);
+                    }
+                }, 760);
             }, 620);
 
             return;
@@ -880,26 +884,56 @@ async function register(event) {
    КАБИНЕТ
    ========================================================= */
 
-async function renderCabinet(session) {
+async function renderCabinet(session, preserveCurrentScene = false) {
     const username =
         session.user.user_metadata?.username ||
         "Игрок";
 
     window.lorgusUsername = username;
-
     window.lorgusCurrentUsername = username;
 
-    document.getElementById("root").innerHTML = `
-        <main class="game-page lorgus-cabinet-entering">
-            <section id="cabinet-content"></section>
-        </main>
+    const root = document.getElementById("root");
+    if (!root) return;
+
+    const previousScene = preserveCurrentScene
+        ? root.firstElementChild
+        : null;
+
+    const cabinet = document.createElement("main");
+    cabinet.className = "game-page lorgus-cabinet-entering";
+    cabinet.style.opacity = "0";
+    cabinet.style.pointerEvents = "none";
+    cabinet.innerHTML = `
+        <section id="cabinet-content"></section>
     `;
 
-    await loadPlayerState(session);
-    const cabinet = document.querySelector(".lorgus-cabinet-entering");
-    if (cabinet) {
-        requestAnimationFrame(() => cabinet.classList.add("ready"));
+    if (preserveCurrentScene) {
+        // Кабинет готовится поверх текущего кадра, но пока полностью прозрачен.
+        // Поэтому ожидание Supabase никогда не превращается в чёрный промежуточный экран.
+        cabinet.style.position = "fixed";
+        cabinet.style.inset = "0";
+        cabinet.style.zIndex = "20";
+        root.appendChild(cabinet);
+    } else {
+        root.innerHTML = "";
+        root.appendChild(cabinet);
     }
+
+    await loadPlayerState(session);
+
+    if (previousScene && previousScene.parentNode === root) {
+        previousScene.remove();
+    }
+
+    cabinet.style.opacity = "";
+    cabinet.style.pointerEvents = "";
+    cabinet.style.position = "";
+    cabinet.style.inset = "";
+    cabinet.style.zIndex = "";
+
+    requestAnimationFrame(() => cabinet.classList.add("ready"));
+
+    return cabinet;
 }
 
 /* =========================================================
