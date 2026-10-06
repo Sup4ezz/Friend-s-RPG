@@ -9842,3 +9842,82 @@ body{
 .lorgus-map-region-button{transition:background .2s ease,border-color .2s ease,transform .2s ease;padding:11px 12px}
 .lorgus-map-region-button:hover{transform:translateX(3px);background:rgba(215,174,90,.055);border-color:rgba(215,174,90,.22)}
 .lorgus-map-region-button.active{background:linear-gradient(90deg,rgba(215,174,90,.1),transparent);border-color:rgba(215,174,90,.25);box-shadow:inset 3px 0 var(--gold)}
+
+
+/* LORGUS command interface */
+.lorgus-global-nav{
+  position:relative;
+  z-index:80;
+  min-height:76px;
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr) 170px;
+  align-items:center;
+  gap:20px;
+  padding:0 26px;
+  background:linear-gradient(180deg,rgba(12,11,9,.98),rgba(8,8,7,.96));
+  border-bottom:1px solid rgba(215,174,90,.22);
+  box-shadow:0 10px 35px rgba(0,0,0,.35);
+}
+.lorgus-global-brand{display:flex;align-items:center;gap:10px;min-width:0}
+.lorgus-global-brand span{font-size:22px;color:var(--gold-light);text-shadow:0 0 18px rgba(215,174,90,.45)}
+.lorgus-global-brand strong{font-family:var(--title-font);font-size:18px;letter-spacing:.18em;color:#f0dfb7}
+.lorgus-global-brand small{font-size:8px;letter-spacing:.2em;color:rgba(240,223,183,.45);margin-left:2px}
+.lorgus-global-links{display:flex;align-items:stretch;justify-content:center;gap:3px;height:76px}
+.lorgus-global-links button{
+  min-width:88px;border:0;border-bottom:2px solid transparent;background:transparent;color:rgba(232,221,194,.54);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:8px 12px;cursor:pointer;
+  transition:all .2s ease;font:inherit
+}
+.lorgus-global-links button span{font-size:16px;color:rgba(215,174,90,.55)}
+.lorgus-global-links button b{font-size:9px;letter-spacing:.16em;font-weight:600}
+.lorgus-global-links button:hover{color:#f2e5c5;background:rgba(215,174,90,.045)}
+.lorgus-global-links button.active{color:#f5e7c3;border-bottom-color:var(--gold)}
+.lorgus-global-links button.active span{color:var(--gold-light);text-shadow:0 0 12px rgba(215,174,90,.45)}
+.lorgus-global-presence{justify-self:end;display:flex;align-items:center;gap:8px;font-size:9px;letter-spacing:.16em;color:rgba(230,220,195,.6)}
+.lorgus-global-presence i,.lorgus-command-status i{width:7px;height:7px;border-radius:50%;background:#c9a85e;box-shadow:0 0 12px rgba(201,168,94,.9);display:block}
+
+.lorgus-command-page{min-height:100%;background:radial-gradient(circle at 50% -10%,rgba(120,91,38,.13),transparent 38%),#080807;color:#eee8d9}
+.lorgus-command-main{max-width:1500px;margin:0 auto;padding:42px 46px 70px}
+.lorgus-command-hero,.lorgus-profile-hero{
+  min-height:190px;display:flex;align-items:flex-end;justify-content:space-between;gap:30px;
+  padding:34px 38px;border:1px solid rgba(215,174,90,.18);background:linear-gradient(135deg,rgba(35,29,19,.9),rgba(12,12,10,.9));
+  box-shadow:0 22px 70px rgba(0,0,0,.32);position:relative;overflow:hidden
+}
+.lorgus-command-hero:after,.lorgus-profile-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 0 55%,rgba(215,174,90,.06));pointer-events:none}
+.lorgus-command-kicker{font-size:10px;letter-spacing:.25em;color:rgba(226,207,166,.55)}
+.lorgus-command-hero h1,.lorgus-profile-hero h1{margin:10px 0 5px;font-family:var(--title-font);font-size:46px;letter-spacing:.02em;color:#f3e5c4}
+.lorgus-command-hero p,.lorgus-profile-hero p{margin:0;color:rgba(229,220,199,.58);font-size:13px}
+.lorgus-command-status{position:relative;z-index:1;display:flex;flex-direction:column;align-items:flex-end;gap:7px;font-size:9px;letter-spacing:.17em;color:#d8c8a4}
+.lorgus-command-status i{width:8px;height:8px}
+.lorgus-command-status small{font-size:11px;letter-spacing:.02em;color:rgba(229,220,199,.45)}
+.lorgus-command-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:18px}
+.lorgus-command-card{
+  min-height:210px;padding:26px;border:1px solid rgba(215,174,90,.13);background:linear-gradient(145deg,rgba(23,22,18,.96),rgba(12,12,10,.96));
+  display:flex;flex-direction:column;align-items:flex-start;transition:transform .2s,border-color .2s,box-shadow .2s
+}
+.lorgus-command-card:hover{transform:translateY(-3px);border-color:rgba(215,174,90,.36);box-shadow:0 18px 40px rgba(0,0,0,.28)}
+.lorgus-command-card>span,.lorgus-dossier-grid article>span,.lorgus-rp-grid article>span{font-size:9px;letter-spacing:.22em;color:rgba(215,174,90,.65)}
+.lorgus-command-card strong{font-family:var(--title-font);font-size:22px;color:#eee1c0;margin:18px 0 8px}
+.lorgus-command-card small{line-height:1.6;color:rgba(225,216,195,.5);font-size:12px;max-width:34em}
+.lorgus-command-card button,.lorgus-rp-grid button{margin-top:auto;border:0;background:transparent;color:#d8b96f;padding:12px 0 0;font-size:10px;letter-spacing:.16em;cursor:pointer}
+.lorgus-command-bottom{margin-top:18px;padding:30px 34px;border:1px solid rgba(215,174,90,.12);display:flex;justify-content:space-between;gap:30px;background:rgba(14,13,11,.82)}
+.lorgus-command-bottom h2{font-family:var(--title-font);font-weight:500;color:#eadbb8;margin:8px 0}
+.lorgus-command-bottom p{max-width:800px;color:rgba(225,216,195,.52);line-height:1.7;margin:0}
+.lorgus-command-metrics{display:flex;gap:34px;align-items:center}
+.lorgus-command-metrics div{display:flex;flex-direction:column;align-items:center}
+.lorgus-command-metrics b{font-family:var(--title-font);font-size:26px;color:#dfc27c}
+.lorgus-command-metrics span{font-size:8px;letter-spacing:.18em;color:rgba(225,216,195,.42)}
+.lorgus-profile-hero{align-items:center;min-height:170px}
+.lorgus-profile-sigil{width:88px;height:88px;border:1px solid rgba(215,174,90,.38);display:grid;place-items:center;font-size:32px;color:#e0c37c;transform:rotate(45deg)}
+.lorgus-profile-sigil+div{flex:1}
+.lorgus-dossier-grid,.lorgus-rp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:18px}
+.lorgus-dossier-grid article,.lorgus-rp-grid article{min-height:180px;padding:25px;border:1px solid rgba(215,174,90,.13);background:rgba(16,15,13,.9)}
+.lorgus-dossier-grid strong,.lorgus-rp-grid strong{display:block;margin:18px 0 8px;color:#eadfca;font-family:var(--title-font);font-size:21px}
+.lorgus-dossier-grid p,.lorgus-rp-grid p{color:rgba(225,216,195,.5);line-height:1.65;font-size:12px}
+@media(max-width:1050px){
+ .lorgus-global-nav{grid-template-columns:1fr;gap:0;padding:0 14px}.lorgus-global-brand{display:none}.lorgus-global-links{overflow-x:auto;justify-content:flex-start}.lorgus-global-presence{display:none}
+ .lorgus-command-grid,.lorgus-dossier-grid,.lorgus-rp-grid{grid-template-columns:1fr 1fr}.lorgus-command-main{padding:25px 18px}
+}
+@media(max-width:680px){
+ .lorgus-command-grid,.lorgus-dossier-grid,.lorgus-rp-grid{grid-template-columns:1fr}.lorgus-command-hero,.lorgus-profile-hero,.lorgus-command-bottom{padding:24px;flex-direction:column;align-items:flex-start}.lorgus-command-hero h1,.lorgus-profile-hero h1{font-size:34px}
+}
