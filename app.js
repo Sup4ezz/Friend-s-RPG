@@ -5,6 +5,8 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.m
 
 let supabase;
 let authSwitching = false;
+let lorgusPortalEntering = false;
+let lorgusPortalEnterStartedAt = 0;
 
 /* =========================================================
    ИНИЦИАЛИЗАЦИЯ
@@ -67,8 +69,24 @@ async function initialize() {
 
 function render(session) {
     if (session) {
+        const authScene = document.querySelector(".lorgus-cinematic-auth");
+
+        if (authScene && !lorgusPortalEntering) {
+            lorgusPortalEntering = true;
+            lorgusPortalEnterStartedAt = performance.now();
+
+            window.setTimeout(() => {
+                if (!lorgusPortalEntering) return;
+                lorgusPortalEntering = false;
+                renderCabinet(session);
+            }, 1900);
+
+            return;
+        }
+
         renderCabinet(session);
     } else {
+        lorgusPortalEntering = false;
         renderAuth();
     }
 }
@@ -5222,9 +5240,20 @@ const openingShape = new THREE.Shape();
         pointer.x += (pointer.tx - pointer.x) * 0.035;
         pointer.y += (pointer.ty - pointer.y) * 0.035;
 
-        camera.position.x += (pointer.x * 1.8 - camera.position.x) * 0.018;
-        camera.position.y += (7.2 - pointer.y * 1.5 - camera.position.y) * 0.018;
-        camera.lookAt(pointer.x * 0.7, 7.5 + pointer.y * 0.55, -0.5);
+        if (lorgusPortalEntering) {
+            const elapsed = performance.now() - lorgusPortalEnterStartedAt;
+            const progress = Math.min(1, elapsed / 1900);
+            const ease = progress * progress * (3 - 2 * progress);
+
+            camera.position.x = 0;
+            camera.position.y = 8.2 + (6.7 - 8.2) * ease;
+            camera.position.z = 36 + (0.9 - 36) * ease;
+            camera.lookAt(0, 6.8, -1.15);
+        } else {
+            camera.position.x += (pointer.x * 1.8 - camera.position.x) * 0.018;
+            camera.position.y += (7.2 - pointer.y * 1.5 - camera.position.y) * 0.018;
+            camera.lookAt(pointer.x * 0.7, 7.5 + pointer.y * 0.55, -0.5);
+        }
 
         portalCore.scale.setScalar(0.92 + Math.sin(time * 1.35) * 0.06);
         portalMist.scale.setScalar(0.96 + Math.sin(time * 0.8 + 1.2) * 0.08);
