@@ -3580,15 +3580,15 @@ function enableLorgusMapEditor() {
     renderLorgusMapEditorRects(active);
 }
 
-function renderLorgusMapEditorRects(active = true) {
+function renderLorgusMapEditorRects() {
     const layer = document.getElementById("lorgus-map-marker-layer");
-    const viewport = document.getElementById("lorgus-map-viewport");
-    if (!layer || !viewport) return;
+    if (!layer) return;
 
     layer.querySelectorAll(".lorgus-map-editor-rect").forEach(el => el.remove());
 
     LORGUS_MAP_EDITOR_RECTS.forEach(rectData => {
-        const label = document.createElement("div");
+        const label = document.createElement("button");
+        label.type = "button";
         label.className = "lorgus-map-editor-rect";
         label.dataset.region = rectData.id;
         label.textContent = rectData.id;
@@ -3598,67 +3598,17 @@ function renderLorgusMapEditorRects(active = true) {
         label.style.height = rectData.h + "%";
         label.style.transform = "translate(-50%,-50%)";
 
-        let pointerId = null;
-        let mode = null;
-        let startX = 0;
-        let startY = 0;
-        let startData = null;
+        if (rectData.id === "Ксандр" || rectData.id === "Спорные Земли") {
+            label.classList.add("dark-label");
+        }
 
-        label.onpointerdown = event => {
+        label.onclick = event => {
             event.preventDefault();
             event.stopPropagation();
-            pointerId = event.pointerId;
-            label.setPointerCapture?.(pointerId);
-            const handle = event.target.closest(".lorgus-map-editor-handle");
-            mode = handle ? "resize" : "move";
-            startX = event.clientX;
-            startY = event.clientY;
-            startData = {...rectData};
-        };
-
-        label.onpointermove = event => {
-            if (event.pointerId !== pointerId || !startData) return;
-            const box = viewport.getBoundingClientRect();
-            const dx = (event.clientX - startX) / box.width * 100;
-            const dy = (event.clientY - startY) / box.height * 100;
-
-            if (mode === "move") {
-                rectData.x = Math.max(1, Math.min(99, startData.x + dx));
-                rectData.y = Math.max(1, Math.min(99, startData.y + dy));
-            } else {
-                rectData.w = Math.max(3, startData.w + dx * 2);
-                rectData.h = Math.max(3, startData.h + dy * 2);
-            }
-
-            label.style.left = rectData.x + "%";
-            label.style.top = rectData.y + "%";
-            label.style.width = rectData.w + "%";
-            label.style.height = rectData.h + "%";
-        };
-
-        const finish = event => {
-            if (event.pointerId !== pointerId) return;
-            label.releasePointerCapture?.(pointerId);
-            pointerId = null;
-            startData = null;
-
-            const hint = document.getElementById("lorgus-map-surface-hint");
-            if (hint) {
-                hint.textContent = rectData.id + " · X:" + rectData.x.toFixed(1) + "% Y:" + rectData.y.toFixed(1) + "% · размер:" + rectData.w.toFixed(1) + "×" + rectData.h.toFixed(1) + "%";
-                hint.classList.add("visible");
-                clearTimeout(window.lorgusMapHintTimer);
-                window.lorgusMapHintTimer = setTimeout(() => hint.classList.remove("visible"), 4000);
+            if (typeof window.selectLorgusMapRegion === "function") {
+                window.selectLorgusMapRegion(rectData.id);
             }
         };
-
-        label.onpointerup = finish;
-        label.onpointercancel = finish;
-
-        const resize = document.createElement("span");
-        resize.className = "lorgus-map-editor-handle";
-        resize.dataset.mode = "resize";
-        resize.title = "Изменить размер";
-        label.appendChild(resize);
 
         layer.appendChild(label);
 
@@ -3896,6 +3846,5 @@ function renderCharacter(container, character) {
 window.selectLorgusMapRegion = selectLorgusMapRegion;
 window.selectLorgusMapMarker = selectLorgusMapMarker;
 window.handleLorgusMapSurfaceClick = handleLorgusMapSurfaceClick;
-window.enableLorgusMapEditor = enableLorgusMapEditor;
 window.lorgusMapZoom = lorgusMapZoom;
 window.lorgusMapReset = lorgusMapReset;
