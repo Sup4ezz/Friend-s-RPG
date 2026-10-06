@@ -12514,3 +12514,71 @@ body{
   position:relative;
   z-index:105;
 }
+
+
+/* HARD VISIBILITY FIX — the creation fields must be physically visible */
+.character-application .character-creation-scene{
+  min-height:100vh!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+}
+.character-application .character-creation-main{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:relative!important;
+  z-index:200!important;
+}
+.character-application .character-creation-form{
+  display:grid!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:relative!important;
+  z-index:201!important;
+  min-height:200px!important;
+}
+.character-application .character-creation-panel{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  position:relative!important;
+  z-index:202!important;
+  min-height:180px!important;
+  color:#eee2c6!important;
+  background:rgba(5,5,5,.94)!important;
+  border:1px solid rgba(218,186,111,.55)!important;
+}
+.character-application .character-creation-panel .creation-panel-heading,
+.character-application .character-creation-panel .creation-fields,
+.character-application .character-creation-panel .creation-wide-field,
+.character-application .character-creation-panel .creation-origins,
+.character-application .character-creation-panel .creation-upload{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+.character-application .character-creation-panel .creation-fields,
+.character-application .character-creation-panel .creation-origins{
+  display:grid!important;
+}
+.character-application .character-creation-panel label{
+  display:flex!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+.character-application .character-creation-panel label>span,
+.character-application .creation-panel-heading,
+.character-application .creation-panel-heading small,
+.character-application .creation-panel-heading h2{
+  visibility:visible!important;
+  opacity:1!important;
+}
+.character-application .character-creation-panel input,
+.character-application .character-creation-panel textarea{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  color:#f5ead7!important;
+  background:#090807!important;
+  border:1px solid rgba(218,186,111,.42)!important;
+}
