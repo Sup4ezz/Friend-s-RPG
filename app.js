@@ -95,9 +95,9 @@ function renderAuth() {
             </div>
 
             <header class="lorgus-auth-header">
-                <span>LORE NETWORK</span>
-                <span>WORLD 001</span>
-                <span>BUILD // LORGUS</span>
+                <span>МИР ЛОРГУС</span>
+                <span>ЛОРГУС</span>
+                <span>ПУТЬ ОТКРЫТ</span>
             </header>
 
             <div class="lorgus-auth-title" aria-hidden="true">
@@ -111,7 +111,7 @@ function renderAuth() {
             </div>
 
             <div class="lorgus-auth-side right" aria-hidden="true">
-                <span>WORLD STATUS</span><b>ACTIVE</b><i></i><span>PLAYER ACCESS</span><b>RESTRICTED</b>
+                <span>СОСТОЯНИЕ МИРА</span><b>АКТИВЕН</b><i></i><span>ДОСТУП ПУТЕШЕСТВЕННИКА</span><b>ЗАКРЫТ</b>
             </div>
 
             <section class="auth-container">
@@ -132,9 +132,9 @@ function renderAuth() {
             </section>
 
             <footer class="lorgus-auth-footer">
-                <span>LORE / ACCESS / 001</span>
-                <span>Вход открывает доступ к миру. Не к сайту.</span>
-                <span>© LORGUS</span>
+                <span>ЛОРГУС</span>
+                <span>Вход открывает путь в мир.</span>
+                <span>ЛОРГУС</span>
             </footer>
         </main>
     `;
