@@ -15261,3 +15261,214 @@ body:has(#root > #cabinet-content.character-application){
         font-size:12px;
     }
 }
+
+
+/* =========================================================
+   УВЕДОМЛЕНИЯ
+   ========================================================= */
+.lorgus-notification-trigger{
+    position:relative;
+    width:36px;
+    height:36px;
+    margin:0 4px 0 8px;
+    padding:0;
+    border:1px solid rgba(214,182,106,.28);
+    border-radius:50%;
+    background:rgba(255,255,255,.025);
+    color:#d6b66a;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    flex:0 0 auto;
+    transition:transform .18s ease,border-color .18s ease,background .18s ease;
+}
+.lorgus-notification-trigger:hover{
+    transform:translateY(-1px);
+    border-color:rgba(214,182,106,.7);
+    background:rgba(214,182,106,.08);
+}
+.lorgus-notification-icon{
+    font-size:20px;
+    line-height:1;
+}
+.lorgus-notification-badge{
+    position:absolute;
+    top:-4px;
+    right:-4px;
+    min-width:17px;
+    height:17px;
+    padding:0 4px;
+    border-radius:999px;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    background:#b73a32;
+    color:#fff7e7;
+    border:2px solid #17130f;
+    font:700 9px/1 Arial,sans-serif;
+}
+.lorgus-notification-badge.visible{display:flex}
+
+.lorgus-notifications-overlay{
+    position:fixed;
+    inset:0;
+    z-index:2147483000;
+    display:flex;
+    align-items:flex-start;
+    justify-content:flex-end;
+    padding:78px 28px 28px;
+}
+.lorgus-notifications-backdrop{
+    position:absolute;
+    inset:0;
+    background:rgba(0,0,0,.62);
+    backdrop-filter:blur(5px);
+}
+.lorgus-notifications-panel{
+    position:relative;
+    width:min(520px,calc(100vw - 32px));
+    max-height:calc(100vh - 106px);
+    overflow:hidden;
+    border:1px solid rgba(214,182,106,.28);
+    border-radius:18px;
+    background:
+        radial-gradient(circle at 20% 0,rgba(214,182,106,.09),transparent 38%),
+        linear-gradient(180deg,#17130f 0%,#0d0b09 100%);
+    box-shadow:0 28px 90px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.025) inset;
+    color:#eee6d7;
+}
+.lorgus-notifications-close{
+    position:absolute;
+    top:14px;
+    right:15px;
+    width:34px;
+    height:34px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:50%;
+    background:rgba(255,255,255,.025);
+    color:#d6c9b2;
+    font-size:22px;
+    cursor:pointer;
+}
+.lorgus-notifications-heading{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:20px;
+    padding:26px 52px 20px 26px;
+    border-bottom:1px solid rgba(255,255,255,.07);
+}
+.lorgus-notifications-heading h2{
+    margin:5px 0 4px;
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:29px;
+    color:#f0e5d2;
+}
+.lorgus-notifications-heading p{
+    margin:0;
+    color:#9f9587;
+    font-size:12px;
+}
+.lorgus-notifications-read-all{
+    margin-top:17px;
+    padding:8px 11px;
+    border:1px solid rgba(214,182,106,.22);
+    border-radius:8px;
+    background:rgba(214,182,106,.045);
+    color:#cdb87f;
+    font-size:9px;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    cursor:pointer;
+    white-space:nowrap;
+}
+.lorgus-notifications-read-all:hover{
+    border-color:rgba(214,182,106,.55);
+    background:rgba(214,182,106,.09);
+}
+.lorgus-notifications-list{
+    max-height:calc(100vh - 230px);
+    overflow:auto;
+    padding:8px;
+}
+.lorgus-notifications-list::-webkit-scrollbar{width:7px}
+.lorgus-notifications-list::-webkit-scrollbar-thumb{background:rgba(214,182,106,.2);border-radius:999px}
+.lorgus-notification-entry{
+    position:relative;
+    width:100%;
+    display:flex;
+    align-items:flex-start;
+    gap:13px;
+    padding:15px 16px;
+    border:1px solid transparent;
+    border-radius:12px;
+    background:transparent;
+    color:inherit;
+    text-align:left;
+    cursor:pointer;
+    transition:background .18s ease,border-color .18s ease;
+}
+.lorgus-notification-entry:hover{
+    background:rgba(255,255,255,.035);
+    border-color:rgba(214,182,106,.12);
+}
+.lorgus-notification-entry.unread{
+    background:rgba(214,182,106,.055);
+    border-color:rgba(214,182,106,.12);
+}
+.lorgus-notification-mark{
+    width:34px;
+    height:34px;
+    flex:0 0 34px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(214,182,106,.2);
+    border-radius:10px;
+    background:rgba(214,182,106,.055);
+    color:#d6b66a;
+    font-size:17px;
+}
+.lorgus-notification-content{
+    min-width:0;
+    display:flex;
+    flex:1;
+    flex-direction:column;
+    gap:4px;
+}
+.lorgus-notification-content strong{font-size:13px;color:#eadfcf}
+.lorgus-notification-content span{font-size:12px;line-height:1.45;color:#c1b6a5}
+.lorgus-notification-content small{font-size:10px;color:#756d63}
+.lorgus-notification-unread-dot{
+    width:7px;
+    height:7px;
+    flex:0 0 7px;
+    margin-top:7px;
+    border-radius:50%;
+    background:#d6b66a;
+    box-shadow:0 0 10px rgba(214,182,106,.45);
+}
+.lorgus-notifications-empty,
+.lorgus-notifications-loading{
+    min-height:250px;
+    padding:45px 30px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    text-align:center;
+    color:#8f8578;
+}
+.lorgus-notifications-empty span{font-size:30px;color:#d6b66a;margin-bottom:10px}
+.lorgus-notifications-empty strong{font:700 18px Georgia,"Times New Roman",serif;color:#d9cebc}
+.lorgus-notifications-empty p{max-width:330px;margin:8px 0 0;font-size:12px;line-height:1.5}
+
+@media (max-width:760px){
+    .lorgus-notifications-overlay{padding:70px 12px 12px}
+    .lorgus-notifications-heading{padding:22px 48px 17px 20px;gap:10px}
+    .lorgus-notifications-heading h2{font-size:24px}
+    .lorgus-notifications-read-all{font-size:8px}
+    .lorgus-notification-trigger{margin-left:4px}
+}
