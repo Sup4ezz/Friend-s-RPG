@@ -4257,7 +4257,7 @@ async function renderLorgusInventory() {
     const renderEquipped = () => document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
         const row = rows.find(r => r.equipped_slot === slot.dataset.equipmentSlot);
         const item = row?.items; const box = slot.querySelector(".lorgus-equipment-slot-item");
-        box.innerHTML = row && item ? '<div class="lorgus-equipped-item" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong></div>' : "";
+        box.innerHTML = row && item ? '<div class="lorgus-equipped-item" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong><button type="button" class="lorgus-equipped-item-remove" data-inventory-id="' + escapeHtml(row.id) + '" title="Снять предмет">Снять</button></div>' : "";
     });
     renderEquipped();
     const setupDrag = card => {
@@ -4277,7 +4277,22 @@ async function renderLorgusInventory() {
     grid.querySelectorAll(".lorgus-inventory-item").forEach(setupDrag);
     document.querySelectorAll(".lorgus-equipped-item").forEach(card => {
         setupDrag(card);
-        card.addEventListener("dblclick", async () => { const { error } = await supabase.rpc("unequip_character_item", { p_inventory_id: card.dataset.inventoryId }); if (error) { alert("Не удалось снять предмет:\n\n" + error.message); return; } await renderLorgusInventory(); });
+    });
+    document.querySelectorAll(".lorgus-equipped-item-remove").forEach(button => {
+        button.addEventListener("click", async event => {
+            event.preventDefault();
+            event.stopPropagation();
+            button.disabled = true;
+            const { error } = await supabase.rpc("unequip_character_item", {
+                p_inventory_id: button.dataset.inventoryId
+            });
+            if (error) {
+                button.disabled = false;
+                alert("Не удалось снять предмет:\n\n" + error.message);
+                return;
+            }
+            await renderLorgusInventory();
+        });
     });
     const rejectDrop = slot => {
         slot.classList.remove("is-invalid-drop");
