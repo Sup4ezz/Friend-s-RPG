@@ -4437,6 +4437,13 @@ async function renderLorgusInventory() {
         return transfer.getData("application/x-lorgus-inventory-id") || transfer.getData("text/plain") || "";
     };
 
+    const clearDragFeedback = () => {
+        grid.classList.remove("is-valid-unequip-drop");
+        document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
+            slot.classList.remove("is-valid-drop", "is-invalid-drop");
+        });
+    };
+
     const setupDrag = card => {
         card.setAttribute("draggable", "true");
         // Не даём браузеру превращать внутренний текст/элементы в отдельный
@@ -4490,7 +4497,7 @@ async function renderLorgusInventory() {
 
         e.preventDefault();
         e.stopPropagation();
-        e.dataTransfer.dropEffect = "move";
+        if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
         grid.classList.add("is-valid-unequip-drop");
     });
 
@@ -4503,12 +4510,15 @@ async function renderLorgusInventory() {
     grid.addEventListener("drop", async e => {
         e.preventDefault();
         e.stopPropagation();
-        grid.classList.remove("is-valid-unequip-drop");
 
         const inventoryId = getDraggedInventoryId(e);
         const row = rows.find(r => r.id === inventoryId);
+        grid.classList.remove("is-valid-unequip-drop");
 
-        if (!row?.equipped_slot) return;
+        if (!row?.equipped_slot) {
+            window.lorgusDraggedInventoryId = null;
+            return;
+        }
 
         const { error } = await supabase.rpc("unequip_character_item", {
             p_inventory_id: inventoryId
@@ -4529,35 +4539,48 @@ async function renderLorgusInventory() {
     document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
         slot.addEventListener("dragover", e => {
             e.preventDefault();
-            const inventoryId = e.dataTransfer.getData("application/x-lorgus-inventory-id") || e.dataTransfer.getData("text/plain");
+            const inventoryId = getDraggedInventoryId(e);
             const row = rows.find(r => r.id === inventoryId);
             const item = row?.items;
-            slot.classList.toggle("is-valid-drop", !!item?.equipment_slot && item.equipment_slot === slot.dataset.equipmentSlot);
+            const valid = !!item?.equipment_slot && item.equipment_slot === slot.dataset.equipmentSlot && !row?.equipped_slot;
+            slot.classList.toggle("is-valid-drop", valid);
+            if (e.dataTransfer) e.dataTransfer.dropEffect = valid ? "move" : "none";
         });
         slot.addEventListener("dragleave", () => slot.classList.remove("is-valid-drop"));
         slot.addEventListener("drop", async e => {
             e.preventDefault();
-            slot.classList.remove("is-valid-drop");
-            const inventoryId = e.dataTransfer.getData("text/plain");
-            if (!inventoryId) return;
+            e.stopPropagation();
+
+            const inventoryId = getDraggedInventoryId(e);
             const row = rows.find(r => r.id === inventoryId);
             const item = row?.items;
             const targetSlot = slot.dataset.equipmentSlot;
-            if (!item?.equipment_slot || item.equipment_slot !== targetSlot) {
+            slot.classList.remove("is-valid-drop");
+
+            if (!inventoryId || !row || !item?.equipment_slot || item.equipment_slot !== targetSlot || row.equipped_slot) {
                 rejectDrop(slot);
+                window.lorgusDraggedInventoryId = null;
                 return;
             }
-            const { error } = await supabase.rpc("equip_character_item", { p_inventory_id: inventoryId, p_slot: targetSlot });
+
+            const { error } = await supabase.rpc("equip_character_item", {
+                p_inventory_id: inventoryId,
+                p_slot: targetSlot
+            });
+
+            window.lorgusDraggedInventoryId = null;
+
             if (error) {
                 rejectDrop(slot);
                 console.error("Не удалось экипировать предмет:", error);
                 return;
             }
-            window.lorgusDraggedInventoryId = null;
+
             await renderLorgusInventory();
         });
     });
 
+    document.addEventListener("dragend", clearDragFeedback, { once: true });
 }
 
 function updateRpItemUseButton() {
