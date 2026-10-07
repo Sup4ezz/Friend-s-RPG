@@ -2429,6 +2429,12 @@ async function renderAdminApplications(container, applications) {
                 ${approved.length ? approved.map(renderAdminCharacterManagement).join("") : '<div class="admin-empty"><h2>Персонажей нет</h2><p>Список пуст.</p></div>'}
             </div>
         </section>
+        <section class="admin-section admin-item-use-management">
+            <div class="admin-section-heading">
+                <div><h2>Использование предметов</h2><p>Журнал предметов, использованных в RP-постах. Здесь можно отменить некорректное использование вместе с постом.</p></div>
+            </div>
+            <div id="admin-item-use-log" class="admin-item-use-log"><div class="admin-empty"><h2>Загрузка журнала...</h2></div></div>
+        </section>
     `;
 
     const list = container.querySelector("#admin-application-list");
@@ -2480,6 +2486,7 @@ async function renderAdminApplications(container, applications) {
     });
 
     renderList();
+    loadAdminItemUseLog(container);
 }
 
 /* =========================================================
@@ -2630,7 +2637,7 @@ function renderAdminCharacterManagement(application) {
                 <div class="admin-character-actions">
                     <button class="admin-character-details-button" type="button" data-character-detail-id="${application.id}">Открыть полную запись</button>
                     <button class="admin-character-details-button admin-character-titles-button" type="button" data-character-title-id="${application.id}">Титулы</button>
-                    <button class="admin-character-details-button admin-character-abilities-button" type="button" data-character-ability-id="${application.id}">Способности</button>
+                    <button class="admin-character-details-button admin-character-abilities-button" type="button" data-character-ability-id="${application.id}">Способности</button><button class="admin-character-details-button admin-character-inventory-button" type="button" data-character-inventory-id="${application.id}">Инвентарь</button>
                     <button class="admin-reject-button admin-delete-character-button" data-character-id="${application.character_id || ""}" data-character-name="${escapeHtml(application.name || "персонажа")}">Удалить персонажа</button>
                 </div>
             </div>
@@ -2772,6 +2779,13 @@ function bindAdminButtons(container) {
             event.stopPropagation();
             const application = (window.adminApplications || []).find(a => String(a.id) === String(button.dataset.characterAbilityId));
             if (application) openAdminCharacterAbilities(application, container);
+        });
+    });
+    container.querySelectorAll(".admin-character-inventory-button").forEach(button => {
+        button.addEventListener("click", event => {
+            event.stopPropagation();
+            const application = (window.adminApplications || []).find(a => String(a.id) === String(button.dataset.characterInventoryId));
+            if (application) openAdminCharacterInventory(application, container);
         });
     });
 
@@ -3707,6 +3721,8 @@ async function renderRoadChat(presence) {
                     </div>
                     <textarea id="lorgus-rp-input" placeholder="Опиши дорогу, встречу или действие персонажа..." rows="4"></textarea>
                     <div class="lorgus-rp-composer-bottom">
+                        <button class="lorgus-rp-use-item" type="button" onclick="openRpItemPicker()">Использовать предмет</button>
+                        <span id="lorgus-rp-item-selection" class="lorgus-rp-item-selection"></span>
                         <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalRpMessage()">Отправить</button>
                     </div>
                 </section>
@@ -3988,7 +4004,8 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
                     </div>
                     <textarea id="lorgus-rp-input" placeholder="Опиши действие, реплику или мысль персонажа..." rows="4"></textarea>
                     <div class="lorgus-rp-composer-bottom">
-                        <button class="lorgus-rp-mention" type="button" disabled>@ Отметить участника</button>
+                        <button class="lorgus-rp-use-item" type="button" onclick="openRpItemPicker()">Использовать предмет</button>
+                        <span id="lorgus-rp-item-selection" class="lorgus-rp-item-selection"></span>
                         <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalRpMessage()">Отправить</button>
                     </div>
                 </section>
@@ -4012,7 +4029,7 @@ async function loadRpMessages(presence) {
 
     let query = supabase
         .from("rp_messages")
-        .select("id, character_id, body, created_at, characters(name)")
+        .select("id, character_id, body, created_at, status, reverted_at, revert_reason, characters(name)")
         .eq("presence_type", presence.type)
         .order("created_at", { ascending: true })
         .limit(200);
@@ -4042,33 +4059,32 @@ async function loadRpMessages(presence) {
     feed.scrollTop = feed.scrollHeight;
 }
 
-function appendRpMessage(message) {
+async function appendRpMessage(message) {
     const feed = document.getElementById("lorgus-rp-feed");
     if (!feed || feed.querySelector('[data-rp-message-id="' + message.id + '"]')) return;
-
     const empty = feed.querySelector(".lorgus-rp-empty");
     if (empty) empty.remove();
-
     const article = document.createElement("article");
-    article.className = "lorgus-rp-message";
+    article.className = "lorgus-rp-message" + (message.status === "reverted" ? " lorgus-rp-message-reverted" : "");
     article.dataset.rpMessageId = message.id;
-
-    const time = new Date(message.created_at).toLocaleTimeString("ru-RU", {
-        hour: "2-digit",
-        minute: "2-digit"
-    });
-
+    const time = new Date(message.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
     article.innerHTML =
         '<div class="lorgus-rp-message-avatar">✦</div>' +
         '<div class="lorgus-rp-message-body">' +
-            '<div class="lorgus-rp-message-meta">' +
-                '<strong>' + escapeHtml(message.characters?.name || "Без имени") + '</strong>' +
-                '<span>' + escapeHtml(time) + '</span>' +
-            '</div>' +
-            '<p>' + escapeHtml(message.body) + '</p>' +
+            '<div class="lorgus-rp-message-meta"><strong>' + escapeHtml(message.characters?.name || "Без имени") + '</strong><span>' + escapeHtml(time) + '</span></div>' +
+            '<p class="lorgus-rp-message-text">' + escapeHtml(message.body) + '</p>' +
+            (message.status === "reverted" ? '<div class="lorgus-rp-reverted-mark">ПОСТ ОТМЕНЁН АДМИНИСТРАЦИЕЙ' + (message.revert_reason ? ' · ' + escapeHtml(message.revert_reason) : '') + '</div>' : '') +
+            '<div class="lorgus-rp-item-uses"></div>' +
         '</div>';
-
     feed.appendChild(article);
+    const { data: uses, error } = await supabase.from("rp_message_item_uses").select("item_id, quantity, status, items(name, icon, color, rarity)").eq("message_id", message.id).eq("status", "active");
+    const useBox = article.querySelector(".lorgus-rp-item-uses");
+    if (useBox && !error && uses?.length) {
+        useBox.innerHTML = uses.map(use => {
+            const item = use.items || {};
+            return '<span class="lorgus-rp-item-use" style="--item-color:' + escapeHtml(item.color || "#d6b36a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong>' + (use.quantity > 1 ? '<small>×' + escapeHtml(String(use.quantity)) + '</small>' : '') + '</span>';
+        }).join("");
+    }
     feed.scrollTop = feed.scrollHeight;
 }
 
@@ -4125,8 +4141,9 @@ async function sendLocalRpMessage() {
         return;
     }
 
+    const itemIds = Array.from(window.pendingRpItemIds || []);
     const { error } = await supabase.rpc(
-        "send_lorgus_rp_message",
+        "send_lorgus_rp_message_with_items",
         {
             p_character_id: window.activeCharacterId,
             p_presence_type: chat.type,
@@ -4137,7 +4154,8 @@ async function sendLocalRpMessage() {
             p_to_region: chat.type === "road" ? chat.toRegion : null,
             p_to_location: chat.type === "road" ? chat.toLocation : null,
             p_body: body,
-            p_visibility: chat.visibility || "public"
+            p_visibility: chat.visibility || "public",
+            p_inventory_ids: itemIds
         }
     );
 
@@ -4148,6 +4166,8 @@ async function sendLocalRpMessage() {
     }
 
     input.value = "";
+    window.pendingRpItemIds = [];
+    updateRpItemUseButton();
     window.activeRpPresence = await getRpPresence();
 
     if (window.activeRpPresence) {
@@ -4161,6 +4181,130 @@ async function sendLocalRpMessage() {
     }
 }
 
+
+/* =========================================================
+   ИНВЕНТАРЬ И ИСПОЛЬЗОВАНИЕ ПРЕДМЕТОВ
+   ========================================================= */
+
+const inventorySlotLabels = {
+    head: "Голова", chest: "Тело", hands: "Руки", legs: "Ноги", feet: "Ступни",
+    main_hand: "Правая рука", off_hand: "Левая рука", accessory: "Аксессуар"
+};
+
+function inventoryRarityLabel(rarity) {
+    return titleRarityLabel(rarity);
+}
+
+function inventoryItemMarkup(row, extraClass = "") {
+    const item = row.items || {};
+    const qty = row.quantity > 1 ? "×" + row.quantity : "";
+    return '<article class="lorgus-inventory-item ' + extraClass + '" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '">' +
+        '<div class="lorgus-inventory-item-icon">' + escapeHtml(item.icon || "◆") + '</div>' +
+        '<div class="lorgus-inventory-item-info"><strong>' + escapeHtml(item.name || "Предмет") + '</strong><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ' + escapeHtml(item.item_type || "misc") + '</small></div>' +
+        '<b class="lorgus-inventory-qty">' + escapeHtml(qty) + '</b></article>';
+}
+
+async function loadCharacterInventory(characterId) {
+    const { data, error } = await supabase.from("character_inventory")
+        .select("id, quantity, equipped_slot, acquired_at, source_note, items(*)")
+        .eq("character_id", characterId).gt("quantity", 0).order("acquired_at", { ascending: true });
+    if (error) console.error("Не удалось загрузить инвентарь:", error);
+    return { data: data || [], error };
+}
+
+async function renderLorgusInventory() {
+    const container = document.getElementById("cabinet-content");
+    const character = window.activeCharacter;
+    if (!container || !character) return;
+    container.className = "lorgus-inventory-page";
+    container.innerHTML = '<div class="lorgus-inventory-shell">' + renderLorgusInterfaceNav("inventory") +
+        '<main class="lorgus-inventory-main"><header class="lorgus-inventory-header"><div><span class="lorgus-command-kicker">СНАРЯЖЕНИЕ · ЛИЧНАЯ КЛАДОВАЯ</span><h1>Инвентарь</h1><p>' + escapeHtml(character.name || "Персонаж") + ' · перетаскивай снаряжение на персонажа.</p></div></header>' +
+        '<div class="lorgus-inventory-layout"><section class="lorgus-equipment-stage"><div class="lorgus-equipment-stage-title">СНАРЯЖЕНИЕ</div><div class="lorgus-equipment-character"><div class="lorgus-equipment-aura"></div><div class="lorgus-equipment-avatar">✦</div><div class="lorgus-equipment-name">' + escapeHtml(character.name || "Персонаж") + '</div><div class="lorgus-equipment-slots">' +
+        Object.entries(inventorySlotLabels).map(([slot,label]) => '<div class="lorgus-equipment-slot" data-equipment-slot="' + slot + '" title="' + label + '"><span>' + escapeHtml(label) + '</span><div class="lorgus-equipment-slot-item"></div></div>').join("") +
+        '</div></div></section><section class="lorgus-inventory-grid-wrap"><div class="lorgus-inventory-grid-title">РЮКЗАК <span id="lorgus-inventory-count"></span></div><div id="lorgus-inventory-grid" class="lorgus-inventory-grid"><div class="lorgus-inventory-empty">Загрузка...</div></div></section></div></main></div>';
+    const { data, error } = await loadCharacterInventory(character.id);
+    const grid = document.getElementById("lorgus-inventory-grid");
+    if (!grid) return;
+    if (error) { grid.innerHTML = '<div class="lorgus-inventory-empty"><h2>Инвентарь недоступен</h2><p>' + escapeHtml(error.message) + '</p></div>'; return; }
+    const rows = data || [];
+    document.getElementById("lorgus-inventory-count").textContent = rows.length + " ячеек";
+    grid.innerHTML = rows.length ? rows.map(row => inventoryItemMarkup(row)).join("") : '<div class="lorgus-inventory-empty"><h2>Рюкзак пуст</h2><p>Когда хранитель выдаст тебе вещи, они появятся здесь.</p></div>';
+    const renderEquipped = () => document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
+        const row = rows.find(r => r.equipped_slot === slot.dataset.equipmentSlot);
+        const item = row?.items; const box = slot.querySelector(".lorgus-equipment-slot-item");
+        box.innerHTML = row && item ? '<div class="lorgus-equipped-item" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong></div>' : "";
+    });
+    renderEquipped();
+    grid.querySelectorAll(".lorgus-inventory-item").forEach(card => {
+        card.addEventListener("dragstart", e => { e.dataTransfer.setData("text/plain", card.dataset.inventoryId); e.dataTransfer.effectAllowed = "move"; });
+    });
+    document.querySelectorAll(".lorgus-equipped-item").forEach(card => {
+        card.addEventListener("dragstart", e => { e.dataTransfer.setData("text/plain", card.dataset.inventoryId); e.dataTransfer.effectAllowed = "move"; });
+        card.addEventListener("dblclick", async () => { const { error } = await supabase.rpc("unequip_character_item", { p_inventory_id: card.dataset.inventoryId }); if (error) { alert("Не удалось снять предмет:\n\n" + error.message); return; } await renderLorgusInventory(); });
+    });
+    document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
+        slot.addEventListener("dragover", e => e.preventDefault());
+        slot.addEventListener("drop", async e => {
+            e.preventDefault();
+            const inventoryId = e.dataTransfer.getData("text/plain"); if (!inventoryId) return;
+            const row = rows.find(r => r.id === inventoryId); if (!row?.items?.equipment_slot) return;
+            const { error } = await supabase.rpc("equip_character_item", { p_inventory_id: inventoryId, p_slot: slot.dataset.equipmentSlot });
+            if (error) { alert("Не удалось экипировать предмет:\n\n" + error.message); return; }
+            await renderLorgusInventory();
+        });
+    });
+}
+
+function updateRpItemUseButton() {
+    const label = document.getElementById("lorgus-rp-item-selection"); if (!label) return;
+    const ids = Array.from(window.pendingRpItemIds || []);
+    label.textContent = ids.length ? "Выбрано предметов: " + ids.length : "";
+}
+
+async function openRpItemPicker() {
+    const existing = document.querySelector(".lorgus-rp-item-overlay"); if (existing) existing.remove();
+    const { data, error } = await loadCharacterInventory(window.activeCharacterId);
+    if (error) { alert("Не удалось открыть инвентарь:\n\n" + error.message); return; }
+    const usable = (data || []).filter(row => row.quantity > 0);
+    const overlay = document.createElement("div"); overlay.className = "lorgus-rp-item-overlay";
+    overlay.innerHTML = '<div class="lorgus-rp-item-backdrop"></div><article class="lorgus-rp-item-picker"><button type="button" class="lorgus-rp-item-close">×</button><span class="lorgus-command-kicker">RP · ИНВЕНТАРЬ</span><h2>Использовать предмет</h2><p>Выбери предметы, которые будут зафиксированы в этом посте.</p><div class="lorgus-rp-item-picker-list">' +
+        (usable.length ? usable.map(row => '<button type="button" class="lorgus-rp-item-choice" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(row.items?.color || "#d6b36a") + '"><span class="lorgus-rp-item-choice-icon">' + escapeHtml(row.items?.icon || "◆") + '</span><span><strong>' + escapeHtml(row.items?.name || "Предмет") + '</strong><small>' + escapeHtml(inventoryRarityLabel(row.items?.rarity)) + ' · осталось ' + escapeHtml(String(row.quantity)) + '</small></span><i>Добавить</i></button>').join("") : '<div class="lorgus-inventory-empty">Используемых предметов нет.</div>') +
+        '</div><div class="lorgus-rp-item-picker-footer"><span class="lorgus-rp-item-picked"></span><button type="button" class="gold-button lorgus-rp-item-confirm">Добавить в пост</button></div></article>';
+    document.body.appendChild(overlay); requestAnimationFrame(() => overlay.classList.add("open"));
+    const close = () => overlay.remove();
+    overlay.querySelector(".lorgus-rp-item-close").addEventListener("click", close);
+    overlay.querySelector(".lorgus-rp-item-backdrop").addEventListener("click", close);
+    const selected = new Set(window.pendingRpItemIds || []); const picked = overlay.querySelector(".lorgus-rp-item-picked");
+    const update = () => { picked.textContent = selected.size ? "Выбрано: " + selected.size : "Ничего не выбрано"; overlay.querySelectorAll(".lorgus-rp-item-choice").forEach(btn => btn.classList.toggle("selected", selected.has(btn.dataset.inventoryId))); };
+    overlay.querySelectorAll(".lorgus-rp-item-choice").forEach(btn => btn.addEventListener("click", () => { const id=btn.dataset.inventoryId; if(selected.has(id)) selected.delete(id); else selected.add(id); update(); }));
+    overlay.querySelector(".lorgus-rp-item-confirm").addEventListener("click", () => { window.pendingRpItemIds=Array.from(selected); updateRpItemUseButton(); close(); });
+    update();
+}
+
+async function openAdminCharacterInventory(application, container) {
+    const characterId=application.character_id; if(!characterId)return;
+    const {data:items,error:itemsError}=await supabase.from("items").select("*").order("rarity").order("name");
+    const {data:inventory,error:inventoryError}=await supabase.from("character_inventory").select("id,character_id,item_id,quantity,equipped_slot,source_note,items(*)").eq("character_id",characterId).order("acquired_at",{ascending:true});
+    if(itemsError||inventoryError){alert("Не удалось загрузить инвентарь:\n\n"+(itemsError||inventoryError).message);return;}
+    const overlay=document.createElement("div");overlay.className="lorgus-admin-inventory-overlay";
+    const panel=document.createElement("article");panel.className="lorgus-admin-inventory-panel";
+    panel.innerHTML='<button type="button" class="lorgus-admin-inventory-close">×</button><span class="lorgus-command-kicker">АДМИНИСТРАЦИЯ · ИНВЕНТАРЬ</span><h2>'+escapeHtml(application.name||"Персонаж")+'</h2><p>Выдача и отзыв предметов. Авторитетный инвентарь не редактируется игроком напрямую.</p><div class="lorgus-admin-inventory-grant"><select class="lorgus-admin-inventory-select"><option value="">Выбери предмет...</option></select><input class="lorgus-admin-inventory-qty" type="number" min="1" value="1"><input class="lorgus-admin-inventory-note" placeholder="Основание / источник"><button type="button" class="lorgus-admin-inventory-grant-btn">Выдать</button></div><div class="lorgus-admin-inventory-list"></div>';
+    const select=panel.querySelector(".lorgus-admin-inventory-select");
+    (items||[]).forEach(item=>{const o=document.createElement("option");o.value=item.id;o.textContent=(item.icon||"◆")+" "+item.name+" · "+inventoryRarityLabel(item.rarity);select.appendChild(o);});
+    const list=panel.querySelector(".lorgus-admin-inventory-list");
+    const render=rows=>{list.innerHTML=rows.length?rows.map(row=>'<div class="lorgus-admin-inventory-row"><span class="lorgus-admin-inventory-row-icon" style="--item-color:'+escapeHtml(row.items?.color||"#d6b36a")+'">'+escapeHtml(row.items?.icon||"◆")+'</span><div><strong>'+escapeHtml(row.items?.name||"Предмет")+'</strong><small>'+escapeHtml(inventoryRarityLabel(row.items?.rarity))+' · ×'+escapeHtml(String(row.quantity))+(row.equipped_slot?" · "+escapeHtml(inventorySlotLabels[row.equipped_slot]||row.equipped_slot):"")+'</small></div><button type="button" data-id="'+escapeHtml(row.id)+'">Забрать</button></div>').join(""):'<div class="lorgus-inventory-empty">Инвентарь пуст.</div>'; list.querySelectorAll("button").forEach(b=>b.addEventListener("click",async()=>{if(!confirm("Забрать этот предмет?"))return;const {error}=await supabase.rpc("admin_revoke_character_item",{p_inventory_id:b.dataset.id,p_quantity:null});if(error){alert("Не удалось забрать предмет:\n\n"+error.message);return;}const {data:fresh}=await supabase.from("character_inventory").select("id,character_id,item_id,quantity,equipped_slot,source_note,items(*)").eq("character_id",characterId).order("acquired_at",{ascending:true});render(fresh||[]);}));
+    render(inventory||[]); document.body.appendChild(overlay); requestAnimationFrame(()=>overlay.classList.add("open"));
+    const close=()=>overlay.remove(); panel.querySelector(".lorgus-admin-inventory-close").addEventListener("click",close);
+    panel.querySelector(".lorgus-admin-inventory-grant-btn").addEventListener("click",async()=>{if(!select.value)return;const qty=Math.max(1,Number(panel.querySelector(".lorgus-admin-inventory-qty").value)||1);const note=panel.querySelector(".lorgus-admin-inventory-note").value.trim();const {error}=await supabase.rpc("admin_grant_character_item",{p_character_id:characterId,p_item_id:select.value,p_quantity:qty,p_source_note:note});if(error){alert("Не удалось выдать предмет:\n\n"+error.message);return;}const {data:fresh}=await supabase.from("character_inventory").select("id,character_id,item_id,quantity,equipped_slot,source_note,items(*)").eq("character_id",characterId).order("acquired_at",{ascending:true});render(fresh||[]);});
+}
+
+async function loadAdminItemUseLog(container) {
+    const box=container.querySelector("#admin-item-use-log"); if(!box)return;
+    const {data,error}=await supabase.from("rp_message_item_uses").select("id,message_id,character_id,item_id,quantity,consumed,status,used_at,reverted_at,revert_reason,items(name,icon,color,rarity),characters(name),rp_messages(body,created_at,status)").order("used_at",{ascending:false}).limit(200);
+    if(error){box.innerHTML='<div class="admin-empty"><h2>Журнал недоступен</h2><p>'+escapeHtml(error.message)+'</p></div>';return;}
+    box.innerHTML=data?.length?data.map(row=>{const item=row.items||{},char=row.characters||{},post=row.rp_messages||{};return '<article class="admin-item-use-entry '+(row.status==="reverted"?"reverted":"")+'"><div class="admin-item-use-icon" style="--item-color:'+escapeHtml(item.color||"#d6b36a")+'">'+escapeHtml(item.icon||"◆")+'</div><div class="admin-item-use-body"><strong>'+escapeHtml(item.name||"Предмет")+'</strong><span>'+escapeHtml(char.name||"Персонаж")+' · пост #'+escapeHtml(String(row.message_id))+' · '+escapeHtml(new Date(row.used_at).toLocaleString("ru-RU"))+'</span><p>'+escapeHtml(post.body||"")+'</p><small>'+(row.consumed?"Предмет расходуется":"Предмет не расходуется")+(row.status==="reverted"?" · ОТКАТ ВЫПОЛНЕН":"")+'</small></div><div class="admin-item-use-action">'+(row.status==="active"?'<button type="button" data-message-id="'+escapeHtml(String(row.message_id))+'">Отменить пост</button>':'<span>Отменено</span>')+'</div></article>';}).join(""):'<div class="admin-empty"><h2>Использований пока нет</h2><p>Когда игрок применит предмет в RP-посте, запись появится здесь.</p></div>';
+    box.querySelectorAll("button[data-message-id]").forEach(button=>button.addEventListener("click",async()=>{const reason=prompt("Почему пост и использование предмета отменяются?","");if(reason===null)return;button.disabled=true;const {error}=await supabase.rpc("admin_revert_rp_message",{p_message_id:Number(button.dataset.messageId),p_reason:reason.trim()});if(error){alert("Не удалось отменить пост:\n\n"+error.message);button.disabled=false;return;}await loadAdminItemUseLog(container);}));
+}
 
 /* =========================================================
    ПИСЬМА И ГОЛУБИНАЯ ПОЧТА
@@ -5177,7 +5321,8 @@ function renderLorgusInterfaceNav(active = "world") {
         ["character", "♙", "Персонаж", "renderLorgusCharacterHub()"],
         ["rp", "◈", "Ролевая", "renderLorgusRpHub()"],
         ["people", "♧", "Люди", "renderWorldCharacterTracker()"],
-        ["mail", "✉", "Письма", "renderMail()"]
+        ["mail", "✉", "Письма", "renderMail()"],
+        ["inventory", "◈", "Инвентарь", "renderLorgusInventory()"]
     ];
     return `
         <nav class="lorgus-global-nav" aria-label="Разделы Лоргуса">
@@ -5262,7 +5407,7 @@ async function renderLorgusCharacterHub() {
                 <article><span>ПРОИСХОЖДЕНИЕ</span><strong>${escapeHtml(c.homeland || "Не указано")}</strong><p>Родина определяет происхождение, но не физическое положение персонажа.</p></article>
                 <article><span>СОСТОЯНИЕ</span><strong>${escapeHtml(String(c.status || "ACTIVE"))}</strong><p>Жизнь персонажа продолжается в мире Лоргуса.</p></article>
                 <article class="lorgus-dossier-abilities"><span>СПОСОБНОСТИ</span><strong>Подтверждённые администрацией</strong><div class="lorgus-ability-list"><div class="lorgus-ability-empty">Загрузка...</div></div></article>
-                <article><span>СНАРЯЖЕНИЕ</span><strong>Инвентарь</strong><p>Оружие, броня, предметы и вещи, которыми владеет персонаж.</p></article>
+                <article class="lorgus-dossier-inventory"><span>СНАРЯЖЕНИЕ</span><strong>Инвентарь</strong><p>Оружие, броня, предметы и вещи, которыми владеет персонаж.</p><button type="button" onclick="renderLorgusInventory()">Открыть инвентарь →</button></article>
                 <article><span>ОТНОШЕНИЯ</span><strong>Связи</strong><p>Доверие, дружба, вражда, семья, долги и обещания.</p></article>
                 <article><span>ИСТОРИЯ</span><strong>Личная хроника</strong><p>События жизни и последствия решений персонажа.</p></article>
             </section>
@@ -5299,6 +5444,9 @@ window.renderLorgusRpHub = renderLorgusRpHub;
 window.openTitlePicker = openTitlePicker;
 window.openAdminCharacterTitles = openAdminCharacterTitles;
 window.openAdminCharacterAbilities = openAdminCharacterAbilities;
+window.renderLorgusInventory = renderLorgusInventory;
+window.openRpItemPicker = openRpItemPicker;
+window.openAdminCharacterInventory = openAdminCharacterInventory;
 
 window.selectLorgusMapRegion = selectLorgusMapRegion;
 window.selectLorgusMapMarker = selectLorgusMapMarker;
