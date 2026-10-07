@@ -14206,3 +14206,115 @@ body:has(#root > #cabinet-content.character-application){
     .admin-character-actions{flex-direction:column!important}
     .admin-character-actions button{width:100%!important}
 }
+
+/* HOTFIX — character cards: stop looking like dashboards, make them RPG codex */
+.admin-hero-character{
+    grid-template-columns:190px minmax(0,1fr)!important;
+    min-height:290px!important;
+    border:1px solid rgba(220,184,102,.22)!important;
+    background:
+      linear-gradient(90deg,rgba(19,14,8,.98) 0,rgba(11,9,6,.98) 27%,rgba(7,6,5,.96) 100%)!important;
+}
+.admin-hero-character:after{
+    content:""!important;
+    position:absolute!important;
+    left:190px!important;top:0!important;bottom:0!important;width:1px!important;
+    background:linear-gradient(transparent,rgba(220,184,102,.32),transparent)!important;
+}
+.admin-hero-character-portrait{
+    min-height:290px!important;
+    background:
+      radial-gradient(circle at center,rgba(213,170,79,.16),transparent 45%),
+      linear-gradient(180deg,rgba(201,164,91,.045),transparent)!important;
+}
+.admin-hero-character-portrait img,.admin-character-sigil{
+    width:142px!important;height:142px!important;
+    border:1px solid rgba(225,193,121,.62)!important;
+    box-shadow:0 0 0 1px rgba(0,0,0,.7),0 18px 45px rgba(0,0,0,.65),0 0 45px rgba(201,164,91,.10)!important;
+}
+.admin-hero-character-body{padding:26px 30px 22px!important}
+.admin-character-heading{padding-bottom:15px!important}
+.admin-character-heading h3{
+    font-size:34px!important;
+    letter-spacing:.07em!important;
+    text-transform:none!important;
+}
+.admin-character-rank{
+    font-size:8px!important;
+    letter-spacing:.27em!important;
+}
+.admin-character-heading p{font-size:11px!important;color:rgba(225,212,188,.46)!important}
+.admin-character-status{
+    background:rgba(201,164,91,.035)!important;
+    font-size:8px!important;
+    padding:7px 10px!important;
+}
+.admin-character-facts{
+    grid-template-columns:repeat(5,1fr)!important;
+    margin:15px 0!important;
+    background:transparent!important;
+    gap:7px!important;
+}
+.admin-character-facts div{
+    min-height:62px!important;
+    padding:10px 11px!important;
+    border-left:1px solid rgba(220,184,102,.13)!important;
+    background:rgba(255,255,255,.012)!important;
+}
+.admin-character-facts small{
+    font-size:7px!important;
+    letter-spacing:.17em!important;
+    margin-bottom:5px!important;
+}
+.admin-character-facts strong{
+    font-size:11px!important;
+    color:rgba(232,219,191,.75)!important;
+}
+.admin-character-lore{
+    grid-template-columns:1fr 1.35fr 1fr!important;
+    gap:0!important;
+    border-top:1px solid rgba(220,184,102,.08)!important;
+    border-bottom:1px solid rgba(220,184,102,.08)!important;
+}
+.admin-character-lore>div{
+    padding:12px 15px 11px 0!important;
+    margin-right:15px!important;
+    border-right:1px solid rgba(220,184,102,.08)!important;
+}
+.admin-character-lore>div:last-child{border-right:0!important}
+.admin-character-lore p{
+    font-size:10px!important;
+    line-height:1.55!important;
+    max-height:57px!important;
+}
+.admin-character-actions{
+    justify-content:flex-start!important;
+    margin-top:14px!important;
+}
+.admin-character-details-button,.admin-delete-character-button{
+    min-height:36px!important;
+    padding:0 14px!important;
+    font-size:9px!important;
+}
+.admin-character-details-button{
+    background:transparent!important;
+    border-color:rgba(220,184,102,.23)!important;
+}
+.admin-delete-character-button{
+    background:rgba(90,20,16,.18)!important;
+}
+@media(max-width:1000px){
+ .admin-hero-character{grid-template-columns:155px 1fr!important}
+ .admin-hero-character:after{left:155px!important}
+ .admin-hero-character-portrait{min-height:270px!important}
+ .admin-character-facts{grid-template-columns:repeat(3,1fr)!important}
+}
+@media(max-width:700px){
+ .admin-hero-character{grid-template-columns:1fr!important}
+ .admin-hero-character:after{display:none!important}
+ .admin-hero-character-portrait{min-height:220px!important}
+ .admin-hero-character-body{padding:22px 18px!important}
+ .admin-character-facts{grid-template-columns:repeat(2,1fr)!important}
+ .admin-character-lore{grid-template-columns:1fr!important}
+ .admin-character-lore>div{border-right:0!important;border-bottom:1px solid rgba(220,184,102,.08)!important;margin:0!important}
+}
