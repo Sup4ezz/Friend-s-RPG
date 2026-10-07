@@ -6209,20 +6209,20 @@ async function openLorgusNotifications() {
 
 function renderLorgusInterfaceNav(active = "world") {
     const items = [
-        ["overview", "⌂", "Обзор", "renderLorgusOverview()"],
-        ["world", "✦", "Мир", "renderLorgusWorldMapCurrent()"],
-        ["character", "♙", "Персонаж", "renderLorgusCharacterHub()"],
-        ["rp", "◈", "Ролевая", "renderLorgusRpHub()"],
-        ["people", "♧", "Люди", "renderWorldCharacterTracker()"],
-        ["mail", "✉", "Письма", "renderMail()"],
-        ["inventory", "◈", "Инвентарь", "renderLorgusInventory()"]
+        ["overview", "⌂", "Обзор", "/overview"],
+        ["world", "✦", "Мир", "/world"],
+        ["character", "♙", "Персонаж", "/character"],
+        ["rp", "◈", "Ролевая", "/rp"],
+        ["people", "♧", "Люди", "/people"],
+        ["mail", "✉", "Письма", "/mail"],
+        ["inventory", "◈", "Инвентарь", "/inventory"]
     ];
     return `
         <nav class="lorgus-global-nav" aria-label="Разделы Лоргуса">
             <div class="lorgus-global-brand"><span>✦</span><strong>ЛОРГУС</strong><small>ЖИВОЙ МИР</small></div>
             <div class="lorgus-global-links">
                 ${items.map(([id, icon, label, action]) => `
-                    <button type="button" class="${id === active ? "active" : ""}" onclick="${action}">
+                    <button type="button" class="${id === active ? "active" : ""}" data-route="${action}">
                         <span>${icon}</span><b>${label}</b>
                     </button>`).join("")}
             </div>
