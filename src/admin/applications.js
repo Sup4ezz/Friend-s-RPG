@@ -37,7 +37,7 @@ async function loadAdminPanel(container) {
    ОТОБРАЖЕНИЕ ЗАЯВОК В АДМИНКЕ
    ========================================================= */
 
-async function window.renderAdminApplications(container, applications) {
+async function renderAdminApplications(container, applications) {
     container.className = "admin-panel";
 
     window.adminApplications = applications;
@@ -68,7 +68,7 @@ async function window.renderAdminApplications(container, applications) {
             </div>
             <div class="admin-head-actions">
                 <button type="button" class="admin-tool-button" id="admin-refresh-button">↻ Обновить</button>
-                <button type="button" class="window.logout-button admin-window.logout-button" onclick="window.logout()">Выйти</button>
+                <button type="button" class="window.logout-button admin-logout-button" onclick="logout()">Выйти</button>
             </div>
         </div>
 
@@ -327,3 +327,6 @@ function window.renderAdminCharacterManagement(application) {
         </article>
     `;
 }
+
+window.loadAdminPanel = loadAdminPanel;
+window.renderAdminApplications = renderAdminApplications;
