@@ -57,7 +57,7 @@ async function initialize() {
                 <div class="error-panel">
                     <div class="error-symbol">✦</div>
                     <h1>Ошибка соединения</h1>
-                    <p>${escapeHtml(error.message)}</p>
+                    <p>${window.escapeHtml(error.message)}</p>
                     <button onclick="location.reload()" class="gold-button">
                         Повторить
                     </button>
@@ -228,7 +228,7 @@ function render(session) {
                     eyeTransition = createLorgusEyeTransition();
 
                     // Пока веки сомкнуты, кабинет спокойно готовится под ними.
-                    await renderCabinet(session, true, true);
+                    await window.renderCabinet(session, true, true);
 
                     window.lorgusPortalEntering = false;
 
@@ -249,7 +249,7 @@ function render(session) {
             return;
         }
 
-        renderCabinet(session);
+        window.renderCabinet(session);
     } else {
         window.lorgusPortalEntering = false;
         window.lorgusPortalDepartureAligning = false;
@@ -345,7 +345,7 @@ t">ЛОРГУС</span>
 
     showLogin(true);
     initializeLorgusScene();
-    initializeLorgusWebGL();
+    window.initializeLorgusWebGL();
     initializeLorgusAudio();
 }
 
@@ -645,8 +645,8 @@ function showLogin(initial = false) {
     if (authSwitching) return;
 
     if (initial) {
-        setActiveTab("login");
-        renderLoginForm();
+        window.setActiveTab("login");
+        window.renderLoginForm();
         return;
     }
 
@@ -668,15 +668,15 @@ function switchAuthForm(type) {
     if (currentType === type) return;
 
     authSwitching = true;
-    setActiveTab(type);
+    window.setActiveTab(type);
 
     form.classList.add("auth-form-leaving");
 
     setTimeout(() => {
         if (type === "login") {
-            renderLoginForm();
+            window.renderLoginForm();
         } else {
-            renderRegisterForm();
+            window.renderRegisterForm();
         }
 
         form.classList.remove("auth-form-leaving");
@@ -699,3 +699,9 @@ function switchAuthForm(type) {
    ФОРМА ВХОДА
    ========================================================= */
 
+
+
+window.showLogin = showLogin;
+window.showRegister = showRegister;
+window.switchAuthForm = switchAuthForm;
+initialize();
