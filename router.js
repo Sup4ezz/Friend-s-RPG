@@ -92,10 +92,11 @@
         if (navigating) return;
 
         const button = event.target.closest?.("button, a");
+        const declaredRoute = button?.getAttribute("data-route");
         if (!button) return;
 
         const action = button.getAttribute("onclick");
-        const path = routeForAction(action);
+        const path = declaredRoute || routeForAction(action);
 
         if (!path) return;
         if (!window.activeCharacter) return;
