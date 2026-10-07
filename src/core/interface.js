@@ -278,9 +278,6 @@ window.openTitlePicker = openTitlePicker;
 window.openAdminCharacterTitles = openAdminCharacterTitles;
 window.openAdminCharacterAbilities = openAdminCharacterAbilities;
 window.renderLorgusInventory = renderLorgusInventory;
-window.openRpItemPicker = openRpItemPicker;
-window.openRpTransferPicker = openRpTransferPicker;
-window.openRpCurrencyTransferPicker = openRpCurrencyTransferPicker;
 window.openAdminCharacterInventory = openAdminCharacterInventory;
 
 window.selectLorgusMapRegion = selectLorgusMapRegion;
