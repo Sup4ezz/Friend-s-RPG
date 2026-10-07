@@ -4293,20 +4293,14 @@ async function openAdminCharacterInventory(application, container) {
     const characterId = application.character_id;
     if (!characterId) return;
 
-    const { data: items, error: itemsError } = await supabase
-        .from("items")
-        .select("*")
-        .order("rarity")
-        .order("name");
-
     const { data: inventory, error: inventoryError } = await supabase
         .from("character_inventory")
         .select("id,character_id,item_id,quantity,equipped_slot,source_note,items(*)")
         .eq("character_id", characterId)
         .order("acquired_at", { ascending: true });
 
-    if (itemsError || inventoryError) {
-        alert("Не удалось загрузить инвентарь:\n\n" + (itemsError || inventoryError).message);
+    if (inventoryError) {
+        alert("Не удалось загрузить инвентарь:\n\n" + inventoryError.message);
         return;
     }
 
@@ -4319,22 +4313,29 @@ async function openAdminCharacterInventory(application, container) {
         '<button type="button" class="lorgus-admin-inventory-close">×</button>' +
         '<span class="lorgus-command-kicker">АДМИНИСТРАЦИЯ · ИНВЕНТАРЬ</span>' +
         '<h2>' + escapeHtml(application.name || "Персонаж") + '</h2>' +
-        '<p>Выдача и отзыв предметов. Авторитетный инвентарь не редактируется игроком напрямую.</p>' +
+        '<p>Выдача предметов. Здесь нет заранее заданного списка вещей — хранитель сам создаёт нужный предмет.</p>' +
         '<div class="lorgus-admin-inventory-grant">' +
-            '<select class="lorgus-admin-inventory-select"><option value="">Выбери предмет...</option></select>' +
-            '<input class="lorgus-admin-inventory-qty" type="number" min="1" value="1">' +
-            '<input class="lorgus-admin-inventory-note" placeholder="Основание / источник">' +
+            '<input class="lorgus-admin-inventory-name" placeholder="Название предмета">' +
+            '<select class="lorgus-admin-inventory-type">' +
+                '<option value="misc">Обычный предмет</option>' +
+                '<option value="consumable">Расходуемый предмет</option>' +
+                '<option value="quest">Квестовый предмет</option>' +
+                '<option value="material">Материал</option>' +
+                '<option value="head">Шлем / голова</option>' +
+                '<option value="chest">Броня / тело</option>' +
+                '<option value="hands">Перчатки</option>' +
+                '<option value="legs">Штаны / ноги</option>' +
+                '<option value="feet">Обувь</option>' +
+                '<option value="main_hand">Оружие / правая рука</option>' +
+                '<option value="off_hand">Щит / левая рука</option>' +
+                '<option value="accessory_chain">Цепочка</option>' +
+                '<option value="accessory_ring">Кольцо</option>' +
+                '<option value="accessory_bracelet">Браслет</option>' +
+            '</select>' +
+            '<input class="lorgus-admin-inventory-qty" type="number" min="1" value="1" placeholder="Количество">' +
             '<button type="button" class="lorgus-admin-inventory-grant-btn">Выдать</button>' +
         '</div>' +
         '<div class="lorgus-admin-inventory-list"></div>';
-
-    const select = panel.querySelector(".lorgus-admin-inventory-select");
-    (items || []).forEach(item => {
-        const option = document.createElement("option");
-        option.value = item.id;
-        option.textContent = (item.icon || "◆") + " " + item.name + " · " + inventoryRarityLabel(item.rarity);
-        select.appendChild(option);
-    });
 
     const list = panel.querySelector(".lorgus-admin-inventory-list");
 
@@ -4404,18 +4405,24 @@ async function openAdminCharacterInventory(application, container) {
     panel.querySelector(".lorgus-admin-inventory-close").addEventListener("click", close);
 
     panel.querySelector(".lorgus-admin-inventory-grant-btn").addEventListener("click", async () => {
-        if (!select.value) return;
-
+        const nameInput = panel.querySelector(".lorgus-admin-inventory-name");
+        const typeInput = panel.querySelector(".lorgus-admin-inventory-type");
         const quantityInput = panel.querySelector(".lorgus-admin-inventory-qty");
-        const noteInput = panel.querySelector(".lorgus-admin-inventory-note");
+        const name = nameInput.value.trim();
+        const type = typeInput.value;
         const quantity = Math.max(1, Number(quantityInput.value) || 1);
-        const note = noteInput.value.trim();
 
-        const { error } = await supabase.rpc("admin_grant_character_item", {
+        if (!name) {
+            alert("Укажи название предмета.");
+            nameInput.focus();
+            return;
+        }
+
+        const { error } = await supabase.rpc("admin_create_and_grant_character_item", {
             p_character_id: characterId,
-            p_item_id: select.value,
-            p_quantity: quantity,
-            p_source_note: note
+            p_name: name,
+            p_type: type,
+            p_quantity: quantity
         });
 
         if (error) {
@@ -4423,12 +4430,11 @@ async function openAdminCharacterInventory(application, container) {
             return;
         }
 
+        nameInput.value = "";
         quantityInput.value = "1";
-        noteInput.value = "";
         await refreshInventory();
     });
 }
-
 async function loadAdminItemUseLog(container) {
     const box=container.querySelector("#admin-item-use-log"); if(!box)return;
     const {data,error}=await supabase.from("rp_message_item_uses").select("id,message_id,character_id,item_id,quantity,consumed,status,used_at,reverted_at,revert_reason,items(name,icon,color,rarity),characters(name),rp_messages(body,created_at,status)").order("used_at",{ascending:false}).limit(200);
