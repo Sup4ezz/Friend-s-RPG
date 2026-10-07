@@ -4785,7 +4785,6 @@ async function openAdminCharacterInventory(application, container) {
         ["pants","Штаны / ноги","equipment"],
         ["boots","Обувь","equipment"],
         ["sword","Меч","equipment"],
-        ["paired_daggers","Парные кинжалы","equipment"],
         ["spear","Копьё","equipment"],
         ["axe","Топор","equipment"],
         ["staff","Посох","equipment"],
