@@ -3578,7 +3578,7 @@ async function renderLocationParticipantsIfVisible() {
     const presence = window.activeRpPresence;
     if (!presence || presence.type !== "location") return;
 
-    const box = document.querySelector(".lorgus-rp-participants");
+    const box = document.getElementById("lorgus-rp-participants");
     if (!box) return;
 
     await renderLocationParticipants(
@@ -3952,12 +3952,12 @@ function renderLocationEntryLock(locationName, regionName) {
 }
 
 async function renderLocationParticipants(locationName, regionName) {
-    const box = document.querySelector(".lorgus-rp-participants");
+    const box = document.getElementById("lorgus-rp-participants");
     if (!box) return;
 
     const { data, error } = await supabase
         .from("rp_presence")
-        .select("character_id, presence_type, location, region, from_location, from_region, to_location, to_region, visibility, characters(name, race)")
+        .select("character_id, presence_type, location, region, visibility, characters(name, race)")
         .eq("visibility", "public")
         .eq("presence_type", "location")
         .eq("region", regionName)
@@ -3969,29 +3969,43 @@ async function renderLocationParticipants(locationName, regionName) {
     }
 
     const participants = data || [];
+    const countNode = document.getElementById("lorgus-rp-online-count");
+    if (countNode) countNode.textContent = String(participants.length || 1);
 
     if (!participants.length) {
-        box.innerHTML = '<div class="lorgus-rp-participant-empty">Здесь пока никого нет</div>';
+        box.innerHTML = '<div class="lorgus-messenger-empty-participants">Сцена пока пуста</div>';
         return;
     }
 
     const participantIds = [...new Set(participants.map(row => row.character_id).filter(Boolean))];
-    const { data: participantCharacters } = participantIds.length ? await supabase.from("characters").select("id, active_title_id").in("id", participantIds) : { data: [] };
+    const { data: participantCharacters } = participantIds.length
+        ? await supabase.from("characters").select("id, active_title_id").in("id", participantIds)
+        : { data: [] };
     const participantTitleIds = [...new Set((participantCharacters || []).map(row => row.active_title_id).filter(Boolean))];
-    const { data: participantTitles } = participantTitleIds.length ? await supabase.from("titles").select("*").in("id", participantTitleIds) : { data: [] };
+    const { data: participantTitles } = participantTitleIds.length
+        ? await supabase.from("titles").select("*").in("id", participantTitleIds)
+        : { data: [] };
     const participantTitleMap = Object.fromEntries((participantTitles || []).map(t => [String(t.id), t]));
     const participantActiveMap = Object.fromEntries((participantCharacters || []).map(row => [String(row.id), participantTitleMap[String(row.active_title_id)] || null]));
+    const photos = await Promise.all(participantIds.map(id => getRpCharacterPhoto(id)));
+    const photoMap = Object.fromEntries(participantIds.map((id, index) => [String(id), photos[index]]));
 
     box.innerHTML = participants.map(row => {
         const character = row.characters || {};
-        const isCurrent = row.character_id === window.activeCharacterId;
+        const id = String(row.character_id);
+        const isCurrent = id === String(window.activeCharacterId);
+        const photo = photoMap[id];
         return `
-            <div class="lorgus-rp-participant ${isCurrent ? "active" : ""}">
-                <span class="lorgus-rp-avatar">✦</span>
-                <div>
-                    <strong>${escapeHtml(character.name || "Без имени")}${renderTitleBadge(participantActiveMap[String(row.character_id)], "lorgus-public-title")}</strong>
-                    <small>${isCurrent ? "Вы" : escapeHtml(character.race || "Персонаж")}</small>
+            <div class="lorgus-messenger-participant ${isCurrent ? "active" : ""}">
+                <div class="lorgus-messenger-avatar">
+                    ${photo ? `<img src="${escapeHtml(photo)}" alt="">` : "<span>✦</span>"}
+                    <i></i>
                 </div>
+                <div class="lorgus-messenger-participant-info">
+                    <strong>${escapeHtml(character.name || "Без имени")}</strong>
+                    <small>${isCurrent ? "Вы · сейчас здесь" : escapeHtml(character.race || "Персонаж")}</small>
+                </div>
+                ${renderTitleBadge(participantActiveMap[id], "lorgus-public-title")}
             </div>
         `;
     }).join("");
