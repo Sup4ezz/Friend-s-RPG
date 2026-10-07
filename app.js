@@ -1058,6 +1058,62 @@ async function openAdminCharacterTitles(application, container) {
     grant.addEventListener("click",async()=>{if(!select.value)return;const {error}=await supabase.rpc("admin_award_character_title",{p_character_id:characterId,p_title_id:select.value});if(error){alert("Не удалось выдать титул:\\n\\n"+error.message);return;}overlay.remove();openAdminCharacterTitles(application,container);});
 }
 
+async function loadCharacterAbilities(characterId) {
+    if (!characterId) return [];
+    const { data, error } = await supabase.from("character_abilities").select("ability_id, acquired_at, source_note, abilities(*)").eq("character_id", characterId).order("acquired_at", { ascending: true });
+    if (error) { console.error("Не удалось загрузить способности:", error); return []; }
+    return (data || []).map(row => ({ ...(row.abilities || {}), acquired_at: row.acquired_at, source_note: row.source_note })).filter(row => row.id);
+}
+
+function abilityRarityLabel(rarity) { return titleRarityLabel(rarity); }
+
+function renderAbilityList(abilities) {
+    if (!abilities?.length) return '<div class="lorgus-ability-empty">Способностей, подтверждённых администрацией, пока нет.</div>';
+    return abilities.map(a => '<article class="lorgus-ability-card" style="--ability-color:' + escapeHtml(a.color || "#d6b36a") + '"><div class="lorgus-ability-icon">' + escapeHtml(a.icon || "✦") + '</div><div class="lorgus-ability-body"><div class="lorgus-ability-top"><strong>' + escapeHtml(a.name) + '</strong><span>' + escapeHtml(abilityRarityLabel(a.rarity)) + '</span></div><small>' + escapeHtml(a.category || "special") + '</small><p>' + escapeHtml(a.description || "Описание отсутствует.") + '</p></div></article>').join("");
+}
+
+async function openAdminCharacterAbilities(application, container) {
+    const characterId = application.character_id;
+    if (!characterId) return;
+    const { data: abilities, error: abilitiesError } = await supabase.from("abilities").select("*").order("category").order("name");
+    const { data: owned, error: ownedError } = await supabase.from("character_abilities").select("ability_id, acquired_at, source_note, abilities(*)").eq("character_id", characterId).order("acquired_at", { ascending: true });
+    if (abilitiesError) { alert("Не удалось загрузить список способностей:\n\n" + abilitiesError.message); return; }
+    if (ownedError) console.error("Не удалось загрузить выданные способности:", ownedError);
+    const overlay = document.createElement("div"); overlay.className = "lorgus-ability-overlay";
+    const panel = document.createElement("article"); panel.className = "lorgus-ability-panel";
+    panel.innerHTML = '<button type="button" class="lorgus-ability-close">×</button><span class="lorgus-command-kicker">АДМИНИСТРАЦИЯ · СПОСОБНОСТИ</span><h2>' + escapeHtml(application.name || "Персонаж") + '</h2><p>Только администрация определяет, какими подтверждёнными способностями владеет персонаж.</p><div class="lorgus-ability-grant-grid"><select class="lorgus-ability-select"><option value="">Выбери способность...</option></select><input class="lorgus-ability-note" type="text" maxlength="500" placeholder="Основание / событие / откуда получена"><button type="button" class="lorgus-ability-grant">✦ Выдать способность</button></div><div class="lorgus-ability-owned"></div><div class="lorgus-ability-create"><span>НОВАЯ СПОСОБНОСТЬ</span><div class="lorgus-ability-create-grid"><input class="ability-new-name" placeholder="Название"><input class="ability-new-icon" placeholder="Иконка" value="✦"><select class="ability-new-category"><option value="combat">Бой</option><option value="magic">Магия</option><option value="craft">Ремесло</option><option value="social">Социальное</option><option value="survival">Выживание</option><option value="special">Особое</option></select><select class="ability-new-rarity"><option value="common">Обычный</option><option value="uncommon">Необычный</option><option value="rare">Редкий</option><option value="epic">Эпический</option><option value="legendary">Легендарный</option><option value="mythic">Мифический</option><option value="unique">Уникальный</option></select><input class="ability-new-color" type="text" value="#d6b36a" placeholder="#d6b36a"><textarea class="ability-new-description" placeholder="Что умеет персонаж?"></textarea></div><button type="button" class="lorgus-ability-create-button">Создать способность</button></div>';
+    const select = panel.querySelector(".lorgus-ability-select");
+    (abilities || []).forEach(a => { const option=document.createElement("option"); option.value=a.id; option.textContent=(a.icon || "✦") + " " + a.name + " · " + abilityRarityLabel(a.rarity); select.appendChild(option); });
+    const ownedBox = panel.querySelector(".lorgus-ability-owned");
+    const renderOwned = rows => {
+        if (!rows?.length) { ownedBox.innerHTML = '<div class="lorgus-ability-empty">У персонажа пока нет подтверждённых способностей.</div>'; return; }
+        ownedBox.innerHTML = rows.map(row => { const a=row.abilities; if(!a)return ""; return '<div class="lorgus-admin-owned-ability" style="--ability-color:' + escapeHtml(a.color || "#d6b36a") + '"><span>' + escapeHtml(a.icon) + '</span><div><strong>' + escapeHtml(a.name) + '</strong><small>' + escapeHtml(abilityRarityLabel(a.rarity)) + (row.source_note ? " · " + escapeHtml(row.source_note) : "") + '</small></div><button type="button" data-ability-id="' + escapeHtml(row.ability_id) + '">Забрать</button></div>'; }).join("");
+        ownedBox.querySelectorAll("button").forEach(button => button.addEventListener("click", async () => {
+            const note = prompt("Причина отзыва способности:", ""); if (note === null) return;
+            const { error } = await supabase.rpc("admin_revoke_character_ability", { p_character_id: characterId, p_ability_id: button.dataset.abilityId, p_source_note: note.trim() });
+            if (error) { alert("Не удалось забрать способность:\n\n" + error.message); return; }
+            const { data: fresh } = await supabase.from("character_abilities").select("ability_id, acquired_at, source_note, abilities(*)").eq("character_id", characterId).order("acquired_at", { ascending: true }); renderOwned(fresh || []);
+        }));
+    };
+    renderOwned(owned || []);
+    panel.querySelector(".lorgus-ability-grant").addEventListener("click", async () => {
+        if (!select.value) return; const note=panel.querySelector(".lorgus-ability-note").value.trim();
+        const { error } = await supabase.rpc("admin_award_character_ability", { p_character_id: characterId, p_ability_id: select.value, p_source_note: note });
+        if (error) { alert("Не удалось выдать способность:\n\n" + error.message); return; }
+        select.value=""; panel.querySelector(".lorgus-ability-note").value="";
+        const { data: fresh } = await supabase.from("character_abilities").select("ability_id, acquired_at, source_note, abilities(*)").eq("character_id", characterId).order("acquired_at", { ascending: true }); renderOwned(fresh || []);
+    });
+    panel.querySelector(".lorgus-ability-create-button").addEventListener("click", async () => {
+        const name=panel.querySelector(".ability-new-name").value.trim(), description=panel.querySelector(".ability-new-description").value.trim();
+        if (!name || !description) { alert("Укажи название и описание способности."); return; }
+        const { data, error } = await supabase.rpc("admin_create_ability", { p_name:name, p_category:panel.querySelector(".ability-new-category").value, p_rarity:panel.querySelector(".ability-new-rarity").value, p_icon:panel.querySelector(".ability-new-icon").value.trim() || "✦", p_color:panel.querySelector(".ability-new-color").value.trim() || "#d6b36a", p_description:description });
+        if (error) { alert("Не удалось создать способность:\n\n" + error.message); return; }
+        const option=document.createElement("option"); option.value=data.id; option.textContent=(data.icon || "✦") + " " + data.name + " · " + abilityRarityLabel(data.rarity); select.appendChild(option); select.value=data.id;
+    });
+    const backdrop=document.createElement("div"); backdrop.className="lorgus-ability-backdrop"; overlay.append(backdrop,panel); document.body.appendChild(overlay);
+    const close=()=>overlay.remove(); panel.querySelector(".lorgus-ability-close").addEventListener("click",close); backdrop.addEventListener("click",close);
+}
+
 async function renderCabinet(session, preserveCurrentScene = false, forceCharacterSelection = false) {
     const username =
         session.user.user_metadata?.username ||
@@ -2527,6 +2583,7 @@ function renderAdminCharacterManagement(application) {
                 <div class="admin-character-actions">
                     <button class="admin-character-details-button" type="button" data-character-detail-id="${application.id}">Открыть полную запись</button>
                     <button class="admin-character-details-button admin-character-titles-button" type="button" data-character-title-id="${application.id}">Титулы</button>
+                    <button class="admin-character-details-button admin-character-abilities-button" type="button" data-character-ability-id="${application.id}">Способности</button>
                     <button class="admin-reject-button admin-delete-character-button" data-character-id="${application.character_id || ""}" data-character-name="${escapeHtml(application.name || "персонажа")}">Удалить персонажа</button>
                 </div>
             </div>
@@ -2660,6 +2717,14 @@ function bindAdminButtons(container) {
             event.stopPropagation();
             const application = (window.adminApplications || []).find(a => String(a.id) === String(button.dataset.characterTitleId));
             if (application) openAdminCharacterTitles(application, container);
+        });
+    });
+
+    container.querySelectorAll(".admin-character-abilities-button").forEach(button => {
+        button.addEventListener("click", event => {
+            event.stopPropagation();
+            const application = (window.adminApplications || []).find(a => String(a.id) === String(button.dataset.characterAbilityId));
+            if (application) openAdminCharacterAbilities(application, container);
         });
     });
 
@@ -5133,7 +5198,7 @@ function renderLorgusWorldMapCurrent() {
     if (container && window.activeCharacter) renderLorgusWorldMap(container, window.activeCharacter);
 }
 
-function renderLorgusCharacterHub() {
+async function renderLorgusCharacterHub() {
     const container = document.getElementById("cabinet-content");
     const c = window.activeCharacter;
     if (!container || !c) return;
@@ -5149,13 +5214,16 @@ function renderLorgusCharacterHub() {
             <section class="lorgus-dossier-grid">
                 <article><span>ПРОИСХОЖДЕНИЕ</span><strong>${escapeHtml(c.homeland || "Не указано")}</strong><p>Родина определяет происхождение, но не физическое положение персонажа.</p></article>
                 <article><span>СОСТОЯНИЕ</span><strong>${escapeHtml(String(c.status || "ACTIVE"))}</strong><p>Жизнь персонажа продолжается в мире Лоргуса.</p></article>
-                <article><span>НАВЫКИ</span><strong>Досье навыков</strong><p>Характеристики, способности и развитие персонажа.</p></article>
+                <article class="lorgus-dossier-abilities"><span>СПОСОБНОСТИ</span><strong>Подтверждённые администрацией</strong><div class="lorgus-ability-list"><div class="lorgus-ability-empty">Загрузка...</div></div></article>
                 <article><span>СНАРЯЖЕНИЕ</span><strong>Инвентарь</strong><p>Оружие, броня, предметы и вещи, которыми владеет персонаж.</p></article>
                 <article><span>ОТНОШЕНИЯ</span><strong>Связи</strong><p>Доверие, дружба, вражда, семья, долги и обещания.</p></article>
                 <article><span>ИСТОРИЯ</span><strong>Личная хроника</strong><p>События жизни и последствия решений персонажа.</p></article>
             </section>
         </main>
     `;
+    const abilities = await loadCharacterAbilities(c.id);
+    const list = container.querySelector(".lorgus-ability-list");
+    if (list) list.innerHTML = renderAbilityList(abilities);
 }
 
 function renderLorgusRpHub() {
@@ -5183,6 +5251,7 @@ window.renderLorgusCharacterHub = renderLorgusCharacterHub;
 window.renderLorgusRpHub = renderLorgusRpHub;
 window.openTitlePicker = openTitlePicker;
 window.openAdminCharacterTitles = openAdminCharacterTitles;
+window.openAdminCharacterAbilities = openAdminCharacterAbilities;
 
 window.selectLorgusMapRegion = selectLorgusMapRegion;
 window.selectLorgusMapMarker = selectLorgusMapMarker;
