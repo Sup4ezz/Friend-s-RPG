@@ -4282,20 +4282,142 @@ async function openRpItemPicker() {
 }
 
 async function openAdminCharacterInventory(application, container) {
-    const characterId=application.character_id; if(!characterId)return;
-    const {data:items,error:itemsError}=await supabase.from("items").select("*").order("rarity").order("name");
-    const {data:inventory,error:inventoryError}=await supabase.from("character_inventory").select("id,character_id,item_id,quantity,equipped_slot,source_note,items(*)").eq("character_id",characterId).order("acquired_at",{ascending:true});
-    if(itemsError||inventoryError){alert("Не удалось загрузить инвентарь:\n\n"+(itemsError||inventoryError).message);return;}
-    const overlay=document.createElement("div");overlay.className="lorgus-admin-inventory-overlay";
-    const panel=document.createElement("article");panel.className="lorgus-admin-inventory-panel";
-    panel.innerHTML='<button type="button" class="lorgus-admin-inventory-close">×</button><span class="lorgus-command-kicker">АДМИНИСТРАЦИЯ · ИНВЕНТАРЬ</span><h2>'+escapeHtml(application.name||"Персонаж")+'</h2><p>Выдача и отзыв предметов. Авторитетный инвентарь не редактируется игроком напрямую.</p><div class="lorgus-admin-inventory-grant"><select class="lorgus-admin-inventory-select"><option value="">Выбери предмет...</option></select><input class="lorgus-admin-inventory-qty" type="number" min="1" value="1"><input class="lorgus-admin-inventory-note" placeholder="Основание / источник"><button type="button" class="lorgus-admin-inventory-grant-btn">Выдать</button></div><div class="lorgus-admin-inventory-list"></div>';
-    const select=panel.querySelector(".lorgus-admin-inventory-select");
-    (items||[]).forEach(item=>{const o=document.createElement("option");o.value=item.id;o.textContent=(item.icon||"◆")+" "+item.name+" · "+inventoryRarityLabel(item.rarity);select.appendChild(o);});
-    const list=panel.querySelector(".lorgus-admin-inventory-list");
-    const render=rows=>{list.innerHTML=rows.length?rows.map(row=>'<div class="lorgus-admin-inventory-row"><span class="lorgus-admin-inventory-row-icon" style="--item-color:'+escapeHtml(row.items?.color||"#d6b36a")+'">'+escapeHtml(row.items?.icon||"◆")+'</span><div><strong>'+escapeHtml(row.items?.name||"Предмет")+'</strong><small>'+escapeHtml(inventoryRarityLabel(row.items?.rarity))+' · ×'+escapeHtml(String(row.quantity))+(row.equipped_slot?" · "+escapeHtml(inventorySlotLabels[row.equipped_slot]||row.equipped_slot):"")+'</small></div><button type="button" data-id="'+escapeHtml(row.id)+'">Забрать</button></div>').join(""):'<div class="lorgus-inventory-empty">Инвентарь пуст.</div>'; list.querySelectorAll("button").forEach(b=>b.addEventListener("click",async()=>{if(!confirm("Забрать этот предмет?"))return;const {error}=await supabase.rpc("admin_revoke_character_item",{p_inventory_id:b.dataset.id,p_quantity:null});if(error){alert("Не удалось забрать предмет:\n\n"+error.message);return;}const {data:fresh}=await supabase.from("character_inventory").select("id,character_id,item_id,quantity,equipped_slot,source_note,items(*)").eq("character_id",characterId).order("acquired_at",{ascending:true});render(fresh||[]);}));
-    render(inventory||[]); document.body.appendChild(overlay); requestAnimationFrame(()=>overlay.classList.add("open"));
-    const close=()=>overlay.remove(); panel.querySelector(".lorgus-admin-inventory-close").addEventListener("click",close);
-    panel.querySelector(".lorgus-admin-inventory-grant-btn").addEventListener("click",async()=>{if(!select.value)return;const qty=Math.max(1,Number(panel.querySelector(".lorgus-admin-inventory-qty").value)||1);const note=panel.querySelector(".lorgus-admin-inventory-note").value.trim();const {error}=await supabase.rpc("admin_grant_character_item",{p_character_id:characterId,p_item_id:select.value,p_quantity:qty,p_source_note:note});if(error){alert("Не удалось выдать предмет:\n\n"+error.message);return;}const {data:fresh}=await supabase.from("character_inventory").select("id,character_id,item_id,quantity,equipped_slot,source_note,items(*)").eq("character_id",characterId).order("acquired_at",{ascending:true});render(fresh||[]);});
+    const characterId = application.character_id;
+    if (!characterId) return;
+
+    const { data: items, error: itemsError } = await supabase
+        .from("items")
+        .select("*")
+        .order("rarity")
+        .order("name");
+
+    const { data: inventory, error: inventoryError } = await supabase
+        .from("character_inventory")
+        .select("id,character_id,item_id,quantity,equipped_slot,source_note,items(*)")
+        .eq("character_id", characterId)
+        .order("acquired_at", { ascending: true });
+
+    if (itemsError || inventoryError) {
+        alert("Не удалось загрузить инвентарь:\n\n" + (itemsError || inventoryError).message);
+        return;
+    }
+
+    const overlay = document.createElement("div");
+    overlay.className = "lorgus-admin-inventory-overlay";
+
+    const panel = document.createElement("article");
+    panel.className = "lorgus-admin-inventory-panel";
+    panel.innerHTML =
+        '<button type="button" class="lorgus-admin-inventory-close">×</button>' +
+        '<span class="lorgus-command-kicker">АДМИНИСТРАЦИЯ · ИНВЕНТАРЬ</span>' +
+        '<h2>' + escapeHtml(application.name || "Персонаж") + '</h2>' +
+        '<p>Выдача и отзыв предметов. Авторитетный инвентарь не редактируется игроком напрямую.</p>' +
+        '<div class="lorgus-admin-inventory-grant">' +
+            '<select class="lorgus-admin-inventory-select"><option value="">Выбери предмет...</option></select>' +
+            '<input class="lorgus-admin-inventory-qty" type="number" min="1" value="1">' +
+            '<input class="lorgus-admin-inventory-note" placeholder="Основание / источник">' +
+            '<button type="button" class="lorgus-admin-inventory-grant-btn">Выдать</button>' +
+        '</div>' +
+        '<div class="lorgus-admin-inventory-list"></div>';
+
+    const select = panel.querySelector(".lorgus-admin-inventory-select");
+    (items || []).forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.id;
+        option.textContent = (item.icon || "◆") + " " + item.name + " · " + inventoryRarityLabel(item.rarity);
+        select.appendChild(option);
+    });
+
+    const list = panel.querySelector(".lorgus-admin-inventory-list");
+
+    const refreshInventory = async () => {
+        const { data: fresh, error } = await supabase
+            .from("character_inventory")
+            .select("id,character_id,item_id,quantity,equipped_slot,source_note,items(*)")
+            .eq("character_id", characterId)
+            .order("acquired_at", { ascending: true });
+
+        if (error) {
+            alert("Не удалось обновить инвентарь:\n\n" + error.message);
+            return;
+        }
+
+        renderInventory(fresh || []);
+    };
+
+    const renderInventory = rows => {
+        list.innerHTML = rows.length
+            ? rows.map(row => {
+                const item = row.items || {};
+                const slot = row.equipped_slot
+                    ? " · " + (inventorySlotLabels[row.equipped_slot] || row.equipped_slot)
+                    : "";
+
+                return (
+                    '<div class="lorgus-admin-inventory-row">' +
+                        '<span class="lorgus-admin-inventory-row-icon" style="--item-color:' + escapeHtml(item.color || "#d6b36a") + '">' +
+                            escapeHtml(item.icon || "◆") +
+                        '</span>' +
+                        '<div>' +
+                            '<strong>' + escapeHtml(item.name || "Предмет") + '</strong>' +
+                            '<small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ×' + escapeHtml(String(row.quantity)) + escapeHtml(slot) + '</small>' +
+                        '</div>' +
+                        '<button type="button" data-id="' + escapeHtml(row.id) + '">Забрать</button>' +
+                    '</div>'
+                );
+            }).join("")
+            : '<div class="lorgus-inventory-empty">Инвентарь пуст.</div>';
+
+        list.querySelectorAll("button[data-id]").forEach(button => {
+            button.addEventListener("click", async () => {
+                if (!confirm("Забрать этот предмет?")) return;
+
+                const { error } = await supabase.rpc("admin_revoke_character_item", {
+                    p_inventory_id: button.dataset.id,
+                    p_quantity: null
+                });
+
+                if (error) {
+                    alert("Не удалось забрать предмет:\n\n" + error.message);
+                    return;
+                }
+
+                await refreshInventory();
+            });
+        });
+    };
+
+    renderInventory(inventory || []);
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("open"));
+
+    const close = () => overlay.remove();
+    panel.querySelector(".lorgus-admin-inventory-close").addEventListener("click", close);
+
+    panel.querySelector(".lorgus-admin-inventory-grant-btn").addEventListener("click", async () => {
+        if (!select.value) return;
+
+        const quantityInput = panel.querySelector(".lorgus-admin-inventory-qty");
+        const noteInput = panel.querySelector(".lorgus-admin-inventory-note");
+        const quantity = Math.max(1, Number(quantityInput.value) || 1);
+        const note = noteInput.value.trim();
+
+        const { error } = await supabase.rpc("admin_grant_character_item", {
+            p_character_id: characterId,
+            p_item_id: select.value,
+            p_quantity: quantity,
+            p_source_note: note
+        });
+
+        if (error) {
+            alert("Не удалось выдать предмет:\n\n" + error.message);
+            return;
+        }
+
+        quantityInput.value = "1";
+        noteInput.value = "";
+        await refreshInventory();
+    });
 }
 
 async function loadAdminItemUseLog(container) {
