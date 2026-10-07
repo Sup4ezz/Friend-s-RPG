@@ -8,7 +8,7 @@ let authSwitching = false;
 window.lorgusPortalEntering = false;
 window.lorgusPortalDepartureAligning = false;
 window.lorgusPortalEnterStartedAt = 0;
-let lorgusPortalOverlay = null;
+window.lorgusPortalOverlay = null;
 window.THREE = THREE;
 window.supabaseClient = null;
 
@@ -70,6 +70,8 @@ async function initialize() {
 /* =========================================================
    ОСНОВНОЙ РЕНДЕР
    ========================================================= */
+
+window.render = render;
 
 function showLogin(initial = false) {
     if (authSwitching) return;
