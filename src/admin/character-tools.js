@@ -182,7 +182,6 @@ async function openAdminCharacterAbilities(application, container) {
     const close=()=>overlay.remove(); panel.querySelector(".lorgus-ability-close").addEventListener("click",close); backdrop.addEventListener("click",close);
 }
 
-async 
 window.titleRarityLabel = titleRarityLabel;
 window.renderTitleBadge = renderTitleBadge;
 window.openTitlePicker = openTitlePicker;
