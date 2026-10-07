@@ -10215,10 +10215,13 @@ body{
   min-width:0;
 }
 .lorgus-global-account .lorgus-global-nav-title{
-  flex:0 1 auto;
-  min-width:0;
-  max-width:180px;
+  flex:0 0 auto;
+  min-width:max-content;
+  max-width:none;
   margin-left:0;
+  overflow:visible;
+  text-overflow:clip;
+  white-space:nowrap;
 }
 .lorgus-global-user{
   flex:1 1 auto;
@@ -14404,7 +14407,7 @@ body:has(#root > #cabinet-content.character-application){
    ========================================================= */
 .lorgus-title-badge{display:inline-flex;align-items:center;gap:7px;margin-left:10px;padding:4px 9px;border:1px solid color-mix(in srgb,var(--title-color) 55%,transparent);background:color-mix(in srgb,var(--title-color) 10%,transparent);color:var(--title-color);font-size:11px;letter-spacing:.06em;line-height:1.1;white-space:nowrap;text-shadow:0 0 12px color-mix(in srgb,var(--title-color) 35%,transparent)}
 .lorgus-title-badge>span{font-size:14px}
-.lorgus-global-nav-title{max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.lorgus-global-nav-title{max-width:none;overflow:visible;text-overflow:clip;white-space:nowrap}
 .lorgus-profile-title{margin:10px 0 0 0;font-size:12px}
 .lorgus-title-manage-button{align-self:center;margin-left:auto;padding:11px 15px;border:1px solid rgba(214,182,106,.38);background:rgba(12,10,7,.68);color:#d6b66a;cursor:pointer;letter-spacing:.08em;text-transform:uppercase}
 .lorgus-title-manage-button:hover{border-color:rgba(214,182,106,.75);background:rgba(214,182,106,.08)}
@@ -14428,7 +14431,7 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-admin-owned-title{display:grid;grid-template-columns:30px 1fr auto auto;align-items:center;gap:10px;padding:11px 12px;border-left:3px solid var(--title-color);background:rgba(255,255,255,.025)}
 .lorgus-admin-owned-title>span{color:var(--title-color);font-size:18px}.lorgus-admin-owned-title small{color:#8d8375}.lorgus-admin-owned-title button{padding:7px 10px;border:1px solid rgba(180,90,70,.4);background:rgba(120,35,25,.12);color:#d59a8c;cursor:pointer}
 .admin-character-actions .admin-character-titles-button{border-color:rgba(214,182,106,.42);color:#d6b66a}
-@media(max-width:720px){.lorgus-title-manage-button{margin:15px 0 0;align-self:flex-start}.lorgus-title-panel{padding:22px}.lorgus-global-nav-title{max-width:150px}.lorgus-admin-owned-title{grid-template-columns:26px 1fr auto}.lorgus-admin-owned-title small{display:none}}
+@media(max-width:720px){.lorgus-title-manage-button{margin:15px 0 0;align-self:flex-start}.lorgus-title-panel{padding:22px}.lorgus-global-nav-title{max-width:none}.lorgus-admin-owned-title{grid-template-columns:26px 1fr auto}.lorgus-admin-owned-title small{display:none}}
 
 
 /* =========================================================
