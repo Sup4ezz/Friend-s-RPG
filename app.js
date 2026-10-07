@@ -4261,12 +4261,28 @@ async function renderLorgusInventory() {
     });
     renderEquipped();
     const setupDrag = card => {
+        card.setAttribute("draggable", "true");
         card.addEventListener("dragstart", e => {
-            e.dataTransfer.setData("text/plain", card.dataset.inventoryId);
+            e.stopPropagation();
+            const id = card.dataset.inventoryId;
+            if (!id || !e.dataTransfer) {
+                e.preventDefault();
+                return;
+            }
+
+            e.dataTransfer.clearData();
+            e.dataTransfer.setData("application/x-lorgus-inventory-id", id);
+            e.dataTransfer.setData("text/plain", id);
             e.dataTransfer.effectAllowed = "move";
+
             const ghost = card.cloneNode(true);
+            ghost.querySelectorAll("button").forEach(button => button.remove());
             ghost.classList.add("lorgus-drag-ghost");
+            ghost.style.position = "fixed";
+            ghost.style.left = "-10000px";
+            ghost.style.top = "-10000px";
             ghost.style.width = Math.min(card.getBoundingClientRect().width, 360) + "px";
+            ghost.style.pointerEvents = "none";
             document.body.appendChild(ghost);
             e.dataTransfer.setDragImage(ghost, 28, 28);
             requestAnimationFrame(() => ghost.remove());
@@ -4303,7 +4319,7 @@ async function renderLorgusInventory() {
     document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
         slot.addEventListener("dragover", e => {
             e.preventDefault();
-            const inventoryId = e.dataTransfer.getData("text/plain");
+            const inventoryId = e.dataTransfer.getData("application/x-lorgus-inventory-id") || e.dataTransfer.getData("text/plain");
             const row = rows.find(r => r.id === inventoryId);
             const item = row?.items;
             slot.classList.toggle("is-valid-drop", !!item?.equipment_slot && item.equipment_slot === slot.dataset.equipmentSlot);
