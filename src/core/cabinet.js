@@ -175,9 +175,21 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
                 await initializeRpPresence(savedCharacter);
 
                 /*
-                    Если игрок обновил страницу прямо внутри RP,
-                    восстанавливаем не только персонажа, но и
-                    последнее RP-пространство.
+                    При прямом открытии SPA-маршрута сам router
+                    отвечает за первый экран. Не рендерим поверх него
+                    старый legacy-экран персонажа/RP, иначе появляется
+                    лишний промежуточный кадр.
+                */
+                if (
+                    window.lorgusRouter &&
+                    window.lorgusRouter.currentPath !== "/"
+                ) {
+                    return;
+                }
+
+                /*
+                    Для корневого входа сохраняем прежнее поведение:
+                    восстанавливаем последнее RP-пространство.
                 */
                 const restoredPresence = window.activeRpPresence;
 
