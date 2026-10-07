@@ -1038,8 +1038,8 @@ const openingShape = new THREE.Shape();
     window.addEventListener("pointermove", onPointer, { passive: true });
     frame();
 
-    const previousCleanup = lorgusSceneCleanup;
-    lorgusSceneCleanup = () => {
+    const previousCleanup = window.lorgusSceneCleanup;
+    window.lorgusSceneCleanup = () => {
         disposed = true;
         cancelAnimationFrame(raf);
         window.removeEventListener("resize", resize);
@@ -1049,3 +1049,5 @@ const openingShape = new THREE.Shape();
     };
 }
 
+
+window.initializeLorgusWebGL = initializeLorgusWebGL;
