@@ -4315,6 +4315,8 @@ async function renderLorgusInventory() {
         });
     });
 
+}
+
 function updateRpItemUseButton() {
     const label = document.getElementById("lorgus-rp-item-selection"); if (!label) return;
     const ids = Array.from(window.pendingRpItemIds || []);
