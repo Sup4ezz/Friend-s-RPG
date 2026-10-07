@@ -4222,9 +4222,10 @@ function inventoryTypeLabel(item) {
 function inventoryItemMarkup(row, extraClass = "") {
     const item = row.items || {};
     const qty = row.quantity > 1 ? "×" + row.quantity : "";
-    return '<article class="lorgus-inventory-item ' + extraClass + '" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '">' +
+    const equippedLabel = row.equipped_slot ? inventorySlotLabels[row.equipped_slot] : "";
+    return '<article class="lorgus-inventory-item ' + extraClass + (row.equipped_slot ? ' is-equipped' : '') + '" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '">' +
         '<div class="lorgus-inventory-item-icon">' + escapeHtml(item.icon || "◆") + '</div>' +
-        '<div class="lorgus-inventory-item-info"><strong>' + escapeHtml(item.name || "Предмет") + '</strong><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ' + escapeHtml(inventoryTypeLabel(item)) + '</small></div>' +
+        '<div class="lorgus-inventory-item-info"><strong>' + escapeHtml(item.name || "Предмет") + '</strong><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ' + escapeHtml(inventoryTypeLabel(item)) + '</small>' + (equippedLabel ? '<em>НАДЕТО · ' + escapeHtml(equippedLabel) + '</em>' : '') + '</div>' +
         '<b class="lorgus-inventory-qty">' + escapeHtml(qty) + '</b></article>';
 }
 
@@ -4252,7 +4253,7 @@ async function renderLorgusInventory() {
     if (error) { grid.innerHTML = '<div class="lorgus-inventory-empty"><h2>Инвентарь недоступен</h2><p>' + escapeHtml(error.message) + '</p></div>'; return; }
     const rows = data || [];
     document.getElementById("lorgus-inventory-count").textContent = rows.length + " ячеек";
-    grid.innerHTML = rows.length ? rows.map(row => inventoryItemMarkup(row)).join("") : '<div class="lorgus-inventory-empty"><h2>Рюкзак пуст</h2><p>Когда хранитель выдаст тебе вещи, они появятся здесь.</p></div>';
+    grid.innerHTML = rows.length ? rows.map(row => inventoryItemMarkup(row, row.equipped_slot ? "is-equipped-in-inventory" : "")).join("") : '<div class="lorgus-inventory-empty"><h2>Рюкзак пуст</h2><p>Когда хранитель выдаст тебе вещи, они появятся здесь.</p></div>';
     const renderEquipped = () => document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
         const row = rows.find(r => r.equipped_slot === slot.dataset.equipmentSlot);
         const item = row?.items; const box = slot.querySelector(".lorgus-equipment-slot-item");
