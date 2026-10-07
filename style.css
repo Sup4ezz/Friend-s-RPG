@@ -14318,3 +14318,34 @@ body:has(#root > #cabinet-content.character-application){
  .admin-character-lore{grid-template-columns:1fr!important}
  .admin-character-lore>div{border-right:0!important;border-bottom:1px solid rgba(220,184,102,.08)!important;margin:0!important}
 }
+
+/* LORGUS MODERATION ACTIONS — readable at a glance */
+.admin-application-actions{
+    min-width:210px!important;
+    gap:10px!important;
+}
+.admin-application-actions button,
+.admin-application-actions .admin-revision-button,
+.admin-application-actions .admin-approve-button,
+.admin-application-actions .admin-reject-button{
+    min-height:48px!important;
+    padding:0 20px!important;
+    font-size:13px!important;
+    line-height:1!important;
+    font-weight:600!important;
+    letter-spacing:.08em!important;
+    white-space:nowrap!important;
+    border-width:1px!important;
+}
+.admin-application-actions button:hover{
+    transform:translateX(-2px)!important;
+}
+.admin-application-actions button:focus-visible{
+    outline:2px solid rgba(220,184,102,.7)!important;
+    outline-offset:2px!important;
+}
+@media(max-width:900px){
+    .admin-application-actions{
+        min-width:0!important;
+    }
+}
