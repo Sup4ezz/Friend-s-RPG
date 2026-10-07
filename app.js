@@ -2245,7 +2245,7 @@ async function submitCharacterApplication(event) {
     }
 
     setCharacterMessage(
-        "Создаём заявку...",
+        "Готовим анкету...",
         "info"
     );
 
@@ -2259,6 +2259,11 @@ async function submitCharacterApplication(event) {
         photoInput.files &&
         photoInput.files.length > 0
     ) {
+        setCharacterMessage(
+            "Подготавливаем портрет...",
+            "info"
+        );
+
         const originalPhoto = photoInput.files[0];
         const croppedPhoto = window.characterPortraitPrepare
             ? await window.characterPortraitPrepare()
@@ -2284,6 +2289,11 @@ async function submitCharacterApplication(event) {
 
         photoPath =
             `${user.id}/${applicationId}/photo.${extension}`;
+
+        setCharacterMessage(
+            "Загружаем портрет...",
+            "info"
+        );
 
         const {
             error: uploadError
@@ -2315,6 +2325,11 @@ async function submitCharacterApplication(event) {
             return;
         }
     }
+
+    setCharacterMessage(
+        "Отправляем анкету администрации...",
+        "info"
+    );
 
     const {
         error: applicationError
@@ -2359,7 +2374,33 @@ async function submitCharacterApplication(event) {
         window.clearLorgusCharacterDraft();
     }
 
-    await loadPlayerState({
+    const pendingApplication = {
+        id: applicationId,
+        player_id: user.id,
+        name,
+        race,
+        age,
+        homeland,
+        personality,
+        backstory,
+        special_skills: specialSkills,
+        preferred_weapon: preferredWeapon || null,
+        occupation,
+        photo_path: photoPath,
+        status: "pending",
+        character_id: null,
+        review_notes: null
+    };
+
+    // Не заставляем игрока ждать повторной загрузки всего кабинета.
+    // Показываем уже созданную заявку сразу, а актуальное состояние
+    // подтягиваем в фоне.
+    renderPendingApplication(
+        document.getElementById("cabinet-content"),
+        pendingApplication
+    );
+
+    void loadPlayerState({
         user
     });
 }
