@@ -1041,7 +1041,7 @@ async function openAdminCharacterTitles(application, container) {
     grant.addEventListener("click",async()=>{if(!select.value)return;const {error}=await supabase.rpc("admin_award_character_title",{p_character_id:characterId,p_title_id:select.value});if(error){alert("Не удалось выдать титул:\\n\\n"+error.message);return;}overlay.remove();openAdminCharacterTitles(application,container);});
 }
 
-function renderCabinet(session, preserveCurrentScene = false, forceCharacterSelection = false) {
+async function renderCabinet(session, preserveCurrentScene = false, forceCharacterSelection = false) {
     const username =
         session.user.user_metadata?.username ||
         "Игрок";
