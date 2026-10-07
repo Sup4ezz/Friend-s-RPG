@@ -1673,12 +1673,6 @@ window.getRpPresence = getRpPresence;
 window.renderWorldCharacterTracker = renderWorldCharacterTracker;
 
 
-/* =========================================================
-   ЗАПУСК
-   ========================================================= */
-
-initialize();
-
 
 /* =========================================================
    LORGUS 2.1 — CINEMATIC WORLD MAP
