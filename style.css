@@ -14646,6 +14646,10 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-rp-transfer-panel label{display:block;margin:14px 0;color:#aaa095;font-size:9px;letter-spacing:.13em;text-transform:uppercase}
 .lorgus-rp-transfer-panel select,.lorgus-rp-transfer-panel input{display:block;width:100%;margin-top:7px;padding:13px 14px;background:#0d0b09;border:1px solid rgba(214,179,106,.18);color:#e9e0d2;outline:none}
 .lorgus-rp-transfer-panel select:focus,.lorgus-rp-transfer-panel input:focus{border-color:rgba(214,179,106,.62);box-shadow:0 0 0 2px rgba(214,179,106,.06)}
+.lorgus-transfer-denominations{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.lorgus-transfer-denominations label{margin:0!important}
+.lorgus-wallet-card b{font-size:11px;line-height:1.45;text-align:right;max-width:130px}
+@media(max-width:600px){.lorgus-transfer-denominations{grid-template-columns:1fr}}
 .lorgus-transfer-confirm{width:100%;margin-top:14px}
 .lorgus-wallet-panel{margin-top:24px;padding:22px;border:1px solid rgba(214,179,106,.16);background:linear-gradient(135deg,rgba(214,179,106,.035),rgba(255,255,255,.012))}
 .lorgus-wallet-title{display:flex;align-items:end;justify-content:space-between;gap:20px;margin-bottom:14px}
