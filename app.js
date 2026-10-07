@@ -4825,7 +4825,11 @@ async function openAdminCharacterInventory(application, container) {
             '<select class="lorgus-admin-currency-code">' +
                 Object.entries(lorgusCurrencies).map(([code,c]) => '<option value="' + code + '">' + c.name + ' · ' + c.kingdom + '</option>').join("") +
             '</select>' +
-            '<input class="lorgus-admin-currency-amount" type="number" value="100" step="1" placeholder="Сумма">' +
+            '<div class="lorgus-admin-currency-denominations">
+            <label>Золотые<input class="lorgus-admin-currency-gold" type="number" min="0" step="1" value="0"></label>
+            <label>Серебряные<input class="lorgus-admin-currency-silver" type="number" min="0" step="1" value="0"></label>
+            <label>Бронзовые<input class="lorgus-admin-currency-bronze" type="number" min="0" step="1" value="100"></label>
+        </div>' +
             '<button type="button" class="lorgus-admin-currency-btn">Выдать валюту</button>' +
         '</div>' +
         '<div class="lorgus-admin-currency-list"></div>' +
@@ -4837,7 +4841,7 @@ async function openAdminCharacterInventory(application, container) {
         if (error) { currencyList.innerHTML = '<div class="lorgus-inventory-empty">' + escapeHtml(error.message) + '</div>'; return; }
         currencyList.innerHTML = Object.entries(lorgusCurrencies).map(([code,c]) => {
             const row=(data||[]).find(x=>x.currency_code===code);
-            return '<div class="lorgus-admin-currency-row"><span>' + escapeHtml(c.icon) + '</span><strong>' + escapeHtml(c.name) + '</strong><small>' + escapeHtml(c.kingdom) + '</small><b>' + escapeHtml(String(row?.amount || 0)) + '</b></div>';
+            return '<div class="lorgus-admin-currency-row"><span>' + escapeHtml(c.icon) + '</span><strong>' + escapeHtml(c.name) + '</strong><small>' + escapeHtml(c.kingdom) + '</small><b>' + escapeHtml(formatLorgusCurrencyAmount(row?.amount || 0)) + '</b></div>';
         }).join("");
     };
 
@@ -4912,11 +4916,17 @@ async function openAdminCharacterInventory(application, container) {
 
     panel.querySelector(".lorgus-admin-currency-btn").addEventListener("click", async () => {
         const code=panel.querySelector(".lorgus-admin-currency-code").value;
-        const amount=Number.parseInt(panel.querySelector(".lorgus-admin-currency-amount").value,10);
-        if(!Number.isInteger(amount) || amount===0){ alert("Укажи ненулевую сумму."); return; }
+        const gold=Number.parseInt(panel.querySelector(".lorgus-admin-currency-gold").value,10) || 0;
+        const silver=Number.parseInt(panel.querySelector(".lorgus-admin-currency-silver").value,10) || 0;
+        const bronze=Number.parseInt(panel.querySelector(".lorgus-admin-currency-bronze").value,10) || 0;
+        if(gold<0 || silver<0 || bronze<0 || (gold===0 && silver===0 && bronze===0)){ alert("Укажи хотя бы одну ненулевую монету."); return; }
+        const amount=(gold*10000)+(silver*100)+bronze;
         const { error }=await supabase.rpc("admin_grant_character_currency",{p_character_id:characterId,p_currency_code:code,p_amount:amount});
         if(error){ alert("Не удалось изменить валюту:\n\n"+error.message); return; }
         await refreshCurrency();
+        panel.querySelector(".lorgus-admin-currency-gold").value="0";
+        panel.querySelector(".lorgus-admin-currency-silver").value="0";
+        panel.querySelector(".lorgus-admin-currency-bronze").value="0";
     });
 
     panel.querySelector(".lorgus-admin-inventory-grant-btn").addEventListener("click", async () => {
