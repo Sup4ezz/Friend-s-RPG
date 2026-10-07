@@ -52,8 +52,10 @@ export default {
 
             headers.set(
                 "Cache-Control",
-                "no-cache, no-store, must-revalidate"
+                "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0, s-maxage=0"
             );
+            headers.set("CDN-Cache-Control", "no-store");
+            headers.set("Cloudflare-CDN-Cache-Control", "no-store");
 
             headers.set(
                 "Pragma",
