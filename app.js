@@ -4863,12 +4863,13 @@ async function openAdminCharacterInventory(application, container) {
             return '<div class="lorgus-admin-currency-row">' +
                 '<div class="lorgus-admin-currency-identity">' +
                     '<span>' + escapeHtml(c.icon) + '</span>' +
-                    '<strong>' + escapeHtml(c.name) + '</strong>' +
-                    '<small>' + escapeHtml(c.kingdom) + '</small>' +
+                    '<div><strong>' + escapeHtml(c.name) + '</strong><small>' + escapeHtml(c.kingdom) + '</small></div>' +
                 '</div>' +
-                '<div class="lorgus-admin-currency-denomination gold"><span>Золото</span><b>' + gold + '</b></div>' +
-                '<div class="lorgus-admin-currency-denomination silver"><span>Серебро</span><b>' + silver + '</b></div>' +
-                '<div class="lorgus-admin-currency-denomination bronze"><span>Медь</span><b>' + bronze + '</b></div>' +
+                '<div class="lorgus-admin-currency-denominations">' +
+                    '<div class="lorgus-admin-currency-denomination gold"><span>Золото</span><b>' + gold + '</b></div>' +
+                    '<div class="lorgus-admin-currency-denomination silver"><span>Серебро</span><b>' + silver + '</b></div>' +
+                    '<div class="lorgus-admin-currency-denomination bronze"><span>Медь</span><b>' + bronze + '</b></div>' +
+                '</div>' +
             '</div>';
         }).join("");
     };
