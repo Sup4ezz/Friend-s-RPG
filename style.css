@@ -15524,3 +15524,101 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-rp-send{min-width:145px;border-radius:5px!important;box-shadow:0 8px 25px rgba(0,0,0,.3)}.lorgus-rp-item-selection{flex:1;min-width:80px}.lorgus-rp-footer{padding:7px 26px 14px}
 @media(max-width:850px){.lorgus-rp-page{width:calc(100% - 12px)}.lorgus-rp-shell{grid-template-columns:1fr}.lorgus-rp-sidebar{min-height:auto;padding:20px}.lorgus-rp-place-mark{margin:22px auto 15px}.lorgus-rp-sidebar-note{margin-top:18px}.lorgus-rp-feed{height:calc(100vh - 520px);min-height:420px}}
 @media(max-width:600px){.lorgus-rp-page{width:100%;margin:0}.lorgus-rp-shell{border-left:0;border-right:0;border-radius:0}.lorgus-rp-header{padding:15px 17px}.lorgus-rp-header h2{font-size:28px}.lorgus-rp-feed{height:calc(100vh - 570px);min-height:380px;padding:25px 15px}.lorgus-rp-message{grid-template-columns:35px minmax(0,1fr);gap:10px}.lorgus-rp-message-avatar{width:35px;height:35px}.lorgus-rp-message-meta strong{font-size:18px}.lorgus-rp-composer{margin:0 8px 9px;padding:10px}.lorgus-rp-composer-bottom{align-items:stretch;flex-direction:column}.lorgus-rp-actions{display:grid;grid-template-columns:1fr 1fr}.lorgus-rp-send{width:100%}}
+
+
+
+/* LORGUS RP — FULL MESSENGER UI */
+.lorgus-rp-page{width:100%;height:calc(100vh - 86px);margin:0;overflow:hidden;background:#08090b}
+.lorgus-messenger-shell{height:100%;display:grid;grid-template-columns:340px minmax(0,1fr);overflow:hidden;background:#0b0d10;border:0;box-shadow:none}
+.lorgus-messenger-sidebar{display:flex;flex-direction:column;min-width:0;background:linear-gradient(180deg,#11151a,#0d1014);border-right:1px solid rgba(255,255,255,.065);z-index:30}
+.lorgus-messenger-sidebar-head{padding:14px 13px 11px;border-bottom:1px solid rgba(255,255,255,.055)}
+.lorgus-messenger-back{display:block;width:100%;margin-bottom:11px;padding:7px 8px;border:0;background:none;color:#89919c;text-align:left;font-size:12px;cursor:pointer}
+.lorgus-messenger-back:hover{color:#d9dde2}
+.lorgus-messenger-search{height:38px;display:flex;align-items:center;gap:9px;padding:0 13px;border-radius:9px;background:#191e24;color:#69727d;font-size:18px}
+.lorgus-messenger-search span{font-size:12px;color:#707984}
+.lorgus-messenger-chat-card{display:flex;gap:11px;padding:12px 13px;margin:5px 7px 10px;border-radius:9px}
+.lorgus-messenger-chat-card.active{background:linear-gradient(90deg,rgba(205,165,84,.17),rgba(205,165,84,.055))}
+.lorgus-messenger-chat-photo,.lorgus-messenger-header-photo{position:relative;flex:0 0 auto;overflow:hidden;background:linear-gradient(135deg,#3b3125,#181818);border-radius:50%;display:grid;place-items:center;color:#cdb071}
+.lorgus-messenger-chat-photo{width:49px;height:49px}
+.lorgus-messenger-chat-info{min-width:0;display:flex;flex-direction:column;justify-content:center}
+.lorgus-messenger-chat-info strong{font-size:14px;color:#e2e5e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lorgus-messenger-chat-info small{font-size:11px;color:#7d8792;margin-top:2px}
+.lorgus-messenger-chat-info em{font-style:normal;font-size:9px;color:#a88a52;margin-top:5px}
+.lorgus-messenger-section-title{padding:8px 18px 7px;color:#69727c;font-size:9px;letter-spacing:.12em;font-weight:700}
+.lorgus-messenger-participants{flex:1;min-height:0;overflow:auto;padding:0 7px 10px}
+.lorgus-messenger-participant{position:relative;display:flex;align-items:center;gap:10px;min-height:58px;padding:7px 8px;border-radius:8px}
+.lorgus-messenger-participant:hover,.lorgus-messenger-participant.active{background:rgba(255,255,255,.055)}
+.lorgus-messenger-participant.active:before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:2px;background:#caa65e;border-radius:2px}
+.lorgus-messenger-avatar{position:relative;flex:0 0 auto;width:43px;height:43px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#413728,#18191b);display:grid;place-items:center;color:#caa65e;font-size:17px}
+.lorgus-messenger-avatar img,.lorgus-messenger-chat-photo img,.lorgus-messenger-header-photo img,.lorgus-messenger-message-avatar img{width:100%;height:100%;display:block;object-fit:cover}
+.lorgus-messenger-avatar i{position:absolute;right:1px;bottom:1px;width:9px;height:9px;border:2px solid #11151a;border-radius:50%;background:#62bd78}
+.lorgus-messenger-participant-info{min-width:0;display:flex;flex-direction:column;flex:1}
+.lorgus-messenger-participant-info strong{font-size:13px;color:#dfe3e7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lorgus-messenger-participant-info small{font-size:10px;color:#747e89;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lorgus-messenger-my-card{display:flex;align-items:center;gap:11px;margin:7px;padding:12px;border-top:1px solid rgba(255,255,255,.06);background:rgba(0,0,0,.16);border-radius:9px}
+.lorgus-messenger-avatar.large{width:44px;height:44px}
+.lorgus-messenger-my-card small{display:block;color:#68727d;font-size:8px;letter-spacing:.1em}
+.lorgus-messenger-my-card strong{display:block;margin-top:3px;color:#ddd4c5;font-size:13px}
+.lorgus-messenger-main{position:relative;min-width:0;min-height:0;display:grid;grid-template-rows:64px minmax(0,1fr) auto 27px;background:#101317}
+.lorgus-messenger-header{position:relative;z-index:10;display:flex;align-items:center;gap:12px;padding:8px 20px;background:rgba(16,19,23,.94);border-bottom:1px solid rgba(255,255,255,.07);backdrop-filter:blur(18px);box-shadow:0 3px 20px rgba(0,0,0,.18)}
+.lorgus-messenger-header-photo{width:44px;height:44px}
+.lorgus-messenger-header-info{min-width:0;flex:1}
+.lorgus-messenger-header-info h1{margin:0;color:#ece8df;font-family:var(--title-font);font-size:19px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lorgus-messenger-header-info p{margin:3px 0 0;color:#747e89;font-size:10px}
+.online-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:#5fbd76;box-shadow:0 0 8px rgba(95,189,118,.45);margin-right:4px}
+.lorgus-messenger-header-actions{display:flex;gap:3px}
+.lorgus-messenger-header-actions button{width:35px;height:35px;border:0;border-radius:8px;background:transparent;color:#7d8791;font-size:18px;cursor:pointer}
+.lorgus-messenger-header-actions button:hover{background:rgba(255,255,255,.055);color:#ddd}
+.lorgus-messenger-feed{position:relative;min-height:0;overflow:auto;padding:22px clamp(16px,5vw,90px) 25px;background:radial-gradient(800px 500px at 50% 0,rgba(201,165,92,.055),transparent 70%),linear-gradient(180deg,#111419,#0e1115)}
+.lorgus-messenger-feed:before{content:"";position:fixed;pointer-events:none;inset:64px 0 27px 340px;background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.012),transparent 48%);z-index:0}
+.lorgus-messenger-message{position:relative;z-index:1;display:flex;align-items:flex-start;gap:10px;max-width:980px;margin:0 auto 14px}
+.lorgus-messenger-message-avatar{width:39px;height:39px;flex:0 0 39px;border-radius:50%;overflow:hidden;background:linear-gradient(135deg,#433a2d,#17191c);display:grid;place-items:center;color:#c9aa69}
+.lorgus-messenger-message-content{min-width:0;max-width:min(760px,calc(100% - 50px))}
+.lorgus-messenger-message-meta{display:flex;align-items:baseline;gap:8px;padding:0 5px 4px}
+.lorgus-messenger-message-meta strong{font-size:12px;color:#d7bf8f;font-weight:650}
+.lorgus-messenger-message-meta time{font-size:9px;color:#626b75}
+.lorgus-messenger-bubble{padding:10px 13px;border:1px solid rgba(255,255,255,.055);border-radius:4px 13px 13px 13px;background:#191d22;box-shadow:0 3px 12px rgba(0,0,0,.12)}
+.lorgus-messenger-bubble p{margin:0;color:#d2d5d8;font-family:var(--body-font);font-size:14px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+.lorgus-messenger-message.mine{flex-direction:row-reverse}
+.lorgus-messenger-message.mine .lorgus-messenger-message-content{display:flex;flex-direction:column;align-items:flex-end}
+.lorgus-messenger-message.mine .lorgus-messenger-message-meta{justify-content:flex-end}
+.lorgus-messenger-message.mine .lorgus-messenger-message-meta strong{color:#e0c487}
+.lorgus-messenger-message.mine .lorgus-messenger-bubble{border-radius:13px 4px 13px 13px;background:linear-gradient(135deg,#342c20,#29231a);border-color:rgba(205,169,91,.14)}
+.lorgus-messenger-start{position:relative;z-index:1;width:min(560px,calc(100% - 30px));margin:80px auto;text-align:center;padding:38px 30px;border-radius:16px;background:rgba(18,21,25,.78);border:1px solid rgba(255,255,255,.065);box-shadow:0 20px 60px rgba(0,0,0,.28)}
+.lorgus-messenger-start-mark{width:58px;height:58px;margin:0 auto 17px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,rgba(207,170,94,.16),rgba(207,170,94,.025));border:1px solid rgba(207,170,94,.22);color:#d3b16c;font-size:25px}
+.lorgus-messenger-start strong{display:block;color:#e4ddd0;font-family:var(--title-font);font-size:22px}
+.lorgus-messenger-start span{display:block;margin-top:6px;color:#9b8257;font-size:10px}
+.lorgus-messenger-start p{margin:17px auto 0;max-width:460px;color:#737c86;font-size:12px;line-height:1.7}
+.lorgus-messenger-composer{display:flex;align-items:flex-end;gap:8px;padding:10px 14px 9px;background:#15181d;border-top:1px solid rgba(255,255,255,.07);z-index:12}
+.lorgus-messenger-composer-tools{display:flex;gap:2px}
+.lorgus-messenger-composer-tools button{width:34px;height:38px;border:0;border-radius:8px;background:transparent;color:#78828d;font-size:19px;cursor:pointer}
+.lorgus-messenger-composer-tools button:hover{background:rgba(255,255,255,.06);color:#d0d4d8}
+.lorgus-messenger-input-wrap{position:relative;flex:1;min-width:0}
+.lorgus-messenger-input-wrap textarea{display:block;width:100%;min-height:38px;max-height:180px;box-sizing:border-box;resize:none;padding:10px 13px;border:1px solid rgba(255,255,255,.07);border-radius:9px;background:#0e1115;color:#d8dce0;font:13px/1.45 var(--body-font);outline:none}
+.lorgus-messenger-input-wrap textarea:focus{border-color:rgba(205,169,91,.32);box-shadow:0 0 0 2px rgba(205,169,91,.045)}
+.lorgus-messenger-send{width:40px;height:40px;flex:0 0 40px;border:0;border-radius:50%;background:linear-gradient(145deg,#d3b16a,#92713b);color:#17130d;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 5px 18px rgba(180,140,65,.2)}
+.lorgus-messenger-send:hover{transform:translateY(-1px);filter:brightness(1.08)}
+.lorgus-messenger-footer{display:flex;align-items:center;justify-content:space-between;padding:0 15px;background:#101317;color:#555e68;font-size:8px}
+.lorgus-messenger-footer button{border:0;background:none;color:#7d6a49;font-size:9px;cursor:pointer}
+.lorgus-messenger-empty-participants,.lorgus-messenger-loading{padding:18px 12px;text-align:center;color:#59636e;font-size:10px}
+.lorgus-messenger-item-selection{position:absolute;left:10px;bottom:calc(100% + 6px);max-width:90%;color:#bca06a;font-size:10px}
+.lorgus-messenger-bubble .lorgus-rp-item-uses{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.lorgus-messenger-bubble .lorgus-rp-item-use{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border:1px solid color-mix(in srgb,var(--item-color) 30%,transparent);border-radius:6px;background:color-mix(in srgb,var(--item-color) 7%,transparent);color:#aa9a7d;font-size:9px}
+.lorgus-messenger-message.reverted{opacity:.55}
+@media(max-width:850px){
+.lorgus-rp-page{height:calc(100vh - 60px)}
+.lorgus-messenger-shell{grid-template-columns:285px minmax(0,1fr)}
+.lorgus-messenger-feed{padding-left:18px;padding-right:18px}
+.lorgus-messenger-feed:before{left:285px}
+}
+@media(max-width:650px){
+.lorgus-messenger-shell{grid-template-columns:1fr}
+.lorgus-messenger-sidebar{position:absolute;left:-100%;top:0;bottom:0;width:min(320px,88vw);transition:left .2s ease;box-shadow:15px 0 40px rgba(0,0,0,.45)}
+.lorgus-messenger-sidebar.mobile-open{left:0}
+.lorgus-messenger-main{grid-column:1}
+.lorgus-messenger-message-content{max-width:calc(100vw - 82px)}
+.lorgus-messenger-message{gap:7px}
+.lorgus-messenger-message-avatar{width:34px;height:34px;flex-basis:34px}
+.lorgus-messenger-composer-tools button{width:30px}
+.lorgus-messenger-header{padding-left:11px;padding-right:8px}
+}
