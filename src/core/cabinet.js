@@ -246,8 +246,6 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
    ВЫБОР ПЕРСОНАЖА
    ========================================================= */
 
-async
-
 window.renderCabinet = renderCabinet;
 window.loadPlayerState = loadPlayerState;
 
