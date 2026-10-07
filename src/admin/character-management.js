@@ -1,5 +1,5 @@
 /* LORGUS admin character management */
-function openAdminCharacterRecord(application, container) {
+async function openAdminCharacterRecord(application, container) {
     const existing = container.querySelector(".admin-character-record-overlay");
     if (existing) existing.remove();
     const esc = value => escapeHtml(value ?? "—");
