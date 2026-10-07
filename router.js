@@ -28,13 +28,13 @@
     let bootTimer = null;
 
     function normalizePath(pathname = window.location.pathname) {
-        const clean = pathname.replace(/\\/+$/, "") || "/";
+        const clean = pathname.replace(/\/+$/, "") || "/";
         return clean === "/" ? "/" : clean;
     }
 
     function routeForAction(action) {
         if (!action) return null;
-        const normalized = action.replace(/\\s/g, "");
+        const normalized = action.replace(/\s/g, "");
         return ACTION_TO_ROUTE[normalized] || null;
     }
 
