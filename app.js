@@ -3721,7 +3721,11 @@ async function renderRoadChat(presence) {
                     </div>
                     <textarea id="lorgus-rp-input" placeholder="Опиши дорогу, встречу или действие персонажа..." rows="4"></textarea>
                     <div class="lorgus-rp-composer-bottom">
-                        <button class="lorgus-rp-use-item" type="button" onclick="openRpItemPicker()">Использовать предмет</button>
+                        <div class="lorgus-rp-actions">
+                            <button class="lorgus-rp-use-item" type="button" onclick="openRpItemPicker()">Использовать предмет</button>
+                            <button class="lorgus-rp-use-item lorgus-rp-transfer-item" type="button" onclick="openRpTransferPicker()">Передать предмет</button>
+                            <button class="lorgus-rp-use-item lorgus-rp-transfer-currency" type="button" onclick="openRpCurrencyTransferPicker()">Передать валюту</button>
+                        </div>
                         <span id="lorgus-rp-item-selection" class="lorgus-rp-item-selection"></span>
                         <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalRpMessage()">Отправить</button>
                     </div>
@@ -4186,6 +4190,18 @@ async function sendLocalRpMessage() {
    ИНВЕНТАРЬ И ИСПОЛЬЗОВАНИЕ ПРЕДМЕТОВ
    ========================================================= */
 
+const lorgusCurrencies = {
+    aur: { name: "Аур", kingdom: "Атэрон", icon: "◈" },
+    lira: { name: "Лира", kingdom: "Лирэн", icon: "✿" },
+    kald: { name: "Кальд", kingdom: "Ксандр", icon: "◆" },
+    dorn: { name: "Дорн", kingdom: "Каэлор", icon: "⬢" },
+    fin: { name: "Фин", kingdom: "Морвейн", icon: "✧" }
+};
+
+function lorgusCurrencyLabel(code) {
+    return lorgusCurrencies[code]?.name || code;
+}
+
 const inventorySlotLabels = {
     head: "Голова",
     chest: "Тело",
@@ -4247,6 +4263,16 @@ async function renderLorgusInventory() {
         '<div class="lorgus-inventory-layout"><section class="lorgus-equipment-stage"><div class="lorgus-equipment-stage-title">СНАРЯЖЕНИЕ</div><div class="lorgus-equipment-character"><div class="lorgus-equipment-aura"></div><div class="lorgus-equipment-avatar">✦</div><div class="lorgus-equipment-name">' + escapeHtml(character.name || "Персонаж") + '</div><div class="lorgus-equipment-slots">' +
         Object.entries(inventorySlotLabels).map(([slot,label]) => '<div class="lorgus-equipment-slot" data-equipment-slot="' + slot + '" title="' + label + '"><span>' + escapeHtml(label) + '</span><div class="lorgus-equipment-slot-item"></div></div>').join("") +
         '</div></div></section><section class="lorgus-inventory-grid-wrap"><div class="lorgus-inventory-grid-title">РЮКЗАК <span id="lorgus-inventory-count"></span></div><div id="lorgus-inventory-grid" class="lorgus-inventory-grid"><div class="lorgus-inventory-empty">Загрузка...</div></div></section></div></main></div>';
+    const walletSection = document.createElement("section");
+    walletSection.className = "lorgus-wallet-panel";
+    walletSection.innerHTML = '<div class="lorgus-wallet-title"><span>КОШЕЛЁК</span><small>Валюты пяти королевств · 1 золотая = 100 медных</small></div><div class="lorgus-wallet-grid" id="lorgus-wallet-grid"></div>';
+    container.querySelector(".lorgus-inventory-main").appendChild(walletSection);
+    const { data: currencyRows } = await loadCharacterCurrency(character.id);
+    const walletGrid = document.getElementById("lorgus-wallet-grid");
+    if (walletGrid) walletGrid.innerHTML = Object.entries(lorgusCurrencies).map(([code,c]) => {
+        const row=(currencyRows||[]).find(x=>x.currency_code===code);
+        return '<div class="lorgus-wallet-card"><span class="lorgus-wallet-icon">' + escapeHtml(c.icon) + '</span><div><strong>' + escapeHtml(c.name) + '</strong><small>' + escapeHtml(c.kingdom) + '</small></div><b>' + escapeHtml(String(row?.amount || 0)) + '</b></div>';
+    }).join("");
     const { data, error } = await loadCharacterInventory(character.id);
     const grid = document.getElementById("lorgus-inventory-grid");
     if (!grid) return;
@@ -4396,6 +4422,99 @@ function updateRpItemUseButton() {
     const label = document.getElementById("lorgus-rp-item-selection"); if (!label) return;
     const ids = Array.from(window.pendingRpItemIds || []);
     label.textContent = ids.length ? "Выбрано предметов: " + ids.length : "";
+}
+
+
+async function loadCharacterCurrency(characterId) {
+    const { data, error } = await supabase.from("character_currency")
+        .select("currency_code, amount")
+        .eq("character_id", characterId)
+        .order("currency_code");
+    if (error) console.error("Не удалось загрузить валюту:", error);
+    return { data: data || [], error };
+}
+
+async function loadNearbyRpParticipants() {
+    const presence = window.activeRpPresence || await getRpPresence();
+    if (!presence || presence.type !== "location") return [];
+    const { data, error } = await supabase
+        .from("rp_presence")
+        .select("character_id, characters(id,name,race)")
+        .eq("visibility", "public")
+        .eq("presence_type", "location")
+        .eq("region", presence.region)
+        .eq("location", presence.location);
+    if (error) {
+        console.error("Не удалось загрузить игроков рядом:", error);
+        return [];
+    }
+    return (data || []).filter(row => row.character_id && row.character_id !== window.activeCharacterId);
+}
+
+function transferErrorMessage(error) {
+    const map = {
+        PLAYERS_NOT_IN_SAME_LOCATION: "Игроки должны находиться в одной локации.",
+        ITEM_MUST_BE_UNEQUIPPED: "Сначала сними предмет с персонажа.",
+        INSUFFICIENT_ITEM_QUANTITY: "Недостаточно предметов.",
+        RECIPIENT_STACK_FULL: "У получателя нет места в стопке этого предмета.",
+        NON_STACKABLE_ITEM: "Этот предмет нельзя передать в таком количестве.",
+        INSUFFICIENT_CURRENCY: "Недостаточно валюты.",
+        INVALID_AMOUNT: "Укажи корректную сумму.",
+        TRANSFER_SELF: "Нельзя передать это самому себе."
+    };
+    return map[error?.message] || error?.message || "Не удалось выполнить передачу.";
+}
+
+async function openRpTransferPicker() {
+    const existing = document.querySelector(".lorgus-rp-transfer-overlay"); if (existing) existing.remove();
+    const participants = await loadNearbyRpParticipants();
+    const { data: inventory, error } = await loadCharacterInventory(window.activeCharacterId);
+    if (error) { alert("Не удалось открыть инвентарь:\n\n" + error.message); return; }
+    const usable = (inventory || []).filter(row => row.quantity > 0 && !row.equipped_slot);
+    const overlay = document.createElement("div"); overlay.className = "lorgus-rp-transfer-overlay";
+    overlay.innerHTML = '<div class="lorgus-rp-item-backdrop"></div><article class="lorgus-rp-transfer-panel"><button type="button" class="lorgus-rp-item-close">×</button><span class="lorgus-command-kicker">RP · ПЕРЕДАЧА</span><h2>Передать предмет</h2><p>Передача доступна только персонажу, который сейчас находится рядом с тобой.</p>' +
+        '<label>Кому<select class="lorgus-transfer-target"><option value="">Выбери персонажа...</option>' + (participants.length ? participants.map(row => '<option value="' + escapeHtml(row.character_id) + '">' + escapeHtml(row.characters?.name || "Без имени") + (row.characters?.race ? ' · ' + escapeHtml(row.characters.race) : '') + '</option>').join("") : '') + '</select></label>' +
+        '<label>Предмет<select class="lorgus-transfer-item"><option value="">Выбери предмет...</option>' + usable.map(row => '<option value="' + escapeHtml(row.id) + '">' + escapeHtml(row.items?.icon || "◆") + ' ' + escapeHtml(row.items?.name || "Предмет") + ' · ' + escapeHtml(inventoryRarityLabel(row.items?.rarity)) + ' · ×' + escapeHtml(String(row.quantity)) + '</option>').join("") + '</select></label>' +
+        '<label>Количество<input class="lorgus-transfer-quantity" type="number" min="1" value="1"></label>' +
+        '<button type="button" class="gold-button lorgus-transfer-confirm">Передать</button></article>';
+    document.body.appendChild(overlay); requestAnimationFrame(() => overlay.classList.add("open"));
+    const close=()=>overlay.remove(); overlay.querySelector(".lorgus-rp-item-close").addEventListener("click",close); overlay.querySelector(".lorgus-rp-item-backdrop").addEventListener("click",close);
+    const itemSelect=overlay.querySelector(".lorgus-transfer-item"), qty=overlay.querySelector(".lorgus-transfer-quantity");
+    itemSelect.addEventListener("change",()=>{ const row=usable.find(x=>x.id===itemSelect.value); qty.max=String(row?.quantity||1); qty.value="1"; });
+    overlay.querySelector(".lorgus-transfer-confirm").addEventListener("click",async()=>{
+        const target=overlay.querySelector(".lorgus-transfer-target").value, itemId=itemSelect.value, amount=Math.max(1,Number.parseInt(qty.value,10)||1);
+        if(!target||!itemId){ alert("Выбери персонажа и предмет."); return; }
+        const row=usable.find(x=>x.id===itemId);
+        if(!row || amount>row.quantity){ alert("Недостаточно предметов."); return; }
+        const { error }=await supabase.rpc("lorgus_transfer_character_item",{p_sender_character_id:window.activeCharacterId,p_recipient_character_id:target,p_inventory_id:itemId,p_quantity:amount});
+        if(error){ console.error(error); alert(transferErrorMessage(error)); return; }
+        close(); await renderLocationParticipantsIfVisible(); alert("Предмет передан.");
+    });
+}
+
+async function openRpCurrencyTransferPicker() {
+    const existing = document.querySelector(".lorgus-rp-transfer-overlay"); if (existing) existing.remove();
+    const participants = await loadNearbyRpParticipants();
+    const { data: balances, error } = await loadCharacterCurrency(window.activeCharacterId);
+    if (error) { alert("Не удалось открыть кошелёк:\n\n" + error.message); return; }
+    const usable = (balances || []).filter(row => row.amount > 0);
+    const overlay = document.createElement("div"); overlay.className = "lorgus-rp-transfer-overlay";
+    overlay.innerHTML = '<div class="lorgus-rp-item-backdrop"></div><article class="lorgus-rp-transfer-panel"><button type="button" class="lorgus-rp-item-close">×</button><span class="lorgus-command-kicker">RP · ОБМЕН</span><h2>Передать валюту</h2><p>Валюту можно передать только персонажу в той же локации.</p>' +
+        '<label>Кому<select class="lorgus-transfer-target"><option value="">Выбери персонажа...</option>' + participants.map(row => '<option value="' + escapeHtml(row.character_id) + '">' + escapeHtml(row.characters?.name || "Без имени") + '</option>').join("") + '</select></label>' +
+        '<label>Валюта<select class="lorgus-transfer-currency">' + (usable.length ? usable.map(row => '<option value="' + escapeHtml(row.currency_code) + '">' + escapeHtml(lorgusCurrencies[row.currency_code]?.icon || "◆") + ' ' + escapeHtml(lorgusCurrencyLabel(row.currency_code)) + ' · доступно ' + escapeHtml(String(row.amount)) + '</option>').join("") : '<option value="">Нет валюты</option>') + '</select></label>' +
+        '<label>Сумма<input class="lorgus-transfer-quantity" type="number" min="1" value="1"></label>' +
+        '<button type="button" class="gold-button lorgus-transfer-confirm">Передать</button></article>';
+    document.body.appendChild(overlay); requestAnimationFrame(() => overlay.classList.add("open"));
+    const close=()=>overlay.remove(); overlay.querySelector(".lorgus-rp-item-close").addEventListener("click",close); overlay.querySelector(".lorgus-rp-item-backdrop").addEventListener("click",close);
+    overlay.querySelector(".lorgus-transfer-confirm").addEventListener("click",async()=>{
+        const target=overlay.querySelector(".lorgus-transfer-target").value, code=overlay.querySelector(".lorgus-transfer-currency").value, amount=Math.max(1,Number.parseInt(overlay.querySelector(".lorgus-transfer-quantity").value,10)||1);
+        if(!target||!code){ alert("Выбери персонажа и валюту."); return; }
+        const balance=usable.find(x=>x.currency_code===code)?.amount||0;
+        if(amount>balance){ alert("Недостаточно валюты."); return; }
+        const { error }=await supabase.rpc("lorgus_transfer_character_currency",{p_sender_character_id:window.activeCharacterId,p_recipient_character_id:target,p_currency_code:code,p_amount:amount});
+        if(error){ console.error(error); alert(transferErrorMessage(error)); return; }
+        close(); alert("Валюта передана.");
+    });
 }
 
 async function openRpItemPicker() {
