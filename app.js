@@ -3097,6 +3097,13 @@ async function renderWorldCharacterTracker() {
         return;
     }
 
+    const trackerIds = [...new Set(data.map(row => row.character_id).filter(Boolean))];
+    const { data: trackerCharacters } = await supabase.from("characters").select("id, active_title_id").in("id", trackerIds);
+    const trackerTitleIds = [...new Set((trackerCharacters || []).map(row => row.active_title_id).filter(Boolean))];
+    const { data: trackerTitles } = trackerTitleIds.length ? await supabase.from("titles").select("*").in("id", trackerTitleIds) : { data: [] };
+    const trackerTitleMap = Object.fromEntries((trackerTitles || []).map(t => [String(t.id), t]));
+    const trackerActiveMap = Object.fromEntries((trackerCharacters || []).map(row => [String(row.id), trackerTitleMap[String(row.active_title_id)] || null]));
+
     tracker.innerHTML = data.map(row => {
         const character = row.characters || {};
         const isSelf = row.character_id === window.activeCharacterId;
@@ -3115,7 +3122,7 @@ async function renderWorldCharacterTracker() {
         return `
             <article class="lorgus-location-card" style="cursor:default">
                 <span class="lorgus-location-card-mark">${row.presence_type === "road" ? "→" : "✦"}</span>
-                <strong>${escapeHtml(character.name || "Без имени")}${isSelf ? " · Вы" : ""}</strong>
+                <strong>${escapeHtml(character.name || "Без имени")}${isSelf ? " · Вы" : ""}${renderTitleBadge(trackerActiveMap[String(row.character_id)], "lorgus-public-title")}</strong>
                 <small>${escapeHtml(character.race || "Персонаж")}</small>
                 <p>${place}<br><span>${status}</span></p>
             </article>
@@ -3689,6 +3696,13 @@ async function renderLocationParticipants(locationName, regionName) {
         return;
     }
 
+    const participantIds = [...new Set(participants.map(row => row.character_id).filter(Boolean))];
+    const { data: participantCharacters } = participantIds.length ? await supabase.from("characters").select("id, active_title_id").in("id", participantIds) : { data: [] };
+    const participantTitleIds = [...new Set((participantCharacters || []).map(row => row.active_title_id).filter(Boolean))];
+    const { data: participantTitles } = participantTitleIds.length ? await supabase.from("titles").select("*").in("id", participantTitleIds) : { data: [] };
+    const participantTitleMap = Object.fromEntries((participantTitles || []).map(t => [String(t.id), t]));
+    const participantActiveMap = Object.fromEntries((participantCharacters || []).map(row => [String(row.id), participantTitleMap[String(row.active_title_id)] || null]));
+
     box.innerHTML = participants.map(row => {
         const character = row.characters || {};
         const isCurrent = row.character_id === window.activeCharacterId;
@@ -3696,7 +3710,7 @@ async function renderLocationParticipants(locationName, regionName) {
             <div class="lorgus-rp-participant ${isCurrent ? "active" : ""}">
                 <span class="lorgus-rp-avatar">✦</span>
                 <div>
-                    <strong>${escapeHtml(character.name || "Без имени")}</strong>
+                    <strong>${escapeHtml(character.name || "Без имени")}${renderTitleBadge(participantActiveMap[String(row.character_id)], "lorgus-public-title")}</strong>
                     <small>${isCurrent ? "Вы" : escapeHtml(character.race || "Персонаж")}</small>
                 </div>
             </div>
