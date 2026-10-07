@@ -5,15 +5,12 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.m
 
 let supabase;
 let authSwitching = false;
-let window.lorgusPortalEntering = false;
-window.window.lorgusPortalEntering = window.lorgusPortalEntering;
-let window.lorgusPortalDepartureAligning = false;
-window.window.lorgusPortalDepartureAligning = window.lorgusPortalDepartureAligning;
-let window.lorgusPortalEnterStartedAt = 0;
-window.window.lorgusPortalEnterStartedAt = window.lorgusPortalEnterStartedAt;
+window.lorgusPortalEntering = false;
+window.lorgusPortalDepartureAligning = false;
+window.lorgusPortalEnterStartedAt = 0;
 let lorgusPortalOverlay = null;
 window.THREE = THREE;
-window.escapeHtml = escapeHtml;
+window.escapeHtml = escapeHtml;\nwindow.supabaseClient = null;
 
 /* =========================================================
    ИНИЦИАЛИЗАЦИЯ
