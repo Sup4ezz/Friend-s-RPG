@@ -15089,3 +15089,67 @@ body:has(#root > #cabinet-content.character-application){
         grid-template-columns:1fr;
     }
 }
+
+/* Admin wallet — three clear denomination columns */
+.lorgus-admin-currency-denominations{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+    width:100%;
+}
+.lorgus-admin-currency-denominations label{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:6px;
+    min-width:0;
+    padding:10px;
+    border:1px solid rgba(214,179,106,.14);
+    background:rgba(255,255,255,.018);
+    font-size:9px;
+    line-height:1;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+}
+.lorgus-admin-currency-denominations label:nth-child(1){
+    color:#e4c35a;
+    border-color:rgba(228,195,90,.28);
+}
+.lorgus-admin-currency-denominations label:nth-child(2){
+    color:#c7c7c7;
+    border-color:rgba(199,199,199,.24);
+}
+.lorgus-admin-currency-denominations label:nth-child(3){
+    color:#b8784f;
+    border-color:rgba(184,120,79,.28);
+}
+.lorgus-admin-currency-denominations input{
+    width:100%;
+    min-width:0;
+    box-sizing:border-box;
+    padding:9px 10px;
+    background:#0d0b09;
+    color:#e9e0d2;
+    border:1px solid currentColor;
+    font-size:14px;
+    line-height:1.2;
+}
+.lorgus-admin-currency-denominations label:nth-child(1) input{color:#e4c35a}
+.lorgus-admin-currency-denominations label:nth-child(2) input{color:#c7c7c7}
+.lorgus-admin-currency-denominations label:nth-child(3) input{color:#b8784f}
+
+@media(max-width:700px){
+    .lorgus-admin-currency-denominations{
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:7px;
+    }
+    .lorgus-admin-currency-denominations label{
+        padding:8px 6px;
+        font-size:8px;
+        letter-spacing:.08em;
+    }
+}
+@media(max-width:430px){
+    .lorgus-admin-currency-denominations{
+        grid-template-columns:1fr;
+    }
+}
