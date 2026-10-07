@@ -1168,6 +1168,7 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
 
     window.lorgusUsername = username;
     window.lorgusCurrentUsername = username;
+    window.lorgusCurrentUserId = session.user.id;
 
     const root = document.getElementById("root");
     if (!root) return;
@@ -1832,6 +1833,53 @@ function renderCharacterApplicationForm(container) {
 
     initializeCharacterPortraitCrop();
 
+    // Локальный черновик анкеты. Он переживает повторный рендер кабинета,
+    // переключение вкладок и возврат к странице. Файл изображения намеренно
+    // не сохраняем: браузер не позволяет безопасно восстановить input[type=file].
+    const draftKey = `lorgus_character_application_draft_${window.lorgusCurrentUserId || "guest"}`;
+    const characterForm = container.querySelector("#character-application-form");
+
+    if (characterForm) {
+        const saveDraft = () => {
+            try {
+                const draft = {};
+                characterForm.querySelectorAll("input, textarea, select").forEach(field => {
+                    if (!field.id || field.type === "file") return;
+                    draft[field.id] = field.value;
+                });
+                localStorage.setItem(draftKey, JSON.stringify(draft));
+            } catch (error) {
+                console.warn("Не удалось сохранить черновик анкеты:", error);
+            }
+        };
+
+        const restoreDraft = () => {
+            try {
+                const raw = localStorage.getItem(draftKey);
+                if (!raw) return;
+                const draft = JSON.parse(raw);
+                characterForm.querySelectorAll("input, textarea, select").forEach(field => {
+                    if (!field.id || field.type === "file") return;
+                    if (Object.prototype.hasOwnProperty.call(draft, field.id)) {
+                        field.value = draft[field.id] ?? "";
+                    }
+                });
+            } catch (error) {
+                console.warn("Не удалось восстановить черновик анкеты:", error);
+            }
+        };
+
+        characterForm.addEventListener("input", saveDraft);
+        characterForm.addEventListener("change", saveDraft);
+        window.addEventListener("pagehide", saveDraft, { once: true });
+        window.addEventListener("beforeunload", saveDraft, { once: true });
+        restoreDraft();
+
+        window.clearLorgusCharacterDraft = () => {
+            localStorage.removeItem(draftKey);
+        };
+    }
+
     const originData = {
         "Атэрон": {
             races: "Преимущественно эльфы",
@@ -2305,6 +2353,10 @@ async function submitCharacterApplication(event) {
         }
 
         return;
+    }
+
+    if (typeof window.clearLorgusCharacterDraft === "function") {
+        window.clearLorgusCharacterDraft();
     }
 
     await loadPlayerState({
