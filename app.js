@@ -4825,11 +4825,11 @@ async function openAdminCharacterInventory(application, container) {
             '<select class="lorgus-admin-currency-code">' +
                 Object.entries(lorgusCurrencies).map(([code,c]) => '<option value="' + code + '">' + c.name + ' · ' + c.kingdom + '</option>').join("") +
             '</select>' +
-            '<div class="lorgus-admin-currency-denominations">
-            <label>Золотые<input class="lorgus-admin-currency-gold" type="number" min="0" step="1" value="0"></label>
-            <label>Серебряные<input class="lorgus-admin-currency-silver" type="number" min="0" step="1" value="0"></label>
-            <label>Бронзовые<input class="lorgus-admin-currency-bronze" type="number" min="0" step="1" value="100"></label>
-        </div>' +
+            '<div class="lorgus-admin-currency-denominations">' +
+                '<label>Золотые<input class="lorgus-admin-currency-gold" type="number" min="0" step="1" value="0"></label>' +
+                '<label>Серебряные<input class="lorgus-admin-currency-silver" type="number" min="0" step="1" value="0"></label>' +
+                '<label>Бронзовые<input class="lorgus-admin-currency-bronze" type="number" min="0" step="1" value="100"></label>' +
+            '</div>' +
             '<button type="button" class="lorgus-admin-currency-btn">Выдать валюту</button>' +
         '</div>' +
         '<div class="lorgus-admin-currency-list"></div>' +
