@@ -7407,6 +7407,7 @@ const openingShape = new THREE.Shape();
         renderer.dispose();
         if (previousCleanup) previousCleanup();
     };
+}
 async function appendRpMessage(message) {
     const feed = document.getElementById("lorgus-rp-feed");
     if (!feed || feed.querySelector('[data-rp-message-id="' + message.id + '"]')) return;
@@ -8619,3 +8620,1993 @@ function setCharacterMessage(
 }
 
 /* =========================================================
+   ВЫХОД
+   ========================================================= */
+
+async function logout() {
+    await supabase.auth.signOut();
+}
+
+/* =========================================================
+   СООБЩЕНИЯ АВТОРИЗАЦИИ
+   ========================================================= */
+
+function setMessage(
+    text,
+    type
+) {
+    const element =
+        document.getElementById(
+            "auth-message"
+        );
+
+    if (!element) return;
+
+    element.className =
+        `auth-message ${type}`;
+
+    element.textContent = text;
+}
+
+/* =========================================================
+   РАСШИРЕНИЕ ФАЙЛА
+   ========================================================= */
+
+function getFileExtension(
+    filename
+) {
+    const parts =
+        filename.split(".");
+
+    if (parts.length < 2) {
+        return "jpg";
+    }
+
+    const extension =
+        parts.pop().toLowerCase();
+
+    if (
+        extension === "jpeg" ||
+        extension === "jpg"
+    ) {
+        return "jpg";
+    }
+
+    if (extension === "png") {
+        return "png";
+    }
+
+    if (extension === "webp") {
+        return "webp";
+    }
+
+    return "jpg";
+}
+
+/* =========================================================
+   ЭКРАНИРОВАНИЕ HTML
+   ========================================================= */
+
+function escapeHtml(value) {
+    return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+}
+
+/* =========================================================
+   GLOBAL
+   ========================================================= */
+
+window.showLogin = showLogin;
+window.showRegister = showRegister;
+window.login = login;
+window.register = register;
+window.logout = logout;
+window.openLorgusNotifications = openLorgusNotifications;
+window.submitCharacterApplication =
+    submitCharacterApplication;
+window.updateCharacterApplication =
+    updateCharacterApplication;
+window.openActiveCharacterProfile = openActiveCharacterProfile;
+window.switchCharacter = switchCharacter;
+window.returnToGame = returnToGame;
+window.renderCharacter = renderCharacter;
+window.renderKingdomLocations = renderKingdomLocations;
+window.renderLocationChats = renderLocationChats;
+window.enterLocationRp = enterLocationRp;
+window.sendLocalRpMessage = sendLocalRpMessage;
+window.renderFloodChat = renderFloodChat;
+window.sendLocalFloodMessage = sendLocalFloodMessage;
+window.renderRoadChat = renderRoadChat;
+window.startTravel = startTravel;
+window.arriveAtDestination = arriveAtDestination;
+window.getRpPresence = getRpPresence;
+window.renderWorldCharacterTracker = renderWorldCharacterTracker;
+window.renderMail = renderMail;
+window.sendLorgusMail = sendLorgusMail;
+window.markLorgusMailRead = markLorgusMailRead;
+
+
+/* =========================================================
+   ЗАПУСК — уже выполнен выше
+   ========================================================= */
+
+
+/* =========================================================
+   LORGUS 2.1 — CINEMATIC WORLD MAP
+   Карта остаётся исходным PNG. Игровые элементы лежат
+   отдельным слоем поверх неё.
+   ========================================================= */
+
+function selectLorgusMapRegion(region) {
+    const title = document.getElementById("lorgus-map-selection-title");
+    const text = document.getElementById("lorgus-map-selection-text");
+    const buttons = document.querySelectorAll(".lorgus-map-region-button");
+
+    buttons.forEach(button => {
+        button.classList.toggle("active", button.dataset.region === region);
+    });
+
+    const descriptions = {
+        "Атэрон": "Знания, древности, исследования и руины.",
+        "Каэлор": "Горы, кузницы, шахты и древнее мастерство.",
+        "Ксандр": "Торговля, банки, дороги и большие рынки.",
+        "Лирэн": "Леса, плодородные земли и древняя природа.",
+        "Морвейн": "Паломничество, память и туманные долины.",
+        "Святые Земли": "Нейтральная территория для переговоров монархов и глав церквей.",
+        "Спорные Земли": "Независимые поселения и территории вне власти пяти королевств."
+    };
+
+    if (title) title.textContent = region;
+    if (text) text.textContent = descriptions[region] || "Выбери край мира, чтобы узнать больше.";
+
+    const enterButton = document.getElementById("lorgus-map-enter-button");
+    if (!enterButton) return;
+
+    const openable = Object.prototype.hasOwnProperty.call(descriptions, region);
+    enterButton.disabled = !openable;
+    enterButton.textContent = openable ? "Открыть край" : "Территория закрыта";
+    enterButton.onclick = openable ? () => renderKingdomLocations(region) : null;
+}
+
+const LORGUS_MAP_MARKERS = [
+    { id:"Атэрон", x:22, y:34, type:"kingdom", description:"Знания, древности, исследования и руины." },
+    { id:"Каэлор", x:72, y:27, type:"kingdom", description:"Горы, кузницы, шахты и древнее мастерство." },
+    { id:"Ксандр", x:79, y:61, type:"kingdom", description:"Торговля, банки, дороги и большие рынки." },
+    { id:"Лирэн", x:31, y:69, type:"kingdom", description:"Леса, плодородные земли и древняя природа." },
+    { id:"Морвейн", x:51, y:82, type:"kingdom", description:"Паломничество, память и туманные долины." },
+    { id:"Святые Земли", x:52, y:50, type:"neutral", description:"Нейтральная территория для переговоров монархов и глав церквей." },
+    { id:"Спорные Земли", x:62, y:66, type:"contested", description:"Независимые поселения и территории вне власти пяти королевств." }
+];
+
+const LORGUS_MAP_EDITOR_RECTS = [
+    { id:"Атэрон", x:62.5, y:62.1, w:11.8, h:6.0, rotation:0 },
+    { id:"Каэлор", x:62.0, y:69.7, w:11.9, h:6.3, rotation:0 },
+    { id:"Ксандр", x:48.4, y:60.6, w:6.7, h:8.2, rotation:0 },
+    { id:"Лирэн", x:25.4, y:56.0, w:17.2, h:8.9, rotation:0 },
+    { id:"Морвейн", x:69.9, y:42.8, w:12.2, h:10.6, rotation:0 },
+    { id:"Святые Земли", x:51.9, y:45.2, w:3.4, h:3.4, rotation:0 },
+    { id:"Спорные Земли", x:54.6, y:31.5, w:6.1, h:5.3, rotation:0 }
+];
+function enableLorgusMapEditor() {
+    const layer = document.getElementById("lorgus-map-marker-layer");
+    const viewport = document.getElementById("lorgus-map-viewport");
+    if (!layer || !viewport) return;
+
+    layer.classList.toggle("editor-mode");
+    const active = layer.classList.contains("editor-mode");
+    const button = document.getElementById("lorgus-map-editor-toggle");
+    if (button) button.textContent = active ? "✓ РЕДАКТОР ВКЛЮЧЁН" : "✎ РЕДАКТОР КАРТЫ";
+
+    renderLorgusMapEditorRects(active);
+}
+
+function bindLorgusMapEditorInteraction(label, rectData, layer) {
+    if (!label || !rectData || !layer) return;
+
+    let drag = null;
+
+    const start = (event, mode) => {
+        if (!layer.classList.contains("editor-mode")) return;
+        event.preventDefault();
+        event.stopPropagation();
+
+        const layerRect = layer.getBoundingClientRect();
+        drag = {
+            mode,
+            startX: event.clientX,
+            startY: event.clientY,
+            x: rectData.x,
+            y: rectData.y,
+            w: rectData.w,
+            h: rectData.h,
+            layerW: layerRect.width,
+            layerH: layerRect.height,
+            moved: false
+        };
+
+        label.setPointerCapture?.(event.pointerId);
+        label.classList.add("editing");
+    };
+
+    label.addEventListener("pointerdown", event => {
+        if (event.target.closest(".lorgus-map-editor-handle")) return;
+        start(event, "move");
+    });
+
+    const handle = document.createElement("span");
+    handle.className = "lorgus-map-editor-handle";
+    handle.title = "Изменить размер";
+    label.appendChild(handle);
+
+    handle.addEventListener("pointerdown", event => {
+        start(event, "resize");
+    });
+
+    label.addEventListener("pointermove", event => {
+        if (!drag) return;
+
+        const dx = ((event.clientX - drag.startX) / drag.layerW) * 100;
+        const dy = ((event.clientY - drag.startY) / drag.layerH) * 100;
+
+        if (Math.abs(dx) + Math.abs(dy) > 0.15) drag.moved = true;
+
+        if (drag.mode === "move") {
+            rectData.x = Math.max(0, Math.min(100, drag.x + dx));
+            rectData.y = Math.max(0, Math.min(100, drag.y + dy));
+        } else {
+            rectData.w = Math.max(1, Math.min(40, drag.w + dx));
+            rectData.h = Math.max(1, Math.min(40, drag.h + dy));
+        }
+
+        label.style.left = rectData.x + "%";
+        label.style.top = rectData.y + "%";
+        label.style.width = rectData.w + "%";
+        label.style.height = rectData.h + "%";
+        fitLorgusMapLabel(label);
+        updateLorgusMapEditorReadout(rectData);
+    });
+
+    const stop = event => {
+        if (!drag) return;
+        label.classList.remove("editing");
+        label.dataset.moved = drag.moved ? "1" : "0";
+        drag = null;
+        if (event) updateLorgusMapEditorReadout(rectData);
+    };
+
+    label.addEventListener("pointerup", stop);
+    label.addEventListener("pointercancel", stop);
+
+    label.addEventListener("click", event => {
+        if (label.dataset.moved === "1") {
+            event.preventDefault();
+            event.stopPropagation();
+            label.dataset.moved = "0";
+        }
+    });
+}
+
+function updateLorgusMapEditorReadout(rectData) {
+    const readout = document.getElementById("lorgus-map-editor-readout");
+    if (!readout || !rectData) return;
+
+    readout.innerHTML =
+        "<strong>" + escapeHtml(rectData.id) + "</strong>" +
+        "<span>X " + rectData.x.toFixed(1) + " · Y " + rectData.y.toFixed(1) +
+        " · W " + rectData.w.toFixed(1) + " · H " + rectData.h.toFixed(1) + "</span>";
+}
+
+function syncLorgusMapLabelLayer() {
+    const world = document.getElementById("lorgus-map-world");
+    const image = world?.querySelector(".lorgus-map-image");
+    const layer = document.getElementById("lorgus-map-marker-layer");
+
+    if (!world || !image || !layer || !image.complete) return;
+
+    // Координаты подписей относятся именно к PNG, а не ко всему viewport.
+    // Это важно, когда object-fit: contain оставляет поля по краям.
+    layer.style.left = image.offsetLeft + "px";
+    layer.style.top = image.offsetTop + "px";
+    layer.style.width = image.offsetWidth + "px";
+    layer.style.height = image.offsetHeight + "px";
+}
+
+function fitLorgusMapLabel(label) {
+    if (!label) return;
+
+    const maxWidth = Math.max(20, label.clientWidth - 10);
+    const maxHeight = Math.max(14, label.clientHeight - 6);
+    const textLength = Math.max(1, (label.textContent || "").trim().length);
+
+    // Размер названия напрямую зависит от размеров рамки.
+    // Ширина учитывается через длину текста, а не через scrollWidth,
+    // чтобы браузерное переносы строк не ужимали шрифт до крошечного размера.
+    const heightSize = maxHeight * 0.78;
+    const widthSize = maxWidth / Math.max(3.8, textLength * 0.52);
+
+    let size = Math.min(56, Math.max(12, heightSize, widthSize));
+    label.style.fontSize = size + "px";
+
+    // Только реальный выход за границы уменьшает размер.
+    while (
+        size > 12 &&
+        (label.scrollWidth > label.clientWidth + 2 || label.scrollHeight > label.clientHeight + 2)
+    ) {
+        size -= 1;
+        label.style.fontSize = size + "px";
+    }
+}
+
+function renderLorgusMapEditorRects() {
+    const layer = document.getElementById("lorgus-map-marker-layer");
+    const image = document.querySelector("#lorgus-map-world .lorgus-map-image");
+    if (!layer || !image) return;
+
+    layer.querySelectorAll(".lorgus-map-editor-rect").forEach(el => el.remove());
+
+    const render = () => {
+        syncLorgusMapLabelLayer();
+
+        LORGUS_MAP_EDITOR_RECTS.forEach(rectData => {
+            const label = document.createElement("button");
+            label.type = "button";
+            label.className = "lorgus-map-editor-rect";
+            label.dataset.region = rectData.id;
+            label.textContent = rectData.id;
+
+            label.style.left = rectData.x + "%";
+            label.style.top = rectData.y + "%";
+            label.style.width = rectData.w + "%";
+            label.style.height = rectData.h + "%";
+            label.style.transform = "translate(-50%,-50%)";
+
+            label.onclick = event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                if (typeof window.selectLorgusMapRegion === "function") {
+                    window.selectLorgusMapRegion(rectData.id);
+                }
+            };
+
+            layer.appendChild(label);
+
+            if (layer.classList.contains("editor-mode")) {
+                bindLorgusMapEditorInteraction(label, rectData, layer);
+            }
+        });
+
+        requestAnimationFrame(() => {
+            syncLorgusMapLabelLayer();
+            layer.querySelectorAll(".lorgus-map-editor-rect").forEach(fitLorgusMapLabel);
+        });
+    };
+
+    if (image.complete) {
+        render();    } else {
+        image.addEventListener("load", render, { once: true });
+    }
+    if (window.lorgusMapLabelResizeObserver) {
+        window.lorgusMapLabelResizeObserver.disconnect();
+    }
+
+    const world = document.getElementById("lorgus-map-world");
+    if (!world) return;
+
+    window.lorgusMapLabelResizeObserver = new ResizeObserver(() => {
+        syncLorgusMapLabelLayer();
+        layer.querySelectorAll(".lorgus-map-editor-rect").forEach(fitLorgusMapLabel);
+    });
+
+    window.lorgusMapLabelResizeObserver.observe(image);
+    window.lorgusMapLabelResizeObserver.observe(world);
+}
+function addLorgusMapEditorUI() {
+    const controls = document.querySelector(".lorgus-map-controls");
+    if (!controls || document.getElementById("lorgus-map-editor-toggle")) return;
+
+    controls.innerHTML = "";
+
+    const button = document.createElement("button");
+    button.id = "lorgus-map-editor-toggle";
+    button.type = "button";
+    button.className = "lorgus-map-control lorgus-map-editor-toggle";
+    button.textContent = "✎ РЕДАКТОР КАРТЫ";
+    button.onclick = enableLorgusMapEditor;
+    controls.appendChild(button);
+
+    const readout = document.createElement("div");
+    readout.id = "lorgus-map-editor-readout";
+    readout.className = "lorgus-map-editor-readout";
+    readout.innerHTML = "<strong>РЕДАКТОР ВЫКЛЮЧЕН</strong><span>Нажми кнопку, затем перетаскивай названия</span>";
+    controls.appendChild(readout);
+}
+
+function renderLorgusMapMarkers() {
+    const layer = document.getElementById("lorgus-map-marker-layer");
+    if (!layer) return;
+
+    layer.innerHTML = LORGUS_MAP_MARKERS.map(marker => `
+        <button
+            type="button"
+            class="lorgus-map-marker ${marker.type}"
+            style="left:${marker.x}%;top:${marker.y}%"
+            data-region="${escapeHtml(marker.id)}"
+            onclick="selectLorgusMapMarker('${escapeHtml(marker.id)}')"
+            title="${escapeHtml(marker.id)}"
+            aria-label="Открыть ${escapeHtml(marker.id)}"
+        >
+            <span class="lorgus-map-marker-pulse"></span>
+            <span class="lorgus-map-marker-core"></span>
+            <span class="lorgus-map-marker-label">${escapeHtml(marker.id)}</span>
+        </button>
+    `).join("");
+
+    const presence = window.activeRpPresence;
+    if (presence?.type === "location" && presence.location) {
+        const current = layer.querySelector(`[data-region="${CSS.escape(presence.location)}"]`);
+        current?.classList.add("current");
+    }
+}
+
+function selectLorgusMapMarker(region) {
+    selectLorgusMapRegion(region);
+    const marker = document.querySelector(`.lorgus-map-marker[data-region="${CSS.escape(region)}"]`);
+    document.querySelectorAll(".lorgus-map-marker").forEach(item => item.classList.remove("selected"));
+    marker?.classList.add("selected");
+}
+
+function handleLorgusMapSurfaceClick(event) {
+    if (event.target.closest(".lorgus-map-marker")) return;
+    const viewport = document.getElementById("lorgus-map-viewport");
+    if (!viewport) return;
+    const rect = viewport.getBoundingClientRect();
+    const x = Math.round(((event.clientX - rect.left) / rect.width) * 100);
+    const y = Math.round(((event.clientY - rect.top) / rect.height) * 100);
+    const hint = document.getElementById("lorgus-map-surface-hint");
+    if (hint) {
+        hint.textContent = `ТОЧКА КАРТЫ · ${Math.max(0,Math.min(100,x))}% / ${Math.max(0,Math.min(100,y))}%`;
+        hint.classList.add("visible");
+        clearTimeout(window.lorgusMapHintTimer);
+        window.lorgusMapHintTimer = setTimeout(() => hint.classList.remove("visible"), 1800);
+    }
+}
+
+function renderLorgusWorldMap(container, character) {
+    if (!container || !character) return;
+
+    container.className = "lorgus-map-page";
+
+    const name = escapeHtml(character.name || "Без имени");
+    const race = escapeHtml(character.race || "Раса не указана");
+    const homeland = escapeHtml(character.homeland || "Родина не указана");
+
+    const presence = window.activeRpPresence;
+    const currentLocation =
+        presence?.type === "location"
+            ? presence.location
+            : presence?.type === "road"
+                ? "В пути"
+                : "Местоположение ещё не определено";
+
+    container.innerHTML = `
+        ${renderLorgusInterfaceNav("world")}
+        <div class="lorgus-map-shell">
+            <aside class="lorgus-map-sidebar">
+                <div class="lorgus-map-brand">
+                    <span class="lorgus-map-brand-mark">✦</span>
+                    <span>ЛОРГУС</span>
+                </div>
+
+                <div class="lorgus-map-character">
+                    <span class="lorgus-map-kicker">ПУТЬ ПЕРСОНАЖА</span>
+                    <h1>${name}</h1>
+                    <p>${race} · ${homeland}</p>
+                    <div class="lorgus-character-seal" aria-hidden="true"><span>✦</span></div>
+                </div>
+
+                <div class="lorgus-map-location-status">
+                    <span>ТЕКУЩЕЕ МЕСТОПОЛОЖЕНИЕ</span>
+                    <strong>${escapeHtml(currentLocation)}</strong>
+                    <small>Положение персонажа в мире</small>
+                </div>
+                <div class="lorgus-map-world-stats">
+                    <div><strong>07</strong><span>КРАЁВ</span></div>
+                    <div><strong>01</strong><span>ЗАКРЫТ</span></div>
+                    <div><strong>∞</strong><span>ПУТЕЙ</span></div>
+                </div>
+
+                <div class="lorgus-map-divider"></div>
+
+                <button class="gold-button lorgus-map-side-button" type="button" onclick="openActiveCharacterProfile()">Профиль</button>
+                <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="renderWorldCharacterTracker()">Люди мира</button>
+                <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="renderMail()">Письма</button>
+                <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="switchCharacter()">Сменить персонажа</button>
+            </aside>
+
+            <main class="lorgus-map-main">
+                <header class="lorgus-map-header">
+                    <div>
+                        <span class="lorgus-map-kicker">МИР ЛОРГУСА · КАРТА</span>
+                        <h2>Лоргус</h2>
+                    </div>
+                    <div class="lorgus-map-header-actions">
+                        <div class="lorgus-map-header-status">
+                            <span class="lorgus-map-status-dot"></span>
+                            <span>МИР АКТИВЕН</span>
+                        </div>
+                    </div>
+                </header>
+
+                <section class="lorgus-map-stage">
+                    <div class="lorgus-map-frame">
+                        <div class="lorgus-map-image-wrap" id="lorgus-map-viewport" >
+                            <div class="lorgus-map-atmosphere" aria-hidden="true"><i></i><i></i><i></i></div>
+                            <div class="lorgus-map-world" id="lorgus-map-world">
+                                <img class="lorgus-map-image" src="/assets/world/nerovland-map.png" alt="Карта Лоргуса" draggable="false">
+                                <div class="lorgus-map-marker-layer" id="lorgus-map-marker-layer" aria-label="Обозначения карты"></div>
+                            </div>
+                            <div class="lorgus-map-surface-hint" id="lorgus-map-surface-hint">ТОЧКА КАРТЫ</div>
+                            <div class="lorgus-map-overlay">
+                                <div class="lorgus-map-corner-mark top-left">L · 001</div>
+                                <div class="lorgus-map-corner-mark top-right">CARTA MUNDI</div>
+                                <div class="lorgus-map-corner-mark bottom-left">ЛОРГУС / WORLD</div>
+                                <div class="lorgus-map-corner-mark bottom-right">07 REGIONS</div>
+                                <div class="lorgus-map-compass" aria-hidden="true"><span>N</span><i></i></div>
+                                <div class="lorgus-map-scale"><span></span><small>МИР</small></div>
+                            </div>
+                        </div>
+
+                        <div class="lorgus-map-controls" aria-label="Управление картой">
+
+                        </div>
+
+                        <div class="lorgus-map-hint">
+                            <span>КАРТА МИРА</span>
+                            <small>Статичная карта · территории выбираются нажатием</small>
+                        </div>
+                    </div>
+
+                    <aside class="lorgus-map-inspector">
+                        <span class="lorgus-map-kicker">ВЫБРАННЫЙ КРАЙ</span>
+                        <div class="lorgus-map-selection-symbol"><span>◇</span><i></i></div>
+                        <h3 id="lorgus-map-selection-title">Атэрон</h3>
+                        <p id="lorgus-map-selection-text">Знания, древности, исследования и руины.</p>
+                        <div class="lorgus-map-inspector-meta">
+                            <span>СТАТУС</span><strong>ОТКРЫТ ДЛЯ ИССЛЕДОВАНИЯ</strong>
+                        </div>
+
+                        <button id="lorgus-map-enter-button" class="gold-button lorgus-map-enter-button" type="button" onclick="renderKingdomLocations('Атэрон')">Открыть край</button>
+
+                        <div class="lorgus-map-regions">
+                            <span class="lorgus-map-regions-title">РЕГИОНЫ</span>
+                            <button class="lorgus-map-region-button active" data-region="Атэрон" type="button" onclick="selectLorgusMapRegion('Атэрон')"><i></i><span>Атэрон</span></button>
+                            <button class="lorgus-map-region-button" data-region="Каэлор" type="button" onclick="selectLorgusMapRegion('Каэлор')"><i></i><span>Каэлор</span></button>
+                            <button class="lorgus-map-region-button" data-region="Ксандр" type="button" onclick="selectLorgusMapRegion('Ксандр')"><i></i><span>Ксандр</span></button>
+                            <button class="lorgus-map-region-button" data-region="Лирэн" type="button" onclick="selectLorgusMapRegion('Лирэн')"><i></i><span>Лирэн</span></button>
+                            <button class="lorgus-map-region-button" data-region="Морвейн" type="button" onclick="selectLorgusMapRegion('Морвейн')"><i></i><span>Морвейн</span></button>
+                            <button class="lorgus-map-region-button" data-region="Святые Земли" type="button" onclick="selectLorgusMapRegion('Святые Земли')"><i></i><span>Святые Земли</span></button>
+                            <button class="lorgus-map-region-button" data-region="Спорные Земли" type="button" onclick="selectLorgusMapRegion('Спорные Земли')"><i></i><span>Спорные Земли</span></button>
+                        </div>
+
+                        <div class="lorgus-map-closed">
+                            <span>ЗАКРЫТАЯ ТЕРРИТОРИЯ</span>
+                            <strong>Геена</strong>
+                            <p>Континент закрыт для игроков. Посещение и происхождение персонажа здесь недоступны.</p>
+                        </div>
+                    </aside>
+                </section>
+            </main>
+        </div>
+    `;
+
+    selectLorgusMapRegion("Атэрон");
+    initializeLorgusMapViewport();
+    renderLorgusMapEditorRects(false);
+    addLorgusMapEditorUI();
+}
+
+let lorgusMapScale = 1;
+let lorgusMapOffsetX = 0;
+let lorgusMapOffsetY = 0;
+let lorgusMapViewportCleanup = null;
+
+function initializeLorgusMapViewport() {
+    if (lorgusMapViewportCleanup) {
+        lorgusMapViewportCleanup();
+        lorgusMapViewportCleanup = null;
+    }
+
+    lorgusMapScale = 1;
+    lorgusMapOffsetX = 0;
+    lorgusMapOffsetY = 0;
+
+    const world = document.getElementById("lorgus-map-world");
+    if (world) {
+        world.style.transform = "translate3d(0,0,0) scale(1)";
+    }
+
+    syncLorgusMapLabelLayer();
+    requestAnimationFrame(syncLorgusMapLabelLayer);
+}
+
+function lorgusMapZoom(factor) {
+    lorgusMapScale = Math.min(3.2, Math.max(.8, lorgusMapScale * factor));
+    const world = document.querySelector(".lorgus-map-world");
+    if (world) {
+        world.style.transform = `translate3d(${lorgusMapOffsetX}px,${lorgusMapOffsetY}px,0) scale(${lorgusMapScale})`;
+    }
+}
+
+function lorgusMapReset() {
+    lorgusMapScale = 1;
+    lorgusMapOffsetX = 0;
+    lorgusMapOffsetY = 0;
+    const world = document.querySelector(".lorgus-map-world");
+    if (world) world.style.transform = "translate3d(0,0,0) scale(1)";
+}
+
+/* Последняя декларация заменяет старый экран выбора королевств. */
+function renderCharacter(container, character) {
+    renderLorgusWorldMap(container, character);
+}
+
+async function refreshLorgusNotificationBadge() {
+    const badgeNodes = document.querySelectorAll(".lorgus-notification-badge");
+    if (!badgeNodes.length || !window.lorgusCurrentUserId || !supabase) return;
+
+    const { count, error } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .is("read_at", null);
+
+    if (error) {
+        console.error("Не удалось загрузить счётчик уведомлений:", error);
+        return;
+    }
+
+    badgeNodes.forEach(badge => {
+        const unread = Number(count || 0);
+        badge.textContent = unread > 99 ? "99+" : String(unread);
+        badge.classList.toggle("visible", unread > 0);
+    });
+}
+
+function formatLorgusNotificationTime(value) {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "—";
+
+    const diff = Math.max(0, Date.now() - date.getTime());
+    if (diff < 60 * 1000) return "только что";
+    if (diff < 60 * 60 * 1000) return Math.floor(diff / (60 * 1000)) + " мин назад";
+    if (diff < 24 * 60 * 60 * 1000) return Math.floor(diff / (60 * 60 * 1000)) + " ч назад";
+
+    return date.toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+async function openLorgusNotifications() {
+    const existing = document.querySelector(".lorgus-notifications-overlay");
+    if (existing) {
+        existing.remove();
+        return;
+    }
+
+    const overlay = document.createElement("div");
+    overlay.className = "lorgus-notifications-overlay";
+    overlay.innerHTML = `
+        <div class="lorgus-notifications-backdrop"></div>
+        <article class="lorgus-notifications-panel">
+            <button type="button" class="lorgus-notifications-close" aria-label="Закрыть">×</button>
+            <div class="lorgus-notifications-heading">
+                <div>
+                    <span class="lorgus-command-kicker">ЛОРГУС · ВЕСТИ</span>
+                    <h2>Уведомления</h2>
+                    <p>События, которые произошли, пока тебя не было.</p>
+                </div>
+                <button type="button" class="lorgus-notifications-read-all">Прочитать всё</button>
+            </div>
+            <div class="lorgus-notifications-list">
+                <div class="lorgus-notifications-loading">Загружаем вести...</div>
+            </div>
+        </article>
+    `;
+    document.body.appendChild(overlay);
+
+    const close = () => overlay.remove();
+    overlay.querySelector(".lorgus-notifications-close").addEventListener("click", close);
+    overlay.querySelector(".lorgus-notifications-backdrop").addEventListener("click", close);
+
+    const list = overlay.querySelector(".lorgus-notifications-list");
+    const readAll = overlay.querySelector(".lorgus-notifications-read-all");
+
+    const render = rows => {
+        if (!rows.length) {
+            list.innerHTML = `
+                <div class="lorgus-notifications-empty">
+                    <span>✦</span>
+                    <strong>Пока тихо</strong>
+                    <p>Здесь появятся важные события, произошедшие в твоё отсутствие.</p>
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = rows.map(row => `
+            <button type="button"
+                class="lorgus-notification-entry${row.read_at ? "" : " unread"}"
+                data-notification-id="${escapeHtml(row.id)}">
+                <span class="lorgus-notification-mark">${row.type === "currency_received" ? "₵" : "✦"}</span>
+                <span class="lorgus-notification-content">
+                    <strong>${escapeHtml(row.title)}</strong>
+                    <span>${escapeHtml(row.body)}</span>
+                    <small>${escapeHtml(formatLorgusNotificationTime(row.created_at))}</small>
+                </span>
+                ${row.read_at ? "" : '<i class="lorgus-notification-unread-dot"></i>'}
+            </button>
+        `).join("");
+
+        list.querySelectorAll(".lorgus-notification-entry.unread").forEach(entry => {
+            entry.addEventListener("click", async () => {
+                const id = entry.dataset.notificationId;
+                const { error } = await supabase
+                    .from("notifications")
+                    .update({ read_at: new Date().toISOString() })
+                    .eq("id", id)
+                    .is("read_at", null);
+
+                if (error) {
+                    console.error("Не удалось отметить уведомление:", error);
+                    return;
+                }
+
+                entry.classList.remove("unread");
+                entry.querySelector(".lorgus-notification-unread-dot")?.remove();
+                await refreshLorgusNotificationBadge();
+            });
+        });
+    };
+
+    const { data, error } = await supabase
+        .from("notifications")
+        .select("id, type, title, body, read_at, created_at, data")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+    if (error) {
+        list.innerHTML = '<div class="lorgus-notifications-empty"><strong>Не удалось загрузить уведомления.</strong><p>' + escapeHtml(error.message) + '</p></div>';
+        console.error("Не удалось загрузить уведомления:", error);
+        return;
+    }
+
+    render(data || []);
+
+    readAll.addEventListener("click", async () => {
+        const now = new Date().toISOString();
+        const { error: updateError } = await supabase
+            .from("notifications")
+            .update({ read_at: now })
+            .is("read_at", null);
+
+        if (updateError) {
+            alert("Не удалось отметить уведомления:\\n\\n" + updateError.message);
+            return;
+        }
+
+        (data || []).forEach(row => { row.read_at = now; });
+        render(data || []);
+        await refreshLorgusNotificationBadge();
+    });
+}
+
+function renderLorgusInterfaceNav(active = "world") {
+    const items = [
+        ["overview", "⌂", "Обзор", "renderLorgusOverview()"],
+        ["world", "✦", "Мир", "renderLorgusWorldMapCurrent()"],
+        ["character", "♙", "Персонаж", "renderLorgusCharacterHub()"],
+        ["rp", "◈", "Ролевая", "renderLorgusRpHub()"],
+        ["people", "♧", "Люди", "renderWorldCharacterTracker()"],
+        ["mail", "✉", "Письма", "renderMail()"],
+        ["inventory", "◈", "Инвентарь", "renderLorgusInventory()"]
+    ];
+    return `
+        <nav class="lorgus-global-nav" aria-label="Разделы Лоргуса">
+            <div class="lorgus-global-brand"><span>✦</span><strong>ЛОРГУС</strong><small>ЖИВОЙ МИР</small></div>
+            <div class="lorgus-global-links">
+                ${items.map(([id, icon, label, action]) => `
+                    <button type="button" class="${id === active ? "active" : ""}" onclick="${action}">
+                        <span>${icon}</span><b>${label}</b>
+                    </button>`).join("")}
+            </div>
+            <div class="lorgus-global-account">
+                <div class="lorgus-global-presence"><i></i><span>МИР АКТИВЕН</span></div>
+                <span class="lorgus-global-user">${escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>${renderTitleBadge(window.activeTitle, "lorgus-global-nav-title")}
+                <button type="button" class="lorgus-notification-trigger" onclick="openLorgusNotifications()" aria-label="Уведомления" title="Уведомления">
+                    <span class="lorgus-notification-icon">♢</span>
+                    <b class="lorgus-notification-badge"></b>
+                </button>
+                <button type="button" class="lorgus-global-logout" onclick="logout()">ВЫЙТИ</button>
+            </div>
+        </nav>
+    `;
+
+    window.setTimeout(() => refreshLorgusNotificationBadge(), 0);
+}
+
+function renderLorgusOverview() {
+    const container = document.getElementById("cabinet-content");
+    const character = window.activeCharacter;
+    if (!container || !character) return;
+
+    const name = escapeHtml(character.name || "Без имени");
+    const race = escapeHtml(character.race || "Раса не указана");
+    const homeland = escapeHtml(character.homeland || "Родина не указана");
+    const presence = window.activeRpPresence;
+    const place = presence?.type === "location" ? presence.location : presence?.type === "road" ? "В пути" : "Не определено";
+
+    container.className = "lorgus-command-page";
+    container.innerHTML = `
+        ${renderLorgusInterfaceNav("overview")}
+        <main class="lorgus-command-main">
+            <section class="lorgus-command-hero">
+                <div>
+                    <span class="lorgus-command-kicker">ЛОРГУС · ЛИЧНАЯ ХРОНИКА</span>
+                    <h1>${name}</h1>
+                    <p>${race} · Родина: ${homeland}</p>
+                </div>
+                <div class="lorgus-command-status"><i></i><span>МИР ПРОДОЛЖАЕТСЯ</span><small>Даже когда тебя нет</small></div>
+            </section>
+            <section class="lorgus-command-grid">
+                <article class="lorgus-command-card command-location">
+                    <span>ФИЗИЧЕСКОЕ ПОЛОЖЕНИЕ</span><strong>${escapeHtml(place)}</strong>
+                    <small>Положение персонажа фиксируется только ролевым действием.</small>
+                    <button type="button" onclick="renderLorgusWorldMapCurrent()">Открыть карту →</button>
+                </article>
+                <article class="lorgus-command-card"><span>ПЕРСОНАЖ</span><strong>История и состояние</strong><small>Характеристики, навыки, снаряжение, деньги и биография.</small><button type="button" onclick="renderLorgusCharacterHub()">Открыть досье →</button></article>
+                <article class="lorgus-command-card"><span>РОЛЕВАЯ</span><strong>Текущая сцена</strong><small>Место, участники, сообщения и последствия действий.</small><button type="button" onclick="renderLorgusRpHub()">Войти в RP →</button></article>
+                <article class="lorgus-command-card"><span>СВЯЗИ</span><strong>Люди мира</strong><small>Знакомства, отношения и персонажи, находящиеся рядом с историей.</small><button type="button" onclick="renderWorldCharacterTracker()">Люди мира →</button></article>
+                <article class="lorgus-command-card"><span>ХРОНИКА</span><strong>Мир не ждёт</strong><small>События, слухи, войны, путешествия и изменения, происходящие независимо от тебя.</small><button type="button" onclick="renderLorgusWorldMapCurrent()">Смотреть мир →</button></article>
+                <article class="lorgus-command-card command-mail"><span>ПОСЛАНИЯ</span><strong>Письма</strong><small>Связь с другими персонажами независимо от расстояния.</small><button type="button" onclick="renderMail()">Открыть почту →</button></article>
+            </section>
+            <section class="lorgus-command-bottom">
+                <div><span class="lorgus-command-kicker">ПРИНЦИП ЛОРГУСА</span><h2>Ты не главный герой этого мира.</h2><p>Королевства принимают решения, торговцы ведут дела, люди рождаются и умирают, армии двигаются, а слухи распространяются — независимо от того, смотришь ли ты на это.</p></div>
+                <div class="lorgus-command-metrics"><div><b>07</b><span>КРАЁВ</span></div><div><b>∞</b><span>ИСТОРИЙ</span></div><div><b>01</b><span>ТВОЯ ЖИЗНЬ</span></div></div>
+            </section>
+        </main>
+    `;
+}
+
+function renderLorgusWorldMapCurrent() {
+    const container = document.getElementById("cabinet-content");
+    if (container && window.activeCharacter) renderLorgusWorldMap(container, window.activeCharacter);
+}
+
+async function renderLorgusCharacterHub() {
+    const container = document.getElementById("cabinet-content");
+    const c = window.activeCharacter;
+    if (!container || !c) return;
+    container.className = "lorgus-command-page";
+    container.innerHTML = `
+        ${renderLorgusInterfaceNav("character")}
+        <main class="lorgus-command-main">
+            <section class="lorgus-profile-hero">
+                <div class="lorgus-profile-sigil">✦</div>
+                <div><span class="lorgus-command-kicker">ЛИЧНОЕ ДОСЬЕ</span><h1>${escapeHtml(c.name || "Без имени")}</h1><p>${escapeHtml(c.race || "Раса")} · ${escapeHtml(c.homeland || "Родина не указана")}</p>${renderTitleBadge(window.activeTitle, "lorgus-profile-title")}</div>
+                <button type="button" class="lorgus-title-manage-button" onclick="openTitlePicker()">Выбрать титул</button>
+            </section>
+            <section class="lorgus-dossier-grid">
+                <article><span>ПРОИСХОЖДЕНИЕ</span><strong>${escapeHtml(c.homeland || "Не указано")}</strong><p>Родина определяет происхождение, но не физическое положение персонажа.</p></article>
+                <article><span>СОСТОЯНИЕ</span><strong>${escapeHtml(String(c.status || "ACTIVE"))}</strong><p>Жизнь персонажа продолжается в мире Лоргуса.</p></article>
+                <article class="lorgus-dossier-abilities"><span>СПОСОБНОСТИ</span><strong>Подтверждённые администрацией</strong><div class="lorgus-ability-list"><div class="lorgus-ability-empty">Загрузка...</div></div></article>
+                <article class="lorgus-dossier-inventory"><span>СНАРЯЖЕНИЕ</span><strong>Инвентарь</strong><p>Оружие, броня, предметы и вещи, которыми владеет персонаж.</p><button type="button" onclick="renderLorgusInventory()">Открыть инвентарь →</button></article>
+                <article><span>ОТНОШЕНИЯ</span><strong>Связи</strong><p>Доверие, дружба, вражда, семья, долги и обещания.</p></article>
+                <article><span>ИСТОРИЯ</span><strong>Личная хроника</strong><p>События жизни и последствия решений персонажа.</p></article>
+            </section>
+        </main>
+    `;
+    const abilities = await loadCharacterAbilities(c.id);
+    const list = container.querySelector(".lorgus-ability-list");
+    if (list) list.innerHTML = renderAbilityList(abilities);
+}
+
+function renderLorgusRpHub() {
+    const container = document.getElementById("cabinet-content");
+    if (!container || !window.activeCharacter) return;
+    const p = window.activeRpPresence;
+    const place = p?.type === "location" ? p.location : p?.type === "road" ? "В пути" : "Свободное состояние";
+    container.className = "lorgus-command-page";
+    container.innerHTML = `
+        ${renderLorgusInterfaceNav("rp")}
+        <main class="lorgus-command-main">
+            <section class="lorgus-command-hero"><div><span class="lorgus-command-kicker">РОЛЕВАЯ ЖИЗНЬ</span><h1>Текущая сцена</h1><p>Место действия определяется поступками персонажа, а не открытием страницы.</p></div><div class="lorgus-command-status"><i></i><span>СЦЕНА</span><small>${escapeHtml(place)}</small></div></section>
+            <section class="lorgus-rp-grid">
+                <article><span>МЕСТО</span><strong>${escapeHtml(place)}</strong><p>Первое сообщение в локации фиксирует физическое положение.</p><button onclick="renderLorgusWorldMapCurrent()">Открыть мир →</button></article>
+                <article><span>УЧАСТНИКИ</span><strong>Люди рядом</strong><p>Персонажи, находящиеся в доступной сцене.</p><button onclick="renderWorldCharacterTracker()">Отследить →</button></article>
+                <article><span>ПУТЬ</span><strong>Дороги и переходы</strong><p>Путешествие требует отдельной дорожной сцены и последовательности действий.</p><button onclick="renderLorgusWorldMapCurrent()">Выбрать путь →</button></article>
+            </section>
+        </main>
+    `;
+}
+
+window.renderLorgusOverview = renderLorgusOverview;
+window.renderLorgusWorldMapCurrent = renderLorgusWorldMapCurrent;
+window.renderLorgusCharacterHub = renderLorgusCharacterHub;
+window.renderLorgusRpHub = renderLorgusRpHub;
+window.openTitlePicker = openTitlePicker;
+window.openAdminCharacterTitles = openAdminCharacterTitles;
+window.openAdminCharacterAbilities = openAdminCharacterAbilities;
+window.renderLorgusInventory = renderLorgusInventory;
+window.openRpItemPicker = openRpItemPicker;
+window.openRpTransferPicker = openRpTransferPicker;
+window.openRpCurrencyTransferPicker = openRpCurrencyTransferPicker;
+window.openAdminCharacterInventory = openAdminCharacterInventory;
+
+window.selectLorgusMapRegion = selectLorgusMapRegion;
+window.selectLorgusMapMarker = selectLorgusMapMarker;
+window.handleLorgusMapSurfaceClick = handleLorgusMapSurfaceClick;
+window.lorgusMapZoom = lorgusMapZoom;
+window.lorgusMapReset = lorgusMapReset;
+
+
+/* =========================================================
+   LORGUS // THREE.JS DEPTH GATE
+   ========================================================= */
+function initializeLorgusWebGL() {
+    const canvas = document.getElementById("lorgus-webgl");
+    if (!canvas) return;
+    let renderer;
+    try {
+        renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    } catch (error) {
+        console.warn("LORGUS WebGL unavailable:", error);
+        return;
+    }
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x171511, 0.0075);
+    const camera = new THREE.PerspectiveCamera(46, 1, 0.1, 220);
+    camera.position.set(0, 8.2, 36);
+    const world = new THREE.Group();
+    scene.add(world);
+
+    const makeStoneTexture = (base, mortar = false) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 256;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = base;
+        ctx.fillRect(0, 0, 256, 256);
+        for (let i = 0; i < 1800; i++) {
+            const x = Math.random() * 256;
+            const y = Math.random() * 256;
+            const v = 18 + Math.random() * 34;
+            ctx.fillStyle = `rgba(${v},${v * .86},${v * .7},${Math.random() * .16})`;
+            ctx.fillRect(x, y, 1 + Math.random() * 3, 1 + Math.random() * 3);
+        }
+        ctx.strokeStyle = mortar ? "rgba(12,10,8,.42)" : "rgba(16,13,10,.25)";
+        ctx.lineWidth = mortar ? 2 : 1;
+        for (let y = 18; y < 256; y += 42 + Math.random() * 12) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(256, y + (Math.random() - .5) * 8); ctx.stroke();
+        }
+        for (let i = 0; i < 28; i++) {
+            const x = Math.random() * 256, y = Math.random() * 256;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(x + (Math.random() - .5) * 28, y + 8 + Math.random() * 22);
+            ctx.stroke();
+        }
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(2.2, 2.2);
+        texture.colorSpace = THREE.SRGBColorSpace;
+        return texture;
+    };
+
+    const stoneTexture = makeStoneTexture("#51483d", true);
+    const darkStoneTexture = makeStoneTexture("#302b26", false);
+    const groundTexture = makeStoneTexture("#39332c", true);
+
+    const stone = new THREE.MeshStandardMaterial({
+        map: stoneTexture, color: 0xb28a62, roughness: 0.88, metalness: 0,
+        bumpMap: stoneTexture, bumpScale: 0.16
+    });
+    const stoneDark = new THREE.MeshStandardMaterial({
+        map: darkStoneTexture, color: 0x626864, roughness: 0.93, metalness: 0,
+        bumpMap: darkStoneTexture, bumpScale: 0.12
+    });
+    const stoneEdge = new THREE.MeshStandardMaterial({
+        map: stoneTexture, color: 0xc39a68, roughness: 0.80, metalness: 0,
+        bumpMap: stoneTexture, bumpScale: 0.18
+    });
+    const groundStone = new THREE.MeshStandardMaterial({
+        map: groundTexture, color: 0x81745e, roughness: 0.94, metalness: 0,
+        bumpMap: groundTexture, bumpScale: 0.08
+    });
+    const rune = new THREE.MeshStandardMaterial({ color: 0x8c6827, emissive: 0x8c6827, emissiveIntensity: 4.2, transparent: true, opacity: 0.82 });
+    const ember = new THREE.MeshBasicMaterial({ color: 0xe2a33d, transparent: true, opacity: 0.8 });
+
+    const bevelStone = (sx, sy, sz, material = stone, bevel = 0.16) => {
+        const radius = Math.min(bevel, sx * 0.14, sy * 0.14, sz * 0.14);
+        const geometry = new THREE.BoxGeometry(sx, sy, sz, 3, 3, 3);
+        const pos = geometry.attributes.position;
+        const inset = Math.min(bevel, sx * 0.08, sy * 0.08, sz * 0.08);
+        for (let i = 0; i < pos.count; i++) {
+            const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+            if (Math.abs(x) > sx * 0.48) pos.setX(i, x - Math.sign(x) * inset * 0.12);
+            if (Math.abs(y) > sy * 0.48) pos.setY(i, y - Math.sign(y) * inset * 0.12);
+            if (Math.abs(z) > sz * 0.48) pos.setZ(i, z - Math.sign(z) * inset * 0.12);
+        }
+        pos.needsUpdate = true;
+        geometry.computeVertexNormals();
+        return new THREE.Mesh(geometry, material);
+    };
+
+    const addArchitecturalBlock = (x, y, z, sx, sy, sz, material = stone, rot = 0, detail = 0) => {
+        const group = new THREE.Group();
+        const body = bevelStone(sx, sy, sz, material, 0.16);
+        body.position.set(0, 0, 0);
+        body.rotation.z = rot;
+        group.add(body);
+        if (detail > 0) {
+            const inset = new THREE.Mesh(
+                new THREE.BoxGeometry(Math.max(0.3, sx * 0.72), Math.max(0.25, sy * 0.18), sz * 0.08),
+                stoneDark
+            );
+            inset.position.set(0, sy * 0.08, sz * 0.52);
+            inset.rotation.z = rot;
+            group.add(inset);
+        }
+        group.position.set(x, y, z);
+        world.add(group);
+        return group;
+    };
+
+    // Monumental layered foundations: the gate should read as architecture, not stacked primitives.
+    addArchitecturalBlock(-10.4, 1.35, 1.15, 5.8, 2.7, 5.4, stoneEdge, -0.015, 1);
+    addArchitecturalBlock(10.4, 1.35, 1.15, 5.8, 2.7, 5.4, stoneEdge, 0.015, 1);
+    addArchitecturalBlock(-10.4, 7.0, 1.05, 5.0, 10.5, 4.7, stone, -0.01, 1);
+    addArchitecturalBlock(10.4, 7.3, 1.05, 5.2, 11.2, 4.7, stone, 0.01, 1);
+
+    // Deep shadowed recesses make the masonry feel carved and massive.
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 3; i++) {
+            const recess = new THREE.Mesh(
+                new THREE.BoxGeometry(1.45, 4.8 + i * 0.35, 0.32),
+                stoneDark
+            );
+            recess.position.set(side * (10.35 + (i - 1) * 1.45), 4.2 + i * 3.1, 3.42);
+            world.add(recess);
+        }
+    }
+
+    // Heavy capstones break the perfectly rectangular silhouette.
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 4; i++) {
+            const cap = new THREE.Mesh(
+                new THREE.BoxGeometry(2.4 + Math.random() * 0.7, 1.0 + Math.random() * 0.35, 5.5, 2, 2, 2),
+                i === 3 ? stoneEdge : stone
+            );
+            cap.position.set(
+                side * (9.1 + i * 0.75),
+                12.9 + i * 0.9,
+                0.75 + (Math.random() - 0.5) * 0.35
+            );
+            cap.rotation.z = (Math.random() - 0.5) * 0.055;
+            cap.castShadow = true;
+            cap.receiveShadow = true;
+            world.add(cap);
+        }
+    }
+
+    // Architectural masonry pass: layered stone courses with bevels and irregular faces.
+    const makeMasonryBlock = (x, y, z, w, h, d, material, rotation = 0, scaleY = 1) => {
+        const geo = new THREE.BoxGeometry(w, h, d, 2, 2, 2);
+        const pos = geo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+            const px = pos.getX(i), py = pos.getY(i), pz = pos.getZ(i);
+            if (Math.abs(px) > w * 0.35) pos.setX(i, px + (Math.random() - 0.5) * 0.12);
+            if (Math.abs(py) > h * 0.35) pos.setY(i, py + (Math.random() - 0.5) * 0.10);
+            if (Math.abs(pz) > d * 0.35) pos.setZ(i, pz + (Math.random() - 0.5) * 0.08);
+        }
+        pos.needsUpdate = true;
+        geo.computeVertexNormals();
+        const mesh = new THREE.Mesh(geo, material);
+        mesh.position.set(x, y, z);
+        mesh.rotation.z = rotation;
+        mesh.scale.y = scaleY;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        world.add(mesh);
+        return mesh;
+    };
+
+    // Massive masonry courses replace the "two giant cubes" silhouette.
+    for (const side of [-1, 1]) {
+        const sx = side;
+        for (let row = 0; row < 6; row++) {
+            const y = 2.9 + row * 1.95;
+            const count = row % 2 ? 3 : 2;
+            const total = 5.1;
+            const bw = total / count;
+            for (let col = 0; col < count; col++) {
+                const x = sx * (7.85 + col * bw);
+                makeMasonryBlock(
+                    x, y, 1.05,
+                    bw * 0.92, 1.72 + Math.random() * 0.22, 4.65,
+                    row % 3 === 0 ? stoneEdge : stone,
+                    (Math.random() - 0.5) * 0.012
+                );
+            }
+        }
+    }
+
+    // Individual stone color variation: old masonry should have age and mineral differences.
+    const masonryTints = [0x9a795b, 0xa68764, 0x8c7057, 0xb0926e, 0x7e6a55];
+    for (const side of [-1, 1]) {
+        for (let row = 0; row < 6; row++) {
+            for (let col = 0; col < (row % 2 ? 3 : 2); col++) {
+                const x = side * (7.85 + col * (5.1 / (row % 2 ? 3 : 2)));
+                const y = 2.9 + row * 1.95;
+                const tint = new THREE.MeshStandardMaterial({
+                    map: stoneTexture,
+                    color: masonryTints[(row * 3 + col) % masonryTints.length],
+                    roughness: 0.88,
+                    bumpMap: stoneTexture,
+                    bumpScale: 0.14
+                });
+                const wash = new THREE.Mesh(new THREE.BoxGeometry(1.15, 0.92, 0.045, 2, 2), tint);
+                wash.position.set(x + (Math.random() - 0.5) * 0.35, y + (Math.random() - 0.5) * 0.25, 3.40);
+                wash.rotation.z = (Math.random() - 0.5) * 0.025;
+                world.add(wash);
+            }
+        }
+    }
+
+    // Deep carved seams on the front face.
+    const seamMat = new THREE.MeshBasicMaterial({
+        color: 0x15110e,
+        transparent: true,
+        opacity: 0.62
+    });
+    for (const side of [-1, 1]) {
+        for (let row = 0; row < 7; row++) {
+            const seam = new THREE.Mesh(
+                new THREE.BoxGeometry(4.9, 0.075, 0.055),
+                seamMat
+            );
+            seam.position.set(side * 10.0, 2.0 + row * 1.95, 3.43);
+            world.add(seam);
+        }
+    }
+
+    // Broken masonry and fallen stones at the bases.
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 12; i++) {
+            const w = 0.8 + Math.random() * 1.5;
+            const h = 0.35 + Math.random() * 0.9;
+            const d = 0.8 + Math.random() * 1.5;
+            const chunk = makeMasonryBlock(
+                side * (5.8 + Math.random() * 5.4),
+                h * 0.45 - 0.08,
+                2.5 + (Math.random() - 0.5) * 4,
+                w, h, d, stoneDark,
+                (Math.random() - 0.5) * 0.7
+            );
+            chunk.rotation.x = (Math.random() - 0.5) * 0.35;
+            chunk.rotation.y = (Math.random() - 0.5) * 0.35;
+        }
+    }
+
+    // Long approach masonry connects the bottom of the frame to the portal.
+    for (let row = 0; row < 14; row++) {
+        const z = 8.5 - row * 5.2;
+        const spread = 5.0 + row * 1.55;
+        const pieces = 5 + (row % 2);
+        for (let col = 0; col < pieces; col++) {
+            const width = (spread * 2) / pieces - 0.14;
+            const slab = new THREE.Mesh(
+                new THREE.BoxGeometry(width, 0.28 + Math.random() * 0.16, 2.05 + Math.random() * 0.35),
+                row < 3 ? stoneEdge : groundStone
+            );
+            slab.position.set(
+                -spread + width * 0.5 + col * (width + 0.14) + (Math.random() - 0.5) * 0.12,
+                -0.03 + Math.random() * 0.07,
+                z
+            );
+            slab.rotation.y = (Math.random() - 0.5) * 0.035;
+            slab.castShadow = true;
+            slab.receiveShadow = true;
+            world.add(slab);
+        }
+    }
+
+    // World-life pass: distant ruins, dead trees and scattered structures give the landscape scale.
+    const ruinMat = new THREE.MeshStandardMaterial({
+        map: darkStoneTexture, color: 0x4d5148, roughness: 0.98, bumpMap: darkStoneTexture, bumpScale: 0.1
+    });
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0x241c16, roughness: 1 });
+
+    // Distant ruined walls flank the horizon.
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 6; i++) {
+            const w = 2.5 + Math.random() * 3.5;
+            const h = 2.5 + Math.random() * 5.5;
+            const ruin = new THREE.Mesh(
+                new THREE.BoxGeometry(w, h, 1.2 + Math.random() * 1.4),
+                ruinMat
+            );
+            ruin.position.set(
+                side * (15 + i * 4.5 + Math.random() * 2),
+                h * 0.5 - 0.1,
+                -10 - Math.random() * 8
+            );
+            ruin.rotation.y = (Math.random() - 0.5) * 0.12;
+            ruin.rotation.z = (Math.random() - 0.5) * 0.08;
+            ruin.castShadow = true;
+            ruin.receiveShadow = true;
+            world.add(ruin);
+        }
+    }
+
+    // Broken towers create recognizable silhouettes in the distance.
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 2; i++) {
+            const tower = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.4 + Math.random() * 0.6, 1.9 + Math.random() * 0.6, 8 + Math.random() * 5, 8),
+                ruinMat
+            );
+            tower.position.set(side * (25 + i * 8), 3.5, -18 - i * 4);
+            tower.rotation.y = Math.random();
+            tower.castShadow = true;
+            tower.receiveShadow = true;
+            world.add(tower);
+        }
+    }
+
+    // Dead trees break the silhouette without turning the gate into a forest.
+    const addDeadTree = (x, z, scale) => {
+        const tree = new THREE.Group();
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.34, 3.8, 6), woodMat);
+        trunk.position.y = 1.9;
+        trunk.rotation.z = (Math.random() - 0.5) * 0.12;
+        tree.add(trunk);
+        for (let b = 0; b < 4; b++) {
+            const branch = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.13, 1.8 + Math.random(), 5), woodMat);
+            branch.position.set((Math.random() - 0.5) * 0.9, 2.5 + b * 0.38, 0);
+            branch.rotation.z = (Math.random() - 0.5) * 1.5;
+            branch.rotation.x = (Math.random() - 0.5) * 0.35;
+            tree.add(branch);
+        }
+        tree.position.set(x, 0, z);
+        tree.scale.setScalar(scale);
+        tree.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+        world.add(tree);
+    };
+    addDeadTree(-17, -1, 1.5);
+    addDeadTree(17, -2, 1.35);
+    addDeadTree(-24, -9, 2.0);
+    addDeadTree(23, -11, 1.8);
+
+    // Small warm points in the distance imply settlements or fires beyond the gate.
+    const distantFire = new THREE.MeshBasicMaterial({
+        color: 0xd98a32, transparent: true, opacity: 0.72, blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    for (let i = 0; i < 14; i++) {
+        const ember = new THREE.Mesh(new THREE.SphereGeometry(0.08 + Math.random() * 0.09, 8, 8), distantFire);
+        ember.position.set((Math.random() - 0.5) * 38, 0.8 + Math.random() * 3.5, -13 - Math.random() * 12);
+        world.add(ember);
+    }
+
+    // Foreground slabs: irregular perspective lines lead the eye into the portal.
+    for (let i = 0; i < 16; i++) {
+        const width = 4.5 + i * 1.05;
+        const slab = makeMasonryBlock(
+            (Math.random() - 0.5) * (1.0 + i * 0.45),
+            -0.12 + Math.random() * 0.08,
+            4.5 + i * 3.8,
+            width,
+            0.22 + Math.random() * 0.18,
+            2.5 + Math.random() * 0.8,
+            i % 2 ? groundStone : stoneDark,
+            (Math.random() - 0.5) * 0.045
+        );
+        slab.scale.x *= 0.8 + Math.random() * 0.35;
+    }
+
+    // Monumental portal frame: a single carved arch, deep jambs and individual voussoirs.
+    const archShape = new THREE.Shape();
+    archShape.moveTo(-7.2, 0);
+    archShape.lineTo(-7.2, 8.2);
+    archShape.quadraticCurveTo(0, 15.4, 7.2, 8.2);
+    archShape.lineTo(7.2, 0);
+    archShape.closePath();
+
+    // Cut the actual passage out of the gate. The gate is a stone FRAME, not a filled wall.
+    const openingHole = new THREE.Path();
+    openingHole.moveTo(-5.15, 0.08);
+    openingHole.lineTo(-5.15, 8.25);
+    openingHole.quadraticCurveTo(0, 13.4, 5.15, 8.25);
+    openingHole.lineTo(5.15, 0.08);
+    openingHole.closePath();
+    archShape.holes.push(openingHole);
+
+    const archGeo = new THREE.ExtrudeGeometry(archShape, {
+        depth: 5.2,
+        bevelEnabled: true,
+        bevelSegments: 4,
+        bevelSize: 0.16,
+        bevelThickness: 0.18,
+        curveSegments: 40
+    });
+    const arch = new THREE.Mesh(archGeo, stoneEdge);
+    arch.position.set(0, 0, 0.25);
+    arch.castShadow = true;
+    arch.receiveShadow = true;
+    world.add(arch);
+
+    for (const side of [-1, 1]) {
+        const jamb = new THREE.Mesh(
+            new THREE.BoxGeometry(2.0, 10.4, 5.3, 3, 3, 3),
+            stone
+        );
+        jamb.position.set(side * 6.65, 5.25, 0.25);
+        jamb.castShadow = true;
+        jamb.receiveShadow = true;
+        world.add(jamb);
+
+        const innerJamb = new THREE.Mesh(
+            new THREE.BoxGeometry(0.62, 9.6, 5.55, 2, 2, 2),
+            stoneDark
+        );
+        innerJamb.position.set(side * 5.45, 4.9, -0.05);
+        innerJamb.castShadow = true;
+        innerJamb.receiveShadow = true;
+        world.add(innerJamb);
+    }
+
+    // Clean outer arch: no oversized floating voussoirs.
+    // The extruded arch itself is the masonry silhouette.
+    // Crown stone gives the gate a strong readable silhouette.
+    // No horizontal crown: the arch itself forms the complete central silhouette.
+
+    // Portal glow uses the exact same arched silhouette as the passage.
+    // No rectangular plane, no border: just a soft luminous shape behind the stone frame.
+    const glowShape = new THREE.Shape();
+    glowShape.moveTo(-5.85, 0.04);
+    glowShape.lineTo(-5.85, 8.15);
+    glowShape.quadraticCurveTo(0, 14.45, 5.85, 8.15);
+    glowShape.lineTo(5.85, 0.04);
+    glowShape.closePath();
+
+    const rift = new THREE.Mesh(
+        new THREE.ShapeGeometry(glowShape, 48),
+        new THREE.MeshBasicMaterial({
+            color: 0xd47b24,
+            transparent: true,
+            opacity: 0.34,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false,
+            depthTest: true,
+            side: THREE.DoubleSide
+        })
+    );
+    rift.position.set(0, 0, -0.72);
+    rift.renderOrder = 1;
+    world.add(rift);
+
+    // True arched portal void — no rectangular plate behind the entrance.
+    
+// Decorative architectural detail: inset buttresses and carved stone bands.
+// These break the primitive-box silhouette and give the gate a deliberate medieval design.
+const addButtress = (side, x, z) => {
+    const g = new THREE.Group();
+    const base = new THREE.Mesh(
+        new THREE.BoxGeometry(3.0, 7.8, 5.0, 2, 2),
+        stoneDark
+    );
+    base.position.y = 3.9;
+    base.scale.x = 0.78;
+    g.add(base);
+
+    const face = new THREE.Mesh(
+        new THREE.BoxGeometry(2.15, 6.4, 0.42, 2, 2),
+        stoneEdge
+    );
+    face.position.set(side * 0.35, 4.15, 2.55);
+    face.rotation.z = side * 0.055;
+    g.add(face);
+
+    const crown = new THREE.Mesh(
+        new THREE.BoxGeometry(3.35, 0.55, 5.45, 2, 2),
+        stoneEdge
+    );
+    crown.position.set(0, 7.85, 0);
+    crown.rotation.z = side * 0.025;
+    g.add(crown);
+
+    g.position.set(x, 0, z);
+    g.rotation.y = side * 0.035;
+    g.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+    world.add(g);
+};
+
+addButtress(-1, -7.55, 0.75);
+addButtress(1, 7.55, 0.75);
+
+// Carved horizontal courses give the façade a designed rhythm instead of a stack of cubes.
+for (const side of [-1, 1]) {
+    for (let row = 0; row < 5; row++) {
+        const y = 3.15 + row * 2.05;
+        const band = new THREE.Mesh(
+            new THREE.BoxGeometry(6.2, 0.24, 4.95, 2, 2),
+            row % 2 ? stoneEdge : stoneDark
+        );
+        band.position.set(side * 9.25, y, 3.34);
+        band.rotation.z = side * 0.006;
+        band.castShadow = true;
+        band.receiveShadow = true;
+        world.add(band);
+    }
+}
+
+const openingShape = new THREE.Shape();
+    openingShape.moveTo(-5.15, 0);
+    openingShape.lineTo(-5.15, 8.25);
+    openingShape.absarc(0, 8.25, 5.15, Math.PI, 0, false);
+    openingShape.lineTo(5.15, 0);
+    openingShape.closePath();
+    const innerGate = new THREE.Mesh(
+        new THREE.ShapeGeometry(openingShape, 48),
+        new THREE.MeshBasicMaterial({
+            color: 0x070605,
+            transparent: true,
+            opacity: 0.72,
+            depthWrite: false
+        })
+    );
+    innerGate.position.set(0, 0, -0.9);
+    innerGate.renderOrder = 0;
+    world.add(innerGate);
+
+    const threshold = new THREE.Mesh(
+        new THREE.CircleGeometry(4.8, 64),
+        new THREE.MeshBasicMaterial({
+            color: 0xb56f27,
+            transparent: true,
+            opacity: 0.10,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        })
+    );
+    threshold.rotation.x = -Math.PI / 2;
+    threshold.position.set(0, 0.025, 0.45);
+    world.add(threshold);
+
+    // Layered portal energy: depth, sparks and drifting motes instead of a flat glowing plane.
+    const portalDepthShape = new THREE.Shape();
+    portalDepthShape.moveTo(-5.05, 0.08);
+    portalDepthShape.lineTo(-5.05, 8.15);
+    portalDepthShape.quadraticCurveTo(0, 13.15, 5.05, 8.15);
+    portalDepthShape.lineTo(5.05, 0.08);
+    portalDepthShape.closePath();
+
+    const portalCoreShape = new THREE.Shape();
+    portalCoreShape.moveTo(-4.35, 0.08);
+    portalCoreShape.lineTo(-4.35, 7.95);
+    portalCoreShape.quadraticCurveTo(0, 12.55, 4.35, 7.95);
+    portalCoreShape.lineTo(4.35, 0.08);
+    portalCoreShape.closePath();
+
+    const portalCore = new THREE.Mesh(
+        new THREE.ShapeGeometry(portalCoreShape, 48),
+        new THREE.MeshBasicMaterial({
+            color: 0xffc46a,
+            transparent: true,
+            opacity: 0.075,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        })
+    );
+    portalCore.position.set(0, 0, -0.78);
+    world.add(portalCore);
+
+    const portalMist = new THREE.Mesh(
+        new THREE.ShapeGeometry(portalDepthShape, 48),
+        new THREE.MeshBasicMaterial({
+            color: 0xc56f25,
+            transparent: true,
+            opacity: 0.045,
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        })
+    );
+    portalMist.position.set(0, 0, -0.94);
+    world.add(portalMist);
+
+    const sparkMat = new THREE.MeshBasicMaterial({
+        color: 0xffc66a,
+        transparent: true,
+        opacity: 0.78,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false
+    });
+    const portalSparks = [];
+    for (let i = 0; i < 70; i++) {
+        const spark = new THREE.Mesh(
+            new THREE.SphereGeometry(0.025 + Math.random() * 0.055, 6, 6),
+            sparkMat
+        );
+        spark.position.set(
+            (Math.random() - 0.5) * 11.0,
+            1.0 + Math.random() * 14.5,
+            -0.5 + (Math.random() - 0.5) * 1.8
+        );
+        spark.userData.phase = Math.random() * Math.PI * 2;
+        spark.userData.speed = 0.25 + Math.random() * 0.7;
+        portalSparks.push(spark);
+        world.add(spark);
+    }
+
+    const riftLight = new THREE.PointLight(0xff8b2c, 52, 28, 2);
+    riftLight.position.set(0, 7.8, -0.4);
+    world.add(riftLight);    world.add(new THREE.HemisphereLight(0xc8a879, 0x17120d, 1.3));
+    world.add(new THREE.AmbientLight(0xb08f68, 0.48));
+    const coolFill = new THREE.DirectionalLight(0x7898ad, 1.8);
+    coolFill.position.set(18, 12, 10);
+    world.add(coolFill);
+
+    const directional = new THREE.DirectionalLight(0xe6c995, 6.4);
+    directional.castShadow = true;
+    directional.shadow.mapSize.set(1024, 1024);
+    directional.shadow.camera.left = -28;
+    directional.shadow.camera.right = 28;
+    directional.shadow.camera.top = 24;
+    directional.shadow.camera.bottom = -8;
+    directional.position.set(-12, 18, 22);
+    world.add(directional);
+    directional.target.position.set(0, 6, 0);
+    world.add(directional.target);
+
+    const floorGeometry = new THREE.PlaneGeometry(80, 70, 32, 28);
+    const floorPositions = floorGeometry.attributes.position;
+    for (let i = 0; i < floorPositions.count; i++) {
+        const x = floorPositions.getX(i);
+        const y = floorPositions.getY(i);
+        const ripple = Math.sin(x * 0.17) * 0.035 + Math.sin(y * 0.21 + x * 0.08) * 0.028;
+        floorPositions.setZ(i, ripple);
+    }
+    floorPositions.needsUpdate = true;
+    floorGeometry.computeVertexNormals();
+    // Full cinematic environment: eliminate the empty black frame around the monument.
+    // Distant mountain silhouettes give the scene a horizon and scale.
+    const mountainMat = new THREE.MeshStandardMaterial({
+        color: 0x252d2b, roughness: 1, metalness: 0
+    });
+    const mountainGroup = new THREE.Group();
+    for (let i = 0; i < 11; i++) {
+        const width = 9 + Math.random() * 9;
+        const height = 7 + Math.random() * 13;
+        const mountain = new THREE.Mesh(
+            new THREE.ConeGeometry(width, height, 5 + Math.floor(Math.random() * 3)),
+            mountainMat
+        );
+        mountain.position.set(-48 + i * 9.5 + Math.random() * 3, height * 0.5 - 1, -15 - Math.random() * 5);
+        mountain.rotation.y = Math.random() * Math.PI;
+        mountainGroup.add(mountain);
+    }
+    world.add(mountainGroup);
+
+    // Giant side monoliths frame the gate instead of leaving empty black corners.
+    const monolithMat = new THREE.MeshStandardMaterial({
+        map: darkStoneTexture, color: 0x4b514f, roughness: 0.98
+    });
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 4; i++) {
+            const h = 8 + Math.random() * 8;
+            const monolith = new THREE.Mesh(
+                new THREE.DodecahedronGeometry(2.0 + Math.random() * 1.5, 1),
+                monolithMat
+            );
+            monolith.scale.y = h / 4.0;
+            monolith.position.set(
+                side * (19 + i * 5 + Math.random() * 2),
+                h * 0.5 - 1,
+                -4 - i * 3.5
+            );
+            monolith.rotation.set(
+                (Math.random() - 0.5) * 0.12,
+                Math.random() * Math.PI,
+                (Math.random() - 0.5) * 0.08
+            );
+            monolith.castShadow = true;
+            monolith.receiveShadow = true;
+            world.add(monolith);
+        }
+    }
+
+    // Elevated cliffs behind the gate connect the architecture to the horizon.
+    const cliffMat = new THREE.MeshStandardMaterial({
+        map: darkStoneTexture, color: 0x343a38, roughness: 1
+    });
+    for (const side of [-1, 1]) {
+        const cliff = new THREE.Mesh(
+            new THREE.ConeGeometry(15, 20, 7, 3),
+            cliffMat
+        );
+        cliff.scale.z = 0.42;
+        cliff.position.set(side * 23, 7, -9);
+        cliff.rotation.y = side * 0.35;
+        cliff.castShadow = true;
+        cliff.receiveShadow = true;
+        world.add(cliff);
+    }
+
+    // Foreground ruins create depth near the camera.
+    for (const side of [-1, 1]) {
+        for (let i = 0; i < 7; i++) {
+            const rock = new THREE.Mesh(
+                new THREE.DodecahedronGeometry(0.8 + Math.random() * 1.8, 1),
+                stoneDark
+            );
+            rock.scale.y = 0.45 + Math.random() * 1.1;
+            rock.position.set(
+                side * (9 + Math.random() * 13),
+                rock.scale.y * 0.7 - 0.05,
+                8 - i * 2.7 + Math.random() * 2
+            );
+            rock.rotation.set(Math.random(), Math.random(), Math.random());
+            rock.castShadow = true;
+            rock.receiveShadow = true;
+            world.add(rock);
+        }
+    }
+
+    const floor = new THREE.Mesh(
+        floorGeometry,
+        groundStone
+    );
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.set(0, -0.15, -8);
+    floor.receiveShadow = true;
+    world.add(floor);
+
+    const pathStone = new THREE.Group();
+    world.add(pathStone);
+    for (let row = 0; row < 9; row++) {
+        const z = 2.5 - row * 4.2;
+        const halfWidth = 5.5 + row * 0.75;
+        const pieces = row % 2 === 0 ? 5 : 6;
+        for (let col = 0; col < pieces; col++) {
+            const gap = 0.18;
+            const width = (halfWidth * 2) / pieces - gap;
+            const slab = new THREE.Mesh(
+                new THREE.BoxGeometry(width, 0.22 + Math.random() * 0.12, 3.25 + Math.random() * 0.5),
+                row < 2 ? stoneEdge : groundStone
+            );
+            slab.position.set(
+                -halfWidth + width * 0.5 + col * (width + gap) + (Math.random() - 0.5) * 0.18,
+                -0.02 + Math.random() * 0.05,
+                z + (Math.random() - 0.5) * 0.3
+            );
+            slab.rotation.y = (Math.random() - 0.5) * 0.035;
+            pathStone.add(slab);
+        }
+    }
+
+    const floorGlow = new THREE.Mesh(
+        new THREE.CircleGeometry(5.8, 64),
+        new THREE.MeshBasicMaterial({ color: 0x8d5a1f, transparent: true, opacity: 0.16, blending: THREE.AdditiveBlending })
+    );
+    floorGlow.rotation.x = -Math.PI / 2;
+    floorGlow.position.set(0, 0.02, 1.5);
+    world.add(floorGlow);
+
+    const sideStones = [];
+    for (let side of [-1, 1]) {
+        for (let n = 0; n < 9; n++) {
+            const w = 1.2 + Math.random() * 1.8;
+            const h = 0.7 + Math.random() * 1.7;
+            const stoneBlock = new THREE.Mesh(
+                new THREE.BoxGeometry(w, h, 1.8 + Math.random() * 1.4),
+                stone
+            );
+            stoneBlock.position.set(
+                side * (12.5 + Math.random() * 4.5),
+                h * 0.5 - 0.1,
+                -2 - n * 1.8 + Math.random() * 1.2
+            );
+            stoneBlock.rotation.y = (Math.random() - 0.5) * 0.18;
+            stoneBlock.rotation.z = (Math.random() - 0.5) * 0.12;
+            stoneBlock.castShadow = true;
+        stoneBlock.receiveShadow = true;
+        world.add(stoneBlock);
+            sideStones.push(stoneBlock);
+        }
+    }
+
+    const gateInnerGlow = new THREE.PointLight(0xff9b3d, 44, 32, 2);
+    gateInnerGlow.position.set(0, 5, -0.7);
+    world.add(gateInnerGlow);
+
+    const debris = [];
+    for (let n = 0; n < 95; n++) {
+        const size = 0.05 + Math.random() * 0.28;
+        const mesh = new THREE.Mesh(
+            new THREE.IcosahedronGeometry(size, 0),
+            Math.random() > 0.72 ? ember : stoneDark
+        );
+        mesh.position.set((Math.random() - 0.5) * 30, Math.random() * 17 - 1, -5 - Math.random() * 24);
+        mesh.userData.spin = (Math.random() - 0.5) * 0.9;
+        world.add(mesh);
+        debris.push(mesh);
+    }
+
+    // Living night sky: many bright moving stars, not a static handful of dots.
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 260;
+    const starPositions = new Float32Array(starCount * 3);
+    const starSpeeds = new Float32Array(starCount);
+    for (let i = 0; i < starCount; i++) {
+        starPositions[i * 3] = (Math.random() - 0.5) * 105;
+        starPositions[i * 3 + 1] = 8 + Math.random() * 42;
+        starPositions[i * 3 + 2] = -32 - Math.random() * 38;
+        starSpeeds[i] = 0.008 + Math.random() * 0.028;
+    }
+    starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
+    const starMaterial = new THREE.PointsMaterial({
+        color: 0xffe3a8,
+        size: 0.11,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        sizeAttenuation: true
+    });
+    const starField = new THREE.Points(starGeometry, starMaterial);
+    world.add(starField);
+
+    // Gate-side architecture: stepped buttresses sit beside the arch without swallowing it.
+    for (const side of [-1, 1]) {
+        const pier = new THREE.Group();
+
+        const main = new THREE.Mesh(
+            new THREE.BoxGeometry(3.55, 11.3, 5.15, 3, 3, 3),
+            stone
+        );
+        main.position.set(0, 5.65, 0.15);
+        main.castShadow = true;
+        main.receiveShadow = true;
+        pier.add(main);
+
+        // Three projecting courses give the masonry a real load-bearing rhythm.
+        const courses = [
+            [4.15, 1.05, 5.7, 0.52],
+            [3.85, 0.72, 5.5, 4.15],
+            [4.05, 0.86, 5.65, 7.85],
+            [4.3, 1.05, 5.8, 11.15]
+        ];
+        for (const [w, h, d, y] of courses) {
+            const block = new THREE.Mesh(
+                new THREE.BoxGeometry(w, h, d, 3, 2, 3),
+                y === 0.52 || y === 11.15 ? stoneEdge : stone
+            );
+            block.position.set(0, y, 0.12);
+            block.rotation.z = (Math.random() - 0.5) * 0.018;
+            block.castShadow = true;
+            block.receiveShadow = true;
+            pier.add(block);
+        }
+
+        // Recessed vertical face: darker stone makes the pier read as carved masonry.
+        const inset = new THREE.Mesh(
+            new THREE.BoxGeometry(2.15, 7.5, 0.28, 2, 2, 2),
+            stoneDark
+        );
+        inset.position.set(0, 5.9, 2.73);
+        inset.castShadow = true;
+        inset.receiveShadow = true;
+        pier.add(inset);
+
+        // Narrow projecting shoulder toward the gate, visually tying the pier to the arch jamb.
+        const shoulder = new THREE.Mesh(
+            new THREE.BoxGeometry(0.72, 9.2, 5.45, 2, 3, 2),
+            stoneEdge
+        );
+        shoulder.position.set(-side * 1.38, 5.0, 0.18);
+        shoulder.castShadow = true;
+        shoulder.receiveShadow = true;
+        pier.add(shoulder);
+
+        pier.position.set(side * 10.05, 0, 0.78);
+        world.add(pier);
+
+        // Separate foundation stones ground the structure instead of letting it read as a cube.
+        for (let i = 0; i < 3; i++) {
+            const base = new THREE.Mesh(
+                new THREE.BoxGeometry(2.7 + i * 0.55, 0.55 + i * 0.12, 5.95 + i * 0.22, 2, 2, 2),
+                i === 0 ? stoneEdge : stone
+            );
+            base.position.set(side * (10.05 - i * 0.04), 0.3 + i * 0.56, 0.78);
+            base.rotation.z = (Math.random() - 0.5) * 0.012;
+            base.castShadow = true;
+            base.receiveShadow = true;
+            world.add(base);
+        }
+    }
+
+    const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+    let raf = 0;
+    let disposed = false;
+    let portalFlight = null;
+
+    const onPointer = event => {
+        pointer.tx = event.clientX / window.innerWidth - 0.5;
+        pointer.ty = event.clientY / window.innerHeight - 0.5;
+    };
+
+    const resize = () => {
+        const dpr = Math.min(window.devicePixelRatio || 1, 1.65);
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        renderer.setPixelRatio(dpr);
+        renderer.setSize(width, height, false);
+        camera.aspect = width / Math.max(height, 1);
+        camera.updateProjectionMatrix();
+    };
+
+    const clock = new THREE.Clock();
+
+    const frame = () => {
+        if (disposed) return;
+        raf = requestAnimationFrame(frame);
+        const time = clock.getElapsedTime();
+
+        pointer.x += (pointer.tx - pointer.x) * 0.035;
+        pointer.y += (pointer.ty - pointer.y) * 0.035;
+
+        if (lorgusPortalDepartureAligning) {
+            camera.fov += (46 - camera.fov) * 0.08;
+            camera.updateProjectionMatrix();
+            camera.lookAt(pointer.x * 0.7, 7.5 + pointer.y * 0.55, -0.5);
+        } else if (lorgusPortalEntering) {
+            const elapsed = performance.now() - lorgusPortalEnterStartedAt;
+            const progress = Math.min(1, elapsed / 1080);
+            // Более мягкий старт: камера сначала словно "цепляется" за взгляд,
+            // затем быстро набирает скорость к воротам.
+            const ease = progress < 0.22
+                ? 0.18 * Math.pow(progress / 0.22, 2)
+                : 0.18 + 0.82 * (1 - Math.pow(1 - ((progress - 0.22) / 0.78), 2));
+
+            // Capture the camera exactly where the player was looking when the
+            // transition began. The flight then stays on one straight line through
+            // the portal instead of spawning a second "video camera".
+            if (!portalFlight) {
+                const portalCenter = new THREE.Vector3(0, 6.9, -0.85);
+                world.localToWorld(portalCenter);
+
+                const start = camera.position.clone();
+                const travelDirection = portalCenter.clone().sub(start).normalize();
+                // Камера останавливается перед плоскостью ворот — она не летит сквозь портал.
+                const end = portalCenter.clone().addScaledVector(travelDirection, -6.5);
+
+                const startQuat = camera.quaternion.clone();
+                const aimCamera = camera.clone();
+                aimCamera.lookAt(portalCenter);
+
+                portalFlight = {
+                    start,
+                    end,
+                    travelDirection,
+                    startQuat,
+                    targetQuat: aimCamera.quaternion.clone(),
+                    portalCenter,
+                    worldRotationY: world.rotation.y
+                };
+            }
+
+            const flight = portalFlight;
+            camera.position.lerpVectors(flight.start, flight.end, ease);
+
+            // During the first part of the shot the camera smoothly turns toward
+            // the portal centre; after crossing, it keeps looking forward.
+            const aimBlend = Math.min(1, progress / 0.24);
+            camera.lookAt(flight.portalCenter);
+
+            // Preserve continuity from the exact original orientation instead of
+            // snapping the camera to a new canned starting angle.
+            if (aimBlend < 1) {
+                const blended = flight.startQuat.clone().slerp(flight.targetQuat, aimBlend);
+                camera.quaternion.copy(blended);
+            }
+
+            camera.fov = 46 + (34 - 46) * ease;
+            camera.updateProjectionMatrix();
+        } else {
+            portalFlight = null;
+            camera.fov += (46 - camera.fov) * 0.06;
+            camera.updateProjectionMatrix();
+            camera.position.x += (pointer.x * 1.8 - camera.position.x) * 0.018;
+            camera.position.y += (7.2 - pointer.y * 1.5 - camera.position.y) * 0.018;
+            camera.lookAt(pointer.x * 0.7, 7.5 + pointer.y * 0.55, -0.5);
+        }
+
+        portalCore.scale.setScalar(0.92 + Math.sin(time * 1.35) * 0.06);
+        portalMist.scale.setScalar(0.96 + Math.sin(time * 0.8 + 1.2) * 0.08);
+        portalSparks.forEach((spark, i) => {
+            spark.position.y += Math.sin(time * spark.userData.speed + spark.userData.phase) * 0.0025 + 0.004;
+            if (spark.position.y > 16.2) spark.position.y = 0.8 + (i % 9) * 0.7;
+            spark.position.x += Math.sin(time * 0.7 + spark.userData.phase) * 0.0018;
+        });
+        riftLight.intensity = 26 + Math.sin(time * 2.1) * 6;
+        gateInnerGlow.intensity = 12 + Math.sin(time * 1.7) * 3;
+        floorGlow.material.opacity = 0.11 + Math.sin(time * 1.9) * 0.025;
+        const starPos = starGeometry.attributes.position;
+        for (let i = 0; i < starCount; i++) {
+            const idx = i * 3;
+            starPos.array[idx + 1] -= starSpeeds[i];
+            starPos.array[idx] += Math.sin(time * 0.22 + i) * 0.0009;
+            if (starPos.array[idx + 1] < 5) {
+                starPos.array[idx + 1] = 48 + Math.random() * 5;
+                starPos.array[idx] = (Math.random() - 0.5) * 105;
+            }
+        }
+        starPos.needsUpdate = true;
+
+        if (lorgusPortalEntering && portalFlight) {
+            world.rotation.y = portalFlight.worldRotationY;
+
+            // Пока камера летит, пространство между ней и воротами не остаётся
+            // чёрным: дальние частицы и обломки слегка ускоряются навстречу кадру,
+            // создавая ощущение реального пролёта, а не движения камеры в пустоте.
+            const flightProgress = Math.min(
+                1,
+                (performance.now() - lorgusPortalEnterStartedAt) / 1080
+            );
+            const flightBoost = Math.max(0, flightProgress - 0.12);
+            for (const mesh of debris) {
+                if (mesh.userData.portalDrift === undefined) {
+                    mesh.userData.portalDrift = 0.12 + Math.random() * 0.22;
+                }
+                mesh.position.z += mesh.userData.portalDrift * flightBoost;
+                if (mesh.position.z > 18) mesh.position.z -= 42;
+            }
+        } else {
+            world.rotation.y = pointer.x * -0.025;
+        }
+
+        for (const mesh of debris) {
+            mesh.rotation.x += mesh.userData.spin * 0.004;
+            mesh.rotation.y += mesh.userData.spin * 0.006;
+            if (mesh.userData.portalDrift === undefined) {
+                mesh.userData.portalDrift = 0.12 + Math.random() * 0.22;
+            }
+        }
+
+        renderer.render(scene, camera);
+    };
+
+    resize();
+    window.addEventListener("resize", resize, { passive: true });
+    window.addEventListener("pointermove", onPointer, { passive: true });
+    frame();
+
+    const previousCleanup = lorgusSceneCleanup;
+    lorgusSceneCleanup = () => {
+        disposed = true;
+        cancelAnimationFrame(raf);
+        window.removeEventListener("resize", resize);
+        window.removeEventListener("pointermove", onPointer);
+        renderer.dispose();
+        if (previousCleanup) previousCleanup();
+    };
+}
