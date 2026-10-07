@@ -2437,7 +2437,60 @@ function renderAdminCharacterManagement(application) {
     `;
 }
 
+function openAdminCharacterRecord(application, container) {
+    const existing = container.querySelector(".admin-character-record-overlay");
+    if (existing) existing.remove();
+    const esc = value => escapeHtml(value ?? "—");
+    const overlay = document.createElement("div");
+    overlay.className = "admin-character-record-overlay";
+    overlay.innerHTML = `
+        <div class="admin-character-record-backdrop"></div>
+        <article class="admin-character-record">
+            <button class="admin-character-record-close" type="button">×</button>
+            <div class="admin-character-record-top">
+                <div class="admin-character-record-portrait">${application.photo_url ? `<img src="${esc(application.photo_url)}" alt="">` : "<span>✦</span>"}</div>
+                <div>
+                    <span class="admin-character-record-kicker">ЛЕТОПИСЬ ЛОРГУСА · ПОЛНАЯ ЗАПИСЬ #${esc(application.id)}</span>
+                    <h2>${esc(application.name)}</h2>
+                    <p>${esc(application.race)} · ${esc(application.homeland)}</p>
+                    <span class="admin-character-record-status">ОДОБРЕН · ЖИТЕЛЬ МИРА</span>
+                </div>
+            </div>
+            <div class="admin-character-record-facts">
+                <div><small>ВОЗРАСТ</small><strong>${esc(application.age ? application.age + " лет" : null)}</strong></div>
+                <div><small>РОД ЗАНЯТИЙ</small><strong>${esc(application.occupation)}</strong></div>
+                <div><small>ОРУЖИЕ</small><strong>${esc(application.preferred_weapon)}</strong></div>
+                <div><small>CHARACTER ID</small><strong>${esc(application.character_id)}</strong></div>
+            </div>
+            <div class="admin-character-record-story">
+                <section><small>ХАРАКТЕР</small><p>${esc(application.personality)}</p></section>
+                <section><small>ПРЕДЫСТОРИЯ</small><p>${esc(application.backstory)}</p></section>
+                <section><small>ОСОБЫЕ НАВЫКИ</small><p>${esc(application.special_skills)}</p></section>
+            </div>
+            <div class="admin-character-record-footer">
+                <span>СТАТУС: <b>${esc(application.status)}</b></span>
+                <span>APPLICATION ID: <b>${esc(application.id)}</b></span>
+            </div>
+            ${application.review_notes ? `<div class="admin-character-record-notes"><small>ЗАПИСКА ХРАНИТЕЛЯ</small><p>${esc(application.review_notes)}</p></div>` : ""}
+        </article>`;
+    container.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("open"));
+    const close = () => { overlay.classList.remove("open"); setTimeout(() => overlay.remove(), 180); };
+    overlay.querySelector(".admin-character-record-close").addEventListener("click", close);
+    overlay.querySelector(".admin-character-record-backdrop").addEventListener("click", close);
+}
+
 function bindAdminButtons(container) {
+    container.querySelectorAll(".admin-character-details-button").forEach(button => {
+        if (button.dataset.bound) return;
+        button.dataset.bound = "1";
+        button.addEventListener("click", event => {
+            event.stopPropagation();
+            const application = (window.adminApplications || []).find(a => String(a.id) === String(button.dataset.characterDetailId));
+            if (application) openAdminCharacterRecord(application, container);
+        });
+    });
+
     container.querySelectorAll(".admin-delete-character-button").forEach(button => {
         button.addEventListener("click", async () => {
             const characterId = button.dataset.characterId;
