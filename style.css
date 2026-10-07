@@ -15481,3 +15481,46 @@ body:has(#root > #cabinet-content.character-application){
     .lorgus-notifications-read-all{font-size:8px}
     .lorgus-notification-trigger{margin-left:4px}
 }
+
+/* LORGUS RP — CINEMATIC ROLEPLAY */
+.lorgus-rp-page{width:min(1540px,calc(100% - 28px));margin:14px auto 24px}
+.lorgus-rp-shell{position:relative;grid-template-columns:340px minmax(0,1fr);min-height:calc(100vh - 118px);border:1px solid rgba(217,183,108,.22);border-radius:10px;background:#070604;box-shadow:0 35px 120px rgba(0,0,0,.72),0 0 90px rgba(217,183,108,.035)}
+.lorgus-rp-shell::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:10px;box-shadow:inset 0 0 90px rgba(0,0,0,.42);z-index:20}
+.lorgus-rp-sidebar{padding:26px 24px;background:radial-gradient(420px 420px at 50% 8%,rgba(217,183,108,.105),transparent 68%),linear-gradient(180deg,#17120d,#0b0907 48%,#080705);border-right:1px solid rgba(217,183,108,.16)}
+.lorgus-rp-sidebar::before{inset:12px;border-color:rgba(217,183,108,.08)}
+.lorgus-rp-back{padding:9px 12px;border:1px solid rgba(217,183,108,.12);background:rgba(0,0,0,.16);border-radius:5px;transition:.2s ease}
+.lorgus-rp-back:hover{background:rgba(217,183,108,.08);border-color:rgba(217,183,108,.28)}
+.lorgus-rp-place-mark{width:86px;height:86px;margin:34px auto 22px;border-color:rgba(217,183,108,.38);background:radial-gradient(circle,rgba(217,183,108,.09),transparent 68%);box-shadow:0 0 60px rgba(217,183,108,.11),inset 0 0 30px rgba(217,183,108,.05)}
+.lorgus-rp-sidebar h1{font-size:44px;line-height:.92;letter-spacing:.01em;text-shadow:0 8px 30px rgba(0,0,0,.6)}
+.lorgus-rp-region{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#a18e70}
+.lorgus-rp-divider{margin:25px 0 20px}
+.lorgus-rp-sidebar-label{font-weight:600;color:#9b8257}
+.lorgus-rp-presence-lock{padding:12px 13px;border:1px solid rgba(217,183,108,.1);border-left:2px solid rgba(217,183,108,.38);background:rgba(217,183,108,.035);color:#8b7d69;font-size:11px;line-height:1.6}
+.lorgus-rp-participants{max-height:220px;overflow:auto;padding-right:3px}
+.lorgus-rp-participant{border-radius:5px;padding:9px;background:linear-gradient(90deg,rgba(217,183,108,.055),rgba(217,183,108,.012));transition:.18s ease}
+.lorgus-rp-participant:hover{border-color:rgba(217,183,108,.25);transform:translateX(2px)}
+.lorgus-rp-participant.active{border-color:rgba(217,183,108,.25);box-shadow:inset 2px 0 rgba(217,183,108,.55)}
+.lorgus-rp-avatar{width:38px;height:38px;background:rgba(0,0,0,.22)}
+.lorgus-rp-participant strong{font-size:13px;color:#e0d0b0}
+.lorgus-rp-main{background:radial-gradient(1000px 600px at 55% 0%,rgba(217,183,108,.045),transparent 62%),linear-gradient(180deg,#0b0907,#070604 75%)}
+.lorgus-rp-header{position:sticky;top:0;z-index:15;min-height:88px;padding:17px 28px;background:rgba(9,7,5,.91);backdrop-filter:blur(16px);border-bottom:1px solid rgba(217,183,108,.14);box-shadow:0 12px 35px rgba(0,0,0,.22)}
+.lorgus-rp-header h2{font-size:35px;text-shadow:0 4px 22px rgba(0,0,0,.55)}
+.lorgus-rp-status{border-radius:999px;padding:7px 12px;background:rgba(217,183,108,.045);color:#a99572}
+.lorgus-rp-status i{background:#9f824e;box-shadow:0 0 9px rgba(217,183,108,.5)}
+.lorgus-rp-feed{min-height:0;height:calc(100vh - 370px);max-height:none;padding:38px clamp(22px,5vw,70px) 34px;scroll-behavior:smooth;background:radial-gradient(650px 450px at 50% 0%,rgba(217,183,108,.035),transparent 72%),repeating-linear-gradient(0deg,rgba(255,255,255,.008) 0,rgba(255,255,255,.008) 1px,transparent 1px,transparent 5px)}
+.lorgus-rp-feed::-webkit-scrollbar{width:7px}.lorgus-rp-feed::-webkit-scrollbar-thumb{background:rgba(217,183,108,.2);border-radius:9px}
+.lorgus-rp-message{position:relative;display:grid;grid-template-columns:44px minmax(0,820px);gap:14px;max-width:920px;margin:0 auto 20px;padding:0 0 20px;border-bottom:1px solid rgba(217,183,108,.075)}
+.lorgus-rp-message-avatar{width:44px;height:44px;margin-top:2px;background:radial-gradient(circle,rgba(217,183,108,.1),rgba(0,0,0,.2));border-color:rgba(217,183,108,.28);box-shadow:0 0 25px rgba(217,183,108,.04)}
+.lorgus-rp-message-meta{gap:11px}.lorgus-rp-message-meta strong{font-size:21px;color:#e5d2ad}.lorgus-rp-message-meta span{padding:3px 7px;border:1px solid rgba(217,183,108,.08);border-radius:999px;color:#786b58}
+.lorgus-rp-message-body{min-width:0}.lorgus-rp-message-text{margin:9px 0 0!important;color:#c0b29b!important;font-size:15px!important;line-height:1.85!important;letter-spacing:.005em}
+.lorgus-rp-empty{min-height:100%;max-width:650px;padding:70px 20px}.lorgus-rp-empty .lorgus-rp-symbol{font-size:42px;margin-bottom:18px}.lorgus-rp-empty h3{font-size:42px;line-height:1;margin:10px 0 12px}.lorgus-rp-empty p{font-size:14px;color:#8f816d}
+.lorgus-rp-composer{position:relative;z-index:16;margin:0 22px 18px;padding:13px;border:1px solid rgba(217,183,108,.2);border-radius:8px;background:rgba(12,9,6,.94);backdrop-filter:blur(18px);box-shadow:0 22px 60px rgba(0,0,0,.55),0 0 40px rgba(217,183,108,.025)}
+.lorgus-rp-composer:focus-within{border-color:rgba(217,183,108,.38);box-shadow:0 25px 70px rgba(0,0,0,.58),0 0 45px rgba(217,183,108,.055)}
+.lorgus-rp-composer-top{padding:2px 3px 9px}.lorgus-rp-composer textarea{min-height:96px;max-height:280px;padding:16px 17px;border-radius:6px;border-color:rgba(217,183,108,.13);background:rgba(3,3,2,.74);font-size:15px;line-height:1.75;outline:none;transition:.2s ease}
+.lorgus-rp-composer textarea:focus{border-color:rgba(217,183,108,.35);box-shadow:inset 0 0 30px rgba(217,183,108,.025)}
+.lorgus-rp-composer-bottom{align-items:center;gap:10px;margin-top:9px}.lorgus-rp-actions{display:flex;flex-wrap:wrap;gap:7px;min-width:0}
+.lorgus-rp-use-item{padding:7px 10px!important;border:1px solid rgba(217,183,108,.11)!important;border-radius:5px!important;background:rgba(217,183,108,.035)!important;color:#94856d!important;font-size:10px!important;transition:.18s ease}
+.lorgus-rp-use-item:hover{border-color:rgba(217,183,108,.3)!important;color:#d2bd91!important;background:rgba(217,183,108,.07)!important}
+.lorgus-rp-send{min-width:145px;border-radius:5px!important;box-shadow:0 8px 25px rgba(0,0,0,.3)}.lorgus-rp-item-selection{flex:1;min-width:80px}.lorgus-rp-footer{padding:7px 26px 14px}
+@media(max-width:850px){.lorgus-rp-page{width:calc(100% - 12px)}.lorgus-rp-shell{grid-template-columns:1fr}.lorgus-rp-sidebar{min-height:auto;padding:20px}.lorgus-rp-place-mark{margin:22px auto 15px}.lorgus-rp-sidebar-note{margin-top:18px}.lorgus-rp-feed{height:calc(100vh - 520px);min-height:420px}}
+@media(max-width:600px){.lorgus-rp-page{width:100%;margin:0}.lorgus-rp-shell{border-left:0;border-right:0;border-radius:0}.lorgus-rp-header{padding:15px 17px}.lorgus-rp-header h2{font-size:28px}.lorgus-rp-feed{height:calc(100vh - 570px);min-height:380px;padding:25px 15px}.lorgus-rp-message{grid-template-columns:35px minmax(0,1fr);gap:10px}.lorgus-rp-message-avatar{width:35px;height:35px}.lorgus-rp-message-meta strong{font-size:18px}.lorgus-rp-composer{margin:0 8px 9px;padding:10px}.lorgus-rp-composer-bottom{align-items:stretch;flex-direction:column}.lorgus-rp-actions{display:grid;grid-template-columns:1fr 1fr}.lorgus-rp-send{width:100%}}
