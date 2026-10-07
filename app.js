@@ -4823,7 +4823,7 @@ async function openAdminCharacterInventory(application, container) {
         '<button type="button" class="lorgus-admin-inventory-close">×</button>' +
         '<span class="lorgus-command-kicker">АДМИНИСТРАЦИЯ · ИНВЕНТАРЬ</span>' +
         '<h2>' + escapeHtml(application.name || "Персонаж") + '</h2>' +
-        '<p>Создай любой предмет вручную. Предметов может быть сколько угодно — здесь нет каталога заранее заданных вещей.</p>' +
+        '<p>Выдача персонажу. Предметов может быть сколько угодно — здесь нет каталога заранее заданных вещей.</p>' +
         '<div class="lorgus-admin-inventory-grant">' +
             '<input class="lorgus-admin-inventory-name" placeholder="Название предмета">' +
             '<select class="lorgus-admin-inventory-type">' +
