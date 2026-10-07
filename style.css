@@ -14763,3 +14763,7 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-equipment-slot>span{
     font-size:10px;
 }
+
+
+/* Fix backpack drop hint overlap */
+.lorgus-inventory-grid.is-valid-unequip-drop:before{display:none!important;}
