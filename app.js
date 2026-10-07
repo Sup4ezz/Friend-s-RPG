@@ -71,8 +71,6 @@ async function initialize() {
    ОСНОВНОЙ РЕНДЕР
    ========================================================= */
 
-window.render = render;
-
 function showLogin(initial = false) {
     if (authSwitching) return;
 
