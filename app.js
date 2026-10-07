@@ -6026,6 +6026,160 @@ function renderCharacter(container, character) {
     renderLorgusWorldMap(container, character);
 }
 
+async function refreshLorgusNotificationBadge() {
+    const badgeNodes = document.querySelectorAll(".lorgus-notification-badge");
+    if (!badgeNodes.length || !window.lorgusCurrentUserId || !supabase) return;
+
+    const { count, error } = await supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .is("read_at", null);
+
+    if (error) {
+        console.error("Не удалось загрузить счётчик уведомлений:", error);
+        return;
+    }
+
+    badgeNodes.forEach(badge => {
+        const unread = Number(count || 0);
+        badge.textContent = unread > 99 ? "99+" : String(unread);
+        badge.classList.toggle("visible", unread > 0);
+    });
+}
+
+function formatLorgusNotificationTime(value) {
+    if (!value) return "—";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "—";
+
+    const diff = Math.max(0, Date.now() - date.getTime());
+    if (diff < 60 * 1000) return "только что";
+    if (diff < 60 * 60 * 1000) return Math.floor(diff / (60 * 1000)) + " мин назад";
+    if (diff < 24 * 60 * 60 * 1000) return Math.floor(diff / (60 * 60 * 1000)) + " ч назад";
+
+    return date.toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+async function openLorgusNotifications() {
+    const existing = document.querySelector(".lorgus-notifications-overlay");
+    if (existing) {
+        existing.remove();
+        return;
+    }
+
+    const overlay = document.createElement("div");
+    overlay.className = "lorgus-notifications-overlay";
+    overlay.innerHTML = `
+        <div class="lorgus-notifications-backdrop"></div>
+        <article class="lorgus-notifications-panel">
+            <button type="button" class="lorgus-notifications-close" aria-label="Закрыть">×</button>
+            <div class="lorgus-notifications-heading">
+                <div>
+                    <span class="lorgus-command-kicker">ЛОРГУС · ВЕСТИ</span>
+                    <h2>Уведомления</h2>
+                    <p>События, которые произошли, пока тебя не было.</p>
+                </div>
+                <button type="button" class="lorgus-notifications-read-all">Прочитать всё</button>
+            </div>
+            <div class="lorgus-notifications-list">
+                <div class="lorgus-notifications-loading">Загружаем вести...</div>
+            </div>
+        </article>
+    `;
+    document.body.appendChild(overlay);
+
+    const close = () => overlay.remove();
+    overlay.querySelector(".lorgus-notifications-close").addEventListener("click", close);
+    overlay.querySelector(".lorgus-notifications-backdrop").addEventListener("click", close);
+
+    const list = overlay.querySelector(".lorgus-notifications-list");
+    const readAll = overlay.querySelector(".lorgus-notifications-read-all");
+
+    const render = rows => {
+        if (!rows.length) {
+            list.innerHTML = `
+                <div class="lorgus-notifications-empty">
+                    <span>✦</span>
+                    <strong>Пока тихо</strong>
+                    <p>Здесь появятся важные события, произошедшие в твоё отсутствие.</p>
+                </div>
+            `;
+            return;
+        }
+
+        list.innerHTML = rows.map(row => `
+            <button type="button"
+                class="lorgus-notification-entry${row.read_at ? "" : " unread"}"
+                data-notification-id="${escapeHtml(row.id)}">
+                <span class="lorgus-notification-mark">${row.type === "currency_received" ? "₵" : "✦"}</span>
+                <span class="lorgus-notification-content">
+                    <strong>${escapeHtml(row.title)}</strong>
+                    <span>${escapeHtml(row.body)}</span>
+                    <small>${escapeHtml(formatLorgusNotificationTime(row.created_at))}</small>
+                </span>
+                ${row.read_at ? "" : '<i class="lorgus-notification-unread-dot"></i>'}
+            </button>
+        `).join("");
+
+        list.querySelectorAll(".lorgus-notification-entry.unread").forEach(entry => {
+            entry.addEventListener("click", async () => {
+                const id = entry.dataset.notificationId;
+                const { error } = await supabase
+                    .from("notifications")
+                    .update({ read_at: new Date().toISOString() })
+                    .eq("id", id)
+                    .is("read_at", null);
+
+                if (error) {
+                    console.error("Не удалось отметить уведомление:", error);
+                    return;
+                }
+
+                entry.classList.remove("unread");
+                entry.querySelector(".lorgus-notification-unread-dot")?.remove();
+                await refreshLorgusNotificationBadge();
+            });
+        });
+    };
+
+    const { data, error } = await supabase
+        .from("notifications")
+        .select("id, type, title, body, read_at, created_at, data")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+    if (error) {
+        list.innerHTML = '<div class="lorgus-notifications-empty"><strong>Не удалось загрузить уведомления.</strong><p>' + escapeHtml(error.message) + '</p></div>';
+        console.error("Не удалось загрузить уведомления:", error);
+        return;
+    }
+
+    render(data || []);
+
+    readAll.addEventListener("click", async () => {
+        const now = new Date().toISOString();
+        const { error: updateError } = await supabase
+            .from("notifications")
+            .update({ read_at: now })
+            .is("read_at", null);
+
+        if (updateError) {
+            alert("Не удалось отметить уведомления:\\n\\n" + updateError.message);
+            return;
+        }
+
+        (data || []).forEach(row => { row.read_at = now; });
+        render(data || []);
+        await refreshLorgusNotificationBadge();
+    });
+}
+
 function renderLorgusInterfaceNav(active = "world") {
     const items = [
         ["overview", "⌂", "Обзор", "renderLorgusOverview()"],
@@ -6048,10 +6202,16 @@ function renderLorgusInterfaceNav(active = "world") {
             <div class="lorgus-global-account">
                 <div class="lorgus-global-presence"><i></i><span>МИР АКТИВЕН</span></div>
                 <span class="lorgus-global-user">${escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>${renderTitleBadge(window.activeTitle, "lorgus-global-nav-title")}
+                <button type="button" class="lorgus-notification-trigger" onclick="openLorgusNotifications()" aria-label="Уведомления" title="Уведомления">
+                    <span class="lorgus-notification-icon">♢</span>
+                    <b class="lorgus-notification-badge"></b>
+                </button>
                 <button type="button" class="lorgus-global-logout" onclick="logout()">ВЫЙТИ</button>
             </div>
         </nav>
     `;
+
+    window.setTimeout(() => refreshLorgusNotificationBadge(), 0);
 }
 
 function renderLorgusOverview() {
