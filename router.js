@@ -179,3 +179,5 @@
         bootCurrentRoute();
     }
 })();
+
+// migration boundary: route logic is isolated from legacy app.js
