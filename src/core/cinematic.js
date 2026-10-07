@@ -16,18 +16,18 @@ function createPortalTransitionOverlay() {
         overlay.classList.add("active");
     });
 
-    lorgusPortalOverlay = overlay;
+    window.lorgusPortalOverlay = overlay;
     return overlay;
 }
 
 function finishPortalTransition() {
-    if (!lorgusPortalOverlay) return;
+    if (!window.lorgusPortalOverlay) return;
 
-    lorgusPortalOverlay.classList.add("release");
+    window.lorgusPortalOverlay.classList.add("release");
     window.setTimeout(() => {
-        if (lorgusPortalOverlay) {
-            lorgusPortalOverlay.remove();
-            lorgusPortalOverlay = null;
+        if (window.lorgusPortalOverlay) {
+            window.lorgusPortalOverlay.remove();
+            window.lorgusPortalOverlay = null;
         }
     }, 850);
 }
@@ -181,9 +181,9 @@ function render(session) {
     } else {
         window.lorgusPortalEntering = false;
         window.lorgusPortalDepartureAligning = false;
-        if (lorgusPortalOverlay) {
-            lorgusPortalOverlay.remove();
-            lorgusPortalOverlay = null;
+        if (window.lorgusPortalOverlay) {
+            window.lorgusPortalOverlay.remove();
+            window.lorgusPortalOverlay = null;
         }
         renderAuth();
     }
