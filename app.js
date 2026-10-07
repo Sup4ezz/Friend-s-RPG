@@ -10609,3 +10609,4 @@ const openingShape = new THREE.Shape();
         if (previousCleanup) previousCleanup();
     };
 }
+}
