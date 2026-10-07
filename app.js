@@ -1202,6 +1202,19 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
 
     await loadPlayerState(session, forceCharacterSelection);
 
+    /*
+        Если приложение было открыто напрямую по SPA-маршруту,
+        после восстановления персонажа отдаём управление router.js.
+        Существующий рендер состояния остаётся fallback-ом для "/".
+    */
+    if (
+        window.activeCharacter &&
+        window.lorgusRouter &&
+        window.lorgusRouter.currentPath !== "/"
+    ) {
+        window.lorgusRouter.bootCurrentRoute();
+    }
+
     if (previousScene && previousScene.parentNode === root) {
         previousScene.remove();
     }
