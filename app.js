@@ -965,7 +965,79 @@ async function register(event) {
    КАБИНЕТ
    ========================================================= */
 
-async function renderCabinet(session, preserveCurrentScene = false, forceCharacterSelection = false) {
+async /* =========================================================
+   ТИТУЛЫ ПЕРСОНАЖЕЙ
+   ========================================================= */
+
+async function loadCharacterTitle(characterId) {
+    if (!characterId) return null;
+    const { data: character, error } = await supabase.from("characters").select("active_title_id").eq("id", characterId).single();
+    if (error || !character?.active_title_id) return null;
+    const { data: title } = await supabase.from("titles").select("*").eq("id", character.active_title_id).single();
+    return title || null;
+}
+
+function renderTitleBadge(title, className = "") {
+    if (!title) return "";
+    return "<span class=\"lorgus-title-badge " + className + "\" style=\"--title-color:" + escapeHtml(title.color || "#d6b66a") + "\"><span>" + escapeHtml(title.icon || "✦") + "</span>" + escapeHtml(title.name) + "</span>";
+}
+
+async function openTitlePicker() {
+    const c = window.activeCharacter;
+    if (!c) return;
+    const { data: owned, error } = await supabase.from("character_titles").select("title_id, awarded_at, titles(*)").eq("character_id", c.id).order("awarded_at", { ascending: true });
+    if (error) { alert("Не удалось загрузить титулы:\\n\\n" + error.message); return; }
+    const overlay = document.createElement("div");
+    overlay.className = "lorgus-title-overlay";
+    const panel = document.createElement("article");
+    panel.className = "lorgus-title-panel";
+    panel.innerHTML = "<button type=\"button\" class=\"lorgus-title-close\">×</button><span class=\"lorgus-command-kicker\">ЛОРГУС · ТИТУЛЫ</span><h2>Как тебя будут называть?</h2><p>Титул выдаётся администрацией. Здесь ты выбираешь только тот, который видят другие.</p>";
+    const list = document.createElement("div"); list.className = "lorgus-title-list";
+    if (!owned?.length) list.innerHTML = "<div class=\"lorgus-title-empty\">Титулов пока нет. Их выдаёт администрация.</div>";
+    (owned || []).forEach(row => {
+        const t = row.titles; if (!t) return;
+        const b = document.createElement("button"); b.type = "button"; b.className = "lorgus-owned-title" + (String(t.id) === String(window.activeTitle?.id) ? " active" : ""); b.dataset.titleId = t.id; b.style.setProperty("--title-color", t.color || "#d6b66a");
+        b.innerHTML = "<span class=\"lorgus-owned-title-icon\">" + escapeHtml(t.icon) + "</span><span><strong>" + escapeHtml(t.name) + "</strong><small>" + escapeHtml(t.category) + " · " + escapeHtml(t.rarity) + "</small></span>";
+        b.addEventListener("click", async () => {
+            const { error: setError } = await supabase.rpc("set_active_character_title", { p_character_id: c.id, p_title_id: t.id });
+            if (setError) { alert("Не удалось установить титул:\\n\\n" + setError.message); return; }
+            window.activeTitle = t; overlay.remove(); renderLorgusCharacterHub();
+        });
+        list.appendChild(b);
+    });
+    panel.appendChild(list);
+    if (owned?.length) {
+        const clear = document.createElement("button"); clear.type = "button"; clear.className = "lorgus-title-clear"; clear.textContent = "Скрыть титул";
+        clear.addEventListener("click", async () => {
+            const { error: setError } = await supabase.rpc("set_active_character_title", { p_character_id: c.id, p_title_id: null });
+            if (setError) { alert("Не удалось снять титул:\\n\\n" + setError.message); return; }
+            window.activeTitle = null; overlay.remove(); renderLorgusCharacterHub();
+        }); panel.appendChild(clear);
+    }
+    const backdrop = document.createElement("div"); backdrop.className = "lorgus-title-backdrop"; overlay.append(backdrop, panel); document.body.appendChild(overlay);
+    const close = () => overlay.remove(); panel.querySelector(".lorgus-title-close").addEventListener("click", close); backdrop.addEventListener("click", close);
+}
+
+async function openAdminCharacterTitles(application, container) {
+    const characterId = application.character_id; if (!characterId) return;
+    const [{ data: titles }, { data: owned }] = await Promise.all([
+        supabase.from("titles").select("*").order("category").order("name"),
+        supabase.from("character_titles").select("title_id, awarded_at, titles(*)").eq("character_id", characterId).order("awarded_at", { ascending: true })
+    ]);
+    const overlay = document.createElement("div"); overlay.className = "lorgus-title-overlay";
+    const panel = document.createElement("article"); panel.className = "lorgus-title-panel lorgus-admin-title-panel";
+    panel.innerHTML = "<button type=\"button\" class=\"lorgus-title-close\">×</button><span class=\"lorgus-command-kicker\">АДМИНИСТРАЦИЯ · ТИТУЛЫ</span><h2>" + escapeHtml(application.name || "Персонаж") + "</h2><p>Выдача и отзыв титулов. Игрок не может создавать или выдавать их себе.</p>";
+    const select = document.createElement("select"); select.className = "lorgus-title-select"; select.innerHTML = "<option value=\"\">Выбери титул...</option>" + (titles || []).map(t => "<option value=\"" + escapeHtml(t.id) + "\">" + escapeHtml(t.icon) + " " + escapeHtml(t.name) + " · " + escapeHtml(t.rarity) + "</option>").join("");
+    const grant = document.createElement("button"); grant.type = "button"; grant.className = "lorgus-title-grant"; grant.textContent = "✦ Выдать титул";
+    const ownedBox = document.createElement("div"); ownedBox.className = "lorgus-title-owned-list";
+    (owned || []).forEach(row => { const t=row.titles; if(!t)return; const item=document.createElement("div"); item.className="lorgus-admin-owned-title"; item.style.setProperty("--title-color",t.color||"#d6b66a"); item.innerHTML="<span>"+escapeHtml(t.icon)+"</span><strong>"+escapeHtml(t.name)+"</strong><small>"+escapeHtml(t.rarity)+"</small>"; const revoke=document.createElement("button"); revoke.type="button"; revoke.textContent="Забрать"; revoke.addEventListener("click",async()=>{const {error}=await supabase.rpc("admin_revoke_character_title",{p_character_id:characterId,p_title_id:row.title_id});if(error){alert("Не удалось забрать титул:\\n\\n"+error.message);return;} overlay.remove(); openAdminCharacterTitles(application,container);}); item.appendChild(revoke); ownedBox.appendChild(item); });
+    if (!owned?.length) ownedBox.innerHTML = "<div class=\"lorgus-title-empty\">У персонажа пока нет титулов.</div>";
+    panel.append(select, grant, ownedBox); overlay.append(document.createElement("div"), panel); overlay.firstChild.className="lorgus-title-backdrop"; document.body.appendChild(overlay);
+    const close=()=>overlay.remove(); panel.querySelector(".lorgus-title-close").addEventListener("click",close); overlay.firstChild.addEventListener("click",close);
+    grant.addEventListener("click",async()=>{if(!select.value)return;const {error}=await supabase.rpc("admin_award_character_title",{p_character_id:characterId,p_title_id:select.value});if(error){alert("Не удалось выдать титул:\\n\\n"+error.message);return;}overlay.remove();openAdminCharacterTitles(application,container);});
+}
+
+function renderCabinet(session, preserveCurrentScene = false, forceCharacterSelection = false) {
     const username =
         session.user.user_metadata?.username ||
         "Игрок";
@@ -1113,6 +1185,7 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
             ) {
                 window.activeCharacterId = savedCharacter.id;
                 window.activeCharacter = savedCharacter;
+                window.activeTitle = await loadCharacterTitle(savedCharacter.id);
 
                 sessionStorage.setItem(
                     "lorgus_active_character_id",
@@ -1159,6 +1232,7 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
 
     window.activeCharacterId = null;
     window.activeCharacter = null;
+    window.activeTitle = null;
 
     if (approvedApplications.length > 0) {
         await renderCharacterSelection(
@@ -1467,6 +1541,7 @@ async function selectCharacter(container, characterId) {
 
     const character = result.data;
     const status = String(character.status || "ACTIVE").toUpperCase();
+    window.activeTitle = await loadCharacterTitle(character.id);
     if (status !== "ACTIVE") {
         showCharacterError(container, "Этот персонаж сейчас недоступен для игры.");
         return;
@@ -2430,6 +2505,7 @@ function renderAdminCharacterManagement(application) {
                 </div>
                 <div class="admin-character-actions">
                     <button class="admin-character-details-button" type="button" data-character-detail-id="${application.id}">Открыть полную запись</button>
+                    <button class="admin-character-details-button admin-character-titles-button" type="button" data-character-title-id="${application.id}">Титулы</button>
                     <button class="admin-reject-button admin-delete-character-button" data-character-id="${application.character_id || ""}" data-character-name="${escapeHtml(application.name || "персонажа")}">Удалить персонажа</button>
                 </div>
             </div>
@@ -2555,6 +2631,14 @@ function bindAdminButtons(container) {
             event.stopPropagation();
             const application = (window.adminApplications || []).find(a => String(a.id) === String(button.dataset.characterDetailId));
             if (application) openAdminCharacterRecord(application, container);
+        });
+    });
+
+    container.querySelectorAll(".admin-character-titles-button").forEach(button => {
+        button.addEventListener("click", event => {
+            event.stopPropagation();
+            const application = (window.adminApplications || []).find(a => String(a.id) === String(button.dataset.characterTitleId));
+            if (application) openAdminCharacterTitles(application, container);
         });
     });
 
@@ -4959,7 +5043,7 @@ function renderLorgusInterfaceNav(active = "world") {
             </div>
             <div class="lorgus-global-account">
                 <div class="lorgus-global-presence"><i></i><span>МИР АКТИВЕН</span></div>
-                <span class="lorgus-global-user">${escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>
+                <span class="lorgus-global-user">${escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>${renderTitleBadge(window.activeTitle, "lorgus-global-nav-title")}
                 <button type="button" class="lorgus-global-logout" onclick="logout()">ВЫЙТИ</button>
             </div>
         </nav>
@@ -5024,7 +5108,8 @@ function renderLorgusCharacterHub() {
         <main class="lorgus-command-main">
             <section class="lorgus-profile-hero">
                 <div class="lorgus-profile-sigil">✦</div>
-                <div><span class="lorgus-command-kicker">ЛИЧНОЕ ДОСЬЕ</span><h1>${escapeHtml(c.name || "Без имени")}</h1><p>${escapeHtml(c.race || "Раса")} · ${escapeHtml(c.homeland || "Родина не указана")}</p></div>
+                <div><span class="lorgus-command-kicker">ЛИЧНОЕ ДОСЬЕ</span><h1>${escapeHtml(c.name || "Без имени")}</h1><p>${escapeHtml(c.race || "Раса")} · ${escapeHtml(c.homeland || "Родина не указана")}</p>${renderTitleBadge(window.activeTitle, "lorgus-profile-title")}</div>
+                <button type="button" class="lorgus-title-manage-button" onclick="openTitlePicker()">Выбрать титул</button>
             </section>
             <section class="lorgus-dossier-grid">
                 <article><span>ПРОИСХОЖДЕНИЕ</span><strong>${escapeHtml(c.homeland || "Не указано")}</strong><p>Родина определяет происхождение, но не физическое положение персонажа.</p></article>
@@ -5061,6 +5146,8 @@ window.renderLorgusOverview = renderLorgusOverview;
 window.renderLorgusWorldMapCurrent = renderLorgusWorldMapCurrent;
 window.renderLorgusCharacterHub = renderLorgusCharacterHub;
 window.renderLorgusRpHub = renderLorgusRpHub;
+window.openTitlePicker = openTitlePicker;
+window.openAdminCharacterTitles = openAdminCharacterTitles;
 
 window.selectLorgusMapRegion = selectLorgusMapRegion;
 window.selectLorgusMapMarker = selectLorgusMapMarker;
