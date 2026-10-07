@@ -4082,7 +4082,7 @@ async function appendRpMessage(message) {
     if (useBox && !error && uses?.length) {
         useBox.innerHTML = uses.map(use => {
             const item = use.items || {};
-            return '<span class="lorgus-rp-item-use" style="--item-color:' + escapeHtml(item.color || "#d6b36a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong>' + (use.quantity > 1 ? '<small>×' + escapeHtml(String(use.quantity)) + '</small>' : '') + '</span>';
+            return '<span class="lorgus-rp-item-use" style="--item-color:' + escapeHtml(item.color || "#d6b36a") + '"><span>' + escapeHtml(item.icon || inventoryTypeIcons[item.item_subtype] || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong>' + (use.quantity > 1 ? '<small>×' + escapeHtml(String(use.quantity)) + '</small>' : '') + '</span>';
         }).join("");
     }
     feed.scrollTop = feed.scrollHeight;
@@ -4200,28 +4200,15 @@ const inventorySlotLabels = {
 };
 
 const inventoryTypeLabels = {
-    helmet: "Шлем",
-    armor: "Броня",
-    gloves: "Перчатки",
-    pants: "Штаны",
-    boots: "Обувь",
-    sword: "Меч",
-    paired_daggers: "Парные кинжалы",
-    spear: "Копьё",
-    axe: "Топор",
-    staff: "Посох",
-    bow: "Лук",
-    crossbow: "Арбалет",
-    shield: "Щит",
-    chain: "Цепочка",
-    ring: "Кольцо",
-    bracelet: "Браслет",
-    potion: "Зелье",
-    scroll: "Свиток",
-    food: "Еда",
-    quest_item: "Квестовый предмет",
-    material: "Материал",
-    misc: "Прочее"
+    helmet: "Шлем", armor: "Броня", gloves: "Перчатки", pants: "Штаны", boots: "Обувь",
+    sword: "Меч", spear: "Копьё", axe: "Топор", staff: "Посох", bow: "Лук", crossbow: "Арбалет",
+    shield: "Щит", chain: "Цепочка", ring: "Кольцо", bracelet: "Браслет", potion: "Зелье",
+    scroll: "Свиток", food: "Еда", quest_item: "Квестовый предмет", material: "Материал", misc: "Прочее"
+};
+const inventoryTypeIcons = {
+    helmet:"⛑", armor:"🛡", gloves:"🧤", pants:"♜", boots:"🥾", sword:"⚔", spear:"🔱", axe:"🪓",
+    staff:"♖", bow:"🏹", crossbow:"⦿", shield:"🛡", chain:"⛓", ring:"◉", bracelet:"◌", potion:"⚗",
+    scroll:"▤", food:"✦", quest_item:"◆", material:"◇", misc:"◆"
 };
 
 function inventoryRarityLabel(rarity) {
@@ -4272,48 +4259,61 @@ async function renderLorgusInventory() {
         box.innerHTML = row && item ? '<div class="lorgus-equipped-item" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong></div>' : "";
     });
     renderEquipped();
-    grid.querySelectorAll(".lorgus-inventory-item").forEach(card => {
-        card.addEventListener("dragstart", e => { e.dataTransfer.setData("text/plain", card.dataset.inventoryId); e.dataTransfer.effectAllowed = "move"; });
-    });
+    const setupDrag = card => {
+        card.addEventListener("dragstart", e => {
+            e.dataTransfer.setData("text/plain", card.dataset.inventoryId);
+            e.dataTransfer.effectAllowed = "move";
+            const ghost = card.cloneNode(true);
+            ghost.classList.add("lorgus-drag-ghost");
+            ghost.style.width = Math.min(card.getBoundingClientRect().width, 360) + "px";
+            document.body.appendChild(ghost);
+            e.dataTransfer.setDragImage(ghost, 28, 28);
+            requestAnimationFrame(() => ghost.remove());
+            card.classList.add("is-dragging");
+        });
+        card.addEventListener("dragend", () => card.classList.remove("is-dragging"));
+    };
+    grid.querySelectorAll(".lorgus-inventory-item").forEach(setupDrag);
     document.querySelectorAll(".lorgus-equipped-item").forEach(card => {
-        card.addEventListener("dragstart", e => { e.dataTransfer.setData("text/plain", card.dataset.inventoryId); e.dataTransfer.effectAllowed = "move"; });
+        setupDrag(card);
         card.addEventListener("dblclick", async () => { const { error } = await supabase.rpc("unequip_character_item", { p_inventory_id: card.dataset.inventoryId }); if (error) { alert("Не удалось снять предмет:\n\n" + error.message); return; } await renderLorgusInventory(); });
     });
+    const rejectDrop = slot => {
+        slot.classList.remove("is-invalid-drop");
+        void slot.offsetWidth;
+        slot.classList.add("is-invalid-drop");
+        window.setTimeout(() => slot.classList.remove("is-invalid-drop"), 520);
+    };
     document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
-        slot.addEventListener("dragover", e => e.preventDefault());
-        slot.addEventListener("drop", async e => {
+        slot.addEventListener("dragover", e => {
             e.preventDefault();
             const inventoryId = e.dataTransfer.getData("text/plain");
+            const row = rows.find(r => r.id === inventoryId);
+            const item = row?.items;
+            slot.classList.toggle("is-valid-drop", !!item?.equipment_slot && item.equipment_slot === slot.dataset.equipmentSlot);
+        });
+        slot.addEventListener("dragleave", () => slot.classList.remove("is-valid-drop"));
+        slot.addEventListener("drop", async e => {
+            e.preventDefault();
+            slot.classList.remove("is-valid-drop");
+            const inventoryId = e.dataTransfer.getData("text/plain");
             if (!inventoryId) return;
-
             const row = rows.find(r => r.id === inventoryId);
             const item = row?.items;
             const targetSlot = slot.dataset.equipmentSlot;
-
-            if (!item?.equipment_slot) {
-                alert("Этот предмет нельзя экипировать.");
+            if (!item?.equipment_slot || item.equipment_slot !== targetSlot) {
+                rejectDrop(slot);
                 return;
             }
-
-            if (item.equipment_slot !== targetSlot) {
-                alert("Нельзя надеть «" + (item.name || "этот предмет") + "» на «" + (inventorySlotLabels[targetSlot] || targetSlot) + "».");
-                return;
-            }
-
-            const { error } = await supabase.rpc("equip_character_item", {
-                p_inventory_id: inventoryId,
-                p_slot: targetSlot
-            });
-
+            const { error } = await supabase.rpc("equip_character_item", { p_inventory_id: inventoryId, p_slot: targetSlot });
             if (error) {
-                alert("Не удалось экипировать предмет:\n\n" + error.message);
+                rejectDrop(slot);
+                console.error("Не удалось экипировать предмет:", error);
                 return;
             }
-
             await renderLorgusInventory();
         });
     });
-}
 
 function updateRpItemUseButton() {
     const label = document.getElementById("lorgus-rp-item-selection"); if (!label) return;
