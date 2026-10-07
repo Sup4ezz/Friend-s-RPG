@@ -9850,7 +9850,7 @@ body{
   z-index:80;
   min-height:76px;
   display:grid;
-  grid-template-columns:220px minmax(0,1fr) minmax(330px,380px);
+  grid-template-columns:220px minmax(0,1fr) minmax(500px,540px);
   align-items:center;
   gap:20px;
   padding:0 26px;
@@ -10210,7 +10210,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:flex-end;
-  gap:12px;
+  gap:8px;
   width:100%;
   min-width:0;
 }
@@ -14428,7 +14428,7 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-admin-owned-title{display:grid;grid-template-columns:30px 1fr auto auto;align-items:center;gap:10px;padding:11px 12px;border-left:3px solid var(--title-color);background:rgba(255,255,255,.025)}
 .lorgus-admin-owned-title>span{color:var(--title-color);font-size:18px}.lorgus-admin-owned-title small{color:#8d8375}.lorgus-admin-owned-title button{padding:7px 10px;border:1px solid rgba(180,90,70,.4);background:rgba(120,35,25,.12);color:#d59a8c;cursor:pointer}
 .admin-character-actions .admin-character-titles-button{border-color:rgba(214,182,106,.42);color:#d6b66a}
-@media(max-width:720px){.lorgus-title-manage-button{margin:15px 0 0;align-self:flex-start}.lorgus-title-panel{padding:22px}.lorgus-global-nav-title{display:none}.lorgus-admin-owned-title{grid-template-columns:26px 1fr auto}.lorgus-admin-owned-title small{display:none}}
+@media(max-width:720px){.lorgus-title-manage-button{margin:15px 0 0;align-self:flex-start}.lorgus-title-panel{padding:22px}.lorgus-global-nav-title{max-width:150px}.lorgus-admin-owned-title{grid-template-columns:26px 1fr auto}.lorgus-admin-owned-title small{display:none}}
 
 
 /* =========================================================
