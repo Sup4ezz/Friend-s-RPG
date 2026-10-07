@@ -122,7 +122,7 @@ function updateLorgusMapEditorReadout(rectData) {
     if (!readout || !rectData) return;
 
     readout.innerHTML =
-        "<strong>" + escapeHtml(rectData.id) + "</strong>" +
+        "<strong>" + window.escapeHtml(rectData.id) + "</strong>" +
         "<span>X " + rectData.x.toFixed(1) + " · Y " + rectData.y.toFixed(1) +
         " · W " + rectData.w.toFixed(1) + " · H " + rectData.h.toFixed(1) + "</span>";
 }
@@ -262,14 +262,14 @@ function renderLorgusMapMarkers() {
             type="button"
             class="lorgus-map-marker ${marker.type}"
             style="left:${marker.x}%;top:${marker.y}%"
-            data-region="${escapeHtml(marker.id)}"
-            onclick="selectLorgusMapMarker('${escapeHtml(marker.id)}')"
-            title="${escapeHtml(marker.id)}"
-            aria-label="Открыть ${escapeHtml(marker.id)}"
+            data-region="${window.escapeHtml(marker.id)}"
+            onclick="selectLorgusMapMarker('${window.escapeHtml(marker.id)}')"
+            title="${window.escapeHtml(marker.id)}"
+            aria-label="Открыть ${window.escapeHtml(marker.id)}"
         >
             <span class="lorgus-map-marker-pulse"></span>
             <span class="lorgus-map-marker-core"></span>
-            <span class="lorgus-map-marker-label">${escapeHtml(marker.id)}</span>
+            <span class="lorgus-map-marker-label">${window.escapeHtml(marker.id)}</span>
         </button>
     `).join("");
 
@@ -308,9 +308,9 @@ function renderLorgusWorldMap(container, character) {
 
     container.className = "lorgus-map-page";
 
-    const name = escapeHtml(character.name || "Без имени");
-    const race = escapeHtml(character.race || "Раса не указана");
-    const homeland = escapeHtml(character.homeland || "Родина не указана");
+    const name = window.escapeHtml(character.name || "Без имени");
+    const race = window.escapeHtml(character.race || "Раса не указана");
+    const homeland = window.escapeHtml(character.homeland || "Родина не указана");
 
     const presence = window.activeRpPresence;
     const currentLocation =
@@ -338,7 +338,7 @@ function renderLorgusWorldMap(container, character) {
 
                 <div class="lorgus-map-location-status">
                     <span>ТЕКУЩЕЕ МЕСТОПОЛОЖЕНИЕ</span>
-                    <strong>${escapeHtml(currentLocation)}</strong>
+                    <strong>${window.escapeHtml(currentLocation)}</strong>
                     <small>Положение персонажа в мире</small>
                 </div>
                 <div class="lorgus-map-world-stats">
@@ -349,7 +349,7 @@ function renderLorgusWorldMap(container, character) {
 
                 <div class="lorgus-map-divider"></div>
 
-                <button class="gold-button lorgus-map-side-button" type="button" onclick="openActiveCharacterProfile()">Профиль</button>
+                <button class="gold-button lorgus-map-side-button" type="button" onclick="window.openActiveCharacterProfile()">Профиль</button>
                 <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="renderWorldCharacterTracker()">Люди мира</button>
                 <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="renderMail()">Письма</button>
                 <button class="character-secondary-button lorgus-map-side-button" type="button" onclick="switchCharacter()">Сменить персонажа</button>
@@ -407,7 +407,7 @@ function renderLorgusWorldMap(container, character) {
                             <span>СТАТУС</span><strong>ОТКРЫТ ДЛЯ ИССЛЕДОВАНИЯ</strong>
                         </div>
 
-                        <button id="lorgus-map-enter-button" class="gold-button lorgus-map-enter-button" type="button" onclick="renderKingdomLocations('Атэрон')">Открыть край</button>
+                        <button id="lorgus-map-enter-button" class="gold-button lorgus-map-enter-button" type="button" onclick="window.renderKingdomLocations('Атэрон')">Открыть край</button>
 
                         <div class="lorgus-map-regions">
                             <span class="lorgus-map-regions-title">РЕГИОНЫ</span>
