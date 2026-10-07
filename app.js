@@ -4252,8 +4252,9 @@ async function renderLorgusInventory() {
     if (!grid) return;
     if (error) { grid.innerHTML = '<div class="lorgus-inventory-empty"><h2>Инвентарь недоступен</h2><p>' + escapeHtml(error.message) + '</p></div>'; return; }
     const rows = data || [];
-    document.getElementById("lorgus-inventory-count").textContent = rows.length + " ячеек";
-    grid.innerHTML = rows.length ? rows.map(row => inventoryItemMarkup(row, row.equipped_slot ? "is-equipped-in-inventory" : "")).join("") : '<div class="lorgus-inventory-empty"><h2>Рюкзак пуст</h2><p>Когда хранитель выдаст тебе вещи, они появятся здесь.</p></div>';
+    const backpackRows = rows.filter(row => !row.equipped_slot);
+    document.getElementById("lorgus-inventory-count").textContent = backpackRows.length + " ячеек";
+    grid.innerHTML = backpackRows.length ? backpackRows.map(row => inventoryItemMarkup(row)).join("") : '<div class="lorgus-inventory-empty"><h2>Рюкзак пуст</h2><p>Перетащи сюда предмет с персонажа, чтобы снять его.</p></div>';
     const renderEquipped = () => document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
         const row = rows.find(r => r.equipped_slot === slot.dataset.equipmentSlot);
         const item = row?.items; const box = slot.querySelector(".lorgus-equipment-slot-item");
