@@ -9850,7 +9850,7 @@ body{
   z-index:80;
   min-height:76px;
   display:grid;
-  grid-template-columns:220px minmax(0,1fr) 170px;
+  grid-template-columns:220px minmax(0,1fr) minmax(330px,380px);
   align-items:center;
   gap:20px;
   padding:0 26px;
@@ -10209,10 +10209,16 @@ body{
 .lorgus-global-account{
   display:flex;
   align-items:center;
-  justify-content:space-between;
-  gap:32px;
+  justify-content:flex-end;
+  gap:12px;
   width:100%;
   min-width:0;
+}
+.lorgus-global-account .lorgus-global-nav-title{
+  flex:0 1 auto;
+  min-width:0;
+  max-width:180px;
+  margin-left:0;
 }
 .lorgus-global-user{
   flex:1 1 auto;
