@@ -14895,3 +14895,197 @@ body:has(#root > #cabinet-content.character-application){
         grid-column:2;
     }
 }
+
+/* Admin character inventory popup — full layout stabilization */
+.lorgus-admin-inventory-overlay{
+    box-sizing:border-box;
+    padding:20px;
+    overflow:auto;
+    align-items:center;
+}
+.lorgus-admin-inventory-panel{
+    box-sizing:border-box;
+    width:min(920px,100%);
+    max-width:100%;
+    max-height:min(900px,calc(100vh - 40px));
+    min-width:0;
+    min-height:0;
+    overflow:auto;
+    padding:30px;
+}
+.lorgus-admin-inventory-panel *{
+    box-sizing:border-box;
+    min-width:0;
+}
+.lorgus-admin-inventory-panel h2{
+    overflow-wrap:anywhere;
+}
+.lorgus-admin-inventory-panel>p{
+    max-width:760px;
+    overflow-wrap:anywhere;
+}
+
+/* Item grant */
+.lorgus-admin-inventory-grant{
+    width:100%;
+    grid-template-columns:minmax(0,2fr) minmax(130px,1.1fr) minmax(120px,1fr) minmax(76px,.55fr) minmax(92px,.7fr);
+}
+.lorgus-admin-inventory-grant>*{
+    min-width:0;
+    max-width:100%;
+}
+.lorgus-admin-inventory-grant input,
+.lorgus-admin-inventory-grant select,
+.lorgus-admin-inventory-grant button{
+    min-width:0;
+    max-width:100%;
+}
+.lorgus-admin-inventory-grant input,
+.lorgus-admin-inventory-grant select{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.lorgus-admin-inventory-grant button{
+    white-space:nowrap;
+}
+
+/* Currency */
+.lorgus-admin-currency-grant{
+    width:100%;
+    grid-template-columns:auto minmax(150px,1fr) minmax(0,2.2fr) auto;
+}
+.lorgus-admin-currency-grant>span{
+    white-space:nowrap;
+}
+.lorgus-admin-currency-denominations{
+    min-width:0;
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+}
+.lorgus-admin-currency-denominations label{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:5px;
+    min-width:0;
+    font-size:8px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:#8f887f;
+}
+.lorgus-admin-currency-denominations input{
+    width:100%;
+    min-width:0;
+}
+
+/* Existing inventory rows */
+.lorgus-admin-inventory-list{
+    min-width:0;
+}
+.lorgus-admin-inventory-row{
+    grid-template-columns:42px minmax(0,1fr) auto;
+    min-width:0;
+}
+.lorgus-admin-inventory-row>div{
+    min-width:0;
+}
+.lorgus-admin-inventory-row strong{
+    overflow-wrap:anywhere;
+}
+.lorgus-admin-inventory-row small{
+    overflow-wrap:anywhere;
+    line-height:1.35;
+}
+.lorgus-admin-inventory-row button{
+    flex:0 0 auto;
+    white-space:nowrap;
+}
+
+@media(max-width:1050px){
+    .lorgus-admin-inventory-panel{
+        width:min(900px,100%);
+        padding:26px;
+    }
+    .lorgus-admin-inventory-grant{
+        grid-template-columns:minmax(0,1.7fr) minmax(0,1fr) minmax(82px,.65fr);
+    }
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-name{
+        grid-column:1/-1;
+    }
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-type{grid-column:1}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-rarity{grid-column:2}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-qty{grid-column:3}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-grant-btn{
+        grid-column:1/-1;
+    }
+    .lorgus-admin-currency-grant{
+        grid-template-columns:auto minmax(0,1fr);
+    }
+    .lorgus-admin-currency-grant>span{
+        grid-column:1/-1;
+    }
+    .lorgus-admin-currency-denominations{
+        grid-column:1/-1;
+    }
+    .lorgus-admin-currency-grant button{
+        grid-column:1/-1;
+    }
+}
+
+@media(max-width:700px){
+    .lorgus-admin-inventory-overlay{
+        padding:10px;
+        align-items:start;
+    }
+    .lorgus-admin-inventory-panel{
+        width:100%;
+        max-height:calc(100vh - 20px);
+        padding:22px 16px;
+    }
+    .lorgus-admin-inventory-panel h2{
+        font-size:26px;
+        line-height:1.15;
+    }
+    .lorgus-admin-inventory-grant{
+        grid-template-columns:minmax(0,1fr) minmax(82px,.65fr);
+        gap:8px;
+        padding:12px;
+    }
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-name{
+        grid-column:1/-1;
+    }
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-type{grid-column:1}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-rarity{grid-column:2}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-qty{grid-column:1}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-grant-btn{grid-column:2}
+    .lorgus-admin-currency-grant{
+        grid-template-columns:1fr;
+        gap:8px;
+    }
+    .lorgus-admin-currency-grant>span,
+    .lorgus-admin-currency-grant select,
+    .lorgus-admin-currency-denominations,
+    .lorgus-admin-currency-grant button{
+        grid-column:1;
+    }
+    .lorgus-admin-currency-denominations{
+        grid-template-columns:repeat(3,minmax(0,1fr));
+    }
+    .lorgus-admin-currency-list{
+        grid-template-columns:1fr;
+    }
+    .lorgus-admin-inventory-row{
+        grid-template-columns:38px minmax(0,1fr);
+    }
+    .lorgus-admin-inventory-row button{
+        grid-column:1/-1;
+        justify-self:stretch;
+    }
+}
+
+@media(max-width:430px){
+    .lorgus-admin-currency-denominations{
+        grid-template-columns:1fr;
+    }
+}
