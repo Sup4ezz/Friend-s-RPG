@@ -1653,36 +1653,13 @@ function getFileExtension(
 }
 
 /* =========================================================
-   ЭКРАНИРОВАНИЕ HTML
-   ========================================================= */
-
-function escapeHtml(value) {
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-}
-
-/* =========================================================
    GLOBAL
    ========================================================= */
 
-window.showLogin = showLogin;
-window.showRegister = showRegister;
-window.login = login;
-window.register = register;
 window.logout = logout;
-window.openLorgusNotifications = openLorgusNotifications;
-window.submitCharacterApplication =
-    submitCharacterApplication;
-window.updateCharacterApplication =
-    updateCharacterApplication;
 window.openActiveCharacterProfile = openActiveCharacterProfile;
 window.switchCharacter = switchCharacter;
 window.returnToGame = returnToGame;
-window.renderCharacter = renderCharacter;
 window.renderKingdomLocations = renderKingdomLocations;
 window.renderLocationChats = renderLocationChats;
 window.enterLocationRp = enterLocationRp;
@@ -1694,9 +1671,6 @@ window.startTravel = startTravel;
 window.arriveAtDestination = arriveAtDestination;
 window.getRpPresence = getRpPresence;
 window.renderWorldCharacterTracker = renderWorldCharacterTracker;
-window.renderMail = renderMail;
-window.sendLorgusMail = sendLorgusMail;
-window.markLorgusMailRead = markLorgusMailRead;
 
 
 /* =========================================================
@@ -1754,4 +1728,3 @@ window.setCharacterMessage = setCharacterMessage;
 window.logout = logout;
 window.setMessage = setMessage;
 window.getFileExtension = getFileExtension;
-window.escapeHtml = escapeHtml;
