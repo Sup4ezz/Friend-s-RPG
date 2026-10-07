@@ -14125,3 +14125,84 @@ body:has(#root > #cabinet-content.character-application){
     .admin-modal-dialog{padding:25px 18px!important}
     .admin-modal-title-row h2{font-size:28px!important}
 }
+
+/* LORGUS RPG COMMAND HALL — readability and character codex */
+.admin-command-tab{font-size:13px!important;letter-spacing:.16em!important;padding:18px 30px!important}
+.admin-command-tab span{font-size:10px!important}
+.admin-command-deck .admin-stat{min-height:150px!important;padding:25px 28px!important}
+.admin-command-deck .admin-stat small{font-size:9px!important;letter-spacing:.18em!important}
+.admin-command-deck .admin-stat strong{font-size:48px!important;margin-top:16px!important}
+.admin-command-deck .admin-stat span{font-size:12px!important;margin-top:9px!important;letter-spacing:.08em!important}
+.admin-tool-button{font-size:12px!important;letter-spacing:.12em!important;padding:0 22px!important}
+.admin-section-eyebrow{font-size:9px!important}
+.admin-section-heading h2{font-size:clamp(30px,3vw,44px)!important}
+.admin-section-heading p{font-size:13px!important}
+.admin-search-field input,.admin-command-toolbar select{font-size:13px!important}
+.admin-application-info span{font-size:12px!important}
+.admin-application-main h3{font-size:30px!important}
+.admin-application-actions button{font-size:11px!important;min-height:44px!important}
+.admin-hero-character{
+    position:relative!important;
+    display:grid!important;
+    grid-template-columns:220px minmax(0,1fr)!important;
+    gap:0!important;
+    min-height:330px!important;
+    overflow:hidden!important;
+    border:1px solid rgba(220,184,102,.18)!important;
+    background:
+        radial-gradient(circle at 12% 50%,rgba(201,164,91,.12),transparent 30%),
+        linear-gradient(105deg,rgba(21,16,9,.98),rgba(7,6,5,.96) 42%,rgba(10,8,6,.9))!important;
+    box-shadow:0 28px 70px rgba(0,0,0,.38)!important;
+}
+.admin-hero-character:before{
+    content:""!important;position:absolute!important;inset:0!important;pointer-events:none!important;
+    background:linear-gradient(90deg,rgba(201,164,91,.07),transparent 18%,transparent 80%,rgba(201,164,91,.04))!important;
+}
+.admin-hero-character-portrait{
+    position:relative!important;display:grid!important;place-items:center!important;
+    min-height:330px!important;
+    border-right:1px solid rgba(220,184,102,.14)!important;
+    background:radial-gradient(circle,rgba(201,164,91,.12),transparent 62%)!important;
+}
+.admin-hero-character-portrait img,.admin-character-sigil{
+    width:172px!important;height:172px!important;border-radius:50%!important;object-fit:cover!important;
+    border:2px solid rgba(220,184,102,.45)!important;
+    box-shadow:0 0 0 8px rgba(201,164,91,.025),0 0 50px rgba(201,164,91,.13)!important;
+}
+.admin-character-sigil{display:grid!important;place-items:center!important;color:#d6ad58!important;background:#090806!important;font-size:45px!important}
+.admin-hero-character-body{position:relative!important;padding:32px 36px!important}
+.admin-character-heading{display:flex!important;justify-content:space-between!important;gap:25px!important;align-items:flex-start!important;border-bottom:1px solid rgba(220,184,102,.11)!important;padding-bottom:20px!important}
+.admin-character-rank{display:block!important;color:rgba(220,184,102,.48)!important;font-size:9px!important;letter-spacing:.22em!important}
+.admin-character-heading h3{margin:8px 0 4px!important;color:#efdbad!important;font:400 38px/1.1 var(--display-font,serif)!important;letter-spacing:.05em!important}
+.admin-character-heading p{margin:0!important;color:rgba(225,212,188,.55)!important;font-size:13px!important}
+.admin-character-status{color:#d7b76e!important;border:1px solid rgba(215,183,110,.3)!important;padding:9px 12px!important;font-size:9px!important;letter-spacing:.18em!important;white-space:nowrap!important}
+.admin-character-facts{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:1px!important;margin:20px 0!important;background:rgba(220,184,102,.08)!important}
+.admin-character-facts div{min-height:76px!important;padding:13px!important;background:rgba(6,5,4,.55)!important}
+.admin-character-facts small,.admin-character-lore small{display:block!important;color:rgba(220,184,102,.48)!important;font-size:8px!important;letter-spacing:.16em!important;margin-bottom:7px!important}
+.admin-character-facts strong{display:block!important;color:#dfd0b2!important;font-size:12px!important;font-weight:400!important;line-height:1.4!important}
+.admin-character-lore{display:grid!important;grid-template-columns:1fr 1.5fr 1fr!important;gap:22px!important}
+.admin-character-lore>div{min-width:0!important}
+.admin-character-lore p{margin:0!important;color:rgba(229,218,195,.56)!important;font-size:12px!important;line-height:1.65!important;max-height:82px!important;overflow:auto!important}
+.admin-character-actions{display:flex!important;justify-content:flex-end!important;gap:9px!important;margin-top:23px!important}
+.admin-character-details-button,.admin-delete-character-button{
+    min-height:44px!important;padding:0 18px!important;cursor:pointer!important;
+    font:11px var(--body-font)!important;letter-spacing:.1em!important;
+}
+.admin-character-details-button{border:1px solid rgba(220,184,102,.32)!important;background:rgba(201,164,91,.07)!important;color:#dfc68e!important}
+.admin-character-details-button:hover{background:rgba(201,164,91,.14)!important}
+@media(max-width:1000px){
+    .admin-hero-character{grid-template-columns:150px 1fr!important}
+    .admin-hero-character-portrait{min-height:300px!important}
+    .admin-hero-character-portrait img,.admin-character-sigil{width:120px!important;height:120px!important}
+    .admin-character-facts{grid-template-columns:repeat(2,1fr)!important}
+    .admin-character-lore{grid-template-columns:1fr!important}
+}
+@media(max-width:700px){
+    .admin-command-tab{font-size:10px!important;padding:16px 12px!important}
+    .admin-hero-character{grid-template-columns:1fr!important}
+    .admin-hero-character-portrait{min-height:230px!important;border-right:0!important;border-bottom:1px solid rgba(220,184,102,.14)!important}
+    .admin-hero-character-body{padding:24px 18px!important}
+    .admin-character-heading{flex-direction:column!important}
+    .admin-character-actions{flex-direction:column!important}
+    .admin-character-actions button{width:100%!important}
+}
