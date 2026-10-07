@@ -4854,24 +4854,40 @@ async function openAdminCharacterInventory(application, container) {
     const refreshCurrency = async () => {
         const { data, error } = await loadCharacterCurrency(characterId);
         if (error) { currencyList.innerHTML = '<div class="lorgus-inventory-empty">' + escapeHtml(error.message) + '</div>'; return; }
-        currencyList.innerHTML = Object.entries(lorgusCurrencies).map(([code,c]) => {
+
+        const currencies = Object.entries(lorgusCurrencies).map(([code,c]) => {
             const row=(data||[]).find(x=>x.currency_code===code);
             const copper = Math.max(0, Number(row?.amount) || 0);
-            const gold = Math.floor(copper / 10000);
-            const silver = Math.floor((copper % 10000) / 100);
-            const bronze = copper % 100;
-            return '<div class="lorgus-admin-currency-row">' +
-                '<div class="lorgus-admin-currency-identity">' +
-                    '<span>' + escapeHtml(c.icon) + '</span>' +
-                    '<div><strong>' + escapeHtml(c.name) + '</strong><small>' + escapeHtml(c.kingdom) + '</small></div>' +
+            return {
+                code,
+                name: c.name,
+                kingdom: c.kingdom,
+                icon: c.icon,
+                gold: Math.floor(copper / 10000),
+                silver: Math.floor((copper % 10000) / 100),
+                bronze: copper % 100
+            };
+        });
+
+        currencyList.innerHTML =
+            '<div class="lorgus-admin-currency-table">' +
+                '<div class="lorgus-admin-currency-header">' +
+                    '<div class="lorgus-admin-currency-label"></div>' +
+                    currencies.map(c => '<div class="lorgus-admin-currency-name"><span>' + escapeHtml(c.icon) + '</span><strong>' + escapeHtml(c.name) + '</strong><small>' + escapeHtml(c.kingdom) + '</small></div>').join('') +
                 '</div>' +
-                '<div class="lorgus-admin-currency-denominations">' +
-                    '<div class="lorgus-admin-currency-denomination gold"><span>Золото</span><b>' + gold + '</b></div>' +
-                    '<div class="lorgus-admin-currency-denomination silver"><span>Серебро</span><b>' + silver + '</b></div>' +
-                    '<div class="lorgus-admin-currency-denomination bronze"><span>Медь</span><b>' + bronze + '</b></div>' +
+                '<div class="lorgus-admin-currency-line gold">' +
+                    '<strong>Золото</strong>' +
+                    currencies.map(c => '<div>' + c.gold + '</div>').join('') +
+                '</div>' +
+                '<div class="lorgus-admin-currency-line silver">' +
+                    '<strong>Серебро</strong>' +
+                    currencies.map(c => '<div>' + c.silver + '</div>').join('') +
+                '</div>' +
+                '<div class="lorgus-admin-currency-line bronze">' +
+                    '<strong>Медь</strong>' +
+                    currencies.map(c => '<div>' + c.bronze + '</div>').join('') +
                 '</div>' +
             '</div>';
-        }).join("");
     };
 
     const list = panel.querySelector(".lorgus-admin-inventory-list");
