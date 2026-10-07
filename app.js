@@ -1254,7 +1254,7 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
             adminError
         );
     } else if (isAdmin) {
-        await loadAdminPanel(container);
+        await window.loadAdminPanel(container);
         return;
     }
 
@@ -2630,7 +2630,7 @@ function bindAdminButtons(container) {
                 return;
             }
 
-            await loadAdminPanel(container);
+            await window.loadAdminPanel(container);
         });
     });
 
@@ -2648,7 +2648,7 @@ function bindAdminButtons(container) {
                 button.textContent = "Одобрить";
                 return;
             }
-            await loadAdminPanel(container);
+            await window.loadAdminPanel(container);
         });
     });
 
@@ -2675,7 +2675,7 @@ function bindAdminButtons(container) {
                 button.textContent = "Выписать правки";
                 return;
             }
-            await loadAdminPanel(container);
+            await window.loadAdminPanel(container);
         });
     });
 
@@ -2699,7 +2699,7 @@ function bindAdminButtons(container) {
                 button.textContent = "Отклонить";
                 return;
             }
-            await loadAdminPanel(container);
+            await window.loadAdminPanel(container);
         });
     });
 }
