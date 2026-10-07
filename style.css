@@ -14495,6 +14495,7 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-inventory-item-info{min-width:0}
 .lorgus-inventory-item-info strong{display:block;color:#eee7da;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lorgus-inventory-item-info small{display:block;margin-top:5px;color:#777066;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.lorgus-inventory-item-info em{display:block;margin-top:5px;color:#d6b36a;font-size:8px;font-style:normal;letter-spacing:.14em;font-weight:700}.lorgus-inventory-item.is-equipped{border-color:rgba(214,179,106,.35);background:rgba(214,179,106,.045)}
 .lorgus-inventory-qty{margin-left:auto;color:#d6b36a;font-size:12px}
 .lorgus-inventory-empty{grid-column:1/-1;min-height:180px;display:grid;place-items:center;text-align:center;border:1px dashed rgba(214,179,106,.14);color:#777066;padding:30px}
 .lorgus-inventory-empty h2{font-family:Georgia,serif;color:#cfc5b5;margin:0 0 7px}
