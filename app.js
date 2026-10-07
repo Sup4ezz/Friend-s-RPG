@@ -2393,27 +2393,45 @@ function renderAdminApplication(application) {
    КНОПКИ АДМИНКИ
    ========================================================= */
 function renderAdminCharacterManagement(application) {
+    const fields = [
+        ["Раса", application.race],
+        ["Возраст", application.age ? `${application.age} лет` : null],
+        ["Родина", application.homeland],
+        ["Род занятий", application.occupation],
+        ["Оружие", application.preferred_weapon],
+        ["Характер", application.personality],
+        ["Предыстория", application.backstory],
+        ["Особые навыки", application.special_skills]
+    ].filter(([, value]) => value);
+
     return `
-        <article
-            class="admin-application admin-character-management-item"
-            data-character-id="${application.character_id || ""}"
-        >
-            <div class="admin-application-main">
-                <h3>${escapeHtml(application.name)}</h3>
-                <div class="admin-application-info">
-                    <span><strong>Раса:</strong> ${escapeHtml(application.race || "—")}</span>
-                    <span><strong>Родина:</strong> ${escapeHtml(application.homeland || "—")}</span>
-                    <span><strong>Заявка:</strong> ${escapeHtml(String(application.id))}</span>
-                </div>
+        <article class="admin-hero-character" data-character-id="${application.character_id || ""}">
+            <div class="admin-hero-character-portrait">
+                ${application.photo_url
+                    ? `<img src="${escapeHtml(application.photo_url)}" alt="">`
+                    : '<div class="admin-character-sigil">✦</div>'}
             </div>
-            <div class="admin-application-actions">
-                <button
-                    class="admin-reject-button admin-delete-character-button"
-                    data-character-id="${application.character_id || ""}"
-                    data-character-name="${escapeHtml(application.name || "персонажа")}"
-                >
-                    Удалить персонажа
-                </button>
+            <div class="admin-hero-character-body">
+                <div class="admin-character-heading">
+                    <div>
+                        <span class="admin-character-rank">ЖИТЕЛЬ ЛОРГУСА · ЗАПИСЬ В ЛЕТОПИСИ #${escapeHtml(String(application.id))}</span>
+                        <h3>${escapeHtml(application.name || "Без имени")}</h3>
+                        <p>${escapeHtml(application.race || "Раса не указана")} · ${escapeHtml(application.homeland || "Родина не указана")}</p>
+                    </div>
+                    <span class="admin-character-status">ОДОБРЕН</span>
+                </div>
+                <div class="admin-character-facts">
+                    ${fields.slice(0,5).map(([label,value]) => `<div><small>${label}</small><strong>${escapeHtml(String(value))}</strong></div>`).join("")}
+                </div>
+                <div class="admin-character-lore">
+                    <div><small>ХАРАКТЕР</small><p>${escapeHtml(application.personality || "—")}</p></div>
+                    <div><small>ПРЕДЫСТОРИЯ</small><p>${escapeHtml(application.backstory || "—")}</p></div>
+                    <div><small>ОСОБЫЕ НАВЫКИ</small><p>${escapeHtml(application.special_skills || "—")}</p></div>
+                </div>
+                <div class="admin-character-actions">
+                    <button class="admin-character-details-button" type="button" data-character-detail-id="${application.id}">Открыть полную запись</button>
+                    <button class="admin-reject-button admin-delete-character-button" data-character-id="${application.character_id || ""}" data-character-name="${escapeHtml(application.name || "персонажа")}">Удалить персонажа</button>
+                </div>
             </div>
         </article>
     `;
