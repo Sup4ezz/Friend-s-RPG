@@ -281,7 +281,7 @@ function renderAdminApplication(application) {
 /* =========================================================
    КНОПКИ АДМИНКИ
    ========================================================= */
-function window.renderAdminCharacterManagement(application) {
+function renderAdminCharacterManagement(application) {
     const fields = [
         ["Раса", application.race],
         ["Возраст", application.age ? `${application.age} лет` : null],
@@ -330,3 +330,5 @@ function window.renderAdminCharacterManagement(application) {
 
 window.loadAdminPanel = loadAdminPanel;
 window.renderAdminApplications = renderAdminApplications;
+
+window.renderAdminCharacterManagement = renderAdminCharacterManagement;
