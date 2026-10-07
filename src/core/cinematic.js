@@ -460,7 +460,7 @@ function initializeLorgusAudio() {
     };
 }
 
-let window.lorgusSceneCleanup = null;
+let lorgusSceneCleanup = null;
 
 function initializeLorgusScene() {
     if (window.lorgusSceneCleanup) {
