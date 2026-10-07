@@ -5,10 +5,15 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.m
 
 let supabase;
 let authSwitching = false;
-let lorgusPortalEntering = false;
-let lorgusPortalDepartureAligning = false;
-let lorgusPortalEnterStartedAt = 0;
+let window.lorgusPortalEntering = false;
+window.window.lorgusPortalEntering = window.lorgusPortalEntering;
+let window.lorgusPortalDepartureAligning = false;
+window.window.lorgusPortalDepartureAligning = window.lorgusPortalDepartureAligning;
+let window.lorgusPortalEnterStartedAt = 0;
+window.window.lorgusPortalEnterStartedAt = window.lorgusPortalEnterStartedAt;
 let lorgusPortalOverlay = null;
+window.THREE = THREE;
+window.escapeHtml = escapeHtml;
 
 /* =========================================================
    ИНИЦИАЛИЗАЦИЯ
@@ -203,10 +208,10 @@ function render(session) {
     if (session) {
         const authScene = document.querySelector(".lorgus-cinematic-auth");
 
-        if (authScene && !lorgusPortalEntering && !lorgusPortalDepartureAligning) {
+        if (authScene && !window.lorgusPortalEntering && !window.lorgusPortalDepartureAligning) {
             // UI уходит и камера начинает полёт из ЕЁ текущего положения.
             // Никакого отдельного transition-screen между сценами нет.
-            lorgusPortalDepartureAligning = false;
+            window.lorgusPortalDepartureAligning = false;
             authScene.classList.add("portal-departure");
 
             // Сначала даём интерфейсу заметно раствориться. Камера всё это время
@@ -214,21 +219,21 @@ function render(session) {
             window.setTimeout(() => {
                 if (!document.querySelector(".lorgus-cinematic-auth")) return;
 
-                lorgusPortalEntering = true;
-                lorgusPortalEnterStartedAt = performance.now();
+                window.lorgusPortalEntering = true;
+                window.lorgusPortalEnterStartedAt = performance.now();
 
                 // Когда портал подходит вплотную, мы не показываем "экран перехода".
                 // Игрок видит закрывающиеся веки: это буквально взгляд персонажа.
                 let eyeTransition = null;
                 window.setTimeout(async () => {
-                    if (!lorgusPortalEntering) return;
+                    if (!window.lorgusPortalEntering) return;
 
                     eyeTransition = createLorgusEyeTransition();
 
                     // Пока веки сомкнуты, кабинет спокойно готовится под ними.
                     await renderCabinet(session, true, true);
 
-                    lorgusPortalEntering = false;
+                    window.lorgusPortalEntering = false;
 
                     if (lorgusSceneCleanup) {
                         const cleanup = lorgusSceneCleanup;
@@ -249,8 +254,8 @@ function render(session) {
 
         renderCabinet(session);
     } else {
-        lorgusPortalEntering = false;
-        lorgusPortalDepartureAligning = false;
+        window.lorgusPortalEntering = false;
+        window.lorgusPortalDepartureAligning = false;
         if (lorgusPortalOverlay) {
             lorgusPortalOverlay.remove();
             lorgusPortalOverlay = null;
