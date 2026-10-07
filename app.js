@@ -977,6 +977,10 @@ async function loadCharacterTitle(characterId) {
     return title || null;
 }
 
+function titleRarityLabel(rarity) {
+    return ({common:"Обычный",uncommon:"Необычный",rare:"Редкий",epic:"Эпический",legendary:"Легендарный",mythic:"Мифический",unique:"Уникальный"})[rarity] || rarity || "";
+}
+
 function renderTitleBadge(title, className = "") {
     if (!title) return "";
     return "<span class=\"lorgus-title-badge " + className + "\" style=\"--title-color:" + escapeHtml(title.color || "#d6b66a") + "\"><span>" + escapeHtml(title.icon || "✦") + "</span>" + escapeHtml(title.name) + "</span>";
@@ -997,7 +1001,7 @@ async function openTitlePicker() {
     (owned || []).forEach(row => {
         const t = row.titles; if (!t) return;
         const b = document.createElement("button"); b.type = "button"; b.className = "lorgus-owned-title" + (String(t.id) === String(window.activeTitle?.id) ? " active" : ""); b.dataset.titleId = t.id; b.style.setProperty("--title-color", t.color || "#d6b66a");
-        b.innerHTML = "<span class=\"lorgus-owned-title-icon\">" + escapeHtml(t.icon) + "</span><span><strong>" + escapeHtml(t.name) + "</strong><small>" + escapeHtml(t.category) + " · " + escapeHtml(t.rarity) + "</small></span>";
+        b.innerHTML = "<span class=\"lorgus-owned-title-icon\">" + escapeHtml(t.icon) + "</span><span><strong>" + escapeHtml(t.name) + "</strong><small>" + escapeHtml(t.category) + " · " + escapeHtml(titleRarityLabel(t.rarity)) + "</small></span>";
         b.addEventListener("click", async () => {
             const { error: setError } = await supabase.rpc("set_active_character_title", { p_character_id: c.id, p_title_id: t.id });
             if (setError) { alert("Не удалось установить титул:\\n\\n" + setError.message); return; }
@@ -1027,7 +1031,7 @@ async function openAdminCharacterTitles(application, container) {
     const overlay = document.createElement("div"); overlay.className = "lorgus-title-overlay";
     const panel = document.createElement("article"); panel.className = "lorgus-title-panel lorgus-admin-title-panel";
     panel.innerHTML = "<button type=\"button\" class=\"lorgus-title-close\">×</button><span class=\"lorgus-command-kicker\">АДМИНИСТРАЦИЯ · ТИТУЛЫ</span><h2>" + escapeHtml(application.name || "Персонаж") + "</h2><p>Выдача и отзыв титулов. Игрок не может создавать или выдавать их себе.</p>";
-    const select = document.createElement("select"); select.className = "lorgus-title-select"; select.innerHTML = "<option value=\"\">Выбери титул...</option>" + (titles || []).map(t => "<option value=\"" + escapeHtml(t.id) + "\">" + escapeHtml(t.icon) + " " + escapeHtml(t.name) + " · " + escapeHtml(t.rarity) + "</option>").join("");
+    const select = document.createElement("select"); select.className = "lorgus-title-select"; select.innerHTML = "<option value=\"\">Выбери титул...</option>" + (titles || []).map(t => "<option value=\"" + escapeHtml(t.id) + "\">" + escapeHtml(t.icon) + " " + escapeHtml(t.name) + " · " + escapeHtml(titleRarityLabel(t.rarity)) + "</option>").join("");
     const grant = document.createElement("button"); grant.type = "button"; grant.className = "lorgus-title-grant"; grant.textContent = "✦ Выдать титул";
     const ownedBox = document.createElement("div"); ownedBox.className = "lorgus-title-owned-list";
     (owned || []).forEach(row => { const t=row.titles; if(!t)return; const item=document.createElement("div"); item.className="lorgus-admin-owned-title"; item.style.setProperty("--title-color",t.color||"#d6b66a"); item.innerHTML="<span>"+escapeHtml(t.icon)+"</span><strong>"+escapeHtml(t.name)+"</strong><small>"+escapeHtml(t.rarity)+"</small>"; const revoke=document.createElement("button"); revoke.type="button"; revoke.textContent="Забрать"; revoke.addEventListener("click",async()=>{const {error}=await supabase.rpc("admin_revoke_character_title",{p_character_id:characterId,p_title_id:row.title_id});if(error){alert("Не удалось забрать титул:\\n\\n"+error.message);return;} overlay.remove(); openAdminCharacterTitles(application,container);}); item.appendChild(revoke); ownedBox.appendChild(item); });
