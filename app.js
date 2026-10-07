@@ -4396,6 +4396,7 @@ async function openAdminCharacterInventory(application, container) {
     };
 
     renderInventory(inventory || []);
+    overlay.appendChild(panel);
     document.body.appendChild(overlay);
     requestAnimationFrame(() => overlay.classList.add("open"));
 
