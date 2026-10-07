@@ -4490,6 +4490,15 @@ async function renderLorgusInventory() {
     // Снятие экипировки: тот же предмет переносится из ячейки персонажа обратно в рюкзак.
     // Никакого клонирования и создания новой записи.
     grid.addEventListener("dragover", e => {
+        // Если тащим над уже существующим предметом в рюкзаке,
+        // это НЕ зона снятия экипировки. Не даём событию всплыть
+        // до общего drop-zone рюкзака.
+        if (e.target.closest(".lorgus-inventory-item")) {
+            grid.classList.remove("is-valid-unequip-drop");
+            if (e.dataTransfer) e.dataTransfer.dropEffect = "none";
+            return;
+        }
+
         const inventoryId = getDraggedInventoryId(e);
         const row = rows.find(r => r.id === inventoryId);
 
@@ -4508,6 +4517,13 @@ async function renderLorgusInventory() {
     });
 
     grid.addEventListener("drop", async e => {
+        // Нельзя снять предмет, бросив его поверх другой вещи в рюкзаке.
+        // Снятие работает только при броске на свободную поверхность рюкзака.
+        if (e.target.closest(".lorgus-inventory-item")) {
+            grid.classList.remove("is-valid-unequip-drop");
+            return;
+        }
+
         e.preventDefault();
         e.stopPropagation();
 
