@@ -1024,10 +1024,27 @@ async function openTitlePicker() {
 
 async function openAdminCharacterTitles(application, container) {
     const characterId = application.character_id; if (!characterId) return;
-    const [{ data: titles }, { data: owned }] = await Promise.all([
-        supabase.from("titles").select("*").order("category").order("name"),
-        supabase.from("character_titles").select("title_id, awarded_at, titles(*)").eq("character_id", characterId).order("awarded_at", { ascending: true })
-    ]);
+    const { data: titles, error: titlesError } = await supabase
+        .from("titles")
+        .select("*")
+        .order("category")
+        .order("name");
+
+    if (titlesError) {
+        console.error("Ошибка загрузки титулов:", titlesError);
+        alert("Не удалось загрузить список титулов:\n\n" + titlesError.message);
+        return;
+    }
+
+    const { data: owned, error: ownedError } = await supabase
+        .from("character_titles")
+        .select("title_id, awarded_at, titles(*)")
+        .eq("character_id", characterId)
+        .order("awarded_at", { ascending: true });
+
+    if (ownedError) {
+        console.error("Ошибка загрузки выданных титулов:", ownedError);
+    }
     const overlay = document.createElement("div"); overlay.className = "lorgus-title-overlay";
     const panel = document.createElement("article"); panel.className = "lorgus-title-panel lorgus-admin-title-panel";
     panel.innerHTML = "<button type=\"button\" class=\"lorgus-title-close\">×</button><span class=\"lorgus-command-kicker\">АДМИНИСТРАЦИЯ · ТИТУЛЫ</span><h2>" + escapeHtml(application.name || "Персонаж") + "</h2><p>Выдача и отзыв титулов. Игрок не может создавать или выдавать их себе.</p>";
