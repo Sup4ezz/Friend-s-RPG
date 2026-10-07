@@ -14474,7 +14474,7 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-inventory-grid-wrap{padding:25px;min-height:690px}
 .lorgus-inventory-grid-title{display:flex;justify-content:space-between;margin-bottom:16px}
 .lorgus-inventory-grid-title span{color:#625c53;letter-spacing:.08em}
-.lorgus-inventory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.lorgus-inventory-grid{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-height:180px}
 .lorgus-inventory-item{position:relative;display:flex;align-items:center;gap:12px;min-height:82px;padding:12px;border:1px solid rgba(214,179,106,.13);background:rgba(255,255,255,.022);cursor:grab;transition:.18s ease}\n.lorgus-inventory-item,.lorgus-equipped-item{user-select:none;-webkit-user-select:none;-webkit-user-drag:element;touch-action:none}
 .lorgus-inventory-item.is-dragging{opacity:.32;transform:scale(.98)}
 .lorgus-inventory-grid.is-valid-unequip-drop{border-color:rgba(214,179,106,.72);background:rgba(214,179,106,.055);box-shadow:inset 0 0 34px rgba(214,179,106,.08),0 0 24px rgba(214,179,106,.08);transition:.18s ease}
