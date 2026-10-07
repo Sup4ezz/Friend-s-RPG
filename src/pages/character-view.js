@@ -198,7 +198,5 @@ const LORGUS_LOCATIONS = {
     }
 };
 
-async
-
 window.loadCharacter = loadCharacter;
 window.renderCharacterLegacy = renderCharacterLegacy;
