@@ -4199,8 +4199,37 @@ const inventorySlotLabels = {
     accessory_bracelet: "Браслет"
 };
 
+const inventoryTypeLabels = {
+    helmet: "Шлем",
+    armor: "Броня",
+    gloves: "Перчатки",
+    pants: "Штаны",
+    boots: "Обувь",
+    sword: "Меч",
+    paired_daggers: "Парные кинжалы",
+    spear: "Копьё",
+    axe: "Топор",
+    staff: "Посох",
+    bow: "Лук",
+    crossbow: "Арбалет",
+    shield: "Щит",
+    chain: "Цепочка",
+    ring: "Кольцо",
+    bracelet: "Браслет",
+    potion: "Зелье",
+    scroll: "Свиток",
+    food: "Еда",
+    quest_item: "Квестовый предмет",
+    material: "Материал",
+    misc: "Прочее"
+};
+
 function inventoryRarityLabel(rarity) {
     return titleRarityLabel(rarity);
+}
+
+function inventoryTypeLabel(item) {
+    return inventoryTypeLabels[item?.item_subtype] || inventoryTypeLabels[item?.item_type] || "Предмет";
 }
 
 function inventoryItemMarkup(row, extraClass = "") {
@@ -4208,7 +4237,7 @@ function inventoryItemMarkup(row, extraClass = "") {
     const qty = row.quantity > 1 ? "×" + row.quantity : "";
     return '<article class="lorgus-inventory-item ' + extraClass + '" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '">' +
         '<div class="lorgus-inventory-item-icon">' + escapeHtml(item.icon || "◆") + '</div>' +
-        '<div class="lorgus-inventory-item-info"><strong>' + escapeHtml(item.name || "Предмет") + '</strong><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ' + escapeHtml(item.item_type || "misc") + '</small></div>' +
+        '<div class="lorgus-inventory-item-info"><strong>' + escapeHtml(item.name || "Предмет") + '</strong><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ' + escapeHtml(inventoryTypeLabel(item)) + '</small></div>' +
         '<b class="lorgus-inventory-qty">' + escapeHtml(qty) + '</b></article>';
 }
 
