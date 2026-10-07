@@ -269,3 +269,10 @@ async function renderLorgusInventory() {
 
     document.addEventListener("dragend", clearDragFeedback, { once: true });
 }
+
+
+/* Shared inventory helpers used by the RP runtime. */
+window.inventoryRarityLabel = inventoryRarityLabel;
+window.inventoryTypeLabel = inventoryTypeLabel;
+window.lorgusCurrencyLabel = lorgusCurrencyLabel;
+window.loadCharacterInventory = loadCharacterInventory;
