@@ -14575,3 +14575,28 @@ body:has(#root > #cabinet-content.character-application){
     .admin-item-use-action{grid-column:1/-1}
     .lorgus-rp-item-picker-footer{flex-direction:column;align-items:stretch}
 }
+
+
+/* Visible unequip action */
+.lorgus-equipped-item{position:relative;padding-right:52px;min-height:32px}
+.lorgus-equipped-item-remove{
+    margin-left:auto;
+    flex:0 0 auto;
+    border:1px solid rgba(214,179,106,.28);
+    background:rgba(8,7,6,.72);
+    color:#b8a27a;
+    padding:5px 8px;
+    font:600 8px/1 Arial,sans-serif;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    cursor:pointer;
+    opacity:.82;
+    transition:.16s ease;
+}
+.lorgus-equipped-item-remove:hover{
+    border-color:#d6b36a;
+    color:#f0d48a;
+    background:rgba(214,179,106,.12);
+    box-shadow:0 0 14px rgba(214,179,106,.12);
+}
+.lorgus-equipped-item-remove:disabled{opacity:.45;cursor:wait}
