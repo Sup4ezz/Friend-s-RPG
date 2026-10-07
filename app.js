@@ -4067,8 +4067,6 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
         visibility: "public"
     };
 
-    await renderLocationParticipants(locationName, regionName);
-
     const character = window.activeCharacter;
     const name = escapeHtml(character?.name || "Без имени");
     const location = escapeHtml(locationName);
@@ -4147,6 +4145,8 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
             </main>
         </div>
     `;
+    await renderLocationParticipants(locationName, regionName);
+
     const chatSpace = window.activeRpChatSpace;
     if (chatSpace) {
         await loadRpMessages(chatSpace);
