@@ -14479,25 +14479,22 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-inventory-grid{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-height:180px}
 .lorgus-inventory-item{position:relative;display:flex;align-items:center;gap:12px;min-height:82px;padding:12px;border:1px solid rgba(214,179,106,.13);background:rgba(255,255,255,.022);cursor:grab;transition:.18s ease}\n.lorgus-inventory-item,.lorgus-equipped-item{user-select:none;-webkit-user-select:none;-webkit-user-drag:element;touch-action:none}
 .lorgus-inventory-item.is-dragging{opacity:.32;transform:scale(.98)}
-.lorgus-inventory-grid.is-valid-unequip-drop{border-color:rgba(214,179,106,.72);background:rgba(214,179,106,.055);box-shadow:inset 0 0 34px rgba(214,179,106,.08),0 0 24px rgba(214,179,106,.08);transition:.18s ease}
-.lorgus-inventory-grid.is-valid-unequip-drop:before{
-  content:"ПОМЕСТИТЬ В РЮКЗАК";
-  position:absolute;
-  left:10px;
-  right:10px;
-  top:-34px;
-  min-height:24px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border:1px solid rgba(214,179,106,.55);
-  background:rgba(12,10,8,.96);
+.lorgus-inventory-grid.is-valid-unequip-drop{
+  border:1px solid rgba(214,179,106,.72);
+  background:rgba(214,179,106,.055);
+  box-shadow:inset 0 0 34px rgba(214,179,106,.08),0 0 24px rgba(214,179,106,.08);
+  outline:1px solid rgba(214,179,106,.22);
+  outline-offset:4px;
+  transition:.18s ease;
+}
+.lorgus-inventory-grid-wrap:has(.lorgus-inventory-grid.is-valid-unequip-drop) .lorgus-inventory-grid-title{
   color:#d6b36a;
-  font:700 9px/1 Arial,sans-serif;
-  letter-spacing:.18em;
-  pointer-events:none;
-  z-index:20;
-  box-shadow:0 8px 22px rgba(0,0,0,.35);
+}
+.lorgus-inventory-grid-wrap:has(.lorgus-inventory-grid.is-valid-unequip-drop) .lorgus-inventory-grid-title:after{
+  content:" · ОТПУСТИ ЗДЕСЬ, ЧТОБЫ СНЯТЬ";
+  color:#d6b36a;
+  font-size:9px;
+  letter-spacing:.12em;
 }
 .lorgus-inventory-grid.is-invalid-drop{animation:lorgusInventoryInvalidDropShake .52s cubic-bezier(.36,.07,.19,.97) both}
 @keyframes lorgusInventoryInvalidDropShake{
@@ -14765,5 +14762,3 @@ body:has(#root > #cabinet-content.character-application){
 }
 
 
-/* Fix backpack drop hint overlap */
-.lorgus-inventory-grid.is-valid-unequip-drop:before{display:none!important;}
