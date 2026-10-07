@@ -14435,3 +14435,124 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-ability-body{min-width:0}.lorgus-ability-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}.lorgus-ability-top strong{color:var(--text);font-family:var(--title-font);font-size:18px}.lorgus-ability-top span{color:var(--ability-color);font-size:10px;letter-spacing:.08em;white-space:nowrap}.lorgus-ability-body>small{display:block;margin-top:3px;color:var(--text-muted);font-size:9px;text-transform:uppercase;letter-spacing:.12em}.lorgus-ability-body p{margin:7px 0 0;color:var(--text-soft);font-size:12px;line-height:1.5}.lorgus-ability-empty{padding:16px;border:1px dashed var(--border-soft);color:var(--text-muted);font-size:12px}
 .lorgus-ability-overlay{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:28px}.lorgus-ability-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.82);backdrop-filter:blur(7px)}.lorgus-ability-panel{position:relative;z-index:1;width:min(900px,100%);max-height:min(900px,92vh);overflow:auto;padding:34px;background:linear-gradient(145deg,rgba(31,26,19,.99),rgba(9,8,6,.99));border:1px solid var(--border-strong);box-shadow:0 30px 100px rgba(0,0,0,.85)}.lorgus-ability-close{position:absolute;right:18px;top:14px;border:0;background:transparent;color:var(--text-muted);font-size:30px}.lorgus-ability-close:hover{color:var(--gold-light)}.lorgus-ability-panel h2{margin:8px 0;color:var(--gold-light);font-family:var(--title-font);font-size:34px}.lorgus-ability-panel>p{color:var(--text-muted);font-size:13px;line-height:1.6}.lorgus-ability-grant-grid{display:grid;grid-template-columns:1.2fr 1fr auto;gap:10px;margin:22px 0}.lorgus-ability-select,.lorgus-ability-note,.ability-new-name,.ability-new-icon,.ability-new-color,.ability-new-category,.ability-new-rarity,.ability-new-description{width:100%;padding:12px;border:1px solid var(--border);background:#0d0b08;color:var(--text);outline:none}.lorgus-ability-grant,.lorgus-ability-create-button{padding:12px 18px;border:1px solid var(--border-strong);background:rgba(155,112,43,.2);color:var(--gold-light);font-weight:700;white-space:nowrap}.lorgus-ability-grant:hover,.lorgus-ability-create-button:hover{background:rgba(190,140,50,.3)}.lorgus-ability-owned{display:grid;gap:8px}.lorgus-admin-owned-ability{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;padding:12px;border:1px solid color-mix(in srgb,var(--ability-color) 30%,var(--border-soft));background:rgba(8,7,5,.72)}.lorgus-admin-owned-ability>span{color:var(--ability-color);font-size:19px;text-align:center}.lorgus-admin-owned-ability strong{display:block;color:var(--text)}.lorgus-admin-owned-ability small{display:block;color:var(--text-muted);font-size:10px;margin-top:3px}.lorgus-admin-owned-ability button{padding:8px 12px;border:1px solid rgba(170,90,70,.5);background:transparent;color:#d5a18f}.lorgus-ability-history{margin:24px 0 4px;padding-top:20px;border-top:1px solid var(--border-soft);display:grid;gap:7px}.lorgus-ability-history-title{color:var(--gold);font-size:10px;letter-spacing:.18em;margin-bottom:3px}.lorgus-ability-history-entry{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--border-soft);background:rgba(8,7,5,.5)}.lorgus-ability-history-icon{text-align:center;font-size:18px;color:var(--gold)}.lorgus-ability-history-entry.revoked .lorgus-ability-history-icon{color:#d5a18f}.lorgus-ability-history-entry strong{display:block;color:var(--text);font-size:12px}.lorgus-ability-history-entry small{display:block;margin-top:3px;color:var(--text-muted);font-size:10px;line-height:1.5}.lorgus-ability-create{margin-top:24px;padding-top:22px;border-top:1px solid var(--border-soft)}.lorgus-ability-create>span{display:block;color:var(--gold);font-size:11px;letter-spacing:.16em;margin-bottom:12px}.lorgus-ability-create-grid{display:grid;grid-template-columns:2fr 80px 1fr 1fr 110px;gap:8px}.ability-new-description{grid-column:1/-1;min-height:90px;resize:vertical}.lorgus-ability-create-button{margin-top:10px}
 @media(max-width:760px){.lorgus-dossier-abilities{grid-column:auto}.lorgus-ability-list{grid-template-columns:1fr}.lorgus-ability-grant-grid{grid-template-columns:1fr}.lorgus-ability-create-grid{grid-template-columns:1fr 1fr}.ability-new-description{grid-column:1/-1}.lorgus-ability-panel{padding:26px 18px}}
+
+
+/* =========================================================
+   LORGUS // ИНВЕНТАРЬ И ПРЕДМЕТЫ
+   ========================================================= */
+
+.lorgus-inventory-page{min-height:100vh;background:radial-gradient(circle at 50% 18%,rgba(173,127,49,.08),transparent 34%),#090807;color:#eee7da}
+.lorgus-inventory-main{max-width:1500px;margin:0 auto;padding:36px 42px 70px}
+.lorgus-inventory-header{padding:26px 0 32px;border-bottom:1px solid rgba(214,179,106,.16)}
+.lorgus-inventory-header h1{margin:7px 0 5px;font-family:Georgia,serif;font-size:46px;font-weight:500;letter-spacing:.02em}
+.lorgus-inventory-header p{margin:0;color:#9e9688}
+.lorgus-inventory-layout{display:grid;grid-template-columns:minmax(520px,1fr) minmax(420px,.95fr);gap:28px;margin-top:30px}
+.lorgus-equipment-stage,.lorgus-inventory-grid-wrap{border:1px solid rgba(214,179,106,.16);background:linear-gradient(145deg,rgba(255,255,255,.025),rgba(0,0,0,.24));box-shadow:0 22px 70px rgba(0,0,0,.3)}
+.lorgus-equipment-stage{min-height:690px;padding:26px;position:relative;overflow:hidden}
+.lorgus-equipment-stage:before{content:"";position:absolute;inset:18px;border:1px solid rgba(214,179,106,.07);pointer-events:none}
+.lorgus-equipment-stage-title,.lorgus-inventory-grid-title{font-size:11px;letter-spacing:.2em;color:#9d8b69;font-weight:700}
+.lorgus-equipment-character{position:relative;min-height:620px;display:flex;align-items:center;justify-content:center}
+.lorgus-equipment-aura{position:absolute;width:260px;height:420px;border-radius:50%;background:radial-gradient(ellipse,rgba(214,179,106,.12),transparent 68%);filter:blur(7px)}
+.lorgus-equipment-avatar{width:170px;height:300px;display:grid;place-items:center;border:1px solid rgba(214,179,106,.3);background:linear-gradient(180deg,rgba(214,179,106,.08),rgba(255,255,255,.015));clip-path:polygon(50% 0,72% 12%,84% 33%,75% 52%,86% 72%,72% 100%,28% 100%,14% 72%,25% 52%,16% 33%,28% 12%);font-size:58px;color:#d6b36a;text-shadow:0 0 30px rgba(214,179,106,.35)}
+.lorgus-equipment-name{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);font-family:Georgia,serif;font-size:20px;color:#ded5c6;white-space:nowrap}
+.lorgus-equipment-slots{position:absolute;inset:30px}
+.lorgus-equipment-slot{position:absolute;width:145px;min-height:76px;padding:9px;border:1px dashed rgba(214,179,106,.25);background:rgba(8,7,6,.68);transition:.18s ease;display:flex;flex-direction:column;justify-content:center}
+.lorgus-equipment-slot:hover{border-color:#d6b36a;background:rgba(214,179,106,.07);box-shadow:0 0 24px rgba(214,179,106,.12)}
+.lorgus-equipment-slot>span{font-size:9px;letter-spacing:.13em;color:#777066;text-transform:uppercase}
+.lorgus-equipment-slot-item{margin-top:5px}
+.lorgus-equipment-slot:nth-child(1){top:5px;left:50%;transform:translateX(-50%)}
+.lorgus-equipment-slot:nth-child(2){top:112px;left:50%;transform:translateX(-50%)}
+.lorgus-equipment-slot:nth-child(3){top:210px;left:2px}
+.lorgus-equipment-slot:nth-child(4){top:330px;left:30px}
+.lorgus-equipment-slot:nth-child(5){top:455px;left:50%;transform:translateX(-50%)}
+.lorgus-equipment-slot:nth-child(6){top:210px;right:2px}
+.lorgus-equipment-slot:nth-child(7){top:330px;right:30px}
+.lorgus-equipment-slot:nth-child(8){top:455px;right:2px}
+.lorgus-equipped-item{display:flex;gap:7px;align-items:center;cursor:grab;color:var(--item-color,#d6b36a);font-size:11px}
+.lorgus-equipped-item span{font-size:20px}
+.lorgus-equipped-item strong{font-size:10px;color:#e8e0d3;line-height:1.15}
+.lorgus-inventory-grid-wrap{padding:25px;min-height:690px}
+.lorgus-inventory-grid-title{display:flex;justify-content:space-between;margin-bottom:16px}
+.lorgus-inventory-grid-title span{color:#625c53;letter-spacing:.08em}
+.lorgus-inventory-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.lorgus-inventory-item{position:relative;display:flex;align-items:center;gap:12px;min-height:82px;padding:12px;border:1px solid rgba(214,179,106,.13);background:rgba(255,255,255,.022);cursor:grab;transition:.18s ease}
+.lorgus-inventory-item:hover{border-color:var(--item-color,#d6b36a);transform:translateY(-2px);background:rgba(255,255,255,.04)}
+.lorgus-inventory-item:active{cursor:grabbing}
+.lorgus-inventory-item-icon{width:48px;height:48px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--item-color,#d6b36a) 45%,transparent);color:var(--item-color,#d6b36a);font-size:23px;flex:none}
+.lorgus-inventory-item-info{min-width:0}
+.lorgus-inventory-item-info strong{display:block;color:#eee7da;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lorgus-inventory-item-info small{display:block;margin-top:5px;color:#777066;font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.lorgus-inventory-qty{margin-left:auto;color:#d6b36a;font-size:12px}
+.lorgus-inventory-empty{grid-column:1/-1;min-height:180px;display:grid;place-items:center;text-align:center;border:1px dashed rgba(214,179,106,.14);color:#777066;padding:30px}
+.lorgus-inventory-empty h2{font-family:Georgia,serif;color:#cfc5b5;margin:0 0 7px}
+.lorgus-inventory-empty p{margin:0;max-width:400px;line-height:1.6}
+.lorgus-dossier-inventory button{margin-top:12px;border:1px solid rgba(214,179,106,.28);background:transparent;color:#d6b36a;padding:8px 12px;cursor:pointer}
+
+.lorgus-rp-use-item{border:1px solid rgba(214,179,106,.3);background:rgba(214,179,106,.05);color:#d6b36a;padding:10px 13px;cursor:pointer;font-size:11px;letter-spacing:.06em}
+.lorgus-rp-use-item:hover{background:rgba(214,179,106,.11)}
+.lorgus-rp-item-selection{color:#b9a06b;font-size:10px;letter-spacing:.06em}
+.lorgus-rp-item-uses{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.lorgus-rp-item-use{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid color-mix(in srgb,var(--item-color,#d6b36a) 38%,transparent);background:color-mix(in srgb,var(--item-color,#d6b36a) 7%,transparent);color:var(--item-color,#d6b36a);font-size:11px}
+.lorgus-rp-item-use strong{font-weight:700}
+.lorgus-rp-item-use small{opacity:.75}
+.lorgus-rp-message-reverted{opacity:.55}
+.lorgus-rp-message-reverted .lorgus-rp-message-text{text-decoration:line-through}
+.lorgus-rp-reverted-mark{margin-top:9px;font-size:9px;letter-spacing:.13em;color:#b56d61;font-weight:700}
+
+.lorgus-rp-item-overlay,.lorgus-admin-inventory-overlay{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;padding:25px;background:rgba(0,0,0,.76);backdrop-filter:blur(7px);opacity:0;transition:opacity .18s ease}
+.lorgus-rp-item-overlay.open,.lorgus-admin-inventory-overlay.open{opacity:1}
+.lorgus-rp-item-backdrop{position:absolute;inset:0}
+.lorgus-rp-item-picker,.lorgus-admin-inventory-panel{position:relative;width:min(720px,100%);max-height:min(82vh,820px);overflow:auto;padding:30px;border:1px solid rgba(214,179,106,.28);background:linear-gradient(145deg,#17130e,#0b0a08);box-shadow:0 30px 100px rgba(0,0,0,.7)}
+.lorgus-rp-item-close,.lorgus-admin-inventory-close{position:absolute;top:13px;right:15px;border:0;background:none;color:#9f9687;font-size:28px;cursor:pointer}
+.lorgus-rp-item-picker h2,.lorgus-admin-inventory-panel h2{font-family:Georgia,serif;font-weight:500;font-size:31px;margin:8px 0}
+.lorgus-rp-item-picker>p,.lorgus-admin-inventory-panel>p{color:#8f887d;margin:0 0 20px}
+.lorgus-rp-item-picker-list{display:grid;gap:8px}
+.lorgus-rp-item-choice{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:12px;width:100%;padding:11px;border:1px solid rgba(214,179,106,.12);background:rgba(255,255,255,.025);color:#ddd4c7;text-align:left;cursor:pointer}
+.lorgus-rp-item-choice:hover,.lorgus-rp-item-choice.selected{border-color:var(--item-color,#d6b36a);background:rgba(214,179,106,.07)}
+.lorgus-rp-item-choice-icon{width:38px;height:38px;display:grid;place-items:center;color:var(--item-color,#d6b36a);font-size:20px;border:1px solid color-mix(in srgb,var(--item-color,#d6b36a) 40%,transparent)}
+.lorgus-rp-item-choice strong,.lorgus-rp-item-choice small{display:block}
+.lorgus-rp-item-choice small{margin-top:4px;color:#777066;font-size:9px}
+.lorgus-rp-item-choice i{font-style:normal;color:#8d8067;font-size:10px}
+.lorgus-rp-item-picker-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(214,179,106,.12);color:#8f887d;font-size:11px}
+
+.lorgus-admin-inventory-grant{display:grid;grid-template-columns:1.5fr .35fr 1fr auto;gap:8px;margin:20px 0}
+.lorgus-admin-inventory-grant select,.lorgus-admin-inventory-grant input{min-width:0;padding:11px;border:1px solid rgba(214,179,106,.18);background:#0d0b09;color:#e5ddcf}
+.lorgus-admin-inventory-grant button{border:1px solid rgba(214,179,106,.3);background:#17120c;color:#d6b36a;padding:10px 15px;cursor:pointer}
+.lorgus-admin-inventory-list{display:grid;gap:7px}
+.lorgus-admin-inventory-row{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;padding:10px;border:1px solid rgba(214,179,106,.1);background:rgba(255,255,255,.02)}
+.lorgus-admin-inventory-row-icon{width:38px;height:38px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--item-color,#d6b36a) 40%,transparent);color:var(--item-color,#d6b36a)}
+.lorgus-admin-inventory-row strong,.lorgus-admin-inventory-row small{display:block}
+.lorgus-admin-inventory-row small{color:#777066;font-size:9px;margin-top:4px}
+.lorgus-admin-inventory-row button,.admin-item-use-action button{border:1px solid rgba(178,105,92,.4);background:transparent;color:#c47a6d;padding:8px 10px;cursor:pointer}
+
+.admin-item-use-log{display:grid;gap:9px}
+.admin-item-use-entry{display:grid;grid-template-columns:48px 1fr auto;gap:13px;align-items:center;padding:14px;border:1px solid rgba(214,179,106,.12);background:rgba(255,255,255,.018)}
+.admin-item-use-entry.reverted{opacity:.52}
+.admin-item-use-icon{width:44px;height:44px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--item-color,#d6b36a) 45%,transparent);color:var(--item-color,#d6b36a);font-size:21px}
+.admin-item-use-body strong{display:block;color:#e9e0d2}
+.admin-item-use-body span,.admin-item-use-body small{display:block;color:#777066;font-size:9px;margin-top:4px}
+.admin-item-use-body p{margin:7px 0 0;color:#a9a092;font-size:12px;line-height:1.45;max-width:800px}
+.admin-item-use-action span{font-size:10px;color:#777066;letter-spacing:.1em}
+.admin-item-use-action button{white-space:nowrap}
+
+@media(max-width:1050px){
+    .lorgus-inventory-layout{grid-template-columns:1fr}
+    .lorgus-equipment-stage{min-height:610px}
+    .lorgus-inventory-grid-wrap{min-height:auto}
+}
+@media(max-width:700px){
+    .lorgus-inventory-main{padding:20px 14px 50px}
+    .lorgus-inventory-header h1{font-size:34px}
+    .lorgus-inventory-grid{grid-template-columns:1fr}
+    .lorgus-equipment-stage{min-height:560px;padding:18px}
+    .lorgus-equipment-slot{width:112px}
+    .lorgus-equipment-slot:nth-child(3){left:0}
+    .lorgus-equipment-slot:nth-child(6){right:0}
+    .lorgus-equipment-slot:nth-child(4){left:0}
+    .lorgus-equipment-slot:nth-child(7){right:0}
+    .lorgus-admin-inventory-grant{grid-template-columns:1fr 90px}
+    .lorgus-admin-inventory-grant input:nth-of-type(2),.lorgus-admin-inventory-grant button{grid-column:1/-1}
+    .admin-item-use-entry{grid-template-columns:40px 1fr}
+    .admin-item-use-action{grid-column:1/-1}
+    .lorgus-rp-item-picker-footer{flex-direction:column;align-items:stretch}
+}
