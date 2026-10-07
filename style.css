@@ -15155,105 +15155,109 @@ body:has(#root > #cabinet-content.character-application){
 }
 
 
-/* Admin wallet balances — currency name on top, denominations underneath */
+/* Admin wallet balances — literal currency matrix */
 .lorgus-admin-currency-list{
-    display:grid;
-    gap:8px;
     width:100%;
     margin:0 0 22px;
 }
-.lorgus-admin-currency-row{
-    display:block;
+.lorgus-admin-currency-table{
     width:100%;
-    padding:10px;
-    border:1px solid rgba(214,179,106,.12);
-    background:rgba(0,0,0,.15);
+    display:grid;
+    grid-template-columns:90px repeat(5,minmax(0,1fr));
+    border:1px solid rgba(214,179,106,.16);
+    overflow:hidden;
+}
+.lorgus-admin-currency-header,
+.lorgus-admin-currency-line{
+    display:contents;
+}
+.lorgus-admin-currency-label,
+.lorgus-admin-currency-name,
+.lorgus-admin-currency-line>strong,
+.lorgus-admin-currency-line>div{
+    min-width:0;
     box-sizing:border-box;
+    border-right:1px solid rgba(214,179,106,.10);
+    border-bottom:1px solid rgba(214,179,106,.10);
 }
-.lorgus-admin-currency-identity{
+.lorgus-admin-currency-name{
     display:flex;
+    flex-direction:column;
     align-items:center;
-    gap:8px;
-    min-width:0;
-    padding:0 2px 8px;
-    border:0;
-    background:none;
-}
-.lorgus-admin-currency-identity>span{
-    flex:0 0 24px;
-    color:#d6b36a;
-    font-size:18px;
-    line-height:1;
+    justify-content:center;
+    gap:3px;
+    min-height:58px;
+    padding:7px 4px;
     text-align:center;
+    background:rgba(214,179,106,.055);
 }
-.lorgus-admin-currency-identity>div{
-    min-width:0;
+.lorgus-admin-currency-name span{
+    font-size:15px;
+    line-height:1;
+    color:#d6b36a;
 }
-.lorgus-admin-currency-identity strong{
-    display:block;
+.lorgus-admin-currency-name strong{
     color:#ddd2c3;
     font-size:11px;
-    line-height:1.15;
+    line-height:1.1;
 }
-.lorgus-admin-currency-identity small{
-    display:block;
-    margin-top:2px;
+.lorgus-admin-currency-name small{
     color:#68625b;
-    font-size:8px;
-    line-height:1.15;
+    font-size:7px;
+    line-height:1;
     text-transform:uppercase;
 }
-.lorgus-admin-currency-denominations{
-    display:grid;
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:6px;
-    width:100%;
-}
-.lorgus-admin-currency-denomination{
+.lorgus-admin-currency-line>strong{
     display:flex;
     align-items:center;
-    justify-content:space-between;
-    gap:8px;
-    min-width:0;
-    padding:7px 9px;
-    border:0;
-    border-top:1px solid rgba(214,179,106,.10);
-    background:rgba(255,255,255,.015);
-}
-.lorgus-admin-currency-denomination span{
+    padding:8px 9px;
     font-size:8px;
-    line-height:1;
-    letter-spacing:.06em;
+    letter-spacing:.05em;
     text-transform:uppercase;
 }
-.lorgus-admin-currency-denomination b{
+.lorgus-admin-currency-line>div{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:8px 4px;
+    min-height:38px;
     font-size:14px;
-    line-height:1;
+    font-weight:700;
+    text-align:center;
 }
-.lorgus-admin-currency-denomination.gold{
+.lorgus-admin-currency-line.gold>strong,
+.lorgus-admin-currency-line.gold>div{
     color:#e4c35a;
+    background:rgba(228,195,90,.07);
 }
-.lorgus-admin-currency-denomination.silver{
+.lorgus-admin-currency-line.silver>strong,
+.lorgus-admin-currency-line.silver>div{
     color:#c7c7c7;
+    background:rgba(199,199,199,.055);
 }
-.lorgus-admin-currency-denomination.bronze{
+.lorgus-admin-currency-line.bronze>strong,
+.lorgus-admin-currency-line.bronze>div{
     color:#b8784f;
+    background:rgba(184,120,79,.07);
 }
 @media(max-width:700px){
-    .lorgus-admin-currency-row{
-        padding:8px;
+    .lorgus-admin-currency-table{
+        grid-template-columns:65px repeat(5,minmax(48px,1fr));
     }
-    .lorgus-admin-currency-denominations{
-        gap:4px;
+    .lorgus-admin-currency-name{
+        min-height:52px;
     }
-    .lorgus-admin-currency-denomination{
-        padding:7px 6px;
-        gap:4px;
+    .lorgus-admin-currency-name strong{
+        font-size:9px;
     }
-    .lorgus-admin-currency-denomination span{
+    .lorgus-admin-currency-name small{
+        display:none;
+    }
+    .lorgus-admin-currency-line>strong{
+        padding:7px 5px;
         font-size:7px;
     }
-    .lorgus-admin-currency-denomination b{
-        font-size:13px;
+    .lorgus-admin-currency-line>div{
+        font-size:12px;
     }
 }
