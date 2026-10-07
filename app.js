@@ -5475,6 +5475,7 @@ window.showRegister = showRegister;
 window.login = login;
 window.register = register;
 window.logout = logout;
+window.openLorgusNotifications = openLorgusNotifications;
 window.submitCharacterApplication =
     submitCharacterApplication;
 window.updateCharacterApplication =
