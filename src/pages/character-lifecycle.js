@@ -1,5 +1,5 @@
 /* LORGUS character selection, creation and submission */
-function renderCharacterSelection(container, applications, pendingApplication = null) {
+async function renderCharacterSelection(container, applications, pendingApplication = null) {
     if (lorgusAudioCleanup) { lorgusAudioCleanup(); lorgusAudioCleanup = null; }
     initializeLorgusCharacterSelectionAudio();
 
@@ -1057,8 +1057,6 @@ async function submitCharacterApplication(event) {
 /* =========================================================
    АДМИНКА
    ========================================================= */
-
-async
 
 window.renderCharacterSelection = renderCharacterSelection;
 window.initializeLorgusCharacterSelectionAudio = initializeLorgusCharacterSelectionAudio;
