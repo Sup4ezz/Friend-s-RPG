@@ -14515,9 +14515,14 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-rp-item-choice i{font-style:normal;color:#8d8067;font-size:10px}
 .lorgus-rp-item-picker-footer{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:20px;padding-top:16px;border-top:1px solid rgba(214,179,106,.12);color:#8f887d;font-size:11px}
 
-.lorgus-admin-inventory-grant{display:grid;grid-template-columns:1.5fr .35fr 1fr auto;gap:8px;margin:20px 0}
+.lorgus-admin-inventory-grant{display:grid;grid-template-columns:minmax(180px,1.5fr) minmax(150px,1fr) minmax(125px,.7fr) 105px auto;gap:8px;margin:20px 0}
 .lorgus-admin-inventory-grant select,.lorgus-admin-inventory-grant input{min-width:0;padding:11px;border:1px solid rgba(214,179,106,.18);background:#0d0b09;color:#e5ddcf}
-.lorgus-admin-inventory-grant button{border:1px solid rgba(214,179,106,.3);background:#17120c;color:#d6b36a;padding:10px 15px;cursor:pointer}
+.lorgus-admin-inventory-grant select:focus,.lorgus-admin-inventory-grant input:focus{outline:none;border-color:rgba(214,179,106,.5);box-shadow:0 0 0 1px rgba(214,179,106,.12)}
+.lorgus-admin-inventory-grant button{border:1px solid rgba(214,179,106,.3);background:#17120c;color:#d6b36a;padding:10px 15px;cursor:pointer;white-space:nowrap}
+.lorgus-admin-inventory-row-icon{font-size:21px;box-shadow:0 0 18px color-mix(in srgb,var(--item-color,#b8a27a) 13%,transparent)}
+.lorgus-admin-inventory-row strong{color:var(--item-color,#e9e0d2)}
+@media(max-width:760px){.lorgus-admin-inventory-grant{grid-template-columns:1fr 1fr}.lorgus-admin-inventory-grant .lorgus-admin-inventory-name{grid-column:1/-1}.lorgus-admin-inventory-grant .lorgus-admin-inventory-grant-btn{grid-column:1/-1}}
+
 .lorgus-admin-inventory-list{display:grid;gap:7px}
 .lorgus-admin-inventory-row{display:grid;grid-template-columns:42px 1fr auto;align-items:center;gap:10px;padding:10px;border:1px solid rgba(214,179,106,.1);background:rgba(255,255,255,.02)}
 .lorgus-admin-inventory-row-icon{width:38px;height:38px;display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--item-color,#d6b36a) 40%,transparent);color:var(--item-color,#d6b36a)}
