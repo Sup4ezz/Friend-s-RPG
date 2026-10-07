@@ -14827,3 +14827,71 @@ body:has(#root > #cabinet-content.character-application){
         margin-right:0;
     }
 }
+
+
+/* Admin inventory grant layout hardening */
+.lorgus-admin-inventory-panel{
+    box-sizing:border-box;
+    min-width:0;
+}
+.lorgus-admin-inventory-grant{
+    box-sizing:border-box;
+    width:100%;
+    min-width:0;
+    display:grid;
+    grid-template-columns:minmax(0,2fr) minmax(0,1.15fr) minmax(0,1fr) minmax(82px,.55fr) minmax(96px,.7fr);
+    gap:10px;
+    align-items:stretch;
+}
+.lorgus-admin-inventory-grant > *{
+    min-width:0;
+    max-width:100%;
+}
+.lorgus-admin-inventory-grant input,
+.lorgus-admin-inventory-grant select,
+.lorgus-admin-inventory-grant button{
+    min-width:0;
+    max-width:100%;
+    box-sizing:border-box;
+}
+.lorgus-admin-inventory-grant input,
+.lorgus-admin-inventory-grant select{
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+.lorgus-admin-inventory-grant button{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+}
+@media(max-width:1100px) and (min-width:761px){
+    .lorgus-admin-inventory-grant{
+        grid-template-columns:minmax(0,1.7fr) minmax(0,1.15fr) minmax(0,1fr);
+    }
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-name{
+        grid-column:1 / -1;
+    }
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-type{grid-column:1}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-rarity{grid-column:2}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-qty{grid-column:3}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-grant-btn{
+        grid-column:1 / -1;
+    }
+}
+@media(max-width:760px){
+    .lorgus-admin-inventory-grant{
+        grid-template-columns:minmax(0,1fr) minmax(88px,.55fr);
+        gap:8px;
+        padding:12px;
+    }
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-name{
+        grid-column:1 / -1;
+    }
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-type{grid-column:1}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-rarity{grid-column:2}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-qty{grid-column:1}
+    .lorgus-admin-inventory-grant .lorgus-admin-inventory-grant-btn{
+        grid-column:2;
+    }
+}
