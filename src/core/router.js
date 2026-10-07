@@ -31,11 +31,7 @@
     }
 
     function canRender() {
-        return Boolean(document.getElementById("cabinet-content"));
-    }
-
-    function hasCharacterDependentRoute(path) {
-        return path !== "/overview";
+        return Boolean(window.activeCharacter && document.getElementById("cabinet-content"));
     }
 
     function resolvePage(path) {
@@ -49,7 +45,6 @@
 
     function renderPath(path, force = false) {
         if (!ROUTES[path] || !canRender()) return false;
-        if (hasCharacterDependentRoute(path) && !window.activeCharacter) return false;
         if (!force && lastRenderedPath === path) return true;
 
         const page = resolvePage(path);
