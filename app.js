@@ -4187,8 +4187,16 @@ async function sendLocalRpMessage() {
    ========================================================= */
 
 const inventorySlotLabels = {
-    head: "Голова", chest: "Тело", hands: "Руки", legs: "Ноги", feet: "Ступни",
-    main_hand: "Правая рука", off_hand: "Левая рука", accessory: "Аксессуар"
+    head: "Голова",
+    chest: "Тело",
+    hands: "Перчатки",
+    legs: "Ноги",
+    feet: "Ступни",
+    main_hand: "Правая рука",
+    off_hand: "Левая рука",
+    accessory_chain: "Цепочка",
+    accessory_ring: "Кольцо",
+    accessory_bracelet: "Браслет"
 };
 
 function inventoryRarityLabel(rarity) {
