@@ -4132,7 +4132,11 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
                     </div>
                     <textarea id="lorgus-rp-input" placeholder="Опиши действие, реплику или мысль персонажа..." rows="4"></textarea>
                     <div class="lorgus-rp-composer-bottom">
-                        <button class="lorgus-rp-use-item" type="button" onclick="openRpItemPicker()">Использовать предмет</button>
+                        <div class="lorgus-rp-actions">
+                            <button class="lorgus-rp-use-item" type="button" onclick="openRpItemPicker()">Использовать предмет</button>
+                            <button class="lorgus-rp-use-item lorgus-rp-transfer-item" type="button" onclick="openRpTransferPicker()">Передать предмет</button>
+                            <button class="lorgus-rp-use-item lorgus-rp-transfer-currency" type="button" onclick="openRpCurrencyTransferPicker()">Передать валюту</button>
+                        </div>
                         <span id="lorgus-rp-item-selection" class="lorgus-rp-item-selection"></span>
                         <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalRpMessage()">Отправить</button>
                     </div>
