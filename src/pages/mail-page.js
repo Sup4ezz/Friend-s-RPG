@@ -68,7 +68,7 @@ async function loadMailRecipients() {
 
     // Статус персонажа хранится не в characters, а в character_applications.
     // Для почты показываем только персонажей с одобренной заявкой.
-    const { data: applications, error: applicationsError } = await supabase
+    const { data: applications, error: applicationsError } = await window.supabaseClient
         .from("character_applications")
         .select("character_id")
         .eq("status", "approved")
@@ -92,7 +92,7 @@ async function loadMailRecipients() {
         return;
     }
 
-    const { data: characters, error: charactersError } = await supabase
+    const { data: characters, error: charactersError } = await window.supabaseClient
         .from("characters")
         .select("id, name, race")
         .in("id", characterIds)
@@ -130,7 +130,7 @@ async function loadMailInbox() {
     const list = document.getElementById("lorgus-mail-inbox-list");
     if (!list || !window.activeCharacterId) return;
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
         .from("lorgus_mail")
         .select("id, sender_character_id, recipient_character_id, body, method, sent_at, deliver_at, delivered_at, read_at, sender:characters!lorgus_mail_sender_character_id_fkey(name)")
         .eq("recipient_character_id", window.activeCharacterId)
@@ -190,13 +190,13 @@ async function sendLorgusMail() {
         return;
     }
 
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: userData } = await window.supabaseClient.auth.getUser();
     if (!userData?.user) return;
 
     const now = new Date();
     const deliverAt = new Date(now.getTime() + 5 * 60 * 1000);
 
-    const { error } = await supabase
+    const { error } = await window.supabaseClient
         .from("lorgus_mail")
         .insert({
             sender_character_id: window.activeCharacterId,
@@ -219,7 +219,7 @@ async function sendLorgusMail() {
 }
 
 async function markLorgusMailRead(mailId) {
-    const { error } = await supabase
+    const { error } = await window.supabaseClient
         .from("lorgus_mail")
         .update({ read_at: new Date().toISOString() })
         .eq("id", mailId)
