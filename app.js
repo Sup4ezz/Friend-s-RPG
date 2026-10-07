@@ -4318,7 +4318,7 @@ async function openAdminCharacterInventory(application, container) {
 
     const { data: inventory, error: inventoryError } = await supabase
         .from("character_inventory")
-        .select("id,character_id,item_id,quantity,equipped_slot,source_note,items(*)")
+        .select("id,character_id,item_id,quantity,equipped_slot,acquired_at,source_note,items(*)")
         .eq("character_id", characterId)
         .order("acquired_at", { ascending: true });
 
@@ -4326,6 +4326,43 @@ async function openAdminCharacterInventory(application, container) {
         alert("Не удалось загрузить инвентарь:\n\n" + inventoryError.message);
         return;
     }
+
+    const itemTypes = [
+        ["helmet","Шлем / голова","equipment"],
+        ["armor","Броня / тело","equipment"],
+        ["gloves","Перчатки","equipment"],
+        ["pants","Штаны / ноги","equipment"],
+        ["boots","Обувь","equipment"],
+        ["sword","Меч","equipment"],
+        ["paired_daggers","Парные кинжалы","equipment"],
+        ["spear","Копьё","equipment"],
+        ["axe","Топор","equipment"],
+        ["staff","Посох","equipment"],
+        ["bow","Лук","equipment"],
+        ["crossbow","Арбалет","equipment"],
+        ["shield","Щит","equipment"],
+        ["chain","Цепочка","equipment"],
+        ["ring","Кольцо","equipment"],
+        ["bracelet","Браслет","equipment"],
+        ["potion","Зелье","consumable"],
+        ["scroll","Свиток","consumable"],
+        ["food","Еда","consumable"],
+        ["quest_item","Квестовый предмет","quest"],
+        ["material","Материал","material"],
+        ["misc","Прочее","misc"]
+    ];
+
+    const rarities = [
+        ["common","Обычный"],
+        ["uncommon","Необычный"],
+        ["rare","Редкий"],
+        ["epic","Эпический"],
+        ["legendary","Легендарный"],
+        ["mythic","Мифический"],
+        ["unique","Уникальный"]
+    ];
+
+    const typeLabel = Object.fromEntries(itemTypes.map(([value,label]) => [value,label]));
 
     const overlay = document.createElement("div");
     overlay.className = "lorgus-admin-inventory-overlay";
@@ -4336,24 +4373,14 @@ async function openAdminCharacterInventory(application, container) {
         '<button type="button" class="lorgus-admin-inventory-close">×</button>' +
         '<span class="lorgus-command-kicker">АДМИНИСТРАЦИЯ · ИНВЕНТАРЬ</span>' +
         '<h2>' + escapeHtml(application.name || "Персонаж") + '</h2>' +
-        '<p>Выдача предметов. Здесь нет заранее заданного списка вещей — хранитель сам создаёт нужный предмет.</p>' +
+        '<p>Создай любой предмет вручную. Предметов может быть сколько угодно — здесь нет каталога заранее заданных вещей.</p>' +
         '<div class="lorgus-admin-inventory-grant">' +
             '<input class="lorgus-admin-inventory-name" placeholder="Название предмета">' +
             '<select class="lorgus-admin-inventory-type">' +
-                '<option value="misc">Обычный предмет</option>' +
-                '<option value="consumable">Расходуемый предмет</option>' +
-                '<option value="quest">Квестовый предмет</option>' +
-                '<option value="material">Материал</option>' +
-                '<option value="head">Шлем / голова</option>' +
-                '<option value="chest">Броня / тело</option>' +
-                '<option value="hands">Перчатки</option>' +
-                '<option value="legs">Штаны / ноги</option>' +
-                '<option value="feet">Обувь</option>' +
-                '<option value="main_hand">Оружие / правая рука</option>' +
-                '<option value="off_hand">Щит / левая рука</option>' +
-                '<option value="accessory_chain">Цепочка</option>' +
-                '<option value="accessory_ring">Кольцо</option>' +
-                '<option value="accessory_bracelet">Браслет</option>' +
+                itemTypes.map(([value,label]) => '<option value="' + value + '">' + label + '</option>').join("") +
+            '</select>' +
+            '<select class="lorgus-admin-inventory-rarity">' +
+                rarities.map(([value,label]) => '<option value="' + value + '">' + label + '</option>').join("") +
             '</select>' +
             '<input class="lorgus-admin-inventory-qty" type="number" min="1" value="1" placeholder="Количество">' +
             '<button type="button" class="lorgus-admin-inventory-grant-btn">Выдать</button>' +
@@ -4365,7 +4392,7 @@ async function openAdminCharacterInventory(application, container) {
     const refreshInventory = async () => {
         const { data: fresh, error } = await supabase
             .from("character_inventory")
-            .select("id,character_id,item_id,quantity,equipped_slot,source_note,items(*)")
+            .select("id,character_id,item_id,quantity,equipped_slot,acquired_at,source_note,items(*)")
             .eq("character_id", characterId)
             .order("acquired_at", { ascending: true });
 
@@ -4384,15 +4411,16 @@ async function openAdminCharacterInventory(application, container) {
                 const slot = row.equipped_slot
                     ? " · " + (inventorySlotLabels[row.equipped_slot] || row.equipped_slot)
                     : "";
+                const subtype = typeLabel[item.item_subtype] || item.item_subtype || item.item_type || "Предмет";
 
                 return (
                     '<div class="lorgus-admin-inventory-row">' +
-                        '<span class="lorgus-admin-inventory-row-icon" style="--item-color:' + escapeHtml(item.color || "#d6b36a") + '">' +
+                        '<span class="lorgus-admin-inventory-row-icon" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '">' +
                             escapeHtml(item.icon || "◆") +
                         '</span>' +
                         '<div>' +
                             '<strong>' + escapeHtml(item.name || "Предмет") + '</strong>' +
-                            '<small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ×' + escapeHtml(String(row.quantity)) + escapeHtml(slot) + '</small>' +
+                            '<small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ' + escapeHtml(subtype) + ' · ×' + escapeHtml(String(row.quantity)) + escapeHtml(slot) + '</small>' +
                         '</div>' +
                         '<button type="button" data-id="' + escapeHtml(row.id) + '">Забрать</button>' +
                     '</div>'
@@ -4430,9 +4458,11 @@ async function openAdminCharacterInventory(application, container) {
     panel.querySelector(".lorgus-admin-inventory-grant-btn").addEventListener("click", async () => {
         const nameInput = panel.querySelector(".lorgus-admin-inventory-name");
         const typeInput = panel.querySelector(".lorgus-admin-inventory-type");
+        const rarityInput = panel.querySelector(".lorgus-admin-inventory-rarity");
         const quantityInput = panel.querySelector(".lorgus-admin-inventory-qty");
         const name = nameInput.value.trim();
-        const type = typeInput.value;
+        const subtype = typeInput.value;
+        const rarity = rarityInput.value;
         const quantity = Math.max(1, Number(quantityInput.value) || 1);
 
         if (!name) {
@@ -4444,8 +4474,10 @@ async function openAdminCharacterInventory(application, container) {
         const { error } = await supabase.rpc("admin_create_and_grant_character_item", {
             p_character_id: characterId,
             p_name: name,
-            p_type: type,
-            p_quantity: quantity
+            p_type: subtype,
+            p_quantity: quantity,
+            p_rarity: rarity,
+            p_subtype: subtype
         });
 
         if (error) {
@@ -4454,6 +4486,7 @@ async function openAdminCharacterInventory(application, container) {
         }
 
         nameInput.value = "";
+        rarityInput.value = "common";
         quantityInput.value = "1";
         await refreshInventory();
     });
