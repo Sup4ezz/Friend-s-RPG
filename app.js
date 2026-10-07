@@ -4254,10 +4254,33 @@ async function renderLorgusInventory() {
         slot.addEventListener("dragover", e => e.preventDefault());
         slot.addEventListener("drop", async e => {
             e.preventDefault();
-            const inventoryId = e.dataTransfer.getData("text/plain"); if (!inventoryId) return;
-            const row = rows.find(r => r.id === inventoryId); if (!row?.items?.equipment_slot) return;
-            const { error } = await supabase.rpc("equip_character_item", { p_inventory_id: inventoryId, p_slot: slot.dataset.equipmentSlot });
-            if (error) { alert("Не удалось экипировать предмет:\n\n" + error.message); return; }
+            const inventoryId = e.dataTransfer.getData("text/plain");
+            if (!inventoryId) return;
+
+            const row = rows.find(r => r.id === inventoryId);
+            const item = row?.items;
+            const targetSlot = slot.dataset.equipmentSlot;
+
+            if (!item?.equipment_slot) {
+                alert("Этот предмет нельзя экипировать.");
+                return;
+            }
+
+            if (item.equipment_slot !== targetSlot) {
+                alert("Нельзя надеть «" + (item.name || "этот предмет") + "» на «" + (inventorySlotLabels[targetSlot] || targetSlot) + "».");
+                return;
+            }
+
+            const { error } = await supabase.rpc("equip_character_item", {
+                p_inventory_id: inventoryId,
+                p_slot: targetSlot
+            });
+
+            if (error) {
+                alert("Не удалось экипировать предмет:\n\n" + error.message);
+                return;
+            }
+
             await renderLorgusInventory();
         });
     });
