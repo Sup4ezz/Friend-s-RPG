@@ -4271,6 +4271,9 @@ async function renderLorgusInventory() {
 
     const setupDrag = card => {
         card.setAttribute("draggable", "true");
+        // Не даём браузеру превращать внутренний текст/элементы в отдельный
+        // "перетаскиваемый объект". Перетаскивается только сама карточка.
+        card.querySelectorAll("*").forEach(child => child.setAttribute("draggable", "false"));
 
         card.addEventListener("dragstart", e => {
             e.stopPropagation();
@@ -4288,16 +4291,13 @@ async function renderLorgusInventory() {
             e.dataTransfer.setData("text/plain", id);
             e.dataTransfer.effectAllowed = "move";
 
-            const ghost = card.cloneNode(true);
-            ghost.querySelectorAll("button").forEach(button => button.remove());
-            ghost.classList.add("lorgus-drag-ghost");
-            ghost.style.position = "fixed";
-            ghost.style.left = "-10000px";
-            ghost.style.top = "-10000px";
-            ghost.style.width = Math.min(card.getBoundingClientRect().width, 360) + "px";
-            ghost.style.pointerEvents = "none";
+            const ghost = document.createElement("div");
+            ghost.className = "lorgus-drag-ghost lorgus-drag-ghost-item";
+            ghost.innerHTML =
+                '<span class="lorgus-drag-ghost-icon">' + escapeHtml(card.querySelector(".lorgus-inventory-item-icon")?.textContent || "◆") + '</span>' +
+                '<span class="lorgus-drag-ghost-name">' + escapeHtml(card.querySelector(".lorgus-inventory-item-info strong")?.textContent || "Предмет") + '</span>';
             document.body.appendChild(ghost);
-            e.dataTransfer.setDragImage(ghost, 28, 28);
+            e.dataTransfer.setDragImage(ghost, 24, 24);
             requestAnimationFrame(() => ghost.remove());
 
             card.classList.add("is-dragging");
@@ -4385,6 +4385,7 @@ async function renderLorgusInventory() {
                 console.error("Не удалось экипировать предмет:", error);
                 return;
             }
+            window.lorgusDraggedInventoryId = null;
             await renderLorgusInventory();
         });
     });
