@@ -59,7 +59,7 @@ function inventoryItemMarkup(row, extraClass = "") {
 }
 
 async function loadCharacterInventory(characterId) {
-    const { data, error } = await supabase.from("character_inventory")
+    const { data, error } = await window.supabaseClient.from("character_inventory")
         .select("id, quantity, equipped_slot, acquired_at, source_note, items(*)")
         .eq("character_id", characterId).gt("quantity", 0).order("acquired_at", { ascending: true });
     if (error) console.error("Не удалось загрузить инвентарь:", error);
@@ -207,7 +207,7 @@ async function renderLorgusInventory() {
             return;
         }
 
-        const { error } = await supabase.rpc("unequip_character_item", {
+        const { error } = await window.supabaseClient.rpc("unequip_character_item", {
             p_inventory_id: inventoryId
         });
 
@@ -250,7 +250,7 @@ async function renderLorgusInventory() {
                 return;
             }
 
-            const { error } = await supabase.rpc("equip_character_item", {
+            const { error } = await window.supabaseClient.rpc("equip_character_item", {
                 p_inventory_id: inventoryId,
                 p_slot: targetSlot
             });
