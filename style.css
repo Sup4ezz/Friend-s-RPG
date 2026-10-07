@@ -14184,6 +14184,7 @@ body:has(#root > #cabinet-content.character-application){
 .admin-character-lore>div{min-width:0!important}
 .admin-character-lore p{margin:0!important;color:rgba(229,218,195,.56)!important;font-size:12px!important;line-height:1.65!important;max-height:82px!important;overflow:auto!important}
 .admin-character-actions{display:flex!important;justify-content:flex-end!important;gap:9px!important;margin-top:23px!important}
+.admin-character-actions button{white-space:nowrap!important;flex:0 0 auto!important;}
 .admin-character-details-button,.admin-delete-character-button{
     min-height:44px!important;padding:0 18px!important;cursor:pointer!important;
     font:11px var(--body-font)!important;letter-spacing:.1em!important;
