@@ -17,7 +17,3 @@ function renderLorgusRpHub() {
         </main>
     `;
 }
-
-window.renderLorgusOverview = renderLorgusOverview;
-window.renderLorgusWorldMapCurrent = renderLorgusWorldMapCurrent;
-window.renderLorgusCharacterHub = renderLorgusCharacterHub;
