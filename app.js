@@ -2072,7 +2072,12 @@ function initializeCharacterPortraitCrop() {
         output.width = 800;
         output.height = 800;
         const octx = output.getContext("2d");
-        const scale = output.width / canvas.width;
+
+        if (!octx) {
+            resolve(null);
+            return;
+        }
+
         octx.save();
         octx.beginPath();
         octx.arc(400, 400, 392, 0, Math.PI * 2);
@@ -2081,7 +2086,21 @@ function initializeCharacterPortraitCrop() {
         octx.fillRect(0, 0, 800, 800);
         octx.drawImage(canvas, 0, 0, 800, 800);
         octx.restore();
-        output.toBlob(blob => resolve(blob), "image/jpeg", 0.92);
+
+        let settled = false;
+        const finish = blob => {
+            if (settled) return;
+            settled = true;
+            resolve(blob ? new File([blob], "portrait.jpg", { type: "image/jpeg" }) : null);
+        };
+
+        try {
+            output.toBlob(finish, "image/jpeg", 0.92);
+            window.setTimeout(() => finish(null), 4000);
+        } catch (error) {
+            console.error("Не удалось подготовить портрет:", error);
+            finish(null);
+        }
     });
 
     const loadFile = file => {
@@ -2270,6 +2289,20 @@ async function submitCharacterApplication(event) {
             : null;
         const photo = croppedPhoto || originalPhoto;
 
+        if (!photo || !photo.size) {
+            setCharacterMessage(
+                "Не удалось подготовить портрет. Выбери изображение ещё раз.",
+                "error"
+            );
+
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = "Отправить заявку";
+            }
+
+            return;
+        }
+
         if (photo.size > 5 * 1024 * 1024) {
             setCharacterMessage(
                 "Изображение не должно превышать 5 МБ.",
@@ -2285,7 +2318,7 @@ async function submitCharacterApplication(event) {
         }
 
         const extension =
-            getFileExtension(photo.name);
+            getFileExtension(photo.name || "portrait.jpg");
 
         photoPath =
             `${user.id}/${applicationId}/photo.${extension}`;
