@@ -4257,7 +4257,7 @@ async function renderLorgusInventory() {
     const renderEquipped = () => document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
         const row = rows.find(r => r.equipped_slot === slot.dataset.equipmentSlot);
         const item = row?.items; const box = slot.querySelector(".lorgus-equipment-slot-item");
-        box.innerHTML = row && item ? '<div class="lorgus-equipped-item" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong><button type="button" class="lorgus-equipped-item-remove" data-inventory-id="' + escapeHtml(row.id) + '" title="Снять предмет">Снять</button></div>' : "";
+        box.innerHTML = row && item ? '<div class="lorgus-equipped-item" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong></div>' : "";
     });
     renderEquipped();
     const setupDrag = card => {
@@ -4294,28 +4294,44 @@ async function renderLorgusInventory() {
     document.querySelectorAll(".lorgus-equipped-item").forEach(card => {
         setupDrag(card);
     });
-    document.querySelectorAll(".lorgus-equipped-item-remove").forEach(button => {
-        button.addEventListener("click", async event => {
-            event.preventDefault();
-            event.stopPropagation();
-            button.disabled = true;
-            const { error } = await supabase.rpc("unequip_character_item", {
-                p_inventory_id: button.dataset.inventoryId
-            });
-            if (error) {
-                button.disabled = false;
-                alert("Не удалось снять предмет:\n\n" + error.message);
-                return;
-            }
-            await renderLorgusInventory();
-        });
-    });
+    // Снятие выполняется перетаскиванием предмета из ячейки экипировки обратно в рюкзак.
     const rejectDrop = slot => {
         slot.classList.remove("is-invalid-drop");
         void slot.offsetWidth;
         slot.classList.add("is-invalid-drop");
         window.setTimeout(() => slot.classList.remove("is-invalid-drop"), 520);
     };
+    grid.addEventListener("dragover", e => {
+        if (!e.dataTransfer) return;
+        const inventoryId = e.dataTransfer.getData("application/x-lorgus-inventory-id") || e.dataTransfer.getData("text/plain");
+        const row = rows.find(r => r.id === inventoryId);
+        if (!row?.equipped_slot) return;
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+        grid.classList.add("is-valid-unequip-drop");
+    });
+    grid.addEventListener("dragleave", e => {
+        if (!grid.contains(e.relatedTarget)) grid.classList.remove("is-valid-unequip-drop");
+    });
+    grid.addEventListener("drop", async e => {
+        e.preventDefault();
+        grid.classList.remove("is-valid-unequip-drop");
+        const inventoryId = e.dataTransfer.getData("application/x-lorgus-inventory-id") || e.dataTransfer.getData("text/plain");
+        const row = rows.find(r => r.id === inventoryId);
+        if (!row?.equipped_slot) return;
+
+        const { error } = await supabase.rpc("unequip_character_item", {
+            p_inventory_id: inventoryId
+        });
+        if (error) {
+            console.error("Не удалось вернуть предмет в рюкзак:", error);
+            grid.classList.add("is-invalid-drop");
+            window.setTimeout(() => grid.classList.remove("is-invalid-drop"), 520);
+            return;
+        }
+        await renderLorgusInventory();
+    });
+
     document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
         slot.addEventListener("dragover", e => {
             e.preventDefault();
