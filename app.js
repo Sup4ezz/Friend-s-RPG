@@ -10,7 +10,7 @@ window.lorgusPortalDepartureAligning = false;
 window.lorgusPortalEnterStartedAt = 0;
 let lorgusPortalOverlay = null;
 window.THREE = THREE;
-window.escapeHtml = escapeHtml;\nwindow.supabaseClient = null;
+window.supabaseClient = null;
 
 /* =========================================================
    ИНИЦИАЛИЗАЦИЯ
@@ -43,10 +43,10 @@ async function initialize() {
             }
         } = await supabase.auth.getSession();
 
-        render(session);
+        window.render(session);
 
         supabase.auth.onAuthStateChange(
-            (_event, newSession) => render(newSession)
+            (_event, newSession) => window.render(newSession)
         );
 
     } catch (error) {
