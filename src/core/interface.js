@@ -188,6 +188,54 @@ async function openLorgusNotifications() {
     });
 }
 
+
+async function openLorgusUpdateLog() {
+    const existing = document.querySelector(".lorgus-update-log-overlay");
+    if (existing) { existing.remove(); return; }
+
+    const overlay = document.createElement("div");
+    overlay.className = "lorgus-update-log-overlay";
+    overlay.innerHTML = `
+        <div class="lorgus-update-log-backdrop"></div>
+        <article class="lorgus-update-log-panel">
+            <button type="button" class="lorgus-update-log-close" aria-label="Закрыть">×</button>
+            <div class="lorgus-update-log-heading">
+                <span class="lorgus-command-kicker">ЛОРГУС · ЛЕТОПИСЬ</span>
+                <h2>Обновления</h2>
+                <p>Здесь остаётся история того, как меняется мир.</p>
+            </div>
+            <div class="lorgus-update-log-list"><div class="lorgus-update-log-loading">Загружаем летопись...</div></div>
+        </article>`;
+    document.body.appendChild(overlay);
+
+    const close = () => overlay.remove();
+    overlay.querySelector(".lorgus-update-log-close").addEventListener("click", close);
+    overlay.querySelector(".lorgus-update-log-backdrop").addEventListener("click", close);
+
+    const list = overlay.querySelector(".lorgus-update-log-list");
+    const { data, error } = await window.supabaseClient
+        .from("lorgus_updates")
+        .select("id,version,title,body,author,published_at")
+        .eq("is_published", true)
+        .order("published_at", { ascending: false });
+
+    if (error) {
+        list.innerHTML = '<div class="lorgus-update-log-empty"><strong>Не удалось загрузить летопись.</strong><p>' + escapeHtml(error.message) + '</p></div>';
+        return;
+    }
+
+    list.innerHTML = (data || []).map(update => `
+        <article class="lorgus-update-entry">
+            <div class="lorgus-update-entry-meta">
+                <span>v${escapeHtml(update.version)}</span>
+                <time>${escapeHtml(formatLorgusNotificationTime(update.published_at))}</time>
+            </div>
+            <h3>${escapeHtml(update.title)}</h3>
+            <div class="lorgus-update-entry-body">${escapeHtml(update.body).replace(/\n/g, "<br>")}</div>
+            <footer>Автор обновления: <strong>${escapeHtml(update.author)}</strong></footer>
+        </article>`).join("") || '<div class="lorgus-update-log-empty"><strong>Летопись пока пуста.</strong></div>';
+}
+
 function renderLorgusInterfaceNav(active = "world") {
     const items = [
         ["overview", "⌂", "Обзор", "/overview"],
