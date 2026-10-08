@@ -16780,8 +16780,7 @@ body:has(#root > #cabinet-content.character-application){
 }
 
 
-/* Полноэкранное перелистывание: две страницы образуют один цельный трек. */
-/* Во время перелистывания двигается весь экран, без прокрутки страницы. */
+/* Полноэкранное перелистывание: каждый экран целиком занимает viewport. */
 html.lorgus-screen-transitioning,
 body.lorgus-screen-transitioning{
     overflow:hidden!important;
@@ -16798,44 +16797,40 @@ body.lorgus-screen-transitioning{
     isolation:isolate!important;
 }
 
-.lorgus-page-transition-track{
-    position:absolute!important;
-    inset:0 auto auto 0!important;
-    width:200vw!important;
-    height:100vh!important;
-    display:flex!important;
-    flex-direction:row!important;
-    transform:translate3d(0,0,0);
-    will-change:transform;
-}
-
-.lorgus-page-transition-track.vertical{
-    width:100vw!important;
-    height:200vh!important;
-    flex-direction:column!important;
-}
-
-.lorgus-page-transition-track.is-moving{
-    transition:transform .68s cubic-bezier(.76,0,.24,1)!important;
-}
-
 .lorgus-transition-panel{
-    flex:0 0 100vw!important;
+    position:absolute!important;
+    inset:0!important;
     width:100vw!important;
     height:100vh!important;
+    min-width:100vw!important;
+    max-width:100vw!important;
     min-height:100vh!important;
     max-height:100vh!important;
     margin:0!important;
+    padding:0!important;
     box-sizing:border-box!important;
     overflow:hidden!important;
-    position:relative!important;
+    will-change:transform;
+    transition:transform .68s cubic-bezier(.76,0,.24,1)!important;
 }
 
-.lorgus-page-transition-track.vertical .lorgus-transition-panel{
-    flex-basis:100vh!important;
-    width:100vw!important;
-    height:100vh!important;
+.lorgus-transition-panel > *{
+    width:100%!important;
+    min-width:100%!important;
+    height:100%!important;
+    min-height:100%!important;
+    box-sizing:border-box!important;
 }
+
+.lorgus-transition-panel.lorgus-transition-old{
+    transform:translate3d(0,0,0);
+}
+
+.lorgus-transition-panel.lorgus-transition-new.horizontal,
+.lorgus-transition-panel.lorgus-transition-new.vertical{
+    transition:transform .68s cubic-bezier(.76,0,.24,1)!important;
+}
+
 
 .lorgus-transition-screen{
     contain:layout paint;
