@@ -1,5 +1,5 @@
 /* LORGUS RP, travel, presence and local chat */
-async async function renderWorldCharacterTracker() {
+async function renderWorldCharacterTracker() {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
