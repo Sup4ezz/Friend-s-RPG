@@ -523,25 +523,45 @@ function showLorgusMapEditorMode(container) {
 window.lorgusSubpageTransition = function(direction, renderTarget) {
     if (typeof renderTarget !== "function" || window.lorgusMainMenuNavigating) return;
 
-    const current = document.querySelector("#cabinet-content > *");
-    if (!current) {
+    const container = document.getElementById("cabinet-content");
+    const current = container?.firstElementChild;
+    if (!container || !current) {
         renderTarget();
         return;
     }
 
     window.lorgusMainMenuNavigating = true;
+    document.documentElement.classList.add("lorgus-screen-transitioning");
+    document.body.classList.add("lorgus-screen-transitioning");
 
+    // Снимок всего текущего экрана. Не отдельных кнопок/блоков.
     const outgoing = current.cloneNode(true);
-    outgoing.classList.add("lorgus-transition-clone");
+    outgoing.classList.add("lorgus-transition-screen", "lorgus-transition-outgoing");
     outgoing.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
-    outgoing.style.cssText += ";position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;margin:0!important;z-index:9998!important;pointer-events:none!important;overflow:hidden!important;";
+    outgoing.style.cssText += [
+        "position:fixed!important",
+        "inset:0!important",
+        "width:100vw!important",
+        "height:100vh!important",
+        "min-height:100vh!important",
+        "max-height:100vh!important",
+        "margin:0!important",
+        "padding:0!important",
+        "box-sizing:border-box!important",
+        "z-index:99998!important",
+        "pointer-events:none!important",
+        "overflow:hidden!important"
+    ].join(";") + ";";
     document.body.appendChild(outgoing);
 
+    // Старый экран убирается из DOM, новый строится целиком заново.
     renderTarget();
 
-    const incoming = document.querySelector("#cabinet-content > *");
+    const incoming = container.firstElementChild;
     if (!incoming || incoming === outgoing) {
         outgoing.remove();
+        document.documentElement.classList.remove("lorgus-screen-transitioning");
+        document.body.classList.remove("lorgus-screen-transitioning");
         window.lorgusMainMenuNavigating = false;
         return;
     }
@@ -550,36 +570,57 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
     const outgoingEnd = { top:"100%", bottom:"-100%", left:"100%", right:"-100%" }[direction];
     const incomingStart = { top:"-100%", bottom:"100%", left:"-100%", right:"100%" }[direction];
 
-    incoming.style.cssText += ";position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;margin:0!important;z-index:9999!important;overflow:hidden!important;";
-    incoming.style.willChange = "transform";
-    incoming.style.transition = "none";
-    incoming.style.transform = `translate${axis}(${incomingStart})`;
+    incoming.classList.add("lorgus-transition-screen", "lorgus-transition-incoming");
+    incoming.style.cssText += [
+        "position:fixed!important",
+        "inset:0!important",
+        "width:100vw!important",
+        "height:100vh!important",
+        "min-height:100vh!important",
+        "max-height:100vh!important",
+        "margin:0!important",
+        "box-sizing:border-box!important",
+        "z-index:99999!important",
+        "overflow:hidden!important",
+        "will-change:transform!important",
+        "transition:none!important",
+        "transform:translate" + axis + "(" + incomingStart + ")!important"
+    ].join(";") + ";";
 
     outgoing.style.willChange = "transform";
     outgoing.style.transition = "none";
     outgoing.style.transform = "translate3d(0,0,0)";
 
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-        const transition = "transform .62s cubic-bezier(.76,0,.24,1)";
-        outgoing.style.transition = transition;
-        incoming.style.transition = transition;
-        outgoing.style.transform = `translate${axis}(${outgoingEnd})`;
-        incoming.style.transform = "translate3d(0,0,0)";
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            const transition = "transform .68s cubic-bezier(.76,0,.24,1)";
+            outgoing.style.transition = transition;
+            incoming.style.transition = transition;
+            outgoing.style.transform = `translate${axis}(${outgoingEnd})`;
+            incoming.style.transform = "translate3d(0,0,0)";
 
-        window.setTimeout(() => {
-            outgoing.remove();
-            incoming.style.willChange = "";
-            incoming.style.transition = "";
-            incoming.style.transform = "";
-            incoming.style.position = "";
-            incoming.style.inset = "";
-            incoming.style.width = "";
-            incoming.style.height = "";
-            incoming.style.margin = "";
-            incoming.style.zIndex = "";
-            window.lorgusMainMenuNavigating = false;
-        }, 650);
-    }));
+            window.setTimeout(() => {
+                outgoing.remove();
+                incoming.classList.remove("lorgus-transition-screen", "lorgus-transition-incoming");
+                incoming.style.removeProperty("position");
+                incoming.style.removeProperty("inset");
+                incoming.style.removeProperty("width");
+                incoming.style.removeProperty("height");
+                incoming.style.removeProperty("min-height");
+                incoming.style.removeProperty("max-height");
+                incoming.style.removeProperty("margin");
+                incoming.style.removeProperty("box-sizing");
+                incoming.style.removeProperty("z-index");
+                incoming.style.removeProperty("overflow");
+                incoming.style.removeProperty("will-change");
+                incoming.style.removeProperty("transition");
+                incoming.style.removeProperty("transform");
+                document.documentElement.classList.remove("lorgus-screen-transitioning");
+                document.body.classList.remove("lorgus-screen-transitioning");
+                window.lorgusMainMenuNavigating = false;
+            }, 700);
+        });
+    });
 };
 
 window.lorgusMainMenuNavigate = function(direction, renderTarget) {
