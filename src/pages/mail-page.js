@@ -8,9 +8,14 @@ async function renderMail() {
 
     container.className = "lorgus-mail-page";
     container.innerHTML = `
-        <button type="button" class="lorgus-subpage-back-arrow bottom" onclick="window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
+        <button type="button" class="lorgus-subpage-back-arrow top" onclick="window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
             <span>▲</span><b>КАРТА</b>
         </button>
+        <div class="lorgus-subpage-utility">
+    <span class="lorgus-subpage-username">${window.escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>
+    <button type="button" class="lorgus-subpage-notifications" onclick="window.openLorgusNotifications?.()" aria-label="Уведомления" title="Уведомления">♢<b class="lorgus-notification-badge"></b></button>
+    <button type="button" class="lorgus-subpage-logout" onclick="window.logout?.()">ВЫЙТИ</button>
+</div>
         <main class="lorgus-subpage-shell lorgus-mail-page-inner">
             <header class="lorgus-subpage-heading">
                 <span class="lorgus-command-kicker">ПИСЬМА</span>
