@@ -8,7 +8,7 @@
 <path d="M0 430Q300 405 600 435T1200 425T1600 430M0 500Q350 470 700 505T1600 495" fill="none" stroke="#b4ced0" stroke-opacity=".28" stroke-width="7"/>
 <!-- distant harbor city --><g fill="#26363b" stroke="#172126" stroke-width="9">
 <path d="M0 410V315l70-55 70 55v95M160 410V285l85-65 85 65v125M350 410V310l65-48 65 48v100M1320 410V295l75-58 75 58v115M1490 410V315l55-42 55 42v95"/></g>
-<!-- lighthouse --><path d="M1115 430l22-265h86l22 265z" fill="#62534d" stroke="#211b1b" stroke-width="10"/><path d="M1128 185h84v55h-84z" fill="#302a2b"/><path d="M1128 165h84l-20-42h-44z" fill="#c2794d" stroke="#211b1b" stroke-width="9"/><circle cx="1170" cy="145" r="18" fill="#ffe0a5"/>
+<!-- lighthouse --><path d="M1118 430L1140 175H1200L1222 430Z" fill="#62534d" stroke="#211b1b" stroke-width="10"/><path d="M1128 185H1212V235H1128Z" fill="#302a2b"/><path d="M1128 165H1212L1197 125H1143Z" fill="#c2794d" stroke="#211b1b" stroke-width="9"/><circle cx="1170" cy="145" r="18" fill="#ffe0a5"/><path d="M1128 300H1212M1124 365H1217" stroke="#8b7162" stroke-width="7" opacity=".7"/>
 <!-- warehouses --><g stroke="#211919" stroke-width="11">
 <path d="M70 635V410l205-105 205 105v225z" fill="#51433d"/><path d="M510 635V425l140-75 140 75v210z" fill="#4a3c38"/>
 </g><g fill="#241a1a"><path d="M115 450h70v130h-70zM215 400h75v180h-75zM325 450h70v130h-70zM550 455h80v125h-80zM660 455h80v125h-80z"/></g>
