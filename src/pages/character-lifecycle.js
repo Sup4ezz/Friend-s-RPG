@@ -293,7 +293,11 @@ async function selectCharacter(container, characterId) {
     sessionStorage.setItem("lorgus_active_character_id", character.id);
     localStorage.setItem("lorgus_active_character_id", character.id);
     await initializeRpPresence(character);
-    renderCharacter(container, character);
+    if (window.lorgusRouter) {
+        window.lorgusRouter.navigate("/character", { replace: true });
+    } else {
+        renderCharacter(container, character);
+    }
 }
 
 /* =========================================================
