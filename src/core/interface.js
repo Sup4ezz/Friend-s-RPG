@@ -302,7 +302,7 @@ function renderLorgusOverview() {
                 <article class="lorgus-command-card"><span>ПЕРСОНАЖ</span><strong>История и состояние</strong><small>Характеристики, навыки, снаряжение, деньги и биография.</small><button type="button" onclick="renderLorgusCharacterHub()">Открыть досье →</button></article>
                 <article class="lorgus-command-card"><span>РОЛЕВАЯ</span><strong>Текущая сцена</strong><small>Место, участники, сообщения и последствия действий.</small><button type="button" onclick="renderLorgusRpHub()">Войти в RP →</button></article>
                 <article class="lorgus-command-card"><span>СВЯЗИ</span><strong>Люди мира</strong><small>Знакомства, отношения и персонажи, находящиеся рядом с историей.</small><button type="button" onclick="renderWorldCharacterTracker()">Люди мира →</button></article>
-                <article class="lorgus-command-card"><span>ХРОНИКА</span><strong>Мир не ждёт</strong><small>События, слухи, войны, путешествия и изменения, происходящие независимо от тебя.</small><button type="button" onclick="renderLorgusWorldMapCurrent()">Смотреть мир →</button></article>
+                <article class="lorgus-command-card"><span>ЛЕТОПИСЬ</span><strong>Обновления ЛОРГУСА</strong><small>Новые версии, изменения мира и сообщения от создателей проекта.</small><button type="button" onclick="openLorgusUpdateLog()">Открыть летопись →</button></article>
                 <article class="lorgus-command-card command-mail"><span>ПОСЛАНИЯ</span><strong>Письма</strong><small>Связь с другими персонажами независимо от расстояния.</small><button type="button" onclick="renderMail()">Открыть почту →</button></article>
             </section>
             <section class="lorgus-command-bottom">
