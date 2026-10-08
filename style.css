@@ -16157,3 +16157,23 @@ body:has(#root > #cabinet-content.character-application){
   box-shadow:inset 0 0 180px rgba(0,0,0,.62)!important;
   animation:none!important;
 }
+
+
+/* COUNCIL BUILDING — RP CHAT INTERIOR */
+.lorgus-messenger-main[data-rp-location="Здание Совета"]{
+  --lorgus-raster-bg:url("/assets/rp-locations/holy-lands.svg");
+}
+.lorgus-messenger-main[data-rp-location="Здание Совета"]::before{
+  background:
+    linear-gradient(180deg,rgba(3,6,6,.08) 0%,rgba(3,6,6,.18) 45%,rgba(2,4,4,.64) 100%),
+    url("/assets/rp-locations/holy-lands.svg") center/cover no-repeat!important;
+  filter:saturate(.9) contrast(1.1) brightness(.74)!important;
+  animation:none!important;
+}
+.lorgus-messenger-main[data-rp-location="Здание Совета"]::after{
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.4),transparent 24%,transparent 76%,rgba(0,0,0,.4)),
+    radial-gradient(ellipse at center,transparent 20%,rgba(0,0,0,.5) 100%)!important;
+  box-shadow:inset 0 0 180px rgba(0,0,0,.62)!important;
+  animation:none!important;
+}
