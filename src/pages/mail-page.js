@@ -8,7 +8,7 @@ async function renderMail() {
 
     container.className = "lorgus-mail-page";
     container.innerHTML = `
-        <button type="button" class="lorgus-subpage-back-arrow" onclick="window.lorgusSubpageTransition('top', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
+        <button type="button" class="lorgus-subpage-back-arrow" onclick="window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
             <span>▲</span><b>КАРТА</b>
         </button>
         <main class="lorgus-subpage-shell lorgus-mail-page-inner">
