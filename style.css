@@ -16198,40 +16198,31 @@ body:has(#root > #cabinet-content.character-application){
 }
 
 
-/* LOCATION CARDS — HARD VISIBILITY SAFETY */
-.lorgus-location-grid{
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:14px!important;
-    width:100%!important;
-}
-.lorgus-location-grid .lorgus-location-card{
-    display:flex!important;
-    flex-direction:column!important;
-    min-height:225px!important;
-    visibility:visible!important;
-    opacity:1!important;
+/* LOCATION CARD READABILITY — preserve every location artwork */
+.lorgus-location-card{
     position:relative!important;
-    z-index:1!important;
-    color:#eee4d1!important;
-    background:
-        linear-gradient(180deg,rgba(7,7,6,.72),rgba(4,4,3,.94))!important;
+    isolation:isolate!important;
+    color:#f3eee3!important;
+    background-color:rgba(8,8,7,.58)!important;
+    background-blend-mode:multiply!important;
 }
-.lorgus-location-grid .lorgus-location-card strong{
-    color:#f0d89d!important;
-    text-shadow:0 3px 12px rgba(0,0,0,.85)!important;
+.lorgus-location-card > *{
+    position:relative;
+    z-index:2;
 }
-.lorgus-location-grid .lorgus-location-card small{
-    color:#b9a57c!important;
+.lorgus-location-card strong{
+    color:#fff8e8!important;
+    text-shadow:0 2px 10px rgba(0,0,0,.95)!important;
 }
-.lorgus-location-grid .lorgus-location-card p{
-    color:#d0c5b2!important;
+.lorgus-location-card small{
+    color:#e1cfaa!important;
+    text-shadow:0 2px 7px rgba(0,0,0,.95)!important;
 }
-.lorgus-location-grid .lorgus-location-card-access{
-    color:#9f917d!important;
+.lorgus-location-card p{
+    color:#eee7dc!important;
+    text-shadow:0 2px 8px rgba(0,0,0,.95)!important;
 }
-@media (max-width:800px){
-    .lorgus-location-grid{
-        grid-template-columns:1fr!important;
-    }
+.lorgus-location-card .lorgus-location-card-access{
+    color:#e7c982!important;
+    text-shadow:0 2px 7px rgba(0,0,0,.95)!important;
 }
