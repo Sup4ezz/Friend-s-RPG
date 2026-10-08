@@ -70,22 +70,27 @@
     }
 
     async function loadAdminRpData() {
-        const [messagesResult, nrpResult] = await Promise.all([
-            window.supabaseClient
+        const messages = [];
+        const pageSize = 1000;
+        for (let offset = 0; ; offset += pageSize) {
+            const page = await window.supabaseClient
                 .from("rp_messages")
                 .select("id,character_id,body,created_at,status,reverted_at,revert_reason,presence_type,region,location,from_region,from_location,to_region,to_location,characters(id,name,race)")
                 .order("created_at", { ascending: false })
-                .range(0, 1999),
-            window.supabaseClient
-                .from("lorgus_nrp_characters")
-                .select("character_id,is_active,created_at,characters(id,name,race,age,homeland,occupation,personality,backstory,special_skills,preferred_weapon,kingdom,location)")
-                .order("created_at", { ascending: false })
-        ]);
+                .range(offset, offset + pageSize - 1);
+            if (page.error) throw page.error;
+            messages.push(...(page.data || []));
+            if (!page.data || page.data.length < pageSize) break;
+        }
 
-        if (messagesResult.error) throw messagesResult.error;
+        const nrpResult = await window.supabaseClient
+            .from("lorgus_nrp_characters")
+            .select("character_id,is_active,created_at,characters(id,name,race,age,homeland,occupation,personality,backstory,special_skills,preferred_weapon,kingdom,location)")
+            .order("created_at", { ascending: false });
+
         if (nrpResult.error) throw nrpResult.error;
 
-        state.messages = messagesResult.data || [];
+        state.messages = messages;
         state.nrp = nrpResult.data || [];
         state.chats = buildChatIndex(state.messages);
         if (!state.activeChatKey && state.chats[0]) state.activeChatKey = state.chats[0].key;
