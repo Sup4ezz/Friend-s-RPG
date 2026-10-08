@@ -16311,3 +16311,404 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-map-page.lorgus-map-editor-active .lorgus-map-editor-rect{
   touch-action:none!important;
 }
+
+
+/* =========================================================
+   LORGUS // MAIN MENU SUBPAGES
+   Minimal full-screen pages matching the world map.
+   ========================================================= */
+
+.lorgus-subpage-container,
+.lorgus-mail-page,
+.lorgus-inventory-page{
+    position:relative!important;
+    min-height:100vh!important;
+    width:100%!important;
+    overflow:hidden!important;
+    background:
+        radial-gradient(circle at 50% 42%,rgba(214,179,106,.055),transparent 34%),
+        radial-gradient(circle at 50% 100%,rgba(0,0,0,.7),transparent 55%),
+        #050505!important;
+    color:#d8cfbd!important;
+}
+
+.lorgus-subpage-container::before,
+.lorgus-mail-page::before,
+.lorgus-inventory-page::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+        linear-gradient(90deg,rgba(0,0,0,.52),transparent 22%,transparent 78%,rgba(0,0,0,.52)),
+        linear-gradient(180deg,rgba(0,0,0,.5),transparent 24%,transparent 76%,rgba(0,0,0,.62));
+}
+
+.lorgus-subpage-shell{
+    position:relative;
+    z-index:1;
+    width:min(1180px,calc(100vw - 140px));
+    min-height:100vh;
+    margin:0 auto;
+    padding:100px 0 70px;
+}
+
+.lorgus-subpage-heading{
+    position:relative;
+    margin:0 auto 38px;
+    text-align:center;
+    max-width:850px;
+}
+
+.lorgus-subpage-heading::after{
+    content:"";
+    display:block;
+    width:90px;
+    height:1px;
+    margin:22px auto 0;
+    background:linear-gradient(90deg,transparent,rgba(214,179,106,.75),transparent);
+}
+
+.lorgus-subpage-heading h1{
+    margin:7px 0 4px;
+    color:#ead29a;
+    font-family:var(--title-font);
+    font-size:clamp(42px,5vw,72px);
+    font-weight:500;
+    letter-spacing:.05em;
+    text-shadow:0 8px 30px rgba(0,0,0,.8);
+}
+
+.lorgus-subpage-heading p{
+    margin:0;
+    color:#8e8576;
+    font-size:14px;
+    letter-spacing:.04em;
+}
+
+.lorgus-subpage-heading .lorgus-profile-title{
+    margin:10px auto 0;
+}
+
+.lorgus-subpage-action{
+    margin-top:18px;
+    padding:8px 15px;
+    border:1px solid rgba(214,179,106,.25);
+    background:rgba(10,9,7,.5);
+    color:#a99b82;
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+}
+
+.lorgus-subpage-action:hover{
+    color:#ead29a;
+    border-color:rgba(214,179,106,.6);
+}
+
+.lorgus-subpage-back-arrow{
+    position:fixed!important;
+    z-index:20;
+    left:28px;
+    top:50%;
+    transform:translateY(-50%);
+    width:42px;
+    height:118px;
+    padding:0;
+    border:0;
+    background:transparent;
+    color:rgba(214,179,106,.28);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    transition:color .25s ease,transform .25s ease;
+}
+
+.lorgus-subpage-back-arrow::before,
+.lorgus-subpage-back-arrow::after{
+    content:"";
+    width:1px;
+    height:30px;
+    background:linear-gradient(180deg,transparent,rgba(214,179,106,.3),transparent);
+}
+
+.lorgus-subpage-back-arrow span{
+    font-size:19px;
+    line-height:1;
+}
+
+.lorgus-subpage-back-arrow b{
+    writing-mode:vertical-rl;
+    transform:rotate(180deg);
+    font-size:9px;
+    font-weight:500;
+    letter-spacing:.22em;
+}
+
+.lorgus-subpage-back-arrow:hover{
+    color:#ead29a;
+    transform:translate(4px,-50%);
+}
+
+.lorgus-character-grid,
+.lorgus-rp-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:1px;
+    border:1px solid rgba(214,179,106,.13);
+    background:rgba(214,179,106,.12);
+    box-shadow:0 25px 80px rgba(0,0,0,.45);
+}
+
+.lorgus-character-grid article,
+.lorgus-rp-grid article{
+    min-height:180px;
+    padding:28px 30px;
+    background:linear-gradient(145deg,rgba(25,21,15,.92),rgba(7,7,6,.96));
+    border:0;
+}
+
+.lorgus-character-grid article span,
+.lorgus-rp-grid article span{
+    display:block;
+    margin-bottom:15px;
+    color:#766e60;
+    font-size:10px;
+    letter-spacing:.18em;
+}
+
+.lorgus-character-grid article strong,
+.lorgus-rp-grid article strong{
+    display:block;
+    color:#d6b36a;
+    font-family:var(--title-font);
+    font-size:27px;
+    font-weight:500;
+}
+
+.lorgus-character-grid article p,
+.lorgus-rp-grid article p{
+    margin:10px 0 0;
+    color:#8f8676;
+    line-height:1.65;
+    font-size:13px;
+}
+
+.lorgus-character-grid .lorgus-character-abilities{
+    min-height:250px;
+}
+
+.lorgus-character-grid .lorgus-character-wide{
+    grid-column:1 / -1;
+    min-height:150px;
+}
+
+.lorgus-ability-list{
+    margin-top:18px;
+}
+
+.lorgus-rp-grid .lorgus-rp-focus{
+    min-height:230px;
+}
+
+.lorgus-rp-grid button{
+    margin-top:22px;
+    padding:9px 14px;
+    border:1px solid rgba(214,179,106,.28);
+    background:rgba(214,179,106,.04);
+    color:#c9b582;
+    font-size:10px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+}
+
+.lorgus-rp-grid button:hover{
+    border-color:rgba(214,179,106,.7);
+    color:#ead29a;
+}
+
+.lorgus-mail-page .lorgus-subpage-shell{
+    max-width:1280px;
+}
+
+.lorgus-mail-layout{
+    display:grid!important;
+    grid-template-columns:minmax(330px,.8fr) minmax(420px,1.2fr);
+    gap:1px;
+    border:1px solid rgba(214,179,106,.13);
+    background:rgba(214,179,106,.12);
+}
+
+.lorgus-mail-compose,
+.lorgus-mail-inbox{
+    min-height:560px;
+    padding:28px;
+    background:linear-gradient(145deg,rgba(25,21,15,.92),rgba(7,7,6,.97));
+}
+
+.lorgus-subpage-section-title{
+    margin-bottom:22px;
+    color:#766e60;
+    font-size:10px;
+    letter-spacing:.18em;
+}
+
+.lorgus-mail-compose label{
+    display:block;
+    margin:16px 0 7px;
+    color:#8e8576;
+    font-size:11px;
+    letter-spacing:.1em;
+}
+
+.lorgus-mail-compose select,
+.lorgus-mail-compose textarea{
+    width:100%;
+    border:1px solid rgba(214,179,106,.18);
+    border-radius:0;
+    background:rgba(0,0,0,.3);
+    color:#d8cfbd;
+    padding:12px;
+    outline:none;
+}
+
+.lorgus-mail-compose textarea{
+    min-height:260px;
+    resize:vertical;
+}
+
+.lorgus-mail-compose select:focus,
+.lorgus-mail-compose textarea:focus{
+    border-color:rgba(214,179,106,.55);
+}
+
+.lorgus-mail-compose-footer{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:15px;
+    margin-top:15px;
+    color:#766e60;
+    font-size:11px;
+}
+
+.lorgus-mail-status{
+    min-height:20px;
+    margin-top:12px;
+    color:#bca56e;
+    font-size:12px;
+}
+
+.lorgus-mail-inbox{
+    overflow:auto;
+}
+
+.lorgus-mail-list{
+    display:grid;
+    gap:10px;
+}
+
+.lorgus-mail-card{
+    padding:18px;
+    border:1px solid rgba(214,179,106,.13);
+    background:rgba(0,0,0,.22);
+}
+
+.lorgus-mail-card.unread{
+    border-color:rgba(214,179,106,.38);
+}
+
+.lorgus-mail-card-top{
+    display:flex;
+    justify-content:space-between;
+    gap:15px;
+}
+
+.lorgus-mail-card-top strong{
+    color:#d6b36a;
+    font-family:var(--title-font);
+    font-size:21px;
+    font-weight:500;
+}
+
+.lorgus-mail-card-top span,
+.lorgus-mail-card-meta{
+    color:#766e60;
+    font-size:10px;
+    letter-spacing:.06em;
+}
+
+.lorgus-mail-card-meta{
+    margin-top:5px;
+}
+
+.lorgus-mail-card p{
+    margin:16px 0;
+    color:#bdb19b;
+    line-height:1.65;
+    white-space:pre-wrap;
+}
+
+.lorgus-mail-card .character-secondary-button{
+    border:1px solid rgba(214,179,106,.25);
+    background:transparent;
+    color:#bca56e;
+    padding:7px 11px;
+    font-size:10px;
+}
+
+.lorgus-inventory-page .lorgus-inventory-shell{
+    min-height:100vh;
+}
+
+.lorgus-inventory-page .lorgus-subpage-shell{
+    max-width:1280px;
+}
+
+.lorgus-inventory-page .lorgus-inventory-layout{
+    position:relative;
+    display:grid!important;
+    grid-template-columns:minmax(430px,.9fr) minmax(420px,1.1fr);
+    gap:1px;
+    border:1px solid rgba(214,179,106,.13);
+    background:rgba(214,179,106,.12);
+}
+
+.lorgus-inventory-page .lorgus-equipment-stage,
+.lorgus-inventory-page .lorgus-inventory-grid-wrap{
+    background:linear-gradient(145deg,rgba(25,21,15,.92),rgba(7,7,6,.97));
+}
+
+.lorgus-inventory-page .lorgus-equipment-stage{
+    min-height:590px;
+}
+
+.lorgus-inventory-page .lorgus-inventory-grid-wrap{
+    padding:28px;
+    overflow:auto;
+}
+
+.lorgus-inventory-page .lorgus-wallet-panel{
+    margin-top:1px;
+    border:1px solid rgba(214,179,106,.13);
+    background:linear-gradient(145deg,rgba(25,21,15,.92),rgba(7,7,6,.97));
+}
+
+@media (max-width:900px){
+    .lorgus-subpage-shell{width:min(100vw - 90px,760px);padding-top:85px}
+    .lorgus-character-grid,
+    .lorgus-rp-grid,
+    .lorgus-mail-layout,
+    .lorgus-inventory-page .lorgus-inventory-layout{grid-template-columns:1fr}
+    .lorgus-character-grid .lorgus-character-wide{grid-column:auto}
+}
+
+@media (max-width:600px){
+    .lorgus-subpage-shell{width:calc(100vw - 68px);padding-top:75px}
+    .lorgus-subpage-back-arrow{left:8px}
+    .lorgus-subpage-heading h1{font-size:40px}
+    .lorgus-mail-compose,
+    .lorgus-mail-inbox{padding:20px}
+}
