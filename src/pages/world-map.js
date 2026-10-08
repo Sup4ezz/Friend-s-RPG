@@ -572,22 +572,22 @@ window.lorgusMainMenuNavigate = function(direction, renderTarget) {
     return window.lorgusSubpageTransition(direction, renderTarget);
 };
 
-// RP has a real route in the SPA, so keep the map arrow independent from
-// whether the RP renderer happened to be exported before this page was parsed.
+// RP is a real SPA route. Navigate through the router instead of calling a
+// renderer directly, so the map cannot be rendered a second time by legacy
+// navigation code and the URL stays in sync.
 window.lorgusOpenRpFromMap = function() {
-    const renderRp = window.renderLorgusRpHub;
-
-    if (typeof renderRp === "function") {
-        return window.lorgusSubpageTransition("left", renderRp);
+    if (typeof window.lorgusNavigate !== "function") {
+        console.error("[LORGUS] RP navigation unavailable: router is missing.");
+        return false;
     }
 
-    // Last-resort SPA route fallback. This also preserves the native
-    // View Transition because the router render happens inside the transition.
-    if (typeof window.lorgusNavigate === "function") {
-        return window.lorgusSubpageTransition("left", () => window.lorgusNavigate("/rp"));
-    }
-
-    console.error("[LORGUS] RP navigation unavailable: renderLorgusRpHub and router are missing.");
+    return window.lorgusSubpageTransition("left", () => {
+        const opened = window.lorgusNavigate("/rp");
+        if (!opened) {
+            console.error("[LORGUS] Router could not open /rp.");
+        }
+        return opened;
+    });
 };
 
 function initializeLorgusMainMenuLight() {
