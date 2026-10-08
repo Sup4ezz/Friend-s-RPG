@@ -417,7 +417,7 @@ function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
-    const destinations = getAvailableTravelDestinations(fromRegion, fromLocation);
+    const destinations = await getAvailableTravelDestinations(fromRegion, fromLocation);
     const hasRequestedDestination = Boolean(toLocation && toRegion);
     const requested = hasRequestedDestination
         ? destinations.find(item => item.location === toLocation && item.region === toRegion)
