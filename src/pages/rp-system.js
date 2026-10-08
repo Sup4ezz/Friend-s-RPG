@@ -413,7 +413,7 @@ async function arriveAtDestination() {
     }
 }
 
-function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
+async function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
