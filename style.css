@@ -5758,16 +5758,15 @@ select:focus-visible{
     margin-top: 16px;
 }
 
-.lorgus-road-destination {
-    min-height: 92px;
-    padding: 17px 18px;
-    text-align: left;
-    border: 1px solid var(--border);
-    background: rgba(255,255,255,.012);
-    color: var(--text);
-    cursor: pointer;
-    transition: border-color .2s ease, background .2s ease, transform .2s ease;
-}
+.lorgus-road-destination { position:relative; overflow:hidden; display:block; min-height:230px; padding:0; text-align:left; border:1px solid var(--border); background:rgba(8,8,8,.82); color:var(--text); cursor:pointer; transition:border-color .2s ease,transform .2s ease,background .2s ease; }
+.lorgus-road-destination-art { position:absolute; inset:0; background-position:center; background-size:cover; background-repeat:no-repeat; opacity:.48; filter:saturate(.82) contrast(1.08) brightness(.62); transition:transform .45s ease,opacity .25s ease; }
+.lorgus-road-destination:hover .lorgus-road-destination-art,.lorgus-road-destination.selected .lorgus-road-destination-art { transform:scale(1.06); opacity:.62; }
+.lorgus-road-destination::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(5,5,5,.12),rgba(5,5,5,.9) 78%); pointer-events:none; }
+.lorgus-road-destination-content { position:relative; z-index:1; display:flex; min-height:230px; box-sizing:border-box; flex-direction:column; justify-content:flex-end; padding:22px; }
+.lorgus-road-destination-kicker { color:var(--gold-light); font-size:.62rem; letter-spacing:.16em; }
+.lorgus-road-destination strong { margin-top:5px; font-family:var(--title-font); font-size:1.45rem; font-weight:500; }
+.lorgus-road-destination small { margin-top:4px; color:var(--text-soft); }
+.lorgus-road-destination p { margin:9px 0 0; color:var(--text-soft); line-height:1.45; font-size:.82rem; }
 
 .lorgus-road-destination:hover,
 .lorgus-road-destination.selected {
