@@ -16087,3 +16087,53 @@ body:has(#root > #cabinet-content.character-application){
 }
 
 .lorgus-messenger-main[data-rp-location="Святые Земли"]{--lorgus-raster-bg:url("/assets/rp-locations/holy-lands.svg")}
+
+
+/* =========================================================
+   LORGUS — LOCATION CARD ART
+   ========================================================= */
+.lorgus-location-card[data-rp-location="Здание Совета"]{
+    position:relative;
+    min-height:260px;
+    overflow:hidden;
+    isolation:isolate;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    padding:24px;
+    border-color:rgba(235,238,231,.24);
+    background:
+      linear-gradient(180deg,rgba(7,10,10,.04) 0%,rgba(7,9,9,.28) 42%,rgba(5,7,7,.94) 100%),
+      url("/assets/rp-locations/holy-lands.svg") center/cover no-repeat;
+    box-shadow:inset 0 0 70px rgba(0,0,0,.42),0 12px 35px rgba(0,0,0,.22);
+}
+.lorgus-location-card[data-rp-location="Здание Совета"]::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:-1;
+    background:linear-gradient(90deg,rgba(0,0,0,.5),transparent 45%,rgba(0,0,0,.22));
+    pointer-events:none;
+}
+.lorgus-location-card[data-rp-location="Здание Совета"] .lorgus-location-card-mark{
+    position:absolute;
+    top:18px;
+    right:18px;
+    margin:0;
+    background:rgba(9,12,12,.55);
+    border-color:rgba(235,238,231,.35);
+    color:#f2f3ed;
+}
+.lorgus-location-card[data-rp-location="Здание Совета"] strong{
+    text-shadow:0 2px 12px rgba(0,0,0,.8);
+}
+.lorgus-location-card[data-rp-location="Здание Совета"] small,
+.lorgus-location-card[data-rp-location="Здание Совета"] p,
+.lorgus-location-card[data-rp-location="Здание Совета"] .lorgus-location-card-access{
+    text-shadow:0 2px 8px rgba(0,0,0,.9);
+}
+.lorgus-location-card[data-rp-location="Здание Совета"]:hover{
+    border-color:rgba(245,246,239,.48);
+    box-shadow:inset 0 0 80px rgba(255,255,255,.04),0 18px 42px rgba(0,0,0,.4);
+    transform:translateY(-3px);
+}
