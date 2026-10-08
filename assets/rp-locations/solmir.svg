@@ -17,13 +17,13 @@
 <path d="M240 505h145l60 55q-100 50-220 0z" fill="#241619"/><path d="M310 505V300M310 310l105 82H310z" fill="#d5b18a"/>
 <path d="M840 505h150l65 58q-110 52-235 0z" fill="#211519"/><path d="M915 505V270M915 280l110 88H915z" fill="#d5b18a"/>
 <path d="M1280 530h120l60 55q-90 48-190 0z" fill="#211519"/><path d="M1340 530V360M1340 365l82 68h-82z" fill="#d0ab82"/></g>
-<!-- dock plane --><path d="M0 610L800 520l800 70v310H0z" fill="url(#d)"/><g stroke="#a46b3d" stroke-width="8" opacity=".7"><path d="M0 690l800-90 800 75M0 790l800-90 800 75M0 875l800-90 800 75"/></g>
-<g stroke="#28170f" stroke-width="18"><path d="M170 600l120 300M420 575l90 325M690 545l65 355M950 540l-40 360M1210 550l-85 350M1450 565l-120 335"/></g>
-<!-- central pier --><path d="M680 540l190-20 190 380H790z" fill="#916039" stroke="#21140e" stroke-width="13"/><g stroke="#d29a59" stroke-width="7"><path d="M735 580l175-18M755 660l190-18M775 740l205-18M795 820l215-18"/></g>
+<!-- dock plane --><path d="M0 600L800 520L1600 600V900H0Z" fill="url(#d)"/><g stroke="#a46b3d" stroke-width="8" opacity=".7"><path d="M0 690L800 520L1600 690M0 790L800 520L1600 790M0 875L800 520L1600 875"/></g>
+<g stroke="#28170f" stroke-width="18"><path d="M145 600L250 900M390 565L450 900M650 535L680 900M950 535L920 900M1210 565L1150 900M1455 600L1350 900"/></g>
+<!-- central pier --><path d="M730 535L870 535L1030 900H570Z" fill="#916039" stroke="#21140e" stroke-width="13"/><g stroke="#d29a59" stroke-width="7"><path d="M700 600L900 600M665 690L935 690M625 785L975 785M585 865L1015 865"/></g>
 <!-- crane --><g fill="none" stroke="#29201d" stroke-width="25"><path d="M550 575V205M550 215h280M815 215v360"/></g><path d="M565 235h245" stroke="#a46d45" stroke-width="10"/><path d="M790 225v220" stroke="#21191a" stroke-width="9"/><path d="M750 445h80v75h-80z" fill="#82502f" stroke="#25160f" stroke-width="9"/>
 <!-- cargo --><g stroke="#26170f" stroke-width="8"><path d="M70 735h180v125H70z" fill="#81502f"/><path d="M275 770h125v90H275z" fill="#70442a"/><path d="M1230 720h165v140h-165z" fill="#81502f"/><path d="M1415 760h105v100h-105z" fill="#70442a"/></g>
 <g fill="#5c3824" stroke="#24150f" stroke-width="7"><path d="M430 790h85v80h-85zM1100 790h85v80h-85z"/><ellipse cx="472" cy="790" rx="43" ry="27"/><ellipse cx="472" cy="870" rx="43" ry="27"/><ellipse cx="1142" cy="790" rx="43" ry="27"/><ellipse cx="1142" cy="870" rx="43" ry="27"/></g>
 <g stroke="#c08a52" stroke-width="6"><path d="M435 815h75M435 845h75M1105 815h75M1105 845h75"/></g>
-<!-- mooring ropes/posts --><g stroke="#b99163" stroke-width="7" fill="none"><path d="M160 590q150 80 310 0t300 10M1030 600q150 80 320 0"/></g><g fill="#392319" stroke="#17100d" stroke-width="8"><path d="M150 570v120M180 570v120M1380 575v120M1410 575v120"/></g>
+<!-- mooring ropes/posts --><g stroke="#b99163" stroke-width="7" fill="none"><path d="M160 590Q470 650 800 520T1440 590"/></g><g fill="#392319" stroke="#17100d" stroke-width="8"><path d="M150 570v120M180 570v120M1380 575v120M1410 575v120"/></g>
 <!-- harbor lamps --><g stroke="#20191a" stroke-width="8" fill="#efb46d"><path d="M40 620V480h45v55" fill="none"/><circle cx="85" cy="545" r="14"/><path d="M1560 620V480h-45v55" fill="none"/><circle cx="1515" cy="545" r="14"/></g>
 </svg>
