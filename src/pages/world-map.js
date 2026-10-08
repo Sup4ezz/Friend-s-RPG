@@ -321,7 +321,12 @@ function renderLorgusWorldMap(container, character) {
                 : "Местоположение ещё не определено";
 
     container.innerHTML = `
-        ${renderLorgusInterfaceNav("world")}
+        <div class="lorgus-mainmenu-nav" aria-label="Главная навигация">
+            <button type="button" class="lorgus-mainmenu-arrow top" onclick="window.renderLorgusCharacterHub?.()" aria-label="Персонаж"><span class="lorgus-mainmenu-glyph">▲</span><span class="lorgus-mainmenu-label">ПЕРСОНАЖ</span></button>
+            <button type="button" class="lorgus-mainmenu-arrow bottom" onclick="window.renderMail?.()" aria-label="Письма"><span class="lorgus-mainmenu-glyph">▼</span><span class="lorgus-mainmenu-label">ПИСЬМА</span></button>
+            <button type="button" class="lorgus-mainmenu-arrow left" onclick="window.renderLorgusRpHub?.()" aria-label="Ролевая"><span class="lorgus-mainmenu-glyph">◀</span><span class="lorgus-mainmenu-label">РОЛЕВАЯ</span></button>
+            <button type="button" class="lorgus-mainmenu-arrow right" onclick="window.renderLorgusInventory?.()" aria-label="Инвентарь"><span class="lorgus-mainmenu-glyph">▶</span><span class="lorgus-mainmenu-label">ИНВЕНТАРЬ</span></button>
+        </div>
         <div class="lorgus-map-shell">
             <aside class="lorgus-map-sidebar">
                 <div class="lorgus-map-brand">
