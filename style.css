@@ -17093,3 +17093,28 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-rp-scene.live .lorgus-rp-scene-art{
     opacity:.68;
 }
+
+
+/* RP scene artwork thumbnails */
+.lorgus-messenger-chat-photo.scene-photo,
+.lorgus-messenger-header-photo.scene-photo{
+    overflow:hidden!important;
+    position:relative!important;
+}
+.lorgus-messenger-chat-photo.scene-photo img,
+.lorgus-messenger-header-photo.scene-photo img{
+    width:100%!important;
+    height:100%!important;
+    display:block!important;
+    object-fit:cover!important;
+    object-position:center!important;
+    filter:saturate(.88) contrast(1.08) brightness(.72)!important;
+}
+.lorgus-messenger-chat-photo.scene-photo::after,
+.lorgus-messenger-header-photo.scene-photo::after{
+    content:""!important;
+    position:absolute!important;
+    inset:0!important;
+    background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.42))!important;
+    pointer-events:none!important;
+}
