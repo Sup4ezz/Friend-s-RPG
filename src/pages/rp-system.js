@@ -565,6 +565,20 @@ async function renderRoadChat(presence) {
             </main>
         </div>
     `;
+    const input = document.getElementById("lorgus-rp-input");
+    if (input) {
+        input.addEventListener("input", () => {
+            input.style.height = "auto";
+            input.style.height = Math.min(input.scrollHeight, 180) + "px";
+        });
+        input.addEventListener("keydown", event => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendLocalRpMessage();
+            }
+        });
+    }
+
     const currentPresence = await getRpPresence();
     await loadRpMessages(currentPresence);
     await subscribeToRpMessages(currentPresence);
