@@ -73,43 +73,82 @@ async function renderLorgusInventory() {
     container.className = "lorgus-inventory-page";
     container.innerHTML = `
         <div class="lorgus-inventory-shell">
-            <button type="button" class="lorgus-subpage-back-arrow left" onclick="window.lorgusSubpageTransition('left', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
-                <span>◀</span><b>КАРТА</b>
-            </button>
-            <div class="lorgus-subpage-utility">
-                <span class="lorgus-subpage-username">${window.escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>
-                <button type="button" class="lorgus-subpage-notifications" onclick="window.openLorgusNotifications?.()" aria-label="Уведомления" title="Уведомления">♢<b class="lorgus-notification-badge"></b></button>
-                <button type="button" class="lorgus-subpage-logout" onclick="window.logout?.()">ВЫЙТИ</button>
-            </div>
-            <main class="lorgus-subpage-shell lorgus-inventory-main">
-                <header class="lorgus-subpage-heading">
-                    <span class="lorgus-command-kicker">ИНВЕНТАРЬ</span>
-                    <h1>Снаряжение</h1>
-                    <p>${escapeHtml(character.name || "Персонаж")} · перетаскивай предметы между персонажем и рюкзаком.</p>
+            <aside class="lorgus-inventory-sidebar">
+                <div class="lorgus-inventory-brand">
+                    <span>✦</span>
+                    <strong>LORGUS</strong>
+                    <small>АРХИВ СНАРЯЖЕНИЯ</small>
+                </div>
+
+                <div class="lorgus-inventory-character">
+                    <div class="lorgus-inventory-character-mark">✦</div>
+                    <div>
+                        <span>ПЕРСОНАЖ</span>
+                        <strong>${window.escapeHtml(character.name || "Персонаж")}</strong>
+                        <small>ЛИЧНЫЙ ИНВЕНТАРЬ</small>
+                    </div>
+                </div>
+
+                <nav class="lorgus-inventory-nav">
+                    <button class="active" type="button"><span>◈</span> Снаряжение</button>
+                    <button type="button" onclick="window.lorgusSubpageTransition?.('left', window.renderLorgusWorldMapCurrent)"><span>⌂</span> Карта мира</button>
+                </nav>
+
+                <div class="lorgus-inventory-sidebar-note">
+                    <span>ПОРЯДОК ВЕЩЕЙ</span>
+                    <p>Перетаскивай предметы между рюкзаком и подходящими ячейками снаряжения.</p>
+                </div>
+
+                <button type="button" class="lorgus-inventory-back" onclick="window.lorgusSubpageTransition?.('left', window.renderLorgusWorldMapCurrent)">
+                    <span>←</span> ВЕРНУТЬСЯ НА КАРТУ
+                </button>
+            </aside>
+
+            <main class="lorgus-inventory-main">
+                <header class="lorgus-inventory-header">
+                    <div>
+                        <span class="lorgus-inventory-kicker">ЛИЧНЫЙ АРСЕНАЛ</span>
+                        <h1>Инвентарь</h1>
+                        <p>Снаряжение, вещи и имущество <strong>${window.escapeHtml(character.name || "Персонаж")}</strong></p>
+                    </div>
+                    <div class="lorgus-inventory-header-meta">
+                        <span><i></i> АРСЕНАЛ АКТИВЕН</span>
+                        <button type="button" onclick="window.logout?.()">ВЫЙТИ</button>
+                    </div>
                 </header>
-                <div class="lorgus-inventory-layout">
+
+                <section class="lorgus-inventory-workspace">
                     <section class="lorgus-equipment-stage">
-                        <div class="lorgus-equipment-stage-title">СНАРЯЖЕНИЕ</div>
+                        <div class="lorgus-inventory-panel-head">
+                            <div><span>СНАРЯЖЕНИЕ</span><h2>Экипировка</h2></div>
+                            <b>10 СЛОТОВ</b>
+                        </div>
                         <div class="lorgus-equipment-character">
                             <div class="lorgus-equipment-aura"></div>
                             <div class="lorgus-equipment-avatar">✦</div>
-                            <div class="lorgus-equipment-name">${escapeHtml(character.name || "Персонаж")}</div>
+                            <div class="lorgus-equipment-name">${window.escapeHtml(character.name || "Персонаж")}</div>
                             <div class="lorgus-equipment-slots">
                                 ${Object.entries(inventorySlotLabels).map(([slot,label]) => '<div class="lorgus-equipment-slot" data-equipment-slot="' + slot + '" title="' + label + '"><span>' + escapeHtml(label) + '</span><div class="lorgus-equipment-slot-item"></div></div>').join("")}
                             </div>
                         </div>
                     </section>
+
                     <section class="lorgus-inventory-grid-wrap">
-                        <div class="lorgus-inventory-grid-title">РЮКЗАК <span id="lorgus-inventory-count"></span></div>
-                        <div id="lorgus-inventory-grid" class="lorgus-inventory-grid"><div class="lorgus-inventory-empty">Загрузка...</div></div>
+                        <div class="lorgus-inventory-panel-head">
+                            <div><span>ХРАНИЛИЩЕ</span><h2>Рюкзак</h2></div>
+                            <b id="lorgus-inventory-count">—</b>
+                        </div>
+                        <div class="lorgus-inventory-grid" id="lorgus-inventory-grid">
+                            <div class="lorgus-inventory-empty">Загрузка...</div>
+                        </div>
                     </section>
-                </div>
+                </section>
             </main>
         </div>
     `;
     const walletSection = document.createElement("section");
     walletSection.className = "lorgus-wallet-panel";
-    walletSection.innerHTML = '<div class="lorgus-wallet-title"><span>КОШЕЛЁК</span><small>Валюты пяти королевств · 1 золотая = 100 серебряных · 1 серебряная = 100 медных</small></div><div class="lorgus-wallet-grid" id="lorgus-wallet-grid"></div>';
+    walletSection.innerHTML = '<div class="lorgus-wallet-title"><div><span>ФИНАНСЫ</span><h2>Кошелёк</h2></div><small>Валюты пяти королевств · 1 золотая = 100 серебряных · 1 серебряная = 100 медных</small></div><div class="lorgus-wallet-grid" id="lorgus-wallet-grid"></div>';
     container.querySelector(".lorgus-inventory-main").appendChild(walletSection);
     const { data: currencyRows } = await loadCharacterCurrency(character.id);
     const walletGrid = document.getElementById("lorgus-wallet-grid");
