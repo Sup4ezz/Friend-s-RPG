@@ -1,114 +1,118 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
 <defs>
-<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#263848"/><stop offset=".65" stop-color="#9a9b91"/><stop offset="1" stop-color="#d6ae72"/></linearGradient>
-<linearGradient id="street" x2="0" y2="1"><stop stop-color="#5b5147"/><stop offset="1" stop-color="#211c19"/></linearGradient>
-<linearGradient id="water" x2="0" y2="1"><stop stop-color="#294957"/><stop offset="1" stop-color="#101d24"/></linearGradient>
-<linearGradient id="ivory" x2="0" y2="1"><stop stop-color="#eee4d0"/><stop offset="1" stop-color="#84796b"/></linearGradient>
-<linearGradient id="gold" x2="0" y2="1"><stop stop-color="#f5d77d"/><stop offset=".5" stop-color="#c08b2e"/><stop offset="1" stop-color="#624116"/></linearGradient>
-<linearGradient id="wood" x2="0" y2="1"><stop stop-color="#70472a"/><stop offset="1" stop-color="#24150d"/></linearGradient>
-<radialGradient id="sun"><stop stop-color="#ffe3a0" stop-opacity=".7"/><stop offset="1" stop-color="#ffe3a0" stop-opacity="0"/></radialGradient>
-<filter id="soft"><feGaussianBlur stdDeviation="20"/></filter>
+<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#334555"/><stop offset=".58" stop-color="#a8a294"/><stop offset="1" stop-color="#d5b47e"/></linearGradient>
+<linearGradient id="ground" x2="0" y2="1"><stop stop-color="#807568"/><stop offset="1" stop-color="#29231f"/></linearGradient>
+<linearGradient id="stone" x2="0" y2="1"><stop stop-color="#eee4d0"/><stop offset="1" stop-color="#938676"/></linearGradient>
+<linearGradient id="wood" x2="0" y2="1"><stop stop-color="#7b4f2c"/><stop offset="1" stop-color="#2d1b11"/></linearGradient>
+<linearGradient id="canopy" x2="0" y2="1"><stop stop-color="#b94d35"/><stop offset="1" stop-color="#633027"/></linearGradient>
+<linearGradient id="canopy2" x2="0" y2="1"><stop stop-color="#d0a34d"/><stop offset="1" stop-color="#755324"/></linearGradient>
+<linearGradient id="water" x2="0" y2="1"><stop stop-color="#315764"/><stop offset="1" stop-color="#17262c"/></linearGradient>
+<radialGradient id="light"><stop stop-color="#ffe6a4" stop-opacity=".75"/><stop offset="1" stop-color="#ffe6a4" stop-opacity="0"/></radialGradient>
+<filter id="blur"><feGaussianBlur stdDeviation="24"/></filter>
 </defs>
 
-<!-- sky / distant horizon -->
+<!-- sky and distant city -->
 <rect width="1600" height="900" fill="url(#sky)"/>
-<ellipse cx="1050" cy="205" rx="390" ry="230" fill="url(#sun)" filter="url(#soft)"/>
-<path d="M0 470L90 405 180 455 260 385 350 455 430 410 520 465 610 425 700 470 800 420 900 468 1010 405 1100 460 1200 395 1300 455 1400 410 1500 460 1600 420V540H0Z" fill="#4e5350"/>
-
-<!-- distant city, all receding toward vanishing point 800,455 -->
-<g stroke="#4b4742" stroke-width="7">
-<path d="M0 525V300L115 245 230 300V525Z" fill="#817b72"/>
-<path d="M230 525V335L330 285 430 335V525Z" fill="#938b7e"/>
-<path d="M1170 525V330L1270 280 1370 330V525Z" fill="#938b7e"/>
-<path d="M1370 525V290L1485 235 1600 290V525Z" fill="#817b72"/>
-</g>
-<g fill="#53636a" stroke="#4b4742" stroke-width="5">
-<rect x="45" y="335" width="38" height="95"/><rect x="105" y="305" width="38" height="125"/><rect x="290" y="365" width="34" height="80"/>
-<rect x="1270" y="350" width="38" height="90"/><rect x="1330" y="330" width="38" height="110"/><rect x="1460" y="320" width="40" height="105"/>
+<ellipse cx="1040" cy="210" rx="390" ry="230" fill="url(#light)" filter="url(#blur)"/>
+<path d="M0 485L120 405 230 460 350 390 470 465 590 420 700 470 800 430 900 470 1030 405 1160 465 1280 395 1410 460 1510 410 1600 450V550H0Z" fill="#555753"/>
+<g stroke="#514b44" stroke-width="7" fill="#91887b">
+<path d="M0 540V335L120 275 240 335V540Z"/><path d="M240 540V365L345 315 450 365V540Z"/>
+<path d="M1150 540V365L1255 315 1360 365V540Z"/><path d="M1360 540V320L1480 260 1600 320V540Z"/>
 </g>
 
-<!-- central financial palace, symmetrical and facing viewer -->
-<path d="M520 500V275L800 155 1080 275V500Z" fill="url(#ivory)" stroke="#4d463d" stroke-width="10"/>
-<path d="M465 285L800 125 1135 285 1100 330 800 190 500 330Z" fill="#d8cdb9" stroke="#514940" stroke-width="9"/>
-<path d="M620 500V350Q620 285 670 265L800 215 930 265Q980 285 980 350V500Z" fill="#5d574f" stroke="#403b36" stroke-width="8"/>
-<g fill="#3c3833">
-<rect x="655" y="315" width="34" height="150" rx="16"/><rect x="735" y="290" width="34" height="175" rx="16"/>
-<rect x="815" y="290" width="34" height="175" rx="16"/><rect x="895" y="315" width="34" height="150" rx="16"/>
+<!-- monumental bank / guild palace in the distance -->
+<path d="M515 515V315L800 185 1085 315V515Z" fill="url(#stone)" stroke="#514a42" stroke-width="10"/>
+<path d="M455 315L800 145 1145 315 1105 355 800 205 495 355Z" fill="#d9cdb8" stroke="#514a42" stroke-width="10"/>
+<path d="M610 515V365L800 270 990 365V515Z" fill="#4a4743" stroke="#393633" stroke-width="9"/>
+<g fill="#b9d0cf" stroke="#5c574f" stroke-width="5">
+<rect x="655" y="365" width="38" height="110"/><rect x="715" y="335" width="38" height="140"/>
+<rect x="847" y="335" width="38" height="140"/><rect x="907" y="365" width="38" height="110"/>
 </g>
-<g fill="#b7c9c8" stroke="#625b52" stroke-width="4">
-<rect x="661" y="330" width="22" height="105"/><rect x="741" y="305" width="22" height="130"/>
-<rect x="821" y="305" width="22" height="130"/><rect x="901" y="330" width="22" height="105"/>
-</g>
-<path d="M735 500V410Q735 355 800 355T865 410V500Z" fill="#2c2621" stroke="#b98b37" stroke-width="8"/>
-<circle cx="800" cy="423" r="17" fill="url(#gold)"/>
-<circle cx="800" cy="180" r="34" fill="#ead39a" stroke="#755522" stroke-width="8"/>
-<path d="M800 158v44M778 180h44" stroke="#76521d" stroke-width="7"/>
+<path d="M752 515V430Q752 370 800 350Q848 370 848 430V515Z" fill="#26231f" stroke="#c4943d" stroke-width="8"/>
+<circle cx="800" cy="225" r="34" fill="#e8cf91" stroke="#745321" stroke-width="8"/>
+<path d="M800 202v46M777 225h46" stroke="#745321" stroke-width="7"/>
 
-<!-- side merchant towers, scaled smaller toward horizon -->
-<g stroke="#514a42" stroke-width="8">
-<path d="M0 610V390L150 330 300 390V610Z" fill="#b8ae9c"/>
-<path d="M300 585V405L410 360 520 405V585Z" fill="#c8bca8"/>
-<path d="M1080 585V405L1190 360 1300 405V585Z" fill="#c8bca8"/>
-<path d="M1300 610V390L1450 330 1600 390V610Z" fill="#b8ae9c"/>
+<!-- side merchant buildings framing the market -->
+<g stroke="#514a42" stroke-width="9">
+<path d="M0 660V410L150 345 300 410V660Z" fill="#b8ad9b"/>
+<path d="M300 620V430L420 375 540 430V620Z" fill="#c9bdab"/>
+<path d="M1060 620V430L1180 375 1300 430V620Z" fill="#c9bdab"/>
+<path d="M1300 660V410L1450 345 1600 410V660Z" fill="#b8ad9b"/>
 </g>
-<g fill="#70858a" stroke="#554e46" stroke-width="5">
-<path d="M55 430h48v105H55zM145 395h48v140h-48zM335 430h38v95h-38zM1227 430h38v95h-38zM1360 395h48v140h-48zM1450 430h48v105h-48z"/>
-</g>
-<g fill="url(#gold)">
-<circle cx="150" cy="365" r="14"/><circle cx="1450" cy="365" r="14"/>
+<g fill="#65797e" stroke="#504a43" stroke-width="5">
+<path d="M55 440h48v130H55zM145 405h48v155h-48zM335 455h38v105h-38z"/>
+<path d="M1227 455h38v105h-38zM1360 405h48v155h-48zM1450 440h48v130h-48z"/>
 </g>
 
-<!-- canal: banks converge to the same vanishing point -->
-<path d="M610 900L730 470L800 455L870 470L990 900Z" fill="url(#water)" stroke="#272b2a" stroke-width="10"/>
-<!-- stone quays -->
-<path d="M0 900L610 900 730 470 800 455 870 470 990 900 1600 900 1600 835 965 835 875 455 800 438 725 455 635 835 0 835Z" fill="url(#ivory)" stroke="#514940" stroke-width="9"/>
-<!-- central road/market island -->
-<path d="M590 900L735 470 800 455 865 470 1010 900Z" fill="url(#street)" stroke="#302b27" stroke-width="9"/>
-<!-- paving lines follow perspective -->
-<g stroke="#827568" stroke-width="5" opacity=".65">
-<path d="M610 820L800 770 990 820M630 745L800 710 970 745M650 680L800 655 950 680M675 615L800 600 925 615M700 555L800 545 900 555M720 510L800 505 880 510"/>
-<path d="M700 900L775 455M900 900L825 455"/>
+<!-- broad market square: one clear plaza, no central obstruction -->
+<path d="M510 900L715 505 800 475 885 505 1090 900Z" fill="url(#ground)" stroke="#3a332e" stroke-width="10"/>
+<!-- plaza paving lines converge to the bank -->
+<g stroke="#a0907c" stroke-width="5" opacity=".65" fill="none">
+<path d="M545 850L800 770 1055 850"/><path d="M575 775L800 710 1025 775"/>
+<path d="M610 700L800 655 990 700"/><path d="M645 630L800 605 955 630"/><path d="M680 565L800 550 920 565"/>
+<path d="M600 900L760 480M1000 900L840 480"/>
 </g>
 
-<!-- merchant bridge crossing canal -->
-<path d="M690 610Q800 550 910 610L895 655Q800 610 705 655Z" fill="#d8cdb9" stroke="#514940" stroke-width="9"/>
-<path d="M720 610Q800 575 880 610" fill="none" stroke="#b38a3d" stroke-width="8"/>
-<g fill="#5b5148">
-<rect x="720" y="585" width="17" height="38"/><rect x="760" y="565" width="17" height="42"/><rect x="823" y="565" width="17" height="42"/><rect x="863" y="585" width="17" height="38"/>
+<!-- market stalls: three unmistakable rows -->
+<g stroke="#3b281c" stroke-width="7">
+<!-- left row -->
+<g>
+<path d="M115 700V555L275 520 400 570V700Z" fill="url(#wood)"/>
+<path d="M95 555L275 485 420 545 400 585 275 535 115 595Z" fill="url(#canopy)"/>
+<path d="M145 610h230v75H145z" fill="#c9954e"/>
+<path d="M165 630h48v35h-48zM230 625h48v40h-48zM295 630h48v35h-48z" fill="#e5c16c"/>
+</g>
+<!-- center near row -->
+<g>
+<path d="M515 720V585L800 525 1085 585V720Z" fill="url(#wood)"/>
+<path d="M480 585L800 475 1120 585 1095 625 800 535 505 625Z" fill="url(#canopy2)"/>
+<path d="M545 625h510v75H545z" fill="#b87339"/>
+<g fill="#ead084">
+<rect x="580" y="642" width="58" height="36"/><rect x="650" y="632" width="58" height="46"/>
+<rect x="720" y="625" width="58" height="53"/><rect x="790" y="625" width="58" height="53"/>
+<rect x="860" y="632" width="58" height="46"/><rect x="930" y="642" width="58" height="36"/>
+</g>
+</g>
+<!-- right row -->
+<g>
+<path d="M1200 700V570L1325 520 1485 555V700Z" fill="url(#wood)"/>
+<path d="M1180 545L1325 485 1505 555 1485 595 1325 535 1200 585Z" fill="url(#canopy)"/>
+<path d="M1225 610h230v75h-230z" fill="#c9954e"/>
+<path d="M1245 630h48v35h-48zM1310 625h48v40h-48zM1375 630h48v35h-48z" fill="#e5c16c"/>
+</g>
 </g>
 
-<!-- foreground market stalls aligned with perspective -->
-<g stroke="#463426" stroke-width="7">
-<path d="M105 700V570H350V700Z" fill="url(#wood)"/>
-<path d="M1250 700V570H1495V700Z" fill="url(#wood)"/>
-<path d="M115 575H340L315 620H140Z" fill="#b79b6d"/>
-<path d="M1260 575H1485L1460 620H1285Z" fill="#b79b6d"/>
-</g>
-<g fill="#d0ad61" stroke="#50391f" stroke-width="4">
-<rect x="145" y="640" width="62" height="40"/><rect x="225" y="640" width="62" height="40"/>
-<rect x="1290" y="640" width="62" height="40"/><rect x="1370" y="640" width="62" height="40"/>
+<!-- hanging market signs / poles, attached to stalls, not standing in the middle -->
+<g stroke="#38281d" stroke-width="8" fill="#d7b15b">
+<path d="M145 555V500h80v55M1375 555V500h80v55"/>
+<path d="M565 585V515h90v70M945 585V515h90v70"/>
 </g>
 
-<!-- foreground cargo, deliberately larger -->
-<g stroke="#2d1c11" stroke-width="7">
-<g fill="#8b5d32"><rect x="55" y="785" width="150" height="105"/><path d="M70 805h120M70 845h120M105 785v105M155 785v105"/></g>
-<ellipse cx="285" cy="840" rx="48" ry="65" fill="#704828"/><path d="M240 820h90M240 855h90"/>
-<g fill="#8b5d32"><rect x="1395" y="785" width="150" height="105"/><path d="M1410 805h120M1410 845h120M1445 785v105M1495 785v105"/></g>
-<ellipse cx="1315" cy="840" rx="48" ry="65" fill="#704828"/><path d="M1270 820h90M1270 855h90"/>
+<!-- canal kept to the edges, clearly secondary to market -->
+<path d="M0 900L300 900 690 500 715 490 600 900Z" fill="url(#water)" stroke="#292e2e" stroke-width="9"/>
+<path d="M1600 900L1300 900 910 500 885 490 1000 900Z" fill="url(#water)" stroke="#292e2e" stroke-width="9"/>
+<path d="M0 900L300 900 690 500" fill="none" stroke="#ddd0b9" stroke-width="18"/>
+<path d="M1600 900L1300 900 910 500" fill="none" stroke="#ddd0b9" stroke-width="18"/>
+
+<!-- foreground merchant carts and cargo -->
+<g stroke="#2d1d13" stroke-width="8">
+<path d="M25 790H300L265 875H60Z" fill="url(#wood)"/>
+<circle cx="75" cy="880" r="27" fill="#292522"/><circle cx="240" cy="880" r="27" fill="#292522"/>
+<path d="M1300 790H1575L1540 875H1335Z" fill="url(#wood)"/>
+<circle cx="1360" cy="880" r="27" fill="#292522"/><circle cx="1525" cy="880" r="27" fill="#292522"/>
+<rect x="350" y="805" width="125" height="85" fill="#875a31"/><path d="M365 830h95M365 860h95M390 805v85M430 805v85"/>
+<rect x="1125" y="805" width="125" height="85" fill="#875a31"/><path d="M1140 830h95M1140 860h95M1165 805v85M1205 805v85"/>
 </g>
 
-<!-- carts point toward center -->
-<g stroke="#302117" stroke-width="8" fill="url(#wood)">
-<path d="M390 800H570L545 875H415Z"/><circle cx="430" cy="885" r="25" fill="#292522"/><circle cx="535" cy="885" r="25" fill="#292522"/>
-<path d="M1030 800H1210L1185 875H1055Z"/><circle cx="1070" cy="885" r="25" fill="#292522"/><circle cx="1175" cy="885" r="25" fill="#292522"/>
+<!-- warm lamps along the market edges -->
+<g stroke="#42382f" stroke-width="8">
+<path d="M330 500V675M1270 500V675M480 540V640M1120 540V640"/>
+</g>
+<g fill="#ffe3a0" stroke="#a07838" stroke-width="5">
+<path d="M312 670h36l-8 45h-20Z"/><path d="M1252 670h36l-8 45h-20Z"/>
+<path d="M462 635h36l-8 40h-20Z"/><path d="M1102 635h36l-8 40h-20Z"/>
 </g>
 
-<!-- lamps -->
-<g stroke="#40372f" stroke-width="8">
-<path d="M330 500V650M1270 500V650M800 480V555"/>
-</g>
-<g fill="#ffe1a0" stroke="#9c7638" stroke-width="5">
-<path d="M312 645h36l-8 42h-20Z"/><path d="M1252 645h36l-8 42h-20Z"/><path d="M782 550h36l-8 42h-20Z"/>
-</g>
-<g fill="url(#sun)" opacity=".28"><ellipse cx="800" cy="470" rx="300" ry="190"/></g>
+<!-- subtle depth haze -->
+<rect width="1600" height="900" fill="url(#light)" opacity=".08"/>
 </svg>
