@@ -444,6 +444,32 @@ function renderLorgusWorldMap(container, character) {
     initializeLorgusMainMenuLight();
 }
 
+function initializeLorgusMainMenuLight() {
+    const viewport = document.getElementById("lorgus-map-viewport");
+    if (!viewport) return;
+
+    if (window.lorgusMainMenuLightCleanup) window.lorgusMainMenuLightCleanup();
+
+    const move = event => {
+        const rect = viewport.getBoundingClientRect();
+        const x = Math.max(0, Math.min(rect.width, event.clientX - rect.left));
+        const y = Math.max(0, Math.min(rect.height, event.clientY - rect.top));
+        viewport.style.setProperty("--lorgus-mx", x + "px");
+        viewport.style.setProperty("--lorgus-my", y + "px");
+        viewport.classList.add("cursor-lit");
+    };
+
+    const leave = () => viewport.classList.remove("cursor-lit");
+
+    viewport.addEventListener("pointermove", move);
+    viewport.addEventListener("pointerleave", leave);
+
+    window.lorgusMainMenuLightCleanup = () => {
+        viewport.removeEventListener("pointermove", move);
+        viewport.removeEventListener("pointerleave", leave);
+    };
+}
+
 let lorgusMapScale = 1;
 let lorgusMapOffsetX = 0;
 let lorgusMapOffsetY = 0;
