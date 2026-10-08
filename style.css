@@ -16727,3 +16727,47 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-subpage-back-arrow.top:hover,.lorgus-subpage-back-arrow.bottom:hover{transform:translateX(-50%) translateY(-3px)!important}
 .lorgus-subpage-back-arrow.left:hover{transform:translateX(3px) translateY(-50%)!important}
 .lorgus-subpage-back-arrow.right:hover{transform:translateX(-3px) translateY(-50%)!important}
+
+
+.lorgus-subpage-utility{
+    position:fixed;
+    z-index:30;
+    top:20px;
+    right:28px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    color:#8e8576;
+    font-size:10px;
+    letter-spacing:.12em;
+}
+.lorgus-subpage-username{opacity:.65}
+.lorgus-subpage-notifications,.lorgus-subpage-logout{
+    border:0;
+    background:transparent;
+    color:rgba(214,179,106,.38);
+    padding:4px 2px;
+    font:inherit;
+    letter-spacing:.12em;
+}
+.lorgus-subpage-notifications{
+    position:relative;
+    font-size:20px;
+    line-height:1;
+}
+.lorgus-subpage-notifications:hover,.lorgus-subpage-logout:hover{color:#ead29a}
+.lorgus-subpage-notifications .lorgus-notification-badge{
+    position:absolute;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    right:-2px;
+    top:-2px;
+    background:#d6b36a;
+    display:none;
+}
+.lorgus-subpage-notifications .lorgus-notification-badge:not(:empty){display:block}
+@media(max-width:700px){
+    .lorgus-subpage-utility{right:14px;gap:9px}
+    .lorgus-subpage-username{display:none}
+}
