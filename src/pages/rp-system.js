@@ -1822,3 +1822,42 @@ if (document.readyState === "loading") {
 } else {
     loadLorgusPpmBackgrounds();
 }
+
+
+/* =========================================================
+   LORGUS RP LOCATION ART
+   ========================================================= */
+const LORGUS_RP_LOCATION_ART = {
+    "Примум": "/assets/rp-locations/primum.svg",
+    "Хелион": "/assets/rp-locations/helion.svg",
+    "Древнее Пламя": "/assets/rp-locations/ancient-flame.svg",
+    "Арджент": "/assets/rp-locations/argent.svg",
+    "Меридиан": "/assets/rp-locations/meridian.svg",
+    "Валькрофт": "/assets/rp-locations/valcroft.svg",
+    "Солмир": "/assets/rp-locations/solmir.svg",
+    "Аврора": "/assets/rp-locations/aurora.svg",
+    "Элвэйн": "/assets/rp-locations/elwain.svg",
+    "Таллирион": "/assets/rp-locations/tallirion.svg",
+    "Эстерваль": "/assets/rp-locations/esterval.svg",
+    "Фин": "/assets/rp-locations/fin.svg",
+    "Святые Земли": "/assets/rp-locations/holy-lands.svg"
+};
+
+function getLorgusRpLocationArt(locationName) {
+    return LORGUS_RP_LOCATION_ART[locationName] || null;
+}
+window.getLorgusRpLocationArt = getLorgusRpLocationArt;
+
+async function openLorgusWorldRoads() {
+    const presence = await getRpPresence();
+    if (presence?.type === "road") {
+        await renderRoadChat(presence);
+        return;
+    }
+    if (presence?.type === "location") {
+        renderTravelScreen(presence.location, presence.region, null, null);
+        return;
+    }
+    window.renderLorgusWorldMapCurrent?.();
+}
+window.openLorgusWorldRoads = openLorgusWorldRoads;
