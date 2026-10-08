@@ -34,9 +34,54 @@
         return Boolean(window.activeCharacter && document.getElementById("cabinet-content"));
     }
 
+    function parseRpChatPath(path) {
+        const match = String(path || "").match(/^\/rp\/chat\/([^/]+)\/([^/]+)$/);
+        if (!match) return null;
+        try {
+            return {
+                region: decodeURIComponent(match[1]),
+                location: decodeURIComponent(match[2])
+            };
+        } catch (error) {
+            console.warn("LORGUS router: invalid RP chat path:", path, error);
+            return null;
+        }
+    }
+
+    function buildRpChatPath(region, location) {
+        return "/rp/chat/" + encodeURIComponent(region) + "/" + encodeURIComponent(location);
+    }
+
+    function resolveRoute(path) {
+        if (ROUTES[path]) return ROUTES[path];
+        if (parseRpChatPath(path)) {
+            return {
+                page: "rp-chat",
+                render: "renderLocationChats",
+                title: "RP-чат"
+            };
+        }
+        return null;
+    }
+
     function resolvePage(path) {
-        const route = ROUTES[path];
+        const route = resolveRoute(path);
         if (!route) return null;
+
+        if (route.page === "rp-chat") {
+            const chat = parseRpChatPath(path);
+            return {
+                render() {
+                    return window.renderLocationChats?.(
+                        chat.location,
+                        chat.region,
+                        true,
+                        true
+                    );
+                }
+            };
+        }
+
         const page = PAGES[route.page];
         if (page && typeof page.render === "function") return page;
         const legacy = window[route.render];
@@ -44,7 +89,7 @@
     }
 
     function renderPath(path, force = false) {
-        if (!ROUTES[path] || !canRender()) return false;
+        if (!resolveRoute(path) || !canRender()) return false;
         if (!force && lastRenderedPath === path) return true;
 
         const page = resolvePage(path);
@@ -73,7 +118,7 @@
     }
 
     function navigate(path, options = {}) {
-        if (!ROUTES[path]) return false;
+        if (!resolveRoute(path)) return false;
 
         const current = normalizePath();
         if (current !== path) {
@@ -111,7 +156,7 @@
 
         if (path === "/") return;
 
-        if (!ROUTES[path]) {
+        if (!resolveRoute(path)) {
             navigate("/world", { replace: true });
             return;
         }
@@ -125,7 +170,7 @@
 
         if (path === "/") return;
 
-        if (!ROUTES[path]) {
+        if (!resolveRoute(path)) {
             window.history.replaceState({ lorgusRoute: "/world" }, "", "/world");
             return;
         }
@@ -164,8 +209,15 @@
         renderPath,
         bootCurrentRoute,
         handlePopState,
+        buildRpChatPath,
+        parseRpChatPath,
         get currentPath() { return normalizePath(); },
         get routes() { return ROUTES; }
+    };
+
+    window.lorgusNavigateChat = (region, location, options = {}) => {
+        const path = buildRpChatPath(region, location);
+        return navigate(path, options);
     };
 
     if (document.readyState === "loading") {
