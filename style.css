@@ -16407,7 +16407,7 @@ body:has(#root > #cabinet-content.character-application){
 }
 
 .lorgus-subpage-back-arrow{
-    position:fixed!important;
+    position:absolute!important;
     z-index:20;
     left:28px;
     top:50%;
@@ -16730,7 +16730,7 @@ body:has(#root > #cabinet-content.character-application){
 
 
 .lorgus-subpage-utility{
-    position:fixed;
+    position:absolute;
     z-index:30;
     top:20px;
     right:28px;
@@ -16770,4 +16770,11 @@ body:has(#root > #cabinet-content.character-application){
 @media(max-width:700px){
     .lorgus-subpage-utility{right:14px;gap:9px}
     .lorgus-subpage-username{display:none}
+}
+
+
+/* Transition screens must carry their edge controls with the screen itself. */
+.lorgus-transition-clone .lorgus-subpage-back-arrow,
+.lorgus-transition-clone .lorgus-subpage-utility{
+    position:absolute!important;
 }
