@@ -1,43 +1,76 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
 <defs>
-<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#102817"/><stop offset=".55" stop-color="#477a45"/><stop offset="1" stop-color="#0a120b"/></linearGradient>
-<linearGradient id="water" x2="0" y2="1"><stop stop-color="#3d7890"/><stop offset="1" stop-color="#102d38"/></linearGradient>
-<linearGradient id="wood" x2="0" y2="1"><stop stop-color="#70462a"/><stop offset="1" stop-color="#24150d"/></linearGradient>
-<linearGradient id="stone" x2="0" y2="1"><stop stop-color="#77755d"/><stop offset="1" stop-color="#302f27"/></linearGradient>
-<linearGradient id="road" x2="0" y2="1"><stop stop-color="#786b50"/><stop offset="1" stop-color="#29271f"/></linearGradient>
-<radialGradient id="sun"><stop stop-color="#e2f0ae" stop-opacity=".5"/><stop offset="1" stop-color="#e2f0ae" stop-opacity="0"/></radialGradient>
+<linearGradient id="bg" x2="0" y2="1"><stop stop-color="#07170d"/><stop offset=".5" stop-color="#234b2d"/><stop offset="1" stop-color="#101b12"/></linearGradient>
+<linearGradient id="water" x2="0" y2="1"><stop stop-color="#376f72"/><stop offset="1" stop-color="#142f32"/></linearGradient>
+<linearGradient id="wood" x2="0" y2="1"><stop stop-color="#6a4328"/><stop offset="1" stop-color="#24150d"/></linearGradient>
+<linearGradient id="stone" x2="0" y2="1"><stop stop-color="#6e705b"/><stop offset="1" stop-color="#2c3028"/></linearGradient>
+<radialGradient id="light"><stop stop-color="#d6e9a0" stop-opacity=".35"/><stop offset="1" stop-color="#d6e9a0" stop-opacity="0"/></radialGradient>
 </defs>
-<rect width="1600" height="900" fill="url(#sky)"/>
-<path d="M0 470Q260 330 500 455T900 430T1300 420T1600 450V610H0Z" fill="#315d35" stroke="#75965d" stroke-width="12"/>
-<path d="M0 545Q280 470 530 535T1000 510T1600 535V650H0Z" fill="#4f7746"/>
-<g fill="none" stroke="#8aa467" stroke-width="14" opacity=".75"><path d="M40 500Q260 420 455 500"/><path d="M80 535Q280 455 470 535"/><path d="M1130 480Q1330 405 1560 490"/><path d="M1170 520Q1360 445 1590 530"/></g>
-<path d="M0 610Q260 550 470 620Q650 680 800 610Q960 540 1130 610Q1370 700 1600 610V900H0Z" fill="url(#water)" stroke="#8eb5b0" stroke-width="10"/>
-<path d="M0 700Q280 640 500 715T950 700T1600 710" fill="none" stroke="#79aeb7" stroke-width="8" opacity=".45"/>
-<path d="M575 625Q690 585 820 625Q860 650 810 685Q675 710 590 675Q550 650 575 625Z" fill="#42683e" stroke="#263c27" stroke-width="9"/>
-<g stroke="#21150e" stroke-width="11">
-<path d="M190 600V455L285 380L380 455V600Z" fill="url(#wood)"/><path d="M190 455L285 380L380 455" fill="none" stroke="#9a8a5d" stroke-width="22"/>
-<path d="M225 500H275V555H225Z" fill="#c6d79a"/><path d="M300 500H350V555H300Z" fill="#c6d79a"/>
-<path d="M1220 600V455L1315 380L1410 455V600Z" fill="url(#wood)"/><path d="M1220 455L1315 380L1410 455" fill="none" stroke="#9a8a5d" stroke-width="22"/>
-<path d="M1255 500H1305V555H1255Z" fill="#c6d79a"/><path d="M1330 500H1380V555H1330Z" fill="#c6d79a"/>
+<!-- deep woodland -->
+<rect width="1600" height="900" fill="url(#bg)"/>
+<g fill="#0b2112" stroke="#315a36" stroke-width="12">
+<path d="M-40 700L80 80L210 700Z"/><path d="M170 700L300 30L430 700Z"/><path d="M360 700L470 110L590 700Z"/>
+<path d="M1010 700L1130 90L1250 700Z"/><path d="M1190 700L1320 20L1450 700Z"/><path d="M1380 700L1510 100L1640 700Z"/>
 </g>
-<g stroke="#26180f" stroke-width="12">
-<path d="M585 600V405L800 255L1015 405V600Z" fill="url(#wood)"/>
-<path d="M585 405L800 255L1015 405" fill="none" stroke="#a08f61" stroke-width="25"/>
-<path d="M700 600V455Q700 400 800 400Q900 400 900 455V600" fill="#151c12" stroke="#9a8a5d" stroke-width="25"/>
-<path d="M735 470H790V525H735Z" fill="#c6d79a"/><path d="M810 470H865V525H810Z" fill="#c6d79a"/>
+<!-- massive irregular trunks -->
+<g fill="#2a1b11" stroke="#4e3821" stroke-width="18">
+<path d="M0 0H180Q210 170 160 330Q120 470 205 610Q245 690 225 900H0Z"/>
+<path d="M310 0H440Q410 180 455 320Q500 455 440 590Q400 700 450 900H300Q350 700 315 590Q255 450 300 320Q345 180 310 0Z"/>
+<path d="M1160 0H1300Q1265 180 1310 320Q1355 455 1295 590Q1255 700 1305 900H1155Q1205 700 1165 590Q1105 450 1150 320Q1195 180 1160 0Z"/>
+<path d="M1420 0H1600V900H1375Q1395 690 1435 610Q1520 470 1480 330Q1430 170 1420 0Z"/>
 </g>
-<circle cx="1040" cy="610" r="112" fill="#5c3a22" stroke="#24160d" stroke-width="18"/><circle cx="1040" cy="610" r="25" fill="#9b7a48" stroke="#24160d" stroke-width="12"/>
-<g stroke="#8c6840" stroke-width="14"><path d="M1040 498V722M928 610H1152M961 531L1119 689M1119 531L961 689"/></g>
-<path d="M1150 605Q1280 570 1400 610" fill="none" stroke="#9a8a5d" stroke-width="20"/>
-<g stroke="#9aa765" stroke-width="10" fill="none"><path d="M40 650Q210 600 360 650"/><path d="M70 690Q220 640 380 690"/><path d="M1230 665Q1400 610 1570 660"/><path d="M1200 705Q1400 650 1590 700"/></g>
-<g fill="#b29455" stroke="#5d4728" stroke-width="8"><ellipse cx="335" cy="655" rx="48" ry="35"/><ellipse cx="1450" cy="650" rx="48" ry="35"/></g>
-<path d="M430 675Q575 605 700 650Q800 685 900 650Q1025 605 1170 675L1150 720Q1010 670 900 710Q800 750 700 710Q575 670 450 720Z" fill="url(#stone)" stroke="#272820" stroke-width="14"/>
-<g stroke="#aaa07c" stroke-width="7"><path d="M510 680l25 35M590 655l25 45M680 660l20 48M920 660l-20 48M1010 655l-25 45M1090 680l-25 35"/></g>
-<path d="M610 900Q670 790 730 720Q780 665 800 620Q820 665 870 720Q930 790 990 900Z" fill="url(#road)" stroke="#3a3427" stroke-width="14"/>
-<g stroke="#a69772" stroke-width="6" opacity=".55"><path d="M700 850h200"/><path d="M730 800h140"/><path d="M755 755h90"/><path d="M775 720h50"/></g>
-<g stroke="#2a1a10" stroke-width="9"><path d="M250 755H370L390 825H270Z" fill="#70462a"/><circle cx="285" cy="835" r="22" fill="#29231a"/><circle cx="365" cy="835" r="22" fill="#29231a"/><path d="M1230 755H1350L1370 825H1250Z" fill="#70462a"/><circle cx="1265" cy="835" r="22" fill="#29231a"/><circle cx="1345" cy="835" r="22" fill="#29231a"/></g>
-<g fill="#b9cf75"><circle cx="300" cy="740" r="22"/><circle cx="335" cy="730" r="18"/><circle cx="1290" cy="740" r="22"/><circle cx="1330" cy="730" r="18"/></g>
-<g stroke="#352316" stroke-width="9" fill="#e2efaa"><path d="M455 800V700"/><circle cx="455" cy="690" r="18"/><path d="M1145 800V700"/><circle cx="1145" cy="690" r="18"/></g>
-<g stroke="#6f9b59" stroke-width="9"><path d="M40 900l25-90M80 900l5-110M1500 900l-25-90M1560 900l-5-110"/></g>
-<ellipse cx="800" cy="500" rx="430" ry="260" fill="url(#sun)"/>
+<!-- natural canopy, NOT triangles -->
+<g fill="none" stroke="#365f35" stroke-linecap="round">
+<path d="M120 260Q330 120 560 260Q720 350 900 235Q1110 105 1470 260" stroke-width="90"/>
+<path d="M170 410Q340 300 520 390Q690 480 850 390Q1040 285 1410 410" stroke-width="55"/>
+</g>
+<!-- forest clearing -->
+<path d="M0 560Q300 510 560 555Q820 600 1060 545Q1330 500 1600 560V900H0Z" fill="#274d2d"/>
+<g fill="#4d7a43" opacity=".9">
+<ellipse cx="90" cy="520" rx="110" ry="45"/><ellipse cx="250" cy="490" rx="130" ry="55"/><ellipse cx="1350" cy="500" rx="140" ry="55"/><ellipse cx="1510" cy="530" rx="120" ry="45"/>
+</g>
+<!-- river tucked through forest -->
+<path d="M0 665Q230 600 430 650Q610 695 760 665Q930 625 1080 665Q1300 720 1600 650V900H0Z" fill="url(#water)" stroke="#6f9f8e" stroke-width="9"/>
+<path d="M0 745Q240 680 470 735T900 735T1600 720" fill="none" stroke="#88b6a4" stroke-width="7" opacity=".35"/>
+<!-- timber village, broad rectangular silhouettes -->
+<g stroke="#20140c" stroke-width="12">
+<path d="M455 610V455H620V610Z" fill="url(#wood)"/><path d="M980 610V455H1145V610Z" fill="url(#wood)"/>
+<path d="M650 590V405H910V590Z" fill="#533522"/>
+</g>
+<!-- shallow sloped roofs, no giant triangles -->
+<g fill="#39251a" stroke="#21150e" stroke-width="12">
+<path d="M430 455L535 405L645 455Z"/><path d="M955 455L1060 405L1170 455Z"/><path d="M620 405L780 340L940 405Z"/>
+</g>
+<!-- windows contained inside walls -->
+<g fill="#c5d79b" stroke="#27331e" stroke-width="8">
+<path d="M485 490H525V545H485Z"/><path d="M555 490H595V545H555Z"/>
+<path d="M1010 490H1050V545H1010Z"/><path d="M1080 490H1120V545H1080Z"/>
+<path d="M700 445H750V510H700Z"/><path d="M810 445H860V510H810Z"/>
+</g>
+<!-- covered wooden walkway -->
+<g fill="#654128" stroke="#25170e" stroke-width="11">
+<path d="M400 625Q530 575 670 605L660 650Q525 630 415 670Z"/>
+<path d="M890 605Q1030 575 1180 625L1165 670Q1030 630 900 650Z"/>
+</g>
+<g stroke="#3b2718" stroke-width="13"><path d="M450 635V760M610 610V750M990 610V750M1150 635V760"/></g>
+<!-- small timber bridge across stream -->
+<path d="M610 690Q800 640 990 690L980 735Q800 700 620 735Z" fill="url(#wood)" stroke="#24170e" stroke-width="13"/>
+<g stroke="#9a7649" stroke-width="7"><path d="M665 690l10 35M730 675l8 38M800 668v40M870 675l-8 38M935 690l-10 35"/></g>
+<!-- forest path, curved rather than triangular -->
+<path d="M790 900Q720 820 650 765Q590 720 560 670" fill="none" stroke="#665b43" stroke-width="95"/>
+<path d="M810 900Q880 820 950 765Q1010 720 1040 670" fill="none" stroke="#665b43" stroke-width="95"/>
+<path d="M790 900Q720 820 650 765Q590 720 560 670M810 900Q880 820 950 765Q1010 720 1040 670" fill="none" stroke="#918060" stroke-width="8" opacity=".5"/>
+<!-- market/farm objects -->
+<g stroke="#25170e" stroke-width="9">
+<path d="M190 760H330V835H190Z" fill="#70462a"/><circle cx="220" cy="845" r="20" fill="#2a241b"/><circle cx="300" cy="845" r="20" fill="#2a241b"/>
+<path d="M1270 760H1410V835H1270Z" fill="#70462a"/><circle cx="1300" cy="845" r="20" fill="#2a241b"/><circle cx="1380" cy="845" r="20" fill="#2a241b"/>
+</g>
+<g fill="#9ebd62"><circle cx="230" cy="745" r="20"/><circle cx="270" cy="735" r="16"/><circle cx="1310" cy="745" r="20"/><circle cx="1350" cy="735" r="16"/></g>
+<!-- foreground foliage -->
+<g fill="#183b22" stroke="#315a36" stroke-width="8">
+<ellipse cx="120" cy="820" rx="150" ry="65"/><ellipse cx="1480" cy="820" rx="150" ry="65"/><ellipse cx="430" cy="860" rx="130" ry="45"/><ellipse cx="1170" cy="860" rx="130" ry="45"/>
+</g>
+<!-- warm village lights -->
+<g fill="#e0edaa" stroke="#332317" stroke-width="8"><circle cx="445" cy="635" r="14"/><circle cx="1160" cy="635" r="14"/><circle cx="800" cy="620" r="18"/></g>
+<ellipse cx="800" cy="530" rx="500" ry="280" fill="url(#light)"/>
 </svg>
