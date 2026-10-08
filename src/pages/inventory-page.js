@@ -73,7 +73,7 @@ async function renderLorgusInventory() {
     container.className = "lorgus-inventory-page";
     container.innerHTML = `
         <div class="lorgus-inventory-shell">
-            <button type="button" class="lorgus-subpage-back-arrow left" onclick="window.lorgusSubpageTransition('right', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
+            <button type="button" class="lorgus-subpage-back-arrow left" onclick="window.lorgusSubpageTransition('left', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
                 <span>◀</span><b>КАРТА</b>
             </button>
             <div class="lorgus-subpage-utility">
