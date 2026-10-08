@@ -1851,15 +1851,45 @@ function getLorgusRpLocationArt(locationName) {
 window.getLorgusRpLocationArt = getLorgusRpLocationArt;
 
 async function openLorgusWorldRoads() {
+    const container = document.getElementById("cabinet-content");
+    if (!container) return;
+
+    // Не отправляем пользователя на /world: «Дороги мира» — отдельный RP-экран.
     const presence = await getRpPresence();
+
     if (presence?.type === "road") {
         await renderRoadChat(presence);
         return;
     }
+
     if (presence?.type === "location") {
         renderTravelScreen(presence.location, presence.region, null, null);
         return;
     }
-    window.renderLorgusWorldMapCurrent?.();
+
+    // Если физическое положение ещё не закреплено, остаёмся внутри SPA.
+    container.className = "lorgus-road-page";
+    container.innerHTML = `
+        <div class="lorgus-road-shell lorgus-road-empty-state">
+            <header class="lorgus-road-header">
+                <span class="lorgus-rp-overline">ПЕРЕМЕЩЕНИЕ</span>
+                <h1>Дороги мира</h1>
+                <p>Персонаж ещё не находится ни в одной локации.</p>
+            </header>
+            <section class="lorgus-road-panel">
+                <div class="lorgus-road-current">
+                    <span>СТАТУС</span>
+                    <strong>Путь не начат</strong>
+                    <small>Сначала войди в любую RP-локацию.</small>
+                </div>
+            </section>
+            <div class="lorgus-road-actions">
+                <button class="character-secondary-button" type="button"
+                    onclick="window.lorgusSubpageTransition?.('right', window.renderLorgusRpHub)">
+                    ← Вернуться в ролевую
+                </button>
+            </div>
+        </div>
+    `;
 }
 window.openLorgusWorldRoads = openLorgusWorldRoads;
