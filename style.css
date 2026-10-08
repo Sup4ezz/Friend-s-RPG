@@ -18161,8 +18161,7 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 @media(max-width:620px){.lorgus-character-header{align-items:flex-start;flex-direction:column}.lorgus-character-header-actions{justify-content:flex-start}.lorgus-character-overview,.lorgus-character-content-grid{grid-template-columns:1fr}.lorgus-character-wide{grid-column:auto}.lorgus-character-nav{grid-template-columns:repeat(2,1fr)}.lorgus-character-header h1{font-size:48px}}
 
 /* LORGUS update log */
-.lorgus-update-log-overlay{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:28px;opacity:0;transition:opacity .18s ease}
-.lorgus-update-log-overlay:not(:has(.lorgus-update-log-loading)){opacity:1}
+.lorgus-update-log-overlay{position:fixed;inset:0;z-index:1200;display:grid;place-items:center;padding:28px;opacity:1;transition:opacity .18s ease}
 .lorgus-update-log-backdrop{position:absolute;inset:0;background:rgba(4,4,3,.82);backdrop-filter:blur(12px)}
 .lorgus-update-log-panel{position:relative;z-index:1;width:min(820px,100%);max-height:min(82vh,900px);overflow:auto;border:1px solid rgba(214,179,106,.18);background:linear-gradient(145deg,rgba(23,20,15,.98),rgba(8,8,7,.99));box-shadow:0 30px 90px rgba(0,0,0,.55);padding:34px}
 .lorgus-update-log-close{position:absolute;top:16px;right:17px;width:34px;height:34px;border:1px solid rgba(214,179,106,.12);background:rgba(214,179,106,.03);color:#a89876;font-size:22px}
