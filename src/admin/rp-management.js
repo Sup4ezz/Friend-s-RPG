@@ -83,16 +83,36 @@
             if (!page.data || page.data.length < pageSize) break;
         }
 
-        const nrpResult = await window.supabaseClient
-            .from("lorgus_nrp_characters")
-            .select("character_id,is_active,created_at,characters(id,name,race,age,homeland,occupation,personality,backstory,special_skills,preferred_weapon,kingdom,location)")
-            .order("created_at", { ascending: false });
+        const [nrpResult, presenceResult] = await Promise.all([
+            window.supabaseClient
+                .from("lorgus_nrp_characters")
+                .select("character_id,is_active,created_at,characters(id,name,race,age,homeland,occupation,personality,backstory,special_skills,preferred_weapon,kingdom,location)")
+                .order("created_at", { ascending: false }),
+            window.supabaseClient
+                .from("rp_presence")
+                .select("presence_type,region,location,from_region,from_location,to_region,to_location,updated_at")
+                .eq("visibility", "public")
+        ]);
 
         if (nrpResult.error) throw nrpResult.error;
+        if (presenceResult.error) throw presenceResult.error;
 
         state.messages = messages;
         state.nrp = nrpResult.data || [];
         state.chats = buildChatIndex(state.messages);
+
+        for (const presence of (presenceResult.data || [])) {
+            const key = chatKey(presence);
+            if (!state.chats.some(chat => chat.key === key)) {
+                state.chats.push({
+                    key,
+                    label: chatLabel(presence),
+                    descriptor: chatDescriptor(presence),
+                    lastMessageAt: presence.updated_at
+                });
+            }
+        }
+        state.chats.sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt));
         if (!state.activeChatKey && state.chats[0]) state.activeChatKey = state.chats[0].key;
         if (state.activeChatKey && !state.chats.some(chat => chat.key === state.activeChatKey)) {
             state.activeChatKey = state.chats[0]?.key || null;
