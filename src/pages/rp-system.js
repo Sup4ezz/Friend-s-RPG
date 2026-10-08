@@ -111,6 +111,7 @@ function renderKingdomLocations(regionName) {
 
             return `
                 <button class="lorgus-location-card ${isCurrent ? "current" : (hasPresence ? "locked" : "")}" type="button"
+                    data-rp-location="${escapeHtml(title)}"
                     onclick="enterLocationRp('${escapeHtml(title)}', '${escapeHtml(regionName)}')">
                     <span class="lorgus-location-card-mark" aria-hidden="true">
                         <span class="lorgus-location-card-glyph ${isCurrent ? "is-current" : (hasPresence ? "is-closed" : "")}"></span>
