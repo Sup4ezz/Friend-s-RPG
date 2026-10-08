@@ -862,6 +862,16 @@ async function renderLocationParticipants(locationName, regionName) {
             </div>
         `;
     }).join("");
+
+    box.querySelectorAll(".lorgus-messenger-participant").forEach((node, index) => {
+        const row = participants[index];
+        if (!row) return;
+        node.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            openRpCharacterQuickCard(row.character_id, node);
+        });
+    });
 }
 
 function sendLocalFloodMessage() {
@@ -928,6 +938,81 @@ async function getRpCharacterPhoto(characterId) {
     const url = !photoError ? (photoData?.signedUrl || null) : null;
     window.rpCharacterPhotoCache[key] = url;
     return url;
+}
+
+async function openRpCharacterQuickCard(characterId, anchorElement = null) {
+    const id = String(characterId || "").trim();
+    if (!id || !window.supabaseClient) return;
+    document.querySelector(".lorgus-rp-character-card-overlay")?.remove();
+
+    const overlay = document.createElement("div");
+    overlay.className = "lorgus-rp-character-card-overlay";
+    overlay.innerHTML = '<div class="lorgus-rp-character-card-backdrop"></div><article class="lorgus-rp-character-card"><button type="button" class="lorgus-rp-character-card-close" aria-label="Закрыть">×</button><div>Загрузка записи…</div></article>';
+    document.body.appendChild(overlay);
+
+    const panel = overlay.querySelector(".lorgus-rp-character-card");
+    const close = () => overlay.remove();
+    overlay.querySelector(".lorgus-rp-character-card-close").addEventListener("click", close);
+    overlay.querySelector(".lorgus-rp-character-card-backdrop").addEventListener("click", close);
+
+    const { data: character, error } = await window.supabaseClient
+        .from("characters")
+        .select("id,name,race,age,homeland,occupation,personality,kingdom,location,active_title_id")
+        .eq("id", id)
+        .maybeSingle();
+
+    if (error || !character) {
+        panel.innerHTML = '<button type="button" class="lorgus-rp-character-card-close" aria-label="Закрыть">×</button><div>Карточка персонажа недоступна.</div>';
+        panel.querySelector(".lorgus-rp-character-card-close").addEventListener("click", close);
+        return;
+    }
+
+    let title = null;
+    if (character.active_title_id) {
+        const titleResult = await window.supabaseClient
+            .from("titles")
+            .select("id,name,icon,color,rarity")
+            .eq("id", character.active_title_id)
+            .maybeSingle();
+        title = titleResult.data || null;
+    }
+
+    const photo = await getRpCharacterPhoto(character.id);
+    const esc = value => escapeHtml(value ?? "—");
+    const titleHtml = title
+        ? '<div class="lorgus-rp-character-card-title">' + renderTitleBadge(title, "lorgus-public-title") + '</div>'
+        : "";
+
+    panel.innerHTML =
+        '<button type="button" class="lorgus-rp-character-card-close" aria-label="Закрыть">×</button>' +
+        '<div class="lorgus-rp-character-card-head">' +
+            '<div class="lorgus-rp-character-card-avatar">' + (photo ? '<img src="' + esc(photo) + '" alt="">' : '<span>✦</span>') + '</div>' +
+            '<div><small>ПЕРСОНАЖ ЛОРГУСА</small><h2>' + esc(character.name) + '</h2><p>' + esc(character.race || "Раса не указана") + (character.kingdom ? " · " + esc(character.kingdom) : "") + '</p>' + titleHtml + '</div>' +
+        '</div>' +
+        '<div class="lorgus-rp-character-card-facts">' +
+            '<div><small>ВОЗРАСТ</small><strong>' + esc(character.age ? character.age + " лет" : "—") + '</strong></div>' +
+            '<div><small>ЗАНЯТИЕ</small><strong>' + esc(character.occupation) + '</strong></div>' +
+            '<div><small>РОДИНА</small><strong>' + esc(character.homeland) + '</strong></div>' +
+            '<div><small>МЕСТО</small><strong>' + esc(character.location) + '</strong></div>' +
+        '</div>' +
+        (character.personality ? '<div class="lorgus-rp-character-card-story"><small>ХАРАКТЕР</small><p>' + esc(character.personality) + '</p></div>' : "");
+
+    panel.querySelector(".lorgus-rp-character-card-close").addEventListener("click", close);
+
+    const rect = anchorElement?.getBoundingClientRect?.();
+    if (rect && window.innerWidth > 600) {
+        const width = Math.min(360, window.innerWidth - 28);
+        const left = Math.max(14, Math.min(rect.left, window.innerWidth - width - 14));
+        const top = rect.bottom + 10 + 390 <= window.innerHeight ? rect.bottom + 10 : Math.max(14, rect.top - 390);
+        panel.style.left = left + "px";
+        panel.style.top = top + "px";
+    } else if (window.innerWidth > 600) {
+        panel.style.left = "50%";
+        panel.style.top = "50%";
+        panel.style.transform = "translate(-50%,-50%)";
+    }
+
+    requestAnimationFrame(() => panel.classList.add("open"));
 }
 
 async function renderLocationChats(locationName, regionName, alreadyPresent = false, fromRoute = false) {
@@ -1851,6 +1936,7 @@ window.startTravel = startTravel;
 window.arriveAtDestination = arriveAtDestination;
 window.getRpPresence = getRpPresence;
 window.renderWorldCharacterTracker = renderWorldCharacterTracker;
+window.openRpCharacterQuickCard = openRpCharacterQuickCard;
 
 
 
