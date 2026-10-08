@@ -198,6 +198,8 @@ function renderLorgusInterfaceNav(active = "world") {
         ["mail", "✉", "Письма", "/mail"],
         ["inventory", "◈", "Инвентарь", "/inventory"]
     ];
+    window.setTimeout(() => refreshLorgusNotificationBadge(), 0);
+
     return `
         <nav class="lorgus-global-nav" aria-label="Разделы Лоргуса">
             <div class="lorgus-global-brand"><span>✦</span><strong>ЛОРГУС</strong><small>ЖИВОЙ МИР</small></div>
@@ -218,8 +220,6 @@ function renderLorgusInterfaceNav(active = "world") {
             </div>
         </nav>
     `;
-
-    window.setTimeout(() => refreshLorgusNotificationBadge(), 0);
 }
 
 function renderLorgusOverview() {
