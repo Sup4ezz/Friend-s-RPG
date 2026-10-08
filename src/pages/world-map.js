@@ -520,11 +520,12 @@ function showLorgusMapEditorMode(container) {
     container.appendChild(hint);
 }
 
-window.lorgusMainMenuNavigate = function(direction, renderTarget) {
+window.lorgusSubpageTransition = function(direction, renderTarget) {
     if (typeof renderTarget !== "function" || window.lorgusMainMenuNavigating) return;
 
-    const current = document.querySelector(".lorgus-map-page");
-    if (!current) {
+    const container = document.getElementById("cabinet-content");
+    const current = container?.firstElementChild;
+    if (!container || !current) {
         renderTarget();
         return;
     }
@@ -533,12 +534,12 @@ window.lorgusMainMenuNavigate = function(direction, renderTarget) {
 
     const outgoing = current.cloneNode(true);
     outgoing.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
-    outgoing.style.cssText += ";position:fixed;inset:0;width:100vw;height:100vh;margin:0;z-index:9998;pointer-events:none;";
+    outgoing.style.cssText += ";position:fixed;inset:0;width:100vw;height:100vh;margin:0;z-index:9998;pointer-events:none;overflow:hidden;";
     document.body.appendChild(outgoing);
 
     renderTarget();
 
-    const incoming = document.querySelector(".lorgus-map-page");
+    const incoming = container.firstElementChild;
     if (!incoming) {
         outgoing.remove();
         window.lorgusMainMenuNavigating = false;
@@ -546,8 +547,8 @@ window.lorgusMainMenuNavigate = function(direction, renderTarget) {
     }
 
     const axis = direction === "top" || direction === "bottom" ? "Y" : "X";
-    const outgoingEnd = { top: "100%", bottom: "-100%", left: "100%", right: "-100%" }[direction];
-    const incomingStart = { top: "-100%", bottom: "100%", left: "-100%", right: "100%" }[direction];
+    const outgoingEnd = { top:"100%", bottom:"-100%", left:"100%", right:"-100%" }[direction];
+    const incomingStart = { top:"-100%", bottom:"100%", left:"-100%", right:"100%" }[direction];
 
     incoming.style.willChange = "transform";
     incoming.style.transition = "none";
@@ -557,23 +558,25 @@ window.lorgusMainMenuNavigate = function(direction, renderTarget) {
     outgoing.style.transition = "none";
     outgoing.style.transform = "translate3d(0,0,0)";
 
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            const transition = "transform .62s cubic-bezier(.76,0,.24,1)";
-            outgoing.style.transition = transition;
-            incoming.style.transition = transition;
-            outgoing.style.transform = `translate${axis}(${outgoingEnd})`;
-            incoming.style.transform = "translate3d(0,0,0)";
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+        const transition = "transform .62s cubic-bezier(.76,0,.24,1)";
+        outgoing.style.transition = transition;
+        incoming.style.transition = transition;
+        outgoing.style.transform = `translate${axis}(${outgoingEnd})`;
+        incoming.style.transform = "translate3d(0,0,0)";
 
-            window.setTimeout(() => {
-                outgoing.remove();
-                incoming.style.willChange = "";
-                incoming.style.transition = "";
-                incoming.style.transform = "";
-                window.lorgusMainMenuNavigating = false;
-            }, 650);
-        });
-    });
+        window.setTimeout(() => {
+            outgoing.remove();
+            incoming.style.willChange = "";
+            incoming.style.transition = "";
+            incoming.style.transform = "";
+            window.lorgusMainMenuNavigating = false;
+        }, 650);
+    }));
+};
+
+window.lorgusMainMenuNavigate = function(direction, renderTarget) {
+    return window.lorgusSubpageTransition(direction, renderTarget);
 };
 function initializeLorgusMainMenuLight() {
     const viewport = document.getElementById("lorgus-map-viewport");
