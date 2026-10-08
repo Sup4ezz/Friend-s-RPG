@@ -46,6 +46,7 @@ async function renderWorldCharacterTracker() {
         .from("rp_presence")
         .select("character_id, presence_type, region, location, from_region, from_location, to_region, to_location, updated_at, characters(name, race)")
         .eq("visibility", "public")
+        .gte("updated_at", new Date(Date.now() - 90000).toISOString())
         .order("updated_at", { ascending: false });
 
     if (error) {
@@ -53,7 +54,10 @@ async function renderWorldCharacterTracker() {
         return;
     }
 
-    const rows = (data || []).filter(row => row.character_id);
+    const rows = (data || []).filter(row =>
+        row.character_id &&
+        row.character_id !== window.activeCharacterId
+    );
     if (!rows.length) {
         tracker.innerHTML = `<div class="lorgus-people-empty"><span>✦</span><strong>Пока никого нет</strong><p>Когда персонажи войдут в мир и откроют своё местоположение, они появятся здесь.</p></div>`;
         return;
@@ -302,8 +306,14 @@ async function initializeRpPresence(character) {
     if (!character?.id) return;
     window.activeCharacterId = character.id;
 
-    // No automatic placement. The character becomes physically fixed only
-    // after the first RP location post.
+    // Presence is "online", not permanent: refresh the heartbeat while the
+    // character is actually active in LORGUS. Stale rows are ignored by the
+    // people-nearby screen.
+    if (window.rpPresenceHeartbeat) {
+        clearInterval(window.rpPresenceHeartbeat);
+        window.rpPresenceHeartbeat = null;
+    }
+
     if (window.rpPresenceChannel) {
         await window.supabaseClient.removeChannel(window.rpPresenceChannel);
     }
@@ -324,7 +334,34 @@ async function initializeRpPresence(character) {
         )
         .subscribe();
 
-    await getRpPresence();
+    const currentPresence = await getRpPresence();
+
+    if (currentPresence?.visibility === "public") {
+        await touchRpPresenceHeartbeat();
+
+        window.rpPresenceHeartbeat = setInterval(() => {
+            touchRpPresenceHeartbeat();
+        }, 30000);
+    }
+}
+
+async function touchRpPresenceHeartbeat() {
+    if (!window.activeCharacterId || !window.supabaseClient) return;
+
+    const { data, error } = await window.supabaseClient
+        .rpc("touch_lorgus_rp_presence", {
+            p_character_id: window.activeCharacterId
+        });
+
+    if (error) {
+        console.error("Не удалось обновить RP heartbeat:", error);
+        return;
+    }
+
+    const row = Array.isArray(data) ? data[0] : data;
+    if (row) {
+        window.activeRpPresence = mapServerPresence(row);
+    }
 }
 
 async function renderLocationParticipantsIfVisible() {
