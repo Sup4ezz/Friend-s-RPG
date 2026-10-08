@@ -4,7 +4,7 @@ function renderLorgusRpHub() {
     if (!container || !window.activeCharacter) return;
     const p = window.activeRpPresence;
     const place = p?.type === "location" ? p.location : p?.type === "road" ? "В пути" : "Свободное состояние";
-    container.className = "lorgus-command-page";
+    container.className = "lorgus-subpage-container";
     container.innerHTML = `
         <button type="button" class="lorgus-subpage-back-arrow" onclick="window.lorgusSubpageTransition('right', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
             <span>▶</span><b>КАРТА</b>
