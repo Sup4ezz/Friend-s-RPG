@@ -1734,3 +1734,90 @@ window.setCharacterMessage = setCharacterMessage;
 window.logout = logout;
 window.setMessage = setMessage;
 window.getFileExtension = getFileExtension;
+
+
+/* =========================================================
+   LORGUS — LOCAL RASTER CHAT ART
+   PPM is a real raster asset; decode it to a browser image
+   without external stock/CDN dependencies.
+   ========================================================= */
+async function loadLorgusPpmBackgrounds() {
+    const locations = {
+        "Примум": "assets/rp-locations/primum.ppm"
+    };
+
+    const decodePpm = async (url) => {
+        const response = await fetch(url, { cache: "force-cache" });
+        if (!response.ok) throw new Error("PPM " + response.status);
+        const text = await response.text();
+        const tokens = text
+            .replace(/#[^\n\r]*/g, "")
+            .trim()
+            .split(/\s+/);
+
+        if (tokens[0] !== "P3") {
+            throw new Error("Unsupported PPM");
+        }
+
+        const width = Number(tokens[1]);
+        const height = Number(tokens[2]);
+        const max = Number(tokens[3]);
+        if (!width || !height || !max) throw new Error("Invalid PPM");
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d", { alpha: false });
+        const image = ctx.createImageData(width, height);
+        let p = 4;
+
+        for (let i = 0; i < image.data.length; i += 4) {
+            const r = Number(tokens[p++]);
+            const g = Number(tokens[p++]);
+            const b = Number(tokens[p++]);
+
+            image.data[i] = Math.round(r * 255 / max);
+            image.data[i + 1] = Math.round(g * 255 / max);
+            image.data[i + 2] = Math.round(b * 255 / max);
+            image.data[i + 3] = 255;
+        }
+
+        ctx.putImageData(image, 0, 0);
+        return canvas.toDataURL("image/png");
+    };
+
+    for (const [location, path] of Object.entries(locations)) {
+        try {
+            const dataUrl = await decodePpm(path);
+            document
+                .querySelectorAll(
+                    '.lorgus-messenger-main[data-rp-location="' +
+                    CSS.escape(location) +
+                    '"]'
+                )
+                .forEach((main) => {
+                    main.style.setProperty(
+                        "--lorgus-raster-bg",
+                        'url("' + dataUrl + '")'
+                    );
+                });
+        } catch (error) {
+            console.warn(
+                "[LORGUS] Не удалось загрузить локальный raster background:",
+                location,
+                error
+            );
+        }
+    }
+}
+
+if (document.readyState === "loading") {
+    document.addEventListener(
+        "DOMContentLoaded",
+        loadLorgusPpmBackgrounds,
+        { once: true }
+    );
+} else {
+    loadLorgusPpmBackgrounds();
+}
