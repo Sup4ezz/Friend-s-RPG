@@ -1,73 +1,95 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
 <defs>
 <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#08170d"/><stop offset=".55" stop-color="#274a2b"/><stop offset="1" stop-color="#09100a"/></linearGradient>
-<linearGradient id="stone" x2="0" y2="1"><stop stop-color="#6b735d"/><stop offset="1" stop-color="#24271f"/></linearGradient>
+<linearGradient id="stone" x2="0" y2="1"><stop stop-color="#777b62"/><stop offset="1" stop-color="#292b23"/></linearGradient>
 <linearGradient id="wood" x2="0" y2="1"><stop stop-color="#70452a"/><stop offset="1" stop-color="#24140d"/></linearGradient>
 <linearGradient id="path" x2="0" y2="1"><stop stop-color="#655d48"/><stop offset="1" stop-color="#1b1a14"/></linearGradient>
-<radialGradient id="mist"><stop stop-color="#b5d6a7" stop-opacity=".35"/><stop offset="1" stop-color="#b5d6a7" stop-opacity="0"/></radialGradient>
+<radialGradient id="mist"><stop stop-color="#b5d6a7" stop-opacity=".32"/><stop offset="1" stop-color="#b5d6a7" stop-opacity="0"/></radialGradient>
 </defs>
-<!-- deep ancient forest -->
 <rect width="1600" height="900" fill="url(#sky)"/>
+<!-- distant forest -->
 <g fill="#0b2112" stroke="#315a36" stroke-width="12">
 <path d="M-80 690L40 90L160 690Z"/><path d="M100 690L230 40L360 690Z"/><path d="M1240 690L1370 40L1500 690Z"/><path d="M1440 690L1570 90L1690 690Z"/>
 </g>
-<!-- enormous ancient trunks -->
+<!-- colossal trees -->
 <g fill="#2a1b12" stroke="#4f3620" stroke-width="18">
 <path d="M120 0H355Q330 180 365 360Q390 500 330 650Q290 760 350 900H0V0Z"/>
 <path d="M1245 0H1480V900H1135Q1195 760 1165 650Q1105 500 1130 360Q1165 180 1245 0Z"/>
 </g>
-<!-- gnarled branches -->
 <g fill="none" stroke="#49301c" stroke-linecap="round">
 <path d="M280 350Q470 175 760 230Q850 245 930 330" stroke-width="100"/>
 <path d="M1320 350Q1130 175 840 230Q750 245 670 330" stroke-width="100"/>
 <path d="M250 500Q430 390 590 430" stroke-width="58"/>
 <path d="M1350 500Q1170 390 1010 430" stroke-width="58"/>
 </g>
-<!-- ancient stone structures, fully grounded in the settlement -->
-<g fill="url(#stone)" stroke="#171a13" stroke-width="12">
-  <path d="M365 585V405Q365 300 465 300Q565 300 565 405V585H520V410Q520 350 465 350Q410 350 410 410V585Z"/>
-  <path d="M1035 585V405Q1035 300 1135 300Q1235 300 1235 405V585H1190V410Q1190 350 1135 350Q1080 350 1080 410V585Z"/>
-</g>
-<!-- old forest settlement, buildings overlap and anchor the ruins -->
 
-<g stroke="#21150e" stroke-width="10">
-  <path d="M405 585L490 485L575 585V690H405Z" fill="url(#wood)"/>
-  <path d="M1025 585L1110 485L1195 585V690H1025Z" fill="url(#wood)"/>
-  <path d="M625 500L800 360L975 500V670H625Z" fill="#523522"/>
+<!-- LEFT GROUNDED ELVEN BUILDING -->
+<g stroke="#21150e" stroke-width="11">
+<path d="M355 650V470L465 350L575 470V650Z" fill="url(#wood)"/>
+<path d="M355 650V470L465 350L575 470" fill="none" stroke="#777b62" stroke-width="24"/>
+<path d="M395 650V485Q395 420 465 420Q535 420 535 485V650" fill="none" stroke="#777b62" stroke-width="34"/>
+<path d="M425 650V490Q425 455 465 455Q505 455 505 490V650" fill="#121812" stroke="#292b23" stroke-width="10"/>
+</g>
+<!-- LEFT windows, clipped visually inside facade -->
+<g fill="#b9d59c" stroke="#26321f" stroke-width="7">
+<path d="M405 505H445V560H405Z"/><path d="M485 505H525V560H485Z"/>
+<path d="M442 390H488V435H442Z"/>
+</g>
+
+<!-- RIGHT GROUNDED ELVEN BUILDING -->
+<g stroke="#21150e" stroke-width="11">
+<path d="M1025 650V470L1135 350L1245 470V650Z" fill="url(#wood)"/>
+<path d="M1025 650V470L1135 350L1245 470" fill="none" stroke="#777b62" stroke-width="24"/>
+<path d="M1065 650V485Q1065 420 1135 420Q1205 420 1205 485V650" fill="none" stroke="#777b62" stroke-width="34"/>
+<path d="M1095 650V490Q1095 455 1135 455Q1175 455 1175 490V650" fill="#121812" stroke="#292b23" stroke-width="10"/>
 </g>
 <g fill="#b9d59c" stroke="#26321f" stroke-width="7">
- stroke="#26321f" stroke-width="7">
-<path d="M430 535h42v62h-42zM495 505h42v62h-42zM1050 505h42v62h-42zM1115 535h42v62h-42z"/>
-<path d="M670 475h58v72h-58zM735 420h58v72h-58zM807 420h58v72h-58zM872 475h58v72h-58z"/>
+<path d="M1075 505H1115V560H1075Z"/><path d="M1155 505H1195V560H1155Z"/>
+<path d="M1112 390H1158V435H1112Z"/>
 </g>
-<!-- elevated old wooden walkways -->
+
+<!-- CENTRAL STONE HALL, all architecture connected -->
+<g stroke="#171a13" stroke-width="12">
+<path d="M620 675V500L800 345L980 500V675Z" fill="#523522"/>
+<path d="M620 675V500L800 345L980 500" fill="none" stroke="#777b62" stroke-width="28"/>
+<!-- central tall arched doorway -->
+<path d="M735 675V535Q735 450 800 450Q865 450 865 535V675Z" fill="#141811" stroke="#777b62" stroke-width="28"/>
+<!-- central windows -->
+<path d="M660 515H715V580H660Z" fill="#b9d59c"/>
+<path d="M885 515H940V580H885Z" fill="#b9d59c"/>
+<path d="M770 395H830V450H770Z" fill="#b9d59c"/>
+</g>
+
+<!-- old elevated walkways physically connected to buildings -->
 <g fill="#604027" stroke="#24170e" stroke-width="11">
-<path d="M360 610Q520 550 670 590L650 640Q510 610 375 660Z"/>
-<path d="M930 590Q1080 550 1240 610L1225 660Q1090 610 950 640Z"/>
+<path d="M350 650Q500 585 625 610L615 660Q490 640 365 700Z"/>
+<path d="M975 610Q1100 585 1250 650L1235 700Q1110 640 985 660Z"/>
 </g>
-<g stroke="#3a2416" stroke-width="14"><path d="M410 630v150M600 600v170M1000 600v170M1190 630v150"/></g>
+<g stroke="#3a2416" stroke-width="14"><path d="M405 660v125M585 625v155M1015 625v155M1195 660v125"/></g>
+
 <!-- central ancient road -->
 <path d="M570 900Q640 745 715 620Q770 535 800 490Q830 535 885 620Q960 745 1030 900Z" fill="url(#path)" stroke="#29271f" stroke-width="14"/>
-<g stroke="#9a8c69" stroke-width="6" opacity=".6"><path d="M670 850h260M700 790h200M730 735h140M755 685h90M775 640h50"/></g>
-<!-- monumental ruined gate -->
-<g fill="none" stroke="#777760" stroke-width="26">
-<path d="M675 560V440Q675 340 800 340Q925 340 925 440V560"/>
+<g stroke="#9a8c69" stroke-width="6" opacity=".6"><path d="M670 850h260"/><path d="M700 790h200"/><path d="M730 735h140"/><path d="M755 685h90"/><path d="M775 640h50"/></g>
+
+<!-- stone remnants actually touching ground -->
+<g fill="url(#stone)" stroke="#171a13" stroke-width="10">
+<path d="M285 700V520H350V700Z"/><path d="M1250 700V520H1315V700Z"/>
 </g>
-<path d="M675 440Q800 340 925 440" fill="none" stroke="#aaa989" stroke-width="10"/>
-<!-- lanterns and green light -->
+
+<!-- lanterns -->
 <g stroke="#342416" stroke-width="9" fill="#c9e7a7">
-<path d="M535 740V635H585M1065 740V635H1015"/><circle cx="585" cy="690" r="17"/><circle cx="1015" cy="690" r="17"/>
+<path d="M535 760V670H575"/><circle cx="575" cy="715" r="17"/>
+<path d="M1065 760V670H1025"/><circle cx="1025" cy="715" r="17"/>
 </g>
+
 <ellipse cx="800" cy="475" rx="380" ry="250" fill="url(#mist)"/>
 <!-- foreground roots and stones -->
 <path d="M0 900Q230 770 470 835Q570 860 650 900M1600 900Q1370 770 1130 835Q1030 860 950 900" fill="none" stroke="#4a301d" stroke-width="90"/>
 <g fill="#4c4d3e" stroke="#202118" stroke-width="8">
 <ellipse cx="260" cy="825" rx="85" ry="32"/><ellipse cx="1340" cy="825" rx="85" ry="32"/><ellipse cx="430" cy="865" rx="55" ry="24"/><ellipse cx="1170" cy="865" rx="55" ry="24"/>
 </g>
-<!-- hanging vines -->
 <g fill="none" stroke="#6c9c58" stroke-width="9">
 <path d="M350 0Q370 170 320 300Q290 390 350 500"/><path d="M1250 0Q1230 170 1280 300Q1310 390 1250 500"/>
 </g>
-<!-- mist motes -->
 <g fill="#b8dfa2"><circle cx="230" cy="530" r="6"/><circle cx="340" cy="420" r="4"/><circle cx="490" cy="330" r="6"/><circle cx="1110" cy="330" r="6"/><circle cx="1260" cy="420" r="4"/><circle cx="1370" cy="530" r="6"/><circle cx="560" cy="740" r="5"/><circle cx="1040" cy="740" r="5"/></g>
 </svg>
