@@ -10,13 +10,13 @@ const LORGUS_MAP_MARKERS = [
 ];
 
 const LORGUS_MAP_EDITOR_RECTS = [
-    { id:"Атэрон", x:62.5, y:62.1, w:11.8, h:6.0, rotation:0 },
-    { id:"Каэлор", x:62.0, y:69.7, w:11.9, h:6.3, rotation:0 },
+    { id:"Атэрон", x:62.5, y:65.1, w:11.8, h:6.0, rotation:0 },
+    { id:"Каэлор", x:62.0, y:72.7, w:11.9, h:6.3, rotation:0 },
     { id:"Ксандр", x:48.4, y:60.6, w:6.7, h:8.2, rotation:0 },
-    { id:"Лирэн", x:25.4, y:56.0, w:17.2, h:8.9, rotation:0 },
-    { id:"Морвейн", x:69.9, y:42.8, w:12.2, h:10.6, rotation:0 },
-    { id:"Святые Земли", x:51.9, y:45.2, w:3.4, h:3.4, rotation:0 },
-    { id:"Спорные Земли", x:54.6, y:31.5, w:6.1, h:5.3, rotation:0 }
+    { id:"Лирэн", x:25.4, y:57.0, w:17.2, h:8.9, rotation:0 },
+    { id:"Морвейн", x:69.9, y:39.8, w:12.2, h:10.6, rotation:0 },
+    { id:"Святые Земли", x:51.9, y:44.2, w:3.4, h:3.4, rotation:0 },
+    { id:"Спорные Земли", x:54.6, y:28.5, w:6.1, h:5.3, rotation:0 }
 ];
 function enableLorgusMapEditor() {
     const layer = document.getElementById("lorgus-map-marker-layer");
