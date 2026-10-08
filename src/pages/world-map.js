@@ -562,13 +562,10 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
     const forward = direction === "right" || direction === "bottom";
     const sign = forward ? -1 : 1;
 
-    if (vertical) {
-        track.appendChild(forward ? incoming : outgoing);
-        track.appendChild(forward ? outgoing : incoming);
-    } else {
-        track.appendChild(forward ? incoming : outgoing);
-        track.appendChild(forward ? outgoing : incoming);
-    }
+    // Направление задаёт реальный порядок двух полноэкранных страниц:
+    // right/bottom: старая -> новая; left/top: новая -> старая.
+    track.appendChild(forward ? outgoing : incoming);
+    track.appendChild(forward ? incoming : outgoing);
 
     stage.appendChild(track);
     document.body.appendChild(stage);
