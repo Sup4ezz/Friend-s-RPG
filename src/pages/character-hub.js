@@ -5,9 +5,14 @@ async function renderLorgusCharacterHub() {
     if (!container || !c) return;
     container.className = "lorgus-subpage-container";
     container.innerHTML = `
-        <button type="button" class="lorgus-subpage-back-arrow top" onclick="window.lorgusSubpageTransition('top', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
+        <button type="button" class="lorgus-subpage-back-arrow bottom" onclick="window.lorgusSubpageTransition('top', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
             <span>▼</span><b>КАРТА</b>
         </button>
+        <div class="lorgus-subpage-utility">
+    <span class="lorgus-subpage-username">${window.escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>
+    <button type="button" class="lorgus-subpage-notifications" onclick="window.openLorgusNotifications?.()" aria-label="Уведомления" title="Уведомления">♢<b class="lorgus-notification-badge"></b></button>
+    <button type="button" class="lorgus-subpage-logout" onclick="window.logout?.()">ВЫЙТИ</button>
+</div>
         <main class="lorgus-subpage-shell lorgus-character-page">
             <header class="lorgus-subpage-heading">
                 <span class="lorgus-command-kicker">ПЕРСОНАЖ</span>
