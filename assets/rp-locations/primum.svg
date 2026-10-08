@@ -1,10 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="bg" x2="0" y2="1"><stop stop-color="#263c55"/><stop offset=".55" stop-color="#172536"/><stop offset="1" stop-color="#080c13"/></linearGradient><linearGradient id="wood"><stop stop-color="#6f482c"/><stop offset="1" stop-color="#2e1d14"/></linearGradient><radialGradient id="lamp"><stop stop-color="#ffe6a0" stop-opacity=".9"/><stop offset="1" stop-color="#d99b3e" stop-opacity="0"/></radialGradient></defs><rect width="1200" height="700" fill="url(#bg)"/><circle cx="870" cy="220" r="250" fill="url(#lamp)"/><path d="M0 520Q300 470 600 520T1200 500V700H0Z" fill="#0b1119"/>
-<!-- huge library shelves -->
-<g fill="url(#wood)" stroke="#9b7045" stroke-width="6"><rect x="45" y="105" width="245" height="395" rx="8"/><rect x="325" y="75" width="245" height="425" rx="8"/><rect x="605" y="120" width="245" height="380" rx="8"/></g>
-<g stroke="#c29a61" stroke-width="8"><path d="M55 225h225M55 345h225M335 205h225M335 325h225M615 235h225M615 355h225"/></g>
-<!-- individual books -->
-<g stroke-width="7"><path d="M70 135v75M90 125v85M115 145v65M140 120v90M170 138v72M200 126v84M230 145v65M250 120v90M350 110v80M375 125v65M405 105v85M435 130v60M465 112v78M495 120v70M525 100v90M635 150v70M665 130v90M695 145v75M725 125v95M755 150v70M785 120v100" stroke="#d6a86b"/></g>
-<g stroke="#7c4f38" stroke-width="7"><path d="M70 245v75M100 235v85M135 250v70M175 230v90M215 245v75M350 225v75M390 215v85M430 240v60M470 220v80M510 235v65M635 255v70M675 240v85M715 250v75M755 230v95M800 245v80"/></g>
-<!-- central reading table --> <ellipse cx="585" cy="585" rx="330" ry="48" fill="#020509" opacity=".7"/><rect x="380" y="500" width="410" height="45" rx="12" fill="#8b5a32"/><path d="M420 545v110M750 545v110" stroke="#5b3824" stroke-width="22"/><rect x="500" y="465" width="120" height="28" fill="#e0c27d"/><path d="M505 462l55-45 55 45" fill="#eee1b6"/>
-<!-- hanging lamps --> <path d="M930 0v150M1050 0v115" stroke="#8f6a40" stroke-width="8"/><path d="M895 150h70l-18 45h-35zM1015 115h70l-18 45h-35z" fill="#e4b965"/><circle cx="930" cy="200" r="120" fill="url(#lamp)"/><circle cx="1050" cy="165" r="100" fill="url(#lamp)"/>
-<text x="48" y="62" fill="#fff5dc" font-family="Georgia,serif" font-size="30" letter-spacing="8">ПРИМУМ • ВЕЛИКАЯ БИБЛИОТЕКА</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice"><defs>
+<linearGradient id="w" x2="0" y2="1"><stop stop-color="#30465a"/><stop offset=".55" stop-color="#172536"/><stop offset="1" stop-color="#080b10"/></linearGradient>
+<linearGradient id="wood" x2="0" y2="1"><stop stop-color="#8b5b38"/><stop offset=".5" stop-color="#4c2d1d"/><stop offset="1" stop-color="#1c110b"/></linearGradient>
+<radialGradient id="gl"><stop stop-color="#ffe4a0" stop-opacity=".75"/><stop offset="1" stop-color="#e5a94d" stop-opacity="0"/></radialGradient>
+<pattern id="bk" width="52" height="82" patternUnits="userSpaceOnUse"><rect x="3" y="7" width="13" height="67" rx="2" fill="#a45c3d"/><rect x="19" y="3" width="12" height="71" rx="2" fill="#c09050"/><rect x="34" y="10" width="15" height="64" rx="2" fill="#536c76"/><path d="M6 17h7M22 14h7M37 22h9" stroke="#f1d99d" stroke-width="2" opacity=".55"/></pattern>
+<filter id="blur"><feGaussianBlur stdDeviation="18"/></filter></defs>
+<rect width="1600" height="900" fill="url(#w)"/><rect y="570" width="1600" height="330" fill="#2a1c16"/>
+<ellipse cx="800" cy="470" rx="650" ry="360" fill="#d99b45" opacity=".12" filter="url(#blur)"/>
+<!-- central grand arch -->
+<path d="M565 575V270Q800 65 1035 270V575Z" fill="#0a1017" stroke="#a57948" stroke-width="18"/><path d="M620 545V300Q800 145 980 300V545Z" fill="#58748b" opacity=".48"/><path d="M800 155v390M625 315h350" stroke="#d5b77a" stroke-width="8" opacity=".35"/><circle cx="800" cy="290" r="190" fill="url(#gl)"/>
+<!-- left shelves -->
+<path d="M45 590V125Q45 90 80 90H525Q560 90 560 125V590Z" fill="url(#wood)" stroke="#b17c4b" stroke-width="11"/><path d="M70 225H535M70 340H535M70 455H535" stroke="#b17c4b" stroke-width="11"/>
+<rect x="82" y="135" width="441" height="78" fill="url(#bk)"/><rect x="82" y="240" width="441" height="88" fill="url(#bk)"/><rect x="82" y="355" width="441" height="88" fill="url(#bk)"/><rect x="82" y="470" width="441" height="88" fill="url(#bk)"/>
+<!-- right shelves -->
+<path d="M1040 590V125Q1040 90 1075 90H1520Q1555 90 1555 125V590Z" fill="url(#wood)" stroke="#b17c4b" stroke-width="11"/><path d="M1065 225H1530M1065 340H1530M1065 455H1530" stroke="#b17c4b" stroke-width="11"/>
+<rect x="1077" y="135" width="441" height="78" fill="url(#bk)"/><rect x="1077" y="240" width="441" height="88" fill="url(#bk)"/><rect x="1077" y="355" width="441" height="88" fill="url(#bk)"/><rect x="1077" y="470" width="441" height="88" fill="url(#bk)"/>
+<!-- perspective foreground shelves -->
+<path d="M0 700L510 555H615L120 900H0Z" fill="#1a100c" stroke="#75492b" stroke-width="9"/><path d="M1600 700L1090 555H985L1480 900H1600Z" fill="#1a100c" stroke="#75492b" stroke-width="9"/><path d="M25 690L510 565M55 760L555 600M1575 690L1090 565M1545 760L1045 600" stroke="#bd8650" stroke-width="8" opacity=".7"/>
+<!-- reading table -->
+<ellipse cx="800" cy="760" rx="430" ry="70" fill="#000" opacity=".55"/><path d="M500 650Q800 610 1100 650L1040 720Q800 750 560 720Z" fill="url(#wood)" stroke="#ad7745" stroke-width="8"/><path d="M590 715L535 875M1010 715L1065 875M720 730L690 870M880 730L910 870" stroke="#432619" stroke-width="28"/><path d="M650 655h150v45H650zM825 650h125v45H825z" fill="#ded1aa" opacity=".9"/>
+<!-- lamps -->
+<g stroke="#a47746" stroke-width="7"><path d="M360 0v150M1240 0v150M800 0v95"/></g><g fill="#e8bd68"><path d="M315 150h90l-22 52h-46zM1195 150h90l-22 52h-46zM755 95h90l-22 52h-46z"/></g><circle cx="360" cy="225" r="190" fill="url(#gl)"/><circle cx="1240" cy="225" r="190" fill="url(#gl)"/><circle cx="800" cy="165" r="145" fill="url(#gl)"/>
+<!-- armchairs -->
+<path d="M225 755q0-80 80-80h115q80 0 80 80v85H225zM1185 755q0-80 80-80h115q80 0 80 80v85h-275z" fill="#463024" stroke="#8a5d3b" stroke-width="9"/>
+<rect x="610" y="35" width="380" height="58" rx="29" fill="#091019" opacity=".75" stroke="#c7a66c" stroke-width="2"/><text x="800" y="74" text-anchor="middle" fill="#f4e5c1" font-family="Georgia,serif" font-size="26" letter-spacing="7">ПРИМУМ</text>
+</svg>
