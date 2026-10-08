@@ -97,6 +97,4 @@
 
 <!-- subtle foreground depth -->
 <rect x="0" y="840" width="1600" height="60" fill="#07090c" opacity=".58"/>
-<rect x="615" y="30" width="370" height="55" rx="27" fill="#080d14" opacity=".82" stroke="#c4a36b" stroke-width="2"/>
-<text x="800" y="67" text-anchor="middle" fill="#e9d7b2" font-family="Georgia,serif" font-size="25" letter-spacing="8">ПРИМУМ</text>
 </svg>
