@@ -534,93 +534,71 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
     document.documentElement.classList.add("lorgus-screen-transitioning");
     document.body.classList.add("lorgus-screen-transitioning");
 
-    // Снимок всего текущего экрана. Не отдельных кнопок/блоков.
     const outgoing = current.cloneNode(true);
-    outgoing.classList.add("lorgus-transition-screen", "lorgus-transition-outgoing");
     outgoing.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
-    outgoing.style.cssText += [
-        "position:fixed!important",
-        "inset:0!important",
-        "width:100vw!important",
-        "height:100vh!important",
-        "min-height:100vh!important",
-        "max-height:100vh!important",
-        "margin:0!important",
-        "padding:0!important",
-        "box-sizing:border-box!important",
-        "z-index:99998!important",
-        "pointer-events:none!important",
-        "overflow:hidden!important"
-    ].join(";") + ";";
-    document.body.appendChild(outgoing);
+    outgoing.classList.add("lorgus-transition-panel");
 
-    // Старый экран убирается из DOM, новый строится целиком заново.
     renderTarget();
 
     const incoming = container.firstElementChild;
     if (!incoming || incoming === outgoing) {
-        outgoing.remove();
+        window.lorgusMainMenuNavigating = false;
         document.documentElement.classList.remove("lorgus-screen-transitioning");
         document.body.classList.remove("lorgus-screen-transitioning");
-        window.lorgusMainMenuNavigating = false;
         return;
     }
 
-    const axis = direction === "top" || direction === "bottom" ? "Y" : "X";
-    const outgoingEnd = { top:"100%", bottom:"-100%", left:"100%", right:"-100%" }[direction];
-    const incomingStart = { top:"-100%", bottom:"100%", left:"-100%", right:"100%" }[direction];
+    incoming.classList.add("lorgus-transition-panel");
 
-    incoming.classList.add("lorgus-transition-screen", "lorgus-transition-incoming");
-    incoming.style.cssText += [
-        "position:fixed!important",
-        "inset:0!important",
-        "width:100vw!important",
-        "height:100vh!important",
-        "min-height:100vh!important",
-        "max-height:100vh!important",
-        "margin:0!important",
-        "box-sizing:border-box!important",
-        "z-index:99999!important",
-        "overflow:hidden!important",
-        "will-change:transform!important",
-        "transition:none!important",
-        "transform:translate" + axis + "(" + incomingStart + ")!important"
-    ].join(";") + ";";
+    // Один общий экран-плёнка. Внутри него две страницы.
+    const stage = document.createElement("div");
+    stage.className = "lorgus-page-transition-stage";
+    const track = document.createElement("div");
+    track.className = "lorgus-page-transition-track";
 
-    outgoing.style.willChange = "transform";
-    outgoing.style.transition = "none";
-    outgoing.style.transform = "translate3d(0,0,0)";
+    const vertical = direction === "top" || direction === "bottom";
+    track.classList.add(vertical ? "vertical" : "horizontal");
+
+    const forward = direction === "right" || direction === "bottom";
+    const sign = forward ? -1 : 1;
+
+    if (vertical) {
+        track.appendChild(forward ? incoming : outgoing);
+        track.appendChild(forward ? outgoing : incoming);
+    } else {
+        track.appendChild(forward ? incoming : outgoing);
+        track.appendChild(forward ? outgoing : incoming);
+    }
+
+    stage.appendChild(track);
+    document.body.appendChild(stage);
+
+    container.style.visibility = "hidden";
+
+    // Стартовая позиция: старый экран полностью занимает viewport.
+    track.style.transform = "translate3d(0,0,0)";
 
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            const transition = "transform .68s cubic-bezier(.76,0,.24,1)";
-            outgoing.style.transition = transition;
-            incoming.style.transition = transition;
-            outgoing.style.transform = `translate${axis}(${outgoingEnd})`;
-            incoming.style.transform = "translate3d(0,0,0)";
-
-            window.setTimeout(() => {
-                outgoing.remove();
-                incoming.classList.remove("lorgus-transition-screen", "lorgus-transition-incoming");
-                incoming.style.removeProperty("position");
-                incoming.style.removeProperty("inset");
-                incoming.style.removeProperty("width");
-                incoming.style.removeProperty("height");
-                incoming.style.removeProperty("min-height");
-                incoming.style.removeProperty("max-height");
-                incoming.style.removeProperty("margin");
-                incoming.style.removeProperty("box-sizing");
-                incoming.style.removeProperty("z-index");
-                incoming.style.removeProperty("overflow");
-                incoming.style.removeProperty("will-change");
-                incoming.style.removeProperty("transition");
-                incoming.style.removeProperty("transform");
-                document.documentElement.classList.remove("lorgus-screen-transitioning");
-                document.body.classList.remove("lorgus-screen-transitioning");
-                window.lorgusMainMenuNavigating = false;
-            }, 700);
+            track.classList.add("is-moving");
+            track.style.transform = vertical
+                ? `translate3d(0,${sign * -50}%,0)`
+                : `translate3d(${sign * -50}%,0,0)`;
         });
     });
+
+    window.setTimeout(() => {
+        // Возвращаем уже отрендеренную страницу в нормальный контейнер.
+        stage.remove();
+        container.style.visibility = "";
+        container.innerHTML = "";
+        container.appendChild(incoming);
+
+        incoming.classList.remove("lorgus-transition-panel");
+        window.lorgusMainMenuNavigating = false;
+        document.documentElement.classList.remove("lorgus-screen-transitioning");
+        document.body.classList.remove("lorgus-screen-transitioning");
+    }, 720);
 };
 
 window.lorgusMainMenuNavigate = function(direction, renderTarget) {
