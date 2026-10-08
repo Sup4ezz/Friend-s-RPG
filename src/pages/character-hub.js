@@ -3,7 +3,7 @@ async function renderLorgusCharacterHub() {
     const container = document.getElementById("cabinet-content");
     const c = window.activeCharacter;
     if (!container || !c) return;
-    container.className = "lorgus-command-page";
+    container.className = "lorgus-subpage-container";
     container.innerHTML = `
         <button type="button" class="lorgus-subpage-back-arrow" onclick="window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
             <span>▼</span><b>КАРТА</b>
