@@ -418,9 +418,10 @@ function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
     if (!container) return;
 
     const destinations = getAvailableTravelDestinations(fromRegion, fromLocation);
-    const requested = destinations.find(item =>
-        item.location === toLocation && item.region === toRegion
-    );
+    const hasRequestedDestination = Boolean(toLocation && toRegion);
+    const requested = hasRequestedDestination
+        ? destinations.find(item => item.location === toLocation && item.region === toRegion)
+        : null;
 
     const choices = requested
         ? [requested, ...destinations.filter(item =>
@@ -433,7 +434,7 @@ function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
         <div class="lorgus-road-shell">
             <header class="lorgus-road-header">
                 <span class="lorgus-rp-overline">ПЕРЕМЕЩЕНИЕ</span>
-                <h1>Путь начинается не в чате.</h1>
+                <h1>Дороги мира</h1>
                 <p>
                     ${escapeHtml(fromLocation)}, ${escapeHtml(fromRegion)}
                     · выбери место, куда направляется персонаж.
@@ -449,8 +450,8 @@ function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
                 <div class="lorgus-road-arrow">→</div>
                 <div class="lorgus-road-current">
                     <span>НАЗНАЧЕНИЕ</span>
-                    <strong>${escapeHtml(toLocation)}</strong>
-                    <small>${escapeHtml(toRegion)}</small>
+                    <strong>${hasRequestedDestination ? escapeHtml(toLocation) : "Выбери направление"}</strong>
+                    <small>${hasRequestedDestination ? escapeHtml(toRegion) : "Доступные канонические пути"}</small>
                 </div>
             </section>
 
@@ -472,10 +473,10 @@ function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion) {
                     onclick="renderKingdomLocations('${escapeHtml(fromRegion)}')">
                     ← Остаться здесь
                 </button>
-                <button class="gold-button" type="button"
+${hasRequestedDestination ? `<button class="gold-button" type="button"
                     onclick="startTravel('${escapeHtml(fromLocation)}','${escapeHtml(fromRegion)}','${escapeHtml(toLocation)}','${escapeHtml(toRegion)}')">
                     Выйти на дорогу
-                </button>
+                </button>` : ""}
             </div>
         </div>
     `;
