@@ -372,10 +372,10 @@ function renderLorgusWorldMap(container, character) {
 
     container.innerHTML = `
         <nav class="lorgus-mainmenu-nav" aria-label="Навигация">
-            <button type="button" class="lorgus-mainmenu-arrow top" onclick="window.renderLorgusCharacterHub?.()" aria-label="Персонаж"><span>▲</span><b>ПЕРСОНАЖ</b></button>
-            <button type="button" class="lorgus-mainmenu-arrow bottom" onclick="window.renderMail?.()" aria-label="Письма"><span>▼</span><b>ПИСЬМА</b></button>
-            <button type="button" class="lorgus-mainmenu-arrow left" onclick="window.renderLorgusRpHub?.()" aria-label="Ролевая"><span>◀</span><b>РОЛЕВАЯ</b></button>
-            <button type="button" class="lorgus-mainmenu-arrow right" onclick="window.renderLorgusInventory?.()" aria-label="Инвентарь"><span>▶</span><b>ИНВЕНТАРЬ</b></button>
+            <button type="button" class="lorgus-mainmenu-arrow top" onclick="window.lorgusMainMenuNavigate('top', window.renderLorgusCharacterHub)" aria-label="Персонаж"><span>▲</span><b>ПЕРСОНАЖ</b></button>
+            <button type="button" class="lorgus-mainmenu-arrow bottom" onclick="window.lorgusMainMenuNavigate('bottom', window.renderMail)" aria-label="Письма"><span>▼</span><b>ПИСЬМА</b></button>
+            <button type="button" class="lorgus-mainmenu-arrow left" onclick="window.lorgusMainMenuNavigate('left', window.renderLorgusRpHub)" aria-label="Ролевая"><span>◀</span><b>РОЛЕВАЯ</b></button>
+            <button type="button" class="lorgus-mainmenu-arrow right" onclick="window.lorgusMainMenuNavigate('right', window.renderLorgusInventory)" aria-label="Инвентарь"><span>▶</span><b>ИНВЕНТАРЬ</b></button>
         </nav>
         <div class="lorgus-map-shell">
             <aside class="lorgus-map-sidebar">
@@ -519,6 +519,52 @@ function showLorgusMapEditorMode(container) {
     };
     container.appendChild(hint);
 }
+
+window.lorgusMainMenuNavigate = function(direction, renderTarget) {
+    if (typeof renderTarget !== "function") return;
+    if (window.lorgusMainMenuNavigating) return;
+
+    const current = document.querySelector(".lorgus-map-page");
+    if (!current) {
+        renderTarget();
+        return;
+    }
+
+    window.lorgusMainMenuNavigating = true;
+    const axis = direction === "top" || direction === "bottom" ? "Y" : "X";
+    const currentOut = { top: "100%", bottom: "-100%", left: "100%", right: "-100%" }[direction];
+    const nextIn = { top: "-100%", bottom: "100%", left: "-100%", right: "100%" }[direction];
+
+    current.style.willChange = "transform";
+    current.style.transition = "transform .62s cubic-bezier(.76,0,.24,1)";
+    current.style.transform = `translate${axis}(${currentOut})`;
+
+    window.setTimeout(() => {
+        renderTarget();
+        const next = document.querySelector(".lorgus-map-page");
+        if (!next) {
+            window.lorgusMainMenuNavigating = false;
+            return;
+        }
+
+        next.style.willChange = "transform";
+        next.style.transition = "none";
+        next.style.transform = `translate${axis}(${nextIn})`;
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                next.style.transition = "transform .62s cubic-bezier(.76,0,.24,1)";
+                next.style.transform = "translate${axis}(0)";
+                window.setTimeout(() => {
+                    next.style.willChange = "";
+                    next.style.transition = "";
+                    next.style.transform = "";
+                    window.lorgusMainMenuNavigating = false;
+                }, 650);
+            });
+        });
+    }, 620);
+};
 
 function initializeLorgusMainMenuLight() {
     const viewport = document.getElementById("lorgus-map-viewport");
