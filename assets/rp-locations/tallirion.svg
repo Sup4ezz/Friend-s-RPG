@@ -1,1 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#102319"/><stop offset="1" stop-color="#05070b"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><rect width="800" height="500" fill="url(#g)" opacity=".25"/><path d="M0 360Q180 270 360 350T800 310V500H0Z" fill="#284d2d"/><path d="M40 410Q200 320 360 410T760 370" fill="none" stroke="#91ca75" stroke-width="18"/><path d="M570 410V230M570 230l-100-65M570 230l100-65M570 230l0-105" stroke="#b78a5b" stroke-width="10"/><circle cx="170" cy="170" r="75" fill="#91ca75" opacity=".16"/><text x="38" y="62" fill="white" opacity=".82" font-family="Georgia,serif" font-size="24" letter-spacing="5">ТАЛЛИРИОН</text><rect width="800" height="500" fill="none" stroke="#91ca75" stroke-opacity=".16" stroke-width="2"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs>
+ <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#1d2018"/><stop offset="1" stop-color="#4b4b32"/></linearGradient>
+ <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#4f5138"/><stop offset="1" stop-color="#1d2017"/></linearGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#c5b26c"/><stop offset=".55" stop-color="#75623d"/><stop offset="1" stop-color="#37301e"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#f1d98a" stop-opacity=".72"/><stop offset="1" stop-color="#f1d98a" stop-opacity="0"/></radialGradient>
+ <filter id="shadow"><feGaussianBlur stdDeviation="14"/></filter>
+</defs>
+<rect width="1600" height="900" fill="url(#wall)"/>
+<path d="M35 560V210L250 80L465 210V560" fill="#2c3024" stroke="#777552" stroke-width="20"/><path d="M1135 560V210L1350 80L1565 210V560" fill="#2c3024" stroke="#777552" stroke-width="20"/><path d="M560 560V170H1040V560" fill="#151912" stroke="#9a8d59" stroke-width="18"/>
+<path d="M0 555 Q800 505 1600 555 V900 H0Z" fill="url(#floor)"/>
+<path d="M0 610Q800 500 1600 610" fill="none" stroke="#7b7449" stroke-width="16"/><g stroke="#665f3e" stroke-width="7"><path d="M800 550L520 900M800 550L1080 900"/></g>
+<ellipse cx="800" cy="430" rx="470" ry="270" fill="url(#glow)"/><path d="M800 55V160" stroke="#7c7048" stroke-width="8"/><path d="M750 160H850L825 205H775Z" fill="#d0b568"/><circle cx="800" cy="190" r="48" fill="url(#glow)"/>
+<ellipse cx="800" cy="790" rx="390" ry="50" fill="#000" opacity=".4"/><path d="M520 665H1080L1025 725H575Z" fill="#655635" stroke="#aa9355" stroke-width="10"/><path d="M590 725L555 860M1010 725L1045 860" stroke="#493c27" stroke-width="28"/><path d="M160 575H450V680H160ZM1150 575H1440V680H1150Z" fill="#594a2d" stroke="#95804a" stroke-width="10"/><g fill="#b8a45d"><path d="M250 520l30-100 30 100z"/><path d="M1290 520l30-100 30 100z"/></g><path d="M680 635h240v32H680z" fill="#c5b56d"/>
+<rect x="0" y="0" width="1600" height="900" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="28"/>
+</svg>
