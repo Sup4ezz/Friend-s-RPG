@@ -6010,6 +6010,39 @@ select:focus-visible{
     z-index: -1;
 }
 
+.lorgus-location-card[data-rp-location] {
+    background-color: #090a0c;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-blend-mode: normal;
+}
+
+.lorgus-location-card[data-rp-location]::before {
+    z-index: 0;
+    background:
+        linear-gradient(180deg, rgba(4,5,7,.34) 0%, rgba(5,6,8,.58) 58%, rgba(4,5,7,.88) 100%),
+        linear-gradient(90deg, rgba(5,6,8,.72) 0%, rgba(5,6,8,.28) 55%, rgba(5,6,8,.56) 100%);
+}
+
+.lorgus-location-card[data-rp-location] > * {
+    position: relative;
+    z-index: 1;
+}
+
+.lorgus-location-card[data-rp-location="Примум"]{background-image:url("/assets/rp-locations/primum.svg")}
+.lorgus-location-card[data-rp-location="Хелион"]{background-image:url("/assets/rp-locations/helion.svg")}
+.lorgus-location-card[data-rp-location="Древнее Пламя"]{background-image:url("/assets/rp-locations/ancient-flame.svg")}
+.lorgus-location-card[data-rp-location="Арджент"]{background-image:url("/assets/rp-locations/argent.svg")}
+.lorgus-location-card[data-rp-location="Меридиан"]{background-image:url("/assets/rp-locations/meridian.svg")}
+.lorgus-location-card[data-rp-location="Валькрофт"]{background-image:url("/assets/rp-locations/valcroft.svg")}
+.lorgus-location-card[data-rp-location="Солмир"]{background-image:url("/assets/rp-locations/solmir.svg")}
+.lorgus-location-card[data-rp-location="Аврора"]{background-image:url("/assets/rp-locations/aurora.svg")}
+.lorgus-location-card[data-rp-location="Элвэйн"]{background-image:url("/assets/rp-locations/elwain.svg")}
+.lorgus-location-card[data-rp-location="Таллирион"]{background-image:url("/assets/rp-locations/tallirion.svg")}
+.lorgus-location-card[data-rp-location="Эстерваль"]{background-image:url("/assets/rp-locations/esterval.svg")}
+.lorgus-location-card[data-rp-location="Фин"]{background-image:url("/assets/rp-locations/fin.svg")}
+
 .lorgus-location-card:hover {
     transform: translateY(-3px);
 }
