@@ -1,1 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#1b2633"/><stop offset="1" stop-color="#05070b"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><rect width="800" height="500" fill="url(#g)" opacity=".25"/><path d="M60 430h680" stroke="#d8d0bc" stroke-width="8" opacity=".35"/><path d="M90 260h150l-30-80H120zM270 260h150l-30-80H300zM450 260h150l-30-80H480z" fill="#d8b768" opacity=".65"/><path d="M105 270v130M225 270v130M285 270v130M405 270v130M465 270v130M585 270v130" stroke="#c6b18a" stroke-width="10" opacity=".45"/><circle cx="650" cy="330" r="45" fill="#d8b768" opacity=".18"/><text x="38" y="62" fill="white" opacity=".82" font-family="Georgia,serif" font-size="24" letter-spacing="5">АРДЖЕНТ</text><rect width="800" height="500" fill="none" stroke="#d8b768" stroke-opacity=".16" stroke-width="2"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs>
+ <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#171a1e"/><stop offset="1" stop-color="#3a3030"/></linearGradient>
+ <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#29252a"/><stop offset="1" stop-color="#111014"/></linearGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#d7c6a0"/><stop offset=".55" stop-color="#866b50"/><stop offset="1" stop-color="#3a2b24"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#ffd98a" stop-opacity=".72"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
+ <filter id="shadow"><feGaussianBlur stdDeviation="14"/></filter>
+</defs>
+<rect width="1600" height="900" fill="url(#wall)"/>
+<path d="M55 560V110H530V560" fill="#151518" stroke="#7b6b60" stroke-width="20"/><path d="M1070 560V110H1545V560" fill="#151518" stroke="#7b6b60" stroke-width="20"/><path d="M585 560V185Q800 30 1015 185V560" fill="#111216" stroke="#a58d75" stroke-width="18"/>
+<path d="M0 555 Q800 505 1600 555 V900 H0Z" fill="url(#floor)"/>
+<g stroke="#51464a" stroke-width="6"><path d="M800 545L500 900M800 545L1100 900M800 545L250 900M800 545L1350 900"/></g>
+<ellipse cx="800" cy="430" rx="430" ry="260" fill="url(#glow)"/><path d="M800 40V135" stroke="#8e7867" stroke-width="8"/><path d="M750 135H850L825 185H775Z" fill="#d7bd8a"/><circle cx="800" cy="170" r="50" fill="url(#glow)"/>
+<path d="M260 520H500V590H260ZM1100 520H1340V590H1100Z" fill="#6b513f"/><g fill="#b78a52" stroke="#d2b77c" stroke-width="3"><rect x="300" y="450" width="60" height="50" rx="8"/><rect x="380" y="430" width="80" height="70" rx="8"/><rect x="1140" y="445" width="75" height="55" rx="8"/><rect x="1230" y="420" width="65" height="80" rx="8"/></g><ellipse cx="800" cy="760" rx="320" ry="55" fill="#000" opacity=".4"/><path d="M575 650Q800 610 1025 650L980 700Q800 730 620 700Z" fill="#674a38" stroke="#b18a65" stroke-width="10"/><path d="M650 700L620 850M950 700L980 850" stroke="#50372c" stroke-width="25"/><path d="M675 635h70v35h-70zM855 625h90v45h-90z" fill="#c7a45e"/>
+<rect x="0" y="0" width="1600" height="900" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="28"/>
+</svg>
