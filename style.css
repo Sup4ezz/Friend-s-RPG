@@ -16959,3 +16959,89 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
         padding-right:4px!important;
     }
 }
+
+/* RP HUB — remove side rails, cinematic fullscreen composition */
+#cabinet-content:has(.lorgus-rp-page){
+    padding-left:0!important;
+    padding-right:0!important;
+    width:100%!important;
+    max-width:none!important;
+}
+.lorgus-rp-page{
+    box-sizing:border-box!important;
+    width:100%!important;
+    max-width:none!important;
+    min-height:100vh!important;
+    margin:0!important;
+    padding:88px clamp(28px,4vw,72px) 48px!important;
+    background:
+      radial-gradient(circle at 50% 0%,rgba(180,150,75,.10),transparent 34%),
+      linear-gradient(180deg,rgba(7,8,12,.16),rgba(7,8,12,.52))!important;
+}
+.lorgus-rp-hero{
+    width:min(1500px,100%)!important;
+    margin:0 auto 28px!important;
+    position:relative!important;
+}
+.lorgus-rp-hero:after{
+    content:""!important;
+    display:block!important;
+    height:1px!important;
+    margin-top:18px!important;
+    background:linear-gradient(90deg,transparent,rgba(215,185,105,.48),transparent)!important;
+}
+.lorgus-rp-command-grid{
+    width:min(1500px,100%)!important;
+    margin:0 auto!important;
+    min-height:calc(100vh - 250px)!important;
+    grid-template-columns:minmax(0,1fr) 390px!important;
+    gap:18px!important;
+}
+.lorgus-rp-scene{
+    min-height:calc(100vh - 250px)!important;
+    border:1px solid rgba(220,190,115,.20)!important;
+    border-radius:4px!important;
+    background:
+      linear-gradient(135deg,rgba(255,255,255,.035),transparent 35%),
+      radial-gradient(circle at 72% 25%,rgba(200,160,70,.08),transparent 32%),
+      rgba(14,15,20,.76)!important;
+    box-shadow:0 28px 90px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.035)!important;
+    backdrop-filter:blur(8px)!important;
+}
+.lorgus-rp-scene-center{
+    max-width:1100px!important;
+    padding:20px!important;
+}
+.lorgus-rp-scene-center h2{
+    font-size:clamp(58px,7vw,112px)!important;
+    letter-spacing:.035em!important;
+    text-shadow:0 12px 40px rgba(0,0,0,.55)!important;
+}
+.lorgus-rp-side{
+    min-height:calc(100vh - 250px)!important;
+    grid-template-rows:repeat(3,minmax(0,1fr))!important;
+    gap:18px!important;
+}
+.lorgus-rp-side-card{
+    padding:30px!important;
+    border:1px solid rgba(220,190,115,.16)!important;
+    background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(10,11,15,.72))!important;
+    box-shadow:0 18px 45px rgba(0,0,0,.30)!important;
+    transition:transform .22s ease,border-color .22s ease,background .22s ease!important;
+}
+.lorgus-rp-side-card:hover{
+    transform:translateY(-3px)!important;
+    border-color:rgba(220,190,115,.38)!important;
+    background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(15,16,21,.82))!important;
+}
+.lorgus-rp-footer{
+    width:min(1500px,100%)!important;
+    margin:18px auto 0!important;
+}
+@media(max-width:1050px){
+ .lorgus-rp-command-grid{grid-template-columns:1fr!important}
+ .lorgus-rp-side{min-height:420px!important}
+}
+@media(max-width:600px){
+ .lorgus-rp-page{padding:76px 12px 30px!important}
+}
