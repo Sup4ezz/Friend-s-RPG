@@ -534,70 +534,68 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
     document.documentElement.classList.add("lorgus-screen-transitioning");
     document.body.classList.add("lorgus-screen-transitioning");
 
+    // Рендерим следующую страницу в обычном контейнере, а в переходе
+    // показываем две визуальные копии. Никаких переносов реальных DOM-узлов:
+    // поэтому ни карта, ни инвентарь не теряют контекст #cabinet-content.
     const outgoing = current.cloneNode(true);
-    outgoing.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
-    outgoing.classList.add("lorgus-transition-panel");
-
     renderTarget();
-
     const incoming = container.firstElementChild;
-    if (!incoming || incoming === outgoing) {
+
+    if (!incoming) {
         window.lorgusMainMenuNavigating = false;
         document.documentElement.classList.remove("lorgus-screen-transitioning");
         document.body.classList.remove("lorgus-screen-transitioning");
         return;
     }
 
-    incoming.classList.add("lorgus-transition-panel");
-
-    // Один общий экран-плёнка. Внутри него две страницы.
     const stage = document.createElement("div");
     stage.className = "lorgus-page-transition-stage";
-    const track = document.createElement("div");
-    track.className = "lorgus-page-transition-track";
 
-    const vertical = direction === "top" || direction === "bottom";
-    track.classList.add(vertical ? "vertical" : "horizontal");
+    const oldPanel = document.createElement("div");
+    oldPanel.className = "lorgus-transition-panel lorgus-transition-old";
+    oldPanel.appendChild(outgoing);
 
+    const newPanel = document.createElement("div");
+    newPanel.className = "lorgus-transition-panel lorgus-transition-new";
+    newPanel.appendChild(incoming.cloneNode(true));
+
+    const horizontal = direction === "left" || direction === "right";
     const forward = direction === "right" || direction === "bottom";
-    const sign = forward ? -1 : 1;
 
-    // Направление задаёт реальный порядок двух полноэкранных страниц:
-    // right/bottom: старая -> новая; left/top: новая -> старая.
-    track.appendChild(forward ? outgoing : incoming);
-    track.appendChild(forward ? incoming : outgoing);
+    if (horizontal) {
+        oldPanel.classList.add("horizontal");
+        newPanel.classList.add("horizontal");
+        newPanel.style.transform = forward ? "translate3d(100%,0,0)" : "translate3d(-100%,0,0)";
+    } else {
+        oldPanel.classList.add("vertical");
+        newPanel.classList.add("vertical");
+        newPanel.style.transform = forward ? "translate3d(0,100%,0)" : "translate3d(0,-100%,0)";
+    }
 
-    stage.appendChild(track);
+    stage.appendChild(oldPanel);
+    stage.appendChild(newPanel);
     document.body.appendChild(stage);
 
     container.style.visibility = "hidden";
 
-    // Стартовая позиция: старый экран полностью занимает viewport.
-    track.style.transform = "translate3d(0,0,0)";
-
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            track.classList.add("is-moving");
-            track.style.transform = vertical
-                ? `translate3d(0,${sign * -50}%,0)`
-                : `translate3d(${sign * -50}%,0,0)`;
+            stage.classList.add("is-moving");
+            oldPanel.style.transform = horizontal
+                ? `translate3d(${forward ? "-100%" : "100%"},0,0)`
+                : `translate3d(0,${forward ? "-100%" : "100%"},0)`;
+            newPanel.style.transform = "translate3d(0,0,0)";
         });
     });
 
     window.setTimeout(() => {
-        // Возвращаем уже отрендеренную страницу в нормальный контейнер.
         stage.remove();
         container.style.visibility = "";
-        container.innerHTML = "";
-        container.appendChild(incoming);
-
-        incoming.classList.remove("lorgus-transition-panel");
         window.lorgusMainMenuNavigating = false;
         document.documentElement.classList.remove("lorgus-screen-transitioning");
         document.body.classList.remove("lorgus-screen-transitioning");
     }, 720);
 };
-
 window.lorgusMainMenuNavigate = function(direction, renderTarget) {
     return window.lorgusSubpageTransition(direction, renderTarget);
 };
