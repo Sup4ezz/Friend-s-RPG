@@ -1,30 +1,40 @@
 /* LORGUS RP, travel, presence and local chat */
-async function renderWorldCharacterTracker() {
+async async function renderWorldCharacterTracker() {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
-    container.className = "lorgus-world-page";
+    container.className = "lorgus-world-page lorgus-people-page";
     container.innerHTML = `
-        <div class="lorgus-world-shell">
-            <aside class="lorgus-world-sidebar">
+        <div class="lorgus-world-shell lorgus-people-shell">
+            <aside class="lorgus-world-sidebar lorgus-people-sidebar">
                 <div class="lorgus-world-sidebar-symbol">✦</div>
-                <div class="lorgus-world-sidebar-label">ЛОРГУС</div>
-                <div class="lorgus-world-sidebar-name">Люди мира</div>
-                <p class="lorgus-world-sidebar-meta">Актуальное публичное местоположение персонажей.</p>
+                <div class="lorgus-world-sidebar-label">ЛОРГУС · СВЯЗИ</div>
+                <div class="lorgus-world-sidebar-name">Люди рядом</div>
+                <p class="lorgus-world-sidebar-meta">Персонажи, чьё местоположение открыто миру.</p>
                 <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="returnToGame()">
                     ← Вернуться к миру
                 </button>
             </aside>
-            <main class="lorgus-world-browser">
-                <header class="lorgus-world-header">
-                    <span class="lorgus-world-kicker">ОТСЛЕЖИВАНИЕ</span>
-                    <h1>Люди мира</h1>
-                    <p>Персонажи, которые не скрывают своё местоположение.</p>
+
+            <main class="lorgus-world-browser lorgus-people-browser">
+                <header class="lorgus-world-header lorgus-people-header">
+                    <span class="lorgus-world-kicker">ЖИВОЙ МИР</span>
+                    <h1>Люди рядом</h1>
+                    <p>Персонажи, которые сейчас находятся в открытых локациях или путешествуют по дорогам.</p>
+                    <div class="lorgus-people-header-line">
+                        <span><i></i> ПУБЛИЧНЫЕ ПЕРСОНАЖИ</span>
+                        <b id="lorgus-people-count">—</b>
+                    </div>
                 </header>
-                <section class="lorgus-world-section">
-                    <div class="lorgus-world-section-title">ТЕКУЩЕЕ ПОЛОЖЕНИЕ</div>
-                    <div id="lorgus-character-tracker" class="lorgus-location-grid">
-                        <div class="lorgus-empty-location"><span>✦</span><h2>Загрузка...</h2></div>
+
+                <section class="lorgus-world-section lorgus-people-section">
+                    <div class="lorgus-world-section-title">СЕЙЧАС В МИРЕ</div>
+                    <div id="lorgus-character-tracker" class="lorgus-people-grid">
+                        <div class="lorgus-people-loading">
+                            <span class="lorgus-people-loading-ring"></span>
+                            <strong>Считываем присутствие…</strong>
+                            <small>Загружаем персонажей и их портреты</small>
+                        </div>
                     </div>
                 </section>
             </main>
@@ -39,46 +49,102 @@ async function renderWorldCharacterTracker() {
         .order("updated_at", { ascending: false });
 
     if (error) {
-        tracker.innerHTML = `<div class="lorgus-empty-location"><span>!</span><h2>Не удалось загрузить людей мира</h2><p>${escapeHtml(error.message)}</p></div>`;
+        tracker.innerHTML = `<div class="lorgus-people-empty"><span>!</span><strong>Не удалось загрузить людей</strong><p>${escapeHtml(error.message)}</p></div>`;
         return;
     }
 
-    if (!data?.length) {
-        tracker.innerHTML = `<div class="lorgus-empty-location"><span>✦</span><h2>Пока никого нет</h2><p>Когда персонажи войдут в мир, они появятся здесь.</p></div>`;
+    const rows = (data || []).filter(row => row.character_id);
+    if (!rows.length) {
+        tracker.innerHTML = `<div class="lorgus-people-empty"><span>✦</span><strong>Пока никого нет</strong><p>Когда персонажи войдут в мир и откроют своё местоположение, они появятся здесь.</p></div>`;
         return;
     }
 
-    const trackerIds = [...new Set(data.map(row => row.character_id).filter(Boolean))];
-    const { data: trackerCharacters } = await window.supabaseClient.from("characters").select("id, active_title_id").in("id", trackerIds);
+    const uniqueRows = [];
+    const seen = new Set();
+    rows.forEach(row => {
+        const key = String(row.character_id);
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniqueRows.push(row);
+        }
+    });
+
+    const trackerIds = uniqueRows.map(row => row.character_id);
+    const { data: trackerCharacters } = await window.supabaseClient
+        .from("characters")
+        .select("id, active_title_id")
+        .in("id", trackerIds);
+
     const trackerTitleIds = [...new Set((trackerCharacters || []).map(row => row.active_title_id).filter(Boolean))];
-    const { data: trackerTitles } = trackerTitleIds.length ? await window.supabaseClient.from("titles").select("*").in("id", trackerTitleIds) : { data: [] };
-    const trackerTitleMap = Object.fromEntries((trackerTitles || []).map(t => [String(t.id), t]));
-    const trackerActiveMap = Object.fromEntries((trackerCharacters || []).map(row => [String(row.id), trackerTitleMap[String(row.active_title_id)] || null]));
+    const { data: trackerTitles } = trackerTitleIds.length
+        ? await window.supabaseClient.from("titles").select("*").in("id", trackerTitleIds)
+        : { data: [] };
 
-    tracker.innerHTML = data.map(row => {
+    const trackerTitleMap = Object.fromEntries((trackerTitles || []).map(t => [String(t.id), t]));
+    const trackerActiveMap = Object.fromEntries(
+        (trackerCharacters || []).map(row => [
+            String(row.id),
+            trackerTitleMap[String(row.active_title_id)] || null
+        ])
+    );
+
+    const photos = await Promise.all(
+        uniqueRows.map(row => getRpCharacterPhoto(row.character_id))
+    );
+
+    tracker.innerHTML = uniqueRows.map((row, index) => {
         const character = row.characters || {};
         const isSelf = row.character_id === window.activeCharacterId;
+        const photo = photos[index];
 
         let place;
         let status;
+        let modeLabel;
 
         if (row.presence_type === "road") {
-            place = `${escapeHtml(row.from_location)} → ${escapeHtml(row.to_location)}`;
-            status = `В пути · ${escapeHtml(row.from_region)} → ${escapeHtml(row.to_region)}`;
+            place = `${escapeHtml(row.from_location || "Неизвестно")} <span class="lorgus-people-route-arrow">→</span> ${escapeHtml(row.to_location || "Неизвестно")}`;
+            status = `${escapeHtml(row.from_region || "Неизвестный край")} → ${escapeHtml(row.to_region || "Неизвестный край")}`;
+            modeLabel = "В ПУТИ";
         } else {
             place = escapeHtml(row.location || "Неизвестно");
             status = escapeHtml(row.region || "Неизвестный край");
+            modeLabel = "В ЛОКАЦИИ";
         }
 
         return `
-            <article class="lorgus-location-card" style="cursor:default">
-                <span class="lorgus-location-card-mark">${row.presence_type === "road" ? "→" : "✦"}</span>
-                <strong>${escapeHtml(character.name || "Без имени")}${isSelf ? " · Вы" : ""}${renderTitleBadge(trackerActiveMap[String(row.character_id)], "lorgus-public-title")}</strong>
-                <small>${escapeHtml(character.race || "Персонаж")}</small>
-                <p>${place}<br><span>${status}</span></p>
+            <article class="lorgus-person-card ${isSelf ? "is-self" : ""}">
+                <div class="lorgus-person-photo">
+                    ${photo
+                        ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(character.name || "Персонаж")}" loading="lazy" decoding="async">`
+                        : `<div class="lorgus-person-photo-missing"><span>✦</span><small>ПОРТРЕТ НЕ ДОСТУПЕН</small></div>`
+                    }
+                    <span class="lorgus-person-presence-dot"></span>
+                </div>
+
+                <div class="lorgus-person-body">
+                    <div class="lorgus-person-topline">
+                        <span class="lorgus-person-mode">${modeLabel}</span>
+                        ${isSelf ? '<span class="lorgus-person-self">ВЫ</span>' : ""}
+                    </div>
+
+                    <h2>${escapeHtml(character.name || "Без имени")}</h2>
+                    ${renderTitleBadge(trackerActiveMap[String(row.character_id)], "lorgus-public-title")}
+                    <div class="lorgus-person-race">${escapeHtml(character.race || "Персонаж")}</div>
+
+                    <div class="lorgus-person-place">
+                        <span class="lorgus-person-place-mark">⌖</span>
+                        <div>
+                            <strong>${place}</strong>
+                            <small>${status}</small>
+                        </div>
+                    </div>
+                </div>
             </article>
         `;
     }).join("");
+
+    const count = document.getElementById("lorgus-people-count");
+    if (count) count.textContent = String(uniqueRows.length);
 }
 
 function renderKingdomLocations(regionName) {
