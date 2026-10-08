@@ -1,75 +1,131 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
 <defs>
- <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#111a1d"/><stop offset=".55" stop-color="#626b68"/><stop offset="1" stop-color="#202629"/></linearGradient>
- <linearGradient id="stone" x2="0" y2="1"><stop stop-color="#d9ddd5"/><stop offset="1" stop-color="#6d7672"/></linearGradient>
- <linearGradient id="armor" x2="0" y2="1"><stop stop-color="#ffffff"/><stop offset=".5" stop-color="#e9eeea"/><stop offset="1" stop-color="#9ca5a3"/></linearGradient>
- <radialGradient id="light"><stop stop-color="#fffef2" stop-opacity=".95"/><stop offset=".5" stop-color="#e8e7cf" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
- <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#7e8179"/><stop offset="1" stop-color="#292d2d"/></linearGradient>
+ <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#101619"/><stop offset=".48" stop-color="#56615f"/><stop offset="1" stop-color="#191e20"/></linearGradient>
+ <linearGradient id="stone" x2="0" y2="1"><stop stop-color="#e3e5df"/><stop offset=".55" stop-color="#a7ada8"/><stop offset="1" stop-color="#555d5b"/></linearGradient>
+ <linearGradient id="armor" x2=".15" y2="1"><stop stop-color="#fff"/><stop offset=".34" stop-color="#f0f3ef"/><stop offset=".72" stop-color="#c7ceca"/><stop offset="1" stop-color="#737c79"/></linearGradient>
+ <linearGradient id="steel" x2="0" y2="1"><stop stop-color="#fafcf8"/><stop offset=".5" stop-color="#cfd5d1"/><stop offset="1" stop-color="#626b68"/></linearGradient>
+ <radialGradient id="holyLight"><stop stop-color="#fffef1" stop-opacity=".95"/><stop offset=".4" stop-color="#e9eadf" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+ <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#777d79"/><stop offset="1" stop-color="#24292a"/></linearGradient>
+ <filter id="glow"><feGaussianBlur stdDeviation="18"/></filter>
 </defs>
+
 <rect width="1600" height="900" fill="url(#bg)"/>
-<!-- immense council chamber -->
-<path d="M80 0H1520V690Q1450 630 1370 605H230Q150 630 80 690Z" fill="#252d2e"/>
-<path d="M170 0H1430V620Q1350 565 1270 545H330Q250 565 170 620Z" fill="#707873" stroke="#3a4140" stroke-width="18"/>
-<!-- tall neutral pillars -->
-<g fill="#aeb5ae" stroke="#454c4b" stroke-width="14">
- <path d="M150 70h110v520H150z"/><path d="M330 30h95v500h-95z"/>
- <path d="M1175 30h95v500h-95z"/><path d="M1340 70h110v520h-110z"/>
+<!-- monumental council hall -->
+<path d="M90 0H1510V610Q1380 545 1250 535H350Q220 545 90 610Z" fill="#252d2e"/>
+<path d="M155 0H1445V600Q1335 520 1210 505H390Q265 520 155 600Z" fill="#737b77" stroke="#343c3b" stroke-width="18"/>
+
+<!-- architecture -->
+<g fill="url(#stone)" stroke="#414947" stroke-width="13">
+ <path d="M125 65h105v545H125z"/><path d="M330 25h82v490h-82z"/>
+ <path d="M1188 25h82v490h-82z"/><path d="M1370 65h105v545h-105z"/>
 </g>
-<!-- windows -->
-<g fill="#cfd6cf" stroke="#4a5250" stroke-width="13">
- <path d="M455 70h105v300l-52 55-53-55z"/><path d="M1040 70h105v300l-52 55-53-55z"/>
+<g fill="#dce1db" stroke="#505855" stroke-width="12">
+ <path d="M475 55h105v285l-52 62-53-62z"/>
+ <path d="M1020 55h105v285l-52 62-53-62z"/>
 </g>
-<!-- neutral banners, no church symbols -->
-<g fill="#e9ece6" opacity=".82"><path d="M300 90h38v210l-19 28-19-28z"/><path d="M1262 90h38v210l-19 28-19-28z"/></g>
-<!-- council dais -->
-<ellipse cx="800" cy="515" rx="360" ry="165" fill="#303738" stroke="#171c1d" stroke-width="22"/>
-<ellipse cx="800" cy="505" rx="315" ry="135" fill="#9b9d91" stroke="#555b59" stroke-width="15"/>
-<ellipse cx="800" cy="495" rx="255" ry="105" fill="#3d4544" stroke="#c2c5bb" stroke-width="9"/>
-<!-- council table -->
-<ellipse cx="800" cy="485" rx="225" ry="88" fill="#252c2c" stroke="#d4d7cc" stroke-width="12"/>
-<ellipse cx="800" cy="485" rx="150" ry="55" fill="#171d1e"/>
-<!-- chairs -->
-<g fill="#c1c5bd" stroke="#424847" stroke-width="10">
- <path d="M550 430h55v90h-55z"/><path d="M665 375h55v90h-55z"/><path d="M880 375h55v90h-55z"/><path d="M995 430h55v90h-55z"/>
- <path d="M600 585h55v75h-55z"/><path d="M945 585h55v75h-55z"/>
+
+<!-- neutral banners -->
+<g fill="#f2f4ee" opacity=".8">
+ <path d="M280 95h32v205l-16 30-16-30z"/><path d="M1288 95h32v205l-16 30-16-30z"/>
 </g>
-<!-- colossal guardian behind council -->
-<ellipse cx="800" cy="270" rx="280" ry="250" fill="url(#light)" opacity=".7"/>
-<!-- cape -->
-<path d="M680 395Q705 290 720 205H880Q895 290 920 395L850 430H750Z" fill="#e7ebe7" stroke="#707876" stroke-width="15"/>
-<!-- legs -->
-<g fill="url(#armor)" stroke="#5b6361" stroke-width="15">
- <path d="M735 385L790 380 775 555 710 555Z"/><path d="M810 380L865 385 890 555 825 555Z"/>
- <path d="M705 535h70l-12 70h-78z"/><path d="M825 535h70l20 70h-78z"/>
+
+<!-- light behind guardian -->
+<ellipse cx="800" cy="285" rx="390" ry="310" fill="url(#holyLight)" filter="url(#glow)"/>
+<ellipse cx="800" cy="285" rx="300" ry="255" fill="url(#holyLight)" opacity=".72"/>
+
+<!-- COUNCIL TABLE -->
+<ellipse cx="800" cy="530" rx="405" ry="170" fill="#252c2c" stroke="#111718" stroke-width="24"/>
+<ellipse cx="800" cy="515" rx="355" ry="142" fill="#a3a69d" stroke="#505653" stroke-width="14"/>
+<ellipse cx="800" cy="500" rx="285" ry="105" fill="#333b3a" stroke="#d7d9d0" stroke-width="10"/>
+<ellipse cx="800" cy="492" rx="220" ry="78" fill="#1c2223" stroke="#727976" stroke-width="7"/>
+
+<!-- chairs around the table -->
+<g fill="#d1d4cd" stroke="#454c4a" stroke-width="11">
+ <path d="M505 450h60v108h-60z"/><path d="M615 385h60v102h-60z"/>
+ <path d="M925 385h60v102h-60z"/><path d="M1035 450h60v108h-60z"/>
+ <path d="M580 610h62v86h-62z"/><path d="M958 610h62v86h-62z"/>
 </g>
-<!-- torso -->
-<path d="M715 205Q800 165 885 205L865 390Q800 430 735 390Z" fill="url(#armor)" stroke="#515957" stroke-width="16"/>
-<path d="M755 225h90v115h-90z" fill="#c9ceca" stroke="#6b7370" stroke-width="10"/>
-<!-- shoulders and arms -->
-<g fill="url(#armor)" stroke="#555d5a" stroke-width="15">
- <ellipse cx="700" cy="225" rx="48" ry="38"/><ellipse cx="900" cy="225" rx="48" ry="38"/>
- <path d="M670 235L610 365 655 390 730 275Z"/><path d="M930 235L990 365 945 390 870 275Z"/>
- <path d="M605 350l45 20-20 70-48-20z"/><path d="M995 350l-45 20 20 70 48-20z"/>
+
+<!-- COLOSSAL KNIGHT / ORDER OF THE IMMOVABLE CIRCLE -->
+<!-- cloak silhouette -->
+<path d="M660 410Q685 310 706 245L735 205H865L894 245Q915 310 940 410L890 455H710Z"
+ fill="#e8ece7" stroke="#555e5a" stroke-width="17"/>
+<path d="M704 260Q730 300 800 315Q870 300 896 260L885 410Q800 452 715 410Z" fill="#c9cfca" opacity=".55"/>
+
+<!-- legs, articulated -->
+<g fill="url(#armor)" stroke="#555e5a" stroke-width="16">
+ <path d="M731 372L793 378L783 553L700 553L716 470Z"/>
+ <path d="M807 378L869 372L884 470L900 553L817 553Z"/>
+ <path d="M698 535H784L774 610L682 610Z"/>
+ <path d="M816 535H902L918 610L826 610Z"/>
 </g>
+<!-- knee plates -->
+<g fill="#f5f7f3" stroke="#606966" stroke-width="12">
+ <path d="M716 462Q758 438 790 462L786 515Q750 535 712 512Z"/>
+ <path d="M810 462Q842 438 884 462L888 512Q850 535 814 515Z"/>
+</g>
+<!-- boots -->
+<g fill="#8d9692" stroke="#4c5451" stroke-width="13">
+ <path d="M682 585h96v32q-30 32-108 20z"/><path d="M822 585h96q12 40-4 52-78 12-108-20z"/>
+</g>
+
+<!-- torso armor -->
+<path d="M713 198Q800 158 887 198L870 397Q800 438 730 397Z" fill="url(#armor)" stroke="#4e5754" stroke-width="18"/>
+<!-- breastplate geometry -->
+<path d="M755 215Q800 232 845 215L850 345Q800 375 750 345Z" fill="#f8faf6" stroke="#7a827f" stroke-width="9"/>
+<path d="M800 225V360" stroke="#a3aaa6" stroke-width="7"/>
+<path d="M765 278Q800 295 835 278" fill="none" stroke="#c2c8c4" stroke-width="8"/>
+<!-- waist -->
+<path d="M730 382Q800 410 870 382L862 425Q800 447 738 425Z" fill="#8e9793" stroke="#4c5552" stroke-width="12"/>
+
+<!-- pauldrons -->
+<g fill="url(#armor)" stroke="#505955" stroke-width="16">
+ <path d="M710 202Q662 205 640 244Q657 278 710 278L742 242Z"/>
+ <path d="M890 202Q938 205 960 244Q943 278 890 278L858 242Z"/>
+</g>
+<!-- arms + gauntlets -->
+<g fill="url(#armor)" stroke="#555e5a" stroke-width="15">
+ <path d="M665 260L610 382L659 405L735 288Z"/>
+ <path d="M935 260L990 382L941 405L865 288Z"/>
+ <path d="M604 365L660 387L642 450L583 426Z"/>
+ <path d="M996 365L940 387L958 450L1017 426Z"/>
+</g>
+<!-- gauntlet fingers -->
+<g fill="none" stroke="#7b8480" stroke-width="6">
+ <path d="M590 418l45 18M595 403l44 18M965 436l45-18M961 421l44-18"/>
+</g>
+
 <!-- helmet -->
-<path d="M745 110Q800 70 855 110L865 200Q800 245 735 200Z" fill="url(#armor)" stroke="#4e5653" stroke-width="16"/>
-<path d="M750 150h100v38l-50 15-50-15z" fill="#31393a"/>
-<path d="M765 128h70" stroke="#fff" stroke-width="9"/>
-<!-- enormous white sword -->
-<path d="M980 430L1080 95 1120 95 1045 435Z" fill="#ffffff" stroke="#858c88" stroke-width="14"/>
-<path d="M1025 110L1100 110" stroke="#fff" stroke-width="10"/>
-<path d="M965 420h105v28H965z" fill="#eef1eb" stroke="#555c59" stroke-width="10"/>
-<path d="M1000 448h35v95h-35z" fill="#b7bdb8" stroke="#555c59" stroke-width="9"/>
-<!-- floor -->
-<path d="M0 610Q260 555 520 620Q800 680 1080 620Q1340 555 1600 610V900H0Z" fill="url(#floor)"/>
-<!-- radial floor stones -->
-<g stroke="#9a9b91" stroke-width="8" opacity=".55">
- <path d="M0 900L650 650M300 900L700 660M1600 900L950 650M1300 900L900 660M800 900V660"/>
- <path d="M120 720H1480M40 800H1560"/>
+<path d="M742 118Q800 68 858 118L870 203Q846 245 800 254Q754 245 730 203Z" fill="url(#steel)" stroke="#4a5350" stroke-width="18"/>
+<!-- helmet crown -->
+<path d="M758 112Q800 82 842 112" fill="none" stroke="#fff" stroke-width="12"/>
+<!-- visor -->
+<path d="M738 153Q800 135 862 153L858 201Q800 222 742 201Z" fill="#252d2e" stroke="#6f7774" stroke-width="10"/>
+<g stroke="#dce1dc" stroke-width="6">
+ <path d="M755 155v48M775 150v58M795 147v61M815 150v58M835 155v48"/>
 </g>
+<!-- neck seal -->
+<path d="M755 205Q800 230 845 205L852 225Q800 255 748 225Z" fill="#707976" stroke="#444c49" stroke-width="10"/>
+
+<!-- enormous white sword, held vertically -->
+<path d="M1045 462L1118 82L1150 82L1090 463Z" fill="#fff" stroke="#69716e" stroke-width="14"/>
+<path d="M1134 94L1147 94" stroke="#fff" stroke-width="9"/>
+<path d="M1018 447H1104V476H1018Z" fill="#edf1ec" stroke="#505854" stroke-width="11"/>
+<path d="M1045 476H1080V590H1045Z" fill="#b8bfba" stroke="#505854" stroke-width="10"/>
+<path d="M1034 586H1092L1103 605H1023Z" fill="#e9ece6" stroke="#4e5653" stroke-width="9"/>
+
+<!-- foreground floor -->
+<path d="M0 625Q260 565 535 625Q800 680 1065 625Q1340 565 1600 625V900H0Z" fill="url(#floor)"/>
+<g stroke="#9da19a" stroke-width="8" opacity=".5">
+ <path d="M0 900L655 660M280 900L710 670M1600 900L945 660M1320 900L890 670M800 900V670"/>
+ <path d="M90 720H1510M25 810H1575"/>
+</g>
+
 <!-- foreground columns -->
-<g fill="#565f5c" stroke="#252b2b" stroke-width="16"><path d="M0 420h135v480H0z"/><path d="M1465 420h135v480h-135z"/></g>
-<g fill="#aab0aa" stroke="#4a514f" stroke-width="12"><path d="M20 450h95v330H20z"/><path d="M1485 450h95v330h-95z"/></g>
-<!-- light -->
-<ellipse cx="800" cy="290" rx="510" ry="390" fill="url(#light)" opacity=".42"/>
+<g fill="#4f5855" stroke="#222829" stroke-width="17">
+ <path d="M0 410h135v490H0z"/><path d="M1465 410h135v490h-135z"/>
+</g>
+<g fill="#aeb4ae" stroke="#49514e" stroke-width="12">
+ <path d="M20 450h95v340H20z"/><path d="M1485 450h95v340h-95z"/>
+</g>
 </svg>
