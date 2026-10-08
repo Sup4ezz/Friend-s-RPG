@@ -16778,3 +16778,14 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-transition-clone .lorgus-subpage-utility{
     position:absolute!important;
 }
+
+
+/* Во время перелистывания двигается весь экран, без прокрутки страницы. */
+html.lorgus-screen-transitioning,
+body.lorgus-screen-transitioning{
+    overflow:hidden!important;
+}
+.lorgus-transition-screen{
+    contain:layout paint;
+    transform-origin:center center;
+}
