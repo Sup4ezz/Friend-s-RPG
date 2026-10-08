@@ -9,6 +9,7 @@ function renderLorgusRpHub() {
     const place = isLocation ? p.location : isRoad ? "В пути" : "Место не выбрано";
     const region = isLocation ? (p.region || "Неизвестный регион") : isRoad ? ((p.fromRegion || "?") + " → " + (p.toRegion || "?")) : "Мир ещё не определил твоё положение";
     const characterName = window.activeCharacter.name || "Персонаж";
+    const sceneArt = isLocation ? window.getLorgusRpLocationArt?.(p.location) : null;
 
     const enterAction = isLocation
         ? "window.enterLocationRp(" + JSON.stringify(p.location) + "," + JSON.stringify(p.region) + ")"
@@ -49,6 +50,7 @@ function renderLorgusRpHub() {
                         <span class="lorgus-rp-state"><i></i>${stateLabel}</span>
                         <span class="lorgus-rp-scene-index">01</span>
                     </div>
+${sceneArt ? `<div class="lorgus-rp-scene-art" style="background-image:url('${sceneArt}')" aria-hidden="true"></div>` : ""}
                     <div class="lorgus-rp-scene-center">
                         <span class="lorgus-rp-label">ТЕКУЩАЯ СЦЕНА</span>
                         <h2>${window.escapeHtml(place)}</h2>
@@ -67,7 +69,7 @@ function renderLorgusRpHub() {
                         <div><small>МИР</small><strong>Люди рядом</strong><p>Посмотреть персонажей, чьё местоположение открыто.</p></div>
                         <b>→</b>
                     </button>
-                    <button type="button" class="lorgus-rp-side-card" onclick="window.renderLorgusWorldMapCurrent?.()">
+                    <button type="button" class="lorgus-rp-side-card" onclick="window.openLorgusWorldRoads?.()">
                         <span class="lorgus-rp-side-number">03</span>
                         <div><small>ПУТЬ</small><strong>Дороги мира</strong><p>Выбрать новое направление и отправиться в путешествие.</p></div>
                         <b>→</b>
