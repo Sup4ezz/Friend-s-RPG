@@ -458,13 +458,25 @@ async function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion
             <section class="lorgus-road-destinations">
                 <div class="lorgus-world-section-title">ДОСТУПНЫЕ НАПРАВЛЕНИЯ</div>
                 <div class="lorgus-road-destination-grid">
-                    ${choices.slice(0, 12).map(item => `
+                    ${choices.slice(0, 12).map(item => {
+                        const regionData = LORGUS_LOCATIONS[item.region];
+                        const locationData = (regionData?.locations || []).find(([name]) => name === item.location);
+                        const description = locationData?.[2] || "Описание этой локации ещё не добавлено.";
+                        const subtitle = locationData?.[1] || regionData?.subtitle || item.region;
+                        const art = window.getLorgusRpLocationArt?.(item.location) || "";
+                        return `
                         <button class="lorgus-road-destination ${item.location === toLocation && item.region === toRegion ? "selected" : ""}" type="button"
                             onclick="startTravel('${escapeHtml(fromLocation)}','${escapeHtml(fromRegion)}','${escapeHtml(item.location)}','${escapeHtml(item.region)}')">
-                            <strong>${escapeHtml(item.location)}</strong>
-                            <small>${escapeHtml(item.region)}</small>
+                            <span class="lorgus-road-destination-art"${art ? ` style="background-image:url('${art}')"` : ""}></span>
+                            <span class="lorgus-road-destination-content">
+                                <span class="lorgus-road-destination-kicker">${escapeHtml(item.travelType === "sea" ? "МОРСКОЙ ПУТЬ" : "СУХОПУТНЫЙ ПУТЬ")}</span>
+                                <strong>${escapeHtml(item.location)}</strong>
+                                <small>${escapeHtml(subtitle)}</small>
+                                <p>${escapeHtml(description)}</p>
+                            </span>
                         </button>
-                    `).join("")}
+                    `;
+                    }).join("")}
                 </div>
             </section>
 
