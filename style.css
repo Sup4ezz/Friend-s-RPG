@@ -17167,3 +17167,41 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
     background:linear-gradient(180deg,rgba(0,0,0,.08),rgba(0,0,0,.42))!important;
     pointer-events:none!important;
 }
+
+/* LORGUS — ROAD CHAT MATCHES MESSENGER */
+.lorgus-road-page{
+    width:100%!important;
+    min-height:100vh!important;
+    height:100vh!important;
+    margin:0!important;
+    padding:0!important;
+}
+.lorgus-road-page .lorgus-messenger-shell{
+    width:100%!important;
+    height:100vh!important;
+    min-height:100vh!important;
+    border:0!important;
+    border-radius:0!important;
+}
+.lorgus-road-page .lorgus-messenger-main{
+    height:100vh!important;
+}
+.lorgus-road-page .road-photo{
+    background:linear-gradient(135deg,#352d22,#14171b)!important;
+    color:#d1b16b!important;
+    font-family:var(--title-font)!important;
+    font-size:20px!important;
+    text-align:center;
+}
+.lorgus-road-page .lorgus-road-arrival-button{
+    min-height:27px;
+    padding:3px 12px;
+    font-size:9px;
+}
+@media(max-width:650px){
+    .lorgus-road-page,
+    .lorgus-road-page .lorgus-messenger-main{
+        height:100vh!important;
+        min-height:100vh!important;
+    }
+}
