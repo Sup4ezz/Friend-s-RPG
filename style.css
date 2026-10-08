@@ -17217,3 +17217,360 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-road-page .lorgus-messenger-feed::before{
     display:none!important;
 }
+
+
+/* =========================================================
+   LORGUS — PEOPLE NEARBY / PORTRAIT CARDS
+   ========================================================= */
+
+.lorgus-people-page {
+    width: min(1540px, calc(100% - 48px));
+}
+
+.lorgus-people-shell {
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 18px;
+}
+
+.lorgus-people-sidebar {
+    min-height: 430px;
+}
+
+.lorgus-people-browser {
+    min-height: 650px;
+}
+
+.lorgus-people-header {
+    min-height: 285px;
+}
+
+.lorgus-people-header-line {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    margin-top:24px;
+    padding-top:15px;
+    border-top:1px solid rgba(217,183,108,.13);
+    color:#968a76;
+    font-size:9px;
+    letter-spacing:.18em;
+}
+
+.lorgus-people-header-line span {
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+
+.lorgus-people-header-line i {
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#9ccf78;
+    box-shadow:0 0 12px rgba(156,207,120,.65);
+}
+
+.lorgus-people-header-line b {
+    color:var(--l-gold-bright);
+    font-family:var(--title-font);
+    font-size:22px;
+    font-weight:500;
+    letter-spacing:.04em;
+}
+
+.lorgus-people-section {
+    padding:0 52px 52px;
+    margin-top:28px;
+}
+
+.lorgus-people-grid {
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:14px;
+}
+
+.lorgus-person-card {
+    position:relative;
+    min-width:0;
+    display:grid;
+    grid-template-columns:148px minmax(0,1fr);
+    min-height:188px;
+    overflow:hidden;
+    border:1px solid rgba(217,183,108,.15);
+    background:
+        linear-gradient(135deg,rgba(30,25,18,.94),rgba(10,9,8,.98));
+    box-shadow:0 16px 38px rgba(0,0,0,.32);
+    transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease;
+}
+
+.lorgus-person-card::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(90deg,transparent 50%,rgba(217,183,108,.035));
+}
+
+.lorgus-person-card:hover {
+    transform:translateY(-3px);
+    border-color:rgba(217,183,108,.38);
+    box-shadow:0 22px 48px rgba(0,0,0,.46),0 0 35px rgba(217,183,108,.055);
+}
+
+.lorgus-person-card.is-self {
+    border-color:rgba(217,183,108,.38);
+}
+
+.lorgus-person-photo {
+    position:relative;
+    min-height:188px;
+    overflow:hidden;
+    background:#11100d;
+}
+
+.lorgus-person-photo::after {
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:
+        linear-gradient(90deg,transparent 55%,rgba(10,9,8,.82) 100%),
+        linear-gradient(180deg,rgba(0,0,0,.02),rgba(0,0,0,.48));
+}
+
+.lorgus-person-photo img {
+    width:100%;
+    height:100%;
+    display:block;
+    object-fit:cover;
+    object-position:center;
+    filter:saturate(.88) contrast(1.05);
+    transform:scale(1.015);
+    transition:transform .45s ease,filter .45s ease;
+}
+
+.lorgus-person-card:hover .lorgus-person-photo img {
+    transform:scale(1.045);
+    filter:saturate(1) contrast(1.06);
+}
+
+.lorgus-person-photo-missing {
+    position:absolute;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    color:#7d735f;
+    background:
+        radial-gradient(circle at 50% 38%,rgba(217,183,108,.08),transparent 35%),
+        #100f0c;
+    z-index:1;
+}
+
+.lorgus-person-photo-missing span {
+    font-size:30px;
+    color:#bda065;
+}
+
+.lorgus-person-photo-missing small {
+    max-width:90px;
+    text-align:center;
+    font-size:7px;
+    letter-spacing:.16em;
+}
+
+.lorgus-person-presence-dot {
+    position:absolute;
+    right:12px;
+    bottom:12px;
+    z-index:3;
+    width:9px;
+    height:9px;
+    border:2px solid #17140f;
+    border-radius:50%;
+    background:#9ccf78;
+    box-shadow:0 0 12px rgba(156,207,120,.7);
+}
+
+.lorgus-person-body {
+    position:relative;
+    z-index:2;
+    min-width:0;
+    padding:20px 20px 18px 17px;
+}
+
+.lorgus-person-topline {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    min-height:15px;
+}
+
+.lorgus-person-mode,
+.lorgus-person-self {
+    color:#8f836e;
+    font-size:8px;
+    letter-spacing:.18em;
+}
+
+.lorgus-person-self {
+    color:var(--l-gold-bright);
+}
+
+.lorgus-person-body h2 {
+    margin:8px 0 3px;
+    color:#f0dfb1;
+    font-family:var(--title-font);
+    font-size:25px;
+    line-height:1.08;
+    font-weight:500;
+    letter-spacing:.02em;
+}
+
+.lorgus-person-race {
+    margin-top:6px;
+    color:#918674;
+    font-size:11px;
+}
+
+.lorgus-person-body .lorgus-public-title {
+    display:inline-block;
+    margin-top:2px;
+    max-width:100%;
+}
+
+.lorgus-person-place {
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin-top:18px;
+    padding-top:12px;
+    border-top:1px solid rgba(255,255,255,.055);
+}
+
+.lorgus-person-place-mark {
+    color:var(--l-gold);
+    font-size:18px;
+    line-height:1;
+}
+
+.lorgus-person-place strong {
+    display:block;
+    overflow:hidden;
+    color:#d6c7a6;
+    font-family:var(--title-font);
+    font-size:14px;
+    font-weight:500;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.lorgus-person-place small {
+    display:block;
+    margin-top:3px;
+    color:#786f61;
+    font-size:9px;
+    letter-spacing:.05em;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+.lorgus-people-route-arrow {
+    padding:0 3px;
+    color:var(--l-gold);
+}
+
+.lorgus-people-loading,
+.lorgus-people-empty {
+    grid-column:1/-1;
+    min-height:300px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    border:1px solid rgba(217,183,108,.12);
+    background:rgba(7,6,5,.35);
+    text-align:center;
+}
+
+.lorgus-people-loading strong,
+.lorgus-people-empty strong {
+    margin-top:15px;
+    color:#d8c79f;
+    font-family:var(--title-font);
+    font-size:22px;
+    font-weight:500;
+}
+
+.lorgus-people-loading small,
+.lorgus-people-empty p {
+    margin:7px 0 0;
+    color:#7f7668;
+    font-size:11px;
+}
+
+.lorgus-people-empty > span {
+    color:var(--l-gold);
+    font-size:28px;
+}
+
+.lorgus-people-loading-ring {
+    width:30px;
+    height:30px;
+    border:1px solid rgba(217,183,108,.22);
+    border-top-color:var(--l-gold);
+    border-radius:50%;
+    animation:lorgusPeopleSpin .8s linear infinite;
+}
+
+@keyframes lorgusPeopleSpin {
+    to { transform:rotate(360deg); }
+}
+
+@media (max-width:1100px) {
+    .lorgus-people-grid {
+        grid-template-columns:1fr;
+    }
+}
+
+@media (max-width:800px) {
+    .lorgus-people-page {
+        width:calc(100% - 24px);
+    }
+
+    .lorgus-people-section {
+        padding:0 20px 30px;
+    }
+
+    .lorgus-person-card {
+        grid-template-columns:120px minmax(0,1fr);
+    }
+
+    .lorgus-person-photo {
+        min-height:175px;
+    }
+
+    .lorgus-person-body {
+        padding:17px 15px;
+    }
+}
+
+@media (max-width:560px) {
+    .lorgus-person-card {
+        grid-template-columns:1fr;
+    }
+
+    .lorgus-person-photo {
+        height:230px;
+        min-height:230px;
+    }
+
+    .lorgus-person-body {
+        padding:16px;
+    }
+}
