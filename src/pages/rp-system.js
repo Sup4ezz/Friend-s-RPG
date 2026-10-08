@@ -82,6 +82,14 @@ async function renderWorldCharacterTracker() {
 }
 
 function renderKingdomLocations(regionName) {
+    if (
+        window.lorgusRouter?.parseRpChatPath &&
+        window.lorgusRouter.parseRpChatPath(window.lorgusRouter.currentPath)
+    ) {
+        window.lorgusRouter.navigate("/world");
+        return;
+    }
+
     const container = document.getElementById("cabinet-content");
     const region = LORGUS_LOCATIONS[regionName];
     if (!container || !region) return;
