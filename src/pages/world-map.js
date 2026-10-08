@@ -532,6 +532,7 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
     window.lorgusMainMenuNavigating = true;
 
     const outgoing = current.cloneNode(true);
+    outgoing.classList.add("lorgus-transition-clone");
     outgoing.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
     outgoing.style.cssText += ";position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;margin:0!important;z-index:9998!important;pointer-events:none!important;overflow:hidden!important;";
     document.body.appendChild(outgoing);
@@ -579,10 +580,6 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
             window.lorgusMainMenuNavigating = false;
         }, 650);
     }));
-};
-
-window.lorgusMainMenuNavigate = function(direction, renderTarget) {
-    return window.lorgusSubpageTransition(direction, renderTarget);
 };
 
 window.lorgusMainMenuNavigate = function(direction, renderTarget) {
