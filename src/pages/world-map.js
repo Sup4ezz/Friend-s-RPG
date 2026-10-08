@@ -523,9 +523,8 @@ function showLorgusMapEditorMode(container) {
 window.lorgusSubpageTransition = function(direction, renderTarget) {
     if (typeof renderTarget !== "function" || window.lorgusMainMenuNavigating) return;
 
-    const container = document.getElementById("cabinet-content");
-    const current = container?.firstElementChild;
-    if (!container || !current) {
+    const current = document.querySelector("#cabinet-content > *");
+    if (!current) {
         renderTarget();
         return;
     }
@@ -534,13 +533,13 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
 
     const outgoing = current.cloneNode(true);
     outgoing.querySelectorAll("[id]").forEach(el => el.removeAttribute("id"));
-    outgoing.style.cssText += ";position:fixed;inset:0;width:100vw;height:100vh;margin:0;z-index:9998;pointer-events:none;overflow:hidden;";
+    outgoing.style.cssText += ";position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;margin:0!important;z-index:9998!important;pointer-events:none!important;overflow:hidden!important;";
     document.body.appendChild(outgoing);
 
     renderTarget();
 
-    const incoming = container.firstElementChild;
-    if (!incoming) {
+    const incoming = document.querySelector("#cabinet-content > *");
+    if (!incoming || incoming === outgoing) {
         outgoing.remove();
         window.lorgusMainMenuNavigating = false;
         return;
@@ -550,6 +549,7 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
     const outgoingEnd = { top:"100%", bottom:"-100%", left:"100%", right:"-100%" }[direction];
     const incomingStart = { top:"-100%", bottom:"100%", left:"-100%", right:"100%" }[direction];
 
+    incoming.style.cssText += ";position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;margin:0!important;z-index:9999!important;overflow:hidden!important;";
     incoming.style.willChange = "transform";
     incoming.style.transition = "none";
     incoming.style.transform = `translate${axis}(${incomingStart})`;
@@ -570,9 +570,19 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
             incoming.style.willChange = "";
             incoming.style.transition = "";
             incoming.style.transform = "";
+            incoming.style.position = "";
+            incoming.style.inset = "";
+            incoming.style.width = "";
+            incoming.style.height = "";
+            incoming.style.margin = "";
+            incoming.style.zIndex = "";
             window.lorgusMainMenuNavigating = false;
         }, 650);
     }));
+};
+
+window.lorgusMainMenuNavigate = function(direction, renderTarget) {
+    return window.lorgusSubpageTransition(direction, renderTarget);
 };
 
 window.lorgusMainMenuNavigate = function(direction, renderTarget) {
