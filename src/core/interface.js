@@ -367,6 +367,15 @@ async function appendRpMessage(message) {
 
     feed.appendChild(article);
 
+    const characterLink = article.querySelector(".lorgus-messenger-message-meta strong");
+    if (characterLink && typeof window.openRpCharacterQuickCard === "function") {
+        characterLink.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            window.openRpCharacterQuickCard(message.character_id, characterLink);
+        });
+    }
+
     const { data: uses, error } = await window.supabaseClient
         .from("rp_message_item_uses")
         .select("item_id, quantity, status, items(name, icon, color, rarity)")
