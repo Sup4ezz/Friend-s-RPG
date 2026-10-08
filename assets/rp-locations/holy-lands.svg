@@ -51,13 +51,6 @@
 <path d="M738 153Q800 134 862 153L858 204Q800 226 742 204Z" fill="#1e2628" stroke="#68716d" stroke-width="10"/>
 <g stroke="#dce2dd" stroke-width="6"><path d="M755 155v48M775 150v58M795 147v61M815 150v58M835 155v48"/></g>
 
-<!-- GREAT SWORD, unmistakable -->
-<path d="M1020 430L1080 105L1140 430L1100 415L1080 430L1060 415Z" fill="url(#blade)" stroke="#4f5855" stroke-width="14"/>
-<path d="M1080 105V410" stroke="#fff" stroke-width="8"/>
-<path d="M1000 425H1160V458H1000Z" fill="#edf1ec" stroke="#4b5451" stroke-width="12"/>
-<path d="M1057 458H1103V570H1057Z" fill="#707976" stroke="#474f4c" stroke-width="12"/>
-<path d="M1045 570Q1080 590 1115 570L1122 607Q1080 630 1038 607Z" fill="#e8ece7" stroke="#474f4c" stroke-width="11"/>
-
 <!-- FLOOR / perspective -->
 <path d="M0 555Q390 505 800 520Q1210 505 1600 555V900H0Z" fill="#343a39"/>
 <g stroke="#9ca19b" stroke-width="7" opacity=".42">
@@ -76,8 +69,8 @@
 
 <!-- chairs follow perspective -->
 <g fill="#cdd2cb" stroke="#444c49" stroke-width="11">
- <path d="M330 485Q360 450 405 460L430 555H350Z"/><path d="M505 395Q540 370 580 380L595 500H520Z"/>
- <path d="M1020 380Q1060 370 1095 395L1080 500H1005Z"/><path d="M1170 460Q1240 450 1270 485L1250 555H1170Z"/>
+ <path d="M205 500Q235 455 290 462L315 585H225Z"/><path d="M430 345Q465 315 510 330L525 485H445Z"/>
+ <path d="M1075 330Q1135 315 1170 345L1155 485H1075Z"/><path d="M1310 462Q1365 455 1395 500L1375 585H1285Z"/>
 </g>
 
 <!-- foreground columns frame the room -->
