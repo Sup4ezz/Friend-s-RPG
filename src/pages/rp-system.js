@@ -1851,23 +1851,87 @@ function getLorgusRpLocationArt(locationName) {
 window.getLorgusRpLocationArt = getLorgusRpLocationArt;
 
 async function openLorgusWorldRoads(event) {
-    if (event) { event.preventDefault(); event.stopPropagation(); }
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
     const container = document.getElementById("cabinet-content");
     if (!container) return false;
 
     container.className = "lorgus-road-page";
-    container.innerHTML = '<div class="lorgus-road-shell lorgus-road-empty-state"><header class="lorgus-road-header"><span class="lorgus-rp-overline">ПЕРЕМЕЩЕНИЕ</span><h1>Дороги мира</h1><p>Определяем текущее положение персонажа…</p></header><section class="lorgus-road-panel"><div class="lorgus-road-current"><span>СТАТУС</span><strong>Загрузка маршрутов</strong><small>Подготавливаем доступные направления.</small></div></section></div>';
+    container.innerHTML = `
+        <div class="lorgus-road-shell lorgus-road-empty-state">
+            <header class="lorgus-road-header">
+                <span class="lorgus-rp-overline">ПЕРЕМЕЩЕНИЕ</span>
+                <h1>Дороги мира</h1>
+                <p>Определяем текущее положение персонажа…</p>
+            </header>
+            <section class="lorgus-road-panel">
+                <div class="lorgus-road-current">
+                    <span>СТАТУС</span>
+                    <strong>Загрузка маршрутов</strong>
+                    <small>Подготавливаем доступные направления.</small>
+                </div>
+            </section>
+        </div>
+    `;
 
     try {
         const presence = await getRpPresence();
-        if (presence?.type === "road") { await renderRoadChat(presence); return false; }
-        if (presence?.type === "location") { renderTravelScreen(presence.location, presence.region, null, null); return false; }
 
-        container.innerHTML = '<div class="lorgus-road-shell lorgus-road-empty-state"><header class="lorgus-road-header"><span class="lorgus-rp-overline">ПЕРЕМЕЩЕНИЕ</span><h1>Дороги мира</h1><p>Персонаж ещё не находится ни в одной локации.</p></header><section class="lorgus-road-panel"><div class="lorgus-road-current"><span>СТАТУС</span><strong>Путь не начат</strong><small>Сначала войди в любую RP-локацию.</small></div></section><div class="lorgus-road-actions"><button class="character-secondary-button" type="button" onclick="window.lorgusSubpageTransition?.('right', window.renderLorgusRpHub)">← Вернуться в ролевую</button></div></div>';
+        if (presence?.type === "road") {
+            await renderRoadChat(presence);
+            return false;
+        }
+
+        if (presence?.type === "location") {
+            renderTravelScreen(presence.location, presence.region, null, null);
+            return false;
+        }
+
+        container.innerHTML = `
+            <div class="lorgus-road-shell lorgus-road-empty-state">
+                <header class="lorgus-road-header">
+                    <span class="lorgus-rp-overline">ПЕРЕМЕЩЕНИЕ</span>
+                    <h1>Дороги мира</h1>
+                    <p>Персонаж ещё не находится ни в одной локации.</p>
+                </header>
+                <section class="lorgus-road-panel">
+                    <div class="lorgus-road-current">
+                        <span>СТАТУС</span>
+                        <strong>Путь не начат</strong>
+                        <small>Сначала войди в любую RP-локацию.</small>
+                    </div>
+                </section>
+                <div class="lorgus-road-actions">
+                    <button class="character-secondary-button" type="button"
+                        onclick="window.lorgusSubpageTransition?.('right', window.renderLorgusRpHub)">
+                        ← Вернуться в ролевую
+                    </button>
+                </div>
+            </div>
+        `;
     } catch (error) {
         console.error("[LORGUS] Не удалось открыть «Дороги мира»:", error);
-        container.innerHTML = '<div class="lorgus-road-shell lorgus-road-empty-state"><header class="lorgus-road-header"><span class="lorgus-rp-overline">ПЕРЕМЕЩЕНИЕ</span><h1>Дороги мира</h1><p>Не удалось получить текущее положение персонажа.</p></header><section class="lorgus-road-panel"><div class="lorgus-road-current"><span>ОШИБКА</span><strong>Маршруты временно недоступны</strong><small>Причина записана в консоль браузера.</small></div></section></div>';
+        container.innerHTML = `
+            <div class="lorgus-road-shell lorgus-road-empty-state">
+                <header class="lorgus-road-header">
+                    <span class="lorgus-rp-overline">ПЕРЕМЕЩЕНИЕ</span>
+                    <h1>Дороги мира</h1>
+                    <p>Не удалось получить текущее положение персонажа.</p>
+                </header>
+                <section class="lorgus-road-panel">
+                    <div class="lorgus-road-current">
+                        <span>ОШИБКА</span>
+                        <strong>Маршруты временно недоступны</strong>
+                        <small>Причина записана в консоль.</small>
+                    </div>
+                </section>
+            </div>
+        `;
     }
+
     return false;
 }
 window.openLorgusWorldRoads = openLorgusWorldRoads;
