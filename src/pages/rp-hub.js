@@ -9,6 +9,11 @@ function renderLorgusRpHub() {
         <button type="button" class="lorgus-subpage-back-arrow right" onclick="window.lorgusSubpageTransition('left', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
             <span>▶</span><b>КАРТА</b>
         </button>
+        <div class="lorgus-subpage-utility">
+    <span class="lorgus-subpage-username">${window.escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>
+    <button type="button" class="lorgus-subpage-notifications" onclick="window.openLorgusNotifications?.()" aria-label="Уведомления" title="Уведомления">♢<b class="lorgus-notification-badge"></b></button>
+    <button type="button" class="lorgus-subpage-logout" onclick="window.logout?.()">ВЫЙТИ</button>
+</div>
         <main class="lorgus-subpage-shell lorgus-rp-page">
             <header class="lorgus-subpage-heading">
                 <span class="lorgus-command-kicker">РОЛЕВАЯ</span>
