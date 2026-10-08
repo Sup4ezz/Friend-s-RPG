@@ -16064,3 +16064,24 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-messenger-main[data-rp-location="Таллирион"]::before{filter:saturate(1.14) hue-rotate(4deg) contrast(1.04) brightness(.8)!important}
 .lorgus-messenger-main[data-rp-location="Эстерваль"]::before{filter:saturate(1.04) hue-rotate(-6deg) contrast(1.07) brightness(.78)!important}
 .lorgus-messenger-main[data-rp-location="Фин"]::before{filter:saturate(.84) hue-rotate(10deg) contrast(1.1) brightness(.72)!important}
+
+
+/* LORGUS — FINAL LOCATION BACKGROUND OVERRIDE
+   Must remain after the base STARFIELD ::before/::after rules. */
+.lorgus-messenger-main::before{
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.10) 0%,rgba(0,0,0,.18) 42%,rgba(0,0,0,.68) 100%),
+    var(--lorgus-raster-bg,#080b10)!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  filter:saturate(.98) contrast(1.08)!important;
+  animation:none!important;
+}
+.lorgus-messenger-main::after{
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.36),transparent 24%,transparent 76%,rgba(0,0,0,.34)),
+    radial-gradient(ellipse at center,transparent 24%,rgba(0,0,0,.48) 100%)!important;
+  box-shadow:inset 0 0 190px rgba(0,0,0,.55)!important;
+  animation:none!important;
+}
