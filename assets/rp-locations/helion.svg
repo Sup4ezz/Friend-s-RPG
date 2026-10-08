@@ -80,7 +80,7 @@
 <g fill="url(#iron)" stroke="#1a1e1f" stroke-width="7">
  <path d="M65 730H300V815H65Z"/><path d="M1300 725H1535V810H1300Z"/>
 </g>
-<g fill="#b1b4b1"><rect x="85" y="700" width="18" height="105" transform="rotate(18 85 700)"/><rect x="125" y="690" width="18" height="120" transform="rotate(8 125 690)"/><rect x="170" y="700" width="18" height="110" transform="rotate(-8 170 700)"/><rect x="1340" y="695" width="18" height="115" transform="rotate(8 1340 695)"/><rect x="1380" y="700" width="18" height="110" transform="rotate(-7 1380 700)"/><rect x="1420" y="690" width="18" height="120" transform="rotate(15 1420 690)"/></g>
+<g fill="#b1b4b1" stroke="#242829" stroke-width="4"><path d="M90 770L115 700L135 705L110 775Z"/><path d="M145 780L165 690L185 695L165 785Z"/><path d="M205 775L220 705L240 710L225 780Z"/><path d="M1340 775L1360 700L1380 705L1360 780Z"/><path d="M1390 780L1410 695L1430 700L1410 785Z"/><path d="M1440 775L1460 705L1480 710L1460 780Z"/></g>
 <!-- sparks -->
 <g fill="#ffd66b"><circle cx="615" cy="470" r="5"/><circle cx="590" cy="430" r="3"/><circle cx="1010" cy="450" r="4"/><circle cx="1040" cy="405" r="3"/><circle cx="350" cy="530" r="4"/><circle cx="1250" cy="520" r="5"/></g>
 <!-- warm forge haze -->
