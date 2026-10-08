@@ -502,69 +502,83 @@ async function renderRoadChat(presence) {
     const character = window.activeCharacter;
     const name = escapeHtml(character?.name || "Без имени");
 
-    container.className = "lorgus-road-page";
+    container.className = "lorgus-rp-page lorgus-road-page";
     container.innerHTML = `
-        <div class="lorgus-rp-shell lorgus-road-chat-shell">
-            <aside class="lorgus-rp-sidebar">
-                <button class="lorgus-rp-back" type="button" onclick="renderRoadChat(window.activeRpPresence)">↻ Обновить путь</button>
-                <div class="lorgus-rp-place-mark">→</div>
-                <span class="lorgus-rp-overline">ДОРОГА</span>
-                <h1>${escapeHtml(presence.fromLocation)} → ${escapeHtml(presence.toLocation)}</h1>
-                <p class="lorgus-rp-region">${escapeHtml(presence.fromRegion)} → ${escapeHtml(presence.toRegion)}</p>
-                <div class="lorgus-rp-divider"></div>
-                <div class="lorgus-rp-sidebar-label">ВАШЕ ПРИСУТСТВИЕ</div>
-                <div class="lorgus-rp-road-lock">
-                    Пока персонаж в пути, он не может писать в чатах исходной или конечной локации.
+        <div class="lorgus-messenger-shell lorgus-road-chat-shell" data-rp-region="${escapeHtml(presence.fromRegion)}" data-rp-location="${escapeHtml(presence.fromLocation)}">
+            <aside class="lorgus-messenger-sidebar">
+                <div class="lorgus-messenger-sidebar-head">
+                    <button class="lorgus-messenger-back" type="button" onclick="window.renderLorgusRpHub?.()">‹ Ролевая</button>
+                    <div class="lorgus-messenger-search">⌕ <span>Поиск в LORGUS</span></div>
                 </div>
-                <div class="lorgus-rp-sidebar-note">
-                    <span>✧</span>
-                    <p>Дорога — самостоятельное RP-пространство. Здесь можно встретить других путников.</p>
+
+                <div class="lorgus-messenger-chat-card active">
+                    <div class="lorgus-messenger-chat-photo road-photo">→</div>
+                    <div class="lorgus-messenger-chat-info">
+                        <strong>${escapeHtml(presence.fromLocation)} → ${escapeHtml(presence.toLocation)}</strong>
+                        <small>${escapeHtml(presence.fromRegion)} → ${escapeHtml(presence.toRegion)}</small>
+                        <em>Живая дорожная сцена</em>
+                    </div>
+                </div>
+
+                <div class="lorgus-messenger-section-title">В ПУТИ</div>
+                <div class="lorgus-messenger-participants" id="lorgus-rp-participants">
+                    <div class="lorgus-messenger-loading">Загрузка участников…</div>
+                </div>
+
+                <div class="lorgus-messenger-my-card">
+                    <div class="lorgus-messenger-avatar large">
+                        <span>✦</span><i></i>
+                    </div>
+                    <div>
+                        <small>ТЫ ИГРАЕШЬ ЗА</small>
+                        <strong>${name}</strong>
+                    </div>
                 </div>
             </aside>
 
-            <main class="lorgus-rp-main">
-                <header class="lorgus-rp-header">
-                    <div>
-                        <span class="lorgus-rp-overline">RP · ДОРОГА</span>
-                        <h2>${escapeHtml(presence.fromLocation)} → ${escapeHtml(presence.toLocation)}</h2>
+            <main class="lorgus-messenger-main" data-rp-region="${escapeHtml(presence.fromRegion)}" data-rp-location="${escapeHtml(presence.fromLocation)}">
+                <header class="lorgus-messenger-header">
+                    <div class="lorgus-messenger-header-photo road-photo">→</div>
+                    <div class="lorgus-messenger-header-info">
+                        <h1>${escapeHtml(presence.fromLocation)} → ${escapeHtml(presence.toLocation)}</h1>
+                        <p><span class="online-dot"></span> Путь · <b id="lorgus-rp-online-count">1</b> участник</p>
                     </div>
-                    <div class="lorgus-rp-status"><i></i> ПУТЬ</div>
+                    <div class="lorgus-messenger-header-actions">
+                        <button type="button" title="Участники" onclick="document.querySelector('.lorgus-messenger-sidebar')?.classList.toggle('mobile-open')">☷</button>
+                        <button type="button" title="Обновить" onclick="renderRoadChat(window.activeRpPresence)">↻</button>
+                    </div>
                 </header>
 
-                <section class="lorgus-rp-feed" id="lorgus-rp-feed">
-                    <div class="lorgus-rp-empty">
-                        <div class="lorgus-rp-symbol">→</div>
-                        <span class="lorgus-rp-stage-kicker">ДОРОЖНЫЙ ЧАТ</span>
-                        <h3>Персонаж находится в пути.</h3>
-                        <p>Пока ты здесь, другие RP-чаты для этого персонажа закрыты.</p>
+                <section class="lorgus-messenger-feed" id="lorgus-rp-feed">
+                    <div class="lorgus-messenger-start">
+                        <div class="lorgus-messenger-start-mark">→</div>
+                        <strong>Ты вышел в путь</strong>
+                        <span>${escapeHtml(presence.fromLocation)} → ${escapeHtml(presence.toLocation)}</span>
+                        <p>Дорога — самостоятельное RP-пространство. Здесь можно встретить других путников и продолжать историю во время путешествия.</p>
                     </div>
                 </section>
 
-                <section class="lorgus-rp-composer">
-                    <div class="lorgus-rp-composer-top">
-                        <span>РОЛЬ: <strong>${name}</strong></span>
-                        <span>ПРОСТРАНСТВО: <b>ДОРОГА</b></span>
+                <section class="lorgus-messenger-composer">
+                    <div class="lorgus-messenger-composer-tools">
+                        <button type="button" onclick="openRpItemPicker()" title="Предмет">＋</button>
+                        <button type="button" onclick="openRpTransferPicker()" title="Передать предмет">◈</button>
+                        <button type="button" onclick="openRpCurrencyTransferPicker()" title="Передать валюту">₿</button>
                     </div>
-                    <div class="lorgus-telegram-composer">
-                        <button class="lorgus-telegram-attach" type="button" aria-label="Действия и предметы" onclick="openRpItemPicker()">📎</button>
-                        <textarea id="lorgus-rp-input" placeholder="Напишите действие или реплику..." rows="1"></textarea>
-                        <button class="lorgus-telegram-send" type="button" aria-label="Отправить" onclick="sendLocalRpMessage()">➤</button>
+                    <div class="lorgus-messenger-input-wrap">
+                        <textarea id="lorgus-rp-input" placeholder="Сообщение от имени ${name}…" rows="1"></textarea>
+                        <span id="lorgus-rp-item-selection" class="lorgus-messenger-item-selection"></span>
                     </div>
-                    <div class="lorgus-rp-composer-tools">
-                        <button class="lorgus-rp-use-item" type="button" onclick="openRpTransferPicker()">Передать предмет</button>
-                        <button class="lorgus-rp-use-item lorgus-rp-transfer-currency" type="button" onclick="openRpCurrencyTransferPicker()">Передать валюту</button>
-                        <span id="lorgus-rp-item-selection" class="lorgus-rp-item-selection"></span>
-                    </div>
+                    <button class="lorgus-messenger-send" type="button" onclick="sendLocalRpMessage()" title="Отправить">➤</button>
                 </section>
 
-                <div class="lorgus-road-arrival">
-                    <button class="gold-button" type="button" onclick="arriveAtDestination()">
-                        Прибыть в ${escapeHtml(presence.toLocation)}
-                    </button>
-                </div>
+                <footer class="lorgus-messenger-footer">
+                    <span>RP · ДОРОГА</span>
+                    <button class="gold-button lorgus-road-arrival-button" type="button" onclick="arriveAtDestination()">Прибыть в ${escapeHtml(presence.toLocation)}</button>
+                </footer>
             </main>
         </div>
     `;
+
     const input = document.getElementById("lorgus-rp-input");
     if (input) {
         input.addEventListener("input", () => {
@@ -579,10 +593,32 @@ async function renderRoadChat(presence) {
         });
     }
 
+    const participants = await loadRpChatParticipants(presence);
+    const box = document.getElementById("lorgus-rp-participants");
+    if (box) {
+        if (!participants.length) {
+            box.innerHTML = '<div class="lorgus-messenger-empty-participants">Пока никого больше нет</div>';
+        } else {
+            const photos = await Promise.all(participants.map(row => getRpCharacterPhoto(row.character_id)));
+            box.innerHTML = participants.map((row,index) => `
+                <div class="lorgus-messenger-participant">
+                    <div class="lorgus-messenger-avatar">
+                        ${photos[index] ? `<img src="${escapeHtml(photos[index])}" alt="">` : "<span>✦</span>"}<i></i>
+                    </div>
+                    <div class="lorgus-messenger-participant-info">
+                        <strong>${escapeHtml(row.characters?.name || "Без имени")}</strong>
+                        <small>${escapeHtml(row.characters?.race || "Путник")}</small>
+                    </div>
+                </div>
+            `).join("");
+            const count = document.getElementById("lorgus-rp-online-count");
+            if (count) count.textContent = String(participants.length + 1);
+        }
+    }
+
     const currentPresence = await getRpPresence();
     await loadRpMessages(currentPresence);
     await subscribeToRpMessages(currentPresence);
-
 }
 
 function renderFloodChat() {
