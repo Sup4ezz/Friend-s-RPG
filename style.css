@@ -16892,3 +16892,70 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-rp-footer{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:18px;color:#665d51;font-size:9px;letter-spacing:.12em}.lorgus-rp-footer strong{color:#9d8c6d;font-weight:500}.lorgus-rp-footer i{width:3px;height:3px;border-radius:50%;background:#8a6b3c}
 @media(max-width:900px){.lorgus-rp-page{width:calc(100vw - 90px);padding-top:78px}.lorgus-rp-command-grid{grid-template-columns:1fr}.lorgus-rp-side{grid-template-columns:1fr 1fr;grid-template-rows:auto;min-height:190px}.lorgus-rp-scene{min-height:440px}.lorgus-rp-footer{flex-wrap:wrap}}
 @media(max-width:600px){.lorgus-rp-page{width:calc(100vw - 60px)}.lorgus-rp-side{grid-template-columns:1fr}.lorgus-rp-scene{padding:20px 18px}.lorgus-rp-scene-center h2{font-size:40px}.lorgus-rp-enter{min-width:210px}.lorgus-rp-footer{display:none}}
+
+/* =========================================================
+   LORGUS // RP HUB — FULLSCREEN EXPANSION
+   ========================================================= */
+.lorgus-rp-page{
+    width:calc(100vw - 116px)!important;
+    max-width:none!important;
+    min-height:100vh!important;
+    padding:92px 28px 42px!important;
+}
+.lorgus-rp-hero{
+    margin-bottom:30px!important;
+}
+.lorgus-rp-command-grid{
+    width:100%!important;
+    min-height:calc(100vh - 300px)!important;
+    grid-template-columns:minmax(0,2.15fr) minmax(330px,.85fr)!important;
+    gap:14px!important;
+}
+.lorgus-rp-scene{
+    min-height:calc(100vh - 300px)!important;
+    padding:30px 38px 32px!important;
+}
+.lorgus-rp-scene-center{
+    max-width:980px!important;
+}
+.lorgus-rp-scene-center h2{
+    font-size:clamp(52px,6vw,92px)!important;
+}
+.lorgus-rp-side{
+    min-height:calc(100vh - 300px)!important;
+    gap:14px!important;
+}
+.lorgus-rp-side-card{
+    padding:30px!important;
+}
+.lorgus-rp-side-card strong{
+    font-size:clamp(24px,2vw,32px)!important;
+}
+.lorgus-rp-side-card p{
+    max-width:360px;
+    font-size:12px!important;
+}
+.lorgus-rp-footer{
+    margin-top:14px!important;
+}
+@media(max-width:900px){
+    .lorgus-rp-page{
+        width:calc(100vw - 86px)!important;
+        padding-left:12px!important;
+        padding-right:12px!important;
+    }
+    .lorgus-rp-command-grid{
+        min-height:auto!important;
+    }
+    .lorgus-rp-scene,
+    .lorgus-rp-side{
+        min-height:440px!important;
+    }
+}
+@media(max-width:600px){
+    .lorgus-rp-page{
+        width:calc(100vw - 58px)!important;
+        padding-left:4px!important;
+        padding-right:4px!important;
+    }
+}
