@@ -755,7 +755,11 @@ async function getRpCharacterPhoto(characterId) {
     return url;
 }
 
-async function renderLocationChats(locationName, regionName, alreadyPresent = false) {
+async function renderLocationChats(locationName, regionName, alreadyPresent = false, fromRoute = false) {
+    if (!fromRoute && window.lorgusNavigateChat) {
+        const navigated = window.lorgusNavigateChat(regionName, locationName);
+        if (navigated) return;
+    }
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
