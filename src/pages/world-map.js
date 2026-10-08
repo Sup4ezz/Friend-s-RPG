@@ -521,7 +521,14 @@ function showLorgusMapEditorMode(container) {
 }
 
 window.lorgusSubpageTransition = function(direction, renderTarget) {
-    if (typeof renderTarget !== "function" || window.lorgusMainMenuNavigating) return;
+    if (typeof renderTarget !== "function") return;
+
+    // Не оставляем навигацию заблокированной после неудачной/прерванной
+    // анимации. Кнопка всегда должна иметь возможность открыть сцену.
+    if (window.lorgusMainMenuNavigating && !document.documentElement.dataset.lorgusTransition) {
+        window.lorgusMainMenuNavigating = false;
+    }
+    if (window.lorgusMainMenuNavigating) return;
 
     const container = document.getElementById("cabinet-content");
     if (!container) {
@@ -529,30 +536,42 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
         return;
     }
 
-    window.lorgusMainMenuNavigating = true;
-    document.documentElement.dataset.lorgusTransition = direction;
-
     const finish = () => {
         delete document.documentElement.dataset.lorgusTransition;
         window.lorgusMainMenuNavigating = false;
     };
 
-    // Используем нативный View Transition: браузер сам снимает текущую
-    // сцену и новую сцену из настоящего #cabinet-content. Никаких клонов,
-    // переносов DOM и чёрного промежуточного экрана.
+    window.lorgusMainMenuNavigating = true;
+    document.documentElement.dataset.lorgusTransition = direction;
+
     if (typeof document.startViewTransition === "function") {
-        const transition = document.startViewTransition(() => renderTarget());
-        transition.finished.then(finish, finish);
-        return transition.finished;
+        try {
+            const transition = document.startViewTransition(() => renderTarget());
+            transition.finished.then(finish, () => {
+                // Даже если браузер сорвал анимацию, оставляем новую сцену.
+                finish();
+            });
+            return transition.finished;
+        } catch (error) {
+            console.warn("[LORGUS] View Transition недоступен, переход выполнен напрямую:", error);
+            finish();
+            renderTarget();
+            return;
+        }
     }
 
-    // Fallback для браузеров без View Transition API.
-    renderTarget();
-    requestAnimationFrame(finish);
+    // Firefox/старые браузеры: сменяем настоящую сцену напрямую.
+    try {
+        renderTarget();
+    } finally {
+        requestAnimationFrame(finish);
+    }
 };
+
 window.lorgusMainMenuNavigate = function(direction, renderTarget) {
     return window.lorgusSubpageTransition(direction, renderTarget);
 };
+
 function initializeLorgusMainMenuLight() {
     const viewport = document.getElementById("lorgus-map-viewport");
     if (!viewport) return;
