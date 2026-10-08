@@ -545,15 +545,15 @@ async function renderRoadChat(presence) {
                         <span>РОЛЬ: <strong>${name}</strong></span>
                         <span>ПРОСТРАНСТВО: <b>ДОРОГА</b></span>
                     </div>
-                    <textarea id="lorgus-rp-input" placeholder="Опиши дорогу, встречу или действие персонажа..." rows="4"></textarea>
-                    <div class="lorgus-rp-composer-bottom">
-                        <div class="lorgus-rp-actions">
-                            <button class="lorgus-rp-use-item" type="button" onclick="openRpItemPicker()">Использовать предмет</button>
-                            <button class="lorgus-rp-use-item lorgus-rp-transfer-item" type="button" onclick="openRpTransferPicker()">Передать предмет</button>
-                            <button class="lorgus-rp-use-item lorgus-rp-transfer-currency" type="button" onclick="openRpCurrencyTransferPicker()">Передать валюту</button>
-                        </div>
+                    <div class="lorgus-telegram-composer">
+                        <button class="lorgus-telegram-attach" type="button" aria-label="Действия и предметы" onclick="openRpItemPicker()">📎</button>
+                        <textarea id="lorgus-rp-input" placeholder="Напишите действие или реплику..." rows="1"></textarea>
+                        <button class="lorgus-telegram-send" type="button" aria-label="Отправить" onclick="sendLocalRpMessage()">➤</button>
+                    </div>
+                    <div class="lorgus-rp-composer-tools">
+                        <button class="lorgus-rp-use-item" type="button" onclick="openRpTransferPicker()">Передать предмет</button>
+                        <button class="lorgus-rp-use-item lorgus-rp-transfer-currency" type="button" onclick="openRpCurrencyTransferPicker()">Передать валюту</button>
                         <span id="lorgus-rp-item-selection" class="lorgus-rp-item-selection"></span>
-                        <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalRpMessage()">Отправить</button>
                     </div>
                 </section>
 
