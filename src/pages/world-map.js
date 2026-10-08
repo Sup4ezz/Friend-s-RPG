@@ -374,7 +374,7 @@ function renderLorgusWorldMap(container, character) {
         <nav class="lorgus-mainmenu-nav" aria-label="Навигация">
             <button type="button" class="lorgus-mainmenu-arrow top" onclick="window.lorgusMainMenuNavigate('top', window.renderLorgusCharacterHub)" aria-label="Персонаж"><span>▲</span><b>ПЕРСОНАЖ</b></button>
             <button type="button" class="lorgus-mainmenu-arrow bottom" onclick="window.lorgusMainMenuNavigate('bottom', window.renderMail)" aria-label="Письма"><span>▼</span><b>ПИСЬМА</b></button>
-            <button type="button" class="lorgus-mainmenu-arrow left" onclick="window.lorgusMainMenuNavigate('left', window.renderLorgusRpHub)" aria-label="Ролевая"><span>◀</span><b>РОЛЕВАЯ</b></button>
+            <button type="button" class="lorgus-mainmenu-arrow left" onclick="window.lorgusOpenRpFromMap()" aria-label="Ролевая"><span>◀</span><b>РОЛЕВАЯ</b></button>
             <button type="button" class="lorgus-mainmenu-arrow right" onclick="window.lorgusMainMenuNavigate('right', window.renderLorgusInventory)" aria-label="Инвентарь"><span>▶</span><b>ИНВЕНТАРЬ</b></button>
         </nav>
         <div class="lorgus-map-shell">
@@ -570,6 +570,24 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
 
 window.lorgusMainMenuNavigate = function(direction, renderTarget) {
     return window.lorgusSubpageTransition(direction, renderTarget);
+};
+
+// RP has a real route in the SPA, so keep the map arrow independent from
+// whether the RP renderer happened to be exported before this page was parsed.
+window.lorgusOpenRpFromMap = function() {
+    const renderRp = window.renderLorgusRpHub;
+
+    if (typeof renderRp === "function") {
+        return window.lorgusSubpageTransition("left", renderRp);
+    }
+
+    // Last-resort SPA route fallback. This also preserves the native
+    // View Transition because the router render happens inside the transition.
+    if (typeof window.lorgusNavigate === "function") {
+        return window.lorgusSubpageTransition("left", () => window.lorgusNavigate("/rp"));
+    }
+
+    console.error("[LORGUS] RP navigation unavailable: renderLorgusRpHub and router are missing.");
 };
 
 function initializeLorgusMainMenuLight() {
