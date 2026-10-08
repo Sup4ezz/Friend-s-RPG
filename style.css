@@ -18178,3 +18178,85 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-update-entry footer strong{color:#bda978}
 .lorgus-update-log-empty,.lorgus-update-log-loading{padding:28px;border:1px dashed rgba(214,179,106,.1);color:#6e6659;text-align:center}
 @media(max-width:620px){.lorgus-update-log-overlay{padding:12px}.lorgus-update-log-panel{padding:24px 18px}.lorgus-update-log-heading h2{font-size:34px}.lorgus-update-entry h3{font-size:23px}}
+
+/* ADMIN RP CONTROL ROOM */
+.admin-rp-control-room{overflow:hidden}
+.admin-rp-heading{align-items:flex-start}
+.admin-rp-status{color:#7b705f;font-size:9px;letter-spacing:.12em;padding-top:6px}
+.admin-rp-layout{display:grid;grid-template-columns:250px minmax(360px,1.35fr) minmax(310px,.85fr);min-height:700px;border:1px solid rgba(214,179,106,.1);background:#0b0a08}
+.admin-rp-chat-browser{border-right:1px solid rgba(214,179,106,.09);display:flex;flex-direction:column;min-width:0}
+.admin-rp-chat-list-head{display:flex;align-items:center;justify-content:space-between;padding:17px;border-bottom:1px solid rgba(214,179,106,.08);color:#b9a779;font-size:9px;letter-spacing:.16em}
+.admin-rp-chat-list-head button{border:1px solid rgba(214,179,106,.14);background:transparent;color:#b8a477;width:30px;height:30px}
+.admin-rp-chat-search{margin:12px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.018);color:#d8d0c1;padding:10px 11px;outline:0}
+.admin-rp-chat-search:focus{border-color:rgba(214,179,106,.35)}
+.admin-rp-chat-list{overflow:auto;padding:0 8px 12px}
+.admin-rp-chat-row{display:grid;grid-template-columns:30px 1fr;gap:9px;width:100%;padding:11px 9px;border:1px solid transparent;background:transparent;color:#827968;text-align:left}
+.admin-rp-chat-row:hover,.admin-rp-chat-row.active{border-color:rgba(214,179,106,.12);background:rgba(214,179,106,.045);color:#d3c398}
+.admin-rp-chat-row.active{box-shadow:inset 2px 0 #b58a43}
+.admin-rp-chat-mark{display:grid;place-items:center;color:#b28e52}
+.admin-rp-chat-row strong,.admin-rp-chat-row small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-rp-chat-row strong{font-size:11px;font-weight:500}
+.admin-rp-chat-row small{margin-top:4px;color:#5f594f;font-size:8px}
+.admin-rp-chat-view{display:grid;grid-template-rows:auto 1fr;min-width:0;background:linear-gradient(180deg,rgba(23,20,15,.45),rgba(8,8,7,.8))}
+.admin-rp-chat-view-head{padding:18px 20px;border-bottom:1px solid rgba(214,179,106,.08)}
+.admin-rp-chat-view-head span{color:#6e6557;font-size:8px;letter-spacing:.2em}
+.admin-rp-chat-view-head h3{margin:5px 0 0;color:#d9c89e;font:500 24px/1 var(--title-font)}
+.admin-rp-message-list{overflow:auto;padding:18px}
+.admin-rp-message{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.045)}
+.admin-rp-message-avatar{width:34px;height:34px;border:1px solid rgba(214,179,106,.18);display:grid;place-items:center;color:#c7a966;background:rgba(214,179,106,.035)}
+.admin-rp-message-meta{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.admin-rp-message-meta strong{color:#cfc1a0;font-size:11px}
+.admin-rp-message-meta span{color:#5f594f;font-size:8px}
+.admin-rp-message p{margin:7px 0 0;color:#aaa092;font-size:12px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.admin-rp-message.reverted{opacity:.5}
+.admin-rp-message-reverted{display:block;margin-top:6px;color:#8e6c64;font-size:8px}
+.admin-rp-tools{border-left:1px solid rgba(214,179,106,.09);overflow:auto;background:rgba(14,12,9,.75)}
+.admin-rp-tool{padding:20px;border-bottom:1px solid rgba(214,179,106,.08)}
+.admin-rp-tool>span{display:block;color:#766b5b;font-size:8px;letter-spacing:.18em}
+.admin-rp-tool h3{margin:6px 0 5px;color:#d4c49c;font:500 22px/1.05 var(--title-font)}
+.admin-rp-tool p{margin:0 0 14px;color:#696156;font-size:10px;line-height:1.5}
+.admin-rp-tool select,.admin-rp-tool input,.admin-rp-tool textarea{display:block;width:100%;box-sizing:border-box;margin-top:8px;border:1px solid rgba(255,255,255,.075);background:#0a0908;color:#d3c9b7;padding:10px;outline:0;font:inherit}
+.admin-rp-tool select:focus,.admin-rp-tool input:focus,.admin-rp-tool textarea:focus{border-color:rgba(214,179,106,.35)}
+.admin-rp-tool textarea{resize:vertical;line-height:1.55}
+.admin-rp-composer-send,.admin-rp-nrp-create button{width:100%;margin-top:9px;padding:11px 12px;border:1px solid rgba(214,179,106,.28);background:rgba(214,179,106,.07);color:#d5c28f;font-size:9px;letter-spacing:.1em}
+.admin-rp-composer-send:hover,.admin-rp-nrp-create button:hover{background:rgba(214,179,106,.13);border-color:rgba(214,179,106,.5)}
+.admin-rp-nrp-list{display:grid;gap:7px;margin-top:12px}
+.admin-rp-nrp-row{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:8px;padding:9px;border:1px solid rgba(255,255,255,.055);background:rgba(255,255,255,.012)}
+.admin-rp-nrp-row.inactive{opacity:.48}
+.admin-rp-nrp-avatar{width:30px;height:30px;display:grid;place-items:center;border:1px solid rgba(214,179,106,.13);color:#b3945b}
+.admin-rp-nrp-row strong,.admin-rp-nrp-row span,.admin-rp-nrp-row small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.admin-rp-nrp-row strong{color:#cfc3a7;font-size:10px}
+.admin-rp-nrp-row span{margin-top:3px;color:#70685d;font-size:8px}
+.admin-rp-nrp-row small{margin-top:3px;color:#8e7650;font-size:7px;letter-spacing:.1em}
+.admin-rp-nrp-row button{padding:6px 7px;border:1px solid rgba(255,255,255,.08);background:transparent;color:#7f7668;font-size:8px}
+.admin-rp-nrp-create{display:grid;grid-template-columns:1fr 1fr;gap:0 7px;margin-top:14px}
+.admin-rp-nrp-create textarea,.admin-rp-nrp-create button{grid-column:1/-1}
+.admin-rp-empty{padding:28px 14px;color:#625c52;text-align:center;font-size:10px;line-height:1.5}
+@media(max-width:1200px){.admin-rp-layout{grid-template-columns:220px minmax(320px,1fr)}.admin-rp-tools{grid-column:1/-1;border-left:0;border-top:1px solid rgba(214,179,106,.09);display:grid;grid-template-columns:1fr 1fr}.admin-rp-tool{border-bottom:0}.admin-rp-tool+ .admin-rp-tool{border-left:1px solid rgba(214,179,106,.09)}}
+@media(max-width:760px){.admin-rp-layout{grid-template-columns:1fr}.admin-rp-chat-browser{border-right:0;border-bottom:1px solid rgba(214,179,106,.09);max-height:320px}.admin-rp-chat-view{min-height:520px}.admin-rp-tools{display:block}.admin-rp-tool+ .admin-rp-tool{border-left:0;border-top:1px solid rgba(214,179,106,.09)}}
+
+/* RP CHARACTER QUICK CARD */
+.lorgus-rp-character-card-overlay{position:fixed;inset:0;z-index:1350;pointer-events:none}
+.lorgus-rp-character-card-backdrop{position:absolute;inset:0;background:transparent;pointer-events:auto}
+.lorgus-rp-character-card{position:absolute;z-index:1;width:min(360px,calc(100vw - 28px));padding:20px;border:1px solid rgba(214,179,106,.2);background:linear-gradient(145deg,rgba(25,22,17,.98),rgba(8,8,7,.99));box-shadow:0 24px 70px rgba(0,0,0,.58);opacity:0;transform:translateY(7px) scale(.985);transition:.16s ease;pointer-events:auto}
+.lorgus-rp-character-card.open{opacity:1;transform:none}
+.lorgus-rp-character-card-close{position:absolute;top:10px;right:10px;width:28px;height:28px;border:1px solid rgba(214,179,106,.12);background:transparent;color:#8c816e;font-size:18px}
+.lorgus-rp-character-card-head{display:grid;grid-template-columns:58px 1fr;gap:13px;align-items:center;padding-right:28px}
+.lorgus-rp-character-card-avatar{width:58px;height:58px;border:1px solid rgba(214,179,106,.2);overflow:hidden;display:grid;place-items:center;background:rgba(214,179,106,.035);color:#c5a866;font-size:22px}
+.lorgus-rp-character-card-avatar img{width:100%;height:100%;object-fit:cover}
+.lorgus-rp-character-card-head small{display:block;color:#756b5b;font-size:7px;letter-spacing:.18em}
+.lorgus-rp-character-card-head h2{margin:5px 0 0;color:#e0cf9e;font:500 25px/1 var(--title-font)}
+.lorgus-rp-character-card-head p{margin:5px 0 0;color:#807667;font-size:9px}
+.lorgus-rp-character-card-facts{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-top:16px;border:1px solid rgba(214,179,106,.08)}
+.lorgus-rp-character-card-facts div{padding:10px;background:rgba(255,255,255,.018)}
+.lorgus-rp-character-card-facts small{display:block;color:#665e52;font-size:7px;letter-spacing:.14em}
+.lorgus-rp-character-card-facts strong{display:block;margin-top:4px;color:#b9ad93;font-size:10px;font-weight:500}
+.lorgus-rp-character-card-story{margin-top:12px;padding-top:12px;border-top:1px solid rgba(214,179,106,.08)}
+.lorgus-rp-character-card-story small{color:#665e52;font-size:7px;letter-spacing:.14em}
+.lorgus-rp-character-card-story p{margin:6px 0 0;color:#918779;font-size:10px;line-height:1.55}
+.lorgus-rp-character-card-title{margin-top:10px}
+.lorgus-messenger-participant{cursor:pointer}
+.lorgus-messenger-participant:focus-visible{outline:1px solid rgba(214,179,106,.5);outline-offset:2px}
+.lorgus-messenger-message-meta strong{cursor:pointer}
+.lorgus-messenger-message-meta strong:hover{color:#ddc88f}
+@media(max-width:600px){.lorgus-rp-character-card{position:fixed;left:14px!important;right:14px!important;bottom:14px;top:auto!important;width:auto}.lorgus-rp-character-card-overlay{pointer-events:auto}}
