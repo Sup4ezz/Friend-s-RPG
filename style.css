@@ -16712,3 +16712,18 @@ body:has(#root > #cabinet-content.character-application){
     .lorgus-mail-compose,
     .lorgus-mail-inbox{padding:20px}
 }
+
+
+/* Mirrored back arrows: same edge as the route, opposite direction. */
+.lorgus-subpage-back-arrow{left:auto!important;top:auto!important;transform:none!important}
+.lorgus-subpage-back-arrow.top,.lorgus-subpage-back-arrow.bottom{left:50%!important;width:118px!important;height:42px!important;transform:translateX(-50%)!important;flex-direction:row!important}
+.lorgus-subpage-back-arrow.top{top:18px!important;bottom:auto!important}
+.lorgus-subpage-back-arrow.bottom{bottom:18px!important;top:auto!important}
+.lorgus-subpage-back-arrow.left,.lorgus-subpage-back-arrow.right{top:50%!important;width:42px!important;height:118px!important;transform:translateY(-50%)!important;flex-direction:column!important}
+.lorgus-subpage-back-arrow.left{left:18px!important;right:auto!important}
+.lorgus-subpage-back-arrow.right{right:18px!important;left:auto!important}
+.lorgus-subpage-back-arrow.top b,.lorgus-subpage-back-arrow.bottom b{writing-mode:horizontal-tb!important;transform:none!important}
+.lorgus-subpage-back-arrow.left b,.lorgus-subpage-back-arrow.right b{writing-mode:vertical-rl!important;transform:rotate(180deg)!important}
+.lorgus-subpage-back-arrow.top:hover,.lorgus-subpage-back-arrow.bottom:hover{transform:translateX(-50%) translateY(-3px)!important}
+.lorgus-subpage-back-arrow.left:hover{transform:translateX(3px) translateY(-50%)!important}
+.lorgus-subpage-back-arrow.right:hover{transform:translateX(-3px) translateY(-50%)!important}
