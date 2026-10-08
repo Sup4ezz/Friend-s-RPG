@@ -293,11 +293,19 @@ async function selectCharacter(container, characterId) {
     sessionStorage.setItem("lorgus_active_character_id", character.id);
     localStorage.setItem("lorgus_active_character_id", character.id);
     await initializeRpPresence(character);
-    if (window.lorgusRouter) {
-        window.lorgusRouter.navigate("/character", { replace: true });
-    } else {
-        renderCharacter(container, character);
+    if (window.lorgusRouter && window.lorgusRouter.navigate("/character", { replace: true })) {
+        return;
     }
+
+    // Если роутер ещё не готов, всё равно переводим выбранного персонажа
+    // на новый SPA-экран, а не оставляем экран выбора.
+    window.history.replaceState({ lorgusRoute: "/character" }, "", "/character");
+    if (typeof window.renderLorgusCharacterHub === "function") {
+        await window.renderLorgusCharacterHub();
+        return;
+    }
+
+    renderCharacter(container, character);
 }
 
 /* =========================================================
