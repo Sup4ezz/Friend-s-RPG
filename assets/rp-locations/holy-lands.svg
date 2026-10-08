@@ -58,6 +58,15 @@
  <path d="M50 650Q800 610 1550 650M10 755Q800 710 1590 755M0 865Q800 815 1600 865"/>
 </g>
 
+<!-- monumental table support: the council table physically rests on the floor -->
+<ellipse cx="800" cy="810" rx="270" ry="48" fill="#101313" opacity=".72" filter="url(#shadow)"/>
+<path d="M640 635L715 675L715 845L665 885L600 850L600 690Z" fill="#252b2a" stroke="#111515" stroke-width="14"/>
+<path d="M960 635L885 675L885 845L935 885L1000 850L1000 690Z" fill="#252b2a" stroke="#111515" stroke-width="14"/>
+<path d="M715 650Q800 680 885 650V850Q800 900 715 850Z" fill="url(#marble)" stroke="#3d4542" stroke-width="16"/>
+<path d="M748 690Q800 705 852 690V830Q800 860 748 830Z" fill="#4a514e" stroke="#1d2322" stroke-width="10"/>
+<path d="M625 842Q800 885 975 842L1015 878Q800 930 585 878Z" fill="#171b1b" stroke="#0c1010" stroke-width="14"/>
+<path d="M650 842Q800 880 950 842L970 862Q800 905 630 862Z" fill="#747b76" stroke="#333a38" stroke-width="9"/>
+
 <!-- 3D COUNCIL TABLE: complete ellipse + thick body, no cropping -->
 <ellipse cx="800" cy="555" rx="500" ry="190" fill="#111516" stroke="#0b0e0f" stroke-width="22"/>
 <path d="M300 555Q800 745 1300 555V625Q800 815 300 625Z" fill="url(#wood)" stroke="#171b1b" stroke-width="18"/>
