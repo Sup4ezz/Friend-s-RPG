@@ -67,12 +67,6 @@
 <!-- table central inlay -->
 <ellipse cx="800" cy="515" rx="170" ry="52" fill="#343b39" stroke="#aeb4ad" stroke-width="5"/>
 
-<!-- chairs follow perspective -->
-<g fill="#cdd2cb" stroke="#444c49" stroke-width="11">
- <path d="M205 500Q235 455 290 462L315 585H225Z"/><path d="M430 345Q465 315 510 330L525 485H445Z"/>
- <path d="M1075 330Q1135 315 1170 345L1155 485H1075Z"/><path d="M1310 462Q1365 455 1395 500L1375 585H1285Z"/>
-</g>
-
 <!-- foreground columns frame the room -->
 <g fill="#48504d" stroke="#202526" stroke-width="18"><path d="M0 390H135V900H0Z"/><path d="M1465 390H1600V900H1465Z"/></g>
 <g fill="#aab0aa" stroke="#4b5350" stroke-width="12"><path d="M22 430H112V790H22Z"/><path d="M1488 430H1578V790H1488Z"/></g>
