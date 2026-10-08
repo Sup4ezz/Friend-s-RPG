@@ -15979,3 +15979,82 @@ body:has(#root > #cabinet-content.character-application){
   color:#f5f7fa!important;
   text-shadow:0 1px 2px #000!important;
 }
+
+
+/* =========================================================
+   LORGUS RP — RASTER LOCATION ART
+   Real photographic/raster backgrounds replace procedural SVG/CSS scenes.
+   ========================================================= */
+.lorgus-messenger-main{
+  --lorgus-raster-bg:none;
+  isolation:isolate!important;
+  overflow:hidden!important;
+  background:#05070a!important;
+}
+.lorgus-messenger-main::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-3!important;
+  pointer-events:none;
+  background-color:#05070a!important;
+  background-image:
+    linear-gradient(180deg,rgba(2,4,7,.10) 0%,rgba(2,4,7,.28) 48%,rgba(2,4,7,.68) 100%),
+    var(--lorgus-raster-bg)!important;
+  background-size:cover!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+  filter:saturate(.92) contrast(1.06)!important;
+  animation:none!important;
+  transform:none!important;
+}
+.lorgus-messenger-main::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-2!important;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.34),transparent 28%,transparent 72%,rgba(0,0,0,.28)),
+    radial-gradient(ellipse at center,transparent 35%,rgba(0,0,0,.38) 100%)!important;
+  box-shadow:inset 0 0 180px rgba(0,0,0,.42)!important;
+  animation:none!important;
+}
+
+/* Primum — warm scholarly interior / tavern-like common room */
+.lorgus-messenger-main[data-rp-location="Примум"]{
+  --lorgus-raster-bg:url("https://images.unsplash.com/photo-1781955781178-6ea29c66e860?auto=format&fit=crop&w=2400&q=86");
+}
+/* Helion — old forge, stone and fire */
+.lorgus-messenger-main[data-rp-location="Хелион"],
+.lorgus-messenger-main[data-rp-location="Древнее Пламя"]{
+  --lorgus-raster-bg:url("https://images.unsplash.com/photo-1636772653773-b925c0720ed6?auto=format&fit=crop&w=2400&q=86");
+}
+/* Argent / Valcroft — medieval stone architecture */
+.lorgus-messenger-main[data-rp-location="Арджент"],
+.lorgus-messenger-main[data-rp-location="Валькрофт"],
+.lorgus-messenger-main[data-rp-location="Эстерваль"]{
+  --lorgus-raster-bg:url("https://images.unsplash.com/photo-1760991742734-e0fbbd26b4a3?auto=format&fit=crop&w=2400&q=86");
+}
+/* Meridian / Fin — deep night and distant mountains */
+.lorgus-messenger-main[data-rp-location="Меридиан"],
+.lorgus-messenger-main[data-rp-location="Фин"]{
+  --lorgus-raster-bg:url("https://images.unsplash.com/photo-1464299426299-436b4db1695b?auto=format&fit=crop&w=2400&q=86");
+}
+/* Solmir — warm candlelit interior */
+.lorgus-messenger-main[data-rp-location="Солмир"]{
+  --lorgus-raster-bg:url("https://images.unsplash.com/photo-1781955781178-6ea29c66e860?auto=format&fit=crop&w=2400&q=86");
+}
+/* Aurora / Elwain — moonlit deep forest */
+.lorgus-messenger-main[data-rp-location="Аврора"],
+.lorgus-messenger-main[data-rp-location="Элвэйн"]{
+  --lorgus-raster-bg:url("https://images.unsplash.com/photo-1724908506996-5310458bcdff?auto=format&fit=crop&w=2400&q=86");
+}
+/* Tallirion — ancient ruins swallowed by woodland */
+.lorgus-messenger-main[data-rp-location="Таллирион"]{
+  --lorgus-raster-bg:url("https://images.unsplash.com/photo-1572984011415-bf6bfb3185e9?auto=format&fit=crop&w=2400&q=86");
+}
+/* Unknown / road — keep a dark cinematic fallback */
+.lorgus-messenger-main:not([data-rp-location]){
+  --lorgus-raster-bg:url("https://images.unsplash.com/photo-1464299426299-436b4db1695b?auto=format&fit=crop&w=2400&q=86");
+}
