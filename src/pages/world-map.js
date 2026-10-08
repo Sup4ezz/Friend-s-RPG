@@ -11,20 +11,67 @@ const LORGUS_MAP_MARKERS = [
 
 const LORGUS_MAP_EDITOR_STORAGE_KEY = "lorgus-map-label-positions-v1";
 
+async function loadLorgusSharedLabelPositions() {
+    const client = window.supabaseClient;
+    if (!client) return;
+
+    try {
+        const { data, error } = await client
+            .from("world_map_label_positions")
+            .select("id,x,y,w,h");
+
+        if (error) throw error;
+
+        const saved = getLorgusSavedLabelPositions();
+        (data || []).forEach(position => {
+            saved[position.id] = {
+                x: position.x,
+                y: position.y,
+                w: position.w,
+                h: position.h
+            };
+        });
+
+        localStorage.setItem(LORGUS_MAP_EDITOR_STORAGE_KEY, JSON.stringify(saved));
+        applyLorgusSavedLabelPositions();
+        renderLorgusMapEditorRects();
+    } catch (error) {
+        console.warn("Не удалось загрузить общие позиции подписей карты:", error);
+    }
+}
+
+async function saveLorgusLabelPosition(rectData) {
+    try {
+        const saved = getLorgusSavedLabelPositions();
+        saved[rectData.id] = { x: rectData.x, y: rectData.y, w: rectData.w, h: rectData.h };
+        localStorage.setItem(LORGUS_MAP_EDITOR_STORAGE_KEY, JSON.stringify(saved));
+    } catch {}
+
+    const client = window.supabaseClient;
+    if (!client) return;
+
+    const { error } = await client
+        .from("world_map_label_positions")
+        .upsert({
+            id: rectData.id,
+            x: rectData.x,
+            y: rectData.y,
+            w: rectData.w,
+            h: rectData.h,
+            updated_at: new Date().toISOString()
+        }, { onConflict: "id" });
+
+    if (error) {
+        console.error("Не удалось сохранить общую позицию подписи:", error);
+    }
+}
+
 function getLorgusSavedLabelPositions() {
     try {
         return JSON.parse(localStorage.getItem(LORGUS_MAP_EDITOR_STORAGE_KEY) || "{}") || {};
     } catch {
         return {};
     }
-}
-
-function saveLorgusLabelPosition(rectData) {
-    try {
-        const saved = getLorgusSavedLabelPositions();
-        saved[rectData.id] = { x: rectData.x, y: rectData.y, w: rectData.w, h: rectData.h };
-        localStorage.setItem(LORGUS_MAP_EDITOR_STORAGE_KEY, JSON.stringify(saved));
-    } catch {}
 }
 
 function applyLorgusSavedLabelPositions() {
@@ -133,7 +180,7 @@ function bindLorgusMapEditorInteraction(label, rectData, layer) {
         label.dataset.moved = drag.moved ? "1" : "0";
         drag = null;
         if (event) {
-            saveLorgusLabelPosition(rectData);
+            void saveLorgusLabelPosition(rectData);
             updateLorgusMapEditorReadout(rectData);
         }
     };
@@ -475,6 +522,7 @@ function renderLorgusWorldMap(container, character) {
     initializeLorgusMapViewport();
     renderLorgusMapEditorRects(false);
     addLorgusMapEditorUI();
+    void loadLorgusSharedLabelPositions();
     if (new URLSearchParams(window.location.search).get("mapedit") === "1") {
         container.classList.add("lorgus-map-editor-active");
         const layer = document.getElementById("lorgus-map-marker-layer");
