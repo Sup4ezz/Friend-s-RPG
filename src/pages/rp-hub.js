@@ -84,3 +84,6 @@ function renderLorgusRpHub() {
         </main>
     \`;
 }
+// Explicit global export: world-map.js passes this renderer into the navigation handler.
+window.renderLorgusRpHub = renderLorgusRpHub;
+
