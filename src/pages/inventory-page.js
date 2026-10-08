@@ -125,10 +125,20 @@ async function renderLorgusInventory() {
                         </div>
                         <div class="lorgus-equipment-character">
                             <div class="lorgus-equipment-aura"></div>
-                            <div class="lorgus-equipment-avatar">✦</div>
+                            <div class="lorgus-human-body" aria-hidden="true">
+                                <div class="lorgus-human-head"></div>
+                                <div class="lorgus-human-neck"></div>
+                                <div class="lorgus-human-torso"></div>
+                                <div class="lorgus-human-arm lorgus-human-arm-left"></div>
+                                <div class="lorgus-human-arm lorgus-human-arm-right"></div>
+                                <div class="lorgus-human-hand lorgus-human-hand-left"></div>
+                                <div class="lorgus-human-hand lorgus-human-hand-right"></div>
+                                <div class="lorgus-human-leg lorgus-human-leg-left"></div>
+                                <div class="lorgus-human-leg lorgus-human-leg-right"></div>
+                            </div>
                             <div class="lorgus-equipment-name">${window.escapeHtml(character.name || "Персонаж")}</div>
                             <div class="lorgus-equipment-slots">
-                                ${Object.entries(inventorySlotLabels).map(([slot,label]) => '<div class="lorgus-equipment-slot" data-equipment-slot="' + slot + '" title="' + label + '"><span>' + escapeHtml(label) + '</span><div class="lorgus-equipment-slot-item"></div></div>').join("")}
+                                ${Object.entries(inventorySlotLabels).map(([slot,label]) => '<div class="lorgus-equipment-slot lorgus-equipment-slot-' + slot + '" data-equipment-slot="' + slot + '" title="' + label + '"><span>' + escapeHtml(label) + '</span><div class="lorgus-equipment-slot-item"></div></div>').join("")}
                             </div>
                         </div>
                     </section>
