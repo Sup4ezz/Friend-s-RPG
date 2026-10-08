@@ -17205,3 +17205,15 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
         min-height:100vh!important;
     }
 }
+
+
+/* ROAD CHAT — NO LOCATION / STARFIELD BACKDROP */
+.lorgus-road-page .lorgus-messenger-main,
+.lorgus-road-page .lorgus-messenger-feed{
+    background:#101317!important;
+}
+.lorgus-road-page .lorgus-messenger-main::before,
+.lorgus-road-page .lorgus-messenger-main::after,
+.lorgus-road-page .lorgus-messenger-feed::before{
+    display:none!important;
+}
