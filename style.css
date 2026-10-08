@@ -16177,3 +16177,22 @@ body:has(#root > #cabinet-content.character-application){
   box-shadow:inset 0 0 180px rgba(0,0,0,.62)!important;
   animation:none!important;
 }
+
+
+/* COUNCIL BUILDING — LET THE HALL SHOW THROUGH THE CHAT */
+.lorgus-messenger-main[data-rp-location="Здание Совета"]{
+  background:#111516!important;
+}
+.lorgus-messenger-main[data-rp-location="Здание Совета"] .lorgus-messenger-feed{
+  background:linear-gradient(180deg,rgba(8,11,11,.24),rgba(5,7,7,.52))!important;
+}
+.lorgus-messenger-main[data-rp-location="Здание Совета"] .lorgus-messenger-feed:before{
+  background:radial-gradient(circle at 50% 35%,rgba(255,255,255,.035),transparent 52%)!important;
+}
+.lorgus-messenger-main[data-rp-location="Здание Совета"] .lorgus-messenger-header,
+.lorgus-messenger-main[data-rp-location="Здание Совета"] .lorgus-messenger-composer,
+.lorgus-messenger-main[data-rp-location="Здание Совета"] .lorgus-messenger-footer{
+  background:rgba(6,9,9,.66)!important;
+  backdrop-filter:blur(10px)!important;
+  -webkit-backdrop-filter:blur(10px)!important;
+}
