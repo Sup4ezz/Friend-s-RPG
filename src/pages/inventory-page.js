@@ -72,7 +72,7 @@ async function renderLorgusInventory() {
     if (!container || !character) return;
     container.className = "lorgus-inventory-page";
     container.innerHTML = '<div class="lorgus-inventory-shell">' +
-        '<button type="button" class="lorgus-subpage-back-arrow" onclick="window.lorgusSubpageTransition(\'right\', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту"><span>▶</span><b>КАРТА</b></button>' +
+        '<button type="button" class="lorgus-subpage-back-arrow left" onclick="window.lorgusSubpageTransition(\'right\', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту"><span>▶</span><b>КАРТА</b></button>' +
         '<main class="lorgus-subpage-shell lorgus-inventory-main"><header class="lorgus-subpage-heading"><span class="lorgus-command-kicker">ИНВЕНТАРЬ</span><h1>Снаряжение</h1><p>' + escapeHtml(character.name || "Персонаж") + ' · перетаскивай предметы между персонажем и рюкзаком.</p></header>' +
         '<div class="lorgus-inventory-layout"><section class="lorgus-equipment-stage"><div class="lorgus-equipment-stage-title">СНАРЯЖЕНИЕ</div><div class="lorgus-equipment-character"><div class="lorgus-equipment-aura"></div><div class="lorgus-equipment-avatar">✦</div><div class="lorgus-equipment-name">' + escapeHtml(character.name || "Персонаж") + '</div><div class="lorgus-equipment-slots">' +
         Object.entries(inventorySlotLabels).map(([slot,label]) => '<div class="lorgus-equipment-slot" data-equipment-slot="' + slot + '" title="' + label + '"><span>' + escapeHtml(label) + '</span><div class="lorgus-equipment-slot-item"></div></div>').join("") +
