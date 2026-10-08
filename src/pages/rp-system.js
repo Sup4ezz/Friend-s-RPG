@@ -800,6 +800,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
     const location = escapeHtml(locationName);
     const region = escapeHtml(regionName);
     const myPhoto = await getRpCharacterPhoto(window.activeCharacterId);
+    const sceneArt = getLorgusRpLocationArt(locationName);
 
     container.className = "lorgus-rp-page";
     container.innerHTML = `
@@ -811,7 +812,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
                 </div>
 
                 <div class="lorgus-messenger-chat-card active">
-                    <div class="lorgus-messenger-chat-photo scene-photo"><span>✦</span></div>
+                    <div class="lorgus-messenger-chat-photo scene-photo">${sceneArt ? `<img src="${sceneArt}" alt="">` : "<span>✦</span>"}</div>
                     <div class="lorgus-messenger-chat-info">
                         <strong>${location}</strong>
                         <small>${region}</small>
@@ -838,7 +839,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
 
             <main class="lorgus-messenger-main" data-rp-region="${region}" data-rp-location="${location}">
                 <header class="lorgus-messenger-header">
-                    <div class="lorgus-messenger-header-photo scene-photo"><span>✦</span></div>
+                    <div class="lorgus-messenger-header-photo scene-photo">${sceneArt ? `<img src="${sceneArt}" alt="">` : "<span>✦</span>"}</div>
                     <div class="lorgus-messenger-header-info">
                         <h1>${location}</h1>
                         <p><span class="online-dot"></span> ${region} · <b id="lorgus-rp-online-count">1</b> участник</p>
