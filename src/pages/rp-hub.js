@@ -69,7 +69,7 @@ ${sceneArt ? `<div class="lorgus-rp-scene-art" style="background-image:url('${sc
                         <div><small>МИР</small><strong>Люди рядом</strong><p>Посмотреть персонажей, чьё местоположение открыто.</p></div>
                         <b>→</b>
                     </button>
-                    <button type="button" class="lorgus-rp-side-card" onclick="window.openLorgusWorldRoads?.()">
+                    <button type="button" class="lorgus-rp-side-card" onclick="return window.openLorgusWorldRoads?.(event)">
                         <span class="lorgus-rp-side-number">03</span>
                         <div><small>ПУТЬ</small><strong>Дороги мира</strong><p>Выбрать новое направление и отправиться в путешествие.</p></div>
                         <b>→</b>
