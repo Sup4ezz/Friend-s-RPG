@@ -15921,3 +15921,18 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-messenger-sidebar,.lorgus-messenger-header,.lorgus-messenger-composer{background:rgba(7,12,20,.38)!important;backdrop-filter:blur(24px) saturate(145%)!important;-webkit-backdrop-filter:blur(24px) saturate(145%)!important}
 .lorgus-messenger-bubble{background:linear-gradient(135deg,rgba(32,42,57,.46),rgba(5,10,18,.28))!important;backdrop-filter:blur(18px) saturate(145%)!important;-webkit-backdrop-filter:blur(18px) saturate(145%)!important}
 .lorgus-messenger-message.mine .lorgus-messenger-bubble{background:linear-gradient(135deg,rgba(126,96,43,.48),rgba(31,24,14,.28))!important}
+
+
+/* LORGUS RP — ACTUAL LOCATION ART */
+.lorgus-messenger-main[data-rp-location="Примум"]{--lorgus-location-bg:url("/assets/rp-locations/primum.svg")}
+.lorgus-messenger-main[data-rp-location="Хелион"]{--lorgus-location-bg:url("/assets/rp-locations/helion.svg")}
+.lorgus-messenger-main[data-rp-location="Древнее Пламя"]{--lorgus-location-bg:url("/assets/rp-locations/ancient-flame.svg")}
+.lorgus-messenger-main[data-rp-location="Арджент"]{--lorgus-location-bg:url("/assets/rp-locations/argent.svg")}
+.lorgus-messenger-main[data-rp-location="Меридиан"]{--lorgus-location-bg:url("/assets/rp-locations/meridian.svg")}
+.lorgus-messenger-main[data-rp-location="Валькрофт"]{--lorgus-location-bg:url("/assets/rp-locations/valcroft.svg")}
+.lorgus-messenger-main[data-rp-location="Солмир"]{--lorgus-location-bg:url("/assets/rp-locations/solmir.svg")}
+.lorgus-messenger-main[data-rp-location="Аврора"]{--lorgus-location-bg:url("/assets/rp-locations/aurora.svg")}
+.lorgus-messenger-main[data-rp-location="Элвэйн"]{--lorgus-location-bg:url("/assets/rp-locations/elwain.svg")}
+.lorgus-messenger-main[data-rp-location="Таллирион"]{--lorgus-location-bg:url("/assets/rp-locations/tallirion.svg")}
+.lorgus-messenger-main[data-rp-location="Эстерваль"]{--lorgus-location-bg:url("/assets/rp-locations/esterval.svg")}
+.lorgus-messenger-main[data-rp-location="Фин"]{--lorgus-location-bg:url("/assets/rp-locations/fin.svg")}
