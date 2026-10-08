@@ -18055,21 +18055,22 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
     color:#716b62!important;
     letter-spacing:.12em;
 }
-.lorgus-inventory-page .lorgus-equipment-slot-head{left:50%;top:16px;transform:translateX(-50%)}
-.lorgus-inventory-page .lorgus-equipment-slot-neck{left:50%;top:91px;transform:translateX(-50%)}
-.lorgus-inventory-page .lorgus-equipment-slot-left_hand{left:10px;top:166px}
-.lorgus-inventory-page .lorgus-equipment-slot-right_hand{right:10px;top:166px}
-.lorgus-inventory-page .lorgus-equipment-slot-chest{left:50%;top:215px;transform:translateX(-50%)}
-.lorgus-inventory-page .lorgus-equipment-slot-legs{left:50%;bottom:92px;transform:translateX(-50%)}
-.lorgus-inventory-page .lorgus-equipment-slot-feet{left:50%;bottom:14px;transform:translateX(-50%)}
-.lorgus-inventory-page .lorgus-equipment-slot-left_hand,
-.lorgus-inventory-page .lorgus-equipment-slot-right_hand{top:183px}
+.lorgus-inventory-page .lorgus-equipment-slot-head{left:50%;top:10px;transform:translateX(-50%)}
+.lorgus-inventory-page .lorgus-equipment-slot-chest{left:50%;top:245px;transform:translateX(-50%)}
+.lorgus-inventory-page .lorgus-equipment-slot-main_hand{right:4px;top:145px}
+.lorgus-inventory-page .lorgus-equipment-slot-off_hand{left:4px;top:145px}
+.lorgus-inventory-page .lorgus-equipment-slot-hands{left:50%;top:335px;transform:translateX(-50%)}
+.lorgus-inventory-page .lorgus-equipment-slot-legs{left:50%;bottom:86px;transform:translateX(-50%)}
+.lorgus-inventory-page .lorgus-equipment-slot-feet{left:50%;bottom:8px;transform:translateX(-50%)}
+.lorgus-inventory-page .lorgus-equipment-slot-accessory_chain{left:4px;top:245px}
+.lorgus-inventory-page .lorgus-equipment-slot-accessory_ring{right:4px;top:245px}
+.lorgus-inventory-page .lorgus-equipment-slot-accessory_bracelet{right:4px;top:330px}
 .lorgus-inventory-page .lorgus-equipment-slot:hover{
     z-index:5;
     transform:translateY(-2px)!important;
 }
-.lorgus-inventory-page .lorgus-equipment-slot-left_hand:hover,
-.lorgus-inventory-page .lorgus-equipment-slot-right_hand:hover{transform:translateY(-2px)!important}
+.lorgus-inventory-page .lorgus-equipment-slot-main_hand:hover,
+.lorgus-inventory-page .lorgus-equipment-slot-off_hand:hover{transform:translateY(-2px)!important}
 
 .lorgus-inventory-back{
     border:1px solid rgba(214,179,106,.13)!important;
