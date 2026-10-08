@@ -382,6 +382,7 @@ function renderLorgusWorldMap(container, character) {
                                 <img class="lorgus-map-image" src="/assets/world/nerovland-map.png" alt="Карта Лоргуса" draggable="false">
                                 <div class="lorgus-map-marker-layer" id="lorgus-map-marker-layer" aria-label="Обозначения карты"></div>
                             </div>
+                            <div class="lorgus-mainmenu-fog" aria-hidden="true"></div>
                             <div class="lorgus-map-surface-hint" id="lorgus-map-surface-hint">ТОЧКА КАРТЫ</div>
                             <div class="lorgus-map-overlay">
                                 <div class="lorgus-map-corner-mark top-left">L · 001</div>
@@ -440,6 +441,7 @@ function renderLorgusWorldMap(container, character) {
     initializeLorgusMapViewport();
     renderLorgusMapEditorRects(false);
     addLorgusMapEditorUI();
+    initializeLorgusMainMenuLight();
 }
 
 let lorgusMapScale = 1;
