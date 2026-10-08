@@ -21,7 +21,7 @@ function renderLorgusRpHub() {
     const actionLabel = isLocation ? "ВОЙТИ В СЦЕНУ" : isRoad ? "ОТКРЫТЬ ПУТЬ" : "ВЫБРАТЬ МЕСТО";
 
     container.className = "lorgus-subpage-container lorgus-rp-page-container";
-    container.innerHTML = \`
+    container.innerHTML = `
         <div class="lorgus-rp-atmosphere" aria-hidden="true">
             <i></i><i></i><i></i><i></i>
         </div>
@@ -31,7 +31,7 @@ function renderLorgusRpHub() {
         </button>
 
         <div class="lorgus-subpage-utility">
-            <span class="lorgus-subpage-username">\${window.escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>
+            <span class="lorgus-subpage-username">${window.escapeHtml(window.lorgusCurrentUsername || "Игрок")}</span>
             <button type="button" class="lorgus-subpage-notifications" onclick="window.openLorgusNotifications?.()" aria-label="Уведомления" title="Уведомления">♢<b class="lorgus-notification-badge"></b></button>
             <button type="button" class="lorgus-subpage-logout" onclick="window.logout?.()">ВЫЙТИ</button>
         </div>
@@ -44,20 +44,20 @@ function renderLorgusRpHub() {
             </header>
 
             <section class="lorgus-rp-command-grid">
-                <article class="lorgus-rp-scene \${stateClass}">
+                <article class="lorgus-rp-scene ${stateClass}">
                     <div class="lorgus-rp-scene-top">
-                        <span class="lorgus-rp-state"><i></i>\${stateLabel}</span>
+                        <span class="lorgus-rp-state"><i></i>${stateLabel}</span>
                         <span class="lorgus-rp-scene-index">01</span>
                     </div>
                     <div class="lorgus-rp-scene-center">
                         <span class="lorgus-rp-label">ТЕКУЩАЯ СЦЕНА</span>
-                        <h2>\${window.escapeHtml(place)}</h2>
-                        <p>\${window.escapeHtml(region)}</p>
+                        <h2>${window.escapeHtml(place)}</h2>
+                        <p>${window.escapeHtml(region)}</p>
                         <div class="lorgus-rp-rule"></div>
-                        <strong>\${window.escapeHtml(characterName)}</strong>
+                        <strong>${window.escapeHtml(characterName)}</strong>
                     </div>
-                    <button type="button" class="lorgus-rp-enter" onclick='\${enterAction}'>
-                        <span>\${actionLabel}</span><b>→</b>
+                    <button type="button" class="lorgus-rp-enter" onclick='${enterAction}'>
+                        <span>${actionLabel}</span><b>→</b>
                     </button>
                 </article>
 
@@ -77,12 +77,12 @@ function renderLorgusRpHub() {
 
             <footer class="lorgus-rp-footer">
                 <span>АКТИВНЫЙ ПЕРСОНАЖ</span>
-                <strong>\${window.escapeHtml(characterName)}</strong>
+                <strong>${window.escapeHtml(characterName)}</strong>
                 <i></i>
-                <span>\${isLocation ? "Мир зафиксировал твоё присутствие." : isRoad ? "Дорога уже начата. Путь продолжается." : "Первое сообщение в сцене определит твоё местоположение."}</span>
+                <span>${isLocation ? "Мир зафиксировал твоё присутствие." : isRoad ? "Дорога уже начата. Путь продолжается." : "Первое сообщение в сцене определит твоё местоположение."}</span>
             </footer>
         </main>
-    \`;
+    `;
 }
 // Explicit global export: world-map.js passes this renderer into the navigation handler.
 window.renderLorgusRpHub = renderLorgusRpHub;
