@@ -8,54 +8,32 @@ async function renderMail() {
 
     container.className = "lorgus-mail-page";
     container.innerHTML = `
-        <div class="lorgus-world-shell">
-            <aside class="lorgus-world-sidebar">
-                <div class="lorgus-world-sidebar-symbol">✉</div>
-                <div class="lorgus-world-sidebar-label">ПЕРСОНАЖ</div>
-                <div class="lorgus-world-sidebar-name">${name}</div>
-                <p class="lorgus-world-sidebar-meta">Почта персонажа и послания, доставленные голубями.</p>
-                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="returnToGame()">
-                    ← Вернуться к миру
-                </button>
-            </aside>
+        <button type="button" class="lorgus-subpage-back-arrow" onclick="window.lorgusSubpageTransition('top', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
+            <span>▲</span><b>КАРТА</b>
+        </button>
+        <main class="lorgus-subpage-shell lorgus-mail-page-inner">
+            <header class="lorgus-subpage-heading">
+                <span class="lorgus-command-kicker">ПИСЬМА</span>
+                <h1>Послания</h1>
+                <p>${name} · сообщения идут к адресату не мгновенно.</p>
+            </header>
 
-            <main class="lorgus-world-browser">
-                <header class="lorgus-world-header">
-                    <span class="lorgus-world-kicker">СВЯЗЬ</span>
-                    <h1>Письма</h1>
-                    <p>Вне зависимости от расстояния персонажи могут отправлять друг другу послания. Голубь не появляется мгновенно: письмо сначала летит к адресату.</p>
-                </header>
-
-                <section class="lorgus-mail-layout">
-                    <div class="lorgus-mail-compose">
-                        <div class="lorgus-world-section-title">НОВОЕ ПОСЛАНИЕ</div>
-                        <label for="lorgus-mail-recipient">Кому</label>
-                        <select id="lorgus-mail-recipient">
-                            <option value="">Загрузка персонажей...</option>
-                        </select>
-
-                        <label for="lorgus-mail-body">Текст письма</label>
-                        <textarea id="lorgus-mail-body" rows="10" maxlength="10000" placeholder="Напиши то, что должен узнать другой персонаж..."></textarea>
-
-                        <div class="lorgus-mail-compose-footer">
-                            <span>🕊 Голубиная почта</span>
-                            <button class="gold-button" type="button" onclick="sendLorgusMail()">Отправить голубя</button>
-                        </div>
-                        <div id="lorgus-mail-status" class="lorgus-mail-status"></div>
-                    </div>
-
-                    <div class="lorgus-mail-inbox">
-                        <div class="lorgus-world-section-title">ВХОДЯЩИЕ</div>
-                        <div id="lorgus-mail-inbox-list" class="lorgus-mail-list">
-                            <div class="lorgus-empty-location">
-                                <span>✉</span>
-                                <h2>Загрузка почты...</h2>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </main>
-        </div>
+            <section class="lorgus-mail-layout">
+                <div class="lorgus-mail-compose">
+                    <div class="lorgus-subpage-section-title">НОВОЕ ПОСЛАНИЕ</div>
+                    <label for="lorgus-mail-recipient">Кому</label>
+                    <select id="lorgus-mail-recipient"><option value="">Загрузка персонажей...</option></select>
+                    <label for="lorgus-mail-body">Текст письма</label>
+                    <textarea id="lorgus-mail-body" rows="10" maxlength="10000" placeholder="Напиши послание..."></textarea>
+                    <div class="lorgus-mail-compose-footer"><span>🕊 Голубиная почта</span><button class="gold-button" type="button" onclick="sendLorgusMail()">Отправить</button></div>
+                    <div id="lorgus-mail-status" class="lorgus-mail-status"></div>
+                </div>
+                <div class="lorgus-mail-inbox">
+                    <div class="lorgus-subpage-section-title">ВХОДЯЩИЕ</div>
+                    <div id="lorgus-mail-inbox-list" class="lorgus-mail-list"><div class="lorgus-empty-location"><span>✉</span><h2>Загрузка почты...</h2></div></div>
+                </div>
+            </section>
+        </main>
     `;
 
     await loadMailRecipients();
