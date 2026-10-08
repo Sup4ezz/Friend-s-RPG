@@ -15936,3 +15936,8 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-messenger-main[data-rp-location="Таллирион"]{--lorgus-location-bg:url("/assets/rp-locations/tallirion.svg")}
 .lorgus-messenger-main[data-rp-location="Эстерваль"]{--lorgus-location-bg:url("/assets/rp-locations/esterval.svg")}
 .lorgus-messenger-main[data-rp-location="Фин"]{--lorgus-location-bg:url("/assets/rp-locations/fin.svg")}
+
+
+/* PRIMUM — MAKE THE LOCATION UNMISSABLE */
+.lorgus-messenger-main[data-rp-location="Примум"]::before{background-image:linear-gradient(180deg,rgba(3,7,13,.02),rgba(3,7,13,.18)),url("/assets/rp-locations/primum.svg")!important;background-size:cover!important;background-position:center!important;filter:none!important;animation:none!important}
+.lorgus-messenger-main[data-rp-location="Примум"]::after{background:linear-gradient(180deg,rgba(2,5,10,.02),rgba(2,5,10,.12))!important;box-shadow:inset 0 0 100px rgba(0,0,0,.35)!important}
