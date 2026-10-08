@@ -9,6 +9,36 @@ const LORGUS_MAP_MARKERS = [
     { id:"Спорные Земли", x:62, y:63, type:"contested", description:"Независимые поселения и территории вне власти пяти королевств." }
 ];
 
+const LORGUS_MAP_EDITOR_STORAGE_KEY = "lorgus-map-label-positions-v1";
+
+function getLorgusSavedLabelPositions() {
+    try {
+        return JSON.parse(localStorage.getItem(LORGUS_MAP_EDITOR_STORAGE_KEY) || "{}") || {};
+    } catch {
+        return {};
+    }
+}
+
+function saveLorgusLabelPosition(rectData) {
+    try {
+        const saved = getLorgusSavedLabelPositions();
+        saved[rectData.id] = { x: rectData.x, y: rectData.y, w: rectData.w, h: rectData.h };
+        localStorage.setItem(LORGUS_MAP_EDITOR_STORAGE_KEY, JSON.stringify(saved));
+    } catch {}
+}
+
+function applyLorgusSavedLabelPositions() {
+    const saved = getLorgusSavedLabelPositions();
+    LORGUS_MAP_EDITOR_RECTS.forEach(rect => {
+        const position = saved[rect.id];
+        if (!position) return;
+        if (Number.isFinite(position.x)) rect.x = position.x;
+        if (Number.isFinite(position.y)) rect.y = position.y;
+        if (Number.isFinite(position.w)) rect.w = position.w;
+        if (Number.isFinite(position.h)) rect.h = position.h;
+    });
+}
+
 const LORGUS_MAP_EDITOR_RECTS = [
     { id:"Атэрон", x:62.5, y:65.1, w:11.8, h:6.0, rotation:0 },
     { id:"Каэлор", x:62.0, y:72.7, w:11.9, h:6.3, rotation:0 },
@@ -102,7 +132,10 @@ function bindLorgusMapEditorInteraction(label, rectData, layer) {
         label.classList.remove("editing");
         label.dataset.moved = drag.moved ? "1" : "0";
         drag = null;
-        if (event) updateLorgusMapEditorReadout(rectData);
+        if (event) {
+            saveLorgusLabelPosition(rectData);
+            updateLorgusMapEditorReadout(rectData);
+        }
     };
 
     label.addEventListener("pointerup", stop);
@@ -169,6 +202,7 @@ function fitLorgusMapLabel(label) {
 }
 
 function renderLorgusMapEditorRects() {
+    applyLorgusSavedLabelPositions();
     const layer = document.getElementById("lorgus-map-marker-layer");
     const image = document.querySelector("#lorgus-map-world .lorgus-map-image");
     if (!layer || !image) return;
@@ -441,7 +475,31 @@ function renderLorgusWorldMap(container, character) {
     initializeLorgusMapViewport();
     renderLorgusMapEditorRects(false);
     addLorgusMapEditorUI();
+    if (new URLSearchParams(window.location.search).get("mapedit") === "1") {
+        container.classList.add("lorgus-map-editor-active");
+        const layer = document.getElementById("lorgus-map-marker-layer");
+        layer?.classList.add("editor-mode");
+        renderLorgusMapEditorRects();
+        showLorgusMapEditorMode(container);
+    }
     initializeLorgusMainMenuLight();
+}
+
+function showLorgusMapEditorMode(container) {
+    if (!container || document.getElementById("lorgus-map-editor-mode-hint")) return;
+    const hint = document.createElement("div");
+    hint.id = "lorgus-map-editor-mode-hint";
+    hint.innerHTML = "<strong>РЕЖИМ РАЗМЕТКИ</strong><span>Перетаскивай названия. Позиция сохраняется автоматически.</span><button type=\"button\">ГОТОВО</button>";
+    hint.querySelector("button").onclick = () => {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("mapedit");
+        window.history.replaceState({}, "", url.pathname + url.search + url.hash);
+        hint.remove();
+        container.classList.remove("lorgus-map-editor-active");
+        document.getElementById("lorgus-map-marker-layer")?.classList.remove("editor-mode");
+        renderLorgusMapEditorRects();
+    };
+    container.appendChild(hint);
 }
 
 function initializeLorgusMainMenuLight() {
