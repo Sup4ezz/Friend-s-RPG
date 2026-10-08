@@ -801,7 +801,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
 
     container.className = "lorgus-rp-page";
     container.innerHTML = `
-        <div class="lorgus-messenger-shell">
+        <div class="lorgus-messenger-shell" data-rp-region="${region}" data-rp-location="${location}">
             <aside class="lorgus-messenger-sidebar">
                 <div class="lorgus-messenger-sidebar-head">
                     <button class="lorgus-messenger-back" type="button" onclick="renderKingdomLocations('${region}')">‹ Мир</button>
@@ -834,7 +834,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
                 </div>
             </aside>
 
-            <main class="lorgus-messenger-main">
+            <main class="lorgus-messenger-main" data-rp-region="${region}" data-rp-location="${location}">
                 <header class="lorgus-messenger-header">
                     <div class="lorgus-messenger-header-photo scene-photo"><span>✦</span></div>
                     <div class="lorgus-messenger-header-info">
