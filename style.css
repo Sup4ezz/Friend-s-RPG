@@ -15622,3 +15622,142 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-messenger-composer-tools button{width:30px}
 .lorgus-messenger-header{padding-left:11px;padding-right:8px}
 }
+
+
+/* LORGUS RP — STARFIELD + LIQUID GLASS CHAT */
+.lorgus-messenger-main{
+    position:relative;
+    isolation:isolate;
+    overflow:hidden;
+    background:#03050a;
+}
+.lorgus-messenger-main::before,
+.lorgus-messenger-main::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+}
+.lorgus-messenger-main::before{
+    z-index:-2;
+    opacity:.95;
+    background:
+        radial-gradient(2px 2px at 7% 12%,rgba(255,255,255,.9),transparent 55%),
+        radial-gradient(1px 1px at 13% 72%,rgba(190,215,255,.8),transparent 55%),
+        radial-gradient(2px 2px at 21% 34%,rgba(255,255,255,.75),transparent 55%),
+        radial-gradient(1px 1px at 28% 83%,rgba(255,255,255,.7),transparent 55%),
+        radial-gradient(2px 2px at 36% 18%,rgba(210,225,255,.85),transparent 55%),
+        radial-gradient(1px 1px at 43% 62%,rgba(255,255,255,.8),transparent 55%),
+        radial-gradient(2px 2px at 51% 8%,rgba(255,255,255,.9),transparent 55%),
+        radial-gradient(1px 1px at 58% 42%,rgba(195,215,255,.75),transparent 55%),
+        radial-gradient(2px 2px at 64% 78%,rgba(255,255,255,.72),transparent 55%),
+        radial-gradient(1px 1px at 71% 25%,rgba(255,255,255,.9),transparent 55%),
+        radial-gradient(2px 2px at 78% 58%,rgba(220,230,255,.8),transparent 55%),
+        radial-gradient(1px 1px at 84% 14%,rgba(255,255,255,.8),transparent 55%),
+        radial-gradient(2px 2px at 91% 86%,rgba(255,255,255,.72),transparent 55%),
+        radial-gradient(1px 1px at 96% 39%,rgba(190,215,255,.85),transparent 55%),
+        radial-gradient(1px 1px at 17% 51%,rgba(255,255,255,.65),transparent 55%),
+        radial-gradient(1px 1px at 47% 91%,rgba(255,255,255,.65),transparent 55%),
+        radial-gradient(1px 1px at 73% 91%,rgba(255,255,255,.65),transparent 55%),
+        radial-gradient(1px 1px at 89% 66%,rgba(255,255,255,.7),transparent 55%);
+}
+.lorgus-messenger-main::after{
+    z-index:-1;
+    background:
+        radial-gradient(700px 500px at 68% 30%,rgba(83,111,170,.12),transparent 68%),
+        radial-gradient(520px 420px at 20% 78%,rgba(111,84,150,.08),transparent 70%),
+        linear-gradient(180deg,rgba(3,6,13,.18),rgba(2,4,9,.62));
+    box-shadow:inset 0 0 180px rgba(0,0,0,.72);
+}
+.lorgus-messenger-feed{
+    background:transparent;
+}
+.lorgus-messenger-feed:before{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    background:
+        radial-gradient(420px 300px at 52% 12%,rgba(130,160,220,.055),transparent 70%),
+        linear-gradient(180deg,rgba(3,6,12,.08),rgba(3,5,10,.24));
+}
+.lorgus-messenger-header{
+    background:rgba(12,16,24,.56);
+    border-bottom:1px solid rgba(255,255,255,.13);
+    backdrop-filter:blur(24px) saturate(145%);
+    -webkit-backdrop-filter:blur(24px) saturate(145%);
+    box-shadow:0 10px 35px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.08);
+}
+.lorgus-messenger-bubble{
+    position:relative;
+    overflow:hidden;
+    background:linear-gradient(135deg,rgba(32,39,51,.72),rgba(13,18,27,.64));
+    border:1px solid rgba(255,255,255,.15);
+    border-top-color:rgba(255,255,255,.25);
+    box-shadow:
+        0 14px 35px rgba(0,0,0,.24),
+        inset 0 1px 0 rgba(255,255,255,.11),
+        inset 0 -1px 0 rgba(0,0,0,.2);
+    backdrop-filter:blur(18px) saturate(135%);
+    -webkit-backdrop-filter:blur(18px) saturate(135%);
+}
+.lorgus-messenger-bubble::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(115deg,rgba(255,255,255,.09),transparent 34%,transparent 72%,rgba(150,185,235,.035));
+}
+.lorgus-messenger-bubble p{
+    position:relative;
+    z-index:1;
+    color:#f1f3f6;
+    text-shadow:0 1px 2px rgba(0,0,0,.7);
+    font-size:14px;
+    line-height:1.72;
+}
+.lorgus-messenger-message-meta strong{
+    color:#f0d39a;
+    text-shadow:0 1px 4px rgba(0,0,0,.7);
+}
+.lorgus-messenger-message-meta time{
+    color:#aab2bd;
+    text-shadow:0 1px 3px rgba(0,0,0,.8);
+}
+.lorgus-messenger-message.mine .lorgus-messenger-bubble{
+    background:linear-gradient(135deg,rgba(91,73,42,.68),rgba(37,31,23,.66));
+    border-color:rgba(232,199,127,.24);
+    border-top-color:rgba(255,232,180,.34);
+}
+.lorgus-messenger-start{
+    background:linear-gradient(135deg,rgba(23,31,43,.7),rgba(10,15,23,.62));
+    border:1px solid rgba(255,255,255,.14);
+    box-shadow:0 20px 70px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.08);
+    backdrop-filter:blur(20px) saturate(135%);
+    -webkit-backdrop-filter:blur(20px) saturate(135%);
+}
+.lorgus-messenger-composer{
+    background:rgba(10,14,21,.62);
+    border-top:1px solid rgba(255,255,255,.12);
+    backdrop-filter:blur(24px) saturate(145%);
+    -webkit-backdrop-filter:blur(24px) saturate(145%);
+    box-shadow:0 -12px 35px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.06);
+}
+.lorgus-messenger-input-wrap textarea{
+    background:rgba(8,12,18,.72);
+    border-color:rgba(255,255,255,.13);
+    color:#f1f3f5;
+    text-shadow:0 1px 2px rgba(0,0,0,.7);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+}
+.lorgus-messenger-input-wrap textarea::placeholder{
+    color:#9aa4b0;
+}
+.lorgus-messenger-sidebar{
+    background:rgba(10,14,20,.78);
+    border-right-color:rgba(255,255,255,.1);
+    backdrop-filter:blur(24px) saturate(135%);
+    -webkit-backdrop-filter:blur(24px) saturate(135%);
+}
