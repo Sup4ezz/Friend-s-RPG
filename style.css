@@ -17045,3 +17045,51 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 @media(max-width:600px){
  .lorgus-rp-page{padding:76px 12px 30px!important}
 }
+
+
+/* =========================================================
+   RP HUB — REAL LOCATION ART + ROADS
+   ========================================================= */
+.lorgus-rp-side{
+    grid-template-rows:repeat(2,minmax(0,1fr))!important;
+}
+.lorgus-rp-scene{
+    position:relative!important;
+    overflow:hidden!important;
+}
+.lorgus-rp-scene-art{
+    position:absolute;
+    inset:0;
+    z-index:0;
+    background-position:center;
+    background-size:cover;
+    background-repeat:no-repeat;
+    opacity:.62;
+    filter:saturate(.82) contrast(1.08) brightness(.58);
+    transform:scale(1.035);
+    transition:transform 8s ease,opacity .35s ease;
+}
+.lorgus-rp-scene:hover .lorgus-rp-scene-art{
+    transform:scale(1.07);
+    opacity:.72;
+}
+.lorgus-rp-scene::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    z-index:1;
+    pointer-events:none;
+    background:
+        linear-gradient(90deg,rgba(7,8,12,.92) 0%,rgba(7,8,12,.58) 34%,rgba(7,8,12,.18) 70%,rgba(7,8,12,.62) 100%),
+        linear-gradient(180deg,rgba(5,6,9,.58),transparent 28%,transparent 62%,rgba(5,6,9,.82));
+}
+.lorgus-rp-scene > *:not(.lorgus-rp-scene-art){
+    position:relative;
+    z-index:2;
+}
+.lorgus-rp-scene-art + .lorgus-rp-scene-center{
+    text-shadow:0 3px 24px rgba(0,0,0,.82);
+}
+.lorgus-rp-scene.live .lorgus-rp-scene-art{
+    opacity:.68;
+}
