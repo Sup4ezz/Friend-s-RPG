@@ -1,88 +1,105 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
 <defs>
- <linearGradient id="stone" x2="0" y2="1"><stop stop-color="#30373a"/><stop offset=".55" stop-color="#1d2325"/><stop offset="1" stop-color="#0b0d0e"/></linearGradient>
- <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#38251b"/><stop offset="1" stop-color="#090807"/></linearGradient>
- <linearGradient id="iron" x2="0" y2="1"><stop stop-color="#70787a"/><stop offset=".45" stop-color="#363c3e"/><stop offset="1" stop-color="#111516"/></linearGradient>
- <linearGradient id="wood" x2="0" y2="1"><stop stop-color="#8b542d"/><stop offset=".55" stop-color="#4a2a18"/><stop offset="1" stop-color="#1a0d08"/></linearGradient>
- <radialGradient id="forgeGlow"><stop stop-color="#fff2ad" stop-opacity=".95"/><stop offset=".16" stop-color="#ffb23f" stop-opacity=".65"/><stop offset=".5" stop-color="#e65a21" stop-opacity=".2"/><stop offset="1" stop-color="#e65a21" stop-opacity="0"/></radialGradient>
- <linearGradient id="fire" x2="0" y2="1"><stop stop-color="#fff7c5"/><stop offset=".35" stop-color="#ffc04a"/><stop offset="1" stop-color="#d63b19"/></linearGradient>
- <filter id="blur"><feGaussianBlur stdDeviation="24"/></filter>
- <filter id="soft"><feGaussianBlur stdDeviation="7"/></filter>
- <pattern id="brick" width="170" height="82" patternUnits="userSpaceOnUse"><path d="M0 81H170M85 0V81" stroke="#a0a7a8" stroke-opacity=".1" stroke-width="4"/></pattern>
+<linearGradient id="wall" x2="0" y2="1"><stop stop-color="#252b2d"/><stop offset=".65" stop-color="#151a1b"/><stop offset="1" stop-color="#090b0c"/></linearGradient>
+<linearGradient id="stone" x2="0" y2="1"><stop stop-color="#505657"/><stop offset=".45" stop-color="#303537"/><stop offset="1" stop-color="#151819"/></linearGradient>
+<linearGradient id="floor" x2="0" y2="1"><stop stop-color="#39271c"/><stop offset="1" stop-color="#0b0807"/></linearGradient>
+<linearGradient id="wood" x2="0" y2="1"><stop stop-color="#704222"/><stop offset=".55" stop-color="#3b2114"/><stop offset="1" stop-color="#160b07"/></linearGradient>
+<linearGradient id="iron" x2="0" y2="1"><stop stop-color="#737a7b"/><stop offset=".5" stop-color="#3c4244"/><stop offset="1" stop-color="#171b1c"/></linearGradient>
+<linearGradient id="ember" x2="0" y2="1"><stop stop-color="#fff2ad"/><stop offset=".3" stop-color="#ff9e32"/><stop offset="1" stop-color="#bd3519"/></linearGradient>
+<radialGradient id="warm"><stop stop-color="#ffae3c" stop-opacity=".42"/><stop offset=".45" stop-color="#d84d20" stop-opacity=".12"/><stop offset="1" stop-color="#d84d20" stop-opacity="0"/></radialGradient>
+<filter id="blur"><feGaussianBlur stdDeviation="22"/></filter>
+<filter id="soft"><feGaussianBlur stdDeviation="6"/></filter>
+<pattern id="blocks" width="180" height="82" patternUnits="userSpaceOnUse"><path d="M0 81H180M90 0V81" stroke="#b1b5b2" stroke-opacity=".1" stroke-width="3"/></pattern>
 </defs>
-<!-- massive dwarven forge chamber -->
-<rect width="1600" height="900" fill="#121719"/>
-<path d="M0 590V170L180 75L360 170V590Z" fill="url(#stone)" stroke="#697274" stroke-width="10"/>
-<path d="M1240 590V170L1420 75L1600 170V590Z" fill="url(#stone)" stroke="#697274" stroke-width="10"/>
-<path d="M300 590V185Q800 -30 1300 185V590Z" fill="#242a2c" stroke="#7b817f" stroke-width="12"/>
-<path d="M365 590V230Q800 35 1235 230V590" fill="#101415" stroke="#4e5658" stroke-width="9"/>
-<path d="M0 285H1600V590H0Z" fill="url(#brick)"/>
-<!-- carved arches and ribs -->
-<path d="M360 590V220Q800 35 1240 220M455 590V285Q800 115 1145 285M550 590V345Q800 205 1050 345" fill="none" stroke="#85837a" stroke-opacity=".45" stroke-width="13"/>
-<path d="M360 220L455 285M1240 220L1145 285M455 285L550 345M1145 285L1050 345" stroke="#9a6438" stroke-width="8"/>
-<!-- giant central forge stack -->
-<path d="M560 590V355L650 285H950L1040 355V590Z" fill="#171b1c" stroke="#8e6240" stroke-width="9"/>
-<path d="M630 590V390L695 335H905L970 390V590Z" fill="#07090a" stroke="#4e4138" stroke-width="8"/>
-<ellipse cx="800" cy="465" rx="350" ry="300" fill="url(#forgeGlow)" filter="url(#blur)"/>
-<!-- chimney masonry -->
-<path d="M650 355V105H750V300M850 300V105H950V355" fill="url(#stone)" stroke="#777875" stroke-width="9"/>
-<path d="M630 108H770L750 75H650Z M830 108H970L950 75H850Z" fill="#252a2b" stroke="#9a683d" stroke-width="7"/>
-<g stroke="#9a9d99" stroke-opacity=".22" stroke-width="4"><path d="M650 155H750M650 210H750M850 155H950M850 210H950"/></g>
-<!-- fire and bellows opening -->
-<path d="M675 500V405Q800 335 925 405V500Z" fill="#030404" stroke="#6d4a34" stroke-width="7"/>
-<path d="M800 505C735 445 785 385 800 300C865 390 895 455 800 505Z" fill="url(#fire)"/>
-<path d="M800 475C770 440 800 395 805 350C830 405 842 445 800 475Z" fill="#fff6bd"/>
-<ellipse cx="800" cy="455" rx="190" ry="130" fill="url(#forgeGlow)" opacity=".55" filter="url(#soft)"/>
-<!-- left furnace alcove -->
-<path d="M95 590V400Q210 305 325 400V590Z" fill="#0b0d0e" stroke="#73503a" stroke-width="9"/>
-<path d="M135 515Q210 435 285 515V555H135Z" fill="#030404"/>
-<path d="M210 520C175 485 205 455 210 415C245 460 255 495 210 520Z" fill="url(#fire)"/>
-<!-- right furnace alcove -->
-<path d="M1275 590V400Q1390 305 1505 400V590Z" fill="#0b0d0e" stroke="#73503a" stroke-width="9"/>
-<path d="M1315 515Q1390 435 1465 515V555H1315Z" fill="#030404"/>
-<path d="M1390 520C1355 485 1385 455 1390 415C1425 460 1435 495 1390 520Z" fill="url(#fire)"/>
-<!-- overhead crane -->
-<path d="M80 105H1520" stroke="#555b5c" stroke-width="24"/>
-<path d="M145 105V250M1455 105V250" stroke="#33393a" stroke-width="18"/>
-<path d="M520 105V190M1080 105V190" stroke="#9b6639" stroke-width="10"/>
-<path d="M470 190H1130" stroke="#7e593b" stroke-width="14"/>
-<path d="M800 190V300" stroke="#a5784b" stroke-width="9"/>
-<path d="M770 300H830L820 345H780Z" fill="#858a89" stroke="#202426" stroke-width="7"/>
-<!-- hanging chains -->
-<g stroke="#9a6a3e" stroke-width="6"><path d="M540 190V345M1060 190V330M800 190V300"/></g>
-<g fill="#636968" stroke="#202426" stroke-width="6"><path d="M515 345L565 325L590 350L540 370Z"/><path d="M1035 330L1085 310L1110 335L1060 355Z"/></g>
-<!-- side workstations -->
-<g>
- <path d="M65 625L330 575L380 625L105 680Z" fill="url(#wood)" stroke="#a16a3b" stroke-width="8"/>
- <path d="M105 675L90 850M350 625L370 800" stroke="#3b2113" stroke-width="30"/>
- <path d="M1220 625L1485 575L1535 625L1260 680Z" fill="url(#wood)" stroke="#a16a3b" stroke-width="8"/>
- <path d="M1260 675L1245 850M1505 625L1525 800" stroke="#3b2113" stroke-width="30"/>
-</g>
-<!-- anvils -->
+
+<!-- dark monumental forge hall -->
+<rect width="1600" height="900" fill="url(#wall)"/>
+<path d="M0 590V170L180 70L360 170V590Z" fill="url(#stone)" stroke="#737877" stroke-width="10"/>
+<path d="M1240 590V170L1420 70L1600 170V590Z" fill="url(#stone)" stroke="#737877" stroke-width="10"/>
+<path d="M300 590V190Q800 -15 1300 190V590Z" fill="#24292b" stroke="#858987" stroke-width="12"/>
+<path d="M360 590V235Q800 40 1240 235V590" fill="#111516" stroke="#555b5c" stroke-width="9"/>
+<path d="M0 285H1600V590H0Z" fill="url(#blocks)"/>
+
+<!-- heavy roof ribs -->
+<path d="M360 590V225Q800 35 1240 225M465 590V285Q800 115 1135 285M570 590V345Q800 205 1030 345" fill="none" stroke="#888985" stroke-opacity=".42" stroke-width="13"/>
+<path d="M360 225L465 285M1240 225L1135 285M465 285L570 345M1135 285L1030 345" stroke="#8e5e39" stroke-width="7"/>
+
+<!-- central industrial furnace: no giant flame -->
+<path d="M585 590V360L660 300H940L1015 360V590Z" fill="#171b1c" stroke="#90603a" stroke-width="9"/>
+<path d="M645 590V405Q800 315 955 405V590Z" fill="#080a0b" stroke="#4e4035" stroke-width="8"/>
+<path d="M690 500V420Q800 355 910 420V500Z" fill="#030405"/>
+<ellipse cx="800" cy="470" rx="170" ry="120" fill="url(#warm)" filter="url(#blur)"/>
+<!-- contained furnace glow -->
+<path d="M800 500C770 470 792 440 800 395C825 440 840 475 800 500Z" fill="url(#ember)"/>
+<path d="M800 480C787 460 799 438 803 420C815 447 820 466 800 480Z" fill="#fff3b0"/>
+
+<!-- chimney -->
+<path d="M665 315V105H755V285M845 285V105H935V315" fill="url(#stone)" stroke="#777b79" stroke-width="9"/>
+<path d="M645 108H775L755 72H665ZM825 108H955L935 72H845Z" fill="#252a2b" stroke="#95623a" stroke-width="7"/>
+
+<!-- organized side furnaces -->
+<path d="M75 590V415Q210 305 345 415V590Z" fill="#111516" stroke="#73503a" stroke-width="9"/>
+<path d="M120 525Q210 435 300 525V565H120Z" fill="#030405"/>
+<path d="M210 530C180 495 204 470 210 435C240 475 250 505 210 530Z" fill="url(#ember)"/>
+<path d="M1255 590V415Q1390 305 1525 415V590Z" fill="#111516" stroke="#73503a" stroke-width="9"/>
+<path d="M1300 525Q1390 435 1480 525V565H1300Z" fill="#030405"/>
+<path d="M1390 530C1360 495 1384 470 1390 435C1420 475 1430 505 1390 530Z" fill="url(#ember)"/>
+
+<!-- crane, restrained -->
+<path d="M120 105H1480" stroke="#515758" stroke-width="22"/>
+<path d="M180 105V235M1420 105V235" stroke="#303536" stroke-width="17"/>
+<path d="M800 105V250" stroke="#9a683d" stroke-width="9"/>
+<path d="M755 250H845" stroke="#806044" stroke-width="12"/>
+<path d="M800 250V330" stroke="#9a683d" stroke-width="7"/>
+<path d="M775 330H825L815 370H785Z" fill="#737978" stroke="#202425" stroke-width="6"/>
+
+<!-- left orderly smithing station -->
+<path d="M85 610L300 575L355 615L135 650Z" fill="url(#wood)" stroke="#9c6438" stroke-width="7"/>
+<path d="M125 648L112 820M320 620L340 780" stroke="#321b11" stroke-width="28"/>
+<!-- right orderly smithing station -->
+<path d="M1245 615L1460 575L1515 615L1295 650Z" fill="url(#wood)" stroke="#9c6438" stroke-width="7"/>
+<path d="M1285 648L1272 820M1480 620L1500 780" stroke="#321b11" stroke-width="28"/>
+
+<!-- only two clear anvils -->
 <g fill="url(#iron)" stroke="#171b1c" stroke-width="7">
- <path d="M145 610L220 578L295 605L270 632H175L190 660H260L240 715H170L145 660Z"/>
- <path d="M1305 610L1380 578L1455 605L1430 632H1335L1350 660H1420L1400 715H1330L1305 660Z"/>
- <path d="M450 625L510 598L570 623L552 647H468L480 675H540L525 720H465L450 675Z"/>
- <path d="M1030 625L1090 598L1150 623L1132 647H1048L1060 675H1120L1105 720H1045L1030 675Z"/>
+<path d="M145 610L215 585L285 610L260 635H170L182 660H252L235 705H175L145 660Z"/>
+<path d="M1315 610L1385 585L1455 610L1430 635H1340L1352 660H1422L1405 705H1345L1315 660Z"/>
 </g>
-<!-- tools and weapon blanks -->
-<g stroke-linecap="round"><g stroke="#b47a43" stroke-width="9"><path d="M135 555L225 475M205 560L300 470M1310 555L1400 470M1390 560L1480 475"/></g>
-<g fill="#777d7e" stroke="#242829" stroke-width="5"><path d="M210 475L235 450L258 475L230 502Z"/><path d="M285 470L310 445L333 470L305 497Z"/><path d="M1390 470L1415 445L1438 470L1410 497Z"/><path d="M1465 475L1490 450L1513 475L1485 502Z"/></g>
-<path d="M470 540L600 420M1000 420L1130 540" stroke="#a9abad" stroke-width="10"/><path d="M585 425L610 400L625 425L600 450ZM1115 540L1140 515L1155 540L1130 565Z" fill="#6f7475"/></g>
-<!-- foreground molten channels -->
-<path d="M800 575L800 900M470 575L620 900M1130 575L980 900" stroke="#1a0d08" stroke-width="58"/>
-<path d="M800 575L800 900M470 575L620 900M1130 575L980 900" stroke="#d9531d" stroke-width="19"/>
-<path d="M800 575L800 900M470 575L620 900M1130 575L980 900" stroke="#ffd56a" stroke-width="6"/>
-<!-- floor -->
+
+<!-- deliberate tool hooks, not scattered -->
+<g stroke="#a87343" stroke-width="8" stroke-linecap="round">
+<path d="M105 555L175 490M145 555L215 490M1385 555L1455 490M1425 555L1495 490"/>
+</g>
+<g fill="#6e7475" stroke="#222627" stroke-width="5">
+<path d="M160 490L185 465L207 490L180 515Z"/>
+<path d="M200 490L225 465L247 490L220 515Z"/>
+<path d="M1440 490L1465 465L1487 490L1460 515Z"/>
+<path d="M1480 490L1505 465L1527 490L1500 515Z"/>
+</g>
+
+<!-- stone floor perspective -->
 <path d="M0 590L800 505L1600 590V900H0Z" fill="url(#floor)"/>
-<g stroke="#b06b35" stroke-opacity=".3" stroke-width="6" fill="none"><path d="M0 685L800 555L1600 685M0 795L800 650L1600 795M0 885L800 745L1600 885"/></g>
-<!-- foreground metal racks -->
-<g fill="url(#iron)" stroke="#1a1e1f" stroke-width="7">
- <path d="M65 730H300V815H65Z"/><path d="M1300 725H1535V810H1300Z"/>
+<g stroke="#a06b3b" stroke-opacity=".28" stroke-width="5" fill="none">
+<path d="M0 685L800 555L1600 685M0 790L800 650L1600 790M0 885L800 745L1600 885"/>
+<path d="M185 900L715 550M500 900L770 550M1100 900L830 550M1415 900L885 550"/>
 </g>
-<g fill="#b1b4b1" stroke="#242829" stroke-width="4"><path d="M90 770L115 700L135 705L110 775Z"/><path d="M145 780L165 690L185 695L165 785Z"/><path d="M205 775L220 705L240 710L225 780Z"/><path d="M1340 775L1360 700L1380 705L1360 780Z"/><path d="M1390 780L1410 695L1430 700L1410 785Z"/><path d="M1440 775L1460 705L1480 710L1460 780Z"/></g>
-<!-- sparks -->
-<g fill="#ffd66b"><circle cx="615" cy="470" r="5"/><circle cx="590" cy="430" r="3"/><circle cx="1010" cy="450" r="4"/><circle cx="1040" cy="405" r="3"/><circle cx="350" cy="530" r="4"/><circle cx="1250" cy="520" r="5"/></g>
-<!-- warm forge haze -->
-<ellipse cx="800" cy="470" rx="620" ry="390" fill="url(#forgeGlow)" opacity=".18" filter="url(#blur)"/>
+
+<!-- controlled molten channels, integrated into floor -->
+<path d="M800 565V900M500 585L620 900M1100 585L980 900" stroke="#160b07" stroke-width="48"/>
+<path d="M800 565V900M500 585L620 900M1100 585L980 900" stroke="#c9471b" stroke-width="12"/>
+<path d="M800 565V900M500 585L620 900M1100 585L980 900" stroke="#ffbd4d" stroke-width="4"/>
+
+<!-- foreground: clean storage racks -->
+<g fill="#202527" stroke="#555c5d" stroke-width="7">
+<path d="M65 710H290V835H65Z"/><path d="M1310 710H1535V835H1310Z"/>
+<path d="M65 755H290M1310 755H1535"/>
+</g>
+<g stroke="#9ca19f" stroke-width="14" stroke-linecap="round">
+<path d="M100 735H255M100 785H255M1345 735H1500M1345 785H1500"/>
+</g>
+<g stroke="#3d4344" stroke-width="7"><path d="M110 720V825M150 720V825M190 720V825M230 720V825M1355 720V825M1395 720V825M1435 720V825M1475 720V825"/></g>
+
+<!-- restrained forge haze and sparks -->
+<ellipse cx="800" cy="470" rx="520" ry="330" fill="url(#warm)" opacity=".18" filter="url(#blur)"/>
+<g fill="#ffd66b"><circle cx="605" cy="470" r="4"/><circle cx="630" cy="440" r="3"/><circle cx="995" cy="455" r="4"/><circle cx="1020" cy="425" r="3"/></g>
 </svg>
