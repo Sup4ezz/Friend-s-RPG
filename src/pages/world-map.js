@@ -524,82 +524,31 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
     if (typeof renderTarget !== "function" || window.lorgusMainMenuNavigating) return;
 
     const container = document.getElementById("cabinet-content");
-    const current = container?.firstElementChild;
-    if (!container || !current) {
+    if (!container) {
         renderTarget();
         return;
     }
 
     window.lorgusMainMenuNavigating = true;
-    document.documentElement.classList.add("lorgus-screen-transitioning");
-    document.body.classList.add("lorgus-screen-transitioning");
+    document.documentElement.dataset.lorgusTransition = direction;
 
-    // Рендерим следующую страницу в обычном контейнере, а в переходе
-    // показываем две визуальные копии. Никаких переносов реальных DOM-узлов:
-    // поэтому ни карта, ни инвентарь не теряют контекст #cabinet-content.
-    const outgoing = current.cloneNode(true);
-    // Клонам нужен тот же CSS-контекст, что и реальному #cabinet-content:
-    // часть старых правил страницы привязана непосредственно к этому id.
-    outgoing.id = "cabinet-content";
+    const finish = () => {
+        delete document.documentElement.dataset.lorgusTransition;
+        window.lorgusMainMenuNavigating = false;
+    };
+
+    // Используем нативный View Transition: браузер сам снимает текущую
+    // сцену и новую сцену из настоящего #cabinet-content. Никаких клонов,
+    // переносов DOM и чёрного промежуточного экрана.
+    if (typeof document.startViewTransition === "function") {
+        const transition = document.startViewTransition(() => renderTarget());
+        transition.finished.then(finish, finish);
+        return transition.finished;
+    }
+
+    // Fallback для браузеров без View Transition API.
     renderTarget();
-    const incoming = container.firstElementChild;
-
-    if (!incoming) {
-        window.lorgusMainMenuNavigating = false;
-        document.documentElement.classList.remove("lorgus-screen-transitioning");
-        document.body.classList.remove("lorgus-screen-transitioning");
-        return;
-    }
-
-    const stage = document.createElement("div");
-    stage.className = "lorgus-page-transition-stage";
-
-    const oldPanel = document.createElement("div");
-    oldPanel.className = "lorgus-transition-panel lorgus-transition-old";
-    oldPanel.appendChild(outgoing);
-
-    const newPanel = document.createElement("div");
-    newPanel.className = "lorgus-transition-panel lorgus-transition-new";
-    const incomingClone = incoming.cloneNode(true);
-    incomingClone.id = "cabinet-content";
-    newPanel.appendChild(incomingClone);
-
-    const horizontal = direction === "left" || direction === "right";
-    const forward = direction === "right" || direction === "bottom";
-
-    if (horizontal) {
-        oldPanel.classList.add("horizontal");
-        newPanel.classList.add("horizontal");
-        newPanel.style.transform = forward ? "translate3d(100%,0,0)" : "translate3d(-100%,0,0)";
-    } else {
-        oldPanel.classList.add("vertical");
-        newPanel.classList.add("vertical");
-        newPanel.style.transform = forward ? "translate3d(0,100%,0)" : "translate3d(0,-100%,0)";
-    }
-
-    stage.appendChild(oldPanel);
-    stage.appendChild(newPanel);
-    document.body.appendChild(stage);
-
-    container.style.visibility = "hidden";
-
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-            stage.classList.add("is-moving");
-            oldPanel.style.transform = horizontal
-                ? `translate3d(${forward ? "-100%" : "100%"},0,0)`
-                : `translate3d(0,${forward ? "-100%" : "100%"},0)`;
-            newPanel.style.transform = "translate3d(0,0,0)";
-        });
-    });
-
-    window.setTimeout(() => {
-        stage.remove();
-        container.style.visibility = "";
-        window.lorgusMainMenuNavigating = false;
-        document.documentElement.classList.remove("lorgus-screen-transitioning");
-        document.body.classList.remove("lorgus-screen-transitioning");
-    }, 720);
+    requestAnimationFrame(finish);
 };
 window.lorgusMainMenuNavigate = function(direction, renderTarget) {
     return window.lorgusSubpageTransition(direction, renderTarget);
