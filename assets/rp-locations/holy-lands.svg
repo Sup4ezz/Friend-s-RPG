@@ -1,1 +1,75 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900"><defs><linearGradient id="s" x2="0" y2="1"><stop stop-color="#17201e"/><stop offset=".58" stop-color="#7b806e"/><stop offset="1" stop-color="#292d27"/></linearGradient><linearGradient id="st" x2="0" y2="1"><stop stop-color="#aaa895"/><stop offset="1" stop-color="#4b4d44"/></linearGradient><linearGradient id="g" x2="0" y2="1"><stop stop-color="#777568"/><stop offset="1" stop-color="#2d302a"/></linearGradient><radialGradient id="l"><stop stop-color="#eee5b5" stop-opacity=".4"/><stop offset="1" stop-color="#ddd5a0" stop-opacity="0"/></radialGradient></defs><rect width="1600" height="900" fill="url(#s)"/><path d="M0 470Q120 390 240 440Q360 365 490 445Q620 375 760 455Q900 370 1030 450Q1160 365 1290 445Q1450 380 1600 455V610H0Z" fill="#30382f" stroke="#777d6d" stroke-width="12"/><g fill="#242b25" stroke="#525b4e" stroke-width="18"><path d="M0 0Q90 170 55 330Q25 470 105 620L0 700Z"/><path d="M1600 0Q1510 170 1545 330Q1575 470 1495 620L1600 700Z"/></g><g stroke="#30332d" stroke-width="14" fill="url(#st)"><path d="M150 650V455Q150 425 185 410L300 360Q335 375 335 410V650Z"/><path d="M1265 650V420Q1265 390 1300 375L1415 325Q1450 340 1450 375V650Z"/><path d="M365 650V430H570V650Z"/><path d="M1030 650V430H1235V650Z"/></g><g fill="#30352f" stroke="#20231f" stroke-width="12"><rect x="180" y="470" width="120" height="105"/><rect x="1295" y="435" width="120" height="105"/><rect x="395" y="475" width="150" height="100"/><rect x="1055" y="475" width="150" height="100"/></g><g fill="#d6d4ad" stroke="#555b4e" stroke-width="8"><rect x="205" y="490" width="70" height="70"/><rect x="1320" y="455" width="70" height="70"/><rect x="430" y="495" width="80" height="65"/><rect x="1090" y="495" width="80" height="65"/></g><g stroke="#292d28" stroke-width="16"><ellipse cx="800" cy="520" rx="250" ry="125" fill="url(#st)"/><ellipse cx="800" cy="495" rx="205" ry="100" fill="#68695e"/><ellipse cx="800" cy="480" rx="150" ry="72" fill="#343a33"/><path d="M650 480Q800 400 950 480V665H650Z" fill="#565950"/></g><g fill="#c9c6a4" stroke="#454b42" stroke-width="9"><circle cx="800" cy="470" r="48"/><circle cx="800" cy="470" r="28"/></g><g fill="#62665a" stroke="#2d312b" stroke-width="11"><rect x="555" y="590" width="95" height="110"/><rect x="700" y="635" width="80" height="100"/><rect x="820" y="635" width="80" height="100"/><rect x="950" y="590" width="95" height="110"/><rect x="770" y="330" width="60" height="75"/></g><path d="M0 735Q240 665 470 700Q640 725 800 685Q960 725 1130 700Q1360 665 1600 735V900H0Z" fill="url(#g)"/><path d="M800 900Q760 820 700 750Q650 710 580 680L800 625L1020 680Q950 710 900 750Q840 820 800 900Z" fill="#66665b" stroke="#30332d" stroke-width="14"/><g fill="#77786b" stroke="#363a33" stroke-width="12"><rect x="90" y="610" width="70" height="105"/><rect x="1450" y="610" width="70" height="105"/></g><g fill="#3e443d" stroke="#242923" stroke-width="12"><rect x="570" y="700" width="120" height="75"/><rect x="910" y="700" width="120" height="75"/></g><g fill="#344334" stroke="#56634f" stroke-width="9"><ellipse cx="110" cy="820" rx="105" ry="55"/><ellipse cx="1490" cy="820" rx="105" ry="55"/><ellipse cx="420" cy="820" rx="85" ry="45"/><ellipse cx="1180" cy="820" rx="85" ry="45"/></g><ellipse cx="800" cy="470" rx="560" ry="330" fill="url(#l)"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
+<defs>
+ <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#111a1d"/><stop offset=".55" stop-color="#626b68"/><stop offset="1" stop-color="#202629"/></linearGradient>
+ <linearGradient id="stone" x2="0" y2="1"><stop stop-color="#d9ddd5"/><stop offset="1" stop-color="#6d7672"/></linearGradient>
+ <linearGradient id="armor" x2="0" y2="1"><stop stop-color="#ffffff"/><stop offset=".5" stop-color="#e9eeea"/><stop offset="1" stop-color="#9ca5a3"/></linearGradient>
+ <radialGradient id="light"><stop stop-color="#fffef2" stop-opacity=".95"/><stop offset=".5" stop-color="#e8e7cf" stop-opacity=".28"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+ <linearGradient id="floor" x2="0" y2="1"><stop stop-color="#7e8179"/><stop offset="1" stop-color="#292d2d"/></linearGradient>
+</defs>
+<rect width="1600" height="900" fill="url(#bg)"/>
+<!-- immense council chamber -->
+<path d="M80 0H1520V690Q1450 630 1370 605H230Q150 630 80 690Z" fill="#252d2e"/>
+<path d="M170 0H1430V620Q1350 565 1270 545H330Q250 565 170 620Z" fill="#707873" stroke="#3a4140" stroke-width="18"/>
+<!-- tall neutral pillars -->
+<g fill="#aeb5ae" stroke="#454c4b" stroke-width="14">
+ <path d="M150 70h110v520H150z"/><path d="M330 30h95v500h-95z"/>
+ <path d="M1175 30h95v500h-95z"/><path d="M1340 70h110v520h-110z"/>
+</g>
+<!-- windows -->
+<g fill="#cfd6cf" stroke="#4a5250" stroke-width="13">
+ <path d="M455 70h105v300l-52 55-53-55z"/><path d="M1040 70h105v300l-52 55-53-55z"/>
+</g>
+<!-- neutral banners, no church symbols -->
+<g fill="#e9ece6" opacity=".82"><path d="M300 90h38v210l-19 28-19-28z"/><path d="M1262 90h38v210l-19 28-19-28z"/></g>
+<!-- council dais -->
+<ellipse cx="800" cy="515" rx="360" ry="165" fill="#303738" stroke="#171c1d" stroke-width="22"/>
+<ellipse cx="800" cy="505" rx="315" ry="135" fill="#9b9d91" stroke="#555b59" stroke-width="15"/>
+<ellipse cx="800" cy="495" rx="255" ry="105" fill="#3d4544" stroke="#c2c5bb" stroke-width="9"/>
+<!-- council table -->
+<ellipse cx="800" cy="485" rx="225" ry="88" fill="#252c2c" stroke="#d4d7cc" stroke-width="12"/>
+<ellipse cx="800" cy="485" rx="150" ry="55" fill="#171d1e"/>
+<!-- chairs -->
+<g fill="#c1c5bd" stroke="#424847" stroke-width="10">
+ <path d="M550 430h55v90h-55z"/><path d="M665 375h55v90h-55z"/><path d="M880 375h55v90h-55z"/><path d="M995 430h55v90h-55z"/>
+ <path d="M600 585h55v75h-55z"/><path d="M945 585h55v75h-55z"/>
+</g>
+<!-- colossal guardian behind council -->
+<ellipse cx="800" cy="270" rx="280" ry="250" fill="url(#light)" opacity=".7"/>
+<!-- cape -->
+<path d="M680 395Q705 290 720 205H880Q895 290 920 395L850 430H750Z" fill="#e7ebe7" stroke="#707876" stroke-width="15"/>
+<!-- legs -->
+<g fill="url(#armor)" stroke="#5b6361" stroke-width="15">
+ <path d="M735 385L790 380 775 555 710 555Z"/><path d="M810 380L865 385 890 555 825 555Z"/>
+ <path d="M705 535h70l-12 70h-78z"/><path d="M825 535h70l20 70h-78z"/>
+</g>
+<!-- torso -->
+<path d="M715 205Q800 165 885 205L865 390Q800 430 735 390Z" fill="url(#armor)" stroke="#515957" stroke-width="16"/>
+<path d="M755 225h90v115h-90z" fill="#c9ceca" stroke="#6b7370" stroke-width="10"/>
+<!-- shoulders and arms -->
+<g fill="url(#armor)" stroke="#555d5a" stroke-width="15">
+ <ellipse cx="700" cy="225" rx="48" ry="38"/><ellipse cx="900" cy="225" rx="48" ry="38"/>
+ <path d="M670 235L610 365 655 390 730 275Z"/><path d="M930 235L990 365 945 390 870 275Z"/>
+ <path d="M605 350l45 20-20 70-48-20z"/><path d="M995 350l-45 20 20 70 48-20z"/>
+</g>
+<!-- helmet -->
+<path d="M745 110Q800 70 855 110L865 200Q800 245 735 200Z" fill="url(#armor)" stroke="#4e5653" stroke-width="16"/>
+<path d="M750 150h100v38l-50 15-50-15z" fill="#31393a"/>
+<path d="M765 128h70" stroke="#fff" stroke-width="9"/>
+<!-- enormous white sword -->
+<path d="M980 430L1080 95 1120 95 1045 435Z" fill="#ffffff" stroke="#858c88" stroke-width="14"/>
+<path d="M1025 110L1100 110" stroke="#fff" stroke-width="10"/>
+<path d="M965 420h105v28H965z" fill="#eef1eb" stroke="#555c59" stroke-width="10"/>
+<path d="M1000 448h35v95h-35z" fill="#b7bdb8" stroke="#555c59" stroke-width="9"/>
+<!-- floor -->
+<path d="M0 610Q260 555 520 620Q800 680 1080 620Q1340 555 1600 610V900H0Z" fill="url(#floor)"/>
+<!-- radial floor stones -->
+<g stroke="#9a9b91" stroke-width="8" opacity=".55">
+ <path d="M0 900L650 650M300 900L700 660M1600 900L950 650M1300 900L900 660M800 900V660"/>
+ <path d="M120 720H1480M40 800H1560"/>
+</g>
+<!-- foreground columns -->
+<g fill="#565f5c" stroke="#252b2b" stroke-width="16"><path d="M0 420h135v480H0z"/><path d="M1465 420h135v480h-135z"/></g>
+<g fill="#aab0aa" stroke="#4a514f" stroke-width="12"><path d="M20 450h95v330H20z"/><path d="M1485 450h95v330h-95z"/></g>
+<!-- light -->
+<ellipse cx="800" cy="290" rx="510" ry="390" fill="url(#light)" opacity=".42"/>
+</svg>
