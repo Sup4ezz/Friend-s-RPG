@@ -1,59 +1,74 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900">
 <defs>
-<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#071b22"/><stop offset=".55" stop-color="#183f3b"/><stop offset="1" stop-color="#08100e"/></linearGradient>
-<linearGradient id="bark" x2="1" y2="0"><stop stop-color="#24150f"/><stop offset=".45" stop-color="#684329"/><stop offset=".72" stop-color="#9a6337"/><stop offset="1" stop-color="#2a1710"/></linearGradient>
-<linearGradient id="leaf" x2="0" y2="1"><stop stop-color="#3e8752"/><stop offset="1" stop-color="#102c20"/></linearGradient>
-<linearGradient id="walk" x2="0" y2="1"><stop stop-color="#5c4934"/><stop offset="1" stop-color="#171510"/></linearGradient>
-<radialGradient id="moon"><stop stop-color="#d9ffe1"/><stop offset="1" stop-color="#8fe0a8" stop-opacity="0"/></radialGradient>
+<linearGradient id="sky" x2="0" y2="1"><stop stop-color="#06151c"/><stop offset=".5" stop-color="#12372f"/><stop offset="1" stop-color="#07110e"/></linearGradient>
+<linearGradient id="trunk" x2="1"><stop stop-color="#21130e"/><stop offset=".32" stop-color="#694126"/><stop offset=".52" stop-color="#9b6538"/><stop offset=".7" stop-color="#4c2c1b"/><stop offset="1" stop-color="#1c110c"/></linearGradient>
+<linearGradient id="wood" x2="0" y2="1"><stop stop-color="#b47a43"/><stop offset="1" stop-color="#392016"/></linearGradient>
+<linearGradient id="ground" x2="0" y2="1"><stop stop-color="#193326"/><stop offset="1" stop-color="#060b09"/></linearGradient>
+<radialGradient id="mist"><stop stop-color="#9de4a9" stop-opacity=".32"/><stop offset="1" stop-color="#9de4a9" stop-opacity="0"/></radialGradient>
+<filter id="blur"><feGaussianBlur stdDeviation="16"/></filter>
 </defs>
 <rect width="1600" height="900" fill="url(#sky)"/>
-<circle cx="1280" cy="150" r="190" fill="url(#moon)"/><circle cx="1280" cy="150" r="48" fill="#d7f4d9"/>
-<!-- enormous ancient tree -->
-<path d="M430 900Q470 670 590 520Q680 405 710 250Q735 125 800 35Q865 125 890 250Q920 405 1010 520Q1130 670 1170 900Z" fill="url(#bark)" stroke="#160e0b" stroke-width="16"/>
-<path d="M675 900Q720 650 765 500Q800 390 800 210Q800 390 835 500Q880 650 925 900Z" fill="#315d36" opacity=".9"/>
-<!-- giant branches -->
-<g fill="none" stroke="#53321f" stroke-linecap="round">
-<path d="M760 330Q590 250 330 150" stroke-width="75"/><path d="M840 335Q1010 240 1300 125" stroke-width="78"/>
-<path d="M700 470Q500 405 205 360" stroke-width="55"/><path d="M900 470Q1110 400 1450 345" stroke-width="58"/>
+<ellipse cx="1180" cy="260" rx="430" ry="250" fill="url(#mist)"/>
+<circle cx="1260" cy="145" r="45" fill="#d9f2cf"/>
+<!-- distant forest -->
+<path d="M0 610L80 330l70 280 90-350 90 350 110-300 90 300 100-360 105 360 100-290 90 290 110-330 100 330 100-280 95 280 90-320 100 320 100-260 100 260V700H0Z" fill="#0a2119"/>
+<!-- colossal trunk, with visible roots -->
+<path d="M510 900Q540 720 610 585Q665 480 690 355Q710 220 800 45Q890 220 910 355Q935 480 990 585Q1060 720 1090 900Z" fill="url(#trunk)" stroke="#180d09" stroke-width="18"/>
+<path d="M705 900Q735 710 770 570Q800 440 800 190Q800 440 830 570Q865 710 895 900Z" fill="#3c6b3b" opacity=".7"/>
+<!-- massive branches -->
+<g fill="none" stroke="#53301d" stroke-linecap="round">
+<path d="M760 300Q625 235 420 105Q300 30 160 70" stroke-width="105"/>
+<path d="M840 300Q975 230 1180 100Q1330 10 1510 80" stroke-width="105"/>
+<path d="M700 430Q520 360 285 335Q150 320 40 390" stroke-width="78"/>
+<path d="M900 430Q1080 355 1320 330Q1470 320 1580 390" stroke-width="82"/>
 </g>
-<!-- canopy masses -->
-<g fill="url(#leaf)" stroke="#5da66a" stroke-width="6">
-<circle cx="180" cy="150" r="105"/><circle cx="340" cy="110" r="125"/><circle cx="500" cy="165" r="120"/><circle cx="655" cy="110" r="105"/>
-<circle cx="950" cy="115" r="120"/><circle cx="1100" cy="95" r="130"/><circle cx="1280" cy="120" r="145"/><circle cx="1460" cy="190" r="120"/>
-<circle cx="130" cy="350" r="105"/><circle cx="300" cy="330" r="125"/><circle cx="470" cy="365" r="105"/>
-<circle cx="1120" cy="350" r="115"/><circle cx="1300" cy="330" r="135"/><circle cx="1490" cy="390" r="115"/>
+<!-- canopy, irregular layered not circles -->
+<g fill="#1b4a30" stroke="#4f9460" stroke-width="8">
+<path d="M0 125Q120 20 265 95Q370 15 500 110Q590 30 705 125L650 250Q500 215 370 255Q200 220 0 285Z"/>
+<path d="M895 125Q1010 30 1110 105Q1250 0 1370 105Q1500 35 1600 135V290Q1440 220 1280 260Q1100 210 950 255Z"/>
+<path d="M0 300Q130 225 255 305Q380 230 510 315Q620 255 705 350L650 455Q470 400 310 445Q130 405 0 475Z"/>
+<path d="M895 350Q1020 260 1135 335Q1280 245 1410 335Q1510 280 1600 360V480Q1440 420 1290 455Q1080 400 950 460Z"/>
 </g>
-<!-- tree dwellings built into trunk -->
-<g stroke="#1c120d" stroke-width="9">
-<path d="M575 575L680 505L785 575V700H575Z" fill="#70472a"/><path d="M815 560L900 505L985 560V690H815Z" fill="#70472a"/>
-<path d="M610 610h55v75h-55zM855 595h50v75h-50z" fill="#b9d58c"/>
-<path d="M690 505h95M900 505h-85" stroke="#9b6338" stroke-width="14"/>
+<!-- inner tree balconies -->
+<g fill="url(#wood)" stroke="#24140d" stroke-width="10">
+<path d="M570 505Q800 455 1030 505L990 565Q800 530 610 565Z"/>
+<path d="M500 635Q800 575 1100 635L1050 700Q800 655 550 700Z"/>
+<path d="M440 765Q800 690 1160 765L1100 835Q800 775 500 835Z"/>
 </g>
-<!-- elevated elven platforms -->
-<g fill="#69432a" stroke="#1b120e" stroke-width="9">
-<path d="M250 485h300l-45 45H295z"/><path d="M1080 465h300l-45 45h-210z"/>
-<path d="M320 530v155M480 530v155M1150 510v175M1310 510v175" fill="none" stroke-width="13"/>
+<!-- treehouse buildings -->
+<g stroke="#21130d" stroke-width="10">
+<path d="M595 425L680 365L765 425V510H595Z" fill="#704328"/><path d="M835 425L920 365L1005 425V510H835Z" fill="#704328"/>
+<path d="M545 555L650 475L755 555V645H545Z" fill="#8a5830"/><path d="M845 555L950 475L1055 555V645H845Z" fill="#8a5830"/>
+<path d="M650 685L800 585L950 685V775H650Z" fill="#9a6235"/>
 </g>
-<g fill="#8bc47e" stroke="#1b120e" stroke-width="8">
-<path d="M300 485q75-105 150 0z"/><path d="M1130 465q75-105 150 0z"/>
+<!-- windows -->
+<g fill="#c8efa4" stroke="#2a1b12" stroke-width="7">
+<path d="M630 445h35v45h-35zM700 430h35v45h-35zM870 430h35v45h-35zM940 445h35v45h-35z"/>
+<path d="M590 575h42v50h-42zM690 550h42v50h-42zM870 550h42v50h-42zM970 575h42v50h-42z"/>
+<path d="M725 685h50v55h-50zM825 685h50v55h-50z"/>
 </g>
-<!-- hanging bridges -->
-<g fill="none" stroke="#b0824e" stroke-width="10">
-<path d="M390 510Q700 650 1140 490"/><path d="M520 520Q760 620 1320 500"/>
+<!-- giant radial platforms -->
+<g fill="#684126" stroke="#24150e" stroke-width="12">
+<path d="M180 520Q400 465 600 500L575 555Q365 535 200 580Z"/>
+<path d="M1000 500Q1200 465 1420 520L1400 580Q1230 535 1025 555Z"/>
 </g>
-<g stroke="#3b2518" stroke-width="7"><path d="M430 535l-8 40M500 565l-8 40M580 590l-8 40M660 610l-8 40M740 620v40M820 615v40M900 600v40M980 575v40M1060 540v40"/></g>
-<!-- luminous plants -->
-<g fill="#9ee7a9" stroke="#355d3b" stroke-width="5">
-<circle cx="180" cy="650" r="13"/><circle cx="230" cy="710" r="9"/><circle cx="1380" cy="650" r="14"/><circle cx="1430" cy="720" r="9"/><circle cx="500" cy="760" r="11"/><circle cx="1090" cy="750" r="12"/>
-</g>
-<!-- ground -->
-<path d="M0 650Q400 575 800 635Q1200 575 1600 650V900H0Z" fill="#10251a"/>
-<path d="M0 720Q400 640 800 690Q1200 640 1600 720" fill="none" stroke="#31593a" stroke-width="14"/>
-<!-- central stone path -->
-<path d="M700 900Q735 790 785 700Q800 670 815 700Q865 790 900 900Z" fill="url(#walk)" stroke="#17110d" stroke-width="10"/>
-<g fill="none" stroke="#8a7251" stroke-width="7"><path d="M735 825h130M750 775h100M765 730h70"/></g>
+<!-- supports -->
+<g stroke="#382116" stroke-width="16"><path d="M250 535L330 720M500 520L540 720M1350 535L1270 720M1100 520L1060 720"/></g>
+<!-- hanging bridge -->
+<path d="M350 555Q800 720 1250 555" fill="none" stroke="#b27a43" stroke-width="18"/>
+<path d="M370 555Q800 690 1230 555" fill="none" stroke="#e0b06b" stroke-width="6"/>
+<g stroke="#4b2b19" stroke-width="8"><path d="M430 580l-10 35M510 610l-8 35M600 635l-5 35M700 655v35M800 660v35M900 655v35M1000 635l5 35M1090 610l8 35M1170 580l10 35"/></g>
+<!-- luminous vines -->
+<g fill="none" stroke="#8ed89a" stroke-width="8"><path d="M600 300Q560 390 610 455T590 600"/><path d="M1000 285Q1040 390 990 455T1010 610"/></g>
+<g fill="#b6f2ad"><circle cx="575" cy="390" r="8"/><circle cx="620" cy="470" r="10"/><circle cx="590" cy="570" r="7"/><circle cx="1025" cy="385" r="9"/><circle cx="980" cy="475" r="8"/><circle cx="1015" cy="570" r="10"/></g>
+<!-- foreground roots and clearing -->
+<path d="M0 900V690Q300 620 520 705Q700 770 800 690Q900 770 1080 705Q1300 620 1600 690V900Z" fill="url(#ground)"/>
+<path d="M620 900Q680 800 750 735L800 690L850 735Q920 800 980 900Z" fill="#4b3827" stroke="#17100d" stroke-width="12"/>
+<g stroke="#806344" stroke-width="7"><path d="M680 835h240M715 785h170M750 745h100"/></g>
+<!-- foreground roots -->
+<path d="M0 900Q210 760 530 820Q650 850 700 900M1600 900Q1390 760 1070 820Q950 850 900 900" fill="none" stroke="#5b3721" stroke-width="70"/>
 <!-- lanterns -->
-<g stroke="#281a13" stroke-width="8" fill="#bdeaa8"><path d="M120 760v-105M120 655h35M155 655v35"/><circle cx="155" cy="705" r="12"/><path d="M1480 760v-105M1480 655h-35M1445 655v35"/><circle cx="1445" cy="705" r="12"/></g>
-<!-- leaves/light motes -->
-<g fill="#b6f1bb"><circle cx="280" cy="560" r="5"/><circle cx="365" cy="610" r="7"/><circle cx="520" cy="500" r="4"/><circle cx="1040" cy="530" r="6"/><circle cx="1190" cy="590" r="5"/><circle cx="1370" cy="540" r="7"/></g>
+<g stroke="#23150e" stroke-width="9" fill="#c9f1a7"><path d="M150 780V650M150 650h55M205 650v45"/><circle cx="205" cy="705" r="15"/><path d="M1450 780V650M1450 650h-55M1395 650v45"/><circle cx="1395" cy="705" r="15"/></g>
+<!-- firefly field -->
+<g fill="#a9edaa"><circle cx="130" cy="590" r="5"/><circle cx="250" cy="650" r="7"/><circle cx="390" cy="610" r="4"/><circle cx="470" cy="700" r="6"/><circle cx="1130" cy="650" r="6"/><circle cx="1240" cy="600" r="4"/><circle cx="1370" cy="675" r="7"/><circle cx="1510" cy="610" r="5"/></g>
 </svg>
