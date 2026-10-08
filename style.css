@@ -16268,3 +16268,46 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-mainmenu-arrow.left:hover{transform:translateY(-50%) translateX(2px)}
 .lorgus-mainmenu-arrow.right:hover{transform:translateY(-50%) translateX(-2px)}
 @media(max-width:760px){.lorgus-mainmenu-arrow{width:30px;height:30px}.lorgus-mainmenu-arrow b{font-size:8px}}
+
+
+/* Temporary world-map label editor */
+.lorgus-map-page.lorgus-map-editor-active #lorgus-map-editor-mode-hint{
+  position:fixed;
+  left:50%;
+  top:18px;
+  z-index:9999;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:10px 14px;
+  border:1px solid rgba(235,205,145,.32);
+  background:rgba(8,8,7,.9);
+  color:#ead7aa;
+  font:500 10px/1 var(--title-font);
+  letter-spacing:.12em;
+  box-shadow:0 8px 28px rgba(0,0,0,.45);
+  backdrop-filter:blur(8px);
+}
+.lorgus-map-page.lorgus-map-editor-active #lorgus-map-editor-mode-hint strong{
+  color:#fff0c9;
+}
+.lorgus-map-page.lorgus-map-editor-active #lorgus-map-editor-mode-hint span{
+  opacity:.72;
+}
+.lorgus-map-page.lorgus-map-editor-active #lorgus-map-editor-mode-hint button{
+  border:1px solid rgba(235,205,145,.38);
+  background:transparent;
+  color:#ead7aa;
+  padding:7px 10px;
+  font:600 9px/1 var(--title-font);
+  letter-spacing:.12em;
+  cursor:pointer;
+}
+.lorgus-map-page.lorgus-map-editor-active #lorgus-map-editor-mode-hint button:hover{
+  background:rgba(235,205,145,.12);
+  color:#fff0c9;
+}
+.lorgus-map-page.lorgus-map-editor-active .lorgus-map-editor-rect{
+  touch-action:none!important;
+}
