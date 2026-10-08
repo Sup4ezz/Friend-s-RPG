@@ -66,16 +66,7 @@
 <path d="M1315 610L1385 585L1455 610L1430 635H1340L1352 660H1422L1405 705H1345L1315 660Z"/>
 </g>
 
-<!-- deliberate tool hooks, not scattered -->
-<g stroke="#a87343" stroke-width="8" stroke-linecap="round">
-<path d="M105 555L175 490M145 555L215 490M1385 555L1455 490M1425 555L1495 490"/>
-</g>
-<g fill="#6e7475" stroke="#222627" stroke-width="5">
-<path d="M160 490L185 465L207 490L180 515Z"/>
-<path d="M200 490L225 465L247 490L220 515Z"/>
-<path d="M1440 490L1465 465L1487 490L1460 515Z"/>
-<path d="M1480 490L1505 465L1527 490L1500 515Z"/>
-</g>
+
 
 <!-- stone floor perspective -->
 <path d="M0 590L800 505L1600 590V900H0Z" fill="url(#floor)"/>
