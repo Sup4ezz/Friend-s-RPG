@@ -17968,7 +17968,7 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
     .lorgus-wallet-grid{grid-template-columns:1fr!important}
 }
 
-/* Human equipment mannequin */
+/* Human equipment mannequin — anatomical layout */
 .lorgus-inventory-page .lorgus-equipment-character{
     position:relative;
     min-height:570px;
@@ -17976,66 +17976,65 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 }
 .lorgus-inventory-page .lorgus-equipment-aura{
     position:absolute;
-    left:50%;top:54%;
-    width:360px;height:500px;
+    left:50%;top:51%;
+    width:310px;height:475px;
     transform:translate(-50%,-50%);
     border-radius:50%;
-    background:radial-gradient(ellipse,rgba(214,179,106,.075),transparent 67%);
+    background:radial-gradient(ellipse,rgba(214,179,106,.06),transparent 68%);
     pointer-events:none;
 }
 .lorgus-human-body{
     position:absolute;
     left:50%;top:51%;
-    width:190px;height:430px;
+    width:210px;height:450px;
     transform:translate(-50%,-50%);
-    filter:drop-shadow(0 0 18px rgba(214,179,106,.08));
-    opacity:.95;
+    filter:drop-shadow(0 0 20px rgba(214,179,106,.07));
 }
 .lorgus-human-head{
-    position:absolute;left:50%;top:0;width:62px;height:72px;
+    position:absolute;left:50%;top:0;width:58px;height:70px;
     transform:translateX(-50%);
-    border:1px solid rgba(214,179,106,.35);
-    border-radius:48% 48% 44% 44%;
-    background:linear-gradient(180deg,rgba(194,178,151,.22),rgba(88,79,69,.1));
+    border:1px solid rgba(214,179,106,.34);
+    border-radius:47% 47% 43% 43%;
+    background:linear-gradient(180deg,rgba(194,178,151,.18),rgba(88,79,69,.07));
 }
 .lorgus-human-neck{
-    position:absolute;left:50%;top:62px;width:31px;height:43px;
+    position:absolute;left:50%;top:61px;width:27px;height:38px;
     transform:translateX(-50%);
-    border-left:1px solid rgba(214,179,106,.28);
-    border-right:1px solid rgba(214,179,106,.28);
-    background:rgba(173,155,125,.08);
+    border-left:1px solid rgba(214,179,106,.25);
+    border-right:1px solid rgba(214,179,106,.25);
+    background:rgba(173,155,125,.07);
 }
 .lorgus-human-torso{
-    position:absolute;left:50%;top:92px;width:112px;height:165px;
+    position:absolute;left:50%;top:88px;width:112px;height:174px;
     transform:translateX(-50%);
     border:1px solid rgba(214,179,106,.28);
-    border-radius:44% 44% 30% 30%;
-    background:linear-gradient(180deg,rgba(194,178,151,.13),rgba(65,59,53,.08));
+    border-radius:42% 42% 27% 27%;
+    background:linear-gradient(180deg,rgba(194,178,151,.12),rgba(65,59,53,.05));
 }
 .lorgus-human-arm{
-    position:absolute;top:100px;width:38px;height:174px;
-    border:1px solid rgba(214,179,106,.25);
-    border-radius:22px;
-    background:linear-gradient(180deg,rgba(194,178,151,.12),rgba(65,59,53,.06));
-}
-.lorgus-human-arm-left{left:8px;transform:rotate(7deg)}
-.lorgus-human-arm-right{right:8px;transform:rotate(-7deg)}
-.lorgus-human-hand{
-    position:absolute;top:263px;width:29px;height:40px;
-    border:1px solid rgba(214,179,106,.25);
-    border-radius:45%;
-    background:rgba(173,155,125,.08);
-}
-.lorgus-human-hand-left{left:12px}
-.lorgus-human-hand-right{right:12px}
-.lorgus-human-leg{
-    position:absolute;top:244px;width:47px;height:181px;
+    position:absolute;top:94px;width:30px;height:172px;
     border:1px solid rgba(214,179,106,.23);
-    border-radius:22px 22px 13px 13px;
-    background:linear-gradient(180deg,rgba(194,178,151,.1),rgba(65,59,53,.055));
+    border-radius:18px;
+    background:linear-gradient(180deg,rgba(194,178,151,.10),rgba(65,59,53,.045));
 }
-.lorgus-human-leg-left{left:48px;transform:rotate(1deg)}
-.lorgus-human-leg-right{right:48px;transform:rotate(-1deg)}
+.lorgus-human-arm-left{left:34px;transform:rotate(8deg);transform-origin:top center}
+.lorgus-human-arm-right{right:34px;transform:rotate(-8deg);transform-origin:top center}
+.lorgus-human-hand{
+    position:absolute;top:252px;width:23px;height:31px;
+    border:1px solid rgba(214,179,106,.22);
+    border-radius:45%;
+    background:rgba(173,155,125,.06);
+}
+.lorgus-human-hand-left{left:31px}
+.lorgus-human-hand-right{right:31px}
+.lorgus-human-leg{
+    position:absolute;top:247px;width:42px;height:190px;
+    border:1px solid rgba(214,179,106,.22);
+    border-radius:19px 19px 12px 12px;
+    background:linear-gradient(180deg,rgba(194,178,151,.09),rgba(65,59,53,.045));
+}
+.lorgus-human-leg-left{left:59px;transform:rotate(1deg);transform-origin:top center}
+.lorgus-human-leg-right{right:59px;transform:rotate(-1deg);transform-origin:top center}
 
 .lorgus-inventory-page .lorgus-equipment-slots{
     position:absolute!important;
@@ -18044,33 +18043,58 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 }
 .lorgus-inventory-page .lorgus-equipment-slot{
     position:absolute!important;
-    width:142px!important;
-    min-height:58px!important;
+    width:126px!important;
+    min-height:54px!important;
     pointer-events:auto;
     display:flex;
     flex-direction:column;
     justify-content:center;
+    z-index:3;
 }
 .lorgus-inventory-page .lorgus-equipment-slot span{
     color:#716b62!important;
-    letter-spacing:.12em;
+    letter-spacing:.1em;
 }
-.lorgus-inventory-page .lorgus-equipment-slot-head{left:50%;top:10px;transform:translateX(-50%)}
-.lorgus-inventory-page .lorgus-equipment-slot-chest{left:50%;top:245px;transform:translateX(-50%)}
-.lorgus-inventory-page .lorgus-equipment-slot-main_hand{right:4px;top:145px}
-.lorgus-inventory-page .lorgus-equipment-slot-off_hand{left:4px;top:145px}
-.lorgus-inventory-page .lorgus-equipment-slot-hands{left:50%;top:335px;transform:translateX(-50%)}
-.lorgus-inventory-page .lorgus-equipment-slot-legs{left:50%;bottom:86px;transform:translateX(-50%)}
-.lorgus-inventory-page .lorgus-equipment-slot-feet{left:50%;bottom:8px;transform:translateX(-50%)}
-.lorgus-inventory-page .lorgus-equipment-slot-accessory_chain{left:4px;top:245px}
-.lorgus-inventory-page .lorgus-equipment-slot-accessory_ring{right:4px;top:245px}
-.lorgus-inventory-page .lorgus-equipment-slot-accessory_bracelet{right:4px;top:330px}
+.lorgus-inventory-page .lorgus-equipment-slot-head{
+    left:50%;top:0;transform:translateX(-50%);
+}
+.lorgus-inventory-page .lorgus-equipment-slot-main_hand{
+    right:0;top:137px;
+}
+.lorgus-inventory-page .lorgus-equipment-slot-off_hand{
+    left:0;top:137px;
+}
+.lorgus-inventory-page .lorgus-equipment-slot-chest{
+    left:50%;top:255px;transform:translateX(-50%);
+}
+.lorgus-inventory-page .lorgus-equipment-slot-accessory_chain{
+    left:0;top:265px;
+}
+.lorgus-inventory-page .lorgus-equipment-slot-accessory_ring{
+    right:0;top:320px;
+}
+.lorgus-inventory-page .lorgus-equipment-slot-accessory_bracelet{
+    right:0;top:190px;
+}
+.lorgus-inventory-page .lorgus-equipment-slot-hands{
+    left:0;top:335px;
+}
+.lorgus-inventory-page .lorgus-equipment-slot-legs{
+    left:50%;bottom:65px;transform:translateX(-50%);
+}
+.lorgus-inventory-page .lorgus-equipment-slot-feet{
+    left:50%;bottom:0;transform:translateX(-50%);
+}
 .lorgus-inventory-page .lorgus-equipment-slot:hover{
-    z-index:5;
+    z-index:8;
     transform:translateY(-2px)!important;
 }
-.lorgus-inventory-page .lorgus-equipment-slot-main_hand:hover,
-.lorgus-inventory-page .lorgus-equipment-slot-off_hand:hover{transform:translateY(-2px)!important}
+.lorgus-inventory-page .lorgus-equipment-slot-head:hover,
+.lorgus-inventory-page .lorgus-equipment-slot-chest:hover,
+.lorgus-inventory-page .lorgus-equipment-slot-legs:hover,
+.lorgus-inventory-page .lorgus-equipment-slot-feet:hover{
+    transform:translate(-50%,-2px)!important;
+}
 
 .lorgus-inventory-back{
     border:1px solid rgba(214,179,106,.13)!important;
