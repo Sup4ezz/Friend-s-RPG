@@ -236,6 +236,8 @@ async function openLorgusUpdateLog() {
         </article>`).join("") || '<div class="lorgus-update-log-empty"><strong>Летопись пока пуста.</strong></div>';
 }
 
+window.openLorgusUpdateLog = openLorgusUpdateLog;
+
 function renderLorgusInterfaceNav(active = "world") {
     const items = [
         ["overview", "⌂", "Обзор", "/overview"],
