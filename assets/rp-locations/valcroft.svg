@@ -1,1 +1,16 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#202b34"/><stop offset="1" stop-color="#05070b"/></linearGradient></defs><rect width="800" height="500" fill="url(#g)"/><rect width="800" height="500" fill="url(#g)" opacity=".25"/><path d="M70 440V190l80-55 80 55v250M570 440V160l80-55 80 55v280M230 440V250h340v190" fill="#202b34" stroke="#a98458" stroke-width="8"/><path d="M280 250v-70h55v70M375 250v-70h55v70M470 250v-70h55v70" stroke="#c7b08b" stroke-width="12"/><path d="M130 210h40M630 180h40" stroke="#a98458" stroke-width="18"/><text x="38" y="62" fill="white" opacity=".82" font-family="Georgia,serif" font-size="24" letter-spacing="5">ВАЛЬКРОФТ</text><rect width="800" height="500" fill="none" stroke="#a98458" stroke-opacity=".16" stroke-width="2"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="900" viewBox="0 0 1600 900">
+<defs>
+ <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#171b1d"/><stop offset="1" stop-color="#303a36"/></linearGradient>
+ <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#343733"/><stop offset="1" stop-color="#101312"/></linearGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#9ca27e"/><stop offset=".55" stop-color="#59634c"/><stop offset="1" stop-color="#252b24"/></linearGradient>
+ <radialGradient id="glow"><stop stop-color="#d9d39b" stop-opacity=".72"/><stop offset="1" stop-color="#d9d39b" stop-opacity="0"/></radialGradient>
+ <filter id="shadow"><feGaussianBlur stdDeviation="14"/></filter>
+</defs>
+<rect width="1600" height="900" fill="url(#wall)"/>
+<path d="M35 560V95H330V560M1270 560V95H1565V560" fill="#202624" stroke="#68715c" stroke-width="20"/><path d="M515 560V220L800 70L1085 220V560" fill="#121716" stroke="#7e866b" stroke-width="22"/><path d="M690 560V300H910V560" fill="#090d0d" stroke="#69715d" stroke-width="14"/>
+<path d="M0 555 Q800 505 1600 555 V900 H0Z" fill="url(#floor)"/>
+<path d="M800 555L800 900" stroke="#5c6255" stroke-width="180"/><path d="M690 560L420 900M910 560L1180 900" stroke="#454b42" stroke-width="55"/>
+<ellipse cx="800" cy="430" rx="360" ry="270" fill="url(#glow)"/><path d="M800 65V180" stroke="#69725d" stroke-width="9"/><path d="M760 180H840L820 220H780Z" fill="#a6ad7f"/><circle cx="800" cy="205" r="45" fill="url(#glow)"/>
+<path d="M170 560H400V650H170ZM1200 560H1430V650H1200Z" fill="#343b31" stroke="#7a826a" stroke-width="10"/><path d="M580 670H1020L980 720H620Z" fill="#3f493c" stroke="#8a9474" stroke-width="10"/><path d="M630 720L600 860M970 720L1000 860" stroke="#2c342c" stroke-width="28"/><path d="M720 625h160v35H720z" fill="#b0aa79"/><g fill="#6d7b61"><path d="M250 470l25-110 25 110z"/><path d="M1325 470l25-110 25 110z"/></g>
+<rect x="0" y="0" width="1600" height="900" fill="none" stroke="#000" stroke-opacity=".35" stroke-width="28"/>
+</svg>
