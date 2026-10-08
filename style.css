@@ -5381,6 +5381,64 @@ select:focus-visible{
 }
 
 
+/* LORGUS — FULLSCREEN ROAD CHAT */
+.lorgus-road-page:has(.lorgus-road-chat-shell){
+    width:100%!important;
+    min-height:100vh!important;
+    box-sizing:border-box!important;
+    padding:0!important;
+    margin:0!important;
+}
+.lorgus-road-chat-shell{
+    width:100%!important;
+    max-width:none!important;
+    min-height:100vh!important;
+    margin:0!important;
+    display:grid!important;
+    grid-template-columns:minmax(280px,340px) minmax(0,1fr)!important;
+    gap:0!important;
+}
+.lorgus-road-chat-shell .lorgus-rp-sidebar{
+    min-height:100vh!important;
+    box-sizing:border-box!important;
+    border-right:1px solid rgba(217,183,108,.14)!important;
+    padding:34px 28px!important;
+}
+.lorgus-road-chat-shell .lorgus-rp-main{
+    min-width:0!important;
+    min-height:100vh!important;
+    display:flex!important;
+    flex-direction:column!important;
+}
+.lorgus-road-chat-shell .lorgus-rp-header{
+    flex:0 0 auto!important;
+    padding:28px 38px!important;
+    border-bottom:1px solid rgba(217,183,108,.10)!important;
+}
+.lorgus-road-chat-shell .lorgus-rp-feed{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow-y:auto!important;
+    padding:38px clamp(28px,5vw,90px)!important;
+}
+.lorgus-road-chat-shell .lorgus-rp-composer{
+    flex:0 0 auto!important;
+    margin:16px clamp(18px,3vw,48px) 18px!important;
+}
+.lorgus-road-chat-shell .lorgus-road-arrival{
+    flex:0 0 auto!important;
+    padding:0 clamp(18px,3vw,48px) 20px!important;
+}
+@media(max-width:850px){
+    .lorgus-road-chat-shell{grid-template-columns:1fr!important}
+    .lorgus-road-chat-shell .lorgus-rp-sidebar{
+        min-height:auto!important;
+        border-right:0!important;
+        border-bottom:1px solid rgba(217,183,108,.14)!important;
+    }
+    .lorgus-road-chat-shell .lorgus-rp-feed{padding:24px 16px!important}
+}
 /* =========================================================
    CHARACTER SELECTION — PREMIUM LAYOUT FIX
    ========================================================= */
