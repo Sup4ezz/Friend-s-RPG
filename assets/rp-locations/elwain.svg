@@ -23,20 +23,22 @@
 <path d="M250 500Q430 390 590 430" stroke-width="58"/>
 <path d="M1350 500Q1170 390 1010 430" stroke-width="58"/>
 </g>
-<!-- ruined stone arches -->
+<!-- ancient stone structures, fully grounded in the settlement -->
 <g fill="url(#stone)" stroke="#171a13" stroke-width="12">
-<path d="M390 565V390Q390 315 470 315T550 390V565H510V405Q510 365 470 365T430 405V565Z"/>
-<path d="M1050 565V390Q1050 315 1130 315T1210 390V565H1170V405Q1170 365 1130 365T1090 405V565Z"/>
+  <path d="M365 585V405Q365 300 465 300Q565 300 565 405V585H520V410Q520 350 465 350Q410 350 410 410V585Z"/>
+  <path d="M1035 585V405Q1035 300 1135 300Q1235 300 1235 405V585H1190V410Q1190 350 1135 350Q1080 350 1080 410V585Z"/>
 </g>
-<!-- old forest settlement -->
+<!-- old forest settlement, buildings overlap and anchor the ruins -->
+
 <g stroke="#21150e" stroke-width="10">
-<path d="M480 545L580 450L680 545V665H480Z" fill="url(#wood)"/>
-<path d="M920 545L1020 450L1120 545V665H920Z" fill="url(#wood)"/>
-<path d="M650 475L800 350L950 475V650H650Z" fill="#523522"/>
+  <path d="M405 585L490 485L575 585V690H405Z" fill="url(#wood)"/>
+  <path d="M1025 585L1110 485L1195 585V690H1025Z" fill="url(#wood)"/>
+  <path d="M625 500L800 360L975 500V670H625Z" fill="#523522"/>
 </g>
 <g fill="#b9d59c" stroke="#26321f" stroke-width="7">
-<path d="M525 540h48v72h-48zM602 505h48v72h-48zM952 505h48v72h-48zM1029 540h48v72h-48z"/>
-<path d="M705 455h55v80h-55zM840 455h55v80h-55zM775 405h50v75h-50z"/>
+ stroke="#26321f" stroke-width="7">
+<path d="M430 535h42v62h-42zM495 505h42v62h-42zM1050 505h42v62h-42zM1115 535h42v62h-42z"/>
+<path d="M670 475h58v72h-58zM735 420h58v72h-58zM807 420h58v72h-58zM872 475h58v72h-58z"/>
 </g>
 <!-- elevated old wooden walkways -->
 <g fill="#604027" stroke="#24170e" stroke-width="11">
