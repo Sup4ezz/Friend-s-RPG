@@ -170,6 +170,7 @@ async function renderAdminApplications(container, applications) {
 
     renderList();
     window.loadAdminItemUseLog(container);
+    if (typeof window.loadAdminRpManagement === "function") window.loadAdminRpManagement(container);
 }
 
 /* =========================================================
