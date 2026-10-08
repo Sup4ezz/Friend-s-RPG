@@ -538,6 +538,9 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
     // показываем две визуальные копии. Никаких переносов реальных DOM-узлов:
     // поэтому ни карта, ни инвентарь не теряют контекст #cabinet-content.
     const outgoing = current.cloneNode(true);
+    // Клонам нужен тот же CSS-контекст, что и реальному #cabinet-content:
+    // часть старых правил страницы привязана непосредственно к этому id.
+    outgoing.id = "cabinet-content";
     renderTarget();
     const incoming = container.firstElementChild;
 
@@ -557,7 +560,9 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
 
     const newPanel = document.createElement("div");
     newPanel.className = "lorgus-transition-panel lorgus-transition-new";
-    newPanel.appendChild(incoming.cloneNode(true));
+    const incomingClone = incoming.cloneNode(true);
+    incomingClone.id = "cabinet-content";
+    newPanel.appendChild(incomingClone);
 
     const horizontal = direction === "left" || direction === "right";
     const forward = direction === "right" || direction === "bottom";
