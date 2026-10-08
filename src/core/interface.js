@@ -273,6 +273,7 @@ function renderLorgusWorldMapCurrent() {
 
 
 
+window.renderLorgusWorldMapCurrent = renderLorgusWorldMapCurrent;
 window.renderLorgusRpHub = renderLorgusRpHub;
 window.openTitlePicker = openTitlePicker;
 window.openAdminCharacterTitles = openAdminCharacterTitles;
