@@ -510,6 +510,7 @@ function showLorgusMapEditorMode(container) {
     hint.querySelector("button").onclick = () => {
         const url = new URL(window.location.href);
         url.searchParams.delete("mapedit");
+        url.searchParams.delete("editmap");
         window.history.replaceState({}, "", url.pathname + url.search + url.hash);
         hint.remove();
         container.classList.remove("lorgus-map-editor-active");
