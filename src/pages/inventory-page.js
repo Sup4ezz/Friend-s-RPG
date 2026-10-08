@@ -71,8 +71,9 @@ async function renderLorgusInventory() {
     const character = window.activeCharacter;
     if (!container || !character) return;
     container.className = "lorgus-inventory-page";
-    container.innerHTML = '<div class="lorgus-inventory-shell">' + renderLorgusInterfaceNav("inventory") +
-        '<main class="lorgus-inventory-main"><header class="lorgus-inventory-header"><div><span class="lorgus-command-kicker">СНАРЯЖЕНИЕ · ЛИЧНАЯ КЛАДОВАЯ</span><h1>Инвентарь</h1><p>' + escapeHtml(character.name || "Персонаж") + ' · перетаскивай снаряжение на персонажа.</p></div></header>' +
+    container.innerHTML = '<div class="lorgus-inventory-shell">' +
+        '<button type="button" class="lorgus-subpage-back-arrow" onclick="window.lorgusSubpageTransition(\'left\', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту"><span>◀</span><b>КАРТА</b></button>' +
+        '<main class="lorgus-subpage-shell lorgus-inventory-main"><header class="lorgus-subpage-heading"><span class="lorgus-command-kicker">ИНВЕНТАРЬ</span><h1>Снаряжение</h1><p>' + escapeHtml(character.name || "Персонаж") + ' · перетаскивай предметы между персонажем и рюкзаком.</p></header>' +
         '<div class="lorgus-inventory-layout"><section class="lorgus-equipment-stage"><div class="lorgus-equipment-stage-title">СНАРЯЖЕНИЕ</div><div class="lorgus-equipment-character"><div class="lorgus-equipment-aura"></div><div class="lorgus-equipment-avatar">✦</div><div class="lorgus-equipment-name">' + escapeHtml(character.name || "Персонаж") + '</div><div class="lorgus-equipment-slots">' +
         Object.entries(inventorySlotLabels).map(([slot,label]) => '<div class="lorgus-equipment-slot" data-equipment-slot="' + slot + '" title="' + label + '"><span>' + escapeHtml(label) + '</span><div class="lorgus-equipment-slot-item"></div></div>').join("") +
         '</div></div></section><section class="lorgus-inventory-grid-wrap"><div class="lorgus-inventory-grid-title">РЮКЗАК <span id="lorgus-inventory-count"></span></div><div id="lorgus-inventory-grid" class="lorgus-inventory-grid"><div class="lorgus-inventory-empty">Загрузка...</div></div></section></div></main></div>';
