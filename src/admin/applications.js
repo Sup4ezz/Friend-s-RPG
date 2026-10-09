@@ -112,11 +112,25 @@ async function renderAdminApplications(container, applications) {
         </section>
 
         <section class="admin-section admin-character-management">
-            <div class="admin-section-heading">
-                <div><h2>Персонажи мира</h2><p>Активные персонажи, созданные после одобрения заявок.</p></div>
+            <div class="admin-section-heading admin-character-directory-heading">
+                <div><h2>Персонажи мира</h2><p>Каталог одобренных персонажей. Ищи, фильтруй и сортируй записи без прокрутки всего списка.</p></div>
+                <span class="admin-directory-total" id="admin-character-total">${approved.length} персонажей</span>
             </div>
-            <div class="admin-applications">
-                ${approved.length ? approved.map(window.renderAdminCharacterManagement).join("") : '<div class="admin-empty"><h2>Персонажей нет</h2><p>Список пуст.</p></div>'}
+            <div class="admin-character-filter-panel">
+                <label class="admin-character-search-wrap">
+                    <span>БЫСТРЫЙ ПОИСК</span>
+                    <input id="admin-character-search" type="search" placeholder="Имя, раса, родина, занятие, навыки…">
+                </label>
+                <label><span>РАСА</span><select id="admin-character-race"><option value="">Все расы</option></select></label>
+                <label><span>РОДИНА</span><select id="admin-character-homeland"><option value="">Все регионы</option></select></label>
+                <label><span>ЗАНЯТИЕ</span><select id="admin-character-occupation"><option value="">Все занятия</option></select></label>
+                <label><span>ВОЗРАСТ</span><select id="admin-character-age"><option value="">Любой возраст</option><option value="young">До 25 лет</option><option value="adult">26–60 лет</option><option value="senior">Старше 60 лет</option><option value="unknown">Не указан</option></select></label>
+                <label><span>СОРТИРОВКА</span><select id="admin-character-sort"><option value="newest">Сначала новые</option><option value="name-asc">Имя: А—Я</option><option value="name-desc">Имя: Я—А</option><option value="age-asc">Возраст: по возрастанию</option><option value="age-desc">Возраст: по убыванию</option></select></label>
+                <button type="button" id="admin-character-reset" class="admin-character-reset">Сбросить фильтры <span>↺</span></button>
+            </div>
+            <div class="admin-character-results-line"><span id="admin-character-results-count">Загрузка списка…</span><span>КАТАЛОГ · АТЛАС ЛОРГУСА</span></div>
+            <div id="admin-character-list" class="admin-applications admin-character-grid">
+                ${approved.length ? approved.map(window.renderAdminCharacterManagement).join("") : '<div class="admin-empty"><h2>Персонажей пока нет</h2><p>Одобренные персонажи появятся здесь.</p></div>'}
             </div>
         </section>
         <section class="admin-section admin-item-use-management">
@@ -180,6 +194,74 @@ async function renderAdminApplications(container, applications) {
     });
 
     renderList();
+
+    // Каталог персонажей: фильтры независимы от фильтров заявок.
+    const characterList = container.querySelector("#admin-character-list");
+    const characterSearch = container.querySelector("#admin-character-search");
+    const characterRace = container.querySelector("#admin-character-race");
+    const characterHomeland = container.querySelector("#admin-character-homeland");
+    const characterOccupation = container.querySelector("#admin-character-occupation");
+    const characterAge = container.querySelector("#admin-character-age");
+    const characterSort = container.querySelector("#admin-character-sort");
+    const characterCount = container.querySelector("#admin-character-results-count");
+    const characterTotal = container.querySelector("#admin-character-total");
+    const characterFilters = [characterSearch, characterRace, characterHomeland, characterOccupation, characterAge, characterSort];
+
+    const fillCharacterFilter = (select, field, placeholder) => {
+        const values = [...new Set(approved.map(a => String(a[field] ?? "").trim()).filter(Boolean))]
+            .sort((a, b) => a.localeCompare(b, "ru", { sensitivity: "base" }));
+        select.innerHTML = '<option value="">' + placeholder + '</option>' +
+            values.map(value => '<option value="' + window.escapeHtml(value) + '">' + window.escapeHtml(value) + '</option>').join("");
+    };
+    fillCharacterFilter(characterRace, "race", "Все расы");
+    fillCharacterFilter(characterHomeland, "homeland", "Все регионы");
+    fillCharacterFilter(characterOccupation, "occupation", "Все занятия");
+    characterTotal.textContent = approved.length + (approved.length === 1 ? " персонаж" : approved.length > 1 && approved.length < 5 ? " персонажа" : " персонажей");
+
+    const renderCharacterDirectory = () => {
+        const query = characterSearch.value.trim().toLocaleLowerCase("ru");
+        let filtered = approved.filter(a => {
+            const haystack = [a.name, a.race, a.homeland, a.occupation, a.personality, a.backstory, a.special_skills, a.preferred_weapon]
+                .filter(Boolean).join(" ").toLocaleLowerCase("ru");
+            const age = Number(a.age);
+            const ageMatches = !characterAge.value ||
+                (characterAge.value === "young" && Number.isFinite(age) && age > 0 && age <= 25) ||
+                (characterAge.value === "adult" && Number.isFinite(age) && age >= 26 && age <= 60) ||
+                (characterAge.value === "senior" && Number.isFinite(age) && age > 60) ||
+                (characterAge.value === "unknown" && (!Number.isFinite(age) || age <= 0));
+            return (!query || haystack.includes(query)) &&
+                (!characterRace.value || a.race === characterRace.value) &&
+                (!characterHomeland.value || a.homeland === characterHomeland.value) &&
+                (!characterOccupation.value || a.occupation === characterOccupation.value) &&
+                ageMatches;
+        });
+        const sort = characterSort.value;
+        filtered.sort((a, b) => {
+            if (sort === "name-asc") return String(a.name || "").localeCompare(String(b.name || ""), "ru");
+            if (sort === "name-desc") return String(b.name || "").localeCompare(String(a.name || ""), "ru");
+            if (sort === "age-asc") return (Number(a.age) || Number.MAX_SAFE_INTEGER) - (Number(b.age) || Number.MAX_SAFE_INTEGER);
+            if (sort === "age-desc") return (Number(b.age) || 0) - (Number(a.age) || 0);
+            return Number(b.id || 0) - Number(a.id || 0);
+        });
+        characterCount.textContent = "Найдено: " + filtered.length + " из " + approved.length;
+        characterList.innerHTML = filtered.length
+            ? filtered.map(window.renderAdminCharacterManagement).join("")
+            : '<div class="admin-empty admin-character-no-results"><h2>Ничего не найдено</h2><p>Измени условия поиска или сбрось фильтры.</p></div>';
+        characterList.querySelectorAll("[data-character-detail-id], [data-character-title-id], [data-character-ability-id], [data-character-inventory-id], [data-character-id]").forEach(() => {});
+        bindAdminButtons(container);
+    };
+    characterFilters.forEach(control => control.addEventListener(control === characterSearch ? "input" : "change", renderCharacterDirectory));
+    container.querySelector("#admin-character-reset").addEventListener("click", () => {
+        characterSearch.value = "";
+        characterRace.value = "";
+        characterHomeland.value = "";
+        characterOccupation.value = "";
+        characterAge.value = "";
+        characterSort.value = "newest";
+        renderCharacterDirectory();
+    });
+    renderCharacterDirectory();
+
     window.loadAdminItemUseLog(container);
     if (typeof window.loadAdminRpManagement === "function") window.loadAdminRpManagement(container);
 }
