@@ -1,0 +1,76 @@
+/* LORGUS admin lore tree */
+.admin-lore-tree-section { margin-top: 30px; }
+.admin-lore-tree-section > .admin-section-heading { margin-bottom: 18px; }
+.admin-lore-tree-section > .admin-section-heading h2 { font-size: 19px; }
+.admin-lore-tree-section > .admin-section-heading p { max-width: 720px; }
+#admin-lore-tree { min-width: 0; }
+.lorgus-lore-tree-layout {
+    display: grid;
+    grid-template-columns: minmax(245px, 310px) minmax(0, 1fr);
+    min-height: 620px;
+    border: 1px solid rgba(203, 169, 100, .2);
+    background: rgba(8, 8, 7, .42);
+    overflow: hidden;
+}
+.lorgus-lore-tree-sidebar {
+    min-width: 0;
+    padding: 20px 14px;
+    border-right: 1px solid rgba(203, 169, 100, .18);
+    background: linear-gradient(180deg, rgba(34, 29, 20, .58), rgba(12, 11, 9, .72));
+}
+.lorgus-lore-tree-sidebar-head { display: grid; gap: 6px; margin: 0 7px 22px; }
+.lorgus-lore-tree-sidebar-head span { color: #ddc48f; font-size: 11px; letter-spacing: .14em; }
+.lorgus-lore-tree-sidebar-head small { color: rgba(225, 211, 180, .38); font-size: 9px; letter-spacing: .2em; }
+.lorgus-lore-tree-search-label { display: block; margin: 0 7px 7px; color: rgba(225, 211, 180, .48); font-size: 9px; letter-spacing: .15em; }
+.lorgus-lore-tree-search {
+    box-sizing: border-box; width: 100%; height: 38px; margin-bottom: 17px; padding: 0 11px;
+    color: #eadfc5; background: rgba(0, 0, 0, .34); border: 1px solid rgba(203, 169, 100, .2);
+    outline: none; font: inherit; font-size: 12px;
+}
+.lorgus-lore-tree-search:focus { border-color: rgba(220, 184, 102, .65); }
+.lorgus-lore-tree-nav { display: grid; gap: 3px; }
+.lorgus-lore-node { min-width: 0; }
+.lorgus-lore-node[hidden] { display: none !important; }
+.lorgus-lore-node-button {
+    display: flex; align-items: center; gap: 8px; width: 100%; min-height: 35px; padding: 7px 8px;
+    border: 1px solid transparent; background: transparent; color: rgba(230, 219, 194, .76);
+    text-align: left; cursor: pointer; font: inherit; font-size: 11px; line-height: 1.4;
+}
+.lorgus-lore-node-button:hover { color: #f0dba9; background: rgba(215, 176, 98, .07); border-color: rgba(215, 176, 98, .1); }
+.lorgus-lore-node-button.is-folder { color: #e0c68e; }
+.lorgus-lore-node-button.is-file { padding-left: 12px; }
+.lorgus-lore-node-icon { flex: 0 0 12px; width: 12px; color: #c8a45f; text-align: center; }
+.lorgus-lore-node-label { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.lorgus-lore-node-count { flex: 0 0 auto; min-width: 18px; padding: 1px 5px; border: 1px solid rgba(215, 176, 98, .13); color: rgba(225, 211, 180, .38); font-size: 9px; text-align: center; }
+.lorgus-lore-children { margin-left: 11px; padding-left: 7px; border-left: 1px solid rgba(203, 169, 100, .14); }
+.lorgus-lore-children[hidden] { display: none !important; }
+.lorgus-lore-node-button.is-selected { color: #f6e7c2; background: rgba(215, 176, 98, .13); border-color: rgba(215, 176, 98, .32); }
+.lorgus-lore-document { min-width: 0; padding: clamp(22px, 4vw, 44px); color: #d8cfba; }
+.lorgus-lore-document-head { padding-bottom: 23px; border-bottom: 1px solid rgba(203, 169, 100, .19); margin-bottom: 25px; }
+.lorgus-lore-document-head > span { color: #c9a45f; font-size: 9px; letter-spacing: .22em; }
+.lorgus-lore-document-head h2 { margin: 11px 0 8px; color: #efdfb9; font-family: "Cormorant Garamond", Georgia, serif; font-size: clamp(27px, 3vw, 38px); font-weight: 600; line-height: 1.1; }
+.lorgus-lore-document-head small { color: rgba(218, 207, 183, .34); font-size: 10px; overflow-wrap: anywhere; }
+.lorgus-lore-document-body { max-width: 850px; font-size: 13px; line-height: 1.85; overflow-wrap: anywhere; }
+.lorgus-lore-document-body h1, .lorgus-lore-document-body h2, .lorgus-lore-document-body h3, .lorgus-lore-document-body h4 { color: #e5cb91; font-weight: 500; line-height: 1.25; margin: 25px 0 11px; }
+.lorgus-lore-document-body h1 { font-size: 25px; }
+.lorgus-lore-document-body h2 { font-size: 22px; }
+.lorgus-lore-document-body h3 { font-size: 18px; }
+.lorgus-lore-document-body h4 { font-size: 15px; }
+.lorgus-lore-document-body p { margin: 0 0 15px; white-space: normal; }
+.lorgus-lore-document-body ul { padding-left: 22px; margin: 8px 0 17px; }
+.lorgus-lore-document-body li { margin: 4px 0; padding-left: 3px; }
+.lorgus-lore-document-body blockquote { margin: 16px 0; padding: 3px 0 3px 15px; border-left: 2px solid #b99452; color: rgba(230, 216, 185, .7); }
+.lorgus-lore-document-body hr { border: 0; border-top: 1px solid rgba(203, 169, 100, .18); margin: 22px 0; }
+.lorgus-lore-document-body strong { color: #ead5a4; }
+.lorgus-lore-document-empty, .lorgus-lore-document-loading { min-height: 350px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.lorgus-lore-document-empty > span { color: #c6a15e; font-size: 35px; }
+.lorgus-lore-document-empty h3 { margin: 14px 0 6px; color: #e5d2a7; font-size: 19px; font-weight: 500; }
+.lorgus-lore-document-empty p, .lorgus-lore-document-loading p { max-width: 360px; color: rgba(225, 211, 180, .45); font-size: 12px; line-height: 1.7; }
+.lorgus-lore-document-empty.is-error code { color: #d7bb83; overflow-wrap: anywhere; }
+.lorgus-lore-spinner { width: 26px; height: 26px; border: 2px solid rgba(215, 176, 98, .15); border-top-color: #d7b062; border-radius: 50%; animation: lorgus-lore-spin .8s linear infinite; }
+@keyframes lorgus-lore-spin { to { transform: rotate(360deg); } }
+@media (max-width: 850px) {
+    .lorgus-lore-tree-layout { grid-template-columns: minmax(0, 1fr); }
+    .lorgus-lore-tree-sidebar { border-right: 0; border-bottom: 1px solid rgba(203, 169, 100, .18); max-height: 450px; overflow: auto; }
+    .lorgus-lore-document { min-height: 350px; padding: 22px 18px; }
+}
