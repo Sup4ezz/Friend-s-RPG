@@ -616,6 +616,7 @@ async function appendRpMessage(message) {
                     return '<span class="lorgus-rp-item-use" style="--item-color:' + escapeHtml(item.color || "#d6b36a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong>' + (use.quantity > 1 ? '<small>×' + escapeHtml(String(use.quantity)) + '</small>' : '') + '</span>';
                 }).join("");
             }
+            if (!error) window.cacheRpMessage?.({ ...message, item_uses: uses || [] });
         }).catch(error => console.warn("Не удалось загрузить предметы сообщения:", error));
 
     feed.scrollTop = feed.scrollHeight;
