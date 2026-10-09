@@ -413,7 +413,7 @@
                         throw new Error("Вместо Markdown получен HTML");
                     }
                 }
-                doc.innerHTML = '<div class="lorgus-lore-document-head"><span>ЛОРГУС · ЛЕТОПИСЬ</span><h2>' + esc(button.querySelector(".lorgus-lore-node-label")?.textContent || "Запись") + '</h2><small>' + esc(file.replace(/\.md$/i, "").replaceAll("/", " / ")) + '</small></div><div class="lorgus-lore-document-body">' + renderMarkdown(markdown) + '</div>';
+                doc.innerHTML = '<div class="lorgus-lore-document-head"><span>ЛОРГУС · ЛЕТОПИСЬ</span><h2>' + esc(button.querySelector(".lorgus-lore-node-label")?.textContent || "Запись") + '</h2><small>' + esc(file.replace(/\.md$/i, "").replaceAll("/", " / ")) + '</small></div><div class="lorgus-lore-document-body">' + renderMarkdown(markdown.replace(new RegExp(String.fromCharCode(96).repeat(3) + "moc[\\s\\S]*?" + String.fromCharCode(96).repeat(3), "gi"), "")) + '</div>';
                 await renderLorePortrait(file, markdown, doc);
             } catch (error) {
                 console.error("Не удалось открыть запись лора:", file, error);
