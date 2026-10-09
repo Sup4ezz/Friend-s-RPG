@@ -1,6 +1,47 @@
 /* LORGUS admin RP control room: all chats + RP actors + RP posting */
 
 (() => {
+
+if (!window.lorgusGetSignedPhotoUrl) {
+    window.lorgusGetSignedPhotoUrl = (() => {
+        const entries = new Map(), queue = [];
+        let active = 0;
+        const runNext = () => {
+            while (active < 2 && queue.length) {
+                const job = queue.shift(); active++;
+                window.supabaseClient.storage.from("character-applications").createSignedUrl(job.path, 3600)
+                    .then(({ data, error }) => {
+                        const entry = entries.get(job.path);
+                        if (error || !data?.signedUrl) {
+                            if (entry) { entry.url = null; entry.expiresAt = 0; entry.failedUntil = Date.now() + 60000; }
+                            job.resolve(null); return;
+                        }
+                        if (entry) { entry.url = data.signedUrl; entry.expiresAt = Date.now() + 3500000; entry.failedUntil = 0; }
+                        job.resolve(data.signedUrl);
+                    })
+                    .catch(() => {
+                        const entry = entries.get(job.path);
+                        if (entry) { entry.url = null; entry.expiresAt = 0; entry.failedUntil = Date.now() + 60000; }
+                        job.resolve(null);
+                    })
+                    .finally(() => { active--; runNext(); });
+            }
+        };
+        return path => {
+            if (!path || !window.supabaseClient) return Promise.resolve(null);
+            const now = Date.now(), cached = entries.get(path);
+            if (cached?.url && cached.expiresAt > now) return Promise.resolve(cached.url);
+            if (cached?.promise) return cached.promise;
+            if (cached?.failedUntil > now) return Promise.resolve(null);
+            let resolve;
+            const promise = new Promise(done => { resolve = done; });
+            entries.set(path, { promise, url: null, expiresAt: 0, failedUntil: 0 });
+            queue.push({ path, resolve }); runNext();
+            return promise;
+        };
+    })();
+}
+
     const state = {
         messages: [],
         chats: [],
@@ -197,10 +238,8 @@
             const path = avatar.dataset.photoPath;
             if (!path) return;
             try {
-                const { data, error } = await window.supabaseClient.storage.from("character-applications").createSignedUrl(path, 3600);
-                if (!error && data?.signedUrl && avatar.isConnected) {
-                    avatar.innerHTML = '<img src="' + esc(data.signedUrl) + '" alt="">';
-                }
+                const signedUrl = await window.lorgusGetSignedPhotoUrl(path);
+                if (signedUrl && avatar.isConnected) avatar.innerHTML = '<img src="' + esc(signedUrl) + '" alt="">';
             } catch (_) {}
         }));
     }
@@ -381,8 +420,8 @@
             const target = box.querySelector('[data-portrait-preview="' + c.id + '"]');
             if (!target) continue;
             try {
-                const { data, error } = await window.supabaseClient.storage.from("character-applications").createSignedUrl(c.photo_path, 3600);
-                if (!error && data?.signedUrl && target.isConnected) target.innerHTML = '<img src="' + esc(data.signedUrl) + '" alt="">';
+                const signedUrl = await window.lorgusGetSignedPhotoUrl(c.photo_path);
+                if (signedUrl && target.isConnected) target.innerHTML = '<img src="' + esc(signedUrl) + '" alt="">';
             } catch (_) {}
         }
 
@@ -469,12 +508,12 @@
             const id = String(row.character_id);
             if (!c.photo_path || state.photoUrls[id] || !window.supabaseClient) continue;
             try {
-                const { data, error } = await window.supabaseClient.storage.from("character-applications").createSignedUrl(c.photo_path, 3600);
-                if (!error && data?.signedUrl) {
-                    state.photoUrls[id] = data.signedUrl;
+                const signedUrl = await window.lorgusGetSignedPhotoUrl(c.photo_path);
+                if (signedUrl) {
+                    state.photoUrls[id] = signedUrl;
                     const card = results.querySelector('[data-rp-character-choice="' + id + '"]');
                     const art = card?.querySelector(".admin-rp-character-card-art");
-                    if (art) art.innerHTML = '<img src="' + esc(data.signedUrl) + '" alt=""><i>' + (id === String(characterSelect.value) ? "✓" : "✦") + '</i>';
+                    if (art) art.innerHTML = '<img src="' + esc(signedUrl) + '" alt=""><i>' + (id === String(characterSelect.value) ? "✓" : "✦") + '</i>';
                 }
             } catch (_) {}
         }
