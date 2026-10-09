@@ -196,10 +196,23 @@
             button.classList.add("is-selected");
             doc.innerHTML = '<div class="lorgus-lore-document-loading"><span class="lorgus-lore-spinner"></span><p>Открываю запись…</p></div>';
             try {
-                const response = await fetch(encodePath(ROOT + file), { cache: "no-cache" });
-                if (!response.ok) throw new Error("HTTP " + response.status);
-                const markdown = await response.text();
-                doc.innerHTML = '<div class="lorgus-lore-document-head"><span>ЛОРГУС · ЛЕТОПИСЬ</span><h2>' + esc(button.querySelector(".lorgus-lore-node-label")?.textContent || "Запись") + '</h2><small>' + esc(file.replace(/\.md$/i, "").replaceAll("/", " / ")) + '</small></div><div class="lorgus-lore-document-body">' + renderMarkdown(markdown) + '</div>';
+                let response = await fetch(encodePath(ROOT + file), { cache: "no-cache" });
+                let markdown = "";
+                if (response.ok) {
+                    markdown = await response.text();
+                }
+                // SPA fallback can return index.html with HTTP 200 for missing .md assets.
+                // Detect that case and retrieve the actual source from the public GitHub repo.
+                if (!response.ok || /<\\s*!doctype\\s+html|<html[\\s>]/i.test(markdown.slice(0, 500))) {
+                    const rawUrl = "https://raw.githubusercontent.com/Sup4ezz/Friend-s-RPG/main/" + encodePath("Obsidian Vault/Obsidian Vault/" + file).replace(/^\\//, "");
+                    response = await fetch(rawUrl, { cache: "no-cache" });
+                    if (!response.ok) throw new Error("Не удалось загрузить файл: HTTP " + response.status);
+                    markdown = await response.text();
+                    if (/^\\s*<\\s*!doctype\\s+html|^\\s*<html[\\s>]/i.test(markdown.slice(0, 500))) {
+                        throw new Error("Вместо Markdown получен HTML");
+                    }
+                }
+                doc.innerHTML = '<div class="lorgus-lore-document-head"><span>ЛОРГУС · ЛЕТОПИСЬ</span><h2>' + esc(button.querySelector(".lorgus-lore-node-label")?.textContent || "Запись") + '</h2><small>' + esc(file.replace(/\\.md$/i, "").replaceAll("/", " / ")) + '</small></div><div class="lorgus-lore-document-body">' + renderMarkdown(markdown) + '</div>';
             } catch (error) {
                 console.error("Не удалось открыть запись лора:", file, error);
                 doc.innerHTML = '<div class="lorgus-lore-document-empty is-error"><span>!</span><h3>Запись не загрузилась</h3><p>Не удалось получить файл из хранилища сайта. Путь: <code>' + esc(file) + '</code></p><p>Проверь наличие файла в распакованном хранилище и доступность статических ресурсов.</p></div>';
