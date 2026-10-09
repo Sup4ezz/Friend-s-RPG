@@ -434,6 +434,9 @@ async function appendRpMessage(message) {
         getRpCharacterPhoto(message.character_id),
         getRpCharacterActiveTitle(message.character_id)
     ]);
+    // Realtime и резервный опрос могут получить одну запись одновременно.
+    // Повторная проверка после await не даёт создать два DOM-элемента.
+    if (feed.querySelector('[data-rp-message-id="' + message.id + '"]')) return;
     const mine = String(message.character_id) === String(window.activeCharacterId);
     const adminPost = Boolean(message.is_admin_post);
     const article = document.createElement("article");
