@@ -98,6 +98,142 @@
     const esc = value => window.escapeHtml(String(value ?? ""));
     const encodePath = path => path.split("/").map(encodeURIComponent).join("/");
 
+    async function hydrateFamilyTree(nav) {
+        try {
+            const response = await fetch("https://api.github.com/repos/Sup4ezz/Friend-s-RPG/git/trees/main?recursive=1", { cache: "no-cache" });
+            if (!response.ok) throw new Error("GitHub tree HTTP " + response.status);
+            const payload = await response.json();
+            const prefix = "Obsidian Vault/Obsidian Vault/НПС/Королевские семьи/";
+            const files = (payload.tree || []).filter(item => item.type === "blob" && item.path.startsWith(prefix) && item.path.endsWith(".md"));
+            const grouped = new Map();
+            for (const item of files) {
+                const relative = item.path.slice(prefix.length);
+                const slash = relative.indexOf("/");
+                if (slash < 0) continue;
+                const folder = relative.slice(0, slash);
+                const filename = relative.slice(slash + 1);
+                if (!grouped.has(folder)) grouped.set(folder, []);
+                grouped.get(folder).push({
+                    label: filename.replace(/\.md$/i, ""),
+                    file: "НПС/Королевские семьи/" + relative,
+                    overview: /^Дом .+\.md$/i.test(filename)
+                });
+            }
+            const kingdomOrder = ["Атэрон", "Морвейн", "Лирэн", "Ксандр", "Каэлор"];
+            const families = [...grouped.entries()].map(([folder, entries]) => {
+                const match = folder.match(/^(.+?)\s*\(([^)]+)\)$/);
+                const family = match ? match[1] : folder;
+                const kingdom = match ? match[2] : "";
+                entries.sort((a, b) => Number(b.overview) - Number(a.overview) || a.label.localeCompare(b.label, "ru"));
+                return { label: (kingdom ? kingdom + " · " : "") + family, kingdom, children: entries };
+            }).sort((a, b) => {
+                const ai = kingdomOrder.indexOf(a.kingdom);
+                const bi = kingdomOrder.indexOf(b.kingdom);
+                return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi) || a.label.localeCompare(b.label, "ru");
+            });
+            if (families.length) {
+                tree[0].children = families;
+                nav.innerHTML = tree.map(node => nodeMarkup(node)).join("");
+            }
+        } catch (error) {
+            console.warn("Не удалось обновить список семей через GitHub API; оставлено встроенное дерево.", error);
+        }
+    }
+
+    async function renderLorePortrait(file, markdown, doc) {
+        const imageMatch = markdown.match(/^\s*image:\s*(.+?)\s*$/m);
+        const originalPath = imageMatch ? imageMatch[1].trim() : "";
+        let imageUrl = originalPath
+            ? "https://raw.githubusercontent.com/Sup4ezz/Friend-s-RPG/main/" + encodePath("Obsidian Vault/Obsidian Vault/" + originalPath)
+            : "";
+        const client = window.supabaseClient;
+        if (client && file.startsWith("НПС/Королевские семьи/")) {
+            try {
+                const result = await client.rpc("admin_get_lore_portrait", { p_note_path: file });
+                if (!result.error && result.data) {
+                    const signed = await client.storage.from("character-applications").createSignedUrl(result.data, 3600);
+                    if (!signed.error && signed.data && signed.data.signedUrl) imageUrl = signed.data.signedUrl;
+                }
+            } catch (error) {
+                console.warn("Не удалось загрузить пользовательский портрет лора", error);
+            }
+        }
+        const panel = document.createElement("section");
+        panel.className = "lorgus-lore-portrait-panel";
+        const preview = document.createElement("div");
+        preview.className = "lorgus-lore-portrait-preview";
+        if (imageUrl) {
+            const img = document.createElement("img");
+            img.src = imageUrl;
+            img.alt = "Иллюстрация записи";
+            preview.appendChild(img);
+        } else {
+            preview.innerHTML = "<span>✧</span><small>Иллюстрации пока нет</small>";
+        }
+        const tools = document.createElement("div");
+        tools.className = "lorgus-lore-portrait-tools";
+        const info = document.createElement("div");
+        info.innerHTML = "<strong>Иллюстрация записи</strong><small>" + (originalPath ? "Источник: " + esc(originalPath) : "Фото не указано в заметке") + "</small>";
+        const label = document.createElement("label");
+        label.className = "lorgus-lore-portrait-upload";
+        label.appendChild(document.createTextNode("Загрузить / заменить фото"));
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/png,image/jpeg,image/webp";
+        input.hidden = true;
+        label.appendChild(input);
+        const status = document.createElement("small");
+        status.className = "lorgus-lore-portrait-status";
+        status.textContent = "Фото сохраняется в хранилище LORGUS отдельно от Markdown.";
+        tools.append(info, label, status);
+        panel.append(preview, tools);
+        const body = doc.querySelector(".lorgus-lore-document-body");
+        if (body) doc.insertBefore(panel, body);
+        else doc.appendChild(panel);
+        input.addEventListener("change", async () => {
+            const selected = input.files && input.files[0];
+            if (!selected) return;
+            if (!/^image\/(png|jpeg|webp)$/.test(selected.type)) {
+                status.textContent = "Поддерживаются PNG, JPG и WebP.";
+                input.value = "";
+                return;
+            }
+            if (selected.size > 10 * 1024 * 1024) {
+                status.textContent = "Файл слишком большой. Максимум — 10 МБ.";
+                input.value = "";
+                return;
+            }
+            if (!client) {
+                status.textContent = "Не подключено хранилище LORGUS.";
+                return;
+            }
+            status.textContent = "Загружаю изображение…";
+            const safeName = selected.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-90) || "portrait.webp";
+            const storagePath = "lore-portraits/" + Date.now() + "-" + safeName;
+            try {
+                const uploaded = await client.storage.from("character-applications").upload(storagePath, selected, {
+                    cacheControl: "3600", upsert: false, contentType: selected.type
+                });
+                if (uploaded.error) throw uploaded.error;
+                const saved = await client.rpc("admin_set_lore_portrait", { p_note_path: file, p_photo_path: storagePath });
+                if (saved.error) throw saved.error;
+                const signed = await client.storage.from("character-applications").createSignedUrl(storagePath, 3600);
+                if (signed.error) throw signed.error;
+                preview.innerHTML = "";
+                const img = document.createElement("img");
+                img.src = signed.data.signedUrl;
+                img.alt = "Иллюстрация записи";
+                preview.appendChild(img);
+                status.textContent = "Фото сохранено. Оно останется после обновления страницы.";
+            } catch (error) {
+                console.error("Не удалось сохранить портрет лора", error);
+                status.textContent = "Не удалось сохранить фото: " + (error.message || "проверь доступ администратора");
+            } finally {
+                input.value = "";
+            }
+        });
+    }
+
     function renderInline(value) {
         let html = esc(value);
         html = html.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '<span class="lorgus-wikilink">$2</span>');
@@ -238,6 +374,7 @@
         const doc = container.querySelector(".lorgus-lore-document");
         const search = container.querySelector(".lorgus-lore-tree-search");
         const nav = container.querySelector(".lorgus-lore-tree-nav");
+        hydrateFamilyTree(nav);
 
         nav.addEventListener("click", async event => {
             const button = event.target.closest("button");
@@ -277,6 +414,7 @@
                     }
                 }
                 doc.innerHTML = '<div class="lorgus-lore-document-head"><span>ЛОРГУС · ЛЕТОПИСЬ</span><h2>' + esc(button.querySelector(".lorgus-lore-node-label")?.textContent || "Запись") + '</h2><small>' + esc(file.replace(/\.md$/i, "").replaceAll("/", " / ")) + '</small></div><div class="lorgus-lore-document-body">' + renderMarkdown(markdown) + '</div>';
+                await renderLorePortrait(file, markdown, doc);
             } catch (error) {
                 console.error("Не удалось открыть запись лора:", file, error);
                 doc.innerHTML = '<div class="lorgus-lore-document-empty is-error"><span>!</span><h3>Запись не загрузилась</h3><p>Не удалось получить файл из хранилища сайта. Путь: <code>' + esc(file) + '</code></p><p>Проверь наличие файла в распакованном хранилище и доступность статических ресурсов.</p></div>';
