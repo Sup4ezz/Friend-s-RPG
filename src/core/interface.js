@@ -519,29 +519,19 @@ async function appendRpMessage(message) {
     const empty = feed.querySelector(".lorgus-messenger-start");
     if (empty) empty.remove();
 
-    const [photo, activeTitle] = await Promise.all([
-        getRpCharacterPhoto(message.character_id),
-        getRpCharacterActiveTitle(message.character_id)
-    ]);
-    // Realtime и резервный опрос могут получить одну запись одновременно.
-    // Повторная проверка после await не даёт создать два DOM-элемента.
-    if (feed.querySelector('[data-rp-message-id="' + message.id + '"]')) return;
     const mine = String(message.character_id) === String(window.activeCharacterId);
     const adminPost = Boolean(message.is_admin_post);
     const article = document.createElement("article");
-    article.className = "lorgus-messenger-message" + (mine ? " mine" : "") + (adminPost ? " admin-authored" : "") + (activeTitle?.color ? " has-active-title" : "") + (message.status === "reverted" ? " reverted" : "");
-    if (activeTitle?.color && /^#[0-9a-f]{3,8}$/i.test(activeTitle.color)) {
-        article.style.setProperty("--rp-title-color", activeTitle.color);
-    }
+    article.className = "lorgus-messenger-message" + (mine ? " mine" : "") + (adminPost ? " admin-authored" : "") + (message.status === "reverted" ? " reverted" : "");
     article.dataset.rpMessageId = message.id;
+    article.dataset.createdAt = message.created_at || "";
     const time = new Date(message.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+    const author = message.characters?.name || "Без имени";
 
     article.innerHTML =
-        '<button type="button" class="lorgus-messenger-message-avatar" aria-label="Открыть карточку персонажа: ' + escapeHtml(message.characters?.name || "Без имени") + '">' +
-            (photo ? '<img src="' + escapeHtml(photo) + '" alt="">' : '<span>✦</span>') +
-        '</button>' +
+        '<button type="button" class="lorgus-messenger-message-avatar" aria-label="Открыть карточку персонажа: ' + escapeHtml(author) + '"><span>✦</span></button>' +
         '<div class="lorgus-messenger-message-content">' +
-            '<div class="lorgus-messenger-message-meta"><strong>' + escapeHtml(message.characters?.name || "Без имени") + '</strong>' + (activeTitle ? '<span class="lorgus-message-title-badge" title="Активный титул" style="--rp-title-color:' + escapeHtml(/^#[0-9a-f]{3,8}$/i.test(activeTitle.color || "") ? activeTitle.color : "#d6b36a") + '">' + escapeHtml((activeTitle.icon ? activeTitle.icon + " " : "✦ ") + activeTitle.name) + '</span>' : '') + (adminPost ? '<span class="lorgus-admin-post-badge" title="Пост опубликован администрацией">✦ АДМИНИСТРАЦИЯ</span>' : '') + '<time>' + escapeHtml(time) + '</time></div>' +
+            '<div class="lorgus-messenger-message-meta"><strong>' + escapeHtml(author) + '</strong>' + (adminPost ? '<span class="lorgus-admin-post-badge" title="Пост опубликован администрацией">✦ АДМИНИСТРАЦИЯ</span>' : '') + '<time>' + escapeHtml(time) + '</time></div>' +
             '<div class="lorgus-messenger-bubble">' +
                 '<p>' + escapeHtml(message.body) + '</p>' +
                 (message.status === "reverted" ? '<div class="lorgus-rp-reverted-mark">Пост отменён администрацией' + (message.revert_reason ? ' · ' + escapeHtml(message.revert_reason) : '') + '</div>' : '') +
@@ -549,7 +539,11 @@ async function appendRpMessage(message) {
             '</div>' +
         '</div>';
 
-    feed.appendChild(article);
+    // Вставляем в хронологическое место: асинхронные портреты не меняют порядок сообщений.
+    const later = Array.from(feed.querySelectorAll(".lorgus-messenger-message")).find(node =>
+        node.dataset.createdAt && new Date(node.dataset.createdAt).getTime() > new Date(message.created_at).getTime()
+    );
+    feed.insertBefore(article, later || null);
     window.cacheRpMessage?.(message);
 
     article.addEventListener("contextmenu", event => {
@@ -568,34 +562,61 @@ async function appendRpMessage(message) {
     const characterLink = article.querySelector(".lorgus-messenger-message-meta strong");
     if (characterLink) characterLink.addEventListener("click", openCharacterCard(characterLink));
     const avatarButton = article.querySelector(".lorgus-messenger-message-avatar");
-    if (avatarButton) {
-        if (photo) {
-            avatarButton.title = "Открыть портрет крупно";
-            avatarButton.setAttribute("aria-label", "Посмотреть портрет крупно: " + (message.characters?.name || "Без имени"));
-            avatarButton.addEventListener("click", event => {
-                event.preventDefault();
-                event.stopPropagation();
-                openLorgusRpPhotoViewer(photo, message.characters?.name || "Портрет персонажа");
-            });
-        } else {
-            avatarButton.addEventListener("click", openCharacterCard(avatarButton));
-        }
-    }
+    if (avatarButton) avatarButton.addEventListener("click", openCharacterCard(avatarButton));
 
-    const { data: uses, error } = await window.supabaseClient
+    // Текст появляется сразу. Портреты, титулы и использованные предметы догружаются параллельно.
+    const photoAndTitle = Promise.all([
+        getRpCharacterPhoto(message.character_id),
+        getRpCharacterActiveTitle(message.character_id)
+    ]).then(([photo, activeTitle]) => {
+        if (!article.isConnected) return;
+        if (activeTitle) {
+            article.classList.add("has-active-title");
+            if (activeTitle.color && /^#[0-9a-f]{3,8}$/i.test(activeTitle.color)) {
+                article.style.setProperty("--rp-title-color", activeTitle.color);
+            }
+            const meta = article.querySelector(".lorgus-messenger-message-meta");
+            const badge = document.createElement("span");
+            badge.className = "lorgus-message-title-badge";
+            badge.title = "Активный титул";
+            badge.style.setProperty("--rp-title-color", /^#[0-9a-f]{3,8}$/i.test(activeTitle.color || "") ? activeTitle.color : "#d6b36a");
+            badge.textContent = (activeTitle.icon ? activeTitle.icon + " " : "✦ ") + activeTitle.name;
+            meta.insertBefore(badge, meta.querySelector(".lorgus-admin-post-badge") || meta.querySelector("time"));
+        }
+        if (photo) {
+            const button = article.querySelector(".lorgus-messenger-message-avatar");
+            if (button) {
+                button.innerHTML = '<img src="' + escapeHtml(photo) + '" alt="">';
+                button.title = "Открыть портрет крупно";
+                button.setAttribute("aria-label", "Посмотреть портрет крупно: " + author);
+                button.replaceWith(button.cloneNode(true));
+                const hydratedButton = article.querySelector(".lorgus-messenger-message-avatar");
+                hydratedButton.addEventListener("click", event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    openLorgusRpPhotoViewer(photo, author || "Портрет персонажа");
+                });
+            }
+        }
+    }).catch(error => console.warn("Не удалось оформить сообщение RP:", error));
+
+    const itemsPromise = window.supabaseClient
         .from("rp_message_item_uses")
         .select("item_id, quantity, status, items(name, icon, color, rarity)")
         .eq("message_id", message.id)
-        .eq("status", "active");
+        .eq("status", "active")
+        .then(({ data: uses, error }) => {
+            const useBox = article.querySelector(".lorgus-rp-item-uses");
+            if (useBox && !error && uses?.length) {
+                useBox.innerHTML = uses.map(use => {
+                    const item = use.items || {};
+                    return '<span class="lorgus-rp-item-use" style="--item-color:' + escapeHtml(item.color || "#d6b36a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong>' + (use.quantity > 1 ? '<small>×' + escapeHtml(String(use.quantity)) + '</small>' : '') + '</span>';
+                }).join("");
+            }
+        }).catch(error => console.warn("Не удалось загрузить предметы сообщения:", error));
 
-    const useBox = article.querySelector(".lorgus-rp-item-uses");
-    if (useBox && !error && uses?.length) {
-        useBox.innerHTML = uses.map(use => {
-            const item = use.items || {};
-            return '<span class="lorgus-rp-item-use" style="--item-color:' + escapeHtml(item.color || "#d6b36a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong>' + (use.quantity > 1 ? '<small>×' + escapeHtml(String(use.quantity)) + '</small>' : '') + '</span>';
-        }).join("");
-    }
     feed.scrollTop = feed.scrollHeight;
+    await Promise.all([photoAndTitle, itemsPromise]);
 }
 
 window.selectLorgusMapRegion = selectLorgusMapRegion;
