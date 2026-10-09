@@ -13,15 +13,15 @@ if (!window.lorgusGetSignedPhotoUrl) {
                     .then(({ data, error }) => {
                         const entry = entries.get(job.path);
                         if (error || !data?.signedUrl) {
-                            if (entry) { entry.url = null; entry.expiresAt = 0; entry.failedUntil = Date.now() + 60000; }
+                            if (entry) { entry.url = null; entry.expiresAt = 0; entry.failedUntil = Date.now() + 60000; entry.promise = null; }
                             job.resolve(null); return;
                         }
-                        if (entry) { entry.url = data.signedUrl; entry.expiresAt = Date.now() + 3500000; entry.failedUntil = 0; }
+                        if (entry) { entry.url = data.signedUrl; entry.expiresAt = Date.now() + 3500000; entry.failedUntil = 0; entry.promise = null; }
                         job.resolve(data.signedUrl);
                     })
                     .catch(() => {
                         const entry = entries.get(job.path);
-                        if (entry) { entry.url = null; entry.expiresAt = 0; entry.failedUntil = Date.now() + 60000; }
+                        if (entry) { entry.url = null; entry.expiresAt = 0; entry.failedUntil = Date.now() + 60000; entry.promise = null; }
                         job.resolve(null);
                     })
                     .finally(() => { active--; runNext(); });
