@@ -141,7 +141,7 @@
     }
 
     async function renderLorePortrait(file, markdown, doc) {
-        if (!file.startsWith("НПС/Королевские семьи/")) return;
+        if (!/^(НПС\/Королевские семьи|Лорбук\/Пантеон Богов|Церковники)\/.+\.md$/i.test(file)) return;
         const imageMatch = markdown.match(/^\s*image:\s*(.+?)\s*$/m);
         const originalPath = imageMatch ? imageMatch[1].trim() : "";
         let imageUrl = originalPath
