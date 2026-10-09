@@ -349,8 +349,9 @@ async function appendRpMessage(message) {
 
     const photo = await getRpCharacterPhoto(message.character_id);
     const mine = String(message.character_id) === String(window.activeCharacterId);
+    const adminPost = Boolean(message.is_admin_post);
     const article = document.createElement("article");
-    article.className = "lorgus-messenger-message" + (mine ? " mine" : "") + (message.status === "reverted" ? " reverted" : "");
+    article.className = "lorgus-messenger-message" + (mine ? " mine" : "") + (adminPost ? " admin-authored" : "") + (message.status === "reverted" ? " reverted" : "");
     article.dataset.rpMessageId = message.id;
     const time = new Date(message.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
 
@@ -359,7 +360,7 @@ async function appendRpMessage(message) {
             (photo ? '<img src="' + escapeHtml(photo) + '" alt="">' : '<span>✦</span>') +
         '</div>' +
         '<div class="lorgus-messenger-message-content">' +
-            '<div class="lorgus-messenger-message-meta"><strong>' + escapeHtml(message.characters?.name || "Без имени") + '</strong><time>' + escapeHtml(time) + '</time></div>' +
+            '<div class="lorgus-messenger-message-meta"><strong>' + escapeHtml(message.characters?.name || "Без имени") + '</strong>' + (adminPost ? '<span class="lorgus-admin-post-badge" title="Пост опубликован администрацией">✦ АДМИНИСТРАЦИЯ</span>' : '') + '<time>' + escapeHtml(time) + '</time></div>' +
             '<div class="lorgus-messenger-bubble">' +
                 '<p>' + escapeHtml(message.body) + '</p>' +
                 (message.status === "reverted" ? '<div class="lorgus-rp-reverted-mark">Пост отменён администрацией' + (message.revert_reason ? ' · ' + escapeHtml(message.revert_reason) : '') + '</div>' : '') +
