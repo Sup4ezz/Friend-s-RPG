@@ -165,9 +165,9 @@
         }
 
         const panel = document.createElement("section");
-        panel.className = "lorgus-lore-portrait-panel lorgus-lore-rp-panel";
+        panel.className = "lorgus-lore-rp-panel";
         const avatar = document.createElement("div");
-        avatar.className = "lorgus-lore-portrait-preview lorgus-lore-portrait-avatar";
+        avatar.className = "lorgus-lore-portrait-avatar";
         if (imageUrl) {
             const img = document.createElement("img");
             img.src = imageUrl;
