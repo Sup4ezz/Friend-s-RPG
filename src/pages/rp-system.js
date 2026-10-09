@@ -1274,6 +1274,29 @@ function readRpMessageCache(presence) {
     return window.rpMessageCache[key];
 }
 
+async function attachRpMessageReplyTargets(messages) {
+    const rows = Array.isArray(messages) ? messages : [];
+    const targetIds = [...new Set(rows.map(message => message.reply_to_id).filter(Boolean).map(String))];
+    if (!targetIds.length || !window.supabaseClient) return rows;
+
+    const { data, error } = await window.supabaseClient
+        .from("rp_messages")
+        .select("id, character_id, body, created_at, characters(name)")
+        .in("id", targetIds);
+    if (error) {
+        console.warn("Не удалось загрузить исходные сообщения для ответов:", error);
+        return rows;
+    }
+
+    const targets = Object.fromEntries((data || []).map(message => [String(message.id), message]));
+    return rows.map(message => ({
+        ...message,
+        reply_to: message.reply_to_id ? (targets[String(message.reply_to_id)] || message.reply_to || null) : null
+    }));
+}
+
+window.attachRpMessageReplyTargets = attachRpMessageReplyTargets;
+
 async function attachRpMessageItemUses(messages) {
     const rows = Array.isArray(messages) ? messages : [];
     const ids = rows.map(message => message.id).filter(Boolean);
@@ -1342,7 +1365,7 @@ async function loadRpMessages(presence) {
 
     let query = window.supabaseClient
         .from("rp_messages")
-        .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, reply_to:rp_messages!rp_messages_reply_to_id_fkey(id, character_id, body, created_at, characters(name)), characters(name)")
+        .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, characters(name)")
         .eq("presence_type", presence.type)
         .order("created_at", { ascending: true })
         .limit(200);
@@ -1362,7 +1385,8 @@ async function loadRpMessages(presence) {
         return;
     }
 
-    const fresh = await attachRpMessageItemUses(data || []);
+    const withReplies = await attachRpMessageReplyTargets(data || []);
+    const fresh = await attachRpMessageItemUses(withReplies);
     writeRpMessageCache(presence, fresh);
     if (!fresh.length && !cached.length) return;
 
@@ -1379,7 +1403,7 @@ async function pollRpMessages(presence) {
     try {
         let query = window.supabaseClient
             .from("rp_messages")
-            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, reply_to:rp_messages!rp_messages_reply_to_id_fkey(id, character_id, body, created_at, characters(name)), characters(name)")
+            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, characters(name)")
             .eq("presence_type", presence.type)
             .order("created_at", { ascending: false })
             .limit(40);
@@ -1400,7 +1424,8 @@ async function pollRpMessages(presence) {
         }
 
         // Один запрос на предметы для всей пачки, а не отдельный запрос на каждое сообщение.
-        const enriched = await attachRpMessageItemUses((data || []).reverse());
+        const withReplies = await attachRpMessageReplyTargets((data || []).reverse());
+        const enriched = await attachRpMessageItemUses(withReplies);
         for (const message of enriched) appendRpMessage(message);
     } finally {
         window.rpMessagesPolling = false;
@@ -1445,12 +1470,12 @@ async function subscribeToRpMessages(presence) {
             // transaction after the base insert, so the INSERT payload may be an older snapshot.
             const { data: committedMessage, error: committedError } = await window.supabaseClient
                 .from("rp_messages")
-                .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, reply_to:rp_messages!rp_messages_reply_to_id_fkey(id, character_id, body, created_at, characters(name)), characters(name)")
+                .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, characters(name)")
                 .eq("id", row.id)
                 .maybeSingle();
 
             if (!committedError && committedMessage) {
-                await appendRpMessage(committedMessage);
+                await appendRpMessage((await attachRpMessageReplyTargets([committedMessage]))[0]);
             } else {
                 const { data: character } = await window.supabaseClient
                     .from("characters")
@@ -1535,7 +1560,7 @@ async function sendLocalRpMessage() {
         // appendRpMessage защищён от дублей по message.id.
         let query = window.supabaseClient
             .from("rp_messages")
-            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, reply_to:rp_messages!rp_messages_reply_to_id_fkey(id, character_id, body, created_at, characters(name)), characters(name)")
+            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, characters(name)")
             .eq("character_id", window.activeCharacterId)
             .eq("presence_type", chat.type)
             .eq("body", body)
@@ -1558,7 +1583,7 @@ async function sendLocalRpMessage() {
             return;
         }
         if (sentMessages?.[0]) {
-            await appendRpMessage(sentMessages[0]);
+            await appendRpMessage((await attachRpMessageReplyTargets(sentMessages))[0]);
         }
     } finally {
         window.rpMessageSending = false;
