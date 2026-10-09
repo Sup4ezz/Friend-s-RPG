@@ -614,3 +614,7 @@
     .lorgus-rp-character-card-banner { margin-left: -17px; margin-right: -17px; }
     .lorgus-rp-context-menu { min-width: 210px; }
 }
+
+.lorgus-rp-character-card { max-height: min(82vh, 760px); overflow-y: auto; scrollbar-color: #655333 #171612; }
+.lorgus-rp-character-card::-webkit-scrollbar { width: 6px; }
+.lorgus-rp-character-card::-webkit-scrollbar-thumb { border-radius: 6px; background: #655333; }
