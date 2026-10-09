@@ -247,7 +247,6 @@ async function renderAdminApplications(container, applications) {
         characterList.innerHTML = filtered.length
             ? filtered.map(window.renderAdminCharacterManagement).join("")
             : '<div class="admin-empty admin-character-no-results"><h2>Ничего не найдено</h2><p>Измени условия поиска или сбрось фильтры.</p></div>';
-        characterList.querySelectorAll("[data-character-detail-id], [data-character-title-id], [data-character-ability-id], [data-character-inventory-id], [data-character-id]").forEach(() => {});
         bindAdminButtons(container);
     };
     characterFilters.forEach(control => control.addEventListener(control === characterSearch ? "input" : "change", renderCharacterDirectory));
