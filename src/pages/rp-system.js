@@ -734,7 +734,7 @@ function renderFloodChat() {
     const character = window.activeCharacter;
     const name = escapeHtml(character?.name || "Без имени");
 
-    container.className = "lorgus-rp-page lorgus-flood-page";
+    container.className = "lorgus-rp-page";
     container.innerHTML = `
         <div class="lorgus-messenger-shell" data-rp-chat-type="flood">
             <aside class="lorgus-messenger-sidebar">
