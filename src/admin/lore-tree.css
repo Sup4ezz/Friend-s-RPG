@@ -175,3 +175,54 @@
   .lorgus-lore-rp-panel {align-items:flex-start;gap:12px}
   .lorgus-lore-rp-panel .lorgus-lore-portrait-avatar {flex-basis:82px;width:82px;height:82px}
 }
+
+
+/* Hard reset legacy portrait-preview rules for the NPC avatar: this element is a circle, not an illustration tile. */
+.lorgus-lore-rp-panel {
+    box-sizing: border-box !important;
+    display: flex !important;
+    grid-template-columns: none !important;
+}
+.lorgus-lore-rp-panel > .lorgus-lore-portrait-avatar {
+    box-sizing: border-box !important;
+    flex: 0 0 112px !important;
+    width: 112px !important;
+    min-width: 112px !important;
+    max-width: 112px !important;
+    height: 112px !important;
+    min-height: 112px !important;
+    max-height: 112px !important;
+    aspect-ratio: 1 / 1 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative !important;
+}
+.lorgus-lore-rp-panel > .lorgus-lore-portrait-avatar > img {
+    position: absolute !important;
+    inset: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    max-height: 100% !important;
+    object-fit: cover !important;
+    border-radius: 50% !important;
+}
+@media(max-width:620px) {
+    .lorgus-lore-rp-panel > .lorgus-lore-portrait-avatar {
+        flex-basis: 82px !important;
+        width: 82px !important;
+        min-width: 82px !important;
+        max-width: 82px !important;
+        height: 82px !important;
+        min-height: 82px !important;
+        max-height: 82px !important;
+    }
+}
