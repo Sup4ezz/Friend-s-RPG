@@ -320,6 +320,7 @@ async function renderAdminApplications(container, applications) {
     });
     renderCharacterDirectory(true);
 
+    if (typeof window.initAdminSectionCollapse === "function") window.initAdminSectionCollapse(container);
     window.loadAdminItemUseLog(container);
     if (typeof window.loadAdminRpManagement === "function") window.loadAdminRpManagement(container);
 }
@@ -480,3 +481,31 @@ window.loadAdminPanel = loadAdminPanel;
 window.renderAdminApplications = renderAdminApplications;
 
 window.renderAdminCharacterManagement = renderAdminCharacterManagement;
+
+window.initAdminSectionCollapse = function(container) {
+    if (!container) return;
+    container.querySelectorAll(":scope > .admin-section").forEach(section => {
+        const heading = section.querySelector(":scope > .admin-section-heading");
+        if (!heading || heading.dataset.collapseReady === "true") return;
+        heading.dataset.collapseReady = "true";
+        heading.classList.add("admin-section-toggle");
+        heading.setAttribute("role", "button");
+        heading.setAttribute("tabindex", "0");
+        heading.setAttribute("aria-expanded", "false");
+        section.classList.add("admin-section-collapsible", "is-collapsed");
+        const toggle = () => {
+            const collapsed = section.classList.toggle("is-collapsed");
+            heading.setAttribute("aria-expanded", String(!collapsed));
+        };
+        heading.addEventListener("click", event => {
+            if (event.target.closest("button,a,input,select,textarea")) return;
+            toggle();
+        });
+        heading.addEventListener("keydown", event => {
+            if (event.key !== "Enter" && event.key !== " ") return;
+            if (event.target !== heading && event.target.closest("button,a,input,select,textarea")) return;
+            event.preventDefault();
+            toggle();
+        });
+    });
+};
