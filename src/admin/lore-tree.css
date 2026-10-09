@@ -74,3 +74,26 @@
     .lorgus-lore-tree-sidebar { border-right: 0; border-bottom: 1px solid rgba(203, 169, 100, .18); max-height: 450px; overflow: auto; }
     .lorgus-lore-document { min-height: 350px; padding: 22px 18px; }
 }
+
+.lorgus-lore-document-body em { color: #e0d0ad; }
+.lorgus-lore-document-body del { opacity: .65; }
+.lorgus-lore-document-body pre {
+    overflow-x: auto; margin: 18px 0; padding: 15px 17px;
+    border: 1px solid rgba(203, 169, 100, .16); background: rgba(0, 0, 0, .28);
+    color: #cfc4a9; font: 12px/1.7 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.lorgus-lore-document-body .lorgus-wikilink {
+    color: #d9bb79; border-bottom: 1px dotted rgba(217, 187, 121, .45);
+}
+.lorgus-lore-callout {
+    margin: 16px 0 22px; border: 1px solid rgba(203, 169, 100, .22);
+    border-left: 3px solid #b99452; background: rgba(0, 0, 0, .16);
+}
+.lorgus-lore-callout > h3 {
+    margin: 0 !important; padding: 12px 15px; border-bottom: 1px solid rgba(203, 169, 100, .13);
+    color: #ead5a4 !important; font-size: 14px !important; font-weight: 600 !important;
+}
+.lorgus-lore-callout > div { padding: 4px 15px 13px; }
+.lorgus-lore-callout p { margin: 8px 0 !important; }
+.lorgus-lore-callout ul { margin: 8px 0 !important; }
+.lorgus-lore-callout-ateron { border-left-color: #bca16a; }
