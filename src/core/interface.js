@@ -600,11 +600,14 @@ async function appendRpMessage(message) {
         }
     }).catch(error => console.warn("Не удалось оформить сообщение RP:", error));
 
-    const itemsPromise = window.supabaseClient
-        .from("rp_message_item_uses")
-        .select("item_id, quantity, status, items(name, icon, color, rarity)")
-        .eq("message_id", message.id)
-        .eq("status", "active")
+    const loadUses = Array.isArray(message.item_uses)
+        ? Promise.resolve({ data: message.item_uses, error: null })
+        : window.supabaseClient
+            .from("rp_message_item_uses")
+            .select("item_id, quantity, status, items(name, icon, color, rarity)")
+            .eq("message_id", message.id)
+            .eq("status", "active");
+    const itemsPromise = loadUses
         .then(({ data: uses, error }) => {
             const useBox = article.querySelector(".lorgus-rp-item-uses");
             if (useBox && !error && uses?.length) {
