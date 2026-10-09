@@ -187,6 +187,67 @@
         box.scrollTop = box.scrollHeight;
     }
 
+    async function editPortraitImage(file) {
+        return new Promise((resolve, reject) => {
+            const url = URL.createObjectURL(file);
+            const image = new Image();
+            image.onload = () => {
+                const overlay = document.createElement("div");
+                overlay.className = "admin-rp-crop-overlay";
+                overlay.innerHTML = `
+                    <section class="admin-rp-crop-dialog" role="dialog" aria-modal="true" aria-label="Настройка портрета">
+                        <header><strong>Настроить портрет</strong><button type="button" data-crop-cancel aria-label="Закрыть">×</button></header>
+                        <p>Меняй размер персонажа и двигай его внутри рамки. Результат сохранится для всех мест, где показывается портрет.</p>
+                        <div class="admin-rp-crop-stage"><canvas width="360" height="440"></canvas></div>
+                        <label>Размер персонажа <output data-crop-zoom>100%</output><input data-crop-zoom-range type="range" min="50" max="200" value="100"></label>
+                        <label>По горизонтали <output data-crop-x>0</output><input data-crop-x-range type="range" min="-100" max="100" value="0"></label>
+                        <label>По вертикали <output data-crop-y>0</output><input data-crop-y-range type="range" min="-100" max="100" value="0"></label>
+                        <footer><button type="button" data-crop-reset>Сбросить</button><button type="button" data-crop-save>Применить портрет</button></footer>
+                    </section>`;
+                document.body.appendChild(overlay);
+                const canvas = overlay.querySelector("canvas");
+                const ctx = canvas.getContext("2d");
+                const zoomInput = overlay.querySelector("[data-crop-zoom-range]");
+                const xInput = overlay.querySelector("[data-crop-x-range]");
+                const yInput = overlay.querySelector("[data-crop-y-range]");
+                let zoom = 1, offsetX = 0, offsetY = 0;
+                const draw = () => {
+                    const W = canvas.width, H = canvas.height;
+                    const scale = Math.max(W / image.naturalWidth, H / image.naturalHeight) * zoom;
+                    const dw = image.naturalWidth * scale, dh = image.naturalHeight * scale;
+                    const maxX = Math.max(0, (dw - W) / 2), maxY = Math.max(0, (dh - H) / 2);
+                    const x = (W - dw) / 2 + maxX * offsetX / 100;
+                    const y = (H - dh) / 2 + maxY * offsetY / 100;
+                    ctx.fillStyle = "#11100d"; ctx.fillRect(0, 0, W, H);
+                    ctx.drawImage(image, x, y, dw, dh);
+                    overlay.querySelector("[data-crop-zoom]").textContent = Math.round(zoom * 100) + "%";
+                    overlay.querySelector("[data-crop-x]").textContent = offsetX;
+                    overlay.querySelector("[data-crop-y]").textContent = offsetY;
+                };
+                const close = () => { URL.revokeObjectURL(url); overlay.remove(); };
+                const cancel = () => { close(); resolve(null); };
+                overlay.querySelector("[data-crop-cancel]").addEventListener("click", cancel);
+                overlay.addEventListener("click", e => { if (e.target === overlay) cancel(); });
+                zoomInput.addEventListener("input", () => { zoom = Number(zoomInput.value) / 100; draw(); });
+                xInput.addEventListener("input", () => { offsetX = Number(xInput.value); draw(); });
+                yInput.addEventListener("input", () => { offsetY = Number(yInput.value); draw(); });
+                overlay.querySelector("[data-crop-reset]").addEventListener("click", () => {
+                    zoom = 1; offsetX = 0; offsetY = 0;
+                    zoomInput.value = 100; xInput.value = 0; yInput.value = 0; draw();
+                });
+                overlay.querySelector("[data-crop-save]").addEventListener("click", () => {
+                    canvas.toBlob(blob => {
+                        if (!blob) { alert("Не удалось подготовить изображение."); return; }
+                        close(); resolve(blob);
+                    }, "image/jpeg", 0.92);
+                });
+                draw();
+            };
+            image.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Не удалось открыть изображение.")); };
+            image.src = url;
+        });
+    }
+
     function renderRpList(root) {
         const box = root.querySelector(".admin-rp-nrp-list");
         if (!box) return;
@@ -220,11 +281,11 @@
                 }
                 input.disabled = true;
                 try {
-                    const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").slice(-90) || "portrait";
-                    const path = "rp-characters/" + characterId + "/" + Date.now() + "-" + safeName;
-                    const { error: uploadError } = await window.supabaseClient.storage
-                        .from("character-applications")
-                        .upload(path, file, { upsert: true, contentType: file.type });
+                    const editedBlob = await editPortraitImage(file);
+                    if (!editedBlob) { input.disabled = false; input.value = ""; return; }
+                    const path = "rp-characters/" + characterId + "/" + Date.now() + "-portrait.jpg";
+                    const { error: uploadError } = await window.supabaseClient.storage.from("character-applications")
+                        .upload(path, editedBlob, { upsert: true, contentType: "image/jpeg" });
                     if (uploadError) throw uploadError;
                     const { error: saveError } = await window.supabaseClient.rpc("admin_set_rp_character_photo", {
                         p_character_id: characterId,
@@ -301,10 +362,11 @@
                 }
                 input.disabled = true;
                 try {
-                    const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").slice(-90) || "portrait";
-                    const path = "rp-characters/" + characterId + "/" + Date.now() + "-" + safeName;
+                    const editedBlob = await editPortraitImage(file);
+                    if (!editedBlob) { input.disabled = false; input.value = ""; return; }
+                    const path = "rp-characters/" + characterId + "/" + Date.now() + "-portrait.jpg";
                     const { error: uploadError } = await window.supabaseClient.storage.from("character-applications")
-                        .upload(path, file, { upsert: true, contentType: file.type });
+                        .upload(path, editedBlob, { upsert: true, contentType: "image/jpeg" });
                     if (uploadError) throw uploadError;
                     const { error: saveError } = await window.supabaseClient.rpc("admin_set_rp_character_photo", {
                         p_character_id: characterId, p_photo_path: path
