@@ -120,6 +120,10 @@
                 async render() {
                     const presence = await window.getRpPresence?.();
                     if (presence?.type === "road") {
+                        const canonicalRoadPath = buildRpRoadPath(presence);
+                        if (normalizePath() !== canonicalRoadPath) {
+                            return navigate(canonicalRoadPath, { replace: true });
+                        }
                         return window.renderRoadChat?.(presence, true);
                     }
                     if (presence?.type === "location") {
