@@ -77,7 +77,7 @@
         for (let offset = 0; ; offset += pageSize) {
             const page = await window.supabaseClient
                 .from("rp_messages")
-                .select("id,character_id,body,created_at,status,reverted_at,revert_reason,presence_type,region,location,from_region,from_location,to_region,to_location,characters(id,name,race)")
+                .select("id,character_id,body,created_at,status,reverted_at,revert_reason,presence_type,region,location,from_region,from_location,to_region,to_location,characters(id,name,race,photo_path)")
                 .order("created_at", { ascending: false })
                 .range(offset, offset + pageSize - 1);
             if (page.error) throw page.error;
@@ -171,7 +171,7 @@
                 const reverted = row.status === "reverted";
                 return `
                     <article class="admin-rp-message ${reverted ? "reverted" : ""}">
-                        <div class="admin-rp-message-avatar">✦</div>
+                        <div class="admin-rp-message-avatar" data-message-avatar="${esc(row.character_id)}" data-photo-path="${esc(character.photo_path || "")}">${character.photo_path ? "" : "✦"}</div>
                         <div class="admin-rp-message-main">
                             <div class="admin-rp-message-meta">
                                 <strong>${esc(character.name || "Неизвестный персонаж")}</strong>
@@ -185,6 +185,21 @@
             : '<div class="admin-rp-empty">В этом чате сообщений пока нет.</div>';
 
         box.scrollTop = box.scrollHeight;
+        hydrateMessageAvatars(box);
+    }
+
+    async function hydrateMessageAvatars(box) {
+        const avatars = Array.from(box.querySelectorAll(".admin-rp-message-avatar[data-photo-path]"));
+        await Promise.all(avatars.map(async avatar => {
+            const path = avatar.dataset.photoPath;
+            if (!path) return;
+            try {
+                const { data, error } = await window.supabaseClient.storage.from("character-applications").createSignedUrl(path, 3600);
+                if (!error && data?.signedUrl && avatar.isConnected) {
+                    avatar.innerHTML = '<img src="' + esc(data.signedUrl) + '" alt="">';
+                }
+            } catch (_) {}
+        }));
     }
 
     async function editPortraitImage(file) {
@@ -421,6 +436,11 @@
             state.chats.map(chat => `<option value="${esc(chat.key)}">${esc(chat.label)}</option>`).join("");
 
         syncComposerChat(root);
+        const pendingId = window.lorgusPendingRpCharacterId;
+        if (pendingId && Array.from(characterSelect.options).some(option => option.value === String(pendingId))) {
+            characterSelect.value = String(pendingId);
+            window.lorgusPendingRpCharacterId = null;
+        }
     }
 
     async function submitNrpPost(root) {
@@ -625,5 +645,20 @@
         await refreshAdminRp(root);
     }
 
+    window.lorgusEditPortraitImage = editPortraitImage;
+    window.lorgusSelectRpCharacter = async characterId => {
+        window.lorgusPendingRpCharacterId = String(characterId);
+        const root = document.querySelector(".admin-rp-control-room");
+        if (!root) return false;
+        await refreshAdminRp(root);
+        const select = root.querySelector(".admin-rp-composer-character");
+        if (!select || !Array.from(select.options).some(option => option.value === String(characterId))) return false;
+        select.value = String(characterId);
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+        root.querySelector(".admin-rp-composer-input")?.focus();
+        root.scrollIntoView({ behavior: "smooth", block: "start" });
+        window.lorgusPendingRpCharacterId = null;
+        return true;
+    };
     window.loadAdminRpManagement = loadAdminRpManagement;
 })();
