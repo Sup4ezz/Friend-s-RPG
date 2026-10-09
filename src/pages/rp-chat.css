@@ -644,3 +644,49 @@
 .lorgus-rp-reply-quote-content strong { overflow: hidden; color: #e2c88f; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
 .lorgus-rp-reply-quote-content span { display: -webkit-box; overflow: hidden; color: #a9a296; font-size: 12px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
 .lorgus-rp-message-target .lorgus-messenger-bubble { outline: 2px solid rgba(214,179,106,.8); box-shadow: 0 0 0 5px rgba(214,179,106,.12); transition: box-shadow .2s ease, outline-color .2s ease; }
+
+
+/* LORGUS RP — keep the illustrated location visible behind the conversation.
+   The shared messenger stylesheet used to paint an opaque feed over the scene. */
+.lorgus-rp-page .lorgus-messenger-main[data-rp-location] {
+    isolation: isolate !important;
+    background: transparent !important;
+}
+.lorgus-rp-page .lorgus-messenger-main[data-rp-location]::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    background-color: #080b10 !important;
+    background-image:
+        linear-gradient(180deg, rgba(3, 6, 11, .14), rgba(3, 6, 11, .42)),
+        var(--lorgus-location-bg, linear-gradient(120deg, #111827, #05070b)) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    filter: saturate(1.04) contrast(1.04) !important;
+    animation: none !important;
+}
+.lorgus-rp-page .lorgus-messenger-main[data-rp-location]::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
+    background: linear-gradient(180deg, rgba(2, 5, 9, .08), rgba(2, 5, 9, .24)) !important;
+    box-shadow: inset 0 0 130px rgba(0, 0, 0, .42) !important;
+    animation: none !important;
+}
+.lorgus-rp-page .lorgus-messenger-main[data-rp-location] .lorgus-messenger-feed {
+    position: relative !important;
+    z-index: 2 !important;
+    background:
+        linear-gradient(180deg, rgba(8, 11, 16, .20), rgba(8, 11, 16, .30)) !important;
+}
+.lorgus-rp-page .lorgus-messenger-main[data-rp-location] .lorgus-messenger-header,
+.lorgus-rp-page .lorgus-messenger-main[data-rp-location] .lorgus-messenger-composer,
+.lorgus-rp-page .lorgus-messenger-main[data-rp-location] .lorgus-messenger-footer {
+    position: relative !important;
+    z-index: 3 !important;
+}
