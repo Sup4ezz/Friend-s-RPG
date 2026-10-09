@@ -141,94 +141,156 @@
     }
 
     async function renderLorePortrait(file, markdown, doc) {
+        if (!file.startsWith("НПС/Королевские семьи/")) return;
         const imageMatch = markdown.match(/^\s*image:\s*(.+?)\s*$/m);
         const originalPath = imageMatch ? imageMatch[1].trim() : "";
         let imageUrl = originalPath
             ? "https://raw.githubusercontent.com/Sup4ezz/Friend-s-RPG/main/" + encodePath("Obsidian Vault/Obsidian Vault/" + originalPath)
             : "";
         const client = window.supabaseClient;
-        if (client && file.startsWith("НПС/Королевские семьи/")) {
+        let actor = null;
+        if (client) {
             try {
-                const result = await client.rpc("admin_get_lore_portrait", { p_note_path: file });
-                if (!result.error && result.data) {
-                    const signed = await client.storage.from("character-applications").createSignedUrl(result.data, 3600);
-                    if (!signed.error && signed.data && signed.data.signedUrl) imageUrl = signed.data.signedUrl;
+                const result = await client.rpc("admin_get_lore_actor", { p_note_path: file });
+                if (!result.error && Array.isArray(result.data) && result.data[0]) {
+                    actor = result.data[0];
+                    if (actor.photo_path) {
+                        const signed = await client.storage.from("character-applications").createSignedUrl(actor.photo_path, 3600);
+                        if (!signed.error && signed.data?.signedUrl) imageUrl = signed.data.signedUrl;
+                    }
                 }
             } catch (error) {
-                console.warn("Не удалось загрузить пользовательский портрет лора", error);
+                console.warn("Не удалось получить RP-привязку персонажа", error);
             }
         }
+
         const panel = document.createElement("section");
-        panel.className = "lorgus-lore-portrait-panel";
-        const preview = document.createElement("div");
-        preview.className = "lorgus-lore-portrait-preview";
+        panel.className = "lorgus-lore-portrait-panel lorgus-lore-rp-panel";
+        const avatar = document.createElement("div");
+        avatar.className = "lorgus-lore-portrait-preview lorgus-lore-portrait-avatar";
         if (imageUrl) {
             const img = document.createElement("img");
             img.src = imageUrl;
-            img.alt = "Иллюстрация записи";
-            preview.appendChild(img);
+            img.alt = "Круглый портрет персонажа";
+            avatar.appendChild(img);
         } else {
-            preview.innerHTML = "<span>✧</span><small>Иллюстрации пока нет</small>";
+            avatar.innerHTML = "<span>✦</span>";
         }
+
         const tools = document.createElement("div");
         tools.className = "lorgus-lore-portrait-tools";
         const info = document.createElement("div");
-        info.innerHTML = "<strong>Иллюстрация записи</strong><small>" + (originalPath ? "Источник: " + esc(originalPath) : "Фото не указано в заметке") + "</small>";
-        const label = document.createElement("label");
-        label.className = "lorgus-lore-portrait-upload";
-        label.appendChild(document.createTextNode("Загрузить / заменить фото"));
+        const title = doc.querySelector(".lorgus-lore-document-head h2")?.textContent || file.split("/").pop().replace(/\.md$/i, "");
+        info.innerHTML = "<strong>RP-ПЕРСОНАЖ</strong><small>" +
+            (actor ? (actor.is_active ? "Подключён к RP и доступен для публикации" : "Персонаж связан с записью") :
+            "Запись лора пока не подключена к RP") +
+            (originalPath ? "<br>Исходная иллюстрация: " + esc(originalPath) : "") + "</small>";
+
+        const actions = document.createElement("div");
+        actions.className = "lorgus-lore-rp-actions";
+        const useButton = document.createElement("button");
+        useButton.type = "button";
+        useButton.className = "lorgus-lore-rp-use";
+        useButton.textContent = actor ? "Выбрать для поста" : "Подключить к RP и выбрать";
+        const uploadLabel = document.createElement("label");
+        uploadLabel.className = "lorgus-lore-portrait-upload";
+        uploadLabel.textContent = actor?.photo_path ? "Заменить фото в кружке" : "Загрузить фото в кружок";
         const input = document.createElement("input");
         input.type = "file";
-        input.accept = "image/png,image/jpeg,image/webp";
+        input.accept = "image/png,image/jpeg,image/webp,image/avif";
         input.hidden = true;
-        label.appendChild(input);
+        uploadLabel.appendChild(input);
         const status = document.createElement("small");
         status.className = "lorgus-lore-portrait-status";
-        status.textContent = "Фото сохраняется в хранилище LORGUS отдельно от Markdown.";
-        tools.append(info, label, status);
-        panel.append(preview, tools);
+        status.textContent = "Аватар будет круглым и появится рядом с сообщениями персонажа.";
+        actions.append(useButton, uploadLabel);
+        tools.append(info, actions, status);
+        panel.append(avatar, tools);
         const body = doc.querySelector(".lorgus-lore-document-body");
         if (body) doc.insertBefore(panel, body);
         else doc.appendChild(panel);
-        input.addEventListener("change", async () => {
-            const selected = input.files && input.files[0];
-            if (!selected) return;
-            if (!/^image\/(png|jpeg|webp)$/.test(selected.type)) {
-                status.textContent = "Поддерживаются PNG, JPG и WebP.";
-                input.value = "";
-                return;
-            }
-            if (selected.size > 10 * 1024 * 1024) {
-                status.textContent = "Файл слишком большой. Максимум — 10 МБ.";
-                input.value = "";
-                return;
-            }
-            if (!client) {
-                status.textContent = "Не подключено хранилище LORGUS.";
-                return;
-            }
-            status.textContent = "Загружаю изображение…";
-            const safeName = selected.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-90) || "portrait.webp";
-            const storagePath = "lore-portraits/" + Date.now() + "-" + safeName;
+
+        const registerActor = async () => {
+            if (actor?.character_id) return actor;
+            if (!client) throw new Error("Не подключено хранилище LORGUS.");
+            status.textContent = "Подключаю персонажа к RP…";
+            const result = await client.rpc("admin_register_lore_actor", { p_note_path: file, p_name: title });
+            if (result.error) throw result.error;
+            actor = Array.isArray(result.data) ? result.data[0] : result.data;
+            if (!actor?.character_id) throw new Error("Сервер не вернул ID персонажа.");
+            useButton.textContent = "Выбрать для поста";
+            uploadLabel.textContent = "Загрузить фото в кружок";
+            uploadLabel.appendChild(input);
+            info.innerHTML = "<strong>RP-ПЕРСОНАЖ</strong><small>Подключён к RP и доступен для публикации</small>";
+            return actor;
+        };
+
+        useButton.addEventListener("click", async () => {
+            useButton.disabled = true;
             try {
-                const uploaded = await client.storage.from("character-applications").upload(storagePath, selected, {
-                    cacheControl: "3600", upsert: false, contentType: selected.type
+                const linked = await registerActor();
+                const selected = await window.lorgusSelectRpCharacter?.(linked.character_id);
+                status.textContent = selected
+                    ? "Персонаж выбран в форме публикации. Можно писать пост."
+                    : "Персонаж подключён. Открой «Ролевая · контрольная комната» — он будет выбран в форме публикации.";
+            } catch (error) {
+                status.textContent = "Не удалось подключить персонажа: " + (error.message || error);
+            } finally {
+                useButton.disabled = false;
+            }
+        });
+
+        input.addEventListener("change", async () => {
+            const selected = input.files?.[0];
+            if (!selected) return;
+            if (!/^image\/(png|jpeg|webp|avif)$/.test(selected.type) || selected.size > 8 * 1024 * 1024) {
+                status.textContent = "Выбери PNG, JPG, WebP или AVIF размером не более 8 МБ.";
+                input.value = "";
+                return;
+            }
+            if (typeof window.lorgusEditPortraitImage !== "function") {
+                status.textContent = "Редактор круглого портрета ещё не загрузился. Обнови страницу.";
+                input.value = "";
+                return;
+            }
+            uploadLabel.style.pointerEvents = "none";
+            status.textContent = "Открой редактор и настрой кадрирование…";
+            try {
+                const linked = await registerActor();
+                const cropped = await window.lorgusEditPortraitImage(selected);
+                if (!cropped) {
+                    status.textContent = "Загрузка отменена.";
+                    return;
+                }
+                status.textContent = "Сохраняю круглый портрет…";
+                const path = "rp-characters/" + linked.character_id + "/" + Date.now() + "-portrait.png";
+                const uploaded = await client.storage.from("character-applications").upload(path, cropped, {
+                    cacheControl: "3600", upsert: false, contentType: "image/png"
                 });
                 if (uploaded.error) throw uploaded.error;
-                const saved = await client.rpc("admin_set_lore_portrait", { p_note_path: file, p_photo_path: storagePath });
+                const saved = await client.rpc("admin_set_rp_character_photo", {
+                    p_character_id: linked.character_id,
+                    p_photo_path: path
+                });
                 if (saved.error) throw saved.error;
-                const signed = await client.storage.from("character-applications").createSignedUrl(storagePath, 3600);
+                const signed = await client.storage.from("character-applications").createSignedUrl(path, 3600);
                 if (signed.error) throw signed.error;
-                preview.innerHTML = "";
+                actor.photo_path = path;
+                avatar.innerHTML = "";
                 const img = document.createElement("img");
                 img.src = signed.data.signedUrl;
-                img.alt = "Иллюстрация записи";
-                preview.appendChild(img);
-                status.textContent = "Фото сохранено. Оно останется после обновления страницы.";
+                img.alt = "Круглый портрет персонажа";
+                avatar.appendChild(img);
+                uploadLabel.textContent = "Заменить фото в кружке";
+                uploadLabel.appendChild(input);
+                status.textContent = "Готово: круглый портрет сохранён и привязан к персонажу RP.";
+                window.rpCharacterPhotoCache = window.rpCharacterPhotoCache || {};
+                delete window.rpCharacterPhotoCache[String(linked.character_id)];
             } catch (error) {
-                console.error("Не удалось сохранить портрет лора", error);
-                status.textContent = "Не удалось сохранить фото: " + (error.message || "проверь доступ администратора");
+                console.error("Не удалось сохранить круглый портрет:", error);
+                status.textContent = "Не удалось сохранить фото: " + (error.message || error);
             } finally {
+                uploadLabel.style.pointerEvents = "";
                 input.value = "";
             }
         });
