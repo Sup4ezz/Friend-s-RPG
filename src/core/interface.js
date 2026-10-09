@@ -424,6 +424,95 @@ function openLorgusRpPhotoViewer(src, caption = "Портрет персонаж
 
 window.openLorgusRpPhotoViewer = openLorgusRpPhotoViewer;
 
+function showRpMessageContextMenu(message, x, y) {
+    document.querySelector(".lorgus-rp-context-menu")?.remove();
+    const menu = document.createElement("div");
+    menu.className = "lorgus-rp-context-menu";
+    menu.setAttribute("role", "menu");
+    menu.innerHTML = `
+        <button type="button" role="menuitem" data-action="reply"><span>↩</span><strong>Ответить</strong></button>
+        <button type="button" role="menuitem" data-action="copy"><span>⧉</span><strong>Копировать текст</strong></button>
+        <button type="button" role="menuitem" data-action="copy-author"><span>≡</span><strong>Копировать с именем</strong></button>
+        <div class="lorgus-rp-context-divider"></div>
+        <button type="button" role="menuitem" data-action="select"><span>⌁</span><strong>Выделить текст</strong></button>
+    `;
+    document.body.appendChild(menu);
+    const rect = menu.getBoundingClientRect();
+    menu.style.left = Math.max(8, Math.min(x, window.innerWidth - rect.width - 8)) + "px";
+    menu.style.top = Math.max(8, Math.min(y, window.innerHeight - rect.height - 8)) + "px";
+
+    const body = String(message.body || "");
+    const author = String(message.characters?.name || "Без имени");
+    const copyText = async value => {
+        try {
+            if (navigator.clipboard?.writeText) {
+                await navigator.clipboard.writeText(value);
+                return;
+            }
+        } catch (_) {}
+        const field = document.createElement("textarea");
+        field.value = value;
+        field.style.position = "fixed";
+        field.style.opacity = "0";
+        document.body.appendChild(field);
+        field.select();
+        try { document.execCommand("copy"); } catch (_) {}
+        field.remove();
+    };
+
+    menu.querySelector('[data-action="reply"]').addEventListener("click", () => {
+        const input = document.getElementById("lorgus-rp-input");
+        if (input) {
+            const quoted = body.split("\\n").map(line => "> " + line).join("\\n");
+            const prefix = "> " + author + ":\\n" + quoted + "\\n\\n";
+            input.value = input.value.trim() ? prefix + input.value : prefix;
+            input.dispatchEvent(new Event("input", { bubbles: true }));
+            input.focus();
+            input.setSelectionRange(input.value.length, input.value.length);
+        }
+        menu.remove();
+    });
+    menu.querySelector('[data-action="copy"]').addEventListener("click", async () => {
+        await copyText(body);
+        menu.remove();
+    });
+    menu.querySelector('[data-action="copy-author"]').addEventListener("click", async () => {
+        await copyText(author + ": " + body);
+        menu.remove();
+    });
+    menu.querySelector('[data-action="select"]').addEventListener("click", () => {
+        const article = document.querySelector('[data-rp-message-id="' + String(message.id).replace(/"/g, '\\"') + '"]');
+        const paragraph = article?.querySelector(".lorgus-messenger-bubble p");
+        if (paragraph) {
+            const selection = window.getSelection();
+            const range = document.createRange();
+            range.selectNodeContents(paragraph);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+        menu.remove();
+    });
+
+    const dismiss = event => {
+        if (!menu.contains(event.target)) {
+            menu.remove();
+            document.removeEventListener("pointerdown", dismiss, true);
+            document.removeEventListener("keydown", escape);
+        }
+    };
+    const escape = event => {
+        if (event.key === "Escape") {
+            menu.remove();
+            document.removeEventListener("pointerdown", dismiss, true);
+            document.removeEventListener("keydown", escape);
+        }
+    };
+    setTimeout(() => {
+        document.addEventListener("pointerdown", dismiss, true);
+        document.addEventListener("keydown", escape);
+    }, 0);
+}
+
 async function appendRpMessage(message) {
     const feed = document.getElementById("lorgus-rp-feed");
     if (!feed || feed.querySelector('[data-rp-message-id="' + message.id + '"]')) return;
@@ -461,6 +550,13 @@ async function appendRpMessage(message) {
         '</div>';
 
     feed.appendChild(article);
+    window.cacheRpMessage?.(message);
+
+    article.addEventListener("contextmenu", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        showRpMessageContextMenu(message, event.clientX, event.clientY);
+    });
 
     const openCharacterCard = anchor => event => {
         event.preventDefault();
