@@ -508,11 +508,13 @@ async function arriveAtDestination() {
     });
 
     if (destination) {
-        renderLocationChats(
-            destination.location,
-            destination.region,
-            true
-        );
+        // Replace the road URL instead of leaving a stale source-location route
+        // behind in browser history.
+        if (window.lorgusNavigateChat) {
+            window.lorgusNavigateChat(destination.region, destination.location, { replace: true });
+        } else {
+            renderLocationChats(destination.location, destination.region, true, true);
+        }
     }
 }
 
@@ -597,8 +599,23 @@ ${hasRequestedDestination ? `<button class="gold-button" type="button"
     `;
 }
 
-async function renderRoadChat(presence) {
+async function renderRoadChat(presence, fromRoute = false) {
     window.clearRpReplyTarget?.();
+    if (!presence || presence.type !== "road") {
+        presence = await getRpPresence();
+    }
+    if (!presence || presence.type !== "road") {
+        if (presence?.type === "location" && window.lorgusNavigateChat) {
+            window.lorgusNavigateChat(presence.region, presence.location, { replace: true });
+        } else if (window.lorgusNavigate) {
+            window.lorgusNavigate("/rp", { replace: true });
+        }
+        return;
+    }
+    if (!fromRoute && window.lorgusNavigateRoadChat) {
+        const navigated = window.lorgusNavigateRoadChat(presence, { replace: true });
+        if (navigated) return;
+    }
     window.activeRpChatSpace = presence;
     const container = document.getElementById("cabinet-content");
     if (!container) return;
