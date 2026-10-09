@@ -253,9 +253,9 @@ async function renderAdminApplications(container, applications) {
             <td>${window.escapeHtml(a.race || "—")}</td><td>${window.escapeHtml(a.homeland || "—")}</td><td>${window.escapeHtml(a.occupation || "—")}</td><td>${a.age ? window.escapeHtml(String(a.age)) : "—"}</td>
             <td><div class="admin-character-table-actions">
                 <button type="button" class="admin-character-details-button" data-character-detail-id="${window.escapeHtml(String(a.id))}">Открыть</button>
-                <button type="button" class="admin-character-details-button admin-character-titles-button" data-character-title-id="${window.escapeHtml(String(a.id))}>Титулы</button>
-                <button type="button" class="admin-character-details-button admin-character-abilities-button" data-character-ability-id="${window.escapeHtml(String(a.id))}>Навыки</button>
-                <button type="button" class="admin-character-details-button admin-character-inventory-button" data-character-inventory-id="${window.escapeHtml(String(a.id))}>Инвентарь</button>
+                <button type="button" class="admin-character-details-button admin-character-titles-button" data-character-title-id="${window.escapeHtml(String(a.id))}">Титулы</button>
+                <button type="button" class="admin-character-details-button admin-character-abilities-button" data-character-ability-id="${window.escapeHtml(String(a.id))}">Навыки</button>
+                <button type="button" class="admin-character-details-button admin-character-inventory-button" data-character-inventory-id="${window.escapeHtml(String(a.id))}">Инвентарь</button>
             </div></td></tr>`).join("");
         return '<div class="admin-character-table-wrap"><table class="admin-character-table"><thead><tr><th>Персонаж</th><th>Раса</th><th>Родина</th><th>Занятие</th><th>Возраст</th><th>Действия</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     };
