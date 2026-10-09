@@ -18296,3 +18296,25 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-messenger-message.has-active-title .lorgus-messenger-message-meta>strong{color:var(--rp-title-color,#d6b36a)!important}
 .lorgus-messenger-message.has-active-title .lorgus-message-title-badge{border-color:var(--rp-title-color,#d6b36a)!important;background:color-mix(in srgb,var(--rp-title-color,#d6b36a) 16%,#100e0b)!important}
 .lorgus-messenger-message.admin-authored.has-active-title{border-top-color:var(--rp-title-color,#d6b36a)!important;border-right-color:var(--rp-title-color,#d6b36a)!important;border-bottom-color:var(--rp-title-color,#d6b36a)!important}
+
+
+/* RP chat: character avatars open the same quick card as character names. */
+.lorgus-messenger-message-avatar {
+    padding: 0;
+    overflow: hidden;
+    cursor: pointer;
+    color: #d9b76c;
+    background: rgba(8,8,7,.7);
+    transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+}
+.lorgus-messenger-message-avatar:hover,
+.lorgus-messenger-message-avatar:focus-visible {
+    border-color: rgba(224,191,121,.75);
+    box-shadow: 0 0 0 3px rgba(214,179,106,.09);
+    outline: none;
+}
+.lorgus-messenger-message-avatar img { display:block; width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.lorgus-rp-character-card-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; padding-top:14px; border-top:1px solid rgba(214,179,106,.12); }
+.lorgus-rp-character-card-action { min-height:36px; padding:8px 11px; border:1px solid rgba(214,179,106,.3); background:rgba(214,179,106,.08); color:#e5d2ad; font:inherit; font-size:11px; cursor:pointer; transition:background .16s ease,border-color .16s ease; }
+.lorgus-rp-character-card-action:hover { background:rgba(214,179,106,.17); border-color:rgba(224,191,121,.65); }
+.lorgus-rp-character-card-action:focus-visible { outline:2px solid rgba(224,191,121,.75); outline-offset:2px; }
