@@ -38,7 +38,21 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
         root.appendChild(cabinet);
     }
 
+    window.lorgusIsAdmin = false;
     await loadPlayerState(session, forceCharacterSelection);
+
+    // Админская панель — самостоятельный экран. Не заменяем её SPA-маршрутом
+    // персонажа, если у администратора сохранён активный персонаж.
+    if (window.lorgusIsAdmin) {
+        cabinet.style.opacity = "";
+        cabinet.style.pointerEvents = "";
+        cabinet.style.position = "";
+        cabinet.style.inset = "";
+        cabinet.style.zIndex = "";
+        cabinet.classList.remove("preparing");
+        requestAnimationFrame(() => cabinet.classList.add("ready"));
+        return cabinet;
+    }
 
     /*
         Если приложение было открыто напрямую по SPA-маршруту,
@@ -90,6 +104,7 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
             adminError
         );
     } else if (isAdmin) {
+        window.lorgusIsAdmin = true;
         await window.loadAdminPanel(container);
         return;
     }
