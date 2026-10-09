@@ -438,3 +438,179 @@
         max-height: 78vh;
     }
 }
+
+
+/* RP message context menu */
+.lorgus-rp-context-menu {
+    position: fixed;
+    z-index: 5000;
+    min-width: 224px;
+    padding: 6px;
+    border: 1px solid rgba(211,177,105,.28);
+    border-radius: 10px;
+    background: linear-gradient(145deg,#201e19,#111214);
+    box-shadow: 0 18px 50px rgba(0,0,0,.62), inset 0 1px rgba(255,255,255,.035);
+    color: #e9e2d3;
+    animation: lorgus-context-in .12s ease-out;
+}
+.lorgus-rp-context-menu button {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    width: 100%;
+    padding: 10px 11px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #d9d0bd;
+    text-align: left;
+    cursor: pointer;
+}
+.lorgus-rp-context-menu button:hover,
+.lorgus-rp-context-menu button:focus-visible {
+    outline: none;
+    background: rgba(211,177,105,.12);
+    color: #f4d99c;
+}
+.lorgus-rp-context-menu button span {
+    width: 18px;
+    color: #c4a565;
+    font-size: 16px;
+    text-align: center;
+}
+.lorgus-rp-context-menu button strong { font-size: 12px; font-weight: 600; }
+.lorgus-rp-context-divider { height: 1px; margin: 5px 7px; background: rgba(211,177,105,.12); }
+@keyframes lorgus-context-in { from { opacity: 0; transform: translateY(4px) scale(.985); } to { opacity: 1; transform: none; } }
+
+/* Character quick card: dossier layout */
+.lorgus-rp-character-card {
+    overflow: hidden;
+    padding: 0 20px 20px !important;
+    border-color: rgba(211,177,105,.32) !important;
+    border-radius: 14px !important;
+    background: radial-gradient(ellipse at 50% 0,rgba(174,132,59,.15),transparent 48%),linear-gradient(155deg,#211f1a 0%,#111214 72%) !important;
+    box-shadow: 0 28px 90px rgba(0,0,0,.72),0 0 0 1px rgba(0,0,0,.25) !important;
+}
+.lorgus-rp-character-card-banner {
+    height: 5px;
+    margin: 0 -20px 20px;
+    background: linear-gradient(90deg,transparent,#9c773c 18%,#e2c37e 50%,#9c773c 82%,transparent);
+}
+.lorgus-rp-character-card-close {
+    z-index: 4;
+    top: 12px !important;
+    right: 12px !important;
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 8px !important;
+    background: rgba(0,0,0,.24) !important;
+    color: #b6a98f !important;
+}
+.lorgus-rp-character-card-close:hover { background: rgba(211,177,105,.14) !important; color: #f2d99e !important; }
+.lorgus-rp-character-card-head {
+    grid-template-columns: 86px minmax(0,1fr) !important;
+    gap: 15px !important;
+    align-items: start !important;
+    padding: 0 22px 0 0 !important;
+}
+.lorgus-rp-character-card-avatar {
+    width: 86px !important;
+    height: 108px !important;
+    border-radius: 8px !important;
+    border-color: rgba(211,177,105,.42) !important;
+    background: #0c0d0e !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,.34);
+}
+.lorgus-rp-character-card-avatar img { object-position: center 25%; }
+.lorgus-rp-character-card-identity { min-width: 0; }
+.lorgus-rp-character-card-head small {
+    margin: 3px 0 7px !important;
+    color: #b69a60 !important;
+    font-size: 8px !important;
+    font-weight: 700;
+    letter-spacing: .19em !important;
+}
+.lorgus-rp-character-card-head h2 {
+    overflow-wrap: anywhere;
+    margin: 0 !important;
+    color: #f0dfb3 !important;
+    font-size: 28px !important;
+    line-height: 1.02 !important;
+}
+.lorgus-rp-character-card-head p {
+    margin-top: 8px !important;
+    color: #b5ad9d !important;
+    font-size: 11px !important;
+}
+.lorgus-rp-character-card-kingdom {
+    display: inline-flex;
+    margin-top: 7px;
+    color: #c4a96c;
+    font-size: 10px;
+}
+.lorgus-rp-character-card-title { margin-top: 9px !important; }
+.lorgus-rp-character-card-title .lorgus-public-title { font-size: 9px !important; }
+.lorgus-rp-character-card-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 21px 0 10px;
+    color: #8f7b52;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: .17em;
+    text-transform: uppercase;
+}
+.lorgus-rp-character-card-divider:after { content: ""; height: 1px; flex: 1; background: linear-gradient(90deg,rgba(211,177,105,.25),transparent); }
+.lorgus-rp-character-card-facts {
+    gap: 6px !important;
+    margin-top: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+}
+.lorgus-rp-character-card-facts div {
+    min-width: 0;
+    padding: 11px 12px !important;
+    border: 1px solid rgba(211,177,105,.1);
+    border-radius: 7px;
+    background: rgba(255,255,255,.025) !important;
+}
+.lorgus-rp-character-card-facts small {
+    color: #96896f !important;
+    font-size: 8px !important;
+    letter-spacing: .12em !important;
+}
+.lorgus-rp-character-card-facts strong {
+    overflow-wrap: anywhere;
+    color: #e1d5bd !important;
+    font-size: 11px !important;
+    line-height: 1.45;
+}
+.lorgus-rp-character-card-story {
+    margin-top: 13px !important;
+    padding: 13px !important;
+    border: 1px solid rgba(211,177,105,.12) !important;
+    border-radius: 8px;
+    background: rgba(0,0,0,.14);
+}
+.lorgus-rp-character-card-story small { color: #b69a60 !important; font-size: 8px !important; letter-spacing: .15em; }
+.lorgus-rp-character-card-story p { color: #c8c0b2 !important; font-size: 11px !important; line-height: 1.7 !important; white-space: pre-line; }
+.lorgus-rp-character-card-story.muted p { color: #756e62 !important; font-style: italic; }
+.lorgus-rp-character-card-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.lorgus-rp-character-card-action {
+    flex: 1 1 130px;
+    min-height: 38px;
+    padding: 9px 11px;
+    border: 1px solid rgba(211,177,105,.28) !important;
+    border-radius: 7px !important;
+    background: rgba(211,177,105,.07) !important;
+    color: #e2c784 !important;
+    font-size: 10px !important;
+    cursor: pointer;
+}
+.lorgus-rp-character-card-action:hover { background: rgba(211,177,105,.15) !important; }
+@media(max-width:600px) {
+    .lorgus-rp-character-card { padding: 0 17px 17px !important; }
+    .lorgus-rp-character-card-banner { margin-left: -17px; margin-right: -17px; }
+    .lorgus-rp-context-menu { min-width: 210px; }
+}
