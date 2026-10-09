@@ -1247,7 +1247,7 @@ function getRpMessageCacheKey(presence) {
     const parts = presence.type === "location"
         ? [presence.type, presence.region, presence.location]
         : [presence.type, presence.fromRegion, presence.fromLocation, presence.toRegion, presence.toLocation];
-    return "lorgus:rp-messages:v1:" + parts.map(value => encodeURIComponent(String(value || ""))).join(":");
+    return "lorgus:rp-messages:v2:" + parts.map(value => encodeURIComponent(String(value || ""))).join(":");
 }
 
 function readRpMessageCache(presence) {
@@ -1263,6 +1263,28 @@ function readRpMessageCache(presence) {
         window.rpMessageCache[key] = [];
     }
     return window.rpMessageCache[key];
+}
+
+async function attachRpMessageItemUses(messages) {
+    const rows = Array.isArray(messages) ? messages : [];
+    const ids = rows.map(message => message.id).filter(Boolean);
+    if (!ids.length || !window.supabaseClient) return rows;
+
+    const { data, error } = await window.supabaseClient
+        .from("rp_message_item_uses")
+        .select("message_id, item_id, quantity, status, items(name, icon, color, rarity)")
+        .in("message_id", ids)
+        .eq("status", "active");
+    if (error) {
+        console.warn("Не удалось пакетно загрузить предметы RP-сообщений:", error);
+        return rows;
+    }
+    const byMessage = {};
+    for (const use of data || []) {
+        const key = String(use.message_id);
+        (byMessage[key] ||= []).push(use);
+    }
+    return rows.map(message => ({ ...message, item_uses: byMessage[String(message.id)] || [] }));
 }
 
 function writeRpMessageCache(presence, rows) {
@@ -1331,7 +1353,7 @@ async function loadRpMessages(presence) {
         return;
     }
 
-    const fresh = data || [];
+    const fresh = await attachRpMessageItemUses(data || []);
     writeRpMessageCache(presence, fresh);
     if (!fresh.length && !cached.length) return;
 
@@ -1368,10 +1390,9 @@ async function pollRpMessages(presence) {
             return;
         }
 
-        // Сверху вниз — чтобы новые сообщения добавлялись в правильном порядке.
-        for (const message of (data || []).reverse()) {
-            appendRpMessage(message);
-        }
+        // Один запрос на предметы для всей пачки, а не отдельный запрос на каждое сообщение.
+        const enriched = await attachRpMessageItemUses((data || []).reverse());
+        for (const message of enriched) appendRpMessage(message);
     } finally {
         window.rpMessagesPolling = false;
     }
