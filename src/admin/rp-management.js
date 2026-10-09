@@ -560,75 +560,85 @@
         root.innerHTML = `
             <div class="admin-section-heading admin-rp-heading">
                 <div>
-                    <h2>Ролевая · контрольная комната</h2>
-                    <p>Все RP-чаты, RP-персонажи и публикация постов от их имени.</p>
+                    <span class="admin-rp-eyebrow">LORGUS / CONTROL DESK</span>
+                    <h2>Ролевая комната</h2>
+                    <p>Чаты, игровые посты, персонажи и портреты — в одном рабочем пространстве.</p>
                 </div>
-                <div class="admin-rp-status">Загрузка…</div>
+                <div class="admin-rp-heading-actions">
+                    <span class="admin-rp-status">Загрузка…</span>
+                    <button type="button" class="admin-rp-refresh" aria-label="Обновить данные" title="Обновить данные">↻ Обновить</button>
+                </div>
             </div>
 
             <div class="admin-rp-layout">
-                <section class="admin-rp-chat-browser">
-                    <div class="admin-rp-chat-list-head">
-                        <strong>ВСЕ ЧАТЫ</strong>
-                        <button type="button" class="admin-rp-refresh">↻</button>
+                <aside class="admin-rp-chat-browser">
+                    <div class="admin-rp-panel-heading">
+                        <div><span>01 / НАВИГАЦИЯ</span><strong>Игровые чаты</strong></div>
+                        <span class="admin-rp-chat-count" data-rp-chat-count>—</span>
                     </div>
-                    <input class="admin-rp-chat-search" type="search" placeholder="Поиск по локации или дороге…">
+                    <label class="admin-rp-search-wrap"><span>НАЙТИ ЛОКАЦИЮ</span><input class="admin-rp-chat-search" type="search" placeholder="Локация, регион или дорога…"></label>
                     <div class="admin-rp-chat-list"></div>
-                </section>
+                </aside>
 
                 <section class="admin-rp-chat-view">
                     <div class="admin-rp-chat-view-head">
-                        <div>
-                            <span>ПРОСМОТР RP</span>
-                            <h3 class="admin-rp-active-chat-title">Чат не выбран</h3>
-                        </div>
+                        <div><span>02 / ЛЕНТА СОБЫТИЙ</span><h3 class="admin-rp-active-chat-title">Чат не выбран</h3></div>
+                        <span class="admin-rp-live-mark"><i></i> RP-ЛЕНТА</span>
                     </div>
                     <div class="admin-rp-message-list"></div>
                 </section>
 
-                <section class="admin-rp-tools">
-                    <div class="admin-rp-tool">
-                        <span>RP-ПОСТ</span>
-                        <h3>Написать от лица персонажа</h3>
-                        <p>Пост сразу появляется в выбранном RP-чате от имени RP-персонажа.</p>
-                        <select class="admin-rp-composer-character"></select>
-                        <select class="admin-rp-composer-chat"></select>
-                        <textarea class="admin-rp-composer-input" rows="7" maxlength="10000" placeholder="Действие, реплика или описание сцены…"></textarea>
-                        <button type="button" class="admin-rp-composer-send">Опубликовать</button>
-                    </div>
+                <aside class="admin-rp-tools">
+                    <details class="admin-rp-tool admin-rp-composer-tool" open>
+                        <summary class="admin-rp-tool-summary"><span class="admin-rp-tool-number">03</span><span><small>ПУБЛИКАЦИЯ</small><strong>Написать RP-пост</strong></span><i>⌄</i></summary>
+                        <div class="admin-rp-tool-content">
+                            <p>Выбери персонажа и чат. Пост появится в ленте от имени выбранного персонажа.</p>
+                            <label>Персонаж<select class="admin-rp-composer-character"></select></label>
+                            <label>Чат<select class="admin-rp-composer-chat"></select></label>
+                            <textarea class="admin-rp-composer-input" rows="6" maxlength="10000" placeholder="Опиши действие, реплику или сцену…"></textarea>
+                            <button type="button" class="admin-rp-composer-send">Опубликовать пост <span>↗</span></button>
+                        </div>
+                    </details>
 
-                    <div class="admin-rp-tool admin-rp-portrait-tool">
-                        <span>БИБЛИОТЕКА ПОРТРЕТОВ</span>
-                        <h3>Фотографии персонажей</h3>
-                        <p>Загрузи изображение и прикрепи его к любой записи персонажа. Фото появится в RP-чате и карточках персонажа.</p>
-                        <input class="admin-rp-portrait-search" type="search" placeholder="Найти персонажа по имени, расе или королевству…">
-                        <div class="admin-rp-portrait-library"></div>
-                    </div>
+                    <details class="admin-rp-tool admin-rp-portrait-tool">
+                        <summary class="admin-rp-tool-summary"><span class="admin-rp-tool-number">04</span><span><small>ВИЗУАЛ</small><strong>Портреты персонажей</strong></span><i>⌄</i></summary>
+                        <div class="admin-rp-tool-content">
+                            <p>Поиск по персонажам и управление изображениями, используемыми в RP.</p>
+                            <input class="admin-rp-portrait-search" type="search" placeholder="Имя, раса или королевство…">
+                            <div class="admin-rp-portrait-library"></div>
+                        </div>
+                    </details>
 
-                    <div class="admin-rp-tool">
-                        <span>RP-ПЕРСОНАЖИ</span>
-                        <h3>Актёры мира</h3>
-                        <div class="admin-rp-nrp-list"></div>
-                        <form class="admin-rp-nrp-create">
-                            <input name="name" required maxlength="120" placeholder="Имя">
-                            <input name="race" maxlength="80" placeholder="Раса">
-                            <input name="age" type="number" min="0" max="999" placeholder="Возраст">
-                            <input name="homeland" maxlength="120" placeholder="Родина">
-                            <input name="kingdom" maxlength="120" placeholder="Королевство">
-                            <input name="location" maxlength="120" placeholder="Локация">
-                            <input name="occupation" maxlength="120" placeholder="Род занятий">
-                            <input name="preferred_weapon" maxlength="120" placeholder="Оружие">
-                            <input name="personality" maxlength="1000" placeholder="Характер">
-                            <textarea name="backstory" rows="3" maxlength="5000" placeholder="Краткая предыстория"></textarea>
-                            <textarea name="special_skills" rows="2" maxlength="2000" placeholder="Особые навыки"></textarea>
-                            <button type="submit">Создать RP-персонажа</button>
-                        </form>
-                    </div>
-                </section>
+                    <details class="admin-rp-tool admin-rp-actors-tool">
+                        <summary class="admin-rp-tool-summary"><span class="admin-rp-tool-number">05</span><span><small>УПРАВЛЕНИЕ МИРОМ</small><strong>RP-персонажи</strong></span><i>⌄</i></summary>
+                        <div class="admin-rp-tool-content">
+                            <p>Персонажи, которыми управляет администрация.</p>
+                            <div class="admin-rp-nrp-list"></div>
+                            <details class="admin-rp-create-details">
+                                <summary>＋ Создать RP-персонажа</summary>
+                                <form class="admin-rp-nrp-create">
+                                    <input name="name" required maxlength="120" placeholder="Имя">
+                                    <input name="race" maxlength="80" placeholder="Раса">
+                                    <input name="age" type="number" min="0" max="999" placeholder="Возраст">
+                                    <input name="homeland" maxlength="120" placeholder="Родина">
+                                    <input name="kingdom" maxlength="120" placeholder="Королевство">
+                                    <input name="location" maxlength="120" placeholder="Локация">
+                                    <input name="occupation" maxlength="120" placeholder="Род занятий">
+                                    <input name="preferred_weapon" maxlength="120" placeholder="Оружие">
+                                    <input name="personality" maxlength="1000" placeholder="Характер">
+                                    <textarea name="backstory" rows="3" maxlength="5000" placeholder="Краткая предыстория"></textarea>
+                                    <textarea name="special_skills" rows="2" maxlength="2000" placeholder="Особые навыки"></textarea>
+                                    <button type="submit">Создать персонажа</button>
+                                </form>
+                            </details>
+                        </div>
+                    </details>
+                </aside>
             </div>
         `;
 
         container.appendChild(root);
+        if (typeof window.initAdminSectionCollapse === "function") window.initAdminSectionCollapse(container);
 
         root.querySelector(".admin-rp-portrait-search").addEventListener("input", event => { state.portraitFilter = event.target.value; renderPortraitLibrary(root); });
         root.querySelector(".admin-rp-chat-search").addEventListener("input", event => {
