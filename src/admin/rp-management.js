@@ -1,10 +1,10 @@
-/* LORGUS admin RP control room: all chats + NRP actors + NRP posting */
+/* LORGUS admin RP control room: all chats + RP actors + RP posting */
 
 (() => {
     const state = {
         messages: [],
         chats: [],
-        nrp: [],
+        rpCharacters: [],
         activeChatKey: null,
         filter: ""
     };
@@ -83,7 +83,7 @@
             if (!page.data || page.data.length < pageSize) break;
         }
 
-        const [nrpResult, presenceResult] = await Promise.all([
+        const [rpCharactersResult, presenceResult] = await Promise.all([
             window.supabaseClient
                 .from("lorgus_nrp_characters")
                 .select("character_id,is_active,created_at,characters(id,name,race,age,homeland,occupation,personality,backstory,special_skills,preferred_weapon,kingdom,location)")
@@ -94,11 +94,11 @@
                 .eq("visibility", "public")
         ]);
 
-        if (nrpResult.error) throw nrpResult.error;
+        if (rpCharactersResult.error) throw rpCharactersResult.error;
         if (presenceResult.error) throw presenceResult.error;
 
         state.messages = messages;
-        state.nrp = nrpResult.data || [];
+        state.rpCharacters = rpCharactersResult.data || [];
         state.chats = buildChatIndex(state.messages);
 
         for (const presence of (presenceResult.data || [])) {
@@ -179,36 +179,36 @@
         box.scrollTop = box.scrollHeight;
     }
 
-    function renderNrpList(root) {
+    function renderRpList(root) {
         const box = root.querySelector(".admin-rp-nrp-list");
         if (!box) return;
 
-        box.innerHTML = state.nrp.length
-            ? state.nrp.map(row => {
+        box.innerHTML = state.rpCharacters.length
+            ? state.rpCharacters.map(row => {
                 const c = row.characters || {};
                 return `
                     <article class="admin-rp-nrp-row ${row.is_active ? "" : "inactive"}">
                         <div class="admin-rp-nrp-avatar">✦</div>
                         <div>
                             <strong>${esc(c.name || "Без имени")}</strong>
-                            <span>${esc(c.race || "НРП-персонаж")} · ${esc(c.occupation || "Занятие не указано")}</span>
+                            <span>${esc(c.race || "RP-персонаж")} · ${esc(c.occupation || "Занятие не указано")}</span>
                             <small>${row.is_active ? "АКТИВЕН" : "ОТКЛЮЧЁН"}</small>
                         </div>
                         <button type="button" data-nrp-toggle="${esc(row.character_id)}">${row.is_active ? "Отключить" : "Включить"}</button>
                     </article>`;
             }).join("")
-            : '<div class="admin-rp-empty">НРП-персонажей пока нет. Создай первого справа.</div>';
+            : '<div class="admin-rp-empty">RP-персонажей пока нет. Создай первого справа.</div>';
 
         box.querySelectorAll("[data-nrp-toggle]").forEach(button => {
             button.addEventListener("click", async () => {
                 button.disabled = true;
-                const current = state.nrp.find(row => String(row.character_id) === String(button.dataset.nrpToggle));
+                const current = state.rpCharacters.find(row => String(row.character_id) === String(button.dataset.nrpToggle));
                 const { error } = await window.supabaseClient.rpc("admin_set_nrp_character_active", {
                     p_character_id: button.dataset.nrpToggle,
                     p_is_active: !current?.is_active
                 });
                 if (error) {
-                    alert("Не удалось изменить статус НРП-персонажа:\n\n" + error.message);
+                    alert("Не удалось изменить статус RP-персонажа:\n\n" + error.message);
                     button.disabled = false;
                     return;
                 }
@@ -228,8 +228,8 @@
         const chatSelect = root.querySelector(".admin-rp-composer-chat");
         if (!characterSelect || !chatSelect) return;
 
-        const activeNrp = state.nrp.filter(row => row.is_active);
-        characterSelect.innerHTML = '<option value="">Выбери НРП-персонажа…</option>' +
+        const activeNrp = state.rpCharacters.filter(row => row.is_active);
+        characterSelect.innerHTML = '<option value="">Выбери RP-персонажа…</option>' +
             activeNrp.map(row => `<option value="${esc(row.character_id)}">${esc(row.characters?.name || "Без имени")}</option>`).join("");
 
         chatSelect.innerHTML = '<option value="">Выбери чат…</option>' +
@@ -248,7 +248,7 @@
         const body = input?.value.trim();
 
         if (!characterId || !chat || !body) {
-            alert("Выбери НРП-персонажа, чат и напиши пост.");
+            alert("Выбери RP-персонажа, чат и напиши пост.");
             return;
         }
 
@@ -269,7 +269,7 @@
         });
 
         if (error) {
-            alert("Не удалось отправить НРП-пост:\n\n" + error.message);
+            alert("Не удалось отправить RP-пост:\n\n" + error.message);
             send.disabled = false;
             send.textContent = "Опубликовать";
             return;
@@ -281,14 +281,14 @@
         await refreshAdminRp(root);
     }
 
-    async function createNrpCharacter(root) {
+    async function createRpCharacter(root) {
         const form = root.querySelector(".admin-rp-nrp-create");
         if (!form) return;
 
         const get = name => form.querySelector("[name=" + name + "]");
         const name = get("name")?.value.trim();
         if (!name) {
-            alert("Укажи имя НРП-персонажа.");
+            alert("Укажи имя RP-персонажа.");
             return;
         }
 
@@ -312,15 +312,15 @@
 
         const { error } = await window.supabaseClient.rpc("admin_create_nrp_character", payload);
         if (error) {
-            alert("Не удалось создать НРП-персонажа:\n\n" + error.message);
+            alert("Не удалось создать RP-персонажа:\n\n" + error.message);
             button.disabled = false;
-            button.textContent = "Создать НРП-персонажа";
+            button.textContent = "Создать RP-персонажа";
             return;
         }
 
         form.reset();
         button.disabled = false;
-        button.textContent = "Создать НРП-персонажа";
+        button.textContent = "Создать RP-персонажа";
         await refreshAdminRp(root);
     }
 
@@ -330,10 +330,10 @@
             await loadAdminRpData();
             renderChatList(root);
             renderChatMessages(root);
-            renderNrpList(root);
+            renderRpList(root);
             renderComposerOptions(root);
             root.querySelector(".admin-rp-status").textContent =
-                state.messages.length + " сообщений · " + state.chats.length + " чатов · " + state.nrp.length + " НРП-персонажей";
+                state.messages.length + " сообщений · " + state.chats.length + " чатов · " + state.rpCharacters.length + " RP-персонажей";
         } catch (error) {
             console.error("Ошибка RP-админки:", error);
             root.querySelector(".admin-rp-status").textContent = "Ошибка загрузки";
@@ -355,7 +355,7 @@
             <div class="admin-section-heading admin-rp-heading">
                 <div>
                     <h2>Ролевая · контрольная комната</h2>
-                    <p>Все RP-чаты, НРП-персонажи и публикация постов от их имени.</p>
+                    <p>Все RP-чаты, RP-персонажи и публикация постов от их имени.</p>
                 </div>
                 <div class="admin-rp-status">Загрузка…</div>
             </div>
@@ -382,9 +382,9 @@
 
                 <section class="admin-rp-tools">
                     <div class="admin-rp-tool">
-                        <span>НРП-ПОСТ</span>
+                        <span>RP-ПОСТ</span>
                         <h3>Написать от лица персонажа</h3>
-                        <p>Пост сразу появляется в выбранном RP-чате от имени НРП-персонажа.</p>
+                        <p>Пост сразу появляется в выбранном RP-чате от имени RP-персонажа.</p>
                         <select class="admin-rp-composer-character"></select>
                         <select class="admin-rp-composer-chat"></select>
                         <textarea class="admin-rp-composer-input" rows="7" maxlength="10000" placeholder="Действие, реплика или описание сцены…"></textarea>
@@ -392,7 +392,7 @@
                     </div>
 
                     <div class="admin-rp-tool">
-                        <span>НРП-ПЕРСОНАЖИ</span>
+                        <span>RP-ПЕРСОНАЖИ</span>
                         <h3>Актёры мира</h3>
                         <div class="admin-rp-nrp-list"></div>
                         <form class="admin-rp-nrp-create">
@@ -407,7 +407,7 @@
                             <input name="personality" maxlength="1000" placeholder="Характер">
                             <textarea name="backstory" rows="3" maxlength="5000" placeholder="Краткая предыстория"></textarea>
                             <textarea name="special_skills" rows="2" maxlength="2000" placeholder="Особые навыки"></textarea>
-                            <button type="submit">Создать НРП-персонажа</button>
+                            <button type="submit">Создать RP-персонажа</button>
                         </form>
                     </div>
                 </section>
@@ -424,7 +424,7 @@
         root.querySelector(".admin-rp-composer-send").addEventListener("click", () => submitNrpPost(root));
         root.querySelector(".admin-rp-nrp-create").addEventListener("submit", event => {
             event.preventDefault();
-            createNrpCharacter(root);
+            createRpCharacter(root);
         });
 
         await refreshAdminRp(root);
