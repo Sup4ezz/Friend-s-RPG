@@ -1277,11 +1277,54 @@ async function loadRpMessages(presence) {
     feed.scrollTop = feed.scrollHeight;
 }
 
+async function pollRpMessages(presence) {
+    if (!window.supabaseClient || !presence || window.rpMessagesPolling) return;
+    const feed = document.getElementById("lorgus-rp-feed");
+    if (!feed) return;
+
+    window.rpMessagesPolling = true;
+    try {
+        let query = window.supabaseClient
+            .from("rp_messages")
+            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, characters(name)")
+            .eq("presence_type", presence.type)
+            .order("created_at", { ascending: false })
+            .limit(40);
+
+        if (presence.type === "location") {
+            query = query.eq("region", presence.region).eq("location", presence.location);
+        } else {
+            query = query.eq("from_region", presence.fromRegion)
+                .eq("from_location", presence.fromLocation)
+                .eq("to_region", presence.toRegion)
+                .eq("to_location", presence.toLocation);
+        }
+
+        const { data, error } = await query;
+        if (error) {
+            console.warn("Не удалось проверить новые RP-сообщения:", error);
+            return;
+        }
+
+        // Сверху вниз — чтобы новые сообщения добавлялись в правильном порядке.
+        for (const message of (data || []).reverse()) {
+            await appendRpMessage(message);
+        }
+    } finally {
+        window.rpMessagesPolling = false;
+    }
+}
+
 async function subscribeToRpMessages(presence) {
     if (!window.supabaseClient || !presence) return;
 
+    if (window.rpMessagesPollTimer) {
+        clearInterval(window.rpMessagesPollTimer);
+        window.rpMessagesPollTimer = null;
+    }
     if (window.rpMessagesChannel) {
         await window.supabaseClient.removeChannel(window.rpMessagesChannel);
+        window.rpMessagesChannel = null;
     }
 
     window.rpMessagesChannel = window.supabaseClient
@@ -1312,9 +1355,19 @@ async function subscribeToRpMessages(presence) {
                 .eq("id", row.character_id)
                 .single();
 
-            appendRpMessage({ ...row, characters: character });
+            await appendRpMessage({ ...row, characters: character });
         })
-        .subscribe();
+        .subscribe((status, error) => {
+            if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
+                console.warn("RP Realtime недоступен; работает резервная проверка сообщений.", status, error || "");
+            }
+        });
+
+    // Realtime для мгновенной доставки + опрос как резерв, если канал не работает.
+    await pollRpMessages(presence);
+    window.rpMessagesPollTimer = setInterval(() => {
+        if (window.activeRpChatSpace) pollRpMessages(window.activeRpChatSpace);
+    }, 3000);
 }
 
 async function sendLocalRpMessage() {
