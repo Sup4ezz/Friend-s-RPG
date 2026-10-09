@@ -7,7 +7,7 @@
 .admin-character-filter-panel{display:grid;grid-template-columns:minmax(220px,1.7fr) repeat(3,minmax(120px,1fr));gap:14px;padding:18px;margin:0 0 12px;border:1px solid rgba(201,164,91,.16);border-radius:5px;background:rgba(10,9,7,.74)}
 .admin-character-filter-panel label,.admin-character-page-size{display:flex;flex-direction:column;gap:7px;min-width:0}
 .admin-character-filter-panel label>span,.admin-character-page-size>span{color:rgba(218,190,129,.75);font-size:9px;font-weight:700;letter-spacing:.11em}
-.admin-character-filter-panel input,.admin-character-filter-panel select,.admin-character-page-size select{box-sizing:border-box;width:100%;min-width:0;height:42px;padding:0 12px;border:1px solid rgba(220,184,102,.2);border-radius:4px;outline:none;background:#0b0a08;color:#e8dfce;font:12px/1.4 inherit;transition:border-color .16s,background .16s}
+.admin-character-filter-panel input,.admin-character-filter-panel select,.admin-character-page-size select{box-sizing:border-box;width:100%;min-width:0;height:42px;padding:0 12px;border:1px solid rgba(220,184,102,.2);border-radius:4px;outline:none;background:#0b0a08;color:#e8dfce;font-family:inherit;font-size:12px;line-height:1.4;transition:border-color .16s,background .16s}
 .admin-character-filter-panel input{font-size:13px}
 .admin-character-filter-panel input::placeholder{color:rgba(224,216,199,.36)}
 .admin-character-filter-panel input:focus,.admin-character-filter-panel select:focus,.admin-character-page-size select:focus{border-color:rgba(218,183,104,.75);background:#100e0a;box-shadow:0 0 0 3px rgba(201,164,91,.08)}
