@@ -352,19 +352,32 @@ function bindLorgusMapLabelFallback(viewport) {
         const layer = document.getElementById("lorgus-map-marker-layer");
         if (!layer || layer.classList.contains("editor-mode")) return;
 
-        for (const label of layer.querySelectorAll(".lorgus-map-editor-rect")) {
+        const labels = [...layer.querySelectorAll(".lorgus-map-editor-rect")];
+        let match = null;
+        let nearestDistance = Infinity;
+
+        // Do not rely on the CSS button hitbox: the map has decorative layers
+        // and the visible lettering can extend beyond the stored label rectangle.
+        // Use the center of each rendered label and a generous click radius.
+        for (const label of labels) {
             const rect = label.getBoundingClientRect();
-            if (
-                event.clientX >= rect.left && event.clientX <= rect.right &&
-                event.clientY >= rect.top && event.clientY <= rect.bottom
-            ) {
-                event.preventDefault();
-                event.stopImmediatePropagation();
-                const region = label.dataset.region;
-                if (region && typeof window.selectLorgusMapRegion === "function") {
-                    window.selectLorgusMapRegion(region);
-                }
-                return;
+            const dx = (event.clientX - (rect.left + rect.right) / 2) / Math.max(1, currentViewport.clientWidth);
+            const dy = (event.clientY - (rect.top + rect.bottom) / 2) / Math.max(1, currentViewport.clientHeight);
+            const distance = Math.hypot(dx, dy);
+            const radiusX = Math.max(0.055, rect.width / Math.max(1, currentViewport.clientWidth) * 0.85);
+            const radiusY = Math.max(0.055, rect.height / Math.max(1, currentViewport.clientHeight) * 0.85);
+            if (Math.abs(dx) <= radiusX && Math.abs(dy) <= radiusY && distance < nearestDistance) {
+                match = label;
+                nearestDistance = distance;
+            }
+        }
+
+        if (match) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            const region = match.dataset.region;
+            if (region && typeof window.selectLorgusMapRegion === "function") {
+                window.selectLorgusMapRegion(region);
             }
         }
     }, true);
