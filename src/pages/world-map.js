@@ -337,6 +337,39 @@ function selectLorgusMapMarker(region) {
     marker?.classList.add("selected");
 }
 
+function bindLorgusMapLabelFallback(viewport) {
+    if (!viewport || viewport.dataset.labelFallbackBound === "1") return;
+    viewport.dataset.labelFallbackBound = "1";
+
+    // Some stacking-context combinations can leave the visible label underneath
+    // a decorative map layer. Resolve clicks by the actual label rectangles too.
+    viewport.addEventListener("click", event => {
+        if (event.target instanceof Element && event.target.closest(".lorgus-map-editor-rect")) return;
+
+        const layer = document.getElementById("lorgus-map-marker-layer");
+        if (!layer || layer.classList.contains("editor-mode")) return;
+
+        const labels = layer.querySelectorAll(".lorgus-map-editor-rect");
+        for (const label of labels) {
+            const rect = label.getBoundingClientRect();
+            if (
+                event.clientX >= rect.left &&
+                event.clientX <= rect.right &&
+                event.clientY >= rect.top &&
+                event.clientY <= rect.bottom
+            ) {
+                event.preventDefault();
+                event.stopPropagation();
+                const region = label.dataset.region;
+                if (region && typeof window.selectLorgusMapRegion === "function") {
+                    window.selectLorgusMapRegion(region);
+                }
+                return;
+            }
+        }
+    });
+}
+
 function handleLorgusMapSurfaceClick(event) {
     if (event.target.closest(".lorgus-map-marker")) return;
     const viewport = document.getElementById("lorgus-map-viewport");
@@ -490,6 +523,7 @@ function renderLorgusWorldMap(container, character) {
     selectLorgusMapRegion("Атэрон");
     initializeLorgusMapViewport();
     renderLorgusMapEditorRects(false);
+    bindLorgusMapLabelFallback(document.getElementById("lorgus-map-viewport"));
     addLorgusMapEditorUI();
     void loadLorgusSharedLabelPositions();
     if (new URLSearchParams(window.location.search).get("mapedit") === "1") {
