@@ -371,6 +371,59 @@ async function getRpCharacterActiveTitle(characterId) {
     return result;
 }
 
+function openLorgusRpPhotoViewer(src, caption = "Портрет персонажа") {
+    if (!src) return;
+    document.querySelector(".lorgus-rp-photo-viewer")?.remove();
+
+    const overlay = document.createElement("div");
+    overlay.className = "lorgus-rp-photo-viewer";
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", caption);
+
+    const backdrop = document.createElement("button");
+    backdrop.type = "button";
+    backdrop.className = "lorgus-rp-photo-viewer-backdrop";
+    backdrop.setAttribute("aria-label", "Закрыть фотографию");
+
+    const panel = document.createElement("div");
+    panel.className = "lorgus-rp-photo-viewer-panel";
+
+    const close = document.createElement("button");
+    close.type = "button";
+    close.className = "lorgus-rp-photo-viewer-close";
+    close.setAttribute("aria-label", "Закрыть");
+    close.textContent = "×";
+
+    const image = document.createElement("img");
+    image.className = "lorgus-rp-photo-viewer-image";
+    image.src = src;
+    image.alt = caption;
+
+    const title = document.createElement("div");
+    title.className = "lorgus-rp-photo-viewer-caption";
+    title.textContent = caption;
+
+    const closeViewer = () => {
+        overlay.remove();
+        document.removeEventListener("keydown", onKeyDown);
+    };
+    const onKeyDown = event => {
+        if (event.key === "Escape") closeViewer();
+    };
+
+    backdrop.addEventListener("click", closeViewer);
+    close.addEventListener("click", closeViewer);
+    panel.addEventListener("click", event => event.stopPropagation());
+    panel.append(close, image, title);
+    overlay.append(backdrop, panel);
+    document.body.appendChild(overlay);
+    document.addEventListener("keydown", onKeyDown);
+    close.focus();
+}
+
+window.openLorgusRpPhotoViewer = openLorgusRpPhotoViewer;
+
 async function appendRpMessage(message) {
     const feed = document.getElementById("lorgus-rp-feed");
     if (!feed || feed.querySelector('[data-rp-message-id="' + message.id + '"]')) return;
@@ -416,7 +469,19 @@ async function appendRpMessage(message) {
     const characterLink = article.querySelector(".lorgus-messenger-message-meta strong");
     if (characterLink) characterLink.addEventListener("click", openCharacterCard(characterLink));
     const avatarButton = article.querySelector(".lorgus-messenger-message-avatar");
-    if (avatarButton) avatarButton.addEventListener("click", openCharacterCard(avatarButton));
+    if (avatarButton) {
+        if (photo) {
+            avatarButton.title = "Открыть портрет крупно";
+            avatarButton.setAttribute("aria-label", "Посмотреть портрет крупно: " + (message.characters?.name || "Без имени"));
+            avatarButton.addEventListener("click", event => {
+                event.preventDefault();
+                event.stopPropagation();
+                openLorgusRpPhotoViewer(photo, message.characters?.name || "Портрет персонажа");
+            });
+        } else {
+            avatarButton.addEventListener("click", openCharacterCard(avatarButton));
+        }
+    }
 
     const { data: uses, error } = await window.supabaseClient
         .from("rp_message_item_uses")
