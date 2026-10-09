@@ -5,6 +5,8 @@
         messages: [],
         chats: [],
         rpCharacters: [],
+        allCharacters: [],
+        portraitFilter: "",
         activeChatKey: null,
         filter: ""
     };
@@ -99,6 +101,12 @@
 
         state.messages = messages;
         state.rpCharacters = rpCharactersResult.data || [];
+        const allCharactersResult = await window.supabaseClient
+            .from("characters")
+            .select("id,name,race,kingdom,location,photo_path")
+            .order("name", { ascending: true });
+        if (allCharactersResult.error) throw allCharactersResult.error;
+        state.allCharacters = allCharactersResult.data || [];
         state.chats = buildChatIndex(state.messages);
 
         for (const presence of (presenceResult.data || [])) {
@@ -252,6 +260,68 @@
         });
     }
 
+    async function renderPortraitLibrary(root) {
+        const box = root.querySelector(".admin-rp-portrait-library");
+        const search = root.querySelector(".admin-rp-portrait-search");
+        if (!box) return;
+        const query = (search?.value || state.portraitFilter || "").trim().toLocaleLowerCase("ru-RU");
+        const rows = state.allCharacters.filter(c =>
+            !query || [c.name, c.race, c.kingdom, c.location].some(v => String(v || "").toLocaleLowerCase("ru-RU").includes(query))
+        );
+        box.innerHTML = rows.length ? rows.map(c => `
+            <article class="admin-rp-portrait-row">
+                <div class="admin-rp-portrait-preview" data-portrait-preview="${esc(c.id)}"><span>✦</span></div>
+                <div class="admin-rp-portrait-info">
+                    <strong>${esc(c.name || "Без имени")}</strong>
+                    <small>${esc([c.race, c.kingdom, c.location].filter(Boolean).join(" · ") || "Данные не указаны")}</small>
+                    <em>${c.photo_path ? "ПОРТРЕТ ПРИКРЕПЛЁН" : "ПОРТРЕТ НЕ НАЗНАЧЕН"}</em>
+                </div>
+                <label class="admin-rp-photo-upload ${c.photo_path ? "has-photo" : ""}">${c.photo_path ? "Заменить фото" : "Загрузить фото"}<input type="file" accept="image/png,image/jpeg,image/webp,image/avif" data-character-portrait="${esc(c.id)}"></label>
+            </article>`).join("") : '<div class="admin-rp-empty">Персонажи не найдены.</div>';
+
+        for (const c of rows) {
+            if (!c.photo_path) continue;
+            const target = box.querySelector('[data-portrait-preview="' + c.id + '"]');
+            if (!target) continue;
+            try {
+                const { data, error } = await window.supabaseClient.storage.from("character-applications").createSignedUrl(c.photo_path, 3600);
+                if (!error && data?.signedUrl && target.isConnected) target.innerHTML = '<img src="' + esc(data.signedUrl) + '" alt="">';
+            } catch (_) {}
+        }
+
+        box.querySelectorAll("[data-character-portrait]").forEach(input => {
+            input.addEventListener("change", async () => {
+                const file = input.files?.[0];
+                const characterId = input.dataset.characterPortrait;
+                if (!file || !characterId) return;
+                if (!/^image\/(png|jpeg|webp|avif)$/.test(file.type) || file.size > 8 * 1024 * 1024) {
+                    alert("Выбери PNG, JPG, WEBP или AVIF размером не более 8 МБ.");
+                    input.value = "";
+                    return;
+                }
+                input.disabled = true;
+                try {
+                    const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").slice(-90) || "portrait";
+                    const path = "rp-characters/" + characterId + "/" + Date.now() + "-" + safeName;
+                    const { error: uploadError } = await window.supabaseClient.storage.from("character-applications")
+                        .upload(path, file, { upsert: true, contentType: file.type });
+                    if (uploadError) throw uploadError;
+                    const { error: saveError } = await window.supabaseClient.rpc("admin_set_rp_character_photo", {
+                        p_character_id: characterId, p_photo_path: path
+                    });
+                    if (saveError) throw saveError;
+                    window.rpCharacterPhotoCache = window.rpCharacterPhotoCache || {};
+                    delete window.rpCharacterPhotoCache[String(characterId)];
+                    await refreshAdminRp(root);
+                } catch (error) {
+                    console.error("Не удалось прикрепить портрет:", error);
+                    alert("Не удалось загрузить или прикрепить фото:\n\n" + (error.message || error));
+                    input.disabled = false;
+                }
+            });
+        });
+    }
+
     function syncComposerChat(root) {
         const select = root.querySelector(".admin-rp-composer-chat");
         if (!select) return;
@@ -366,6 +436,7 @@
             renderChatList(root);
             renderChatMessages(root);
             renderRpList(root);
+            renderPortraitLibrary(root);
             renderComposerOptions(root);
             root.querySelector(".admin-rp-status").textContent =
                 state.messages.length + " сообщений · " + state.chats.length + " чатов · " + state.rpCharacters.length + " RP-персонажей";
@@ -426,6 +497,14 @@
                         <button type="button" class="admin-rp-composer-send">Опубликовать</button>
                     </div>
 
+                    <div class="admin-rp-tool admin-rp-portrait-tool">
+                        <span>БИБЛИОТЕКА ПОРТРЕТОВ</span>
+                        <h3>Фотографии персонажей</h3>
+                        <p>Загрузи изображение и прикрепи его к любой записи персонажа. Фото появится в RP-чате и карточках персонажа.</p>
+                        <input class="admin-rp-portrait-search" type="search" placeholder="Найти персонажа по имени, расе или королевству…">
+                        <div class="admin-rp-portrait-library"></div>
+                    </div>
+
                     <div class="admin-rp-tool">
                         <span>RP-ПЕРСОНАЖИ</span>
                         <h3>Актёры мира</h3>
@@ -451,6 +530,7 @@
 
         container.appendChild(root);
 
+        root.querySelector(".admin-rp-portrait-search").addEventListener("input", event => { state.portraitFilter = event.target.value; renderPortraitLibrary(root); });
         root.querySelector(".admin-rp-chat-search").addEventListener("input", event => {
             state.filter = event.target.value;
             renderChatList(root);
