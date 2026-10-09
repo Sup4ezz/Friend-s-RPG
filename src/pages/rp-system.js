@@ -1062,17 +1062,20 @@ async function openRpCharacterQuickCard(characterId, anchorElement = null) {
 
     panel.innerHTML =
         '<button type="button" class="lorgus-rp-character-card-close" aria-label="Закрыть">×</button>' +
+        '<div class="lorgus-rp-character-card-banner"></div>' +
         '<div class="lorgus-rp-character-card-head">' +
             '<div class="lorgus-rp-character-card-avatar">' + (photo ? '<img src="' + esc(photo) + '" alt="">' : '<span>✦</span>') + '</div>' +
-            '<div><small>ПЕРСОНАЖ ЛОРГУСА</small><h2>' + esc(character.name) + '</h2><p>' + esc(character.race || "Раса не указана") + (character.kingdom ? " · " + esc(character.kingdom) : "") + '</p>' + titleHtml + '</div>' +
+            '<div class="lorgus-rp-character-card-identity"><small>ДОСЬЕ ПЕРСОНАЖА</small><h2>' + esc(character.name) + '</h2><p>' + esc(character.race || "Раса не указана") + '</p>' +
+                (character.kingdom ? '<span class="lorgus-rp-character-card-kingdom">⌖ ' + esc(character.kingdom) + '</span>' : '') + titleHtml + '</div>' +
         '</div>' +
+        '<div class="lorgus-rp-character-card-divider"><span>О персонаже</span></div>' +
         '<div class="lorgus-rp-character-card-facts">' +
-            '<div><small>ВОЗРАСТ</small><strong>' + esc(character.age ? character.age + " лет" : "—") + '</strong></div>' +
-            '<div><small>ЗАНЯТИЕ</small><strong>' + esc(character.occupation) + '</strong></div>' +
-            '<div><small>РОДИНА</small><strong>' + esc(character.homeland) + '</strong></div>' +
-            '<div><small>МЕСТО</small><strong>' + esc(character.location) + '</strong></div>' +
+            '<div><small>ВОЗРАСТ</small><strong>' + esc(character.age ? character.age + " лет" : "Не указан") + '</strong></div>' +
+            '<div><small>ЗАНЯТИЕ</small><strong>' + esc(character.occupation || "Не указано") + '</strong></div>' +
+            '<div><small>РОДИНА</small><strong>' + esc(character.homeland || "Не указана") + '</strong></div>' +
+            '<div><small>МЕСТО</small><strong>' + esc(character.location || "Не указано") + '</strong></div>' +
         '</div>' +
-        (character.personality ? '<div class="lorgus-rp-character-card-story"><small>ХАРАКТЕР</small><p>' + esc(character.personality) + '</p></div>' : "") +
+        (character.personality ? '<div class="lorgus-rp-character-card-story"><small>ХАРАКТЕР И ПОВЕДЕНИЕ</small><p>' + esc(character.personality) + '</p></div>' : '<div class="lorgus-rp-character-card-story muted"><p>О характере пока ничего не известно.</p></div>') +
         transferActions;
 
     panel.querySelector(".lorgus-rp-character-card-close").addEventListener("click", close);
@@ -1239,9 +1242,73 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
     }
 }
 
+function getRpMessageCacheKey(presence) {
+    if (!presence) return "";
+    const parts = presence.type === "location"
+        ? [presence.type, presence.region, presence.location]
+        : [presence.type, presence.fromRegion, presence.fromLocation, presence.toRegion, presence.toLocation];
+    return "lorgus:rp-messages:v1:" + parts.map(value => encodeURIComponent(String(value || ""))).join(":");
+}
+
+function readRpMessageCache(presence) {
+    const key = getRpMessageCacheKey(presence);
+    if (!key) return [];
+    window.rpMessageCache = window.rpMessageCache || {};
+    if (window.rpMessageCache[key]) return window.rpMessageCache[key];
+    try {
+        const stored = sessionStorage.getItem(key);
+        const rows = stored ? JSON.parse(stored) : [];
+        window.rpMessageCache[key] = Array.isArray(rows) ? rows : [];
+    } catch (_) {
+        window.rpMessageCache[key] = [];
+    }
+    return window.rpMessageCache[key];
+}
+
+function writeRpMessageCache(presence, rows) {
+    const key = getRpMessageCacheKey(presence);
+    if (!key) return;
+    const sorted = (rows || []).slice(-200).sort((a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+    window.rpMessageCache = window.rpMessageCache || {};
+    window.rpMessageCache[key] = sorted;
+    try { sessionStorage.setItem(key, JSON.stringify(sorted)); } catch (_) {}
+}
+
+window.cacheRpMessage = function (message) {
+    const presence = window.activeRpChatSpace;
+    if (!presence || !message) return;
+    const sameRoom = message.presence_type === presence.type && (
+        presence.type === "location"
+            ? message.region === presence.region && message.location === presence.location
+            : message.from_region === presence.fromRegion &&
+              message.from_location === presence.fromLocation &&
+              message.to_region === presence.toRegion &&
+              message.to_location === presence.toLocation
+    );
+    if (!sameRoom) return;
+    const rows = readRpMessageCache(presence);
+    const index = rows.findIndex(row => String(row.id) === String(message.id));
+    if (index >= 0) rows[index] = { ...rows[index], ...message };
+    else rows.push(message);
+    writeRpMessageCache(presence, rows);
+};
+
 async function loadRpMessages(presence) {
     const feed = document.getElementById("lorgus-rp-feed");
     if (!feed || !presence) return;
+
+    // Мгновенно показываем прошлую историю из sessionStorage, пока идёт запрос к БД.
+    const cached = readRpMessageCache(presence);
+    feed.innerHTML = "";
+    if (cached.length) {
+        const ids = [...new Set(cached.map(row => row.character_id).filter(Boolean))];
+        await Promise.all(ids.map(id => Promise.all([getRpCharacterPhoto(id), getRpCharacterActiveTitle(id)])));
+        for (const message of cached) await appendRpMessage(message);
+    } else {
+        feed.innerHTML = '<div class="lorgus-messenger-start"><div class="lorgus-messenger-start-mark">✦</div><strong>История ещё не началась</strong><span>Первое сообщение создаст сцену.</span><p>Пиши свободно. Действия, реплики и мысли персонажа будут появляться здесь как настоящая переписка.</p></div>';
+    }
 
     let query = window.supabaseClient
         .from("rp_messages")
@@ -1265,15 +1332,13 @@ async function loadRpMessages(presence) {
         return;
     }
 
-    feed.innerHTML = "";
-    if (!data?.length) {
-        feed.innerHTML = '<div class="lorgus-messenger-start"><div class="lorgus-messenger-start-mark">✦</div><strong>История ещё не началась</strong><span>Первое сообщение создаст сцену.</span><p>Пиши свободно. Действия, реплики и мысли персонажа будут появляться здесь как настоящая переписка.</p></div>';
-        return;
-    }
+    const fresh = data || [];
+    writeRpMessageCache(presence, fresh);
+    if (!fresh.length && !cached.length) return;
 
-    const ids = [...new Set(data.map(row => row.character_id).filter(Boolean))];
-    await Promise.all(ids.map(id => getRpCharacterPhoto(id)));
-    for (const message of data) await appendRpMessage(message);
+    const ids = [...new Set(fresh.map(row => row.character_id).filter(Boolean))];
+    await Promise.all(ids.map(id => Promise.all([getRpCharacterPhoto(id), getRpCharacterActiveTitle(id)])));
+    for (const message of fresh) await appendRpMessage(message);
     feed.scrollTop = feed.scrollHeight;
 }
 
