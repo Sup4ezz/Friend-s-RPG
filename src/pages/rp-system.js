@@ -727,48 +727,93 @@ async function renderRoadChat(presence) {
 }
 
 function renderFloodChat() {
+    window.clearRpReplyTarget?.();
     const container = document.getElementById("cabinet-content");
     if (!container) return;
 
     const character = window.activeCharacter;
     const name = escapeHtml(character?.name || "Без имени");
 
-    container.className = "lorgus-flood-page";
+    container.className = "lorgus-rp-page lorgus-flood-page";
     container.innerHTML = `
-        <div class="lorgus-flood-shell">
-            <header class="lorgus-flood-header">
-                <div>
-                    <span class="lorgus-rp-overline">ОБЩИЙ КАНАЛ</span>
-                    <h1>Флуд</h1>
-                    <p>Свободное общение игроков. Флуд не считается RP-присутствием.</p>
+        <div class="lorgus-messenger-shell" data-rp-chat-type="flood">
+            <aside class="lorgus-messenger-sidebar">
+                <div class="lorgus-messenger-sidebar-head">
+                    <button class="lorgus-messenger-back" type="button" onclick="returnToGame()">‹ К миру</button>
+                    <div class="lorgus-messenger-search">⌕ <span>Общий канал LORGUS</span></div>
                 </div>
-                <button class="character-secondary-button" type="button" onclick="returnToGame()">← К миру</button>
-            </header>
 
-            <section class="lorgus-flood-feed" id="lorgus-flood-feed">
-                <div class="lorgus-rp-empty">
-                    <div class="lorgus-rp-symbol">✧</div>
-                    <span class="lorgus-rp-stage-kicker">ФЛУД</span>
-                    <h3>Общий разговор ещё пуст.</h3>
-                    <p>Здесь можно общаться вне роли, не покидая своё текущее RP-пространство.</p>
+                <div class="lorgus-messenger-chat-card active">
+                    <div class="lorgus-messenger-chat-photo">✧</div>
+                    <div class="lorgus-messenger-chat-info">
+                        <strong>Флуд</strong>
+                        <small>Общий канал</small>
+                        <em>Вне роли</em>
+                    </div>
                 </div>
-            </section>
 
-            <section class="lorgus-rp-composer">
-                <div class="lorgus-rp-composer-top">
-                    <span>АККАУНТ: <strong>${name}</strong></span>
-                    <span>НЕ ВЛИЯЕТ НА ПЕРЕМЕЩЕНИЕ</span>
+                <div class="lorgus-messenger-section-title">ОБЩЕНИЕ</div>
+                <div class="lorgus-messenger-participants">
+                    <div class="lorgus-messenger-empty-participants">Свободное общение игроков. Флуд не влияет на местоположение персонажа.</div>
                 </div>
-                <textarea id="lorgus-flood-input" placeholder="Напиши сообщение во флуд..." rows="3"></textarea>
-                <div class="lorgus-rp-composer-bottom">
-                    <span class="lorgus-rp-mention">Флуд доступен независимо от RP-присутствия.</span>
-                    <button class="gold-button lorgus-rp-send" type="button" onclick="sendLocalFloodMessage()">Отправить</button>
+
+                <div class="lorgus-messenger-my-card">
+                    <div class="lorgus-messenger-avatar large"><span>✦</span><i></i></div>
+                    <div><small>ТВОЙ АККАУНТ</small><strong>${name}</strong></div>
                 </div>
-            </section>
+            </aside>
+
+            <main class="lorgus-messenger-main">
+                <header class="lorgus-messenger-header">
+                    <div class="lorgus-messenger-header-photo"><span>✧</span></div>
+                    <div class="lorgus-messenger-header-info">
+                        <h1>Флуд</h1>
+                        <p>Общий канал · вне роли · не влияет на перемещение</p>
+                    </div>
+                    <div class="lorgus-messenger-header-actions">
+                        <button type="button" title="К миру" onclick="returnToGame()">⌂</button>
+                        <button type="button" title="Очистить вид" onclick="renderFloodChat()">↻</button>
+                    </div>
+                </header>
+
+                <section class="lorgus-messenger-feed" id="lorgus-flood-feed">
+                    <div class="lorgus-messenger-start">
+                        <div class="lorgus-messenger-start-mark">✧</div>
+                        <strong>Общий разговор ещё пуст</strong>
+                        <span>ФЛУД · ВНЕ РОЛИ</span>
+                        <p>Здесь можно общаться с другими игроками, не прерывая историю персонажа.</p>
+                    </div>
+                </section>
+
+                <section class="lorgus-messenger-composer">
+                    <div class="lorgus-messenger-input-wrap">
+                        <textarea id="lorgus-flood-input" placeholder="Напиши сообщение во флуд…" rows="1"></textarea>
+                    </div>
+                    <button class="lorgus-messenger-send" type="button" onclick="sendLocalFloodMessage()" title="Отправить">➤</button>
+                </section>
+
+                <footer class="lorgus-messenger-footer">
+                    <span>ОБЩИЙ КАНАЛ · ВНЕ РОЛИ</span>
+                    <span>Сообщения флуд-чата не закрепляют персонажа в локации</span>
+                </footer>
+            </main>
         </div>
     `;
-}
 
+    const input = document.getElementById("lorgus-flood-input");
+    if (input) {
+        input.addEventListener("input", () => {
+            input.style.height = "auto";
+            input.style.height = Math.min(input.scrollHeight, 180) + "px";
+        });
+        input.addEventListener("keydown", event => {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendLocalFloodMessage();
+            }
+        });
+    }
+}
 function renderLocationEntryLock(locationName, regionName) {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
@@ -895,15 +940,16 @@ function sendLocalFloodMessage() {
     if (empty) empty.remove();
 
     const message = document.createElement("article");
-    message.className = "lorgus-rp-message";
+    message.className = "lorgus-messenger-message mine";
+    message.dataset.rpFloodMessage = "true";
     message.innerHTML = `
-        <div class="lorgus-rp-message-avatar">✧</div>
-        <div class="lorgus-rp-message-body">
-            <div class="lorgus-rp-message-meta">
+        <div class="lorgus-messenger-message-avatar"><span>✧</span></div>
+        <div class="lorgus-messenger-message-content">
+            <div class="lorgus-messenger-message-meta">
                 <strong>${escapeHtml(character.name || "Без имени")}</strong>
-                <span>флуд · сейчас</span>
+                <time>флуд · сейчас</time>
             </div>
-            <p>${escapeHtml(text)}</p>
+            <div class="lorgus-messenger-bubble"><p>${escapeHtml(text)}</p></div>
         </div>
     `;
     feed.appendChild(message);
