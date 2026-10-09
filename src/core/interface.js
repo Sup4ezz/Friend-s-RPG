@@ -424,6 +424,63 @@ function openLorgusRpPhotoViewer(src, caption = "Портрет персонаж
 
 window.openLorgusRpPhotoViewer = openLorgusRpPhotoViewer;
 
+function setRpReplyTarget(message) {
+    if (!message?.id) return;
+    window.rpReplyTarget = {
+        id: message.id,
+        body: String(message.body || ""),
+        character_id: message.character_id,
+        created_at: message.created_at,
+        characters: { name: String(message.characters?.name || "Без имени") }
+    };
+    const preview = document.getElementById("lorgus-rp-reply-preview");
+    if (!preview) return;
+    const author = window.rpReplyTarget.characters.name;
+    const snippet = window.rpReplyTarget.body.replace(/\s+/g, " ").slice(0, 180);
+    preview.hidden = false;
+    preview.innerHTML = '<div class="lorgus-rp-reply-preview-mark">↩</div><div class="lorgus-rp-reply-preview-copy"><small>ОТВЕТ НА СООБЩЕНИЕ</small><strong>' + escapeHtml(author) + '</strong><span>' + escapeHtml(snippet || "Вложение") + '</span></div><button type="button" class="lorgus-rp-reply-cancel" aria-label="Отменить ответ" title="Отменить ответ">×</button>';
+    preview.querySelector(".lorgus-rp-reply-cancel")?.addEventListener("click", clearRpReplyTarget);
+}
+
+function clearRpReplyTarget() {
+    window.rpReplyTarget = null;
+    const preview = document.getElementById("lorgus-rp-reply-preview");
+    if (preview) {
+        preview.hidden = true;
+        preview.innerHTML = "";
+    }
+}
+
+async function jumpToRpMessage(messageId) {
+    if (!messageId) return;
+    const feed = document.getElementById("lorgus-rp-feed");
+    if (!feed) return;
+    const selector = '[data-rp-message-id="' + String(messageId).replace(/"/g, '\\"') + '"]';
+    let article = feed.querySelector(selector);
+    if (!article && window.supabaseClient) {
+        let query = window.supabaseClient
+            .from("rp_messages")
+            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, reply_to:rp_messages!rp_messages_reply_to_id_fkey(id, character_id, body, created_at, characters(name)), characters(name)")
+            .eq("id", messageId);
+        const room = window.activeRpChatSpace;
+        if (room?.type === "location") query = query.eq("presence_type", "location").eq("region", room.region).eq("location", room.location);
+        else if (room?.type === "road") query = query.eq("presence_type", "road").eq("from_region", room.fromRegion).eq("from_location", room.fromLocation).eq("to_region", room.toRegion).eq("to_location", room.toLocation);
+        const { data, error } = await query.maybeSingle();
+        if (!error && data) {
+            await appendRpMessage(data);
+            article = feed.querySelector(selector);
+        }
+    }
+    if (!article) {
+        console.warn("Исходное RP-сообщение не найдено в этой сцене:", messageId);
+        return;
+    }
+    article.scrollIntoView({ behavior: "smooth", block: "center" });
+    article.classList.remove("lorgus-rp-message-target");
+    requestAnimationFrame(() => article.classList.add("lorgus-rp-message-target"));
+    setTimeout(() => article.classList.remove("lorgus-rp-message-target"), 1800);
+}
+
 function showRpMessageContextMenu(message, x, y) {
     document.querySelector(".lorgus-rp-context-menu")?.remove();
     const menu = document.createElement("div");
@@ -461,15 +518,8 @@ function showRpMessageContextMenu(message, x, y) {
     };
 
     menu.querySelector('[data-action="reply"]').addEventListener("click", () => {
-        const input = document.getElementById("lorgus-rp-input");
-        if (input) {
-            const quoted = body.split("\n").map(line => "> " + line).join("\n");
-            const prefix = "> " + author + ":\n" + quoted + "\n\n";
-            input.value = input.value.trim() ? prefix + input.value : prefix;
-            input.dispatchEvent(new Event("input", { bubbles: true }));
-            input.focus();
-            input.setSelectionRange(input.value.length, input.value.length);
-        }
+        window.setRpReplyTarget?.(message);
+        document.getElementById("lorgus-rp-input")?.focus();
         menu.remove();
     });
     menu.querySelector('[data-action="copy"]').addEventListener("click", async () => {
@@ -533,6 +583,8 @@ async function appendRpMessage(message) {
         '<div class="lorgus-messenger-message-content">' +
             '<div class="lorgus-messenger-message-meta"><strong>' + escapeHtml(author) + '</strong>' + (adminPost ? '<span class="lorgus-admin-post-badge" title="Пост опубликован администрацией">✦ АДМИНИСТРАЦИЯ</span>' : '') + '<time>' + escapeHtml(time) + '</time></div>' +
             '<div class="lorgus-messenger-bubble">' +
+                (message.reply_to_id && message.reply_to ? '<button type="button" class="lorgus-rp-reply-quote" data-reply-target-id="' + escapeHtml(String(message.reply_to_id)) + '">' +
+                    '<span class="lorgus-rp-reply-quote-mark">↩</span><span class="lorgus-rp-reply-quote-content"><strong>' + escapeHtml(message.reply_to.characters?.name || "Без имени") + '</strong><span>' + escapeHtml(String(message.reply_to.body || "").replace(/\s+/g, " ").slice(0, 180)) + '</span></span></button>' : '') +
                 '<p>' + escapeHtml(message.body) + '</p>' +
                 (message.status === "reverted" ? '<div class="lorgus-rp-reverted-mark">Пост отменён администрацией' + (message.revert_reason ? ' · ' + escapeHtml(message.revert_reason) : '') + '</div>' : '') +
                 '<div class="lorgus-rp-item-uses"></div>' +
@@ -550,6 +602,12 @@ async function appendRpMessage(message) {
         event.preventDefault();
         event.stopPropagation();
         showRpMessageContextMenu(message, event.clientX, event.clientY);
+    });
+
+    article.querySelector(".lorgus-rp-reply-quote")?.addEventListener("click", event => {
+        event.preventDefault();
+        event.stopPropagation();
+        jumpToRpMessage(message.reply_to_id);
     });
 
     const openCharacterCard = anchor => event => {
@@ -632,3 +690,7 @@ window.renderLorgusInterfaceNav = renderLorgusInterfaceNav;
 window.renderLorgusOverview = renderLorgusOverview;
 window.renderLorgusWorldMapCurrent = renderLorgusWorldMapCurrent;
 window.appendRpMessage = appendRpMessage;
+
+window.setRpReplyTarget = setRpReplyTarget;
+window.clearRpReplyTarget = clearRpReplyTarget;
+window.jumpToRpMessage = jumpToRpMessage;
