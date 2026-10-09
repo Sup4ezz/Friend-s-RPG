@@ -1,4 +1,5 @@
 -- Persist editable label geometry for the world map.
+-- The version matches the already-applied production migration history.
 create table if not exists public.world_map_label_positions (
     id text primary key, x double precision not null, y double precision not null,
     w double precision not null, h double precision not null,
