@@ -72,6 +72,13 @@ async function renderAdminApplications(container, applications) {
             </div>
         </div>
 
+        <section class="admin-section admin-lore-tree-section">
+            <div class="admin-section-heading">
+                <div><h2>Древо мира</h2><p>Навигация по лору: королевские семьи, церковники, боги, церкви, земли и легенды.</p></div>
+            </div>
+            <div id="admin-lore-tree"></div>
+        </section>
+
         <div class="admin-stats">
             <button class="admin-stat admin-filter-stat active" data-admin-filter="pending">
                 <span class="admin-stat-value">${pending.length}</span><span class="admin-stat-label">На рассмотрении</span>
@@ -119,6 +126,10 @@ async function renderAdminApplications(container, applications) {
             <div id="admin-item-use-log" class="admin-item-use-log"><div class="admin-empty"><h2>Загрузка журнала...</h2></div></div>
         </section>
     `;
+
+    if (typeof window.renderAdminLoreTree === "function") {
+        window.renderAdminLoreTree(container.querySelector("#admin-lore-tree"));
+    }
 
     const list = container.querySelector("#admin-application-list");
     const search = container.querySelector("#admin-search");
