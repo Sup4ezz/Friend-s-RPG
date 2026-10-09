@@ -1,0 +1,36 @@
+/* LORGUS public codex */
+.lorgus-codex-page { min-width: 0; color: #ded2b8; padding: clamp(18px, 3vw, 38px); }
+.lorgus-codex-header { margin-bottom: 24px; border-bottom: 1px solid rgba(203,169,100,.22); padding-bottom: 20px; }
+.lorgus-codex-header > span { color: #c9a45f; font-size: 10px; letter-spacing: .2em; }
+.lorgus-codex-header h1 { margin: 9px 0; color: #f0e2c2; font: 600 clamp(30px,4vw,44px)/1.05 "Cormorant Garamond", Georgia, serif; }
+.lorgus-codex-header p { margin: 0; color: rgba(225,211,180,.65); font-size: 13px; }
+.lorgus-codex-layout { display: grid; grid-template-columns: minmax(210px, 270px) minmax(0,1fr); border: 1px solid rgba(203,169,100,.2); background: rgba(8,8,7,.42); min-height: 520px; }
+.lorgus-codex-nav { display: grid; align-content: start; gap: 4px; padding: 12px; border-right: 1px solid rgba(203,169,100,.18); background: rgba(26,22,16,.42); }
+.lorgus-codex-topic { display: grid; gap: 5px; padding: 12px; border: 1px solid transparent; background: transparent; color: #dfd0ae; text-align: left; cursor: pointer; font: inherit; }
+.lorgus-codex-topic strong { font: 600 13px/1.25 "Lora", Georgia, serif; }
+.lorgus-codex-topic small { color: rgba(225,211,180,.48); font-size: 11px; line-height: 1.45; }
+.lorgus-codex-topic:hover { background: rgba(203,169,100,.06); border-color: rgba(203,169,100,.14); }
+.lorgus-codex-topic.active { background: rgba(203,169,100,.11); border-color: rgba(203,169,100,.32); }
+.lorgus-codex-topic.active strong { color: #f3dba5; }
+.lorgus-codex-article { min-width: 0; padding: clamp(20px,3.2vw,38px); overflow-wrap: anywhere; }
+.lorgus-codex-article h2, .lorgus-codex-article h3, .lorgus-codex-article h4 { color: #ecd7a9; font-family: "Cormorant Garamond", Georgia, serif; line-height: 1.15; }
+.lorgus-codex-article h2 { font-size: 30px; margin: 0 0 20px; }
+.lorgus-codex-article h3 { font-size: 24px; margin: 28px 0 10px; }
+.lorgus-codex-article h4 { font-size: 19px; margin: 22px 0 8px; }
+.lorgus-codex-article p, .lorgus-codex-article li { color: rgba(231,221,199,.84); font-size: 13px; line-height: 1.8; }
+.lorgus-codex-article p { margin: 10px 0 14px; }
+.lorgus-codex-article ul { padding-left: 21px; margin: 8px 0 18px; }
+.lorgus-codex-article li { margin: 5px 0; }
+.lorgus-codex-article strong { color: #ecd4a0; }
+.lorgus-codex-article blockquote { margin: 14px 0; padding: 8px 0 8px 15px; border-left: 2px solid #b99452; color: rgba(230,216,185,.66); }
+.lorgus-codex-article hr { border: 0; border-top: 1px solid rgba(203,169,100,.18); margin: 22px 0; }
+.lorgus-codex-loading, .lorgus-codex-error { padding: 22px; color: rgba(225,211,180,.58); }
+.lorgus-codex-back { margin-top: 18px; padding: 10px 14px; border: 1px solid rgba(203,169,100,.22); background: transparent; color: #e5d1a5; cursor: pointer; font: inherit; font-size: 12px; }
+.lorgus-codex-back:hover { background: rgba(203,169,100,.08); }
+@media (max-width: 760px) {
+    .lorgus-codex-page { padding: 16px 12px; }
+    .lorgus-codex-layout { grid-template-columns: minmax(0,1fr); }
+    .lorgus-codex-nav { grid-template-columns: repeat(2,minmax(0,1fr)); border-right: 0; border-bottom: 1px solid rgba(203,169,100,.18); }
+    .lorgus-codex-topic { padding: 10px 8px; }
+    .lorgus-codex-article { padding: 20px 16px; }
+}
