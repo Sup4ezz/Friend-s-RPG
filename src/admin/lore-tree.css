@@ -124,3 +124,54 @@
     .lorgus-lore-portrait-panel { grid-template-columns: minmax(90px, 125px) minmax(0,1fr); gap: 12px; padding: 10px; }
     .lorgus-lore-portrait-preview { min-height: 125px; }
 }
+
+/* Lore tree NPC action panel: round RP avatar, never a rectangular illustration card. */
+.lorgus-lore-rp-panel {
+    display: flex !important;
+    align-items: center;
+    gap: 18px;
+    padding: 14px 16px !important;
+    margin: 14px 0 20px;
+    border: 1px solid rgba(203,169,100,.24);
+    background: rgba(10,9,7,.68);
+    border-radius: 8px;
+}
+.lorgus-lore-rp-panel .lorgus-lore-portrait-avatar {
+    flex: 0 0 112px;
+    width: 112px;
+    height: 112px;
+    min-height: 0 !important;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(203,169,100,.65);
+    background: radial-gradient(circle at 35% 25%,#302719,#090806 70%);
+    box-shadow: 0 0 0 4px rgba(203,169,100,.07),0 8px 28px rgba(0,0,0,.35);
+}
+.lorgus-lore-rp-panel .lorgus-lore-portrait-avatar img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+.lorgus-lore-rp-panel .lorgus-lore-portrait-avatar > span {font-size:32px;color:#c8a45f}
+.lorgus-lore-rp-panel .lorgus-lore-portrait-tools {flex:1;min-width:0;gap:9px}
+.lorgus-lore-rp-panel .lorgus-lore-rp-actions {display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.lorgus-lore-rp-panel .lorgus-lore-rp-use {
+    border:1px solid rgba(203,169,100,.6);border-radius:4px;padding:10px 13px;
+    color:#171109;background:#c6a15a;font-size:11px;font-weight:700;cursor:pointer;
+}
+.lorgus-lore-rp-panel .lorgus-lore-rp-use:hover {background:#e0bf79}
+.lorgus-lore-rp-panel .lorgus-lore-rp-use:disabled {opacity:.55;cursor:wait}
+.lorgus-lore-rp-panel .lorgus-lore-portrait-upload {border-radius:4px}
+.lorgus-lore-rp-panel .lorgus-lore-portrait-status {display:block;line-height:1.45}
+.admin-rp-message-avatar {width:42px;height:42px;flex:0 0 42px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.admin-rp-message-avatar img {display:block;width:100%;height:100%;object-fit:cover;border-radius:50%}
+@media(max-width:620px) {
+  .lorgus-lore-rp-panel {align-items:flex-start;gap:12px}
+  .lorgus-lore-rp-panel .lorgus-lore-portrait-avatar {flex-basis:82px;width:82px;height:82px}
+}
