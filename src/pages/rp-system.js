@@ -1204,7 +1204,12 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
         type: "location",
         location: locationName,
         region: regionName,
-        visibility: "public"
+        visibility: "public",
+        // История видна с момента входа именно этого персонажа.
+        // Для игрока, который оставался в локации, дата не меняется.
+        visitStartedAt: presence?.type === "location" && presence.enteredAt
+            ? presence.enteredAt
+            : new Date().toISOString()
     };
 
     const character = window.activeCharacter;
@@ -1316,12 +1321,29 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
     }
 }
 
+function getRpVisitStart(presence) {
+    if (!presence) return null;
+    const value = presence.visitStartedAt ||
+        (presence.type === "location" ? presence.enteredAt : presence.startedAt);
+    if (!value) return null;
+    const timestamp = new Date(value).getTime();
+    return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null;
+}
+
+function isRpMessageInCurrentVisit(message, presence) {
+    const start = getRpVisitStart(presence);
+    if (!start || !message?.created_at) return true;
+    return new Date(message.created_at).getTime() >= new Date(start).getTime();
+}
+
 function getRpMessageCacheKey(presence) {
     if (!presence) return "";
     const parts = presence.type === "location"
         ? [presence.type, presence.region, presence.location]
         : [presence.type, presence.fromRegion, presence.fromLocation, presence.toRegion, presence.toLocation];
-    return "lorgus:rp-messages:v3:" + parts.map(value => encodeURIComponent(String(value || ""))).join(":");
+    // Кэш разделён по входу персонажа: повторный вход не поднимет старую переписку.
+    parts.push(getRpVisitStart(presence) || "visit-unknown");
+    return "lorgus:rp-messages:v4:" + parts.map(value => encodeURIComponent(String(value || ""))).join(":");
 }
 
 function readRpMessageCache(presence) {
@@ -1407,7 +1429,8 @@ window.cacheRpMessage = function (message) {
               message.to_location === presence.toLocation
     );
     if (!sameRoom) return;
-    const rows = readRpMessageCache(presence);
+    if (!isRpMessageInCurrentVisit(message, presence)) return;
+    const rows = readRpMessageCache(presence).filter(row => isRpMessageInCurrentVisit(row, presence));
     const index = rows.findIndex(row => String(row.id) === String(message.id));
     if (index >= 0) rows[index] = { ...rows[index], ...message };
     else rows.push(message);
@@ -1419,7 +1442,7 @@ async function loadRpMessages(presence) {
     if (!feed || !presence) return;
 
     // Мгновенно показываем прошлую историю из sessionStorage, пока идёт запрос к БД.
-    const cached = readRpMessageCache(presence);
+    const cached = readRpMessageCache(presence).filter(message => isRpMessageInCurrentVisit(message, presence));
     feed.innerHTML = "";
     if (cached.length) {
         // Рисуем кэш сразу; портреты и титулы appendRpMessage догрузит отдельно.
@@ -1443,6 +1466,8 @@ async function loadRpMessages(presence) {
             .eq("to_region", presence.toRegion)
             .eq("to_location", presence.toLocation);
     }
+    const visitStart = getRpVisitStart(presence);
+    if (visitStart) query = query.gte("created_at", visitStart);
 
     const { data, error } = await query;
     if (error) {
@@ -1481,6 +1506,8 @@ async function pollRpMessages(presence) {
                 .eq("to_region", presence.toRegion)
                 .eq("to_location", presence.toLocation);
         }
+        const visitStart = getRpVisitStart(presence);
+        if (visitStart) query = query.gte("created_at", visitStart);
 
         const { data, error } = await query;
         if (error) {
@@ -1530,6 +1557,8 @@ async function subscribeToRpMessages(presence) {
                 row.to_location === presence.toLocation;
 
             if (!sameLocation && !sameRoad) return;
+            // Игрок видит только сообщения с момента своего текущего входа.
+            if (!isRpMessageInCurrentVisit(row, presence)) return;
 
             // Re-read the committed row: the reply RPC updates reply_to_id in the same
             // transaction after the base insert, so the INSERT payload may be an older snapshot.
@@ -1633,6 +1662,8 @@ async function sendLocalRpMessage() {
             .limit(1);
 
         if (replyTarget) query = query.eq("reply_to_id", replyTarget.id);
+        const visitStart = getRpVisitStart(chat);
+        if (visitStart) query = query.gte("created_at", visitStart);
         if (chat.type === "location") {
             query = query.eq("region", chat.region).eq("location", chat.location);
         } else {
