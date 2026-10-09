@@ -910,22 +910,36 @@ function sendLocalFloodMessage() {
 }
 
 async function getRpCharacterPhoto(characterId) {
-    if (!characterId) return null;
+    if (!characterId || !window.supabaseClient) return null;
     window.rpCharacterPhotoCache = window.rpCharacterPhotoCache || {};
     const key = String(characterId);
     if (Object.prototype.hasOwnProperty.call(window.rpCharacterPhotoCache, key)) {
         return window.rpCharacterPhotoCache[key];
     }
 
-    const { data, error } = await window.supabaseClient
-        .from("character_applications")
+    // Prefer a portrait assigned directly to the character; approved
+    // applications remain the fallback for player-created characters.
+    let photoPath = null;
+    const { data: character } = await window.supabaseClient
+        .from("characters")
         .select("photo_path")
-        .eq("character_id", characterId)
-        .eq("status", "approved")
-        .limit(1)
+        .eq("id", characterId)
         .maybeSingle();
 
-    if (error || !data?.photo_path) {
+    if (character?.photo_path) {
+        photoPath = character.photo_path;
+    } else {
+        const { data: application } = await window.supabaseClient
+            .from("character_applications")
+            .select("photo_path")
+            .eq("character_id", characterId)
+            .eq("status", "approved")
+            .limit(1)
+            .maybeSingle();
+        photoPath = application?.photo_path || null;
+    }
+
+    if (!photoPath) {
         window.rpCharacterPhotoCache[key] = null;
         return null;
     }
@@ -933,7 +947,7 @@ async function getRpCharacterPhoto(characterId) {
     const { data: photoData, error: photoError } = await window.supabaseClient
         .storage
         .from("character-applications")
-        .createSignedUrl(data.photo_path, 60 * 60);
+        .createSignedUrl(photoPath, 60 * 60);
 
     const url = !photoError ? (photoData?.signedUrl || null) : null;
     window.rpCharacterPhotoCache[key] = url;
@@ -1159,7 +1173,7 @@ async function loadRpMessages(presence) {
 
     let query = window.supabaseClient
         .from("rp_messages")
-        .select("id, character_id, body, created_at, status, reverted_at, revert_reason, characters(name)")
+        .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, characters(name)")
         .eq("presence_type", presence.type)
         .order("created_at", { ascending: true })
         .limit(200);
