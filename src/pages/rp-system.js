@@ -1319,7 +1319,7 @@ async function subscribeToRpMessages(presence) {
 
 async function sendLocalRpMessage() {
     const input = document.getElementById("lorgus-rp-input");
-    if (!input || !window.activeCharacterId) return;
+    if (!input || !window.activeCharacterId || window.rpMessageSending) return;
 
     const body = input.value.trim();
     if (!body) return;
@@ -1330,43 +1330,82 @@ async function sendLocalRpMessage() {
         return;
     }
 
-    const itemIds = Array.from(window.pendingRpItemIds || []);
-    const { error } = await window.supabaseClient.rpc(
-        "send_lorgus_rp_message_with_items",
-        {
-            p_character_id: window.activeCharacterId,
-            p_presence_type: chat.type,
-            p_region: chat.type === "location" ? chat.region : null,
-            p_location: chat.type === "location" ? chat.location : null,
-            p_from_region: chat.type === "road" ? chat.fromRegion : null,
-            p_from_location: chat.type === "road" ? chat.fromLocation : null,
-            p_to_region: chat.type === "road" ? chat.toRegion : null,
-            p_to_location: chat.type === "road" ? chat.toLocation : null,
-            p_body: body,
-            p_visibility: chat.visibility || "public",
-            p_inventory_ids: itemIds
-        }
-    );
-
-    if (error) {
-        console.error("Не удалось отправить RP-сообщение:", error);
-        alert("Не удалось отправить сообщение: " + error.message);
-        return;
+    window.rpMessageSending = true;
+    const sendButton = document.querySelector(".lorgus-messenger-send");
+    if (sendButton) {
+        sendButton.disabled = true;
+        sendButton.classList.add("is-sending");
     }
 
-    input.value = "";
-    window.pendingRpItemIds = [];
-    updateRpItemUseButton();
-    window.activeRpPresence = await getRpPresence();
+    try {
+        const itemIds = Array.from(window.pendingRpItemIds || []);
+        const { error } = await window.supabaseClient.rpc(
+            "send_lorgus_rp_message_with_items",
+            {
+                p_character_id: window.activeCharacterId,
+                p_presence_type: chat.type,
+                p_region: chat.type === "location" ? chat.region : null,
+                p_location: chat.type === "location" ? chat.location : null,
+                p_from_region: chat.type === "road" ? chat.fromRegion : null,
+                p_from_location: chat.type === "road" ? chat.fromLocation : null,
+                p_to_region: chat.type === "road" ? chat.toRegion : null,
+                p_to_location: chat.type === "road" ? chat.toLocation : null,
+                p_body: body,
+                p_visibility: chat.visibility || "public",
+                p_inventory_ids: itemIds
+            }
+        );
 
-    if (window.activeRpPresence) {
-        window.activeRpChatSpace = window.activeRpPresence;
-        await loadRpMessages(window.activeRpPresence);
-        await subscribeToRpMessages(window.activeRpPresence);
-        await renderLocationParticipantsIfVisible();
-    } else {
-        await loadRpMessages(chat);
-        await subscribeToRpMessages(chat);
+        if (error) {
+            console.error("Не удалось отправить RP-сообщение:", error);
+            alert("Не удалось отправить сообщение: " + error.message);
+            return;
+        }
+
+        // Не очищаем поле, если игрок успел начать набирать следующее сообщение.
+        if (input.value.trim() === body) {
+            input.value = "";
+            input.style.height = "auto";
+        }
+        window.pendingRpItemIds = [];
+        updateRpItemUseButton();
+
+        // Подписка Realtime добавит сообщение сама. Этот запрос — страховка,
+        // чтобы автор увидел собственный пост сразу, даже если событие задержится.
+        // appendRpMessage защищён от дублей по message.id.
+        let query = window.supabaseClient
+            .from("rp_messages")
+            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, characters(name)")
+            .eq("character_id", window.activeCharacterId)
+            .eq("presence_type", chat.type)
+            .eq("body", body)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+        if (chat.type === "location") {
+            query = query.eq("region", chat.region).eq("location", chat.location);
+        } else {
+            query = query.eq("from_region", chat.fromRegion)
+                .eq("from_location", chat.fromLocation)
+                .eq("to_region", chat.toRegion)
+                .eq("to_location", chat.toLocation);
+        }
+
+        const { data: sentMessages, error: fetchError } = await query;
+        if (fetchError) {
+            console.warn("Сообщение отправлено; ожидание события Realtime:", fetchError);
+            return;
+        }
+        if (sentMessages?.[0]) {
+            await appendRpMessage(sentMessages[0]);
+        }
+    } finally {
+        window.rpMessageSending = false;
+        const currentButton = document.querySelector(".lorgus-messenger-send");
+        if (currentButton) {
+            currentButton.disabled = false;
+            currentButton.classList.remove("is-sending");
+        }
     }
 }
 
