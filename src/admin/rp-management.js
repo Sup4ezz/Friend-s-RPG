@@ -6,6 +6,7 @@
         chats: [],
         rpCharacters: [],
         allCharacters: [],
+        photoUrls: {},
         portraitFilter: "",
         activeChatKey: null,
         filter: ""
@@ -425,58 +426,59 @@
         select.value = state.activeChatKey || "";
     }
 
-    function renderComposerCharacterPicker(root) {
+    async function renderComposerCharacterPicker(root) {
         const characterSelect = root.querySelector(".admin-rp-composer-character");
         const search = root.querySelector(".admin-rp-character-search");
         const results = root.querySelector(".admin-rp-character-results");
         const selected = root.querySelector(".admin-rp-character-selected");
         if (!characterSelect || !search || !results || !selected) return;
-
         const activeNrp = state.rpCharacters.filter(row => row.is_active);
         const selectedRow = activeNrp.find(row => String(row.character_id) === String(characterSelect.value));
         selected.innerHTML = selectedRow
             ? `<span class="admin-rp-selected-check">✓</span><span><small>ВЫБРАН ПЕРСОНАЖ</small><strong>${esc(selectedRow.characters?.name || "Без имени")}</strong><em>${esc([selectedRow.characters?.race, selectedRow.characters?.kingdom].filter(Boolean).join(" · ") || "RP-персонаж")}</em></span><button type="button" class="admin-rp-character-clear" aria-label="Сбросить выбор">×</button>`
-            : '<span class="admin-rp-selected-empty">Персонаж не выбран</span>';
-
+            : '<span class="admin-rp-selected-empty">Выбери карточку персонажа ниже</span>';
         selected.querySelector(".admin-rp-character-clear")?.addEventListener("click", () => {
             characterSelect.value = "";
-            search.value = "";
             renderComposerCharacterPicker(root);
             search.focus();
         });
-
         const query = search.value.trim().toLocaleLowerCase("ru-RU");
-        if (!query) {
-            results.innerHTML = '<div class="admin-rp-character-hint">Начни вводить имя, расу или королевство — покажу подходящих персонажей.</div>';
-            results.hidden = false;
-            return;
-        }
-
         const matches = activeNrp.filter(row => {
             const c = row.characters || {};
-            return [c.name, c.race, c.kingdom, c.location, c.occupation]
-                .some(value => String(value || "").toLocaleLowerCase("ru-RU").includes(query));
-        }).slice(0, 12);
-
+            return !query || [c.name, c.race, c.kingdom, c.location, c.occupation].some(value => String(value || "").toLocaleLowerCase("ru-RU").includes(query));
+        });
         results.innerHTML = matches.length ? matches.map(row => {
             const c = row.characters || {};
-            const isSelected = String(row.character_id) === String(characterSelect.value);
-            return `<button type="button" class="admin-rp-character-result ${isSelected ? "is-selected" : ""}" data-rp-character-choice="${esc(row.character_id)}">
-                <span class="admin-rp-character-result-mark">${isSelected ? "✓" : "✦"}</span>
-                <span><strong>${esc(c.name || "Без имени")}</strong><small>${esc([c.race, c.kingdom, c.location].filter(Boolean).join(" · ") || "RP-персонаж")}</small></span>
-                <em>${isSelected ? "ВЫБРАН" : "ВЫБРАТЬ"}</em>
+            const id = String(row.character_id);
+            const isSelected = id === String(characterSelect.value);
+            const photoUrl = state.photoUrls[id] || "";
+            return `<button type="button" class="admin-rp-character-card ${isSelected ? "is-selected" : ""}" data-rp-character-choice="${esc(id)}">
+                <span class="admin-rp-character-card-art">${photoUrl ? `<img src="${esc(photoUrl)}" alt="">` : '<span class="admin-rp-character-card-placeholder">✦</span>'}<i>${isSelected ? "✓" : "✦"}</i></span>
+                <span class="admin-rp-character-card-info"><strong>${esc(c.name || "Без имени")}</strong><small>${esc([c.race, c.kingdom].filter(Boolean).join(" · ") || "RP-персонаж")}</small><em>${esc([c.location, c.occupation].filter(Boolean).join(" / ") || "Без дополнительных данных")}</em><b>${isSelected ? "ВЫБРАН" : "ВЫБРАТЬ ПЕРСОНАЖА"}</b></span>
             </button>`;
-        }).join("") : '<div class="admin-rp-character-hint">Ничего не найдено. Попробуй другое имя или часть названия.</div>';
+        }).join("") : '<div class="admin-rp-character-hint">Подходящих персонажей не найдено.</div>';
         results.hidden = false;
-
         results.querySelectorAll("[data-rp-character-choice]").forEach(button => {
             button.addEventListener("click", () => {
                 characterSelect.value = button.dataset.rpCharacterChoice;
                 renderComposerCharacterPicker(root);
             });
         });
+        for (const row of matches) {
+            const c = row.characters || {};
+            const id = String(row.character_id);
+            if (!c.photo_path || state.photoUrls[id] || !window.supabaseClient) continue;
+            try {
+                const { data, error } = await window.supabaseClient.storage.from("character-applications").createSignedUrl(c.photo_path, 3600);
+                if (!error && data?.signedUrl) {
+                    state.photoUrls[id] = data.signedUrl;
+                    const card = results.querySelector('[data-rp-character-choice="' + id + '"]');
+                    const art = card?.querySelector(".admin-rp-character-card-art");
+                    if (art) art.innerHTML = '<img src="' + esc(data.signedUrl) + '" alt=""><i>' + (id === String(characterSelect.value) ? "✓" : "✦") + '</i>';
+                }
+            } catch (_) {}
+        }
     }
-
     function renderComposerOptions(root) {
         const characterSelect = root.querySelector(".admin-rp-composer-character");
         const chatSelect = root.querySelector(".admin-rp-composer-chat");
