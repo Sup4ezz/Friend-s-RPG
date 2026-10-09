@@ -246,7 +246,7 @@ function renderLorgusInterfaceNav(active = "world") {
         ["rp", "◈", "Ролевая", "/rp"],
         ["people", "♧", "Люди", "/people"],
         ["mail", "✉", "Письма", "/mail"],
-        ["inventory", "◈", "Инвентарь", "/inventory"]
+        ["codex", "▤", "Лорбук", "/codex"]
     ];
     window.setTimeout(() => refreshLorgusNotificationBadge(), 0);
 
