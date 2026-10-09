@@ -341,33 +341,29 @@ function bindLorgusMapLabelFallback(viewport) {
     if (!viewport || document.documentElement.dataset.lorgusMapLabelFallbackBound === "1") return;
     document.documentElement.dataset.lorgusMapLabelFallbackBound = "1";
 
-    // The map artwork can contain lettering outside the overlay buttons.
-    // Resolve the click against the rendered label positions on pointerup,
-    // before the map's own pointer handlers can swallow the interaction.
-    document.addEventListener("pointerup", event => {
-        if (!(event.target instanceof Element)) return;
+    // Listen at document level: decorative layers can sit above the map and
+    // become event.target even when the user clicks directly on a region name.
+    const selectRegionAtPoint = event => {
         const currentViewport = document.getElementById("lorgus-map-viewport");
-        if (!currentViewport || !currentViewport.contains(event.target)) return;
-
         const layer = document.getElementById("lorgus-map-marker-layer");
-        if (!layer || layer.classList.contains("editor-mode")) return;
+        if (!currentViewport || !layer || layer.classList.contains("editor-mode")) return;
+
+        const viewportRect = currentViewport.getBoundingClientRect();
+        if (event.clientX < viewportRect.left || event.clientX > viewportRect.right ||
+            event.clientY < viewportRect.top || event.clientY > viewportRect.bottom) return;
 
         const labels = [...layer.querySelectorAll(".lorgus-map-editor-rect")];
         if (!labels.length) return;
 
-        const width = Math.max(1, currentViewport.clientWidth);
-        const height = Math.max(1, currentViewport.clientHeight);
-        const x = (event.clientX - currentViewport.getBoundingClientRect().left) / width;
-        const y = (event.clientY - currentViewport.getBoundingClientRect().top) / height;
         let match = null;
         let nearestDistance = Infinity;
+        const width = Math.max(1, viewportRect.width);
+        const height = Math.max(1, viewportRect.height);
 
         for (const label of labels) {
             const rect = label.getBoundingClientRect();
-            const cx = (rect.left + rect.right) / 2;
-            const cy = (rect.top + rect.bottom) / 2;
-            const dx = (event.clientX - cx) / width;
-            const dy = (event.clientY - cy) / height;
+            const dx = (event.clientX - (rect.left + rect.right) / 2) / width;
+            const dy = (event.clientY - (rect.top + rect.bottom) / 2) / height;
             const radiusX = Math.max(0.14, rect.width / width * 1.5);
             const radiusY = Math.max(0.12, rect.height / height * 1.5);
             const distance = Math.hypot(dx, dy);
@@ -380,9 +376,12 @@ function bindLorgusMapLabelFallback(viewport) {
         if (!match) return;
         const region = match.dataset.region;
         if (region && typeof window.selectLorgusMapRegion === "function") {
+            event.preventDefault();
             window.selectLorgusMapRegion(region);
         }
-    }, true);
+    };
+
+    document.addEventListener("click", selectRegionAtPoint, true);
 }
 function handleLorgusMapSurfaceClick(event) {
     if (event.target.closest(".lorgus-map-marker")) return;
