@@ -425,14 +425,69 @@
         select.value = state.activeChatKey || "";
     }
 
+    function renderComposerCharacterPicker(root) {
+        const characterSelect = root.querySelector(".admin-rp-composer-character");
+        const search = root.querySelector(".admin-rp-character-search");
+        const results = root.querySelector(".admin-rp-character-results");
+        const selected = root.querySelector(".admin-rp-character-selected");
+        if (!characterSelect || !search || !results || !selected) return;
+
+        const activeNrp = state.rpCharacters.filter(row => row.is_active);
+        const selectedRow = activeNrp.find(row => String(row.character_id) === String(characterSelect.value));
+        selected.innerHTML = selectedRow
+            ? `<span class="admin-rp-selected-check">✓</span><span><small>ВЫБРАН ПЕРСОНАЖ</small><strong>${esc(selectedRow.characters?.name || "Без имени")}</strong><em>${esc([selectedRow.characters?.race, selectedRow.characters?.kingdom].filter(Boolean).join(" · ") || "RP-персонаж")}</em></span><button type="button" class="admin-rp-character-clear" aria-label="Сбросить выбор">×</button>`
+            : '<span class="admin-rp-selected-empty">Персонаж не выбран</span>';
+
+        const query = search.value.trim().toLocaleLowerCase("ru-RU");
+        if (!query) {
+            results.innerHTML = '<div class="admin-rp-character-hint">Начни вводить имя, расу или королевство — покажу подходящих персонажей.</div>';
+            results.hidden = false;
+            return;
+        }
+
+        const matches = activeNrp.filter(row => {
+            const c = row.characters || {};
+            return [c.name, c.race, c.kingdom, c.location, c.occupation]
+                .some(value => String(value || "").toLocaleLowerCase("ru-RU").includes(query));
+        }).slice(0, 12);
+
+        results.innerHTML = matches.length ? matches.map(row => {
+            const c = row.characters || {};
+            const isSelected = String(row.character_id) === String(characterSelect.value);
+            return `<button type="button" class="admin-rp-character-result ${isSelected ? "is-selected" : ""}" data-rp-character-choice="${esc(row.character_id)}">
+                <span class="admin-rp-character-result-mark">${isSelected ? "✓" : "✦"}</span>
+                <span><strong>${esc(c.name || "Без имени")}</strong><small>${esc([c.race, c.kingdom, c.location].filter(Boolean).join(" · ") || "RP-персонаж")}</small></span>
+                <em>${isSelected ? "ВЫБРАН" : "ВЫБРАТЬ"}</em>
+            </button>`;
+        }).join("") : '<div class="admin-rp-character-hint">Ничего не найдено. Попробуй другое имя или часть названия.</div>';
+        results.hidden = false;
+
+        results.querySelectorAll("[data-rp-character-choice]").forEach(button => {
+            button.addEventListener("click", () => {
+                characterSelect.value = button.dataset.rpCharacterChoice;
+                renderComposerCharacterPicker(root);
+            });
+        });
+        selected.querySelector(".admin-rp-character-clear")?.addEventListener("click", () => {
+            characterSelect.value = "";
+            search.value = "";
+            renderComposerCharacterPicker(root);
+            search.focus();
+        });
+    }
+
     function renderComposerOptions(root) {
         const characterSelect = root.querySelector(".admin-rp-composer-character");
         const chatSelect = root.querySelector(".admin-rp-composer-chat");
         if (!characterSelect || !chatSelect) return;
 
         const activeNrp = state.rpCharacters.filter(row => row.is_active);
+        const previousCharacterId = characterSelect.value;
         characterSelect.innerHTML = '<option value="">Выбери RP-персонажа…</option>' +
             activeNrp.map(row => `<option value="${esc(row.character_id)}">${esc(row.characters?.name || "Без имени")}</option>`).join("");
+        if (activeNrp.some(row => String(row.character_id) === String(previousCharacterId))) {
+            characterSelect.value = previousCharacterId;
+        }
 
         chatSelect.innerHTML = '<option value="">Выбери чат…</option>' +
             state.chats.map(chat => `<option value="${esc(chat.key)}">${esc(chat.label)}</option>`).join("");
@@ -443,6 +498,7 @@
             characterSelect.value = String(pendingId);
             window.lorgusPendingRpCharacterId = null;
         }
+        renderComposerCharacterPicker(root);
     }
 
     async function submitNrpPost(root) {
@@ -595,7 +651,12 @@
                         <summary class="admin-rp-tool-summary"><span class="admin-rp-tool-number">03</span><span><small>ПУБЛИКАЦИЯ</small><strong>Написать RP-пост</strong></span><i>⌄</i></summary>
                         <div class="admin-rp-tool-content">
                             <p>Выбери персонажа и чат. Пост появится в ленте от имени выбранного персонажа.</p>
-                            <label>Персонаж<select class="admin-rp-composer-character"></select></label>
+                            <div class="admin-rp-character-picker">
+                                <label class="admin-rp-character-search-label">НАЙТИ RP-ПЕРСОНАЖА<input class="admin-rp-character-search" type="search" autocomplete="off" placeholder="Начни вводить имя, расу или королевство…"></label>
+                                <div class="admin-rp-character-selected" aria-live="polite"><span class="admin-rp-selected-empty">Персонаж не выбран</span></div>
+                                <div class="admin-rp-character-results" aria-label="Результаты поиска"></div>
+                                <select class="admin-rp-composer-character" aria-hidden="true" tabindex="-1"></select>
+                            </div>
                             <label>Чат<select class="admin-rp-composer-chat"></select></label>
                             <textarea class="admin-rp-composer-input" rows="6" maxlength="10000" placeholder="Опиши действие, реплику или сцену…"></textarea>
                             <button type="button" class="admin-rp-composer-send">Опубликовать пост <span>↗</span></button>
@@ -649,6 +710,7 @@
         });
         root.querySelector(".admin-rp-refresh").addEventListener("click", () => refreshAdminRp(root));
         root.querySelector(".admin-rp-composer-send").addEventListener("click", () => submitNrpPost(root));
+        root.querySelector(".admin-rp-character-search").addEventListener("input", () => renderComposerCharacterPicker(root));
         root.querySelector(".admin-rp-nrp-create").addEventListener("submit", event => {
             event.preventDefault();
             createRpCharacter(root);
