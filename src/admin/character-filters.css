@@ -102,3 +102,85 @@
 .admin-character-accordion-lore p{margin:5px 0 0;color:rgba(224,216,199,.72);font-size:12px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
 .admin-character-accordion .admin-character-actions{margin-top:15px;padding-top:12px;border-top:1px solid rgba(220,184,102,.1)}
 @media(max-width:760px){.admin-character-accordion-summary{grid-template-columns:38px minmax(0,1fr) 18px;gap:9px;padding:9px 10px}.admin-character-accordion-portrait{width:36px;height:36px}.admin-character-accordion-meta,.admin-character-accordion-status{display:none}.admin-character-accordion-content{padding:0 12px 14px}.admin-character-accordion-facts{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.admin-character-toolbar{align-items:flex-start;flex-direction:column}.admin-character-view-tools{justify-content:flex-start;width:100%}}
+
+
+/* Admin sections: collapsed by default, open on heading click */
+.admin-section-collapsible{position:relative}
+.admin-section-collapsible>.admin-section-heading{position:relative;cursor:pointer;padding-right:42px;user-select:none}
+.admin-section-collapsible>.admin-section-heading:after{content:"＋";position:absolute;right:14px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:26px;height:26px;border:1px solid rgba(214,179,106,.22);border-radius:4px;color:#c9aa69;font-size:16px;font-weight:400}
+.admin-section-collapsible:not(.is-collapsed)>.admin-section-heading:after{content:"−"}
+.admin-section-collapsible>.admin-section-heading:focus-visible{outline:1px solid rgba(214,179,106,.6);outline-offset:3px}
+.admin-section-collapsible.is-collapsed>:not(.admin-section-heading){display:none!important}
+.admin-section-collapsible.is-collapsed{padding-bottom:0}
+
+/* Item-use journal search and filters */
+.admin-item-use-filters{display:grid;grid-template-columns:minmax(220px,1.6fr) minmax(150px,.7fr) minmax(150px,.7fr) auto;gap:10px;align-items:end;margin:0 0 14px;padding:14px;border:1px solid rgba(214,179,106,.13);background:rgba(214,179,106,.025)}
+.admin-item-use-filters label{display:grid;gap:6px;min-width:0}
+.admin-item-use-filters label>span{font-size:9px;letter-spacing:.12em;color:#99896c}
+.admin-item-use-filters input,.admin-item-use-filters select{width:100%;min-width:0;box-sizing:border-box;padding:10px 11px;border:1px solid rgba(214,179,106,.15);border-radius:3px;background:#100e0b;color:#e0d4bd;font:inherit;font-size:12px}
+.admin-item-use-filters input:focus,.admin-item-use-filters select:focus{outline:1px solid rgba(214,179,106,.42);border-color:rgba(214,179,106,.42)}
+.admin-item-use-filters>[data-item-use-count]{padding:10px 0;color:#c9ae73;font-size:10px;white-space:nowrap}
+.admin-item-use-results{display:grid;gap:8px}
+@media(max-width:850px){.admin-item-use-filters{grid-template-columns:1fr 1fr}.admin-item-use-filters label:first-child{grid-column:1/-1}.admin-item-use-filters>[data-item-use-count]{grid-column:1/-1}}
+@media(max-width:520px){.admin-item-use-filters{grid-template-columns:1fr}.admin-item-use-filters label:first-child{grid-column:auto}}
+
+/* Rebuilt RP control room */
+.admin-rp-control-room{padding:0!important;border:1px solid rgba(214,179,106,.16)!important;background:#0b0a08!important}
+.admin-rp-heading{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:18px!important;padding:22px 24px!important;margin:0!important;background:linear-gradient(110deg,rgba(214,179,106,.07),transparent 68%)}
+.admin-rp-heading>div:first-child{min-width:0}
+.admin-rp-eyebrow{display:block;margin-bottom:7px;color:#9b8251;font-size:9px;letter-spacing:.2em}
+.admin-rp-heading h2{margin:0;color:#e1d0a6;font-size:clamp(24px,3vw,34px);line-height:1.05}
+.admin-rp-heading p{margin:8px 0 0;color:#817767;font-size:11px;line-height:1.5}
+.admin-rp-heading-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:flex-end}
+.admin-rp-heading-actions .admin-rp-refresh{padding:9px 12px;border:1px solid rgba(214,179,106,.24);border-radius:4px;background:rgba(214,179,106,.07);color:#d9c18d;cursor:pointer}
+.admin-rp-layout{display:grid!important;grid-template-columns:minmax(230px,.72fr) minmax(320px,1.4fr) minmax(300px,.9fr)!important;min-height:650px!important;border-top:1px solid rgba(214,179,106,.13)!important;gap:0!important}
+.admin-rp-chat-browser{min-width:0!important;background:#0d0c0a}
+.admin-rp-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 14px 10px}
+.admin-rp-panel-heading>div{display:grid;gap:5px}
+.admin-rp-panel-heading>div>span,.admin-rp-search-wrap>span{color:#82745a;font-size:8px;letter-spacing:.16em}
+.admin-rp-panel-heading strong{color:#d8c69c;font-size:14px;font-weight:500}
+.admin-rp-chat-count{color:#b99a5c;font-size:11px;font-variant-numeric:tabular-nums}
+.admin-rp-search-wrap{display:grid;gap:6px;margin:0 12px 12px}
+.admin-rp-chat-search{width:100%;box-sizing:border-box;margin:0!important}
+.admin-rp-chat-list{max-height:650px}
+.admin-rp-chat-row{grid-template-columns:25px minmax(0,1fr)!important;gap:8px!important;padding:12px 9px!important;border-radius:4px!important}
+.admin-rp-chat-row strong{font-size:12px!important;color:#c6b994}
+.admin-rp-chat-row small{font-size:9px!important;white-space:normal!important;line-height:1.45}
+.admin-rp-chat-view{min-height:650px;border-left:1px solid rgba(214,179,106,.09);border-right:1px solid rgba(214,179,106,.09)}
+.admin-rp-chat-view-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 20px!important;background:rgba(214,179,106,.025)}
+.admin-rp-chat-view-head h3{font-size:clamp(20px,2vw,27px)!important;line-height:1.15!important;overflow-wrap:anywhere}
+.admin-rp-live-mark{display:flex;align-items:center;gap:7px;color:#8f815f;font-size:8px;letter-spacing:.13em;white-space:nowrap}
+.admin-rp-live-mark i{width:6px;height:6px;border-radius:50%;background:#9aab72;box-shadow:0 0 10px rgba(154,171,114,.35)}
+.admin-rp-message-list{max-height:850px}
+.admin-rp-message{grid-template-columns:36px minmax(0,1fr)!important;gap:11px!important}
+.admin-rp-message-meta{align-items:flex-start!important;flex-direction:column!important;gap:4px!important}
+.admin-rp-message-meta strong{font-size:12px!important}
+.admin-rp-message-meta span{font-size:9px!important}
+.admin-rp-message p{font-size:12px!important;line-height:1.7!important}
+.admin-rp-tools{display:flex!important;flex-direction:column!important;gap:0!important;min-width:0;background:#0d0c0a!important}
+.admin-rp-tool{padding:0!important;border:0!important;border-bottom:1px solid rgba(214,179,106,.12)!important}
+.admin-rp-tool-summary{display:grid;grid-template-columns:27px minmax(0,1fr) 18px;align-items:center;gap:10px;padding:15px 14px;cursor:pointer;list-style:none}
+.admin-rp-tool-summary::-webkit-details-marker,.admin-rp-create-details>summary::-webkit-details-marker{display:none}
+.admin-rp-tool-summary:hover{background:rgba(214,179,106,.035)}
+.admin-rp-tool-number{display:grid;place-items:center;width:26px;height:26px;border:1px solid rgba(214,179,106,.18);border-radius:4px;color:#bba16a;font-size:10px}
+.admin-rp-tool-summary>span:nth-child(2){display:grid;gap:4px;min-width:0}
+.admin-rp-tool-summary small{color:#82745a;font-size:8px;letter-spacing:.15em}
+.admin-rp-tool-summary strong{color:#d9c79c;font-size:13px;font-weight:500}
+.admin-rp-tool-summary>i{color:#b79b61;font-style:normal;transition:transform .15s}
+.admin-rp-tool[open]>.admin-rp-tool-summary>i{transform:rotate(180deg)}
+.admin-rp-tool-content{padding:0 14px 17px}
+.admin-rp-tool-content>p{margin:0 0 12px!important;font-size:11px!important;line-height:1.55!important}
+.admin-rp-tool-content>label{display:block;margin-top:10px;color:#968568;font-size:9px;letter-spacing:.08em}
+.admin-rp-tool-content>label select{margin-top:5px}
+.admin-rp-tool-content .admin-rp-composer-input{min-height:125px;margin-top:10px}
+.admin-rp-composer-send{display:flex;align-items:center;justify-content:space-between;gap:12px;text-align:left!important;padding:13px 14px!important;font-size:10px!important;letter-spacing:.06em!important;cursor:pointer}
+.admin-rp-composer-send span{font-size:15px}
+.admin-rp-create-details{margin-top:12px;border:1px solid rgba(214,179,106,.15);border-radius:4px}
+.admin-rp-create-details>summary{padding:10px;color:#cdb783;font-size:11px;cursor:pointer;list-style:none}
+.admin-rp-create-details[open]>summary{border-bottom:1px solid rgba(214,179,106,.12)}
+.admin-rp-create-details .admin-rp-nrp-create{padding:10px;margin-top:0}
+.admin-rp-nrp-create input,.admin-rp-nrp-create textarea{min-width:0}
+.admin-rp-portrait-tool .admin-rp-portrait-library{max-height:380px;grid-template-columns:1fr}
+.admin-rp-actors-tool .admin-rp-nrp-list{max-height:360px;overflow:auto}
+@media(max-width:1250px){.admin-rp-layout{grid-template-columns:minmax(220px,.7fr) minmax(0,1.3fr)!important}.admin-rp-tools{grid-column:1/-1;display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;border-top:1px solid rgba(214,179,106,.12)}.admin-rp-tool{border-right:1px solid rgba(214,179,106,.1)!important}.admin-rp-tool-content{padding:0 12px 14px}.admin-rp-tool-summary{grid-template-columns:25px minmax(0,1fr) 14px;padding:13px 10px}.admin-rp-tool-summary strong{font-size:12px}}
+@media(max-width:820px){.admin-rp-layout{grid-template-columns:1fr!important}.admin-rp-chat-browser{border-right:0!important;border-bottom:1px solid rgba(214,179,106,.12);max-height:360px}.admin-rp-chat-view{min-height:480px;border:0}.admin-rp-tools{grid-template-columns:1fr!important}.admin-rp-tool{border-right:0!important}.admin-rp-heading{align-items:flex-start!important;flex-direction:column!important;padding:18px 16px!important}.admin-rp-heading-actions{justify-content:flex-start}.admin-rp-message-list{max-height:560px}}
