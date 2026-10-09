@@ -997,12 +997,10 @@ async function getRpCharacterPhoto(characterId) {
 
     // Seeded RP actors have no uploaded image yet. Give them a distinct
     // illustrated portrait instead of an empty star; a real upload always wins.
-    const { data: rpActor } = await window.supabaseClient
-        .from("lorgus_nrp_characters")
-        .select("character_id")
-        .eq("character_id", characterId)
-        .maybeSingle();
-    const fallback = rpActor ? buildRpFallbackPortrait(character || {}) : null;
+    // The RP actor registry is admin-only, so do not depend on reading it
+    // from a player's browser. Every character without an uploaded image gets
+    // a distinct generated fantasy portrait; uploaded photos take precedence.
+    const fallback = character ? buildRpFallbackPortrait(character) : null;
     window.rpCharacterPhotoCache[key] = fallback;
     return fallback;
 }
