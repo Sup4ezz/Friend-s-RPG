@@ -738,9 +738,11 @@ async function renderRoadChat(presence, fromRoute = false) {
         }
     }
 
-    const currentPresence = await getRpPresence();
-    await loadRpMessages(currentPresence);
-    await subscribeToRpMessages(currentPresence);
+    // Keep the exact room rendered above. A second presence lookup here can
+    // return null/stale data and prevent the existing room history from loading.
+    const chatSpace = window.activeRpChatSpace || presence;
+    await loadRpMessages(chatSpace);
+    await subscribeToRpMessages(chatSpace);
 }
 
 function renderFloodChat() {
