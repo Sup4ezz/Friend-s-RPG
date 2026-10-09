@@ -97,3 +97,30 @@
 .lorgus-lore-callout p { margin: 8px 0 !important; }
 .lorgus-lore-callout ul { margin: 8px 0 !important; }
 .lorgus-lore-callout-ateron { border-left-color: #bca16a; }
+
+.lorgus-lore-portrait-panel {
+    display: grid; grid-template-columns: minmax(140px, 210px) minmax(0, 1fr);
+    gap: 18px; align-items: center; margin: 22px 0 28px; padding: 14px;
+    border: 1px solid rgba(203,169,100,.22); background: rgba(0,0,0,.2);
+}
+.lorgus-lore-portrait-preview {
+    min-height: 150px; aspect-ratio: 4 / 5; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px; overflow: hidden;
+    border: 1px solid rgba(203,169,100,.2); background: rgba(0,0,0,.28); color: #c7a25c;
+}
+.lorgus-lore-portrait-preview img { display: block; width: 100%; height: 100%; min-height: 150px; object-fit: cover; }
+.lorgus-lore-portrait-preview small { color: #9f9278; font-size: 10px; }
+.lorgus-lore-portrait-tools { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; min-width: 0; }
+.lorgus-lore-portrait-tools > div { display: grid; gap: 5px; }
+.lorgus-lore-portrait-tools strong { color: #ead5a4; font-size: 14px; }
+.lorgus-lore-portrait-tools small { color: #a99b80; font-size: 10px; overflow-wrap: anywhere; }
+.lorgus-lore-portrait-upload {
+    display: inline-flex; align-items: center; justify-content: center; padding: 10px 13px;
+    border: 1px solid rgba(203,169,100,.4); background: rgba(176,135,54,.16);
+    color: #e9d4a5; font-size: 11px; cursor: pointer;
+}
+.lorgus-lore-portrait-upload:hover { background: rgba(176,135,54,.27); }
+@media(max-width: 620px) {
+    .lorgus-lore-portrait-panel { grid-template-columns: minmax(90px, 125px) minmax(0,1fr); gap: 12px; padding: 10px; }
+    .lorgus-lore-portrait-preview { min-height: 125px; }
+}
