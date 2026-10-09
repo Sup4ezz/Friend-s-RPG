@@ -198,8 +198,8 @@
                     <section class="admin-rp-crop-dialog" role="dialog" aria-modal="true" aria-label="Настройка портрета">
                         <header><strong>Настроить портрет</strong><button type="button" data-crop-cancel aria-label="Закрыть">×</button></header>
                         <p>Меняй размер персонажа и двигай его внутри рамки. Результат сохранится для всех мест, где показывается портрет.</p>
-                        <div class="admin-rp-crop-stage"><canvas width="360" height="440"></canvas></div>
-                        <label>Размер персонажа <output data-crop-zoom>100%</output><input data-crop-zoom-range type="range" min="50" max="200" value="100"></label>
+                        <div class="admin-rp-crop-stage"><canvas width="440" height="440"></canvas></div>
+                        <label>Размер персонажа <output data-crop-zoom>100%</output><input data-crop-zoom-range type="range" min="50" max="500" value="100"></label>
                         <label>По горизонтали <output data-crop-x>0</output><input data-crop-x-range type="range" min="-100" max="100" value="0"></label>
                         <label>По вертикали <output data-crop-y>0</output><input data-crop-y-range type="range" min="-100" max="100" value="0"></label>
                         <footer><button type="button" data-crop-reset>Сбросить</button><button type="button" data-crop-save>Применить портрет</button></footer>
@@ -218,8 +218,15 @@
                     const maxX = Math.max(0, (dw - W) / 2), maxY = Math.max(0, (dh - H) / 2);
                     const x = (W - dw) / 2 + maxX * offsetX / 100;
                     const y = (H - dh) / 2 + maxY * offsetY / 100;
-                    ctx.fillStyle = "#11100d"; ctx.fillRect(0, 0, W, H);
+                    ctx.clearRect(0, 0, W, H);
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(W / 2, H / 2, Math.min(W, H) / 2, 0, Math.PI * 2);
+                    ctx.clip();
+                    ctx.fillStyle = "#11100d";
+                    ctx.fillRect(0, 0, W, H);
                     ctx.drawImage(image, x, y, dw, dh);
+                    ctx.restore();
                     overlay.querySelector("[data-crop-zoom]").textContent = Math.round(zoom * 100) + "%";
                     overlay.querySelector("[data-crop-x]").textContent = offsetX;
                     overlay.querySelector("[data-crop-y]").textContent = offsetY;
@@ -236,10 +243,21 @@
                     zoomInput.value = 100; xInput.value = 0; yInput.value = 0; draw();
                 });
                 overlay.querySelector("[data-crop-save]").addEventListener("click", () => {
-                    canvas.toBlob(blob => {
+                    const output = document.createElement("canvas");
+                    output.width = canvas.width;
+                    output.height = canvas.height;
+                    const outCtx = output.getContext("2d");
+                    outCtx.clearRect(0, 0, output.width, output.height);
+                    outCtx.save();
+                    outCtx.beginPath();
+                    outCtx.arc(output.width / 2, output.height / 2, Math.min(output.width, output.height) / 2, 0, Math.PI * 2);
+                    outCtx.clip();
+                    outCtx.drawImage(canvas, 0, 0);
+                    outCtx.restore();
+                    output.toBlob(blob => {
                         if (!blob) { alert("Не удалось подготовить изображение."); return; }
                         close(); resolve(blob);
-                    }, "image/jpeg", 0.92);
+                    }, "image/png");
                 });
                 draw();
             };
@@ -283,9 +301,9 @@
                 try {
                     const editedBlob = await editPortraitImage(file);
                     if (!editedBlob) { input.disabled = false; input.value = ""; return; }
-                    const path = "rp-characters/" + characterId + "/" + Date.now() + "-portrait.jpg";
+                    const path = "rp-characters/" + characterId + "/" + Date.now() + "-portrait.png";
                     const { error: uploadError } = await window.supabaseClient.storage.from("character-applications")
-                        .upload(path, editedBlob, { upsert: true, contentType: "image/jpeg" });
+                        .upload(path, editedBlob, { upsert: true, contentType: "image/png" });
                     if (uploadError) throw uploadError;
                     const { error: saveError } = await window.supabaseClient.rpc("admin_set_rp_character_photo", {
                         p_character_id: characterId,
@@ -364,9 +382,9 @@
                 try {
                     const editedBlob = await editPortraitImage(file);
                     if (!editedBlob) { input.disabled = false; input.value = ""; return; }
-                    const path = "rp-characters/" + characterId + "/" + Date.now() + "-portrait.jpg";
+                    const path = "rp-characters/" + characterId + "/" + Date.now() + "-portrait.png";
                     const { error: uploadError } = await window.supabaseClient.storage.from("character-applications")
-                        .upload(path, editedBlob, { upsert: true, contentType: "image/jpeg" });
+                        .upload(path, editedBlob, { upsert: true, contentType: "image/png" });
                     if (uploadError) throw uploadError;
                     const { error: saveError } = await window.supabaseClient.rpc("admin_set_rp_character_photo", {
                         p_character_id: characterId, p_photo_path: path
