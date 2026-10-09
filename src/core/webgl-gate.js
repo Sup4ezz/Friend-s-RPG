@@ -594,7 +594,7 @@ const openingShape = new THREE.Shape();
         depthWrite: false
     });
     const portalSparks = [];
-    for (let i = 0; i < 70; i++) {
+    for (let i = 0; i < (lowPower ? 28 : 70); i++) {
         const spark = new THREE.Mesh(
             new THREE.SphereGeometry(0.025 + Math.random() * 0.055, 6, 6),
             sparkMat
@@ -792,7 +792,7 @@ const openingShape = new THREE.Shape();
     world.add(gateInnerGlow);
 
     const debris = [];
-    for (let n = 0; n < 95; n++) {
+    for (let n = 0; n < (lowPower ? 40 : 95); n++) {
         const size = 0.05 + Math.random() * 0.28;
         const mesh = new THREE.Mesh(
             new THREE.IcosahedronGeometry(size, 0),
@@ -806,7 +806,7 @@ const openingShape = new THREE.Shape();
 
     // Living night sky: many bright moving stars, not a static handful of dots.
     const starGeometry = new THREE.BufferGeometry();
-    const starCount = 260;
+    const starCount = lowPower ? 100 : 260;
     const starPositions = new Float32Array(starCount * 3);
     const starSpeeds = new Float32Array(starCount);
     for (let i = 0; i < starCount; i++) {
