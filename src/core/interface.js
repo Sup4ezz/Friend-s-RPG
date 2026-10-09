@@ -463,8 +463,8 @@ function showRpMessageContextMenu(message, x, y) {
     menu.querySelector('[data-action="reply"]').addEventListener("click", () => {
         const input = document.getElementById("lorgus-rp-input");
         if (input) {
-            const quoted = body.split("\\n").map(line => "> " + line).join("\\n");
-            const prefix = "> " + author + ":\\n" + quoted + "\\n\\n";
+            const quoted = body.split("\n").map(line => "> " + line).join("\n");
+            const prefix = "> " + author + ":\n" + quoted + "\n\n";
             input.value = input.value.trim() ? prefix + input.value : prefix;
             input.dispatchEvent(new Event("input", { bubbles: true }));
             input.focus();
