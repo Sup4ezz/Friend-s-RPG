@@ -1,7 +1,6 @@
 import {
     createClient
 } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js";
 
 let supabase;
 let authSwitching = false;
@@ -9,7 +8,6 @@ window.lorgusPortalEntering = false;
 window.lorgusPortalDepartureAligning = false;
 window.lorgusPortalEnterStartedAt = 0;
 window.lorgusPortalOverlay = null;
-window.THREE = THREE;
 window.supabaseClient = null;
 
 /* =========================================================
