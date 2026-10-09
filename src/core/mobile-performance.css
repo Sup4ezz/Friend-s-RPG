@@ -1,0 +1,296 @@
+/* LORGUS mobile + low-power rendering overrides.
+   Keep the desktop art direction; simplify layout and expensive effects on phones. */
+
+@media (max-width: 720px) {
+    body {
+        background: var(--bg, #090806);
+    }
+
+    .lorgus-panel,
+    .auth-panel,
+    .error-panel,
+    .lorgus-world-sidebar,
+    .lorgus-world-browser,
+    .lorgus-character-sidebar,
+    .lorgus-character-main,
+    .lorgus-mail-sidebar,
+    .lorgus-mail-main {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .24) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .lorgus-world-shell {
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 0 !important;
+        min-height: 0 !important;
+    }
+
+    .lorgus-world-sidebar {
+        position: relative !important;
+        top: auto !important;
+        min-height: 0 !important;
+        padding: 16px !important;
+        border-right: 0 !important;
+        border-left: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .lorgus-world-sidebar-symbol,
+    .lorgus-world-sidebar-meta {
+        display: none !important;
+    }
+
+    .lorgus-world-sidebar-name {
+        margin-top: 0 !important;
+        font-size: 24px !important;
+    }
+
+    .lorgus-world-sidebar-button {
+        width: auto !important;
+        max-width: 100%;
+        margin-top: 10px !important;
+    }
+
+    .lorgus-world-browser {
+        min-width: 0 !important;
+        padding: 22px 14px !important;
+        border-right: 0 !important;
+        border-left: 0 !important;
+        border-radius: 0 !important;
+    }
+
+    .lorgus-global-nav {
+        position: sticky !important;
+        top: 0;
+        z-index: 100;
+        min-width: 0;
+        padding: 6px 10px !important;
+        gap: 4px !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .lorgus-global-links {
+        min-width: 0;
+        height: auto !important;
+        min-height: 48px;
+        overflow-x: auto;
+        justify-content: flex-start !important;
+        gap: 2px !important;
+        scrollbar-width: none;
+        overscroll-behavior-x: contain;
+    }
+
+    .lorgus-global-links::-webkit-scrollbar {
+        display: none;
+    }
+
+    .lorgus-global-links button {
+        flex: 0 0 auto;
+        min-width: 62px !important;
+        height: 48px !important;
+        padding: 5px 8px !important;
+        gap: 3px !important;
+    }
+
+    .lorgus-global-links button b {
+        font-size: 9px !important;
+        letter-spacing: 0 !important;
+    }
+
+    .lorgus-global-account {
+        min-width: 0;
+        gap: 8px !important;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        padding: 4px 0 !important;
+    }
+
+    .lorgus-global-user {
+        overflow: hidden;
+        max-width: 42vw;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .lorgus-command-grid,
+    .lorgus-command-bottom,
+    .lorgus-character-overview,
+    .lorgus-character-content-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .lorgus-command-card,
+    .lorgus-character-card {
+        min-width: 0;
+    }
+
+    .lorgus-character-shell {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .lorgus-character-sidebar {
+        position: relative !important;
+        min-height: 0 !important;
+        padding: 14px !important;
+        border-right: 0 !important;
+        border-bottom: 1px solid rgba(214, 179, 106, .12);
+    }
+
+    .lorgus-character-portrait {
+        display: none !important;
+    }
+
+    .lorgus-character-main {
+        min-width: 0;
+        padding: 20px 14px 32px !important;
+    }
+
+    .lorgus-character-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .lorgus-mail-shell {
+        display: block !important;
+        width: 100% !important;
+        min-height: 100vh;
+        height: auto !important;
+        overflow: visible !important;
+    }
+
+    .lorgus-mail-sidebar {
+        display: flex !important;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px !important;
+        border-right: 0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, .08);
+    }
+
+    .lorgus-mail-sidebar-note {
+        display: none !important;
+    }
+
+    .lorgus-mail-main,
+    .lorgus-mail-workspace,
+    .lorgus-mail-inbox {
+        min-width: 0 !important;
+        width: 100% !important;
+    }
+
+    .lorgus-mail-workspace {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .lorgus-rp-page .lorgus-messenger-shell {
+        grid-template-columns: minmax(0, 1fr) !important;
+        min-width: 0 !important;
+    }
+
+    .lorgus-rp-page .lorgus-messenger-main {
+        min-width: 0 !important;
+    }
+
+    .lorgus-rp-page .lorgus-messenger-feed {
+        min-width: 0;
+        padding: 12px !important;
+        overscroll-behavior: contain;
+    }
+
+    .lorgus-rp-page .lorgus-messenger-message {
+        gap: 8px !important;
+        margin-bottom: 14px !important;
+    }
+
+    .lorgus-rp-page .lorgus-messenger-message-avatar {
+        width: 40px !important;
+        height: 40px !important;
+        flex-basis: 40px !important;
+    }
+
+    .lorgus-rp-page .lorgus-messenger-message-content {
+        width: calc(100% - 48px) !important;
+        max-width: none !important;
+    }
+
+    .lorgus-rp-page .lorgus-messenger-bubble p {
+        font-size: 14px !important;
+        line-height: 1.65 !important;
+        overflow-wrap: anywhere;
+    }
+
+    .lorgus-rp-page .lorgus-messenger-header,
+    .lorgus-rp-page .lorgus-messenger-sidebar,
+    .lorgus-rp-page .lorgus-messenger-composer,
+    .lorgus-rp-page .lorgus-messenger-bubble {
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    .lorgus-rp-context-menu {
+        max-width: calc(100vw - 16px);
+    }
+
+    input,
+    select,
+    textarea {
+        max-width: 100%;
+    }
+
+    button,
+    a,
+    input,
+    select,
+    textarea {
+        touch-action: manipulation;
+    }
+}
+
+@media (max-width: 420px) {
+    .lorgus-world-browser,
+    .lorgus-character-main {
+        padding: 16px 12px !important;
+    }
+
+    .lorgus-global-brand small,
+    .lorgus-global-presence,
+    .lorgus-global-nav-title {
+        display: none !important;
+    }
+
+    .lorgus-global-links button {
+        min-width: 56px !important;
+        padding-inline: 6px !important;
+    }
+
+    .lorgus-global-links button span {
+        font-size: 15px !important;
+    }
+
+    .lorgus-global-links button b {
+        font-size: 8px !important;
+    }
+
+    .lorgus-character-header h1 {
+        font-size: clamp(30px, 9vw, 42px) !important;
+        overflow-wrap: anywhere;
+    }
+
+    .lorgus-rp-page .lorgus-messenger-composer {
+        padding: 8px !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}
