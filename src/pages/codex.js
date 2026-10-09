@@ -13,14 +13,14 @@
     ];
     const esc = value => window.escapeHtml ? window.escapeHtml(String(value ?? "")) : String(value ?? "").replace(/[&<>"]/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[ch]));
     const encodePath = value => value.split("/").map(encodeURIComponent).join("/");
-    const slug = value => String(value || "").trim().toLocaleLowerCase("ru").replace(/\\[[^\\]]*\\]/g, "").replace(/[^\\p{L}\\p{N}]+/gu, "-").replace(/^-|-$/g, "");
+    const slug = value => String(value || "").trim().toLocaleLowerCase("ru").replace(/\[[^\]]*\]/g, "").replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "");
     function inline(value) {
         return esc(value)
-            .replace(/\\[\\[([^|\\]]+)\\|([^\\]]+)\\]\\]/g, '<a class="lorgus-codex-wikilink" href="#" data-codex-target="$1">$2</a>')
-            .replace(/\\[\\[([^\\]]+)\\]\\]/g, '<a class="lorgus-codex-wikilink" href="#" data-codex-target="$1">$1</a>')
-            .replace(/\\*\\*(.+?)\\*\\*/g, "<strong>$1</strong>")
-            .replace(/\\*(.+?)\\*/g, "<em>$1</em>")
-            .replace(/\\x60([^\\x60]+)\\x60/g, "<code>$1</code>");
+            .replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, '<a class="lorgus-codex-wikilink" href="#" data-codex-target="$1">$2</a>')
+            .replace(/\[\[([^\]]+)\]\]/g, '<a class="lorgus-codex-wikilink" href="#" data-codex-target="$1">$1</a>')
+            .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+            .replace(/\*(.+?)\*/g, "<em>$1</em>")
+            .replace(/\x60([^\x60]+)\x60/g, "<code>$1</code>");
     }
 
     function markdown(source) {
@@ -32,7 +32,7 @@
         for (const line of lines) {
             const t = line.trim();
             if (!t) { flushP(); flushL(); continue; }
-            const heading = t.match(/^(#{1,4})\\s+(.+)$/);
+            const heading = t.match(/^(#{1,4})\s+(.+)$/);
             if (heading) { flushP(); flushL(); const level = Math.min(heading[1].length + 1, 5); const id = slug(heading[2]); out.push('<h' + level + ' id="' + id + '">' + inline(heading[2]) + "</h" + level + ">"); continue; }
             if (/^---+$/.test(t)) { flushP(); flushL(); out.push("<hr>"); continue; }
             if (/^>\s?/.test(t)) { flushP(); flushL(); out.push("<blockquote>" + inline(t.replace(/^>\s?/, "")) + "</blockquote>"); continue; }
@@ -77,7 +77,7 @@
                         }
                         const topicIndex = topics.findIndex(item => {
                             const title = slug(item.title);
-                            const file = slug(item.file.replace(/\\.md$/i, ""));
+                            const file = slug(item.file.replace(/\.md$/i, ""));
                             return title === targetSlug || file === targetSlug;
                         });
                         if (topicIndex >= 0) void loadTopic(topicIndex);
