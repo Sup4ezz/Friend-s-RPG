@@ -27,3 +27,8 @@
 .admin-rp-crop-dialog input[type=range]{grid-column:1/-1;width:100%;accent-color:#c6a15a}
 .admin-rp-crop-dialog footer{margin-top:18px;flex-wrap:wrap}
 @media(max-width:480px){.admin-rp-crop-overlay{padding:8px}.admin-rp-crop-dialog{padding:13px}.admin-rp-crop-dialog footer button{flex:1}}
+
+/* Round portrait crop preview and stronger zoom */
+.admin-rp-crop-stage{width:min(100%,320px);aspect-ratio:1;margin:14px auto;padding:0;border:0;background:transparent;position:relative;overflow:visible}
+.admin-rp-crop-stage:before{content:"";position:absolute;inset:0;border:2px solid #d6b36a;border-radius:50%;pointer-events:none;z-index:1;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 22px rgba(214,179,106,.12)}
+.admin-rp-crop-stage canvas{display:block;width:100%;height:auto;aspect-ratio:1;border-radius:50%;background:#11100d}
