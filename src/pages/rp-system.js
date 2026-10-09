@@ -1303,9 +1303,8 @@ async function loadRpMessages(presence) {
     const cached = readRpMessageCache(presence);
     feed.innerHTML = "";
     if (cached.length) {
-        const ids = [...new Set(cached.map(row => row.character_id).filter(Boolean))];
-        await Promise.all(ids.map(id => Promise.all([getRpCharacterPhoto(id), getRpCharacterActiveTitle(id)])));
-        for (const message of cached) await appendRpMessage(message);
+        // Рисуем кэш сразу; портреты и титулы appendRpMessage догрузит отдельно.
+        cached.forEach(message => { appendRpMessage(message); });
     } else {
         feed.innerHTML = '<div class="lorgus-messenger-start"><div class="lorgus-messenger-start-mark">✦</div><strong>История ещё не началась</strong><span>Первое сообщение создаст сцену.</span><p>Пиши свободно. Действия, реплики и мысли персонажа будут появляться здесь как настоящая переписка.</p></div>';
     }
@@ -1336,9 +1335,7 @@ async function loadRpMessages(presence) {
     writeRpMessageCache(presence, fresh);
     if (!fresh.length && !cached.length) return;
 
-    const ids = [...new Set(fresh.map(row => row.character_id).filter(Boolean))];
-    await Promise.all(ids.map(id => Promise.all([getRpCharacterPhoto(id), getRpCharacterActiveTitle(id)])));
-    for (const message of fresh) await appendRpMessage(message);
+    fresh.forEach(message => { appendRpMessage(message); });
     feed.scrollTop = feed.scrollHeight;
 }
 
@@ -1373,7 +1370,7 @@ async function pollRpMessages(presence) {
 
         // Сверху вниз — чтобы новые сообщения добавлялись в правильном порядке.
         for (const message of (data || []).reverse()) {
-            await appendRpMessage(message);
+            appendRpMessage(message);
         }
     } finally {
         window.rpMessagesPolling = false;
