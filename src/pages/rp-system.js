@@ -1441,22 +1441,24 @@ async function subscribeToRpMessages(presence) {
 
             if (!sameLocation && !sameRoad) return;
 
-            const { data: character } = await window.supabaseClient
-                .from("characters")
-                .select("name")
-                .eq("id", row.character_id)
-                .single();
-            let replyTo = null;
-            if (row.reply_to_id) {
-                const { data: parent } = await window.supabaseClient
-                    .from("rp_messages")
-                    .select("id, character_id, body, created_at, characters(name)")
-                    .eq("id", row.reply_to_id)
-                    .maybeSingle();
-                replyTo = parent || null;
-            }
+            // Re-read the committed row: the reply RPC updates reply_to_id in the same
+            // transaction after the base insert, so the INSERT payload may be an older snapshot.
+            const { data: committedMessage, error: committedError } = await window.supabaseClient
+                .from("rp_messages")
+                .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, reply_to:rp_messages!rp_messages_reply_to_id_fkey(id, character_id, body, created_at, characters(name)), characters(name)")
+                .eq("id", row.id)
+                .maybeSingle();
 
-            await appendRpMessage({ ...row, characters: character, reply_to: replyTo });
+            if (!committedError && committedMessage) {
+                await appendRpMessage(committedMessage);
+            } else {
+                const { data: character } = await window.supabaseClient
+                    .from("characters")
+                    .select("name")
+                    .eq("id", row.character_id)
+                    .single();
+                await appendRpMessage({ ...row, characters: character });
+            }
         })
         .subscribe((status, error) => {
             if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
