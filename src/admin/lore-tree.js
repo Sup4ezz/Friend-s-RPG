@@ -98,48 +98,112 @@
     const esc = value => window.escapeHtml(String(value ?? ""));
     const encodePath = path => path.split("/").map(encodeURIComponent).join("/");
 
+    function renderInline(value) {
+        let html = esc(value);
+        html = html.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '<span class="lorgus-wikilink">$2</span>');
+        html = html.replace(/\[\[([^\]]+)\]\]/g, '<span class="lorgus-wikilink">$1</span>');
+        html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        html = html.replace(/__(.+?)__/g, "<strong>$1</strong>");
+        html = html.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>");
+        html = html.replace(/(^|[^_])_([^_\n]+)_(?!_)/g, "$1<em>$2</em>");
+        html = html.replace(/~~(.+?)~~/g, "<del>$1</del>");
+        return html;
+    }
+
     function renderMarkdown(source) {
         const lines = String(source || "").replace(/\r/g, "").split("\n");
         const blocks = [];
         let paragraph = [];
         let list = [];
+        let code = [];
+        let inCode = false;
+        const fence = String.fromCharCode(96).repeat(3);
         const flushParagraph = () => {
             if (paragraph.length) {
-                blocks.push("<p>" + paragraph.map(esc).join("<br>") + "</p>");
+                blocks.push("<p>" + paragraph.map(renderInline).join("<br>") + "</p>");
                 paragraph = [];
             }
         };
         const flushList = () => {
             if (list.length) {
-                blocks.push("<ul>" + list.map(item => "<li>" + esc(item) + "</li>").join("") + "</ul>");
+                blocks.push("<ul>" + list.map(item => "<li>" + renderInline(item) + "</li>").join("") + "</ul>");
                 list = [];
             }
         };
-        for (const line of lines) {
-            const trimmed = line.trim();
+        const flushCode = () => {
+            blocks.push("<pre><code>" + esc(code.join("\n")) + "</code></pre>");
+            code = [];
+        };
+        for (let i = 0; i < lines.length; i++) {
+            const trimmed = lines[i].trim();
+            if (trimmed.startsWith(fence)) {
+                flushParagraph(); flushList();
+                if (inCode) { flushCode(); inCode = false; }
+                else { inCode = true; }
+                continue;
+            }
+            if (inCode) { code.push(lines[i]); continue; }
             if (!trimmed) { flushParagraph(); flushList(); continue; }
+
             const heading = trimmed.match(/^(#{1,4})\s+(.+)$/);
             if (heading) {
                 flushParagraph(); flushList();
                 const level = heading[1].length;
-                blocks.push("<h" + level + ">" + esc(heading[2]) + "</h" + level + ">");
-            } else if (/^[-*+]\s+/.test(trimmed)) {
+                blocks.push("<h" + level + ">" + renderInline(heading[2]) + "</h" + level + ">");
+                continue;
+            }
+            if (/^>\s?/.test(trimmed)) {
+                flushParagraph(); flushList();
+                const quoteLines = [];
+                while (i < lines.length && /^\s*>/.test(lines[i])) {
+                    quoteLines.push(lines[i].trim().replace(/^>\s?/, ""));
+                    i++;
+                }
+                i--;
+                const callout = quoteLines[0]?.match(/^\[!([\w-]+)\]([+-])?\s*(.*)$/);
+                if (callout) {
+                    const kind = callout[1].toLowerCase();
+                    const title = callout[3] || "Запись";
+                    const bodyLines = quoteLines.slice(1);
+                    const body = [];
+                    let quoteList = [];
+                    const flushQuoteList = () => {
+                        if (quoteList.length) {
+                            body.push("<ul>" + quoteList.map(item => "<li>" + renderInline(item) + "</li>").join("") + "</ul>");
+                            quoteList = [];
+                        }
+                    };
+                    for (const bodyLine of bodyLines) {
+                        const item = bodyLine.match(/^[-*+]\s+(.+)$/);
+                        if (item) quoteList.push(item[1]);
+                        else {
+                            flushQuoteList();
+                            if (bodyLine.trim()) body.push("<p>" + renderInline(bodyLine) + "</p>");
+                        }
+                    }
+                    flushQuoteList();
+                    blocks.push('<section class="lorgus-lore-callout lorgus-lore-callout-' + esc(kind) + '"><h3>' + renderInline(title) + '</h3><div>' + body.join("") + '</div></section>');
+                } else {
+                    blocks.push("<blockquote>" + quoteLines.map(renderInline).join("<br>") + "</blockquote>");
+                }
+                continue;
+            }
+            if (/^[-*+]\s+/.test(trimmed)) {
                 flushParagraph();
                 list.push(trimmed.replace(/^[-*+]\s+/, ""));
-            } else if (/^>\s?/.test(trimmed)) {
-                flushParagraph(); flushList();
-                blocks.push("<blockquote>" + esc(trimmed.replace(/^>\s?/, "")) + "</blockquote>");
-            } else if (/^---+$/.test(trimmed)) {
-                flushParagraph(); flushList(); blocks.push("<hr>");
-            } else {
-                flushList();
-                paragraph.push(trimmed);
+                continue;
             }
+            if (/^---+$/.test(trimmed)) {
+                flushParagraph(); flushList(); blocks.push("<hr>");
+                continue;
+            }
+            flushList();
+            paragraph.push(trimmed.replace(/\\\s*$/, ""));
         }
         flushParagraph(); flushList();
+        if (inCode) flushCode();
         return blocks.join("");
     }
-
     function nodeMarkup(node, depth = 0) {
         const hasChildren = Array.isArray(node.children) && node.children.length;
         const key = node.file ? "file" : "folder";
