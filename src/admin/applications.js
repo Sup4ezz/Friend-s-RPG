@@ -118,19 +118,35 @@ async function renderAdminApplications(container, applications) {
             </div>
             <div class="admin-character-filter-panel">
                 <label class="admin-character-search-wrap">
-                    <span>БЫСТРЫЙ ПОИСК</span>
-                    <input id="admin-character-search" type="search" placeholder="Имя, раса, родина, занятие, навыки…">
+                    <span>ПОИСК ПО КАТАЛОГУ</span>
+                    <input id="admin-character-search" type="search" autocomplete="off" placeholder="Имя, описание, раса, регион, оружие…">
                 </label>
                 <label><span>РАСА</span><select id="admin-character-race"><option value="">Все расы</option></select></label>
                 <label><span>РОДИНА</span><select id="admin-character-homeland"><option value="">Все регионы</option></select></label>
                 <label><span>ЗАНЯТИЕ</span><select id="admin-character-occupation"><option value="">Все занятия</option></select></label>
                 <label><span>ВОЗРАСТ</span><select id="admin-character-age"><option value="">Любой возраст</option><option value="young">До 25 лет</option><option value="adult">26–60 лет</option><option value="senior">Старше 60 лет</option><option value="unknown">Не указан</option></select></label>
+                <label><span>ПРОФИЛЬ</span><select id="admin-character-completeness"><option value="">Любое заполнение</option><option value="complete">Есть описание и навыки</option><option value="incomplete">Не хватает данных</option><option value="no-photo">Без портрета</option></select></label>
                 <label><span>СОРТИРОВКА</span><select id="admin-character-sort"><option value="newest">Сначала новые</option><option value="name-asc">Имя: А—Я</option><option value="name-desc">Имя: Я—А</option><option value="age-asc">Возраст: по возрастанию</option><option value="age-desc">Возраст: по убыванию</option></select></label>
-                <button type="button" id="admin-character-reset" class="admin-character-reset">Сбросить фильтры <span>↺</span></button>
+                <button type="button" id="admin-character-reset" class="admin-character-reset">Сбросить всё <span>↺</span></button>
             </div>
-            <div class="admin-character-results-line"><span id="admin-character-results-count">Загрузка списка…</span><span>КАТАЛОГ · АТЛАС ЛОРГУСА</span></div>
+            <div class="admin-character-toolbar">
+                <div class="admin-character-results-line"><strong id="admin-character-results-count">Загрузка списка…</strong><span id="admin-character-active-summary">Все персонажи</span></div>
+                <div class="admin-character-view-tools">
+                    <label class="admin-character-page-size"><span>НА СТРАНИЦЕ</span><select id="admin-character-page-size"><option value="12">12</option><option value="24" selected>24</option><option value="48">48</option><option value="all">Все</option></select></label>
+                    <div class="admin-character-view-toggle" role="group" aria-label="Вид каталога">
+                        <button type="button" class="active" data-character-view="cards" aria-pressed="true">Карточки</button>
+                        <button type="button" data-character-view="table" aria-pressed="false">Таблица</button>
+                    </div>
+                    <button type="button" id="admin-character-export" class="admin-character-export">Экспорт CSV ↗</button>
+                </div>
+            </div>
+            <div id="admin-character-active-filters" class="admin-character-active-filters" aria-live="polite"></div>
             <div id="admin-character-list" class="admin-applications admin-character-grid">
                 ${approved.length ? approved.map(window.renderAdminCharacterManagement).join("") : '<div class="admin-empty"><h2>Персонажей пока нет</h2><p>Одобренные персонажи появятся здесь.</p></div>'}
+            </div>
+            <div class="admin-character-pagination" id="admin-character-pagination">
+                <span id="admin-character-page-label">Страница 1</span>
+                <div><button type="button" id="admin-character-prev" disabled>← Назад</button><button type="button" id="admin-character-next" disabled>Далее →</button></div>
             </div>
         </section>
         <section class="admin-section admin-item-use-management">
@@ -195,17 +211,28 @@ async function renderAdminApplications(container, applications) {
 
     renderList();
 
-    // Каталог персонажей: фильтры независимы от фильтров заявок.
+    // Каталог персонажей: фильтрация, сортировка, постраничный просмотр и экспорт.
     const characterList = container.querySelector("#admin-character-list");
     const characterSearch = container.querySelector("#admin-character-search");
     const characterRace = container.querySelector("#admin-character-race");
     const characterHomeland = container.querySelector("#admin-character-homeland");
     const characterOccupation = container.querySelector("#admin-character-occupation");
     const characterAge = container.querySelector("#admin-character-age");
+    const characterCompleteness = container.querySelector("#admin-character-completeness");
     const characterSort = container.querySelector("#admin-character-sort");
     const characterCount = container.querySelector("#admin-character-results-count");
     const characterTotal = container.querySelector("#admin-character-total");
-    const characterFilters = [characterSearch, characterRace, characterHomeland, characterOccupation, characterAge, characterSort];
+    const characterActiveSummary = container.querySelector("#admin-character-active-summary");
+    const characterActiveFilters = container.querySelector("#admin-character-active-filters");
+    const characterPageSize = container.querySelector("#admin-character-page-size");
+    const characterPagination = container.querySelector("#admin-character-pagination");
+    const characterPageLabel = container.querySelector("#admin-character-page-label");
+    const characterPrev = container.querySelector("#admin-character-prev");
+    const characterNext = container.querySelector("#admin-character-next");
+    const characterFilters = [characterSearch, characterRace, characterHomeland, characterOccupation, characterAge, characterCompleteness, characterSort, characterPageSize];
+    let characterPage = 1;
+    let characterView = "cards";
+    let filteredCharacters = [...approved];
 
     const fillCharacterFilter = (select, field, placeholder) => {
         const values = [...new Set(approved.map(a => String(a[field] ?? "").trim()).filter(Boolean))]
@@ -216,12 +243,28 @@ async function renderAdminApplications(container, applications) {
     fillCharacterFilter(characterRace, "race", "Все расы");
     fillCharacterFilter(characterHomeland, "homeland", "Все регионы");
     fillCharacterFilter(characterOccupation, "occupation", "Все занятия");
-    characterTotal.textContent = approved.length + (approved.length === 1 ? " персонаж" : approved.length > 1 && approved.length < 5 ? " персонажа" : " персонажей");
+    const pluralCharacters = n => n + (n % 10 === 1 && n % 100 !== 11 ? " персонаж" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? " персонажа" : " персонажей");
+    characterTotal.textContent = pluralCharacters(approved.length);
 
-    const renderCharacterDirectory = () => {
+    const csvCell = value => '"' + String(value ?? "").replace(/"/g, '""').replace(/\r?\n/g, " ") + '"';
+    const renderCharacterTable = items => {
+        const rows = items.map(a => `<tr>
+            <td><div class="admin-character-table-name">${a.photo_url ? '<img src="' + window.escapeHtml(a.photo_url) + '" alt="">' : '<span class="admin-character-table-placeholder">✦</span>'}<span><strong>${window.escapeHtml(a.name || "Без имени")}</strong><small>#${window.escapeHtml(String(a.id))} · ID ${window.escapeHtml(String(a.character_id || "—"))}</small></span></div></td>
+            <td>${window.escapeHtml(a.race || "—")}</td><td>${window.escapeHtml(a.homeland || "—")}</td><td>${window.escapeHtml(a.occupation || "—")}</td><td>${a.age ? window.escapeHtml(String(a.age)) : "—"}</td>
+            <td><div class="admin-character-table-actions">
+                <button type="button" class="admin-character-details-button" data-character-detail-id="${window.escapeHtml(String(a.id))}">Открыть</button>
+                <button type="button" class="admin-character-details-button admin-character-titles-button" data-character-title-id="${window.escapeHtml(String(a.id))}>Титулы</button>
+                <button type="button" class="admin-character-details-button admin-character-abilities-button" data-character-ability-id="${window.escapeHtml(String(a.id))}>Навыки</button>
+                <button type="button" class="admin-character-details-button admin-character-inventory-button" data-character-inventory-id="${window.escapeHtml(String(a.id))}>Инвентарь</button>
+            </div></td></tr>`).join("");
+        return '<div class="admin-character-table-wrap"><table class="admin-character-table"><thead><tr><th>Персонаж</th><th>Раса</th><th>Родина</th><th>Занятие</th><th>Возраст</th><th>Действия</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+    };
+
+    const renderCharacterDirectory = resetPage => {
+        if (resetPage) characterPage = 1;
         const query = characterSearch.value.trim().toLocaleLowerCase("ru");
-        let filtered = approved.filter(a => {
-            const haystack = [a.name, a.race, a.homeland, a.occupation, a.personality, a.backstory, a.special_skills, a.preferred_weapon]
+        filteredCharacters = approved.filter(a => {
+            const haystack = [a.name, a.race, a.homeland, a.occupation, a.personality, a.backstory, a.special_skills, a.preferred_weapon, a.character_id]
                 .filter(Boolean).join(" ").toLocaleLowerCase("ru");
             const age = Number(a.age);
             const ageMatches = !characterAge.value ||
@@ -229,37 +272,97 @@ async function renderAdminApplications(container, applications) {
                 (characterAge.value === "adult" && Number.isFinite(age) && age >= 26 && age <= 60) ||
                 (characterAge.value === "senior" && Number.isFinite(age) && age > 60) ||
                 (characterAge.value === "unknown" && (!Number.isFinite(age) || age <= 0));
+            const complete = Boolean(a.personality?.trim() && a.backstory?.trim() && a.special_skills?.trim());
+            const profileMatches = !characterCompleteness.value ||
+                (characterCompleteness.value === "complete" && complete) ||
+                (characterCompleteness.value === "incomplete" && !complete) ||
+                (characterCompleteness.value === "no-photo" && !a.photo_url);
             return (!query || haystack.includes(query)) &&
                 (!characterRace.value || a.race === characterRace.value) &&
                 (!characterHomeland.value || a.homeland === characterHomeland.value) &&
                 (!characterOccupation.value || a.occupation === characterOccupation.value) &&
-                ageMatches;
+                ageMatches && profileMatches;
         });
         const sort = characterSort.value;
-        filtered.sort((a, b) => {
+        filteredCharacters.sort((a, b) => {
             if (sort === "name-asc") return String(a.name || "").localeCompare(String(b.name || ""), "ru");
             if (sort === "name-desc") return String(b.name || "").localeCompare(String(a.name || ""), "ru");
             if (sort === "age-asc") return (Number(a.age) || Number.MAX_SAFE_INTEGER) - (Number(b.age) || Number.MAX_SAFE_INTEGER);
             if (sort === "age-desc") return (Number(b.age) || 0) - (Number(a.age) || 0);
             return Number(b.id || 0) - Number(a.id || 0);
         });
-        characterCount.textContent = "Найдено: " + filtered.length + " из " + approved.length;
-        characterList.innerHTML = filtered.length
-            ? filtered.map(window.renderAdminCharacterManagement).join("")
-            : '<div class="admin-empty admin-character-no-results"><h2>Ничего не найдено</h2><p>Измени условия поиска или сбрось фильтры.</p></div>';
+        const pageSize = characterPageSize.value === "all" ? Math.max(filteredCharacters.length, 1) : Number(characterPageSize.value);
+        const pages = Math.max(1, Math.ceil(filteredCharacters.length / pageSize));
+        characterPage = Math.min(characterPage, pages);
+        const start = (characterPage - 1) * pageSize;
+        const visible = filteredCharacters.slice(start, start + pageSize);
+        characterCount.textContent = filteredCharacters.length ? `Показаны ${start + 1}–${Math.min(start + visible.length, filteredCharacters.length)} из ${filteredCharacters.length}` : "Ничего не найдено";
+        characterActiveSummary.textContent = filteredCharacters.length === approved.length ? "Без ограничений" : `Отобрано ${filteredCharacters.length} из ${approved.length}`;
+        characterPagination.hidden = filteredCharacters.length <= pageSize;
+        characterPageLabel.textContent = `Страница ${characterPage} из ${pages}`;
+        characterPrev.disabled = characterPage <= 1;
+        characterNext.disabled = characterPage >= pages;
+        characterList.classList.toggle("is-table-view", characterView === "table");
+        characterList.innerHTML = visible.length
+            ? (characterView === "table" ? renderCharacterTable(visible) : visible.map(window.renderAdminCharacterManagement).join(""))
+            : '<div class="admin-empty admin-character-no-results"><h2>Ничего не найдено</h2><p>Попробуй убрать часть фильтров или изменить запрос.</p><button type="button" class="admin-character-reset-empty">Сбросить фильтры</button></div>';
+        const active = [];
+        if (query) active.push("Поиск: " + characterSearch.value.trim());
+        if (characterRace.value) active.push("Раса: " + characterRace.value);
+        if (characterHomeland.value) active.push("Родина: " + characterHomeland.value);
+        if (characterOccupation.value) active.push("Занятие: " + characterOccupation.value);
+        if (characterAge.value) active.push("Возраст: " + characterAge.options[characterAge.selectedIndex].text);
+        if (characterCompleteness.value) active.push("Профиль: " + characterCompleteness.options[characterCompleteness.selectedIndex].text);
+        characterActiveFilters.innerHTML = active.map((label, i) => '<span class="admin-character-filter-chip">' + window.escapeHtml(label) + '<button type="button" data-remove-filter="' + i + '" aria-label="Убрать фильтр">×</button></span>').join("");
+        characterActiveFilters.hidden = !active.length;
         bindAdminButtons(container);
     };
-    characterFilters.forEach(control => control.addEventListener(control === characterSearch ? "input" : "change", renderCharacterDirectory));
+    characterFilters.forEach(control => control.addEventListener(control === characterSearch ? "input" : "change", () => renderCharacterDirectory(true)));
+    characterPrev.addEventListener("click", () => { characterPage--; renderCharacterDirectory(false); });
+    characterNext.addEventListener("click", () => { characterPage++; renderCharacterDirectory(false); });
+    container.querySelectorAll("[data-character-view]").forEach(button => button.addEventListener("click", () => {
+        characterView = button.dataset.characterView;
+        container.querySelectorAll("[data-character-view]").forEach(item => {
+            const active = item === button;
+            item.classList.toggle("active", active);
+            item.setAttribute("aria-pressed", String(active));
+        });
+        renderCharacterDirectory(false);
+    }));
+    characterActiveFilters.addEventListener("click", event => {
+        const button = event.target.closest("[data-remove-filter]");
+        if (!button) return;
+        const index = Number(button.dataset.removeFilter);
+        [characterSearch, characterRace, characterHomeland, characterOccupation, characterAge, characterCompleteness][index]?.dispatchEvent(new Event(index === 0 ? "input" : "change", { bubbles: true }));
+        const control = [characterSearch, characterRace, characterHomeland, characterOccupation, characterAge, characterCompleteness][index];
+        if (control) control.value = "";
+        renderCharacterDirectory(true);
+    });
+    characterList.addEventListener("click", event => {
+        if (!event.target.closest(".admin-character-reset-empty")) return;
+        container.querySelector("#admin-character-reset").click();
+    });
     container.querySelector("#admin-character-reset").addEventListener("click", () => {
         characterSearch.value = "";
         characterRace.value = "";
         characterHomeland.value = "";
         characterOccupation.value = "";
         characterAge.value = "";
+        characterCompleteness.value = "";
         characterSort.value = "newest";
-        renderCharacterDirectory();
+        characterPageSize.value = "24";
+        characterPage = 1;
+        renderCharacterDirectory(true);
     });
-    renderCharacterDirectory();
+    container.querySelector("#admin-character-export").addEventListener("click", () => {
+        const columns = [["id","ID заявки"],["character_id","ID персонажа"],["name","Имя"],["race","Раса"],["age","Возраст"],["homeland","Родина"],["occupation","Занятие"],["preferred_weapon","Оружие"],["personality","Характер"],["backstory","Предыстория"],["special_skills","Особые навыки"]];
+        const csv = "\uFEFF" + [columns.map(c => csvCell(c[1])).join(";"), ...filteredCharacters.map(a => columns.map(c => csvCell(a[c[0]])).join(";"))].join("\r\n");
+        const url = URL.createObjectURL(new Blob([csv], { type:"text/csv;charset=utf-8;" }));
+        const link = document.createElement("a");
+        link.href = url; link.download = "lorgus-characters.csv"; link.click();
+        URL.revokeObjectURL(url);
+    });
+    renderCharacterDirectory(true);
 
     window.loadAdminItemUseLog(container);
     if (typeof window.loadAdminRpManagement === "function") window.loadAdminRpManagement(container);
