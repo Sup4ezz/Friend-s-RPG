@@ -53,6 +53,30 @@
         return "/rp/chat/" + encodeURIComponent(region) + "/" + encodeURIComponent(location);
     }
 
+    function parseRpRoadPath(path) {
+        const match = String(path || "").match(/^\/rp\/road\/([^/]+)\/([^/]+)\/([^/]+)\/([^/]+)$/);
+        if (!match) return null;
+        try {
+            return {
+                fromRegion: decodeURIComponent(match[1]),
+                fromLocation: decodeURIComponent(match[2]),
+                toRegion: decodeURIComponent(match[3]),
+                toLocation: decodeURIComponent(match[4])
+            };
+        } catch (error) {
+            console.warn("LORGUS router: invalid RP road path:", path, error);
+            return null;
+        }
+    }
+
+    function buildRpRoadPath(presence) {
+        return "/rp/road/" +
+            encodeURIComponent(presence.fromRegion) + "/" +
+            encodeURIComponent(presence.fromLocation) + "/" +
+            encodeURIComponent(presence.toRegion) + "/" +
+            encodeURIComponent(presence.toLocation);
+    }
+
     function resolveRoute(path) {
         if (ROUTES[path]) return ROUTES[path];
         if (parseRpChatPath(path)) {
@@ -60,6 +84,13 @@
                 page: "rp-chat",
                 render: "renderLocationChats",
                 title: "RP-чат"
+            };
+        }
+        if (parseRpRoadPath(path)) {
+            return {
+                page: "rp-road",
+                render: "renderRoadChat",
+                title: "RP-дорога"
             };
         }
         return null;
@@ -79,6 +110,22 @@
                         true,
                         true
                     );
+                }
+            };
+        }
+
+        if (route.page === "rp-road") {
+            const road = parseRpRoadPath(path);
+            return {
+                async render() {
+                    const presence = await window.getRpPresence?.();
+                    if (presence?.type === "road") {
+                        return window.renderRoadChat?.(presence, true);
+                    }
+                    if (presence?.type === "location") {
+                        return navigate(buildRpChatPath(presence.region, presence.location), { replace: true });
+                    }
+                    return navigate("/rp", { replace: true });
                 }
             };
         }
@@ -219,6 +266,11 @@
     window.lorgusNavigateChat = (region, location, options = {}) => {
         const path = buildRpChatPath(region, location);
         return navigate(path, options);
+    };
+
+    window.lorgusNavigateRoadChat = (presence, options = {}) => {
+        if (!presence || presence.type !== "road") return false;
+        return navigate(buildRpRoadPath(presence), options);
     };
 
     if (document.readyState === "loading") {
