@@ -375,7 +375,7 @@ function renderLorgusWorldMap(container, character) {
             <button type="button" class="lorgus-mainmenu-arrow top" onclick="window.lorgusMainMenuNavigate('top', window.renderLorgusCharacterHub)" aria-label="Персонаж"><span>▲</span><b>ПЕРСОНАЖ</b></button>
             <button type="button" class="lorgus-mainmenu-arrow bottom" onclick="window.lorgusMainMenuNavigate('bottom', window.renderMail)" aria-label="Письма"><span>▼</span><b>ПИСЬМА</b></button>
             <button type="button" class="lorgus-mainmenu-arrow left" onclick="window.lorgusOpenRpFromMap()" aria-label="Ролевая"><span>◀</span><b>РОЛЕВАЯ</b></button>
-            <button type="button" class="lorgus-mainmenu-arrow right" onclick="window.lorgusMainMenuNavigate('right', window.renderLorgusInventory)" aria-label="Инвентарь"><span>▶</span><b>ИНВЕНТАРЬ</b></button>
+            <button type="button" class="lorgus-mainmenu-arrow right" onclick="window.lorgusMainMenuNavigate('right', window.renderLorgusCodex)" aria-label="Лорбук"><span>▶</span><b>ЛОРБУК</b></button>
         </nav>
         <div class="lorgus-map-shell">
             <aside class="lorgus-map-sidebar">
