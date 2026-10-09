@@ -909,6 +909,55 @@ function sendLocalFloodMessage() {
     feed.scrollTop = feed.scrollHeight;
 }
 
+function buildRpFallbackPortrait(character) {
+    const name = String(character?.name || "Персонаж");
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+    const palettes = [
+        ["#182c3a", "#6da6ba", "#d4b080", "#263744"],
+        ["#30243f", "#bd91d5", "#e2bd9c", "#392c48"],
+        ["#3a241d", "#d18b5b", "#e6c6a1", "#4c3026"],
+        ["#1e332c", "#80b99a", "#d9b88f", "#283e34"],
+        ["#332d1b", "#d7b65f", "#e5c8a5", "#4a3b22"],
+        ["#252a40", "#879fe0", "#d6b69c", "#333850"],
+        ["#3c202a", "#d5798b", "#e7c4a7", "#502b36"]
+    ];
+    const p = palettes[hash % palettes.length];
+    const hair = ["#241b19", "#574034", "#bca06a", "#d9d2c4", "#a94f35", "#18191f", "#6d7181"][(hash >>> 4) % 7];
+    const style = (hash >>> 8) % 3;
+    const hairShape = style === 0
+        ? "M27 39 Q24 15 49 13 Q76 14 72 43 L68 32 Q55 38 43 29 Q37 38 27 39Z"
+        : style === 1
+            ? "M25 40 Q17 12 49 12 Q79 12 73 43 L68 28 Q60 18 49 23 Q37 20 29 33Z"
+            : "M28 38 Q22 12 49 14 Q76 12 70 39 L65 31 Q60 37 54 31 L49 23 L39 34 L31 31Z";
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="${p[0]}"/><stop offset="1" stop-color="${p[3]}"/></linearGradient>
+        <linearGradient id="cloth" x1="0" y1="0" x2="0" y2="1"><stop stop-color="${p[1]}"/><stop offset="1" stop-color="${p[3]}"/></linearGradient>
+        <radialGradient id="glow"><stop stop-color="${p[1]}" stop-opacity=".42"/><stop offset="1" stop-color="${p[1]}" stop-opacity="0"/></radialGradient>
+      </defs>
+      <rect width="96" height="96" rx="13" fill="url(#bg)"/>
+      <circle cx="48" cy="39" r="39" fill="url(#glow)"/>
+      <circle cx="48" cy="43" r="34" fill="none" stroke="${p[2]}" stroke-opacity=".42"/>
+      <circle cx="48" cy="43" r="29" fill="none" stroke="${p[1]}" stroke-opacity=".25" stroke-dasharray="2 4"/>
+      <path d="M10 96 Q12 68 32 63 L40 60 L56 60 L64 63 Q84 68 86 96Z" fill="url(#cloth)" stroke="${p[2]}" stroke-opacity=".7"/>
+      <path d="M38 57 L38 68 L48 78 L58 68 L58 57Z" fill="#b98567"/>
+      <path d="M31 36 Q30 22 48 21 Q66 22 65 37 L62 52 Q57 62 48 63 Q39 62 34 52Z" fill="${p[2]}"/>
+      <path d="${hairShape}" fill="${hair}"/>
+      <path d="M28 38 Q23 52 33 58 L35 45 L32 32Z" fill="${hair}"/>
+      <path d="M68 34 L65 47 L64 57 Q75 48 69 32Z" fill="${hair}"/>
+      <path d="M38 42 Q42 39 45 42 M51 42 Q55 39 59 42" fill="none" stroke="#47342d" stroke-width="1.6" stroke-linecap="round"/>
+      <circle cx="42" cy="43" r="1.3" fill="#221d1c"/><circle cx="55" cy="43" r="1.3" fill="#221d1c"/>
+      <path d="M48 44 L46 50 L49 51" fill="none" stroke="#9a6d57" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M43 55 Q48 58 53 55" fill="none" stroke="#74483f" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M29 73 L40 66 L48 78 L56 66 L67 73 L61 96 L35 96Z" fill="${p[3]}" stroke="${p[2]}" stroke-opacity=".65"/>
+      <path d="M40 67 L48 78 L56 67" fill="none" stroke="${p[2]}" stroke-width="1.5"/>
+      <path d="M48 78 l3 4 -3 5 -3 -5Z" fill="${p[2]}"/>
+      <path d="M8 18 L14 18 L14 8 M82 8 L82 18 L88 18 M8 78 L14 78 L14 88 M82 88 L82 78 L88 78" fill="none" stroke="${p[2]}" stroke-opacity=".75" stroke-width="1.3"/>
+    </svg>`;
+    return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
+}
+
 async function getRpCharacterPhoto(characterId) {
     if (!characterId || !window.supabaseClient) return null;
     window.rpCharacterPhotoCache = window.rpCharacterPhotoCache || {};
@@ -917,18 +966,14 @@ async function getRpCharacterPhoto(characterId) {
         return window.rpCharacterPhotoCache[key];
     }
 
-    // Prefer a portrait assigned directly to the character; approved
-    // applications remain the fallback for player-created characters.
-    let photoPath = null;
     const { data: character } = await window.supabaseClient
         .from("characters")
-        .select("photo_path")
+        .select("photo_path,name,race,occupation,kingdom")
         .eq("id", characterId)
         .maybeSingle();
 
-    if (character?.photo_path) {
-        photoPath = character.photo_path;
-    } else {
+    let photoPath = character?.photo_path || null;
+    if (!photoPath) {
         const { data: application } = await window.supabaseClient
             .from("character_applications")
             .select("photo_path")
@@ -939,19 +984,27 @@ async function getRpCharacterPhoto(characterId) {
         photoPath = application?.photo_path || null;
     }
 
-    if (!photoPath) {
-        window.rpCharacterPhotoCache[key] = null;
-        return null;
+    if (photoPath) {
+        const { data: photoData, error: photoError } = await window.supabaseClient
+            .storage
+            .from("character-applications")
+            .createSignedUrl(photoPath, 60 * 60);
+        if (!photoError && photoData?.signedUrl) {
+            window.rpCharacterPhotoCache[key] = photoData.signedUrl;
+            return photoData.signedUrl;
+        }
     }
 
-    const { data: photoData, error: photoError } = await window.supabaseClient
-        .storage
-        .from("character-applications")
-        .createSignedUrl(photoPath, 60 * 60);
-
-    const url = !photoError ? (photoData?.signedUrl || null) : null;
-    window.rpCharacterPhotoCache[key] = url;
-    return url;
+    // Seeded RP actors have no uploaded image yet. Give them a distinct
+    // illustrated portrait instead of an empty star; a real upload always wins.
+    const { data: rpActor } = await window.supabaseClient
+        .from("lorgus_nrp_characters")
+        .select("character_id")
+        .eq("character_id", characterId)
+        .maybeSingle();
+    const fallback = rpActor ? buildRpFallbackPortrait(character || {}) : null;
+    window.rpCharacterPhotoCache[key] = fallback;
+    return fallback;
 }
 
 async function openRpCharacterQuickCard(characterId, anchorElement = null) {
