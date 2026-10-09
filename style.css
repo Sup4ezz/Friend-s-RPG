@@ -18272,3 +18272,12 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .admin-rp-photo-upload{display:inline-flex;align-items:center;justify-content:center;gap:5px;grid-column:1/-1;margin-top:7px;padding:7px;border:1px dashed rgba(214,179,106,.25);color:#bca978;font-size:8px;letter-spacing:.06em;cursor:pointer}
 .admin-rp-photo-upload input{max-width:100%;font-size:9px;padding:4px;margin:0;border:0;background:transparent}
 .admin-rp-photo-upload.has-photo{border-style:solid;border-color:rgba(115,157,108,.35);color:#a5bc91}
+
+
+/* Active title identity in RP messages */
+.lorgus-messenger-message.has-active-title{border:1px solid color-mix(in srgb,var(--rp-title-color,#d6b36a) 52%,transparent);border-left:3px solid var(--rp-title-color,#d6b36a);border-radius:9px;background:linear-gradient(110deg,color-mix(in srgb,var(--rp-title-color,#d6b36a) 8%,transparent),rgba(14,13,11,.12) 68%);box-shadow:inset 0 0 22px color-mix(in srgb,var(--rp-title-color,#d6b36a) 4%,transparent),0 5px 20px rgba(0,0,0,.09)}
+.lorgus-messenger-message.has-active-title .lorgus-messenger-message-avatar{border:1px solid color-mix(in srgb,var(--rp-title-color,#d6b36a) 75%,transparent);box-shadow:0 0 12px color-mix(in srgb,var(--rp-title-color,#d6b36a) 18%,transparent)}
+.lorgus-messenger-message.has-active-title .lorgus-messenger-message-meta>strong{color:var(--rp-title-color,#d6b36a)}
+.lorgus-message-title-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border:1px solid color-mix(in srgb,var(--rp-title-color,#d6b36a) 58%,transparent);border-radius:3px;background:color-mix(in srgb,var(--rp-title-color,#d6b36a) 11%,transparent);color:var(--rp-title-color,#d6b36a);font-size:9px;font-weight:750;letter-spacing:.025em;line-height:1.3;text-shadow:0 0 10px color-mix(in srgb,var(--rp-title-color,#d6b36a) 20%,transparent)}
+.lorgus-messenger-message.admin-authored.has-active-title{border-color:color-mix(in srgb,var(--rp-title-color,#d6b36a) 64%,transparent);border-left-color:var(--rp-title-color,#d6b36a)}
+.lorgus-messenger-message.admin-authored.has-active-title .lorgus-admin-post-badge{border-color:rgba(222,180,91,.42);color:#e2bf70}
