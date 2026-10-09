@@ -606,9 +606,9 @@ async function renderRoadChat(presence) {
     const character = window.activeCharacter;
     const name = escapeHtml(character?.name || "Без имени");
 
-    container.className = "lorgus-rp-page lorgus-road-page";
+    container.className = "lorgus-rp-page";
     container.innerHTML = `
-        <div class="lorgus-messenger-shell lorgus-road-chat-shell" data-rp-region="${escapeHtml(presence.fromRegion)}" data-rp-location="${escapeHtml(presence.fromLocation)}">
+        <div class="lorgus-messenger-shell" data-rp-region="${escapeHtml(presence.fromRegion)}" data-rp-location="${escapeHtml(presence.fromLocation)}">
             <aside class="lorgus-messenger-sidebar">
                 <div class="lorgus-messenger-sidebar-head">
                     <button class="lorgus-messenger-back" type="button" onclick="window.renderLorgusRpHub?.()">‹ Ролевая</button>
