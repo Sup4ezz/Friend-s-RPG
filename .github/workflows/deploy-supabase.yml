@@ -42,7 +42,7 @@ jobs:
         run: supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
 
       - name: Apply production migrations
-        run: supabase db push --linked
+        run: supabase db push --linked --include-all
 
       - name: Verify migration state
         run: supabase migration list --linked
