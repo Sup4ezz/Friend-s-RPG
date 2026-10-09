@@ -438,6 +438,13 @@
             ? `<span class="admin-rp-selected-check">✓</span><span><small>ВЫБРАН ПЕРСОНАЖ</small><strong>${esc(selectedRow.characters?.name || "Без имени")}</strong><em>${esc([selectedRow.characters?.race, selectedRow.characters?.kingdom].filter(Boolean).join(" · ") || "RP-персонаж")}</em></span><button type="button" class="admin-rp-character-clear" aria-label="Сбросить выбор">×</button>`
             : '<span class="admin-rp-selected-empty">Персонаж не выбран</span>';
 
+        selected.querySelector(".admin-rp-character-clear")?.addEventListener("click", () => {
+            characterSelect.value = "";
+            search.value = "";
+            renderComposerCharacterPicker(root);
+            search.focus();
+        });
+
         const query = search.value.trim().toLocaleLowerCase("ru-RU");
         if (!query) {
             results.innerHTML = '<div class="admin-rp-character-hint">Начни вводить имя, расу или королевство — покажу подходящих персонажей.</div>';
@@ -467,12 +474,6 @@
                 characterSelect.value = button.dataset.rpCharacterChoice;
                 renderComposerCharacterPicker(root);
             });
-        });
-        selected.querySelector(".admin-rp-character-clear")?.addEventListener("click", () => {
-            characterSelect.value = "";
-            search.value = "";
-            renderComposerCharacterPicker(root);
-            search.focus();
         });
     }
 
