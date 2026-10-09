@@ -1,3 +1,44 @@
+
+if (!window.lorgusGetSignedPhotoUrl) {
+    window.lorgusGetSignedPhotoUrl = (() => {
+        const entries = new Map(), queue = [];
+        let active = 0;
+        const runNext = () => {
+            while (active < 2 && queue.length) {
+                const job = queue.shift(); active++;
+                window.supabaseClient.storage.from("character-applications").createSignedUrl(job.path, 3600)
+                    .then(({ data, error }) => {
+                        const entry = entries.get(job.path);
+                        if (error || !data?.signedUrl) {
+                            if (entry) { entry.url = null; entry.expiresAt = 0; entry.failedUntil = Date.now() + 60000; }
+                            job.resolve(null); return;
+                        }
+                        if (entry) { entry.url = data.signedUrl; entry.expiresAt = Date.now() + 3500000; entry.failedUntil = 0; }
+                        job.resolve(data.signedUrl);
+                    })
+                    .catch(() => {
+                        const entry = entries.get(job.path);
+                        if (entry) { entry.url = null; entry.expiresAt = 0; entry.failedUntil = Date.now() + 60000; }
+                        job.resolve(null);
+                    })
+                    .finally(() => { active--; runNext(); });
+            }
+        };
+        return path => {
+            if (!path || !window.supabaseClient) return Promise.resolve(null);
+            const now = Date.now(), cached = entries.get(path);
+            if (cached?.url && cached.expiresAt > now) return Promise.resolve(cached.url);
+            if (cached?.promise) return cached.promise;
+            if (cached?.failedUntil > now) return Promise.resolve(null);
+            let resolve;
+            const promise = new Promise(done => { resolve = done; });
+            entries.set(path, { promise, url: null, expiresAt: 0, failedUntil: 0 });
+            queue.push({ path, resolve }); runNext();
+            return promise;
+        };
+    })();
+}
+
 /* LORGUS admin applications */
 async function loadAdminPanel(container) {
     const {
@@ -48,11 +89,7 @@ async function renderAdminApplications(container, applications) {
             continue;
         }
 
-        const { data, error } = await window.supabaseClient.storage
-            .from("character-applications")
-            .createSignedUrl(application.photo_path, 60 * 60);
-
-        application.photo_url = error ? null : (data?.signedUrl || null);
+        application.photo_url = await window.lorgusGetSignedPhotoUrl(application.photo_path);
     }
 
     const pending = applications.filter(a => a.status === "pending");
