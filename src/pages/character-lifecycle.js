@@ -35,10 +35,17 @@ async function renderCharacterSelection(container, applications, pendingApplicat
 
     const grid = container.querySelector(".character-selection-grid");
 
-    // Load character rows and signed portrait URLs concurrently instead of serial N+1 waits.
+    // Fetch all character rows in one request; sign portraits concurrently afterwards.
+    const characterIds = [...new Set(applications.map(application => application.character_id).filter(Boolean))];
+    const { data: characters, error: charactersError } = characterIds.length
+        ? await window.supabaseClient.from("characters").select("*").in("id", characterIds)
+        : { data: [], error: null };
+    if (charactersError) console.error("Не удалось загрузить персонажей:", charactersError);
+    const characterById = new Map((characters || []).map(character => [String(character.id), character]));
+
     const characterEntries = await Promise.all(applications.map(async application => {
-        const result = await window.supabaseClient.from("characters").select("*").eq("id", application.character_id).single();
-        if (result.error || !result.data) return null;
+        const character = characterById.get(String(application.character_id));
+        if (!character) return null;
 
         let photoUrl = null;
         if (application.photo_path) {
@@ -51,7 +58,7 @@ async function renderCharacterSelection(container, applications, pendingApplicat
                 console.warn("Не удалось загрузить портрет персонажа:", error);
             }
         }
-        return { application, character: result.data, photoUrl };
+        return { application, character, photoUrl };
     }));
 
     for (const entry of characterEntries) {
