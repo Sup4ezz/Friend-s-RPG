@@ -1,11 +1,26 @@
 /* LORGUS cinematic WebGL gate */
-function initializeLorgusWebGL() {
+async function initializeLorgusWebGL() {
     const canvas = document.getElementById("lorgus-webgl");
     if (!canvas) return;
+
+    // Returning players do not download Three.js unless the login gate is shown.
+    let THREE = window.THREE;
+    if (!THREE) {
+        try {
+            THREE = await import("https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js");
+            window.THREE = THREE;
+        } catch (error) {
+            console.warn("LORGUS Three.js unavailable:", error);
+            return;
+        }
+    }
+
+    const smallScreen = window.matchMedia("(max-width: 700px)").matches;
+    const lowPower = smallScreen || (navigator.deviceMemory && navigator.deviceMemory <= 4) || (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
     let renderer;
     try {
-        renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: "high-performance" });
-        renderer.shadowMap.enabled = true;
+        renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !lowPower, powerPreference: lowPower ? "low-power" : "high-performance" });
+        renderer.shadowMap.enabled = !lowPower;
         renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     } catch (error) {
         console.warn("LORGUS WebGL unavailable:", error);
@@ -893,7 +908,8 @@ const openingShape = new THREE.Shape();
     };
 
     const resize = () => {
-        const dpr = Math.min(window.devicePixelRatio || 1, 1.65);
+        const maxDpr = lowPower ? 1 : 1.5;
+        const dpr = Math.min(window.devicePixelRatio || 1, maxDpr);
         const width = window.innerWidth;
         const height = window.innerHeight;
         renderer.setPixelRatio(dpr);
@@ -905,7 +921,7 @@ const openingShape = new THREE.Shape();
     const clock = new THREE.Clock();
 
     const frame = () => {
-        if (disposed) return;
+        if (disposed || document.hidden) { raf = 0; return; }
         raf = requestAnimationFrame(frame);
         const time = clock.getElapsedTime();
 
@@ -1036,6 +1052,17 @@ const openingShape = new THREE.Shape();
     resize();
     window.addEventListener("resize", resize, { passive: true });
     window.addEventListener("pointermove", onPointer, { passive: true });
+    const onVisibilityChange = () => {
+        if (document.hidden) {
+            if (raf) cancelAnimationFrame(raf);
+            raf = 0;
+            clock.stop();
+        } else if (!disposed && !raf) {
+            clock.start();
+            frame();
+        }
+    };
+    document.addEventListener("visibilitychange", onVisibilityChange);
     frame();
 
     const previousCleanup = window.lorgusSceneCleanup;
@@ -1044,6 +1071,7 @@ const openingShape = new THREE.Shape();
         cancelAnimationFrame(raf);
         window.removeEventListener("resize", resize);
         window.removeEventListener("pointermove", onPointer);
+        document.removeEventListener("visibilitychange", onVisibilityChange);
         renderer.dispose();
         if (previousCleanup) previousCleanup();
     };
