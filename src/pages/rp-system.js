@@ -936,7 +936,7 @@ function sendLocalFloodMessage() {
         return;
     }
 
-    const empty = feed.querySelector(".lorgus-rp-empty");
+    const empty = feed.querySelector(".lorgus-rp-empty, .lorgus-messenger-start");
     if (empty) empty.remove();
 
     const message = document.createElement("article");
