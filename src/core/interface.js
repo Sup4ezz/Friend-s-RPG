@@ -392,9 +392,9 @@ async function appendRpMessage(message) {
     const time = new Date(message.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
 
     article.innerHTML =
-        '<div class="lorgus-messenger-message-avatar">' +
+        '<button type="button" class="lorgus-messenger-message-avatar" aria-label="Открыть карточку персонажа: ' + escapeHtml(message.characters?.name || "Без имени") + '">' +
             (photo ? '<img src="' + escapeHtml(photo) + '" alt="">' : '<span>✦</span>') +
-        '</div>' +
+        '</button>' +
         '<div class="lorgus-messenger-message-content">' +
             '<div class="lorgus-messenger-message-meta"><strong>' + escapeHtml(message.characters?.name || "Без имени") + '</strong>' + (activeTitle ? '<span class="lorgus-message-title-badge" title="Активный титул" style="--rp-title-color:' + escapeHtml(/^#[0-9a-f]{3,8}$/i.test(activeTitle.color || "") ? activeTitle.color : "#d6b36a") + '">' + escapeHtml((activeTitle.icon ? activeTitle.icon + " " : "✦ ") + activeTitle.name) + '</span>' : '') + (adminPost ? '<span class="lorgus-admin-post-badge" title="Пост опубликован администрацией">✦ АДМИНИСТРАЦИЯ</span>' : '') + '<time>' + escapeHtml(time) + '</time></div>' +
             '<div class="lorgus-messenger-bubble">' +
@@ -406,14 +406,17 @@ async function appendRpMessage(message) {
 
     feed.appendChild(article);
 
+    const openCharacterCard = anchor => event => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof window.openRpCharacterQuickCard === "function") {
+            window.openRpCharacterQuickCard(message.character_id, anchor);
+        }
+    };
     const characterLink = article.querySelector(".lorgus-messenger-message-meta strong");
-    if (characterLink && typeof window.openRpCharacterQuickCard === "function") {
-        characterLink.addEventListener("click", event => {
-            event.preventDefault();
-            event.stopPropagation();
-            window.openRpCharacterQuickCard(message.character_id, characterLink);
-        });
-    }
+    if (characterLink) characterLink.addEventListener("click", openCharacterCard(characterLink));
+    const avatarButton = article.querySelector(".lorgus-messenger-message-avatar");
+    if (avatarButton) avatarButton.addEventListener("click", openCharacterCard(avatarButton));
 
     const { data: uses, error } = await window.supabaseClient
         .from("rp_message_item_uses")
