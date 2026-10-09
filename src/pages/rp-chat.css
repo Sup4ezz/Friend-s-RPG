@@ -8,6 +8,7 @@
     background: #090b0e !important;
 }
 .lorgus-rp-page .lorgus-messenger-shell {
+    position: relative;
     grid-template-columns: 300px minmax(0, 1fr) !important;
     height: 100% !important;
     min-height: 0 !important;
