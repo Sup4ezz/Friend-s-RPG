@@ -1,3 +1,4 @@
+# Trigger deployment of the current main branch through Actions on push.
 name: Deploy LORGUS to Cloudflare Workers
 
 on:
