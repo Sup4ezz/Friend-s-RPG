@@ -8,6 +8,7 @@
     const fallbackRoutes = {
         "/overview": { page: "overview", render: "renderLorgusOverview", title: "Обзор" },
         "/world": { page: "world", render: "renderLorgusWorldMapCurrent", title: "Мир" },
+        "/codex": { page: "codex", render: "renderLorgusCodex", title: "Лорбук" },
         "/character": { page: "character", render: "renderLorgusCharacterHub", title: "Персонаж" },
         "/rp": { page: "rp", render: "renderLorgusRpHub", title: "Ролевая" },
         "/people": { page: "people", render: "renderWorldCharacterTracker", title: "Люди" },
