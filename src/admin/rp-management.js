@@ -86,7 +86,7 @@
         const [rpCharactersResult, presenceResult] = await Promise.all([
             window.supabaseClient
                 .from("lorgus_nrp_characters")
-                .select("character_id,is_active,created_at,characters(id,name,race,age,homeland,occupation,personality,backstory,special_skills,preferred_weapon,kingdom,location)")
+                .select("character_id,is_active,created_at,characters(id,name,race,age,homeland,occupation,personality,backstory,special_skills,preferred_weapon,kingdom,location,photo_path)")
                 .order("created_at", { ascending: false }),
             window.supabaseClient
                 .from("rp_presence")
@@ -188,16 +188,51 @@
                 const c = row.characters || {};
                 return `
                     <article class="admin-rp-nrp-row ${row.is_active ? "" : "inactive"}">
-                        <div class="admin-rp-nrp-avatar">✦</div>
+                        <div class="admin-rp-nrp-avatar">${c.photo_path ? "◉" : "✦"}</div>
                         <div>
                             <strong>${esc(c.name || "Без имени")}</strong>
                             <span>${esc(c.race || "RP-персонаж")} · ${esc(c.occupation || "Занятие не указано")}</span>
-                            <small>${row.is_active ? "АКТИВЕН" : "ОТКЛЮЧЁН"}</small>
+                            <small>${c.photo_path ? "ПОРТРЕТ ЗАГРУЖЕН" : "НЕТ ПОРТРЕТА"} · ${row.is_active ? "АКТИВЕН" : "ОТКЛЮЧЁН"}</small>
                         </div>
                         <button type="button" data-nrp-toggle="${esc(row.character_id)}">${row.is_active ? "Отключить" : "Включить"}</button>
+                        <label class="admin-rp-photo-upload ${c.photo_path ? "has-photo" : ""}">Загрузить портрет<input type="file" accept="image/png,image/jpeg,image/webp,image/avif" data-rp-photo="${esc(row.character_id)}"></label>
                     </article>`;
             }).join("")
             : '<div class="admin-rp-empty">RP-персонажей пока нет. Создай первого справа.</div>';
+
+        box.querySelectorAll("[data-rp-photo]").forEach(input => {
+            input.addEventListener("change", async () => {
+                const file = input.files?.[0];
+                const characterId = input.dataset.rpPhoto;
+                if (!file || !characterId) return;
+                if (!/^image\/(png|jpeg|webp|avif)$/.test(file.type) || file.size > 8 * 1024 * 1024) {
+                    alert("Выбери PNG, JPG, WEBP или AVIF размером не более 8 МБ.");
+                    input.value = "";
+                    return;
+                }
+                input.disabled = true;
+                try {
+                    const safeName = file.name.toLowerCase().replace(/[^a-z0-9._-]+/g, "-").slice(-90) || "portrait";
+                    const path = "rp-characters/" + characterId + "/" + Date.now() + "-" + safeName;
+                    const { error: uploadError } = await window.supabaseClient.storage
+                        .from("character-applications")
+                        .upload(path, file, { upsert: true, contentType: file.type });
+                    if (uploadError) throw uploadError;
+                    const { error: saveError } = await window.supabaseClient.rpc("admin_set_rp_character_photo", {
+                        p_character_id: characterId,
+                        p_photo_path: path
+                    });
+                    if (saveError) throw saveError;
+                    window.rpCharacterPhotoCache = window.rpCharacterPhotoCache || {};
+                    delete window.rpCharacterPhotoCache[String(characterId)];
+                    await refreshAdminRp(root);
+                } catch (error) {
+                    console.error("Не удалось сохранить портрет RP-персонажа:", error);
+                    alert("Не удалось загрузить портрет:\n\n" + (error.message || error));
+                    input.disabled = false;
+                }
+            });
+        });
 
         box.querySelectorAll("[data-nrp-toggle]").forEach(button => {
             button.addEventListener("click", async () => {
