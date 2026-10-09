@@ -598,6 +598,7 @@ ${hasRequestedDestination ? `<button class="gold-button" type="button"
 }
 
 async function renderRoadChat(presence) {
+    window.clearRpReplyTarget?.();
     window.activeRpChatSpace = presence;
     const container = document.getElementById("cabinet-content");
     if (!container) return;
@@ -668,6 +669,7 @@ async function renderRoadChat(presence) {
                         <button type="button" onclick="openRpCurrencyTransferPicker()" title="Передать валюту">₿</button>
                     </div>
                     <div class="lorgus-messenger-input-wrap">
+                        <div id="lorgus-rp-reply-preview" class="lorgus-rp-reply-preview" hidden></div>
                         <textarea id="lorgus-rp-input" placeholder="Сообщение от имени ${name}…" rows="1"></textarea>
                         <span id="lorgus-rp-item-selection" class="lorgus-messenger-item-selection"></span>
                     </div>
@@ -1110,6 +1112,7 @@ async function openRpCharacterQuickCard(characterId, anchorElement = null) {
 }
 
 async function renderLocationChats(locationName, regionName, alreadyPresent = false, fromRoute = false) {
+    window.clearRpReplyTarget?.();
     if (!fromRoute && window.lorgusNavigateChat) {
         const navigated = window.lorgusNavigateChat(regionName, locationName);
         if (navigated) return;
@@ -1210,6 +1213,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
                         <button type="button" onclick="openRpCurrencyTransferPicker()" title="Передать валюту">₿</button>
                     </div>
                     <div class="lorgus-messenger-input-wrap">
+                        <div id="lorgus-rp-reply-preview" class="lorgus-rp-reply-preview" hidden></div>
                         <textarea id="lorgus-rp-input" placeholder="Сообщение от имени ${name}…" rows="1"></textarea>
                         <span id="lorgus-rp-item-selection" class="lorgus-messenger-item-selection"></span>
                     </div>
@@ -1252,7 +1256,7 @@ function getRpMessageCacheKey(presence) {
     const parts = presence.type === "location"
         ? [presence.type, presence.region, presence.location]
         : [presence.type, presence.fromRegion, presence.fromLocation, presence.toRegion, presence.toLocation];
-    return "lorgus:rp-messages:v2:" + parts.map(value => encodeURIComponent(String(value || ""))).join(":");
+    return "lorgus:rp-messages:v3:" + parts.map(value => encodeURIComponent(String(value || ""))).join(":");
 }
 
 function readRpMessageCache(presence) {
@@ -1338,7 +1342,7 @@ async function loadRpMessages(presence) {
 
     let query = window.supabaseClient
         .from("rp_messages")
-        .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, characters(name)")
+        .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, reply_to:rp_messages!rp_messages_reply_to_id_fkey(id, character_id, body, created_at, characters(name)), characters(name)")
         .eq("presence_type", presence.type)
         .order("created_at", { ascending: true })
         .limit(200);
@@ -1375,7 +1379,7 @@ async function pollRpMessages(presence) {
     try {
         let query = window.supabaseClient
             .from("rp_messages")
-            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, characters(name)")
+            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, reply_to:rp_messages!rp_messages_reply_to_id_fkey(id, character_id, body, created_at, characters(name)), characters(name)")
             .eq("presence_type", presence.type)
             .order("created_at", { ascending: false })
             .limit(40);
@@ -1442,8 +1446,17 @@ async function subscribeToRpMessages(presence) {
                 .select("name")
                 .eq("id", row.character_id)
                 .single();
+            let replyTo = null;
+            if (row.reply_to_id) {
+                const { data: parent } = await window.supabaseClient
+                    .from("rp_messages")
+                    .select("id, character_id, body, created_at, characters(name)")
+                    .eq("id", row.reply_to_id)
+                    .maybeSingle();
+                replyTo = parent || null;
+            }
 
-            await appendRpMessage({ ...row, characters: character });
+            await appendRpMessage({ ...row, characters: character, reply_to: replyTo });
         })
         .subscribe((status, error) => {
             if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
@@ -1479,10 +1492,10 @@ async function sendLocalRpMessage() {
     }
 
     try {
+        const replyTarget = window.rpReplyTarget || null;
         const itemIds = Array.from(window.pendingRpItemIds || []);
-        const { error } = await window.supabaseClient.rpc(
-            "send_lorgus_rp_message_with_items",
-            {
+        const rpcName = replyTarget ? "send_lorgus_rp_reply_with_items" : "send_lorgus_rp_message_with_items";
+        const rpcArgs = {
                 p_character_id: window.activeCharacterId,
                 p_presence_type: chat.type,
                 p_region: chat.type === "location" ? chat.region : null,
@@ -1493,9 +1506,10 @@ async function sendLocalRpMessage() {
                 p_to_location: chat.type === "road" ? chat.toLocation : null,
                 p_body: body,
                 p_visibility: chat.visibility || "public",
-                p_inventory_ids: itemIds
-            }
-        );
+                p_inventory_ids: itemIds,
+                ...(replyTarget ? { p_reply_to_id: replyTarget.id } : {})
+            };
+        const { error } = await window.supabaseClient.rpc(rpcName, rpcArgs);
 
         if (error) {
             console.error("Не удалось отправить RP-сообщение:", error);
@@ -1510,19 +1524,23 @@ async function sendLocalRpMessage() {
         }
         window.pendingRpItemIds = [];
         updateRpItemUseButton();
+        if (replyTarget && String(window.rpReplyTarget?.id) === String(replyTarget.id)) {
+            window.clearRpReplyTarget?.();
+        }
 
         // Подписка Realtime добавит сообщение сама. Этот запрос — страховка,
         // чтобы автор увидел собственный пост сразу, даже если событие задержится.
         // appendRpMessage защищён от дублей по message.id.
         let query = window.supabaseClient
             .from("rp_messages")
-            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, characters(name)")
+            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, reply_to:rp_messages!rp_messages_reply_to_id_fkey(id, character_id, body, created_at, characters(name)), characters(name)")
             .eq("character_id", window.activeCharacterId)
             .eq("presence_type", chat.type)
             .eq("body", body)
             .order("created_at", { ascending: false })
             .limit(1);
 
+        if (replyTarget) query = query.eq("reply_to_id", replyTarget.id);
         if (chat.type === "location") {
             query = query.eq("region", chat.region).eq("location", chat.location);
         } else {
