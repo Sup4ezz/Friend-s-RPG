@@ -1047,19 +1047,6 @@ async function openRpCharacterQuickCard(characterId, anchorElement = null) {
     const titleHtml = title
         ? '<div class="lorgus-rp-character-card-title">' + renderTitleBadge(title, "lorgus-public-title") + '</div>'
         : "";
-    const chatParticipants = window.activeRpChatSpace
-        ? await loadRpChatParticipants(window.activeRpChatSpace)
-        : [];
-    const nearbyParticipants = await loadNearbyRpParticipants();
-    const isChatParticipant = chatParticipants.some(row => String(row.character_id) === id);
-    const isNearbyParticipant = nearbyParticipants.some(row => String(row.character_id) === id);
-    const transferActions = character.id !== window.activeCharacterId
-        ? '<div class="lorgus-rp-character-card-actions">' +
-            (isNearbyParticipant ? '<button type="button" class="lorgus-rp-character-card-action" data-transfer-kind="item">Передать предмет</button>' : '') +
-            (isChatParticipant ? '<button type="button" class="lorgus-rp-character-card-action" data-transfer-kind="currency">Передать валюту</button>' : '') +
-          '</div>'
-        : "";
-
     panel.innerHTML =
         '<button type="button" class="lorgus-rp-character-card-close" aria-label="Закрыть">×</button>' +
         '<div class="lorgus-rp-character-card-banner"></div>' +
@@ -1075,18 +1062,36 @@ async function openRpCharacterQuickCard(characterId, anchorElement = null) {
             '<div><small>РОДИНА</small><strong>' + esc(character.homeland || "Не указана") + '</strong></div>' +
             '<div><small>МЕСТО</small><strong>' + esc(character.location || "Не указано") + '</strong></div>' +
         '</div>' +
-        (character.personality ? '<div class="lorgus-rp-character-card-story"><small>ХАРАКТЕР И ПОВЕДЕНИЕ</small><p>' + esc(character.personality) + '</p></div>' : '<div class="lorgus-rp-character-card-story muted"><p>О характере пока ничего не известно.</p></div>') +
-        transferActions;
+        (character.personality ? '<div class="lorgus-rp-character-card-story"><small>ХАРАКТЕР И ПОВЕДЕНИЕ</small><p>' + esc(character.personality) + '</p></div>' : '<div class="lorgus-rp-character-card-story muted"><p>О характере пока ничего не известно.</p></div>');
 
     panel.querySelector(".lorgus-rp-character-card-close").addEventListener("click", close);
-    panel.querySelectorAll("[data-transfer-kind]").forEach(button => {
-        button.addEventListener("click", () => {
-            const kind = button.dataset.transferKind;
-            close();
-            if (kind === "item") window.openRpTransferPicker?.(id);
-            if (kind === "currency") window.openRpCurrencyTransferPicker?.(id);
-        });
-    });
+
+    // Карточка показывается сразу; проверки доступных действий идут в фоне.
+    if (String(character.id) !== String(window.activeCharacterId)) {
+        Promise.all([
+            window.activeRpChatSpace ? loadRpChatParticipants(window.activeRpChatSpace) : Promise.resolve([]),
+            loadNearbyRpParticipants()
+        ]).then(([chatParticipants, nearbyParticipants]) => {
+            if (!panel.isConnected) return;
+            const isChatParticipant = chatParticipants.some(row => String(row.character_id) === id);
+            const isNearbyParticipant = nearbyParticipants.some(row => String(row.character_id) === id);
+            const actions = document.createElement("div");
+            actions.className = "lorgus-rp-character-card-actions";
+            if (isNearbyParticipant) actions.insertAdjacentHTML("beforeend", '<button type="button" class="lorgus-rp-character-card-action" data-transfer-kind="item">Передать предмет</button>');
+            if (isChatParticipant) actions.insertAdjacentHTML("beforeend", '<button type="button" class="lorgus-rp-character-card-action" data-transfer-kind="currency">Передать валюту</button>');
+            if (actions.childElementCount) {
+                panel.appendChild(actions);
+                actions.querySelectorAll("[data-transfer-kind]").forEach(button => {
+                    button.addEventListener("click", () => {
+                        const kind = button.dataset.transferKind;
+                        close();
+                        if (kind === "item") window.openRpTransferPicker?.(id);
+                        if (kind === "currency") window.openRpCurrencyTransferPicker?.(id);
+                    });
+                });
+            }
+        }).catch(error => console.warn("Не удалось загрузить действия карточки персонажа:", error));
+    }
 
     const rect = anchorElement?.getBoundingClientRect?.();
     if (rect && window.innerWidth > 600) {
