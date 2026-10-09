@@ -235,7 +235,6 @@ async function renderAdminApplications(container, applications) {
 
     const csvCell = value => '"' + String(value ?? "").replace(/"/g, '""').replace(/\r?\n/g, " ") + '"';
     const renderCharacterDirectory = resetPage => {
-        if (resetPage) characterPage = 1;
         const query = characterSearch.value.trim().toLocaleLowerCase("ru");
         filteredCharacters = approved.filter(a => {
             const haystack = [a.name, a.race, a.homeland, a.occupation, a.personality, a.backstory, a.special_skills, a.preferred_weapon, a.character_id]
@@ -309,7 +308,6 @@ async function renderAdminApplications(container, applications) {
         characterAge.value = "";
         characterCompleteness.value = "";
         characterSort.value = "newest";
-        characterPageSize.value = "24";
         renderCharacterDirectory(true);
     });
     container.querySelector("#admin-character-export").addEventListener("click", () => {
