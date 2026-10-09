@@ -618,3 +618,29 @@
 .lorgus-rp-character-card { max-height: min(82vh, 760px); overflow-y: auto; scrollbar-color: #655333 #171612; }
 .lorgus-rp-character-card::-webkit-scrollbar { width: 6px; }
 .lorgus-rp-character-card::-webkit-scrollbar-thumb { border-radius: 6px; background: #655333; }
+
+
+/* Native message replies */
+.lorgus-rp-reply-preview[hidden] { display: none !important; }
+.lorgus-rp-reply-preview {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+    border-bottom: 1px solid rgba(211,177,105,.15);
+    background: linear-gradient(90deg, rgba(211,177,105,.09), rgba(211,177,105,.025));
+}
+.lorgus-rp-reply-preview-mark { flex: 0 0 28px; color: #d6b36a; font-size: 21px; text-align: center; }
+.lorgus-rp-reply-preview-copy { display: flex; min-width: 0; flex: 1; flex-direction: column; gap: 2px; }
+.lorgus-rp-reply-preview-copy small { color: #a68a54; font-size: 9px; letter-spacing: .12em; }
+.lorgus-rp-reply-preview-copy strong { overflow: hidden; color: #e9d4a4; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.lorgus-rp-reply-preview-copy span { overflow: hidden; color: #b9b3a7; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
+.lorgus-rp-reply-cancel { flex: 0 0 28px; width: 28px; height: 28px; border: 1px solid rgba(211,177,105,.18); border-radius: 7px; background: rgba(255,255,255,.025); color: #d7c9ac; cursor: pointer; font-size: 20px; }
+.lorgus-rp-reply-quote {
+    display: flex; align-items: stretch; gap: 9px; width: 100%; max-width: 100%;
+    margin: 0 0 9px; padding: 8px 10px; border: 0; border-left: 2px solid #c8a45d;
+    border-radius: 0 7px 7px 0; background: rgba(211,177,105,.075); color: #d9d0bd; text-align: left; cursor: pointer;
+}
+.lorgus-rp-reply-quote:hover { background: rgba(211,177,105,.13); }
+.lorgus-rp-reply-quote-mark { color: #d6b36a; font-size: 16px; }
+.lorgus-rp-reply-quote-content { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+.lorgus-rp-reply-quote-content strong { overflow: hidden; color: #e2c88f; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+.lorgus-rp-reply-quote-content span { display: -webkit-box; overflow: hidden; color: #a9a296; font-size: 12px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.lorgus-rp-message-target .lorgus-messenger-bubble { outline: 2px solid rgba(214,179,106,.8); box-shadow: 0 0 0 5px rgba(214,179,106,.12); transition: box-shadow .2s ease, outline-color .2s ease; }
