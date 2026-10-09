@@ -132,11 +132,8 @@ async function renderAdminApplications(container, applications) {
             <div class="admin-character-toolbar">
                 <div class="admin-character-results-line"><strong id="admin-character-results-count">Загрузка списка…</strong><span id="admin-character-active-summary">Все персонажи</span></div>
                 <div class="admin-character-view-tools">
-                    <label class="admin-character-page-size"><span>НА СТРАНИЦЕ</span><select id="admin-character-page-size"><option value="12">12</option><option value="24" selected>24</option><option value="48">48</option><option value="all">Все</option></select></label>
-                    <div class="admin-character-view-toggle" role="group" aria-label="Вид каталога">
-                        <button type="button" class="active" data-character-view="cards" aria-pressed="true">Карточки</button>
-                        <button type="button" data-character-view="table" aria-pressed="false">Таблица</button>
-                    </div>
+                    <button type="button" id="admin-character-expand-all" class="admin-character-export">Развернуть все</button>
+                    <button type="button" id="admin-character-collapse-all" class="admin-character-export">Свернуть все</button>
                     <button type="button" id="admin-character-export" class="admin-character-export">Экспорт CSV ↗</button>
                 </div>
             </div>
@@ -144,10 +141,7 @@ async function renderAdminApplications(container, applications) {
             <div id="admin-character-list" class="admin-applications admin-character-grid">
                 ${approved.length ? approved.map(window.renderAdminCharacterManagement).join("") : '<div class="admin-empty"><h2>Персонажей пока нет</h2><p>Одобренные персонажи появятся здесь.</p></div>'}
             </div>
-            <div class="admin-character-pagination" id="admin-character-pagination">
-                <span id="admin-character-page-label">Страница 1</span>
-                <div><button type="button" id="admin-character-prev" disabled>← Назад</button><button type="button" id="admin-character-next" disabled>Далее →</button></div>
-            </div>
+
         </section>
         <section class="admin-section admin-item-use-management">
             <div class="admin-section-heading">
@@ -224,14 +218,7 @@ async function renderAdminApplications(container, applications) {
     const characterTotal = container.querySelector("#admin-character-total");
     const characterActiveSummary = container.querySelector("#admin-character-active-summary");
     const characterActiveFilters = container.querySelector("#admin-character-active-filters");
-    const characterPageSize = container.querySelector("#admin-character-page-size");
-    const characterPagination = container.querySelector("#admin-character-pagination");
-    const characterPageLabel = container.querySelector("#admin-character-page-label");
-    const characterPrev = container.querySelector("#admin-character-prev");
-    const characterNext = container.querySelector("#admin-character-next");
-    const characterFilters = [characterSearch, characterRace, characterHomeland, characterOccupation, characterAge, characterCompleteness, characterSort, characterPageSize];
-    let characterPage = 1;
-    let characterView = "cards";
+    const characterFilters = [characterSearch, characterRace, characterHomeland, characterOccupation, characterAge, characterCompleteness, characterSort];
     let filteredCharacters = [...approved];
 
     const fillCharacterFilter = (select, field, placeholder) => {
@@ -247,19 +234,6 @@ async function renderAdminApplications(container, applications) {
     characterTotal.textContent = pluralCharacters(approved.length);
 
     const csvCell = value => '"' + String(value ?? "").replace(/"/g, '""').replace(/\r?\n/g, " ") + '"';
-    const renderCharacterTable = items => {
-        const rows = items.map(a => `<tr>
-            <td><div class="admin-character-table-name">${a.photo_url ? '<img src="' + window.escapeHtml(a.photo_url) + '" alt="">' : '<span class="admin-character-table-placeholder">✦</span>'}<span><strong>${window.escapeHtml(a.name || "Без имени")}</strong><small>#${window.escapeHtml(String(a.id))} · ID ${window.escapeHtml(String(a.character_id || "—"))}</small></span></div></td>
-            <td>${window.escapeHtml(a.race || "—")}</td><td>${window.escapeHtml(a.homeland || "—")}</td><td>${window.escapeHtml(a.occupation || "—")}</td><td>${a.age ? window.escapeHtml(String(a.age)) : "—"}</td>
-            <td><div class="admin-character-table-actions">
-                <button type="button" class="admin-character-details-button" data-character-detail-id="${window.escapeHtml(String(a.id))}">Открыть</button>
-                <button type="button" class="admin-character-details-button admin-character-titles-button" data-character-title-id="${window.escapeHtml(String(a.id))}">Титулы</button>
-                <button type="button" class="admin-character-details-button admin-character-abilities-button" data-character-ability-id="${window.escapeHtml(String(a.id))}">Навыки</button>
-                <button type="button" class="admin-character-details-button admin-character-inventory-button" data-character-inventory-id="${window.escapeHtml(String(a.id))}">Инвентарь</button>
-            </div></td></tr>`).join("");
-        return '<div class="admin-character-table-wrap"><table class="admin-character-table"><thead><tr><th>Персонаж</th><th>Раса</th><th>Родина</th><th>Занятие</th><th>Возраст</th><th>Действия</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
-    };
-
     const renderCharacterDirectory = resetPage => {
         if (resetPage) characterPage = 1;
         const query = characterSearch.value.trim().toLocaleLowerCase("ru");
@@ -291,20 +265,10 @@ async function renderAdminApplications(container, applications) {
             if (sort === "age-desc") return (Number(b.age) || 0) - (Number(a.age) || 0);
             return Number(b.id || 0) - Number(a.id || 0);
         });
-        const pageSize = characterPageSize.value === "all" ? Math.max(filteredCharacters.length, 1) : Number(characterPageSize.value);
-        const pages = Math.max(1, Math.ceil(filteredCharacters.length / pageSize));
-        characterPage = Math.min(characterPage, pages);
-        const start = (characterPage - 1) * pageSize;
-        const visible = filteredCharacters.slice(start, start + pageSize);
-        characterCount.textContent = filteredCharacters.length ? `Показаны ${start + 1}–${Math.min(start + visible.length, filteredCharacters.length)} из ${filteredCharacters.length}` : "Ничего не найдено";
-        characterActiveSummary.textContent = filteredCharacters.length === approved.length ? "Без ограничений" : `Отобрано ${filteredCharacters.length} из ${approved.length}`;
-        characterPagination.hidden = filteredCharacters.length <= pageSize;
-        characterPageLabel.textContent = `Страница ${characterPage} из ${pages}`;
-        characterPrev.disabled = characterPage <= 1;
-        characterNext.disabled = characterPage >= pages;
-        characterList.classList.toggle("is-table-view", characterView === "table");
-        characterList.innerHTML = visible.length
-            ? (characterView === "table" ? renderCharacterTable(visible) : visible.map(window.renderAdminCharacterManagement).join(""))
+        characterCount.textContent = filteredCharacters.length ? `Найдено: ${filteredCharacters.length} персонажей` : "Ничего не найдено";
+        characterActiveSummary.textContent = filteredCharacters.length === approved.length ? "Все персонажи мира" : `Отобрано из ${approved.length}`;
+        characterList.innerHTML = filteredCharacters.length
+            ? filteredCharacters.map(window.renderAdminCharacterManagement).join("")
             : '<div class="admin-empty admin-character-no-results"><h2>Ничего не найдено</h2><p>Попробуй убрать часть фильтров или изменить запрос.</p><button type="button" class="admin-character-reset-empty">Сбросить фильтры</button></div>';
         const active = [];
         if (query) active.push("Поиск: " + characterSearch.value.trim());
@@ -318,17 +282,12 @@ async function renderAdminApplications(container, applications) {
         bindAdminButtons(container);
     };
     characterFilters.forEach(control => control.addEventListener(control === characterSearch ? "input" : "change", () => renderCharacterDirectory(true)));
-    characterPrev.addEventListener("click", () => { characterPage--; renderCharacterDirectory(false); });
-    characterNext.addEventListener("click", () => { characterPage++; renderCharacterDirectory(false); });
-    container.querySelectorAll("[data-character-view]").forEach(button => button.addEventListener("click", () => {
-        characterView = button.dataset.characterView;
-        container.querySelectorAll("[data-character-view]").forEach(item => {
-            const active = item === button;
-            item.classList.toggle("active", active);
-            item.setAttribute("aria-pressed", String(active));
-        });
-        renderCharacterDirectory(false);
-    }));
+    container.querySelector("#admin-character-expand-all").addEventListener("click", () => {
+        characterList.querySelectorAll(".admin-character-accordion").forEach(item => { item.open = true; });
+    });
+    container.querySelector("#admin-character-collapse-all").addEventListener("click", () => {
+        characterList.querySelectorAll(".admin-character-accordion").forEach(item => { item.open = false; });
+    });
     characterActiveFilters.addEventListener("click", event => {
         const button = event.target.closest("[data-remove-filter]");
         if (!button) return;
@@ -351,7 +310,6 @@ async function renderAdminApplications(container, applications) {
         characterCompleteness.value = "";
         characterSort.value = "newest";
         characterPageSize.value = "24";
-        characterPage = 1;
         renderCharacterDirectory(true);
     });
     container.querySelector("#admin-character-export").addEventListener("click", () => {
@@ -478,49 +436,45 @@ function renderAdminApplication(application) {
    КНОПКИ АДМИНКИ
    ========================================================= */
 function renderAdminCharacterManagement(application) {
-    const fields = [
-        ["Раса", application.race],
-        ["Возраст", application.age ? `${application.age} лет` : null],
-        ["Родина", application.homeland],
-        ["Род занятий", application.occupation],
-        ["Оружие", application.preferred_weapon],
-        ["Характер", application.personality],
-        ["Предыстория", application.backstory],
-        ["Особые навыки", application.special_skills]
-    ].filter(([, value]) => value);
-
+    const esc = value => window.escapeHtml(String(value ?? "—"));
     return `
-        <article class="admin-hero-character" data-character-id="${application.character_id || ""}">
-            <div class="admin-hero-character-portrait">
-                ${application.photo_url
-                    ? `<img src="${window.escapeHtml(application.photo_url)}" alt="">`
-                    : '<div class="admin-character-sigil">✦</div>'}
-            </div>
-            <div class="admin-hero-character-body">
-                <div class="admin-character-heading">
-                    <div>
-                        <span class="admin-character-rank">ЖИТЕЛЬ ЛОРГУСА · ЗАПИСЬ В ЛЕТОПИСИ #${window.escapeHtml(String(application.id))}</span>
-                        <h3>${window.escapeHtml(application.name || "Без имени")}</h3>
-                        <p>${window.escapeHtml(application.race || "Раса не указана")} · ${window.escapeHtml(application.homeland || "Родина не указана")}</p>
-                    </div>
-                    <span class="admin-character-status">ОДОБРЕН</span>
+        <details class="admin-character-accordion" data-character-id="${esc(application.character_id || "")}">
+            <summary class="admin-character-accordion-summary">
+                <span class="admin-character-accordion-portrait">${application.photo_url ? `<img src="${esc(application.photo_url)}" alt="">` : "✦"}</span>
+                <span class="admin-character-accordion-main">
+                    <strong>${esc(application.name || "Без имени")}</strong>
+                    <span>${esc(application.race || "Раса не указана")} · ${esc(application.homeland || "Родина не указана")}</span>
+                </span>
+                <span class="admin-character-accordion-meta">
+                    <span>${esc(application.occupation || "Занятие не указано")}</span>
+                    <small>${application.age ? esc(application.age + " лет") : "Возраст не указан"} · #${esc(application.id)}</small>
+                </span>
+                <span class="admin-character-accordion-status">ОДОБРЕН</span>
+                <span class="admin-character-accordion-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div class="admin-character-accordion-content">
+                <div class="admin-character-accordion-facts">
+                    <div><small>РАСА</small><strong>${esc(application.race)}</strong></div>
+                    <div><small>ВОЗРАСТ</small><strong>${application.age ? esc(application.age + " лет") : "—"}</strong></div>
+                    <div><small>РОДИНА</small><strong>${esc(application.homeland)}</strong></div>
+                    <div><small>ЗАНЯТИЕ</small><strong>${esc(application.occupation)}</strong></div>
+                    <div><small>ОРУЖИЕ</small><strong>${esc(application.preferred_weapon)}</strong></div>
+                    <div><small>ID ПЕРСОНАЖА</small><strong>${esc(application.character_id)}</strong></div>
                 </div>
-                <div class="admin-character-facts">
-                    ${fields.slice(0,5).map(([label,value]) => `<div><small>${label}</small><strong>${window.escapeHtml(String(value))}</strong></div>`).join("")}
-                </div>
-                <div class="admin-character-lore">
-                    <div><small>ХАРАКТЕР</small><p>${window.escapeHtml(application.personality || "—")}</p></div>
-                    <div><small>ПРЕДЫСТОРИЯ</small><p>${window.escapeHtml(application.backstory || "—")}</p></div>
-                    <div><small>ОСОБЫЕ НАВЫКИ</small><p>${window.escapeHtml(application.special_skills || "—")}</p></div>
+                <div class="admin-character-accordion-lore">
+                    <section><small>ХАРАКТЕР</small><p>${esc(application.personality)}</p></section>
+                    <section><small>ПРЕДЫСТОРИЯ</small><p>${esc(application.backstory)}</p></section>
+                    <section><small>ОСОБЫЕ НАВЫКИ</small><p>${esc(application.special_skills)}</p></section>
                 </div>
                 <div class="admin-character-actions">
-                    <button class="admin-character-details-button" type="button" data-character-detail-id="${application.id}">Открыть полную запись</button>
-                    <button class="admin-character-details-button admin-character-titles-button" type="button" data-character-title-id="${application.id}">Титулы</button>
-                    <button class="admin-character-details-button admin-character-abilities-button" type="button" data-character-ability-id="${application.id}">Способности</button><button class="admin-character-details-button admin-character-inventory-button" type="button" data-character-inventory-id="${application.id}">Инвентарь</button>
-                    <button class="admin-reject-button admin-delete-character-button" data-character-id="${application.character_id || ""}" data-character-name="${window.escapeHtml(application.name || "персонажа")}">Удалить персонажа</button>
+                    <button class="admin-character-details-button" type="button" data-character-detail-id="${esc(application.id)}">Полная запись</button>
+                    <button class="admin-character-details-button admin-character-titles-button" type="button" data-character-title-id="${esc(application.id)}">Титулы</button>
+                    <button class="admin-character-details-button admin-character-abilities-button" type="button" data-character-ability-id="${esc(application.id)}">Способности</button>
+                    <button class="admin-character-details-button admin-character-inventory-button" type="button" data-character-inventory-id="${esc(application.id)}">Инвентарь</button>
+                    <button class="admin-reject-button admin-delete-character-button" data-character-id="${esc(application.character_id || "")}" data-character-name="${esc(application.name || "персонажа")}">Удалить персонажа</button>
                 </div>
             </div>
-        </article>
+        </details>
     `;
 }
 
