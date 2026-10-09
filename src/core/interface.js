@@ -341,17 +341,53 @@ window.lorgusMapReset = lorgusMapReset;
 /* =========================================================
    LORGUS // THREE.JS DEPTH GATE
    ========================================================= */
+async function getRpCharacterActiveTitle(characterId) {
+    if (!characterId || !window.supabaseClient) return null;
+    window.rpCharacterTitleCache = window.rpCharacterTitleCache || {};
+    const key = String(characterId);
+    if (Object.prototype.hasOwnProperty.call(window.rpCharacterTitleCache, key)) {
+        return window.rpCharacterTitleCache[key];
+    }
+
+    const { data: character, error: characterError } = await window.supabaseClient
+        .from("characters")
+        .select("active_title_id")
+        .eq("id", characterId)
+        .maybeSingle();
+
+    if (characterError || !character?.active_title_id) {
+        window.rpCharacterTitleCache[key] = null;
+        return null;
+    }
+
+    const { data: title, error: titleError } = await window.supabaseClient
+        .from("titles")
+        .select("id,name,icon,color,rarity")
+        .eq("id", character.active_title_id)
+        .maybeSingle();
+
+    const result = titleError ? null : (title || null);
+    window.rpCharacterTitleCache[key] = result;
+    return result;
+}
+
 async function appendRpMessage(message) {
     const feed = document.getElementById("lorgus-rp-feed");
     if (!feed || feed.querySelector('[data-rp-message-id="' + message.id + '"]')) return;
     const empty = feed.querySelector(".lorgus-messenger-start");
     if (empty) empty.remove();
 
-    const photo = await getRpCharacterPhoto(message.character_id);
+    const [photo, activeTitle] = await Promise.all([
+        getRpCharacterPhoto(message.character_id),
+        getRpCharacterActiveTitle(message.character_id)
+    ]);
     const mine = String(message.character_id) === String(window.activeCharacterId);
     const adminPost = Boolean(message.is_admin_post);
     const article = document.createElement("article");
-    article.className = "lorgus-messenger-message" + (mine ? " mine" : "") + (adminPost ? " admin-authored" : "") + (message.status === "reverted" ? " reverted" : "");
+    article.className = "lorgus-messenger-message" + (mine ? " mine" : "") + (adminPost ? " admin-authored" : "") + (activeTitle?.color ? " has-active-title" : "") + (message.status === "reverted" ? " reverted" : "");
+    if (activeTitle?.color && /^#[0-9a-f]{3,8}$/i.test(activeTitle.color)) {
+        article.style.setProperty("--rp-title-color", activeTitle.color);
+    }
     article.dataset.rpMessageId = message.id;
     const time = new Date(message.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
 
@@ -360,7 +396,7 @@ async function appendRpMessage(message) {
             (photo ? '<img src="' + escapeHtml(photo) + '" alt="">' : '<span>✦</span>') +
         '</div>' +
         '<div class="lorgus-messenger-message-content">' +
-            '<div class="lorgus-messenger-message-meta"><strong>' + escapeHtml(message.characters?.name || "Без имени") + '</strong>' + (adminPost ? '<span class="lorgus-admin-post-badge" title="Пост опубликован администрацией">✦ АДМИНИСТРАЦИЯ</span>' : '') + '<time>' + escapeHtml(time) + '</time></div>' +
+            '<div class="lorgus-messenger-message-meta"><strong>' + escapeHtml(message.characters?.name || "Без имени") + '</strong>' + (activeTitle ? '<span class="lorgus-message-title-badge" title="Активный титул" style="--rp-title-color:' + escapeHtml(/^#[0-9a-f]{3,8}$/i.test(activeTitle.color || "") ? activeTitle.color : "#d6b36a") + '">' + escapeHtml((activeTitle.icon ? activeTitle.icon + " " : "✦ ") + activeTitle.name) + '</span>' : '') + (adminPost ? '<span class="lorgus-admin-post-badge" title="Пост опубликован администрацией">✦ АДМИНИСТРАЦИЯ</span>' : '') + '<time>' + escapeHtml(time) + '</time></div>' +
             '<div class="lorgus-messenger-bubble">' +
                 '<p>' + escapeHtml(message.body) + '</p>' +
                 (message.status === "reverted" ? '<div class="lorgus-rp-reverted-mark">Пост отменён администрацией' + (message.revert_reason ? ' · ' + escapeHtml(message.revert_reason) : '') + '</div>' : '') +
