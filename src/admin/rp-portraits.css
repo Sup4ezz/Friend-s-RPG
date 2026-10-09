@@ -11,3 +11,19 @@
 .admin-rp-portrait-info em{font-size:8px;font-style:normal;letter-spacing:.08em;color:#b7a06b}
 .admin-rp-portrait-row .admin-rp-photo-upload{grid-column:2;justify-self:start;margin-top:0;max-width:100%}
 @media(max-width:640px){.admin-rp-portrait-library{grid-template-columns:1fr}.admin-rp-portrait-row{grid-template-columns:50px minmax(0,1fr)}.admin-rp-portrait-preview{width:50px;height:60px}}
+
+/* Portrait crop editor */
+.admin-rp-crop-overlay{position:fixed;inset:0;z-index:100000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.82);backdrop-filter:blur(5px)}
+.admin-rp-crop-dialog{width:min(100%,480px);max-height:94vh;overflow:auto;padding:18px;background:#17140f;border:1px solid rgba(214,179,106,.45);border-radius:8px;box-shadow:0 24px 90px #000;color:#e9ddc5}
+.admin-rp-crop-dialog header,.admin-rp-crop-dialog footer{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.admin-rp-crop-dialog header strong{font-size:17px;color:#f0d59a}
+.admin-rp-crop-dialog p{font-size:12px;line-height:1.5;color:#b9ac93}
+.admin-rp-crop-dialog button{cursor:pointer;border:1px solid rgba(214,179,106,.35);border-radius:4px;padding:9px 12px;background:#282117;color:#e9ddc5}
+.admin-rp-crop-dialog [data-crop-save]{background:#b48a3c;color:#171109;border-color:#d4b16a;font-weight:700}
+.admin-rp-crop-stage{width:min(100%,300px);margin:14px auto;padding:8px;background:#0a0907;border:1px solid rgba(214,179,106,.25)}
+.admin-rp-crop-stage canvas{display:block;width:100%;height:auto;aspect-ratio:9/11;object-fit:contain}
+.admin-rp-crop-dialog label{display:grid;grid-template-columns:1fr auto;gap:6px;margin:14px 0;font-size:12px;color:#d7c6a3}
+.admin-rp-crop-dialog label output{color:#f0d59a;font-variant-numeric:tabular-nums}
+.admin-rp-crop-dialog input[type=range]{grid-column:1/-1;width:100%;accent-color:#c6a15a}
+.admin-rp-crop-dialog footer{margin-top:18px;flex-wrap:wrap}
+@media(max-width:480px){.admin-rp-crop-overlay{padding:8px}.admin-rp-crop-dialog{padding:13px}.admin-rp-crop-dialog footer button{flex:1}}
