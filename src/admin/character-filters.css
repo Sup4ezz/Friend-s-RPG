@@ -7,7 +7,7 @@
 .admin-character-filter-panel{display:grid;grid-template-columns:minmax(220px,1.5fr) repeat(3,minmax(130px,1fr));gap:13px;padding:18px;margin:0 0 14px;border:1px solid rgba(201,164,91,.18);background:linear-gradient(135deg,rgba(25,21,15,.9),rgba(8,7,6,.96));box-shadow:0 16px 35px rgba(0,0,0,.18)}
 .admin-character-filter-panel label{display:flex;flex-direction:column;gap:7px;min-width:0}
 .admin-character-filter-panel label>span{color:rgba(218,190,129,.7);font-size:9px;font-weight:700;letter-spacing:.14em}
-.admin-character-filter-panel input,.admin-character-filter-panel select{width:100%;min-width:0;height:42px;padding:0 12px;border:1px solid rgba(220,184,102,.2);border-radius:3px;outline:none;background:#0b0a08;color:#e8dfce;font:12px/1.4 inherit;transition:border-color .18s,background .18s}
+.admin-character-filter-panel input,.admin-character-filter-panel select{width:100%;min-width:0;height:42px;padding:0 12px;border:1px solid rgba(220,184,102,.2);border-radius:3px;outline:none;background:#0b0a08;color:#e8dfce;font-size:12px;font-family:inherit;line-height:1.4;transition:border-color .18s,background .18s}
 .admin-character-filter-panel input::placeholder{color:rgba(224,216,199,.35)}
 .admin-character-filter-panel input:focus,.admin-character-filter-panel select:focus{border-color:rgba(218,183,104,.75);background:#100e0a;box-shadow:0 0 0 3px rgba(201,164,91,.08)}
 .admin-character-search-wrap{grid-column:span 2}
