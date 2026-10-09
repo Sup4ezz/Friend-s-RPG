@@ -132,6 +132,8 @@
         const visible = state.chats.filter(chat => !query || chat.label.toLowerCase().includes(query));
         const box = root.querySelector(".admin-rp-chat-list");
         if (!box) return;
+        const chatCount = root.querySelector("[data-rp-chat-count]");
+        if (chatCount) chatCount.textContent = visible.length + " / " + state.chats.length;
 
         box.innerHTML = visible.length
             ? visible.map(chat => {
@@ -589,7 +591,7 @@
                 </section>
 
                 <aside class="admin-rp-tools">
-                    <details class="admin-rp-tool admin-rp-composer-tool" open>
+                    <details class="admin-rp-tool admin-rp-composer-tool">
                         <summary class="admin-rp-tool-summary"><span class="admin-rp-tool-number">03</span><span><small>ПУБЛИКАЦИЯ</small><strong>Написать RP-пост</strong></span><i>⌄</i></summary>
                         <div class="admin-rp-tool-content">
                             <p>Выбери персонажа и чат. Пост появится в ленте от имени выбранного персонажа.</p>
