@@ -485,6 +485,7 @@ function showRpMessageContextMenu(message, x, y) {
     document.querySelector(".lorgus-rp-context-menu")?.remove();
     const menu = document.createElement("div");
     menu.className = "lorgus-rp-context-menu";
+    menu.dataset.messageId = String(message.id || "");
     menu.setAttribute("role", "menu");
     menu.innerHTML = `
         <button type="button" role="menuitem" data-action="reply"><span>↩</span><strong>Ответить</strong></button>
@@ -598,9 +599,21 @@ async function appendRpMessage(message) {
     feed.insertBefore(article, later || null);
     window.cacheRpMessage?.(message);
 
+    // Firefox can handle the native context menu differently from Chromium.
+    // Open our menu on the right-button press as a fallback, then suppress the
+    // native contextmenu event without rebuilding the same menu twice.
+    article.addEventListener("mousedown", event => {
+        if (event.button !== 2) return;
+        event.preventDefault();
+        event.stopPropagation();
+        showRpMessageContextMenu(message, event.clientX, event.clientY);
+    });
+
     article.addEventListener("contextmenu", event => {
         event.preventDefault();
         event.stopPropagation();
+        const existingMenu = document.querySelector(".lorgus-rp-context-menu");
+        if (existingMenu?.dataset.messageId === String(message.id || "")) return;
         showRpMessageContextMenu(message, event.clientX, event.clientY);
     });
 
