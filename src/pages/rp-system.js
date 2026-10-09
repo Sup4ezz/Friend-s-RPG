@@ -1797,11 +1797,72 @@ async function openAdminCharacterInventory(application, container) {
     });
 }
 async function loadAdminItemUseLog(container) {
-    const box=container.querySelector("#admin-item-use-log"); if(!box)return;
-    const {data,error}=await window.supabaseClient.from("rp_message_item_uses").select("id,message_id,character_id,item_id,quantity,consumed,status,used_at,reverted_at,revert_reason,items(name,icon,color,rarity),characters(name),rp_messages(body,created_at,status)").order("used_at",{ascending:false}).limit(200);
-    if(error){box.innerHTML='<div class="admin-empty"><h2>Журнал недоступен</h2><p>'+escapeHtml(error.message)+'</p></div>';return;}
-    box.innerHTML=data?.length?data.map(row=>{const item=row.items||{},char=row.characters||{},post=row.rp_messages||{};return '<article class="admin-item-use-entry '+(row.status==="reverted"?"reverted":"")+'"><div class="admin-item-use-icon" style="--item-color:'+escapeHtml(item.color||"#d6b36a")+'">'+escapeHtml(item.icon||"◆")+'</div><div class="admin-item-use-body"><strong>'+escapeHtml(item.name||"Предмет")+'</strong><span>'+escapeHtml(char.name||"Персонаж")+' · пост #'+escapeHtml(String(row.message_id))+' · '+escapeHtml(new Date(row.used_at).toLocaleString("ru-RU"))+'</span><p>'+escapeHtml(post.body||"")+'</p><small>'+(row.consumed?"Предмет расходуется":"Предмет не расходуется")+(row.status==="reverted"?" · ОТКАТ ВЫПОЛНЕН":"")+'</small></div><div class="admin-item-use-action">'+(row.status==="active"?'<button type="button" data-message-id="'+escapeHtml(String(row.message_id))+'">Отменить пост</button>':'<span>Отменено</span>')+'</div></article>';}).join(""):'<div class="admin-empty"><h2>Использований пока нет</h2><p>Когда игрок применит предмет в RP-посте, запись появится здесь.</p></div>';
-    box.querySelectorAll("button[data-message-id]").forEach(button=>button.addEventListener("click",async()=>{const reason=prompt("Почему пост и использование предмета отменяются?","");if(reason===null)return;button.disabled=true;const {error}=await window.supabaseClient.rpc("admin_revert_rp_message",{p_message_id:Number(button.dataset.messageId),p_reason:reason.trim()});if(error){alert("Не удалось отменить пост:\n\n"+error.message);button.disabled=false;return;}await loadAdminItemUseLog(container);}));
+    const box = container.querySelector("#admin-item-use-log");
+    if (!box) return;
+    const { data, error } = await window.supabaseClient
+        .from("rp_message_item_uses")
+        .select("id,message_id,character_id,item_id,quantity,consumed,status,used_at,reverted_at,revert_reason,items(name,icon,color,rarity),characters(name),rp_messages(body,created_at,status)")
+        .order("used_at", { ascending: false })
+        .limit(200);
+
+    if (error) {
+        box.innerHTML = '<div class="admin-empty"><h2>Журнал недоступен</h2><p>' + escapeHtml(error.message) + '</p></div>';
+        return;
+    }
+
+    const rows = data || [];
+    const renderRows = () => {
+        const query = (box.querySelector("[data-item-use-search]")?.value || "").trim().toLocaleLowerCase("ru");
+        const status = box.querySelector("[data-item-use-status]")?.value || "";
+        const consumed = box.querySelector("[data-item-use-consumed]")?.value || "";
+        const filtered = rows.filter(row => {
+            const item = row.items || {}, character = row.characters || {}, post = row.rp_messages || {};
+            const haystack = [item.name, item.rarity, character.name, post.body, row.message_id, row.item_id, row.revert_reason]
+                .filter(Boolean).join(" ").toLocaleLowerCase("ru");
+            return (!query || haystack.includes(query)) &&
+                (!status || (status === "active" ? row.status !== "reverted" : row.status === "reverted")) &&
+                (!consumed || (consumed === "yes" ? Boolean(row.consumed) : !row.consumed));
+        });
+        const list = box.querySelector("[data-item-use-results]");
+        const count = box.querySelector("[data-item-use-count]");
+        count.textContent = "Найдено: " + filtered.length + " из " + rows.length;
+        list.innerHTML = filtered.length ? filtered.map(row => {
+            const item = row.items || {}, char = row.characters || {}, post = row.rp_messages || {};
+            return '<article class="admin-item-use-entry ' + (row.status === "reverted" ? "reverted" : "") + '">' +
+                '<div class="admin-item-use-icon" style="--item-color:' + escapeHtml(item.color || "#d6b36a") + '">' + escapeHtml(item.icon || "◆") + '</div>' +
+                '<div class="admin-item-use-body"><strong>' + escapeHtml(item.name || "Предмет") + '</strong>' +
+                '<span>' + escapeHtml(char.name || "Персонаж") + ' · пост #' + escapeHtml(String(row.message_id)) + ' · ' + escapeHtml(row.used_at ? new Date(row.used_at).toLocaleString("ru-RU") : "—") + '</span>' +
+                '<p>' + escapeHtml(post.body || "") + '</p><small>' + (row.consumed ? "Предмет расходуется" : "Предмет не расходуется") +
+                (row.status === "reverted" ? " · ОТКАТ ВЫПОЛНЕН" : "") + '</small></div>' +
+                '<div class="admin-item-use-action">' + (row.status !== "reverted" ? '<button type="button" data-message-id="' + escapeHtml(String(row.message_id)) + '">Отменить пост</button>' : '<span>Отменено</span>') + '</div></article>';
+        }).join("") : '<div class="admin-empty"><h2>Ничего не найдено</h2><p>Измени поиск или фильтры журнала.</p></div>';
+
+        list.querySelectorAll("button[data-message-id]").forEach(button => button.addEventListener("click", async () => {
+            const reason = prompt("Почему пост и использование предмета отменяются?", "");
+            if (reason === null) return;
+            button.disabled = true;
+            const { error } = await window.supabaseClient.rpc("admin_revert_rp_message", {
+                p_message_id: Number(button.dataset.messageId),
+                p_reason: reason.trim()
+            });
+            if (error) {
+                alert("Не удалось отменить пост:\n\n" + error.message);
+                button.disabled = false;
+                return;
+            }
+            await loadAdminItemUseLog(container);
+        }));
+    };
+
+    box.innerHTML = '<div class="admin-item-use-filters">' +
+        '<label><span>ПОИСК ПО ЖУРНАЛУ</span><input type="search" data-item-use-search placeholder="Предмет, персонаж, текст поста, ID…"></label>' +
+        '<label><span>СОСТОЯНИЕ</span><select data-item-use-status><option value="">Все записи</option><option value="active">Действующие</option><option value="reverted">Отменённые</option></select></label>' +
+        '<label><span>РАСХОД</span><select data-item-use-consumed><option value="">Любой</option><option value="yes">Предмет израсходован</option><option value="no">Без расхода</option></select></label>' +
+        '<strong data-item-use-count>Загрузка…</strong></div><div data-item-use-results class="admin-item-use-results"></div>';
+    box.querySelectorAll("[data-item-use-search],[data-item-use-status],[data-item-use-consumed]").forEach(control =>
+        control.addEventListener(control.matches("[data-item-use-search]") ? "input" : "change", renderRows)
+    );
+    renderRows();
 }
 
 /* =========================================================
