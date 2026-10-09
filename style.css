@@ -18281,3 +18281,18 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-message-title-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 6px;border:1px solid color-mix(in srgb,var(--rp-title-color,#d6b36a) 58%,transparent);border-radius:3px;background:color-mix(in srgb,var(--rp-title-color,#d6b36a) 11%,transparent);color:var(--rp-title-color,#d6b36a);font-size:9px;font-weight:750;letter-spacing:.025em;line-height:1.3;text-shadow:0 0 10px color-mix(in srgb,var(--rp-title-color,#d6b36a) 20%,transparent)}
 .lorgus-messenger-message.admin-authored.has-active-title{border-color:color-mix(in srgb,var(--rp-title-color,#d6b36a) 64%,transparent);border-left-color:var(--rp-title-color,#d6b36a)}
 .lorgus-messenger-message.admin-authored.has-active-title .lorgus-admin-post-badge{border-color:rgba(222,180,91,.42);color:#e2bf70}
+
+
+/* RP title identity — stronger, visible frame, not just a subtle tint */
+.lorgus-messenger-message.has-active-title{
+  position:relative!important;
+  border:1px solid var(--rp-title-color,#d6b36a)!important;
+  border-left:5px solid var(--rp-title-color,#d6b36a)!important;
+  background:linear-gradient(115deg,color-mix(in srgb,var(--rp-title-color,#d6b36a) 15%,#100e0b),#100e0b 72%)!important;
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--rp-title-color,#d6b36a) 20%,transparent),0 7px 22px rgba(0,0,0,.22),inset 0 0 20px color-mix(in srgb,var(--rp-title-color,#d6b36a) 7%,transparent)!important;
+}
+.lorgus-messenger-message.has-active-title .lorgus-messenger-bubble{border-color:color-mix(in srgb,var(--rp-title-color,#d6b36a) 42%,transparent)!important}
+.lorgus-messenger-message.has-active-title .lorgus-messenger-message-avatar{border:2px solid var(--rp-title-color,#d6b36a)!important;box-shadow:0 0 0 2px color-mix(in srgb,var(--rp-title-color,#d6b36a) 17%,transparent),0 0 15px color-mix(in srgb,var(--rp-title-color,#d6b36a) 28%,transparent)!important}
+.lorgus-messenger-message.has-active-title .lorgus-messenger-message-meta>strong{color:var(--rp-title-color,#d6b36a)!important}
+.lorgus-messenger-message.has-active-title .lorgus-message-title-badge{border-color:var(--rp-title-color,#d6b36a)!important;background:color-mix(in srgb,var(--rp-title-color,#d6b36a) 16%,#100e0b)!important}
+.lorgus-messenger-message.admin-authored.has-active-title{border-top-color:var(--rp-title-color,#d6b36a)!important;border-right-color:var(--rp-title-color,#d6b36a)!important;border-bottom-color:var(--rp-title-color,#d6b36a)!important}
