@@ -35,11 +35,28 @@ async function renderCharacterSelection(container, applications, pendingApplicat
 
     const grid = container.querySelector(".character-selection-grid");
 
-    for (const application of applications) {
+    // Load character rows and signed portrait URLs concurrently instead of serial N+1 waits.
+    const characterEntries = await Promise.all(applications.map(async application => {
         const result = await window.supabaseClient.from("characters").select("*").eq("id", application.character_id).single();
-        if (result.error || !result.data) continue;
+        if (result.error || !result.data) return null;
 
-        const character = result.data;
+        let photoUrl = null;
+        if (application.photo_path) {
+            try {
+                const { data, error } = await window.supabaseClient.storage
+                    .from("character-applications")
+                    .createSignedUrl(application.photo_path, 60 * 60);
+                if (!error) photoUrl = data?.signedUrl || null;
+            } catch (error) {
+                console.warn("Не удалось загрузить портрет персонажа:", error);
+            }
+        }
+        return { application, character: result.data, photoUrl };
+    }));
+
+    for (const entry of characterEntries) {
+        if (!entry) continue;
+        const { application, character, photoUrl } = entry;
         const status = String(character.status || "ACTIVE").toUpperCase();
         const card = document.createElement("article");
         card.className = "character-card";
@@ -47,22 +64,14 @@ async function renderCharacterSelection(container, applications, pendingApplicat
         const avatar = document.createElement("div");
         avatar.className = "character-card-avatar";
 
-        if (application.photo_path) {
-            const { data: photoData, error: photoError } = await window.supabaseClient
-                .storage
-                .from("character-applications")
-                .createSignedUrl(application.photo_path, 60 * 60);
-
-            if (!photoError && photoData?.signedUrl) {
-                const image = document.createElement("img");
-                image.src = photoData.signedUrl;
-                image.alt = character.name || "Персонаж";
-                image.className = "character-card-photo";
-                avatar.appendChild(image);
-            } else {
-                avatar.classList.add("character-card-placeholder");
-                avatar.innerHTML = "<span>✦</span>";
-            }
+        if (photoUrl) {
+            const image = document.createElement("img");
+            image.src = photoUrl;
+            image.alt = character.name || "Персонаж";
+            image.className = "character-card-photo";
+            image.loading = "lazy";
+            image.decoding = "async";
+            avatar.appendChild(image);
         } else {
             avatar.classList.add("character-card-placeholder");
             avatar.innerHTML = "<span>✦</span>";
