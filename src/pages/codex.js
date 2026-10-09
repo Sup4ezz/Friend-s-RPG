@@ -13,14 +13,16 @@
     ];
     const esc = value => window.escapeHtml ? window.escapeHtml(String(value ?? "")) : String(value ?? "").replace(/[&<>"]/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[ch]));
     const encodePath = value => value.split("/").map(encodeURIComponent).join("/");
+    const slug = value => String(value || "").trim().toLocaleLowerCase("ru").replace(/\\[[^\\]]*\\]/g, "").replace(/[^\\p{L}\\p{N}]+/gu, "-").replace(/^-|-$/g, "");
     function inline(value) {
         return esc(value)
-            .replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, "$2")
-            .replace(/\[\[([^\]]+)\]\]/g, "$1")
-            .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-            .replace(/\*(.+?)\*/g, "<em>$1</em>")
-            .replace(/\x60([^\x60]+)\x60/g, "<code>$1</code>");
+            .replace(/\\[\\[([^|\\]]+)\\|([^\\]]+)\\]\\]/g, '<a class="lorgus-codex-wikilink" href="#" data-codex-target="$1">$2</a>')
+            .replace(/\\[\\[([^\\]]+)\\]\\]/g, '<a class="lorgus-codex-wikilink" href="#" data-codex-target="$1">$1</a>')
+            .replace(/\\*\\*(.+?)\\*\\*/g, "<strong>$1</strong>")
+            .replace(/\\*(.+?)\\*/g, "<em>$1</em>")
+            .replace(/\\x60([^\\x60]+)\\x60/g, "<code>$1</code>");
     }
+
     function markdown(source) {
         const lines = String(source || "").replace(/\r/g, "").split("\n");
         const out = [];
@@ -30,8 +32,8 @@
         for (const line of lines) {
             const t = line.trim();
             if (!t) { flushP(); flushL(); continue; }
-            const heading = t.match(/^(#{1,4})\s+(.+)$/);
-            if (heading) { flushP(); flushL(); const level = Math.min(heading[1].length + 1, 5); out.push("<h" + level + ">" + inline(heading[2]) + "</h" + level + ">"); continue; }
+            const heading = t.match(/^(#{1,4})\\s+(.+)$/);
+            if (heading) { flushP(); flushL(); const level = Math.min(heading[1].length + 1, 5); const id = slug(heading[2]); out.push('<h' + level + ' id="' + id + '">' + inline(heading[2]) + "</h" + level + ">"); continue; }
             if (/^---+$/.test(t)) { flushP(); flushL(); out.push("<hr>"); continue; }
             if (/^>\s?/.test(t)) { flushP(); flushL(); out.push("<blockquote>" + inline(t.replace(/^>\s?/, "")) + "</blockquote>"); continue; }
             if (/^[-*+]\s+/.test(t)) { flushP(); list.push(t.replace(/^[-*+]\s+/, "")); continue; }
@@ -59,6 +61,28 @@
                 const source = await response.text();
                 if (/^\s*<!doctype html/i.test(source)) throw new Error("Получен HTML вместо текста летописи");
                 article.innerHTML = markdown(source);
+                article.querySelectorAll("[data-codex-target]").forEach(link => {
+                    link.addEventListener("click", event => {
+                        event.preventDefault();
+                        const target = String(link.dataset.codexTarget || "").trim();
+                        const parts = target.split("#");
+                        const targetSlug = slug(parts[0]);
+                        const anchorSlug = slug(parts[1] || "");
+                        const anchor = anchorSlug
+                            ? article.querySelector("#" + CSS.escape(anchorSlug))
+                            : article.querySelector("#" + CSS.escape(targetSlug));
+                        if (anchor) {
+                            anchor.scrollIntoView({ behavior: "smooth", block: "start" });
+                            return;
+                        }
+                        const topicIndex = topics.findIndex(item => {
+                            const title = slug(item.title);
+                            const file = slug(item.file.replace(/\\.md$/i, ""));
+                            return title === targetSlug || file === targetSlug;
+                        });
+                        if (topicIndex >= 0) void loadTopic(topicIndex);
+                    });
+                });
                 article.scrollTop = 0;
             } catch (error) {
                 console.error("Не удалось загрузить справочник:", error);
