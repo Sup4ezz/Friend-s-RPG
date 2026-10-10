@@ -1906,6 +1906,7 @@ async function openAdminCharacterInventory(application, container) {
         ["food","Еда","consumable"],
         ["quest_item","Квестовый предмет","quest"],
         ["material","Материал","material"],
+        ["lootbox","Лутбокс · случайная награда","misc"],
         ["misc","Прочее","misc"]
     ];
 
