@@ -32,12 +32,12 @@ const inventoryTypeLabels = {
     helmet: "Шлем", armor: "Броня", gloves: "Перчатки", pants: "Штаны", boots: "Обувь",
     sword: "Меч", spear: "Копьё", axe: "Топор", staff: "Посох", bow: "Лук", crossbow: "Арбалет",
     shield: "Щит", chain: "Цепочка", ring: "Кольцо", bracelet: "Браслет", potion: "Зелье",
-    scroll: "Свиток", food: "Еда", quest_item: "Квестовый предмет", material: "Материал", misc: "Прочее"
+    scroll: "Свиток", food: "Еда", quest_item: "Квестовый предмет", material: "Материал", lootbox: "Лутбокс", misc: "Прочее"
 };
 const inventoryTypeIcons = {
     helmet:"⛑", armor:"🛡", gloves:"🧤", pants:"♜", boots:"🥾", sword:"⚔", spear:"🔱", axe:"🪓",
     staff:"♖", bow:"🏹", crossbow:"⦿", shield:"🛡", chain:"⛓", ring:"◉", bracelet:"◌", potion:"⚗",
-    scroll:"▤", food:"✦", quest_item:"◆", material:"◇", misc:"◆"
+    scroll:"▤", food:"✦", quest_item:"◆", material:"◇", lootbox:"🎁", misc:"◆"
 };
 
 function inventoryRarityLabel(rarity) {
@@ -52,10 +52,12 @@ function inventoryItemMarkup(row, extraClass = "") {
     const item = row.items || {};
     const qty = row.quantity > 1 ? "×" + row.quantity : "";
     const equippedLabel = row.equipped_slot ? inventorySlotLabels[row.equipped_slot] : "";
-    return '<article class="lorgus-inventory-item ' + extraClass + (row.equipped_slot ? ' is-equipped' : '') + '" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '">' +
-        '<div class="lorgus-inventory-item-icon">' + escapeHtml(item.icon || "◆") + '</div>' +
+    const isLootbox = item.item_subtype === "lootbox" && !row.equipped_slot;
+    return '<article class="lorgus-inventory-item ' + extraClass + (row.equipped_slot ? ' is-equipped' : '') + (isLootbox ? ' is-lootbox' : '') + '" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '">' +
+        '<div class="lorgus-inventory-item-icon">' + escapeHtml(item.icon || (isLootbox ? "🎁" : "◆")) + '</div>' +
         '<div class="lorgus-inventory-item-info"><strong>' + escapeHtml(item.name || "Предмет") + '</strong><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ' + escapeHtml(inventoryTypeLabel(item)) + '</small>' + (equippedLabel ? '<em>НАДЕТО · ' + escapeHtml(equippedLabel) + '</em>' : '') + '</div>' +
-        '<b class="lorgus-inventory-qty">' + escapeHtml(qty) + '</b></article>';
+        '<b class="lorgus-inventory-qty">' + escapeHtml(qty) + '</b>' +
+        (isLootbox ? '<button type="button" class="lorgus-lootbox-open-button" data-open-lootbox="' + escapeHtml(row.id) + '">ОТКРЫТЬ</button>' : '') + '</article>';
 }
 
 async function loadCharacterInventory(characterId) {
@@ -238,6 +240,14 @@ async function renderLorgusInventory() {
     grid.querySelectorAll(".lorgus-inventory-item").forEach(setupDrag);
     document.querySelectorAll(".lorgus-equipped-item").forEach(setupDrag);
 
+    grid.querySelectorAll("[data-open-lootbox]").forEach(button => {
+        button.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            window.openLorgusLootbox?.(button.dataset.openLootbox);
+        });
+    });
+
     // Снятие экипировки: тот же предмет переносится из ячейки персонажа обратно в рюкзак.
     // Никакого клонирования и создания новой записи.
     grid.addEventListener("dragover", e => {
@@ -356,3 +366,79 @@ window.inventoryRarityLabel = inventoryRarityLabel;
 window.inventoryTypeLabel = inventoryTypeLabel;
 window.lorgusCurrencyLabel = lorgusCurrencyLabel;
 window.loadCharacterInventory = loadCharacterInventory;
+
+
+/* LORGUS lootbox opening scene */
+window.openLorgusLootbox = async function(inventoryId) {
+    if (!inventoryId || !window.activeCharacter || !window.supabaseClient) return;
+    if (document.querySelector(".lorgus-lootbox-overlay")) return;
+
+    const overlay = document.createElement("div");
+    overlay.className = "lorgus-lootbox-overlay";
+    overlay.innerHTML = `
+        <div class="lorgus-lootbox-backdrop"></div>
+        <section class="lorgus-lootbox-scene" role="dialog" aria-modal="true" aria-label="Открытие лутбокса">
+            <button class="lorgus-lootbox-close" type="button" aria-label="Закрыть">×</button>
+            <div class="lorgus-lootbox-overline">ПЕЧАТЬ ХРАНИТЕЛЯ · LORGUS</div>
+            <h2 class="lorgus-lootbox-title">Судьба внутри</h2>
+            <p class="lorgus-lootbox-subtitle">Печать трескается. Содержимое ещё не раскрыто.</p>
+            <div class="lorgus-lootbox-portal">
+                <div class="lorgus-lootbox-rune-ring"></div>
+                <div class="lorgus-lootbox-rays"></div>
+                <div class="lorgus-lootbox-chest" aria-hidden="true"><span class="lorgus-lootbox-chest-glow"></span><span class="lorgus-lootbox-chest-lid"></span><span class="lorgus-lootbox-chest-body">✦</span><span class="lorgus-lootbox-lock">◆</span></div>
+                <div class="lorgus-lootbox-sparks"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="lorgus-lootbox-reward" hidden></div>
+            <div class="lorgus-lootbox-status">ОЖИДАНИЕ РАСКРЫТИЯ</div>
+            <button class="lorgus-lootbox-reveal" type="button">РАСКРЫТЬ ПЕЧАТЬ</button>
+        </section>`;
+    document.body.appendChild(overlay);
+    requestAnimationFrame(() => overlay.classList.add("is-visible"));
+    const close = () => overlay.remove();
+    overlay.querySelector(".lorgus-lootbox-close").addEventListener("click", close);
+    overlay.querySelector(".lorgus-lootbox-backdrop").addEventListener("click", close);
+    const revealButton = overlay.querySelector(".lorgus-lootbox-reveal");
+    const status = overlay.querySelector(".lorgus-lootbox-status");
+    const subtitle = overlay.querySelector(".lorgus-lootbox-subtitle");
+    const chest = overlay.querySelector(".lorgus-lootbox-chest");
+    const rewardBox = overlay.querySelector(".lorgus-lootbox-reward");
+    let opened = false;
+
+    revealButton.addEventListener("click", async () => {
+        if (opened) { close(); await renderLorgusInventory(); return; }
+        opened = true;
+        revealButton.disabled = true;
+        revealButton.textContent = "ПЕЧАТЬ РАЗРУШАЕТСЯ…";
+        status.textContent = "СВЯЗЬ С СУДЬБОЙ";
+        subtitle.textContent = "Сокровище выбирается. Не прерывай ритуал.";
+        overlay.classList.add("is-opening");
+        chest.classList.add("is-shaking");
+        await new Promise(resolve => setTimeout(resolve, 2200));
+
+        const { data, error } = await window.supabaseClient.rpc("open_character_lootbox", {
+            p_inventory_id: inventoryId
+        });
+        chest.classList.remove("is-shaking");
+        if (error || !data || data.error) {
+            overlay.classList.remove("is-opening");
+            status.textContent = "ПЕЧАТЬ НЕ ПОДДАЛАСЬ";
+            subtitle.textContent = error?.message || data?.error || "Не удалось открыть лутбокс.";
+            revealButton.disabled = false;
+            revealButton.textContent = "ПОПРОБОВАТЬ СНОВА";
+            opened = false;
+            return;
+        }
+
+        const item = data.reward || data;
+        chest.classList.add("is-open");
+        overlay.classList.remove("is-opening");
+        overlay.classList.add("has-reward");
+        status.textContent = "НАГРАДА ПОЛУЧЕНА";
+        subtitle.textContent = "Содержимое лутбокса добавлено в твой инвентарь.";
+        rewardBox.hidden = false;
+        rewardBox.style.setProperty("--reward-color", item.color || "#d7b56d");
+        rewardBox.innerHTML = '<span class="lorgus-lootbox-reward-icon">' + escapeHtml(item.icon || "◆") + '</span><div><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + '</small><strong>' + escapeHtml(item.name || "Неизвестный предмет") + '</strong><p>' + escapeHtml(item.description || "Новая вещь теперь принадлежит тебе.") + '</p></div>';
+        revealButton.disabled = false;
+        revealButton.textContent = "ЗАБРАТЬ НАГРАДУ";
+    });
+};
