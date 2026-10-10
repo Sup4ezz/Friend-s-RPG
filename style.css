@@ -18440,7 +18440,7 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
     display: flex; align-items: center; gap: 18px; text-align: left; margin: 0 auto 24px; padding: 18px;
     border: 1px solid color-mix(in srgb, var(--reward-color, #d7b56d) 75%, transparent);
     background: linear-gradient(120deg, color-mix(in srgb, var(--reward-color, #d7b56d) 12%, #111), #111);
-    box-shadow: 0 0 35px color-mix(in srgb, var(--reward-color, #d7b56d) 15%, transparent), inset 0 0 25px #fff05;
+    box-shadow: 0 0 35px color-mix(in srgb, var(--reward-color, #d7b56d) 15%, transparent), inset 0 0 25px rgba(255,255,255,.02);
     animation: lorgus-lootbox-card .65s cubic-bezier(.15,.9,.25,1) both;
 }
 .lorgus-lootbox-reward[hidden] { display: none; }
