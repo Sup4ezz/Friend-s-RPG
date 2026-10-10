@@ -18319,3 +18319,149 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-rp-character-card-action { min-height:36px; padding:8px 11px; border:1px solid rgba(214,179,106,.3); background:rgba(214,179,106,.08); color:#e5d2ad; font:inherit; font-size:11px; cursor:pointer; transition:background .16s ease,border-color .16s ease; }
 .lorgus-rp-character-card-action:hover { background:rgba(214,179,106,.17); border-color:rgba(224,191,121,.65); }
 .lorgus-rp-character-card-action:focus-visible { outline:2px solid rgba(224,191,121,.75); outline-offset:2px; }
+
+
+/* ── LORGUS · Lootbox ritual ─────────────────────────────── */
+.lorgus-inventory-item.is-lootbox {
+    border-color: color-mix(in srgb, var(--item-color, #d7b56d) 58%, #4b3320);
+    background: linear-gradient(135deg, rgba(63,43,24,.92), rgba(18,16,17,.98));
+    box-shadow: inset 0 0 22px rgba(221,166,76,.08), 0 0 18px rgba(196,139,52,.08);
+}
+.lorgus-inventory-item.is-lootbox .lorgus-inventory-item-icon {
+    color: #f0ca77;
+    text-shadow: 0 0 16px rgba(244,186,71,.55);
+}
+.lorgus-lootbox-open-button {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    margin-top: 7px;
+    padding: 8px 12px;
+    border: 1px solid rgba(222,177,91,.52);
+    background: linear-gradient(135deg, #67451f, #21180f);
+    color: #f8e4b3;
+    font: 600 10px/1.2 "Lora", serif;
+    letter-spacing: .18em;
+    cursor: pointer;
+    transition: border-color .2s, box-shadow .2s, transform .2s;
+}
+.lorgus-lootbox-open-button:hover { border-color: #f5d58b; box-shadow: 0 0 18px #e3ad4a38; transform: translateY(-1px); }
+.lorgus-lootbox-overlay {
+    position: fixed; inset: 0; z-index: 100500;
+    display: grid; place-items: center;
+    padding: 20px;
+    opacity: 0; visibility: hidden;
+    transition: opacity .35s ease, visibility .35s;
+    color: #f4ead5;
+    font-family: "Lora", serif;
+}
+.lorgus-lootbox-overlay.is-visible { opacity: 1; visibility: visible; }
+.lorgus-lootbox-backdrop {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 48%, rgba(100,65,24,.34), rgba(5,5,7,.96) 68%);
+    backdrop-filter: blur(9px);
+}
+.lorgus-lootbox-scene {
+    position: relative; width: min(590px, 100%); max-height: min(92vh, 900px);
+    overflow: auto; text-align: center; padding: 38px 34px 32px;
+    border: 1px solid rgba(219,177,94,.42);
+    background:
+      radial-gradient(ellipse at 50% 32%, rgba(133,91,38,.2), transparent 52%),
+      linear-gradient(155deg, rgba(31,27,24,.98), rgba(10,10,12,.99) 68%);
+    box-shadow: 0 35px 110px #000, inset 0 0 70px rgba(203,146,54,.06);
+    transform: translateY(22px) scale(.97);
+    transition: transform .55s cubic-bezier(.2,.85,.2,1);
+}
+.is-visible .lorgus-lootbox-scene { transform: translateY(0) scale(1); }
+.lorgus-lootbox-close {
+    position: absolute; top: 10px; right: 13px; border: 0; background: transparent;
+    color: #c9bba1; font: 300 30px/1 serif; cursor: pointer;
+}
+.lorgus-lootbox-overline { color: #caa45e; font-size: 9px; letter-spacing: .34em; }
+.lorgus-lootbox-title { margin: 12px 0 5px; font: 500 clamp(29px, 5vw, 42px)/1.1 "Cormorant Garamond", serif; letter-spacing: .04em; }
+.lorgus-lootbox-subtitle { min-height: 22px; margin: 0; color: #a79a84; font-size: 12px; line-height: 1.7; }
+.lorgus-lootbox-portal { position: relative; height: 270px; margin: 5px auto 0; display: grid; place-items: center; isolation: isolate; }
+.lorgus-lootbox-rune-ring {
+    position: absolute; width: 220px; height: 220px; border: 1px solid rgba(223,173,82,.4); border-radius: 50%;
+    box-shadow: 0 0 28px #b9822a24, inset 0 0 35px #b9822a12;
+}
+.lorgus-lootbox-rune-ring::before, .lorgus-lootbox-rune-ring::after {
+    content: "✦ ᚱ ✧ ᚷ ✦ ᚾ ✧ ᛟ ✦ ᚱ ✧ ᚷ";
+    position: absolute; inset: 9px; display: grid; place-items: center; border: 1px dashed rgba(223,173,82,.38);
+    border-radius: 50%; color: #d9b76e; font-size: 12px; letter-spacing: .35em;
+}
+.lorgus-lootbox-rune-ring::after { inset: 30px; transform: rotate(17deg); color: #8c6d3c; font-size: 9px; }
+.lorgus-lootbox-rays {
+    position: absolute; width: 190px; height: 190px; border-radius: 50%;
+    background: conic-gradient(from 0deg, transparent 0 8deg, #e7b74a22 9deg 12deg, transparent 13deg 28deg, #f7d98b17 29deg 33deg, transparent 34deg 48deg);
+    filter: blur(2px); opacity: .7;
+}
+.lorgus-lootbox-chest { position: relative; width: 122px; height: 105px; z-index: 2; filter: drop-shadow(0 15px 17px #000); transform-origin: 50% 80%; }
+.lorgus-lootbox-chest-body {
+    position: absolute; bottom: 5px; left: 4px; right: 4px; height: 66px; display: grid; place-items: center;
+    border: 2px solid #c49b4c; border-radius: 8px 8px 14px 14px;
+    background: linear-gradient(110deg, #3e2417, #8d5a25 48%, #321c12);
+    color: #ffe6a0; font-size: 29px; text-shadow: 0 0 14px #ffce64;
+    box-shadow: inset 0 0 0 5px #27170f, inset 0 0 23px #f4bf5230;
+}
+.lorgus-lootbox-chest-body::after { content: ""; position: absolute; top: 0; bottom: 0; left: 48%; width: 7px; background: linear-gradient(#f4d07a, #6c431b); box-shadow: 0 0 10px #e5b4516b; }
+.lorgus-lootbox-chest-lid {
+    position: absolute; z-index: 2; top: 11px; left: 0; width: 122px; height: 38px;
+    border: 2px solid #d0a654; border-radius: 12px 12px 4px 4px;
+    background: linear-gradient(180deg, #b7833a, #59351c 70%, #26170f);
+    transform-origin: 12% 100%; box-shadow: inset 0 0 0 4px #382114;
+}
+.lorgus-lootbox-lock { position: absolute; z-index: 4; top: 39px; left: 51px; width: 21px; height: 27px; display: grid; place-items: center; background: #d6ad55; border: 1px solid #ffe3a0; color: #4b2c12; font-size: 10px; box-shadow: 0 0 12px #ffd36b8a; }
+.lorgus-lootbox-chest-glow { position: absolute; inset: 15px -35px -10px; background: #ffc95a; opacity: 0; filter: blur(28px); border-radius: 50%; }
+.lorgus-lootbox-sparks { position: absolute; inset: 0; pointer-events: none; }
+.lorgus-lootbox-sparks i { position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; border-radius: 50%; background: #ffe8a3; opacity: 0; box-shadow: 0 0 12px 3px #f2bd4d; }
+.lorgus-lootbox-sparks i:nth-child(1) { --sx:-95px; --sy:-65px; } .lorgus-lootbox-sparks i:nth-child(2) { --sx:98px; --sy:-56px; }
+.lorgus-lootbox-sparks i:nth-child(3) { --sx:-125px; --sy:22px; } .lorgus-lootbox-sparks i:nth-child(4) { --sx:125px; --sy:33px; }
+.lorgus-lootbox-sparks i:nth-child(5) { --sx:-61px; --sy:100px; } .lorgus-lootbox-sparks i:nth-child(6) { --sx:67px; --sy:96px; }
+.lorgus-lootbox-sparks i:nth-child(7) { --sx:-10px; --sy:-115px; } .lorgus-lootbox-sparks i:nth-child(8) { --sx:25px; --sy:120px; }
+.lorgus-lootbox-overlay.is-opening .lorgus-lootbox-rune-ring { animation: lorgus-lootbox-spin 2.2s linear infinite; }
+.lorgus-lootbox-overlay.is-opening .lorgus-lootbox-rays { animation: lorgus-lootbox-spin 1.3s linear infinite; }
+.lorgus-lootbox-overlay.is-opening .lorgus-lootbox-chest.is-shaking { animation: lorgus-lootbox-shake .12s linear infinite; }
+.lorgus-lootbox-overlay.is-opening .lorgus-lootbox-sparks i { animation: lorgus-lootbox-spark .9s ease-out infinite; }
+.lorgus-lootbox-overlay.is-opening .lorgus-lootbox-chest-glow { opacity: .75; animation: lorgus-lootbox-pulse .7s ease-in-out infinite alternate; }
+.lorgus-lootbox-overlay.has-reward .lorgus-lootbox-rune-ring { animation: lorgus-lootbox-reveal-ring .9s ease-out both; border-color: #f6d68a; }
+.lorgus-lootbox-overlay.has-reward .lorgus-lootbox-chest-lid { animation: lorgus-lootbox-lid .75s cubic-bezier(.15,.8,.2,1) forwards; }
+.lorgus-lootbox-overlay.has-reward .lorgus-lootbox-lock { opacity: 0; transform: translateY(25px) scale(.5); transition: .3s; }
+.lorgus-lootbox-overlay.has-reward .lorgus-lootbox-chest-glow { opacity: .95; }
+.lorgus-lootbox-status { color: #c5a35d; font-size: 9px; letter-spacing: .28em; margin: 0 0 20px; }
+.lorgus-lootbox-reveal {
+    min-width: 220px; padding: 14px 24px; border: 1px solid #b98b40;
+    background: linear-gradient(110deg, #6e4b20, #332212); color: #ffe9b5;
+    font: 600 10px/1.2 "Lora", serif; letter-spacing: .22em; cursor: pointer;
+    box-shadow: 0 7px 25px #0008; transition: .2s;
+}
+.lorgus-lootbox-reveal:hover:not(:disabled) { box-shadow: 0 0 25px #d9a6424d; border-color: #f5d68b; }
+.lorgus-lootbox-reveal:disabled { opacity: .65; cursor: wait; }
+.lorgus-lootbox-reward {
+    display: flex; align-items: center; gap: 18px; text-align: left; margin: 0 auto 24px; padding: 18px;
+    border: 1px solid color-mix(in srgb, var(--reward-color, #d7b56d) 75%, transparent);
+    background: linear-gradient(120deg, color-mix(in srgb, var(--reward-color, #d7b56d) 12%, #111), #111);
+    box-shadow: 0 0 35px color-mix(in srgb, var(--reward-color, #d7b56d) 15%, transparent), inset 0 0 25px #fff05;
+    animation: lorgus-lootbox-card .65s cubic-bezier(.15,.9,.25,1) both;
+}
+.lorgus-lootbox-reward[hidden] { display: none; }
+.lorgus-lootbox-reward-icon { flex: 0 0 70px; height: 70px; display: grid; place-items: center; color: var(--reward-color); font-size: 42px; border: 1px solid color-mix(in srgb, var(--reward-color) 55%, transparent); background: #0007; text-shadow: 0 0 20px var(--reward-color); }
+.lorgus-lootbox-reward small { color: var(--reward-color); text-transform: uppercase; letter-spacing: .2em; font-size: 9px; }
+.lorgus-lootbox-reward strong { display: block; margin: 4px 0; color: #f4e7ca; font: 500 25px/1.1 "Cormorant Garamond", serif; }
+.lorgus-lootbox-reward p { margin: 0; color: #a99e8c; font-size: 11px; line-height: 1.6; }
+@keyframes lorgus-lootbox-spin { to { transform: rotate(360deg); } }
+@keyframes lorgus-lootbox-shake { 0%,100% { transform: rotate(-2deg) translate(-2px,1px); } 50% { transform: rotate(2deg) translate(2px,-1px); } }
+@keyframes lorgus-lootbox-pulse { from { opacity: .35; transform: scale(.8); } to { opacity: .95; transform: scale(1.3); } }
+@keyframes lorgus-lootbox-spark { 0% { opacity: 0; transform: translate(0,0) scale(.3); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(var(--sx),var(--sy)) scale(0); } }
+@keyframes lorgus-lootbox-lid { to { transform: translate(-3px,-24px) rotate(-24deg); } }
+@keyframes lorgus-lootbox-reveal-ring { 0% { transform: scale(.55) rotate(0); opacity: .3; } 100% { transform: scale(1.08) rotate(35deg); opacity: 1; } }
+@keyframes lorgus-lootbox-card { from { opacity: 0; transform: translateY(24px) scale(.82); filter: blur(8px); } to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); } }
+@media (max-width: 560px) {
+    .lorgus-lootbox-scene { padding: 32px 18px 24px; }
+    .lorgus-lootbox-portal { height: 235px; }
+    .lorgus-lootbox-rune-ring { width: 190px; height: 190px; }
+    .lorgus-lootbox-reward { gap: 12px; padding: 12px; }
+    .lorgus-lootbox-reward-icon { flex-basis: 54px; height: 54px; font-size: 31px; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .lorgus-lootbox-overlay *, .lorgus-lootbox-overlay *::before, .lorgus-lootbox-overlay *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
