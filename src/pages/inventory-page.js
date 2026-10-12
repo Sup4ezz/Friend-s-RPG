@@ -15,6 +15,10 @@ function formatLorgusCurrencyAmount(amount) {
     ].filter(Boolean).join(" · ");
 }
 
+function formatLorgusRewardCurrency(amount, code) {
+    return formatLorgusCurrencyAmount(amount) + " · " + lorgusCurrencyLabel(code);
+}
+
 const inventorySlotLabels = {
     head: "Голова",
     chest: "Тело",
@@ -468,7 +472,7 @@ window.openLorgusLootbox = async function(inventoryId) {
         const poolWithoutWinner = pool.filter(entry => entry !== matching);
         const decoys = poolWithoutWinner.length ? poolWithoutWinner : pool;
         const cards = Array.from({length:total}, (_, index) => index === target ? winningCard : decoys[Math.floor(Math.random() * decoys.length)]);
-        reelTrack.innerHTML = cards.map(entry => '<article class="lorgus-lootbox-reel-card" style="--reward-color:' + escapeHtml(entry.color || colors[entry.rarity] || "#b8a27a") + ';"><span class="lorgus-lootbox-reel-card-icon">' + escapeHtml(entry.icon || "✦") + '</span><strong>' + escapeHtml(entry.name || "Таинственная награда") + '</strong><small>' + escapeHtml(rarity[entry.rarity] || entry.rarity || "НАГРАДА") + '</small></article>').join("");
+        reelTrack.innerHTML = cards.map(entry => '<article class="lorgus-lootbox-reel-card" style="--reward-color:' + escapeHtml(entry.color || colors[entry.rarity] || "#b8a27a") + ';"><span class="lorgus-lootbox-reel-card-icon">' + escapeHtml(entry.icon || "✦") + '</span><strong>' + escapeHtml(entry.name || "Таинственная награда") + '</strong><small>' + escapeHtml(entry.reward_type === "currency" ? formatLorgusRewardCurrency(entry.amount, entry.currency_code) : (rarity[entry.rarity] || entry.rarity || "НАГРАДА")) + '</small></article>').join("");
         const card = reelTrack.children[target];
         // Сначала показываем ленту: измерения скрытого элемента дают нулевые размеры,
         // из-за чего предыдущая версия фактически не могла прокрутить карточки.
@@ -525,7 +529,7 @@ window.openLorgusLootbox = async function(inventoryId) {
         contentsList.innerHTML = contents.map(item =>
             '<article class="lorgus-lootbox-content-row" style="--reward-color:' + escapeHtml(item.color || "#d7b56d") + '">' +
                 '<span class="lorgus-lootbox-content-icon">' + escapeHtml(item.icon || "✦") + '</span>' +
-                '<span class="lorgus-lootbox-content-info"><strong>' + escapeHtml(item.name || "Таинственная награда") + '</strong><small>' + escapeHtml(rewardTypeLabels[item.reward_type] || "Награда") + ' · ' + escapeHtml(rarityLabels[item.rarity] || item.rarity || "—") + '</small><em>' + escapeHtml((item.description || (item.reward_type === "currency" ? "Деньги для кошелька." : "")) + (item.reward_type === "currency" ? " Сумма: " + Number(item.amount || 0).toLocaleString("ru-RU") + " " + lorgusCurrencyLabel(item.currency_code) + "." : "")) + '</em></span>' +
+                '<span class="lorgus-lootbox-content-info"><strong>' + escapeHtml(item.name || "Таинственная награда") + '</strong><small>' + escapeHtml(rewardTypeLabels[item.reward_type] || "Награда") + ' · ' + escapeHtml(rarityLabels[item.rarity] || item.rarity || "—") + '</small><em>' + escapeHtml((item.description || (item.reward_type === "currency" ? "Деньги для кошелька." : "")) + (item.reward_type === "currency" ? " Сумма: " + formatLorgusRewardCurrency(item.amount, item.currency_code) + "." : "")) + '</em></span>' +
                 '<strong class="lorgus-lootbox-content-chance">' + Number(item.chance || 0).toLocaleString("ru-RU",{maximumFractionDigits:4}) + '%</strong>' +
             '</article>'
         ).join("");
@@ -569,7 +573,7 @@ window.openLorgusLootbox = async function(inventoryId) {
         rewardBox.hidden = false;
         rewardBox.style.setProperty("--reward-color", item.color || "#d7b56d");
         const rewardDescription = item.reward_type === "currency"
-            ? (item.description || "").replace(/\s*Получено:.*$/i, "").trim() + " Зачислено: " + Number(item.amount || 0).toLocaleString("ru-RU") + " " + lorgusCurrencyLabel(item.currency_code) + "."
+            ? (item.description || "").replace(/\s*Получено:.*$/i, "").trim() + " Зачислено: " + formatLorgusRewardCurrency(item.amount, item.currency_code) + "."
             : item.description || (item.reward_type === "title" ? "Новый титул доступен в карточке персонажа." : "Награда записана в историю персонажа.");
         rewardBox.innerHTML = '<span class="lorgus-lootbox-reward-icon">' + escapeHtml(item.icon || "✦") + '</span><div><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ' + escapeHtml(rewardTypeLabels[item.reward_type] || "Награда") + '</small><strong>' + escapeHtml(item.name || "Неизвестная награда") + '</strong><p>' + escapeHtml(rewardDescription) + '</p></div>';
         revealButton.disabled = false;
