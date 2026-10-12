@@ -164,7 +164,7 @@ function renderKingdomLocations(regionName) {
     const region = LORGUS_LOCATIONS[regionName];
     if (!container || !region) return;
 
-    container.className = "lorgus-world-page";
+    container.className = "lorgus-world-page lorgus-region-arrival";
     const character = window.activeCharacter;
     const name = escapeHtml(character?.name || "Без имени");
 
