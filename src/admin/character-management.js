@@ -37,9 +37,6 @@ async function openAdminCharacterRecord(application, container) {
                 <span>ОДОБРЕНА: <b>${date(application.approved_at)}</b></span>
             </div>
             ${application.review_notes ? `<div class="admin-character-record-notes"><small>ЗАПИСКА ХРАНИТЕЛЯ</small><p>${esc(application.review_notes)}</p></div>` : ""}
-            <div class="admin-character-record-controls">
-                <button class="admin-character-edit-button" type="button">✦ Внести изменения в персонажа</button>
-            </div>
             <div class="admin-character-history"><small>ЛЕТОПИСЬ ИЗМЕНЕНИЙ</small><div class="admin-character-history-list">Загрузка истории...</div></div>
         </article>`;
     container.appendChild(overlay);
@@ -62,51 +59,7 @@ async function openAdminCharacterRecord(application, container) {
             </div>`).join("") || "История пока пуста.";
     }
 
-    overlay.querySelector(".admin-character-edit-button").addEventListener("click", () => {
-        const body = overlay.querySelector(".admin-character-record");
-        const form = document.createElement("form");
-        form.className = "admin-character-edit-form";
-        form.innerHTML = `
-            <div class="admin-edit-grid">
-                <label>Имя<input name="name" value="${esc(application.name)}"></label>
-                <label>Возраст<input name="age" type="number" value="${esc(application.age)}"></label>
-                <label>Раса<input name="race" value="${esc(application.race)}"></label>
-                <label>Родина<input name="homeland" value="${esc(application.homeland)}"></label>
-                <label>Занятие<input name="occupation" value="${esc(application.occupation)}"></label>
-                <label>Оружие<input name="preferred_weapon" value="${esc(application.preferred_weapon)}"></label>
-            </div>
-            <label>Характер<textarea name="personality">${esc(application.personality)}</textarea></label>
-            <label>Предыстория<textarea name="backstory">${esc(application.backstory)}</textarea></label>
-            <label>Особые навыки<textarea name="special_skills">${esc(application.special_skills)}</textarea></label>
-            <div class="admin-character-edit-actions">
-                <button type="submit">Сохранить изменения</button>
-                <button type="button" class="cancel">Отмена</button>
-            </div>`;
-        body.querySelector(".admin-character-edit-form")?.remove();
-        body.appendChild(form);
-        form.scrollIntoView({ behavior:"smooth", block:"end" });
-        form.querySelector(".cancel").addEventListener("click", () => form.remove());
-        form.addEventListener("submit", async event => {
-            event.preventDefault();
-            const patch = Object.fromEntries(new FormData(form).entries());
-            patch.age = Number(patch.age);
-            const save = form.querySelector("button[type=submit]");
-            save.disabled = true; save.textContent = "Сохранение...";
-            const { data, error } = await window.supabaseClient.rpc("admin_update_character_application", {
-                p_application_id: application.id,
-                p_patch: patch
-            });
-            if (error) {
-                alert("Не удалось сохранить изменения:\\n\\n" + error.message);
-                save.disabled = false; save.textContent = "Сохранить изменения";
-                return;
-            }
-            Object.assign(application, data);
-            form.remove();
-            overlay.remove();
-            openAdminCharacterRecord(application, container);
-        });
-    });
+
 }
 
 function bindAdminButtons(container) {
