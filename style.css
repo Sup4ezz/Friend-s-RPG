@@ -18909,3 +18909,13 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 @media(max-width:900px){.lorgus-region-arrival .lorgus-location-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.lorgus-region-arrival .lorgus-world-browser{padding-top:130px!important}}
 @media(max-width:580px){.lorgus-region-arrival .lorgus-location-grid{grid-template-columns:1fr!important}.lorgus-region-arrival .lorgus-world-browser{padding:118px 16px 40px!important}.lorgus-region-arrival .lorgus-world-header h1{font-size:clamp(50px,16vw,78px)!important}.lorgus-region-arrival .lorgus-location-card{min-height:210px!important;padding:20px!important}.lorgus-region-arrival .lorgus-world-sidebar{left:16px!important;top:16px!important}}
 @media(prefers-reduced-motion:reduce){.lorgus-map-page .lorgus-map-atmosphere::before,.lorgus-map-page .lorgus-map-atmosphere::after,.lorgus-map-page .lorgus-mainmenu-fog::before{animation:none!important}.lorgus-region-transition-veil,.lorgus-region-transition-veil *{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* Fog is a foreground layer; keep it above the map image while remaining click-through. */
+.lorgus-map-page #lorgus-map-viewport{isolation:isolate!important}
+.lorgus-map-page .lorgus-map-atmosphere{z-index:8!important}
+.lorgus-map-page #lorgus-map-world{position:relative!important;z-index:7!important}
+.lorgus-map-page #lorgus-map-marker-layer{z-index:10!important}
+.lorgus-map-page .lorgus-mainmenu-fog{z-index:12!important;pointer-events:none!important}
+.lorgus-map-page .lorgus-map-marker-layer .lorgus-map-editor-rect{z-index:10!important}
+.lorgus-map-page .lorgus-map-entering .lorgus-map-world,
+.lorgus-map-page #lorgus-map-viewport.lorgus-map-entering #lorgus-map-world{transform-origin:var(--lorgus-entry-x,50%) var(--lorgus-entry-y,50%)!important;transition:transform .62s cubic-bezier(.2,.65,.2,1)!important;transform:scale(1.16)!important}
