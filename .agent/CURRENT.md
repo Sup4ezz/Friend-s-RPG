@@ -67,3 +67,8 @@
 - Содержимое включает деньги в валютах королевств, новые титулы, сюжетные сюрпризы и разовые привилегии, включая «Шаг сквозь карту».
 - В окне открытия игрок видит все награды и шанс каждой до открытия. Денежные суммы показываются в правильной валюте.
 - Последние изменения в inventory-page.js проверены на синтаксис. Браузерный smoke-test ещё не выполнен.
+
+## RP read policy applied and verified (2026-10-12)
+- Applied production migration `restore_rp_message_read_policy` from `supabase/migrations/20261012160000_restore_rp_message_read_policy.sql` successfully.
+- Re-queried `pg_policies`: `rp_messages_select_current_presence` exists for `authenticated`, alongside the admin SELECT policy and current-presence INSERT policy.
+- Policy permits admins, users with no `rp_presence` (pre-first-post reading), and users reading the exact location/road matching their own presence. This is a database-policy verification, not a live browser test.
