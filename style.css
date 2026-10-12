@@ -18706,3 +18706,9 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-mail-filter-empty p{margin:0;font-size:12px}
 .lorgus-mail-card.unread{border-left:3px solid #c7a65e}
 @media(max-width:600px){.lorgus-mail-tools{grid-template-columns:24px minmax(0,1fr)}.lorgus-mail-tools select{grid-column:2}.lorgus-mail-inbox-actions{gap:6px}.lorgus-mail-inbox-actions button{padding:6px;font-size:10px}}
+
+/* LORGUS mail folders */
+.lorgus-mail-nav button.active{border-color:rgba(199,166,94,.55);background:linear-gradient(90deg,rgba(126,91,38,.2),rgba(126,91,38,.04));color:#e2c783}
+.lorgus-mail-nav button em{font-style:normal;margin-left:auto;color:#d9bd7b;font-size:11px}
+.lorgus-mail-nav button[hidden],.lorgus-mail-inbox-actions button[hidden]{display:none!important}
+.lorgus-mail-card-top strong{overflow-wrap:anywhere}
