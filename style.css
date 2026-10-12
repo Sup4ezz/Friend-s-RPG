@@ -18648,3 +18648,27 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
     .lorgus-admin-lootbox-row { grid-template-columns: 30px minmax(0,1fr) 72px; }
     .lorgus-admin-lootbox-chance { grid-column: 2; text-align: left; }
 }
+
+
+.lorgus-character-special-rewards {
+    margin-top: 20px;
+    padding: 18px;
+    border: 1px solid rgba(190,157,94,.24);
+    border-radius: 12px;
+    background: linear-gradient(145deg,rgba(28,24,19,.94),rgba(15,14,13,.95));
+}
+.lorgus-character-special-rewards-list { display:grid; gap:9px; margin-top:12px; }
+.lorgus-character-special-rewards-list > p { color:#b9ad98; margin:6px 0; }
+.lorgus-character-special-reward {
+    display:grid; grid-template-columns:40px minmax(0,1fr); gap:11px; align-items:start;
+    padding:12px; border:1px solid color-mix(in srgb,var(--reward-color,#b8a27a) 32%,transparent);
+    border-radius:9px; background:rgba(255,255,255,.025);
+}
+.lorgus-character-special-reward > span {
+    display:grid; place-items:center; width:38px; height:38px; border:1px solid var(--reward-color,#b8a27a);
+    border-radius:9px; color:var(--reward-color,#b8a27a); font-size:1.2rem;
+}
+.lorgus-character-special-reward > div { min-width:0; }
+.lorgus-character-special-reward strong { color:#eee1ca; }
+.lorgus-character-special-reward small { display:block; margin-top:4px; color:var(--reward-color,#b8a27a); font-size:.67rem; letter-spacing:.08em; }
+.lorgus-character-special-reward p { margin:7px 0 0; color:#b9ad98; font-size:.84rem; line-height:1.45; }
