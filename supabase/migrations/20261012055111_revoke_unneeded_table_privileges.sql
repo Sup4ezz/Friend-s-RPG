@@ -1,3 +1,4 @@
+-- Filename aligned with the production migration history version 20261012055111.
 -- Remove non-application table privileges from API roles.
 -- RLS does not protect TRUNCATE. Keep normal CRUD grants unchanged.
 REVOKE TRUNCATE, REFERENCES, TRIGGER ON ALL TABLES IN SCHEMA public
