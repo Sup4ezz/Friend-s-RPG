@@ -1944,12 +1944,17 @@ async function openAdminCharacterInventory(application, container) {
             '<button type="button" class="lorgus-admin-inventory-grant-btn">Выдать</button>' +
         '</div>' +
         '<section class="lorgus-admin-lootbox-manager">' +
-            '<span class="lorgus-command-kicker">НАПОЛНЕНИЕ ЛУТБОКСОВ</span>' +
-            '<p>У каждой коробки собственный список наград. Вес определяет относительный шанс: вес 5 в пять раз вероятнее веса 1.</p>' +
+            '<span class="lorgus-command-kicker">СОДЕРЖИМОЕ И ШАНСЫ ЛУТБОКСА</span>' +
+            '<p>Игрок увидит этот список до открытия. Шанс рассчитывается автоматически по редкости: обычные награды выпадают чаще, уникальные — значительно реже.</p>' +
             '<label>Лутбокс<select class="lorgus-admin-lootbox-select"><option value="">Загрузка лутбоксов…</option></select></label>' +
             '<div class="lorgus-admin-lootbox-add">' +
-                '<label>Предмет-награда<select class="lorgus-admin-lootbox-reward"><option value="">Выбери предмет</option></select></label>' +
-                '<label>Вес / шанс<input class="lorgus-admin-lootbox-weight" type="number" min="1" max="100000" step="1" value="1"></label>' +
+                '<label>Тип награды<select class="lorgus-admin-lootbox-type"><option value="title">Титул</option><option value="privilege">Привилегия</option><option value="currency">Деньги</option><option value="special">Особая / прикольная награда</option></select></label>' +
+                '<label class="lorgus-lootbox-title-field">Титул<select class="lorgus-admin-lootbox-title"><option value="">Загрузка титулов…</option></select></label>' +
+                '<label class="lorgus-lootbox-name-field">Название<input class="lorgus-admin-lootbox-name" maxlength="120" placeholder="Например: Право первого хода"></label>' +
+                '<label class="lorgus-lootbox-description-field">Описание<textarea class="lorgus-admin-lootbox-description" rows="2" maxlength="500" placeholder="Что именно получает игрок?"></textarea></label>' +
+                '<label class="lorgus-lootbox-rarity-field">Редкость<select class="lorgus-admin-lootbox-rarity"><option value="common">Обычная</option><option value="uncommon">Необычная</option><option value="rare">Редкая</option><option value="epic">Эпическая</option><option value="legendary">Легендарная</option><option value="mythic">Мифическая</option><option value="unique">Уникальная</option></select></label>' +
+                '<label class="lorgus-lootbox-currency-field">Валюта<select class="lorgus-admin-lootbox-currency">' + Object.entries(lorgusCurrencies).map(([code,c]) => '<option value="' + code + '">' + escapeHtml(c.name) + '</option>').join("") + '</select></label>' +
+                '<label class="lorgus-lootbox-amount-field">Сумма в медных монетах<input class="lorgus-admin-lootbox-amount" type="number" min="1" step="1" value="100"></label>' +
                 '<button type="button" class="lorgus-admin-lootbox-add-btn">Добавить награду</button>' +
             '</div>' +
             '<div class="lorgus-admin-lootbox-pool"><p>Выбери лутбокс, чтобы увидеть его содержимое.</p></div>' +
@@ -2079,99 +2084,95 @@ async function openAdminCharacterInventory(application, container) {
     panel.querySelector(".lorgus-admin-inventory-close").addEventListener("click", close);
 
     const lootboxSelect = panel.querySelector(".lorgus-admin-lootbox-select");
-    const rewardSelect = panel.querySelector(".lorgus-admin-lootbox-reward");
+    const rewardTypeSelect = panel.querySelector(".lorgus-admin-lootbox-type");
+    const titleSelect = panel.querySelector(".lorgus-admin-lootbox-title");
     const lootboxPool = panel.querySelector(".lorgus-admin-lootbox-pool");
     let lootboxItems = [];
-    let rewardItems = [];
+    let titleOptions = [];
+
+    const updateRewardFields = () => {
+        const type = rewardTypeSelect.value;
+        panel.querySelector(".lorgus-lootbox-title-field").hidden = type !== "title";
+        panel.querySelector(".lorgus-lootbox-name-field").hidden = type === "title";
+        panel.querySelector(".lorgus-lootbox-description-field").hidden = type === "title";
+        panel.querySelector(".lorgus-lootbox-rarity-field").hidden = type === "title";
+        panel.querySelector(".lorgus-lootbox-currency-field").hidden = type !== "currency";
+        panel.querySelector(".lorgus-lootbox-amount-field").hidden = type !== "currency";
+    };
 
     const renderLootboxPool = async () => {
         const lootboxId = lootboxSelect.value;
-        if (!lootboxId) {
-            lootboxPool.innerHTML = '<p>Сначала создай и выбери лутбокс.</p>';
-            return;
-        }
+        if (!lootboxId) { lootboxPool.innerHTML = '<p>Сначала создай и выбери лутбокс.</p>'; return; }
         lootboxPool.innerHTML = '<p>Загружаем содержимое…</p>';
-        const { data, error } = await window.supabaseClient.rpc("admin_list_lootbox_rewards", {
-            p_lootbox_item_id: lootboxId
-        });
-        if (error) {
-            lootboxPool.innerHTML = '<p class="lorgus-admin-lootbox-error">' + escapeHtml(error.message) + '</p>';
-            return;
-        }
+        const { data, error } = await window.supabaseClient.rpc("admin_list_lootbox_rewards", { p_lootbox_item_id: lootboxId });
+        if (error) { lootboxPool.innerHTML = '<p class="lorgus-admin-lootbox-error">' + escapeHtml(error.message) + '</p>'; return; }
         const rows = Array.isArray(data) ? data : [];
-        lootboxPool.innerHTML = rows.length ? rows.map(row =>
-            '<article class="lorgus-admin-lootbox-row">' +
-                '<span class="lorgus-admin-lootbox-icon" style="--item-color:' + escapeHtml(row.color || "#b8a27a") + '">' + escapeHtml(row.icon || "◆") + '</span>' +
-                '<span class="lorgus-admin-lootbox-name"><strong>' + escapeHtml(row.name || "Предмет") + '</strong><small>' + escapeHtml(row.rarity || "common") + '</small></span>' +
-                '<label>Вес<input type="number" min="1" max="100000" step="1" value="' + escapeHtml(String(row.weight)) + '" data-lootbox-weight="' + escapeHtml(row.id) + '"></label>' +
-                '<button type="button" data-lootbox-save="' + escapeHtml(row.reward_item_id) + '">Сохранить</button>' +
+        const total = rows.reduce((sum,row) => sum + Number(row.weight || 0), 0);
+        const rarityNames = {common:"Обычная",uncommon:"Необычная",rare:"Редкая",epic:"Эпическая",legendary:"Легендарная",mythic:"Мифическая",unique:"Уникальная"};
+        const typeNames = {title:"Титул",privilege:"Привилегия",currency:"Деньги",special:"Особая награда"};
+        lootboxPool.innerHTML = rows.length ? rows.map(row => {
+            const chance = total ? (Number(row.weight) / total * 100) : 0;
+            const extra = row.reward_type === "currency" ? " · " + escapeHtml(row.amount + " медных монет") : "";
+            return '<article class="lorgus-admin-lootbox-row">' +
+                '<span class="lorgus-admin-lootbox-icon" style="--item-color:' + escapeHtml(row.color || "#d7b56d") + '">' + escapeHtml(row.icon || (row.reward_type === "privilege" ? "♛" : row.reward_type === "currency" ? "◈" : "✦")) + '</span>' +
+                '<span class="lorgus-admin-lootbox-name"><strong>' + escapeHtml(row.name || "Награда") + '</strong><small>' + escapeHtml(typeNames[row.reward_type] || "Награда") + ' · ' + escapeHtml(rarityNames[row.rarity] || row.rarity || "—") + extra + '</small><small>' + escapeHtml(row.description || "") + '</small></span>' +
+                '<strong class="lorgus-admin-lootbox-chance">' + chance.toLocaleString("ru-RU",{maximumFractionDigits:4}) + '%</strong>' +
                 '<button type="button" data-lootbox-remove="' + escapeHtml(row.id) + '">Убрать</button>' +
-            '</article>'
-        ).join("") : '<p>В этой коробке пока нет наград. Добавь предмет ниже.</p>';
-
-        lootboxPool.querySelectorAll("[data-lootbox-save]").forEach(button => button.addEventListener("click", async () => {
-            const rowId = button.closest(".lorgus-admin-lootbox-row");
-            const weight = Number.parseInt(rowId.querySelector("[data-lootbox-weight]").value, 10);
-            if (!Number.isInteger(weight) || weight < 1 || weight > 100000) {
-                alert("Вес должен быть целым числом от 1 до 100000.");
-                return;
-            }
-            const { error: saveError } = await window.supabaseClient.rpc("admin_set_lootbox_reward", {
-                p_lootbox_item_id: lootboxSelect.value,
-                p_reward_item_id: button.dataset.lootboxSave,
-                p_weight: weight
-            });
-            if (saveError) { alert("Не удалось сохранить шанс: " + saveError.message); return; }
-            await renderLootboxPool();
-        }));
-
+            '</article>';
+        }).join("") : '<p>В этом лутбоксе пока нет наград.</p>';
         lootboxPool.querySelectorAll("[data-lootbox-remove]").forEach(button => button.addEventListener("click", async () => {
             if (!confirm("Убрать эту награду из выбранного лутбокса?")) return;
-            const { error: removeError } = await window.supabaseClient.rpc("admin_remove_lootbox_reward", {
-                p_reward_row_id: button.dataset.lootboxRemove
-            });
+            const { error: removeError } = await window.supabaseClient.rpc("admin_remove_lootbox_reward", { p_reward_row_id: button.dataset.lootboxRemove });
             if (removeError) { alert("Не удалось убрать награду: " + removeError.message); return; }
             await renderLootboxPool();
         }));
     };
 
     const loadLootboxManager = async () => {
-        const { data, error } = await window.supabaseClient.from("items")
-            .select("id,name,item_subtype,item_type,rarity,icon,color")
-            .order("name", { ascending: true });
-        if (error) {
-            lootboxSelect.innerHTML = '<option value="">Не удалось загрузить лутбоксы</option>';
-            lootboxPool.innerHTML = '<p class="lorgus-admin-lootbox-error">' + escapeHtml(error.message) + '</p>';
-            return;
+        const { data, error } = await window.supabaseClient.from("items").select("id,name,item_subtype").order("name", {ascending:true});
+        if (error) { lootboxSelect.innerHTML = '<option value="">Не удалось загрузить лутбоксы</option>'; lootboxPool.innerHTML = '<p class="lorgus-admin-lootbox-error">' + escapeHtml(error.message) + '</p>'; return; }
+        lootboxItems = (data || []).filter(item => item.item_subtype === "lootbox");
+        lootboxSelect.innerHTML = lootboxItems.length ? lootboxItems.map(item => '<option value="' + escapeHtml(item.id) + '">' + escapeHtml(item.name) + '</option>').join("") : '<option value="">Лутбоксов пока нет</option>';
+        const { data: titles, error: titleError } = await window.supabaseClient.from("titles").select("id,name,rarity,icon").order("name",{ascending:true});
+        if (titleError) { titleSelect.innerHTML = '<option value="">Не удалось загрузить титулы</option>'; }
+        else {
+            titleOptions = titles || [];
+            titleSelect.innerHTML = '<option value="">Выбери титул</option>' + titleOptions.map(title => '<option value="' + escapeHtml(title.id) + '">' + escapeHtml(title.name) + ' · ' + escapeHtml(title.rarity) + '</option>').join("");
         }
-        const items = data || [];
-        lootboxItems = items.filter(item => item.item_subtype === "lootbox");
-        rewardItems = items.filter(item => item.item_subtype !== "lootbox");
-        lootboxSelect.innerHTML = lootboxItems.length
-            ? lootboxItems.map(item => '<option value="' + escapeHtml(item.id) + '">' + escapeHtml(item.name) + '</option>').join("")
-            : '<option value="">Лутбоксов пока нет</option>';
-        rewardSelect.innerHTML = '<option value="">Выбери предмет</option>' + rewardItems.map(item =>
-            '<option value="' + escapeHtml(item.id) + '">' + escapeHtml(item.name) + ' · ' + escapeHtml(item.rarity || "common") + '</option>'
-        ).join("");
         await renderLootboxPool();
     };
 
     lootboxSelect.addEventListener("change", renderLootboxPool);
+    rewardTypeSelect.addEventListener("change", updateRewardFields);
     panel.querySelector(".lorgus-admin-lootbox-add-btn").addEventListener("click", async () => {
         const lootboxId = lootboxSelect.value;
-        const rewardId = rewardSelect.value;
-        const weight = Number.parseInt(panel.querySelector(".lorgus-admin-lootbox-weight").value, 10);
+        const type = rewardTypeSelect.value;
+        const name = panel.querySelector(".lorgus-admin-lootbox-name").value.trim();
+        const description = panel.querySelector(".lorgus-admin-lootbox-description").value.trim();
+        const rarity = panel.querySelector(".lorgus-admin-lootbox-rarity").value;
+        const titleId = titleSelect.value || null;
+        const currencyCode = panel.querySelector(".lorgus-admin-lootbox-currency").value;
+        const amount = Number.parseInt(panel.querySelector(".lorgus-admin-lootbox-amount").value,10);
         if (!lootboxId) { alert("Сначала создай лутбокс и выбери его."); return; }
-        if (!rewardId) { alert("Выбери предмет для награды."); return; }
-        if (!Number.isInteger(weight) || weight < 1 || weight > 100000) { alert("Вес должен быть целым числом от 1 до 100000."); return; }
+        if (type === "title" && !titleId) { alert("Выбери титул."); return; }
+        if (type !== "title" && !name) { alert("Укажи название награды."); return; }
+        if (type === "currency" && (!Number.isInteger(amount) || amount < 1)) { alert("Сумма должна быть положительным целым числом медных монет."); return; }
         const { error } = await window.supabaseClient.rpc("admin_set_lootbox_reward", {
             p_lootbox_item_id: lootboxId,
-            p_reward_item_id: rewardId,
-            p_weight: weight
+            p_reward_type: type,
+            p_title_id: type === "title" ? titleId : null,
+            p_name: type === "title" ? null : name,
+            p_description: type === "title" ? "" : description,
+            p_rarity: type === "title" ? "common" : rarity,
+            p_currency_code: type === "currency" ? currencyCode : null,
+            p_amount: type === "currency" ? amount : null
         });
         if (error) { alert("Не удалось добавить награду: " + error.message); return; }
+        panel.querySelector(".lorgus-admin-lootbox-name").value = "";
+        panel.querySelector(".lorgus-admin-lootbox-description").value = "";
         await renderLootboxPool();
     });
+    updateRewardFields();
     await loadLootboxManager();
 
     panel.querySelector(".lorgus-admin-currency-btn").addEventListener("click", async () => {
