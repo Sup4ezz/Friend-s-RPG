@@ -723,7 +723,7 @@ async function renderRoadChat(presence, fromRoute = false) {
         } else {
             const photos = await Promise.all(participants.map(row => getRpCharacterPhoto(row.character_id)));
             box.innerHTML = participants.map((row,index) => `
-                <div class="lorgus-messenger-participant">
+                <div class="lorgus-messenger-participant" role="button" tabindex="0" title="Открыть карточку персонажа">
                     <div class="lorgus-messenger-avatar">
                         ${photos[index] ? `<img src="${escapeHtml(photos[index])}" alt="">` : "<span>✦</span>"}<i></i>
                     </div>
@@ -733,6 +733,19 @@ async function renderRoadChat(presence, fromRoute = false) {
                     </div>
                 </div>
             `).join("");
+            box.querySelectorAll(".lorgus-messenger-participant").forEach((node, index) => {
+                const row = participants[index];
+                if (!row) return;
+                const openCard = event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    openRpCharacterQuickCard(row.character_id, node);
+                };
+                node.addEventListener("click", openCard);
+                node.addEventListener("keydown", event => {
+                    if (event.key === "Enter" || event.key === " ") openCard(event);
+                });
+            });
             const count = document.getElementById("lorgus-rp-online-count");
             if (count) count.textContent = String(participants.length + 1);
         }
