@@ -1414,6 +1414,7 @@ async function fetchRpMessageItemUsesForSpace(messageIds) {
         p_from_location: presence.type === "road" ? presence.fromLocation : null,
         p_to_region: presence.type === "road" ? presence.toRegion : null,
         p_to_location: presence.type === "road" ? presence.toLocation : null,
+        p_since: getRpVisitStart(presence) || null,
         p_message_ids: ids
     });
     if (error) {
