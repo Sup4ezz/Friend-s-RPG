@@ -1069,3 +1069,11 @@ Commits:
 - Выборочно проверены production SECURITY DEFINER функции: административные RPC в выборке содержат `is_admin()`; пользовательские RPC передачи предметов/валюты, RP-чтения и открытия лутбоксов содержат проверки auth/владения персонажем/присутствия по назначению. Это не полный аудит всех 44 функций.
 - Следующий конкретный риск: политика записи `world_map_label_positions` разрешает любому authenticated изменять общие координаты подписей карты. Черновик `.agent/drafts/world_map_label_positions_admin_only.sql` ограничивает запись через `public.is_admin()` и сохраняет чтение; production-политика пока не изменялась.
 - Не применять черновик к production до отдельного подтверждения изменения политики БД. Также остаются leaked-password protection и настройка default ACL для будущих таблиц.
+
+
+## Карта мира: политика записи закрыта (2026-10-12)
+- В production Supabase удалена политика `authenticated users can write world map labels`.
+- Создана политика `admins can write world map labels` для `authenticated` с `USING (coalesce(public.is_admin(), false))` и `WITH CHECK (coalesce(public.is_admin(), false))`.
+- Проверка `pg_policies` подтвердила новую политику записи и сохранённую политику `world map labels are readable` для `anon, authenticated`; чтение карты осталось публичным.
+- Миграция сохранена в репозитории: `supabase/migrations/20261012210000_world_map_labels_admin_only.sql`. Изменение применено напрямую в production SQL; добавление файла в Git само по себе не записывает его в историю миграций Supabase.
+- Удалён временный черновик `.agent/drafts/world_map_label_positions_admin_only.sql`.
