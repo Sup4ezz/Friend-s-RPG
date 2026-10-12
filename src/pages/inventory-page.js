@@ -381,7 +381,8 @@ window.openLorgusLootbox = async function(inventoryId) {
             <button class="lorgus-lootbox-close" type="button" aria-label="Закрыть">×</button>
             <div class="lorgus-lootbox-overline">ПЕЧАТЬ ХРАНИТЕЛЯ · LORGUS</div>
             <h2 class="lorgus-lootbox-title">Судьба внутри</h2>
-            <p class="lorgus-lootbox-subtitle">Печать трескается. Содержимое ещё не раскрыто.</p>
+            <p class="lorgus-lootbox-subtitle">Перед открытием изучи возможные награды и шансы их получения.</p>
+            <section class="lorgus-lootbox-contents"><header><span>СОДЕРЖИМОЕ</span><strong>ШАНС ВЫПАДЕНИЯ</strong></header><div class="lorgus-lootbox-contents-list"><p>Сверяем печать…</p></div></section>
             <div class="lorgus-lootbox-portal">
                 <div class="lorgus-lootbox-rune-ring"></div>
                 <div class="lorgus-lootbox-rays"></div>
@@ -402,6 +403,26 @@ window.openLorgusLootbox = async function(inventoryId) {
     const subtitle = overlay.querySelector(".lorgus-lootbox-subtitle");
     const chest = overlay.querySelector(".lorgus-lootbox-chest");
     const rewardBox = overlay.querySelector(".lorgus-lootbox-reward");
+    const contentsList = overlay.querySelector(".lorgus-lootbox-contents-list");
+    const contentsSection = overlay.querySelector(".lorgus-lootbox-contents");
+    const rarityLabels = {common:"Обычная",uncommon:"Необычная",rare:"Редкая",epic:"Эпическая",legendary:"Легендарная",mythic:"Мифическая",unique:"Уникальная"};
+    const rewardTypeLabels = {title:"Титул",privilege:"Привилегия",currency:"Деньги",special:"Особая награда"};
+    const { data: contents, error: contentsError } = await window.supabaseClient.rpc("get_lootbox_contents", { p_inventory_id: inventoryId });
+    if (contentsError) {
+        contentsList.innerHTML = '<p class="lorgus-lootbox-contents-error">Не удалось загрузить список наград. ' + escapeHtml(contentsError.message) + '</p>';
+        revealButton.disabled = true;
+    } else if (!Array.isArray(contents) || !contents.length) {
+        contentsList.innerHTML = '<p>В этой коробке пока не запечатано ни одной награды.</p>';
+        revealButton.disabled = true;
+    } else {
+        contentsList.innerHTML = contents.map(item =>
+            '<article class="lorgus-lootbox-content-row" style="--reward-color:' + escapeHtml(item.color || "#d7b56d") + '">' +
+                '<span class="lorgus-lootbox-content-icon">' + escapeHtml(item.icon || "✦") + '</span>' +
+                '<span class="lorgus-lootbox-content-info"><strong>' + escapeHtml(item.name || "Таинственная награда") + '</strong><small>' + escapeHtml(rewardTypeLabels[item.reward_type] || "Награда") + ' · ' + escapeHtml(rarityLabels[item.rarity] || item.rarity || "—") + '</small><em>' + escapeHtml(item.description || (item.reward_type === "currency" ? "Монеты для кошелька" : "")) + '</em></span>' +
+                '<strong class="lorgus-lootbox-content-chance">' + Number(item.chance || 0).toLocaleString("ru-RU",{maximumFractionDigits:4}) + '%</strong>' +
+            '</article>'
+        ).join("");
+    }
     let opened = false;
 
     revealButton.addEventListener("click", async () => {
@@ -434,10 +455,14 @@ window.openLorgusLootbox = async function(inventoryId) {
         overlay.classList.remove("is-opening");
         overlay.classList.add("has-reward");
         status.textContent = "НАГРАДА ПОЛУЧЕНА";
-        subtitle.textContent = "Содержимое лутбокса добавлено в твой инвентарь.";
+        subtitle.textContent = item.reward_type === "currency" ? "Деньги зачислены в кошелёк." : item.reward_type === "title" ? "Титул добавлен в коллекцию персонажа." : item.reward_type === "privilege" ? "Привилегия записана в награды персонажа." : "Особая награда теперь принадлежит тебе.";
+        contentsSection.hidden = true;
         rewardBox.hidden = false;
         rewardBox.style.setProperty("--reward-color", item.color || "#d7b56d");
-        rewardBox.innerHTML = '<span class="lorgus-lootbox-reward-icon">' + escapeHtml(item.icon || "◆") + '</span><div><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + '</small><strong>' + escapeHtml(item.name || "Неизвестный предмет") + '</strong><p>' + escapeHtml(item.description || "Новая вещь теперь принадлежит тебе.") + '</p></div>';
+        const rewardDescription = item.reward_type === "currency"
+            ? (item.description || "") + " Получено: " + formatLorgusCurrencyAmount(item.amount || 0) + "."
+            : item.description || (item.reward_type === "title" ? "Новый титул доступен в карточке персонажа." : "Награда записана в историю персонажа.");
+        rewardBox.innerHTML = '<span class="lorgus-lootbox-reward-icon">' + escapeHtml(item.icon || "✦") + '</span><div><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ' + escapeHtml(rewardTypeLabels[item.reward_type] || "Награда") + '</small><strong>' + escapeHtml(item.name || "Неизвестная награда") + '</strong><p>' + escapeHtml(rewardDescription) + '</p></div>';
         revealButton.disabled = false;
         revealButton.textContent = "ЗАБРАТЬ НАГРАДУ";
     });
