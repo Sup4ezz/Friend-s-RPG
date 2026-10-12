@@ -430,7 +430,10 @@ window.openLorgusLootbox = async function(inventoryId) {
     roulette.className = "lorgus-lootbox-roulette";
     roulette.hidden = true;
     roulette.innerHTML = '<div class="lorgus-lootbox-roulette-label">ПЕЧАТЬ ВЫБИРАЕТ НАГРАДУ</div><div class="lorgus-lootbox-reel-window"><div class="lorgus-lootbox-reel-track"></div><i class="lorgus-lootbox-reel-pointer"></i></div><div class="lorgus-lootbox-reel-caption">Слушай, как замедляется печать…</div>';
-    contentsSection.insertAdjacentElement("afterend", roulette);
+    // Рулетка находится рядом с сундуком, а не внизу списка содержимого.
+    // Во время вращения освобождаем сцену под саму ленту.
+    const portal = overlay.querySelector(".lorgus-lootbox-portal");
+    subtitle.insertAdjacentElement("afterend", roulette);
     const reelWindow = roulette.querySelector(".lorgus-lootbox-reel-window");
     const reelTrack = roulette.querySelector(".lorgus-lootbox-reel-track");
     const reelStyle = document.createElement("style");
@@ -467,16 +470,20 @@ window.openLorgusLootbox = async function(inventoryId) {
         const cards = Array.from({length:total}, (_, index) => index === target ? winningCard : decoys[Math.floor(Math.random() * decoys.length)]);
         reelTrack.innerHTML = cards.map(entry => '<article class="lorgus-lootbox-reel-card" style="--reward-color:' + escapeHtml(entry.color || colors[entry.rarity] || "#b8a27a") + ';"><span class="lorgus-lootbox-reel-card-icon">' + escapeHtml(entry.icon || "✦") + '</span><strong>' + escapeHtml(entry.name || "Таинственная награда") + '</strong><small>' + escapeHtml(rarity[entry.rarity] || entry.rarity || "НАГРАДА") + '</small></article>').join("");
         const card = reelTrack.children[target];
-        const viewportWidth = reelWindow.getBoundingClientRect().width;
+        // Сначала показываем ленту: измерения скрытого элемента дают нулевые размеры,
+        // из-за чего предыдущая версия фактически не могла прокрутить карточки.
+        roulette.hidden = false;
+        contentsSection.hidden = true;
+        if (portal) portal.hidden = true;
         reelTrack.style.transform = "translateX(0px)";
-        reelTrack.getBoundingClientRect();
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        const viewportWidth = reelWindow.getBoundingClientRect().width;
         const trackRect = reelTrack.getBoundingClientRect();
         const cardRect = card.getBoundingClientRect();
         // Центруем именно карточку фактически выданной сервером награды.
         // Расчёт по реальным координатам DOM не зависит от ширины карточек/зазоров.
         const cardCenter = cardRect.left - trackRect.left + cardRect.width / 2;
         const endX = Math.round(viewportWidth / 2 - cardCenter);
-        roulette.hidden = false; contentsSection.hidden = true;
         overlay.classList.add("is-spinning");
         playLootboxTone(95,.5,"sawtooth",.035); playLootboxTone(190,.38,"triangle",.025,.04); playLootboxTone(380,.25,"sine",.018,.12);
         lastReelTick = -1;
@@ -499,6 +506,7 @@ window.openLorgusLootbox = async function(inventoryId) {
         animation.cancel();
         reelTrack.style.transform = "translateX(" + endX + "px)";
         overlay.classList.remove("is-spinning"); overlay.classList.add("has-reward");
+        if (portal) portal.hidden = false;
         card.classList.add("is-winner");
         const base = ({common:330,uncommon:392,rare:494,epic:587,legendary:659,mythic:784,unique:988})[winner.rarity] || 440;
         playLootboxTone(base,.6,"sine",.055); playLootboxTone(base*1.5,.8,"triangle",.035,.09); playLootboxTone(base*2,1,"sine",.022,.18);
