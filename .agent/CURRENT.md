@@ -100,3 +100,11 @@
 - Проверка после применения: на всех таблицах public у обеих API-ролей 0 привилегий TRUNCATE, TRIGGER и REFERENCES. Все 27 обычных таблиц public имеют RLS.
 - Обычные CRUD grants не снимались; проверка подтвердила сохранение имеющихся SELECT/INSERT/UPDATE/DELETE grants (доступ к строкам по-прежнему регулируется RLS).
 - Важное ограничение: default ACL будущих таблиц не удалось изменить через текущую роль подключения. В базе остаются default privileges, которые могут повторно выдать эти права новым таблицам; требуется отдельно настроить default ACL от имени владельца/роли, которой это разрешено. Миграционный файл обновлён, чтобы совпадал с фактически применённым SQL.
+
+## Следующий этап аудита RLS и привилегий (2026-10-12)
+- Повторный аудит подтвердил, что у `anon` было право PostgreSQL 17 `MAINTAIN` на 19 таблицах `public`, у `authenticated` — на 18. Это не нужно браузерным ролям.
+- Найдена чрезмерно открытая политика `authenticated users can write world map labels`: `FOR ALL TO authenticated USING (true) WITH CHECK (true)`. Любой вошедший пользователь мог изменять общие координаты подписей карты. В `src/pages/world-map.js` сохранение выполняется прямым upsert в эту таблицу.
+- Подготовлена, но НЕ применена к production миграция `supabase/migrations/20261012190000_harden_map_editor_and_revoke_maintain.sql`: отзывает `MAINTAIN` у `anon/authenticated` на существующих таблицах и ограничивает запись карты проверкой `public.is_admin()`; чтение карты сохраняется.
+- Четыре таблицы без политик RLS (`admins`, `application_reviews`, `lootbox_rewards`, `lorgus_lore_portraits`) не предоставляют `anon/authenticated` обычных table CRUD grants; прямого доступа через Data API по текущим grants не обнаружено.
+- Supabase Security Advisor также сообщает о 44 SECURITY DEFINER RPC, доступных authenticated, и выключенной защите от утёкших паролей. Эти пункты требуют раздельной проверки: многие admin RPC намеренно доступны для вызова из клиентского приложения, но должны содержать `is_admin()`; не отзывать доступ массово без проверки UI-зависимостей.
+- Изменение default privileges для будущих таблиц не удалось применить ранее из-за `permission denied to change default privileges`; текущие grants исправлены, но будущие таблицы требуют отдельной настройки владельцем соответствующих default ACL.
