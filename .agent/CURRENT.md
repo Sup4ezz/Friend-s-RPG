@@ -93,3 +93,10 @@
 - Подготовлена `supabase/migrations/20261012180000_revoke_unneeded_table_privileges.sql`: отозвать TRUNCATE/REFERENCES/TRIGGER у `anon` и `authenticated` на существующих таблицах public и убрать эти привилегии из default ACL ролей `postgres` и `supabase_admin`. Обычные CRUD-привилегии не меняются.
 - Миграция сохранена в GitHub commit `f16a9eb3273d82310c1d9c641512137bbdd55c5f`, production пока не менялся. Перед применением требуется подтверждение пользователя.
 - Lootbox RPC `get_lootbox_contents` и `open_character_lootbox` проверяют авторизацию и владение одобренным персонажем; административные lootbox RPC содержат `is_admin()` guard. Отдельно остаётся browser QA.
+
+## Лишние table grants отозваны в production (2026-10-12)
+- Применена миграция `20261012180000_revoke_unneeded_table_privileges` к Supabase project `dxdxnttpznoekaiecrlv`.
+- Первоначальный вариант с `ALTER DEFAULT PRIVILEGES` отклонён PostgreSQL из-за `permission denied to change default privileges`; он не применился. Затем успешно применена корректированная миграция только с `REVOKE TRUNCATE, REFERENCES, TRIGGER ON ALL TABLES IN SCHEMA public FROM anon, authenticated`.
+- Проверка после применения: на всех таблицах public у обеих API-ролей 0 привилегий TRUNCATE, TRIGGER и REFERENCES. Все 27 обычных таблиц public имеют RLS.
+- Обычные CRUD grants не снимались; проверка подтвердила сохранение имеющихся SELECT/INSERT/UPDATE/DELETE grants (доступ к строкам по-прежнему регулируется RLS).
+- Важное ограничение: default ACL будущих таблиц не удалось изменить через текущую роль подключения. В базе остаются default privileges, которые могут повторно выдать эти права новым таблицам; требуется отдельно настроить default ACL от имени владельца/роли, которой это разрешено. Миграционный файл обновлён, чтобы совпадал с фактически применённым SQL.
