@@ -87,3 +87,9 @@
 - SQL smoke tests с реальными одобренными тестовыми персонажами: поддельные sender_player_id и timestamps переопределяются сервером, голубиная доставка выставляется примерно на +5 минут, delivered_at/read_at сбрасываются; self-send возвращает `MAIL_SELF_SEND_FORBIDDEN`. Тестовая запись откатилась, постоянные данные не создавались.
 - Security advisor запущен; сообщил 4 таблицы без RLS policy и 44 SECURITY DEFINER RPC доступных authenticated (часть — admin RPC, требующие отдельной проверки защитных guard-ов).
 - Ограничение: браузерный сценарий ещё не проверен. Автоматическое выставление `delivered_at` отдельным серверным процессом остаётся отдельной задачей; клиент пока вычисляет отображаемую доставку по `deliver_at`.
+
+## Следующая security-миграция подготовлена, но НЕ применена (2026-10-12)
+- Обнаружено, что в схеме `public` роли `anon` имеют TRUNCATE и TRIGGER на 19 таблицах, а `authenticated` — на 18; также выданы REFERENCES. RLS не защищает TRUNCATE. У ролей нет CREATE на схему `public`, поэтому возможность произвольного создания триггеров через прямой DDL не подтверждена, но эти привилегии не нужны клиентскому API.
+- Подготовлена `supabase/migrations/20261012180000_revoke_unneeded_table_privileges.sql`: отозвать TRUNCATE/REFERENCES/TRIGGER у `anon` и `authenticated` на существующих таблицах public и убрать эти привилегии из default ACL ролей `postgres` и `supabase_admin`. Обычные CRUD-привилегии не меняются.
+- Миграция сохранена в GitHub commit `f16a9eb3273d82310c1d9c641512137bbdd55c5f`, production пока не менялся. Перед применением требуется подтверждение пользователя.
+- Lootbox RPC `get_lootbox_contents` и `open_character_lootbox` проверяют авторизацию и владение одобренным персонажем; административные lootbox RPC содержат `is_admin()` guard. Отдельно остаётся browser QA.
