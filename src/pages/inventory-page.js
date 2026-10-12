@@ -156,7 +156,7 @@ async function renderLorgusInventory() {
     `;
     const walletSection = document.createElement("section");
     walletSection.className = "lorgus-wallet-panel";
-    walletSection.innerHTML = '<div class="lorgus-wallet-title"><div><span>ФИНАНСЫ</span><h2>Кошелёк</h2></div><small>Баланс в местной валюте и её эквивалент в золотых</small></div><div class="lorgus-wallet-grid" id="lorgus-wallet-grid"></div>';
+    walletSection.innerHTML = '<div class="lorgus-wallet-title"><div><span>ФИНАНСЫ</span><h2>Кошелёк</h2></div><small>Баланс в местной валюте и пересчёт в условных единицах</small></div><div class="lorgus-wallet-grid" id="lorgus-wallet-grid"></div>';
     container.querySelector(".lorgus-inventory-main").appendChild(walletSection);
     const { data: currencyRows } = await loadCharacterCurrency(character.id);
     const walletGrid = document.getElementById("lorgus-wallet-grid");
