@@ -18997,3 +18997,17 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-region-transition-veil.is-leaving .lorgus-region-transition-mist{
   opacity:0!important;
 }
+
+
+/* LORGUS: region selection must never zoom or move the map. Only the fog/title veil transitions. */
+.lorgus-map-page #lorgus-map-viewport,
+.lorgus-map-page #lorgus-map-viewport.lorgus-map-entering,
+.lorgus-map-page #lorgus-map-world,
+.lorgus-map-page .lorgus-map-entering .lorgus-map-world,
+.lorgus-map-page #lorgus-map-viewport.lorgus-map-entering #lorgus-map-world{
+  transform:none!important;
+  transform-origin:center center!important;
+  transition:none!important;
+  animation:none!important;
+  will-change:auto!important;
+}
