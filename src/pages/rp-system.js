@@ -1761,18 +1761,15 @@ async function openRpCurrencyTransferPicker(targetCharacterId = null) {
     overlay.innerHTML = '<div class="lorgus-rp-item-backdrop"></div><article class="lorgus-rp-transfer-panel"><button type="button" class="lorgus-rp-item-close">×</button><span class="lorgus-command-kicker">RP · ОБМЕН</span><h2>Передать валюту</h2><p>Передача доступна только персонажу, который сейчас состоит в этом RP-чате.</p>' +
         '<label>Кому<select class="lorgus-transfer-target"><option value="">Выбери персонажа...</option>' + participants.map(row => '<option value="' + escapeHtml(row.character_id) + '"' + (String(row.character_id) === selectedTarget ? ' selected' : '') + '>' + escapeHtml(row.characters?.name || "Без имени") + '</option>').join("") + '</select></label>' +
         '<label>Валюта<select class="lorgus-transfer-currency">' + (usable.length ? usable.map(row => '<option value="' + escapeHtml(row.currency_code) + '">' + escapeHtml(lorgusCurrencies[row.currency_code]?.icon || "◆") + ' ' + escapeHtml(lorgusCurrencyLabel(row.currency_code)) + ' · доступно ' + escapeHtml(formatLorgusCurrencyAmount(row.amount)) + '</option>').join("") : '<option value="">Нет валюты</option>') + '</select></label>' +
-        '<div class="lorgus-transfer-denominations"><label>Золотые<input class="lorgus-transfer-gold" type="number" min="0" value="0"></label><label>Серебряные<input class="lorgus-transfer-silver" type="number" min="0" value="0"></label><label>Медные<input class="lorgus-transfer-copper" type="number" min="0" value="1"></label></div>' +
-        '<button type="button" class="gold-button lorgus-transfer-confirm">Передать</button></article>';
+        '<label>Сумма<input class="lorgus-transfer-amount" type="number" min="1" step="1" value="1"' + (usable.length ? ' max="' + escapeHtml(String(usable[0].amount)) + '"' : ' disabled') + '></label>' +
+        '<button type="button" class="gold-button lorgus-transfer-confirm"' + (usable.length ? '' : ' disabled') + '>Передать</button></article>';
     document.body.appendChild(overlay); requestAnimationFrame(() => overlay.classList.add("open"));
     const close=()=>overlay.remove(); overlay.querySelector(".lorgus-rp-item-close").addEventListener("click",close); overlay.querySelector(".lorgus-rp-item-backdrop").addEventListener("click",close);
     overlay.querySelector(".lorgus-transfer-confirm").addEventListener("click",async()=>{
         const target=overlay.querySelector(".lorgus-transfer-target").value, code=overlay.querySelector(".lorgus-transfer-currency").value;
-        const gold=Math.max(0,Number.parseInt(overlay.querySelector(".lorgus-transfer-gold").value,10)||0);
-        const silver=Math.max(0,Number.parseInt(overlay.querySelector(".lorgus-transfer-silver").value,10)||0);
-        const copper=Math.max(0,Number.parseInt(overlay.querySelector(".lorgus-transfer-copper").value,10)||0);
-        const amount=gold*10000+silver*100+copper;
+        const amount=Number.parseInt(overlay.querySelector(".lorgus-transfer-amount").value,10);
         if(!target||!code){ alert("Выбери персонажа и валюту."); return; }
-        if(amount<1){ alert("Укажи сумму передачи."); return; }
+        if(!Number.isSafeInteger(amount)||amount<1){ alert("Укажи целую сумму не меньше 1."); return; }
         const balance=usable.find(x=>x.currency_code===code)?.amount||0;
         if(amount>balance){ alert("Недостаточно валюты."); return; }
         const chat = window.activeRpChatSpace;
@@ -1790,7 +1787,7 @@ async function openRpCurrencyTransferPicker(targetCharacterId = null) {
             p_to_location:chat?.type === "road" ? chat.toLocation : null
         });
         if(error){ console.error(error); alert(transferErrorMessage(error)); return; }
-        close(); alert("Валюта передана.");
+        close(); await renderLocationParticipantsIfVisible(); alert("Валюта передана.");
     });
 }
 
