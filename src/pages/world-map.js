@@ -248,17 +248,10 @@ function renderLorgusMapEditorRects() {
                 event.stopPropagation();
 
                 const region = rectData.id;
-                if (typeof window.selectLorgusMapRegion === "function") {
-                    window.selectLorgusMapRegion(region);
-                }
-
-                // A map label is an actual navigation target, not just a selector.
-                const enterButton = document.getElementById("lorgus-map-enter-button");
-                if (enterButton && !enterButton.disabled && typeof enterButton.onclick === "function") {
-                    enterButton.click();
+                if (typeof window.lorgusEnterRegionCinematic === "function") {
+                    window.lorgusEnterRegionCinematic(region);
                     return;
                 }
-
                 if (typeof window.renderKingdomLocations === "function") {
                     window.renderKingdomLocations(region);
                 }
@@ -657,6 +650,50 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
     } finally {
         requestAnimationFrame(finish);
     }
+};
+
+
+// Enter a region as a scene, not as an abrupt replacement of the map.
+window.lorgusEnterRegionCinematic = function(region) {
+    if (!region || typeof window.renderKingdomLocations !== "function") return;
+    if (window.lorgusRegionTransitionActive) return;
+    window.lorgusRegionTransitionActive = true;
+
+    const viewport = document.getElementById("lorgus-map-viewport");
+    const labels = document.querySelectorAll("#lorgus-map-marker-layer .lorgus-map-editor-rect");
+    labels.forEach(label => { label.disabled = true; });
+    const veil = document.createElement("div");
+    veil.className = "lorgus-region-transition-veil";
+    veil.innerHTML = '<div class="lorgus-region-transition-mist"></div><div class="lorgus-region-transition-title"><span>ЛОРГУС · ПУТЕШЕСТВИЕ</span><strong></strong><i></i></div>';
+    veil.querySelector("strong").textContent = region;
+    document.body.appendChild(veil);
+
+    if (viewport) {
+        viewport.classList.add("lorgus-map-entering");
+        const target = [...labels].find(label => label.dataset.region === region);
+        if (target) {
+            viewport.style.setProperty("--lorgus-entry-x", (target.offsetLeft + target.offsetWidth / 2) + "px");
+            viewport.style.setProperty("--lorgus-entry-y", (target.offsetTop + target.offsetHeight / 2) + "px");
+        }
+    }
+    requestAnimationFrame(() => veil.classList.add("is-active"));
+
+    window.setTimeout(() => {
+        try {
+            window.renderKingdomLocations(region);
+            const destination = document.getElementById("cabinet-content");
+            destination?.classList.add("lorgus-region-arrival");
+            veil.classList.add("is-leaving");
+        } catch (error) {
+            console.error("[LORGUS] Не удалось открыть край:", error);
+            veil.remove();
+            window.lorgusRegionTransitionActive = false;
+        }
+        window.setTimeout(() => {
+            veil.remove();
+            window.lorgusRegionTransitionActive = false;
+        }, 850);
+    }, 620);
 };
 
 window.lorgusMainMenuNavigate = function(direction, renderTarget) {
