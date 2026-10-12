@@ -464,7 +464,7 @@ window.openLorgusLootbox = async function(inventoryId) {
     };
     const spinLootboxRoulette = async winner => {
         const pool = Array.isArray(contents) ? contents : [];
-        const matching = pool.find(entry => entry.reward_type === winner.reward_type && String(entry.name || "") === String(winner.name || "") && (entry.reward_type !== "currency" || (entry.currency_code === winner.currency_code && Number(entry.amount) === Number(winner.amount))));
+        const matching = pool.find(entry => entry.id != null && winner.id != null && String(entry.id) === String(winner.id)) || pool.find(entry => entry.reward_type === winner.reward_type && String(entry.name || "") === String(winner.name || "") && (entry.reward_type !== "currency" || (entry.currency_code === winner.currency_code && Number(entry.amount) === Number(winner.amount))));
         const winningCard = matching || winner;
         const colors = {common:"#b8a27a",uncommon:"#76b85f",rare:"#5f9fe8",epic:"#a875e8",legendary:"#e0a14a",mythic:"#e45bc7",unique:"#f3e7b0"};
         const rarity = {common:"ОБЫЧНАЯ",uncommon:"НЕОБЫЧНАЯ",rare:"РЕДКАЯ",epic:"ЭПИЧЕСКАЯ",legendary:"ЛЕГЕНДАРНАЯ",mythic:"МИФИЧЕСКАЯ",unique:"УНИКАЛЬНАЯ"};
