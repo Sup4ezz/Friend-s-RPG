@@ -241,14 +241,28 @@ function renderLorgusMapEditorRects() {
             label.style.height = rectData.h + "%";
             label.style.transform = "translate(-50%,-50%)";
 
-            label.onclick = event => {
+            label.setAttribute("aria-label", "Открыть край: " + rectData.id);
+            label.title = "Открыть " + rectData.id;
+            label.addEventListener("click", event => {
                 event.preventDefault();
                 event.stopPropagation();
 
+                const region = rectData.id;
                 if (typeof window.selectLorgusMapRegion === "function") {
-                    window.selectLorgusMapRegion(rectData.id);
+                    window.selectLorgusMapRegion(region);
                 }
-            };
+
+                // A map label is an actual navigation target, not just a selector.
+                const enterButton = document.getElementById("lorgus-map-enter-button");
+                if (enterButton && !enterButton.disabled && typeof enterButton.onclick === "function") {
+                    enterButton.click();
+                    return;
+                }
+
+                if (typeof window.renderKingdomLocations === "function") {
+                    window.renderKingdomLocations(region);
+                }
+            });
 
             layer.appendChild(label);
 
