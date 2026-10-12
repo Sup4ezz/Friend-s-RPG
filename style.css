@@ -18738,3 +18738,35 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-map-atlas-fallback .lorgus-map-region-button:hover{border-color:rgba(199,166,94,.58);color:#f0d99c}
 .lorgus-map-atlas-fallback .lorgus-map-region-button[hidden]{display:none!important}
 .lorgus-map-atlas-fallback .lorgus-map-region-filters button{cursor:pointer}
+
+
+/* LORGUS atlas visibility fix: keep the cinematic map, but expose its atlas controls. */
+.lorgus-map-page .lorgus-map-sidebar{
+    display:block!important;
+    position:fixed!important;
+    z-index:30!important;
+    top:52px!important;
+    left:18px!important;
+    bottom:18px!important;
+    width:290px!important;
+    max-width:calc(100vw - 36px)!important;
+    overflow-y:auto!important;
+    box-sizing:border-box!important;
+    padding:12px!important;
+    border:1px solid rgba(190,157,98,.3)!important;
+    background:linear-gradient(155deg,rgba(12,12,10,.94),rgba(7,7,6,.82))!important;
+    box-shadow:0 12px 42px rgba(0,0,0,.55),inset 0 0 24px rgba(190,157,98,.035)!important;
+    backdrop-filter:blur(8px)!important;
+}
+.lorgus-map-page .lorgus-map-sidebar>*{display:none!important}
+.lorgus-map-page .lorgus-map-sidebar>.lorgus-map-brand,
+.lorgus-map-page .lorgus-map-sidebar>.lorgus-map-atlas-fallback,
+.lorgus-map-page .lorgus-map-sidebar>[data-lorgus-codex-link]{display:block!important}
+.lorgus-map-page .lorgus-map-sidebar>.lorgus-map-brand{margin:0!important;padding:5px 4px 12px!important;border-bottom:1px solid rgba(190,157,98,.2)!important}
+.lorgus-map-page .lorgus-map-atlas-fallback{margin:12px 0!important}
+.lorgus-map-page .lorgus-map-side-button[data-lorgus-codex-link]{width:100%!important;margin-top:8px!important}
+.lorgus-map-page .lorgus-map-image{filter:saturate(.86) sepia(.025) contrast(1.04) brightness(.82) blur(.25px)!important}
+.lorgus-map-page .lorgus-mainmenu-fog{background:radial-gradient(circle 210px at var(--lorgus-mx,50%) var(--lorgus-my,50%),rgba(255,225,160,.015),rgba(230,205,153,.025) 20%,rgba(15,16,14,.10) 43%,rgba(5,6,5,.27) 74%,rgba(3,4,4,.42))!important}
+@media(max-width:650px){
+    .lorgus-map-page .lorgus-map-sidebar{top:44px!important;left:8px!important;bottom:8px!important;width:min(270px,calc(100vw - 16px))!important;max-width:calc(100vw - 16px)!important}
+}
