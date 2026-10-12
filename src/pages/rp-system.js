@@ -1943,6 +1943,17 @@ async function openAdminCharacterInventory(application, container) {
             '<input class="lorgus-admin-inventory-qty" type="number" min="1" value="1" placeholder="Количество">' +
             '<button type="button" class="lorgus-admin-inventory-grant-btn">Выдать</button>' +
         '</div>' +
+        '<section class="lorgus-admin-lootbox-manager">' +
+            '<span class="lorgus-command-kicker">НАПОЛНЕНИЕ ЛУТБОКСОВ</span>' +
+            '<p>У каждой коробки собственный список наград. Вес определяет относительный шанс: вес 5 в пять раз вероятнее веса 1.</p>' +
+            '<label>Лутбокс<select class="lorgus-admin-lootbox-select"><option value="">Загрузка лутбоксов…</option></select></label>' +
+            '<div class="lorgus-admin-lootbox-add">' +
+                '<label>Предмет-награда<select class="lorgus-admin-lootbox-reward"><option value="">Выбери предмет</option></select></label>' +
+                '<label>Вес / шанс<input class="lorgus-admin-lootbox-weight" type="number" min="1" max="100000" step="1" value="1"></label>' +
+                '<button type="button" class="lorgus-admin-lootbox-add-btn">Добавить награду</button>' +
+            '</div>' +
+            '<div class="lorgus-admin-lootbox-pool"><p>Выбери лутбокс, чтобы увидеть его содержимое.</p></div>' +
+        '</section>' +
         '<div class="lorgus-admin-currency-grant">' +
             '<span>КОШЕЛЁК</span>' +
             '<select class="lorgus-admin-currency-code">' +
@@ -2066,6 +2077,102 @@ async function openAdminCharacterInventory(application, container) {
 
     const close = () => overlay.remove();
     panel.querySelector(".lorgus-admin-inventory-close").addEventListener("click", close);
+
+    const lootboxSelect = panel.querySelector(".lorgus-admin-lootbox-select");
+    const rewardSelect = panel.querySelector(".lorgus-admin-lootbox-reward");
+    const lootboxPool = panel.querySelector(".lorgus-admin-lootbox-pool");
+    let lootboxItems = [];
+    let rewardItems = [];
+
+    const renderLootboxPool = async () => {
+        const lootboxId = lootboxSelect.value;
+        if (!lootboxId) {
+            lootboxPool.innerHTML = '<p>Сначала создай и выбери лутбокс.</p>';
+            return;
+        }
+        lootboxPool.innerHTML = '<p>Загружаем содержимое…</p>';
+        const { data, error } = await window.supabaseClient.rpc("admin_list_lootbox_rewards", {
+            p_lootbox_item_id: lootboxId
+        });
+        if (error) {
+            lootboxPool.innerHTML = '<p class="lorgus-admin-lootbox-error">' + escapeHtml(error.message) + '</p>';
+            return;
+        }
+        const rows = Array.isArray(data) ? data : [];
+        lootboxPool.innerHTML = rows.length ? rows.map(row =>
+            '<article class="lorgus-admin-lootbox-row">' +
+                '<span class="lorgus-admin-lootbox-icon" style="--item-color:' + escapeHtml(row.color || "#b8a27a") + '">' + escapeHtml(row.icon || "◆") + '</span>' +
+                '<span class="lorgus-admin-lootbox-name"><strong>' + escapeHtml(row.name || "Предмет") + '</strong><small>' + escapeHtml(row.rarity || "common") + '</small></span>' +
+                '<label>Вес<input type="number" min="1" max="100000" step="1" value="' + escapeHtml(String(row.weight)) + '" data-lootbox-weight="' + escapeHtml(row.id) + '"></label>' +
+                '<button type="button" data-lootbox-save="' + escapeHtml(row.reward_item_id) + '">Сохранить</button>' +
+                '<button type="button" data-lootbox-remove="' + escapeHtml(row.id) + '">Убрать</button>' +
+            '</article>'
+        ).join("") : '<p>В этой коробке пока нет наград. Добавь предмет ниже.</p>';
+
+        lootboxPool.querySelectorAll("[data-lootbox-save]").forEach(button => button.addEventListener("click", async () => {
+            const rowId = button.closest(".lorgus-admin-lootbox-row");
+            const weight = Number.parseInt(rowId.querySelector("[data-lootbox-weight]").value, 10);
+            if (!Number.isInteger(weight) || weight < 1 || weight > 100000) {
+                alert("Вес должен быть целым числом от 1 до 100000.");
+                return;
+            }
+            const { error: saveError } = await window.supabaseClient.rpc("admin_set_lootbox_reward", {
+                p_lootbox_item_id: lootboxSelect.value,
+                p_reward_item_id: button.dataset.lootboxSave,
+                p_weight: weight
+            });
+            if (saveError) { alert("Не удалось сохранить шанс: " + saveError.message); return; }
+            await renderLootboxPool();
+        }));
+
+        lootboxPool.querySelectorAll("[data-lootbox-remove]").forEach(button => button.addEventListener("click", async () => {
+            if (!confirm("Убрать эту награду из выбранного лутбокса?")) return;
+            const { error: removeError } = await window.supabaseClient.rpc("admin_remove_lootbox_reward", {
+                p_reward_row_id: button.dataset.lootboxRemove
+            });
+            if (removeError) { alert("Не удалось убрать награду: " + removeError.message); return; }
+            await renderLootboxPool();
+        }));
+    };
+
+    const loadLootboxManager = async () => {
+        const { data, error } = await window.supabaseClient.from("items")
+            .select("id,name,item_subtype,item_type,rarity,icon,color")
+            .order("name", { ascending: true });
+        if (error) {
+            lootboxSelect.innerHTML = '<option value="">Не удалось загрузить лутбоксы</option>';
+            lootboxPool.innerHTML = '<p class="lorgus-admin-lootbox-error">' + escapeHtml(error.message) + '</p>';
+            return;
+        }
+        const items = data || [];
+        lootboxItems = items.filter(item => item.item_subtype === "lootbox");
+        rewardItems = items.filter(item => item.item_subtype !== "lootbox");
+        lootboxSelect.innerHTML = lootboxItems.length
+            ? lootboxItems.map(item => '<option value="' + escapeHtml(item.id) + '">' + escapeHtml(item.name) + '</option>').join("")
+            : '<option value="">Лутбоксов пока нет</option>';
+        rewardSelect.innerHTML = '<option value="">Выбери предмет</option>' + rewardItems.map(item =>
+            '<option value="' + escapeHtml(item.id) + '">' + escapeHtml(item.name) + ' · ' + escapeHtml(item.rarity || "common") + '</option>'
+        ).join("");
+        await renderLootboxPool();
+    };
+
+    lootboxSelect.addEventListener("change", renderLootboxPool);
+    panel.querySelector(".lorgus-admin-lootbox-add-btn").addEventListener("click", async () => {
+        const lootboxId = lootboxSelect.value;
+        const rewardId = rewardSelect.value;
+        const weight = Number.parseInt(panel.querySelector(".lorgus-admin-lootbox-weight").value, 10);
+        if (!lootboxId) { alert("Сначала создай лутбокс и выбери его."); return; }
+        if (!rewardId) { alert("Выбери предмет для награды."); return; }
+        if (!Number.isInteger(weight) || weight < 1 || weight > 100000) { alert("Вес должен быть целым числом от 1 до 100000."); return; }
+        const { error } = await window.supabaseClient.rpc("admin_set_lootbox_reward", {
+            p_lootbox_item_id: lootboxId,
+            p_reward_item_id: rewardId,
+            p_weight: weight
+        });
+        if (error) { alert("Не удалось добавить награду: " + error.message); return; }
+        await renderLootboxPool();
+    });
+    await loadLootboxManager();
 
     panel.querySelector(".lorgus-admin-currency-btn").addEventListener("click", async () => {
         const code=panel.querySelector(".lorgus-admin-currency-code").value;
