@@ -27,8 +27,11 @@ async function renderMail() {
                 </div>
 
                 <nav class="lorgus-mail-nav" aria-label="Почта">
-                    <button type="button" class="active">
+                    <button type="button" class="active" id="lorgus-mail-folder-inbox">
                         <span>▱</span><strong>Входящие</strong><em id="lorgus-mail-nav-count">—</em>
+                    </button>
+                    <button type="button" id="lorgus-mail-folder-sent">
+                        <span>➤</span><strong>Отправленные</strong>
                     </button>
                     <button type="button" onclick="document.getElementById('lorgus-mail-recipient')?.focus()">
                         <span>✎</span><strong>Новое письмо</strong>
@@ -110,6 +113,8 @@ async function renderMail() {
     document.getElementById("lorgus-mail-search")?.addEventListener("input", filterLorgusMail);
     document.getElementById("lorgus-mail-filter")?.addEventListener("change", filterLorgusMail);
     document.getElementById("lorgus-mail-read-all")?.addEventListener("click", markAllLorgusMailRead);
+    document.getElementById("lorgus-mail-folder-inbox")?.addEventListener("click", () => switchLorgusMailFolder("inbox"));
+    document.getElementById("lorgus-mail-folder-sent")?.addEventListener("click", () => switchLorgusMailFolder("sent"));
 }
 
 async function loadMailRecipients() {
@@ -152,10 +157,11 @@ async function loadMailInbox() {
     const list = document.getElementById("lorgus-mail-inbox-list");
     if (!list || !window.activeCharacterId) return;
 
+    const folder = window.lorgusMailFolder || "inbox";
     const { data, error } = await window.supabaseClient
         .from("lorgus_mail")
-        .select("id, sender_character_id, recipient_character_id, body, method, sent_at, deliver_at, delivered_at, read_at, sender:characters!lorgus_mail_sender_character_id_fkey(name)")
-        .eq("recipient_character_id", window.activeCharacterId)
+        .select("id, sender_character_id, recipient_character_id, body, method, sent_at, deliver_at, delivered_at, read_at, sender:characters!lorgus_mail_sender_character_id_fkey(name), recipient:characters!lorgus_mail_recipient_character_id_fkey(name)")
+        .eq(folder === "sent" ? "sender_character_id" : "recipient_character_id", window.activeCharacterId)
         .order("sent_at", { ascending: false })
         .limit(100);
 
@@ -175,18 +181,25 @@ async function loadMailInbox() {
     const unreadCount = data.filter(mail => !mail.read_at && (mail.delivered_at || new Date(mail.deliver_at).getTime() <= now)).length;
     const navCount = document.getElementById("lorgus-mail-nav-count");
     const totalCount = document.getElementById("lorgus-mail-inbox-total");
+    const inboxMode = folder !== "sent";
     if (navCount) navCount.textContent = String(unreadCount);
     if (totalCount) totalCount.textContent = data.length + (data.length % 10 === 1 && data.length % 100 !== 11 ? " письмо" : data.length % 10 >= 2 && data.length % 10 <= 4 && (data.length % 100 < 12 || data.length % 100 > 14) ? " письма" : " писем");
+    const title = document.querySelector(".lorgus-mail-inbox .lorgus-mail-panel-head h2");
+    if (title) title.textContent = inboxMode ? "Входящие" : "Отправленные";
+    const readAll = document.getElementById("lorgus-mail-read-all");
+    if (readAll) readAll.hidden = !inboxMode;
 
     list.innerHTML = data.map(mail => {
         const delivered = Boolean(mail.delivered_at) || new Date(mail.deliver_at).getTime() <= now;
         const sender = mail.sender?.name || "Неизвестный отправитель";
-        const unread = !mail.read_at && delivered;
+        const recipient = mail.recipient?.name || "Неизвестный адресат";
+        const unread = inboxMode && !mail.read_at && delivered;
+        const contact = inboxMode ? sender : recipient;
 
         return `
-            <article class="lorgus-mail-card ${unread ? "unread" : ""}" data-mail-id="${escapeHtml(mail.id)}" data-mail-sender="${escapeHtml(sender.toLocaleLowerCase("ru-RU"))}" data-mail-body="${escapeHtml(mail.body.toLocaleLowerCase("ru-RU"))}" data-mail-state="${delivered ? "delivered" : "transit"}" data-mail-unread="${unread ? "true" : "false"}">
+            <article class="lorgus-mail-card ${unread ? "unread" : ""}" data-mail-id="${escapeHtml(mail.id)}" data-mail-sender="${escapeHtml(contact.toLocaleLowerCase("ru-RU"))}" data-mail-body="${escapeHtml(mail.body.toLocaleLowerCase("ru-RU"))}" data-mail-state="${delivered ? "delivered" : "transit"}" data-mail-unread="${unread ? "true" : "false"}">
                 <div class="lorgus-mail-card-top">
-                    <strong>${escapeHtml(sender)}</strong>
+                    <strong>${inboxMode ? "От: " : "Кому: "}${escapeHtml(contact)}</strong>
                     <span>${delivered ? "Доставлено" : "В пути"}</span>
                 </div>
                 <div class="lorgus-mail-card-meta">
@@ -198,6 +211,17 @@ async function loadMailInbox() {
             </article>
         `;
     }).join("");
+}
+
+function switchLorgusMailFolder(folder) {
+    window.lorgusMailFolder = folder === "sent" ? "sent" : "inbox";
+    document.getElementById("lorgus-mail-folder-inbox")?.classList.toggle("active", window.lorgusMailFolder === "inbox");
+    document.getElementById("lorgus-mail-folder-sent")?.classList.toggle("active", window.lorgusMailFolder === "sent");
+    const filter = document.getElementById("lorgus-mail-filter");
+    if (filter) filter.value = "all";
+    const search = document.getElementById("lorgus-mail-search");
+    if (search) search.value = "";
+    loadMailInbox();
 }
 
 function filterLorgusMail() {
