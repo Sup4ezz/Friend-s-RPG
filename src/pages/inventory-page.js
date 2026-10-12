@@ -4,15 +4,8 @@ function lorgusCurrencyLabel(code) {
 }
 
 function formatLorgusCurrencyAmount(amount) {
-    const copper = Math.max(0, Number(amount) || 0);
-    const gold = Math.floor(copper / 10000);
-    const silver = Math.floor((copper % 10000) / 100);
-    const bronze = copper % 100;
-    return [
-        gold ? gold + " золот." : "",
-        silver ? silver + " серебр." : "",
-        bronze || (!gold && !silver) ? bronze + " медн." : ""
-    ].filter(Boolean).join(" · ");
+    const value = Math.max(0, Math.floor(Number(amount) || 0));
+    return new Intl.NumberFormat("ru-RU").format(value);
 }
 
 function formatLorgusRewardCurrency(amount, code) {
@@ -164,7 +157,7 @@ async function renderLorgusInventory() {
     `;
     const walletSection = document.createElement("section");
     walletSection.className = "lorgus-wallet-panel";
-    walletSection.innerHTML = '<div class="lorgus-wallet-title"><div><span>ФИНАНСЫ</span><h2>Кошелёк</h2></div><small>Валюты пяти королевств · 1 золотая = 100 серебряных · 1 серебряная = 100 медных</small></div><div class="lorgus-wallet-grid" id="lorgus-wallet-grid"></div>';
+    walletSection.innerHTML = '<div class="lorgus-wallet-title"><div><span>ФИНАНСЫ</span><h2>Кошелёк</h2></div><small>Пять отдельных валют королевств · баланс каждой валюты указан целым числом</small></div><div class="lorgus-wallet-grid" id="lorgus-wallet-grid"></div>';
     container.querySelector(".lorgus-inventory-main").appendChild(walletSection);
     const { data: currencyRows } = await loadCharacterCurrency(character.id);
     const walletGrid = document.getElementById("lorgus-wallet-grid");
