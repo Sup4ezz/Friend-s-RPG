@@ -52,8 +52,6 @@ async function updateCharacterApplication(event, applicationId) {
         special_skills: document.getElementById("character-skills").value.trim(),
         preferred_weapon: document.getElementById("character-weapon").value.trim() || null,
         occupation: document.getElementById("character-occupation").value.trim(),
-        review_notes: null,
-        status: "pending"
     };
 
     if (!values.name || !values.race || !values.age || !values.homeland || !values.personality || !values.backstory || !values.special_skills || !values.occupation) {
