@@ -19085,3 +19085,13 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
   background:radial-gradient(circle 52px at var(--lorgus-mx,50%) var(--lorgus-my,50%),rgba(255,222,153,.34) 0%,rgba(255,211,135,.17) 28%,rgba(235,190,112,.06) 56%,transparent 78%)!important;
   mix-blend-mode:screen!important;
 }
+
+
+/* LORGUS map: much stronger warm cursor lantern against the deepened darkness. */
+.lorgus-map-page .lorgus-mainmenu-fog::after{
+  background:radial-gradient(circle 112px at var(--lorgus-mx,50%) var(--lorgus-my,50%),rgba(255,236,181,.66) 0%,rgba(255,220,145,.42) 18%,rgba(255,204,120,.22) 38%,rgba(235,184,105,.09) 61%,rgba(225,174,100,.025) 78%,transparent 100%)!important;
+  mix-blend-mode:screen!important;
+  opacity:1!important;
+  filter:blur(1.5px)!important;
+}
+.lorgus-map-page .lorgus-map-image-wrap.cursor-lit .lorgus-mainmenu-fog::after{opacity:1!important;}
