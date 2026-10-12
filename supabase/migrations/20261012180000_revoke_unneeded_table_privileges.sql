@@ -1,13 +1,8 @@
 -- Remove non-application table privileges from API roles.
--- RLS does not protect TRUNCATE, and API clients have no reason to create triggers
--- or add foreign keys. Keep normal SELECT/INSERT/UPDATE/DELETE grants unchanged.
+-- RLS does not protect TRUNCATE. Keep normal CRUD grants unchanged.
+REVOKE TRUNCATE, REFERENCES, TRIGGER ON ALL TABLES IN SCHEMA public
+FROM anon, authenticated;
 
-revoke truncate, references, trigger on all tables in schema public
-    from anon, authenticated;
-
--- Prevent the same excessive privileges from being granted to future tables.
-alter default privileges for role postgres in schema public
-    revoke truncate, references, trigger on tables from anon, authenticated;
-
-alter default privileges for role supabase_admin in schema public
-    revoke truncate, references, trigger on tables from anon, authenticated;
+-- Note: changing default ACLs owned by postgres/supabase_admin is not permitted
+-- through the connected production migration role. Existing grants are revoked;
+-- future-table default ACL hardening remains a separate operational task.
