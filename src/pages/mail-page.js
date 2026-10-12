@@ -64,8 +64,9 @@ async function renderMail() {
                                 <span>ЯЩИК</span>
                                 <h2>Входящие</h2>
                             </div>
-                            <b id="lorgus-mail-inbox-total">—</b>
+                            <div class="lorgus-mail-inbox-actions"><b id="lorgus-mail-inbox-total">—</b><button type="button" id="lorgus-mail-read-all">Прочитать всё</button></div>
                         </div>
+                        <div class="lorgus-mail-tools"><label for="lorgus-mail-search">⌕</label><input id="lorgus-mail-search" type="search" placeholder="Найти отправителя или письмо…" autocomplete="off"><select id="lorgus-mail-filter" aria-label="Фильтр писем"><option value="all">Все письма</option><option value="unread">Непрочитанные</option><option value="transit">В пути</option><option value="delivered">Доставленные</option></select></div>
                         <div id="lorgus-mail-inbox-list" class="lorgus-mail-list">
                             <div class="lorgus-mail-loading"><span></span><strong>Открываем почту…</strong></div>
                         </div>
@@ -106,6 +107,9 @@ async function renderMail() {
 
     await loadMailRecipients();
     await loadMailInbox();
+    document.getElementById("lorgus-mail-search")?.addEventListener("input", filterLorgusMail);
+    document.getElementById("lorgus-mail-filter")?.addEventListener("change", filterLorgusMail);
+    document.getElementById("lorgus-mail-read-all")?.addEventListener("click", markAllLorgusMailRead);
 }
 
 async function loadMailRecipients() {
@@ -168,13 +172,19 @@ async function loadMailInbox() {
 
     const now = Date.now();
 
+    const unreadCount = data.filter(mail => !mail.read_at && (mail.delivered_at || new Date(mail.deliver_at).getTime() <= now)).length;
+    const navCount = document.getElementById("lorgus-mail-nav-count");
+    const totalCount = document.getElementById("lorgus-mail-inbox-total");
+    if (navCount) navCount.textContent = String(unreadCount);
+    if (totalCount) totalCount.textContent = data.length + (data.length % 10 === 1 && data.length % 100 !== 11 ? " письмо" : data.length % 10 >= 2 && data.length % 10 <= 4 && (data.length % 100 < 12 || data.length % 100 > 14) ? " письма" : " писем");
+
     list.innerHTML = data.map(mail => {
-        const delivered = mail.delivered_at || new Date(mail.deliver_at).getTime() <= now;
+        const delivered = Boolean(mail.delivered_at) || new Date(mail.deliver_at).getTime() <= now;
         const sender = mail.sender?.name || "Неизвестный отправитель";
         const unread = !mail.read_at && delivered;
 
         return `
-            <article class="lorgus-mail-card ${unread ? "unread" : ""}" data-mail-id="${escapeHtml(mail.id)}">
+            <article class="lorgus-mail-card ${unread ? "unread" : ""}" data-mail-id="${escapeHtml(mail.id)}" data-mail-sender="${escapeHtml(sender.toLocaleLowerCase("ru-RU"))}" data-mail-body="${escapeHtml(mail.body.toLocaleLowerCase("ru-RU"))}" data-mail-state="${delivered ? "delivered" : "transit"}" data-mail-unread="${unread ? "true" : "false"}">
                 <div class="lorgus-mail-card-top">
                     <strong>${escapeHtml(sender)}</strong>
                     <span>${delivered ? "Доставлено" : "В пути"}</span>
@@ -188,6 +198,49 @@ async function loadMailInbox() {
             </article>
         `;
     }).join("");
+}
+
+function filterLorgusMail() {
+    const query = (document.getElementById("lorgus-mail-search")?.value || "").trim().toLocaleLowerCase("ru-RU");
+    const mode = document.getElementById("lorgus-mail-filter")?.value || "all";
+    const cards = [...document.querySelectorAll("#lorgus-mail-inbox-list .lorgus-mail-card")];
+    let visible = 0;
+    cards.forEach(card => {
+        const matchesQuery = !query || (card.dataset.mailSender || "").includes(query) || (card.dataset.mailBody || "").includes(query);
+        const matchesMode = mode === "all" || (mode === "unread" && card.dataset.mailUnread === "true") || card.dataset.mailState === mode;
+        card.hidden = !(matchesQuery && matchesMode);
+        if (!card.hidden) visible++;
+    });
+    let empty = document.querySelector("#lorgus-mail-inbox-list .lorgus-mail-filter-empty");
+    if (!visible && cards.length) {
+        if (!empty) {
+            empty = document.createElement("div");
+            empty.className = "lorgus-mail-filter-empty";
+            empty.innerHTML = "<span>⌕</span><h2>Ничего не найдено</h2><p>Измени запрос или фильтр писем.</p>";
+            document.getElementById("lorgus-mail-inbox-list")?.appendChild(empty);
+        }
+        empty.hidden = false;
+    } else if (empty) empty.hidden = true;
+}
+
+async function markAllLorgusMailRead() {
+    const button = document.getElementById("lorgus-mail-read-all");
+    if (!window.activeCharacterId || !button) return;
+    button.disabled = true;
+    const { error } = await window.supabaseClient
+        .from("lorgus_mail")
+        .update({ read_at: new Date().toISOString() })
+        .eq("recipient_character_id", window.activeCharacterId)
+        .is("read_at", null)
+        .lte("deliver_at", new Date().toISOString());
+    button.disabled = false;
+    const status = document.getElementById("lorgus-mail-status");
+    if (error) {
+        if (status) status.textContent = "Не удалось отметить письма: " + error.message;
+        return;
+    }
+    await loadMailInbox();
+    filterLorgusMail();
 }
 
 async function sendLorgusMail() {
