@@ -887,13 +887,15 @@ async function renderLocationParticipants(locationName, regionName) {
     const box = document.getElementById("lorgus-rp-participants");
     if (!box) return;
 
+    const activeSince = new Date(Date.now() - 90_000).toISOString();
     const { data, error } = await window.supabaseClient
         .from("rp_presence")
-        .select("character_id, presence_type, location, region, visibility, characters(name, race)")
+        .select("character_id, presence_type, location, region, visibility, updated_at, characters(name, race)")
         .eq("visibility", "public")
         .eq("presence_type", "location")
         .eq("region", regionName)
-        .eq("location", locationName);
+        .eq("location", locationName)
+        .gte("updated_at", activeSince);
 
     if (error) {
         console.error("Не удалось загрузить участников:", error);
@@ -1662,11 +1664,13 @@ async function loadCharacterCurrency(characterId) {
 
 async function loadRpChatParticipants(chat = window.activeRpChatSpace) {
     if (!chat) return [];
+    const activeSince = new Date(Date.now() - 90_000).toISOString();
     let query = window.supabaseClient
         .from("rp_presence")
-        .select("character_id, presence_type, region, location, from_region, from_location, to_region, to_location, characters(id,name,race)")
+        .select("character_id, presence_type, region, location, from_region, from_location, to_region, to_location, updated_at, characters(id,name,race)")
         .eq("visibility", "public")
-        .eq("presence_type", chat.type);
+        .eq("presence_type", chat.type)
+        .gte("updated_at", activeSince);
 
     if (chat.type === "location") {
         query = query.eq("region", chat.region).eq("location", chat.location);
