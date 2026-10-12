@@ -4,8 +4,7 @@ function lorgusCurrencyLabel(code) {
 }
 
 function formatLorgusCurrencyAmount(amount) {
-    const value = Math.max(0, Math.floor(Number(amount) || 0));
-    return new Intl.NumberFormat("ru-RU").format(value);
+    return new Intl.NumberFormat("ru-RU").format(Math.max(0, Math.floor(Number(amount) || 0)));
 }
 
 function formatLorgusRewardCurrency(amount, code) {
@@ -157,13 +156,15 @@ async function renderLorgusInventory() {
     `;
     const walletSection = document.createElement("section");
     walletSection.className = "lorgus-wallet-panel";
-    walletSection.innerHTML = '<div class="lorgus-wallet-title"><div><span>ФИНАНСЫ</span><h2>Кошелёк</h2></div><small>Пять отдельных валют королевств · баланс каждой валюты указан целым числом</small></div><div class="lorgus-wallet-grid" id="lorgus-wallet-grid"></div>';
+    walletSection.innerHTML = '<div class="lorgus-wallet-title"><div><span>ФИНАНСЫ</span><h2>Кошелёк</h2></div><small>Баланс в местной валюте и её эквивалент в золотых</small></div><div class="lorgus-wallet-grid" id="lorgus-wallet-grid"></div>';
     container.querySelector(".lorgus-inventory-main").appendChild(walletSection);
     const { data: currencyRows } = await loadCharacterCurrency(character.id);
     const walletGrid = document.getElementById("lorgus-wallet-grid");
     if (walletGrid) walletGrid.innerHTML = Object.entries(lorgusCurrencies).map(([code,c]) => {
         const row=(currencyRows||[]).find(x=>x.currency_code===code);
-        return '<div class="lorgus-wallet-card"><span class="lorgus-wallet-icon">' + escapeHtml(c.icon) + '</span><div><strong>' + escapeHtml(c.name) + '</strong><small>' + escapeHtml(c.kingdom) + ' · 1 золотая = ' + escapeHtml(c.goldRate) + ' экв.</small></div><b>' + escapeHtml(formatLorgusCurrencyAmount(row?.amount || 0)) + '</b></div>';
+        const amount = Math.max(0, Number(row?.amount) || 0);
+        const equivalent = amount * (Number.parseFloat(String(c.goldRate).replace(",", ".")) || 0);
+        return '<div class="lorgus-wallet-card"><span class="lorgus-wallet-icon">' + escapeHtml(c.icon) + '</span><div><strong>' + escapeHtml(c.name) + '</strong><small>' + escapeHtml(c.kingdom) + ' · Эквивалент: ' + new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 }).format(equivalent) + ' золотых</small></div><b>' + escapeHtml(formatLorgusCurrencyAmount(amount)) + '</b></div>';
     }).join("");
     const specialRewardsSection = document.createElement("section");
     specialRewardsSection.className = "lorgus-character-special-rewards";
