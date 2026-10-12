@@ -66,7 +66,6 @@ const LORGUS_MAP_EDITOR_RECTS = [
 ];
 function enableLorgusMapEditor() {
     const layer = document.getElementById("lorgus-map-marker-layer");
-    const viewport = document.getElementById("lorgus-map-viewport");
     if (!layer || !viewport) return;
 
     layer.classList.toggle("editor-mode");
@@ -668,14 +667,6 @@ window.lorgusEnterRegionCinematic = function(region) {
     veil.querySelector("strong").textContent = region;
     document.body.appendChild(veil);
 
-    if (viewport) {
-        viewport.classList.add("lorgus-map-entering");
-        const target = [...labels].find(label => label.dataset.region === region);
-        if (target) {
-            viewport.style.setProperty("--lorgus-entry-x", (target.offsetLeft + target.offsetWidth / 2) + "px");
-            viewport.style.setProperty("--lorgus-entry-y", (target.offsetTop + target.offsetHeight / 2) + "px");
-        }
-    }
     requestAnimationFrame(() => veil.classList.add("is-active"));
 
     window.setTimeout(() => {
