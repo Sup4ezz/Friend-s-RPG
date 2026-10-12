@@ -18804,3 +18804,34 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
         max-width:calc(100vw - 54px)!important;
     }
 }
+
+
+/* LORGUS world menu final composition: full-screen map, clickable region names. */
+.lorgus-map-page .lorgus-map-sidebar{display:none!important}
+.lorgus-map-page .lorgus-map-shell{display:block!important;width:100%!important;min-height:100vh!important}
+.lorgus-map-page .lorgus-map-main{width:100%!important;height:100vh!important}
+.lorgus-map-page .lorgus-mainmenu-nav{z-index:45!important}
+.lorgus-map-page .lorgus-mainmenu-arrow{z-index:46!important}
+.lorgus-map-page .lorgus-map-marker-layer{z-index:8!important;pointer-events:none!important}
+.lorgus-map-page .lorgus-map-marker-layer .lorgus-map-editor-rect{
+    display:flex!important;
+    pointer-events:auto!important;
+    cursor:pointer!important;
+}
+.lorgus-map-page .lorgus-map-marker-layer .lorgus-map-editor-rect:hover{
+    color:#fff0c2!important;
+    text-shadow:0 0 12px rgba(245,211,132,.85),0 2px 10px #000!important;
+    filter:brightness(1.12);
+}
+.lorgus-map-page .lorgus-map-marker-layer.editor-mode{pointer-events:auto!important}
+.lorgus-map-page .lorgus-map-sidebar{visibility:hidden!important}
+.lorgus-map-page .lorgus-map-image{filter:saturate(.78) sepia(.08) contrast(1.04) brightness(.88)!important}
+.lorgus-map-page .lorgus-map-frame:hover .lorgus-map-image{filter:saturate(.84) sepia(.1) contrast(1.06) brightness(.93)!important}
+.lorgus-map-page .lorgus-mainmenu-fog{
+    background:radial-gradient(circle 155px at var(--lorgus-mx,50%) var(--lorgus-my,50%),
+      rgba(255,225,160,.02),rgba(230,205,153,.08) 20%,rgba(15,16,14,.24) 43%,rgba(5,6,5,.64) 74%,rgba(3,4,4,.78))!important;
+}
+.lorgus-map-page .lorgus-mainmenu-fog::after{
+    background:radial-gradient(circle 105px at var(--lorgus-mx,50%) var(--lorgus-my,50%),
+      rgba(255,232,184,.22),rgba(235,203,143,.07) 35%,transparent 72%)!important;
+}
