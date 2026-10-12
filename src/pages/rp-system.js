@@ -2107,11 +2107,14 @@ async function openAdminCharacterInventory(application, container) {
         const { data, error } = await window.supabaseClient.rpc("admin_list_lootbox_rewards", { p_lootbox_item_id: lootboxId });
         if (error) { lootboxPool.innerHTML = '<p class="lorgus-admin-lootbox-error">' + escapeHtml(error.message) + '</p>'; return; }
         const rows = Array.isArray(data) ? data : [];
-        const total = rows.reduce((sum,row) => sum + Number(row.weight || 0), 0);
+        // admin_list_lootbox_rewards currently omits weight, so derive the same fixed weights used by admin_set_lootbox_reward.
+        const lootboxRarityWeights = {common:100,uncommon:40,rare:15,epic:5,legendary:1.5,mythic:0.4,unique:0.1};
+        const getLootboxRewardWeight = row => Number(row.weight ?? lootboxRarityWeights[row.rarity] ?? 0);
+        const total = rows.reduce((sum,row) => sum + getLootboxRewardWeight(row), 0);
         const rarityNames = {common:"Обычная",uncommon:"Необычная",rare:"Редкая",epic:"Эпическая",legendary:"Легендарная",mythic:"Мифическая",unique:"Уникальная"};
         const typeNames = {title:"Титул",privilege:"Привилегия",currency:"Деньги",special:"Особая награда"};
         lootboxPool.innerHTML = rows.length ? rows.map(row => {
-            const chance = total ? (Number(row.weight) / total * 100) : 0;
+            const chance = total ? (getLootboxRewardWeight(row) / total * 100) : 0;
             const extra = row.reward_type === "currency" ? " · " + escapeHtml(row.amount + " медных монет") : "";
             return '<article class="lorgus-admin-lootbox-row">' +
                 '<span class="lorgus-admin-lootbox-icon" style="--item-color:' + escapeHtml(row.color || "#d7b56d") + '">' + escapeHtml(row.icon || (row.reward_type === "privilege" ? "♛" : row.reward_type === "currency" ? "◈" : "✦")) + '</span>' +
