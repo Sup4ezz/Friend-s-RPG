@@ -461,35 +461,42 @@ window.openLorgusLootbox = async function(inventoryId) {
         const winningCard = matching || winner;
         const colors = {common:"#b8a27a",uncommon:"#76b85f",rare:"#5f9fe8",epic:"#a875e8",legendary:"#e0a14a",mythic:"#e45bc7",unique:"#f3e7b0"};
         const rarity = {common:"ОБЫЧНАЯ",uncommon:"НЕОБЫЧНАЯ",rare:"РЕДКАЯ",epic:"ЭПИЧЕСКАЯ",legendary:"ЛЕГЕНДАРНАЯ",mythic:"МИФИЧЕСКАЯ",unique:"УНИКАЛЬНАЯ"};
-        const total = 42, target = 35;
+        const total = 60, target = 50;
         const poolWithoutWinner = pool.filter(entry => entry !== matching);
-        const cards = Array.from({length:total}, (_, index) => index === target ? winningCard : (poolWithoutWinner.length ? poolWithoutWinner : pool)[Math.floor(Math.random() * (poolWithoutWinner.length ? poolWithoutWinner.length : pool.length))]);
+        const decoys = poolWithoutWinner.length ? poolWithoutWinner : pool;
+        const cards = Array.from({length:total}, (_, index) => index === target ? winningCard : decoys[Math.floor(Math.random() * decoys.length)]);
         reelTrack.innerHTML = cards.map(entry => '<article class="lorgus-lootbox-reel-card" style="--reward-color:' + escapeHtml(entry.color || colors[entry.rarity] || "#b8a27a") + ';"><span class="lorgus-lootbox-reel-card-icon">' + escapeHtml(entry.icon || "✦") + '</span><strong>' + escapeHtml(entry.name || "Таинственная награда") + '</strong><small>' + escapeHtml(rarity[entry.rarity] || entry.rarity || "НАГРАДА") + '</small></article>').join("");
         const card = reelTrack.children[target];
-        const gap = parseFloat(getComputedStyle(reelTrack).gap) || 8;
-        const width = card.getBoundingClientRect().width, step = width + gap;
         const viewportWidth = reelWindow.getBoundingClientRect().width;
-        const endX = Math.round(viewportWidth / 2 - (target * step + width / 2));
         reelTrack.style.transform = "translateX(0px)";
         reelTrack.getBoundingClientRect();
+        const trackRect = reelTrack.getBoundingClientRect();
+        const cardRect = card.getBoundingClientRect();
+        // Центруем именно карточку фактически выданной сервером награды.
+        // Расчёт по реальным координатам DOM не зависит от ширины карточек/зазоров.
+        const cardCenter = cardRect.left - trackRect.left + cardRect.width / 2;
+        const endX = Math.round(viewportWidth / 2 - cardCenter);
         roulette.hidden = false; contentsSection.hidden = true;
         overlay.classList.add("is-spinning");
         playLootboxTone(95,.5,"sawtooth",.035); playLootboxTone(190,.38,"triangle",.025,.04); playLootboxTone(380,.25,"sine",.018,.12);
         lastReelTick = -1;
-        const duration = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1000 : 6400;
+        const reducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const duration = reducedMotion ? 1500 : 12000;
         const started = performance.now();
         const animation = reelTrack.animate([{transform:"translateX(0px)"},{transform:"translateX(" + endX + "px)"}],{duration,easing:"cubic-bezier(.08,.68,.12,1)",fill:"forwards"});
         let raf;
         const tick = now => {
             const progress = Math.min(1,(now-started)/duration), eased = 1-Math.pow(1-progress,4);
             const position = -endX*eased;
-            const index = Math.floor((position + viewportWidth/2)/step);
+            const cardStep = cardRect.width + (parseFloat(getComputedStyle(reelTrack).gap) || 8);
+            const index = Math.floor((position + viewportWidth/2)/cardStep);
             if (index > lastReelTick) { for (let i=0;i<Math.min(3,index-lastReelTick);i++) { playLootboxTone(720,.035,"square",.018); playLootboxTone(1120,.025,"sine",.009,.005); } lastReelTick=index; }
             if (progress < 1) raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);
         await animation.finished.catch(() => {});
         cancelAnimationFrame(raf);
+        animation.cancel();
         reelTrack.style.transform = "translateX(" + endX + "px)";
         overlay.classList.remove("is-spinning"); overlay.classList.add("has-reward");
         card.classList.add("is-winner");
