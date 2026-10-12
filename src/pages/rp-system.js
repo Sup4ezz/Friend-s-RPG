@@ -1338,12 +1338,16 @@ function isRpMessageInCurrentVisit(message, presence) {
 
 function getRpMessageCacheKey(presence) {
     if (!presence) return "";
-    const parts = presence.type === "location"
-        ? [presence.type, presence.region, presence.location]
-        : [presence.type, presence.fromRegion, presence.fromLocation, presence.toRegion, presence.toLocation];
-    // Кэш разделён по входу персонажа: повторный вход не поднимет старую переписку.
+    const parts = [
+        window.activeCharacterId || "no-character",
+        ...(presence.type === "location"
+            ? [presence.type, presence.region, presence.location]
+            : [presence.type, presence.fromRegion, presence.fromLocation, presence.toRegion, presence.toLocation])
+    ];
+    // Кэш разделён по персонажу и конкретному входу: персонажи одного аккаунта
+    // не переиспользуют локальную историю друг друга.
     parts.push(getRpVisitStart(presence) || "visit-unknown");
-    return "lorgus:rp-messages:v4:" + parts.map(value => encodeURIComponent(String(value || ""))).join(":");
+    return "lorgus:rp-messages:v5:" + parts.map(value => encodeURIComponent(String(value || ""))).join(":");
 }
 
 function readRpMessageCache(presence) {
@@ -1361,51 +1365,52 @@ function readRpMessageCache(presence) {
     return window.rpMessageCache[key];
 }
 
+async function fetchRpMessagesForSpace(presence, options = {}) {
+    if (!window.supabaseClient || !presence || !window.activeCharacterId) return [];
+    const args = {
+        p_character_id: window.activeCharacterId,
+        p_presence_type: presence.type,
+        p_region: presence.type === "location" ? presence.region : null,
+        p_location: presence.type === "location" ? presence.location : null,
+        p_from_region: presence.type === "road" ? presence.fromRegion : null,
+        p_from_location: presence.type === "road" ? presence.fromLocation : null,
+        p_to_region: presence.type === "road" ? presence.toRegion : null,
+        p_to_location: presence.type === "road" ? presence.toLocation : null,
+        p_since: options.since || getRpVisitStart(presence) || null,
+        p_limit: Math.max(1, Math.min(Number(options.limit) || 200, 200)),
+        p_message_ids: options.messageIds?.length ? options.messageIds : null
+    };
+    const { data, error } = await window.supabaseClient.rpc("get_lorgus_rp_messages", args);
+    if (error) {
+        console.error("Не удалось безопасно загрузить RP-сообщения:", error);
+        return [];
+    }
+    const rows = data || [];
+    const characterIds = [...new Set(rows.map(row => row.character_id).filter(Boolean))];
+    if (!characterIds.length) return rows;
+    const { data: characters, error: characterError } = await window.supabaseClient
+        .from("characters")
+        .select("id, name")
+        .in("id", characterIds);
+    if (characterError) console.warn("Не удалось загрузить имена авторов RP:", characterError);
+    const characterMap = Object.fromEntries((characters || []).map(row => [String(row.id), row]));
+    return rows.map(row => ({ ...row, characters: characterMap[String(row.character_id)] || null }));
+}
+
 async function attachRpMessageReplyTargets(messages) {
     const rows = Array.isArray(messages) ? messages : [];
     const targetIds = [...new Set(rows.map(message => message.reply_to_id).filter(Boolean).map(String))];
-    if (!targetIds.length || !window.supabaseClient) return rows;
-
-    const { data, error } = await window.supabaseClient
-        .from("rp_messages")
-        .select("id, character_id, body, created_at, characters(name)")
-        .in("id", targetIds);
-    if (error) {
-        console.warn("Не удалось загрузить исходные сообщения для ответов:", error);
-        return rows;
-    }
-
-    const targets = Object.fromEntries((data || []).map(message => [String(message.id), message]));
+    if (!targetIds.length || !window.supabaseClient || !window.activeRpChatSpace) return rows;
+    const targets = await fetchRpMessagesForSpace(window.activeRpChatSpace, {
+        messageIds: targetIds,
+        limit: Math.min(targetIds.length, 200)
+    });
+    const targetMap = Object.fromEntries(targets.map(message => [String(message.id), message]));
     return rows.map(message => ({
         ...message,
-        reply_to: message.reply_to_id ? (targets[String(message.reply_to_id)] || message.reply_to || null) : null
+        reply_to: message.reply_to_id ? (targetMap[String(message.reply_to_id)] || message.reply_to || null) : null
     }));
 }
-
-window.attachRpMessageReplyTargets = attachRpMessageReplyTargets;
-
-async function attachRpMessageItemUses(messages) {
-    const rows = Array.isArray(messages) ? messages : [];
-    const ids = rows.map(message => message.id).filter(Boolean);
-    if (!ids.length || !window.supabaseClient) return rows;
-
-    const { data, error } = await window.supabaseClient
-        .from("rp_message_item_uses")
-        .select("message_id, item_id, quantity, status, items(name, icon, color, rarity)")
-        .in("message_id", ids)
-        .eq("status", "active");
-    if (error) {
-        console.warn("Не удалось пакетно загрузить предметы RP-сообщений:", error);
-        return rows;
-    }
-    const byMessage = {};
-    for (const use of data || []) {
-        const key = String(use.message_id);
-        (byMessage[key] ||= []).push(use);
-    }
-    return rows.map(message => ({ ...message, item_uses: byMessage[String(message.id)] || [] }));
-}
-
 function writeRpMessageCache(presence, rows) {
     const key = getRpMessageCacheKey(presence);
     if (!key) return;
@@ -1441,46 +1446,21 @@ async function loadRpMessages(presence) {
     const feed = document.getElementById("lorgus-rp-feed");
     if (!feed || !presence) return;
 
-    // Мгновенно показываем прошлую историю из sessionStorage, пока идёт запрос к БД.
     const cached = readRpMessageCache(presence).filter(message => isRpMessageInCurrentVisit(message, presence));
     feed.innerHTML = "";
     if (cached.length) {
-        // Рисуем кэш сразу; портреты и титулы appendRpMessage догрузит отдельно.
         cached.forEach(message => { appendRpMessage(message); });
     } else {
         feed.innerHTML = '<div class="lorgus-messenger-start"><div class="lorgus-messenger-start-mark">✦</div><strong>История ещё не началась</strong><span>Первое сообщение создаст сцену.</span><p>Пиши свободно. Действия, реплики и мысли персонажа будут появляться здесь как настоящая переписка.</p></div>';
     }
 
-    let query = window.supabaseClient
-        .from("rp_messages")
-        .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, characters(name)")
-        .eq("presence_type", presence.type)
-        .order("created_at", { ascending: true })
-        .limit(200);
-
-    if (presence.type === "location") {
-        query = query.eq("region", presence.region).eq("location", presence.location);
-    } else {
-        query = query.eq("from_region", presence.fromRegion)
-            .eq("from_location", presence.fromLocation)
-            .eq("to_region", presence.toRegion)
-            .eq("to_location", presence.toLocation);
-    }
-    const visitStart = getRpVisitStart(presence);
-    if (visitStart) query = query.gte("created_at", visitStart);
-
-    const { data, error } = await query;
-    if (error) {
-        console.error("Не удалось загрузить RP-сообщения:", error);
-        return;
-    }
-
-    const withReplies = await attachRpMessageReplyTargets(data || []);
-    const fresh = await attachRpMessageItemUses(withReplies);
-    writeRpMessageCache(presence, fresh);
-    if (!fresh.length && !cached.length) return;
-
-    fresh.forEach(message => { appendRpMessage(message); });
+    const fresh = await fetchRpMessagesForSpace(presence, { limit: 200 });
+    const withReplies = await attachRpMessageReplyTargets(fresh);
+    const enriched = await attachRpMessageItemUses(withReplies);
+    writeRpMessageCache(presence, enriched);
+    if (!enriched.length && !cached.length) return;
+    feed.innerHTML = "";
+    enriched.forEach(message => { appendRpMessage(message); });
     feed.scrollTop = feed.scrollHeight;
 }
 
@@ -1491,32 +1471,8 @@ async function pollRpMessages(presence) {
 
     window.rpMessagesPolling = true;
     try {
-        let query = window.supabaseClient
-            .from("rp_messages")
-            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, characters(name)")
-            .eq("presence_type", presence.type)
-            .order("created_at", { ascending: false })
-            .limit(40);
-
-        if (presence.type === "location") {
-            query = query.eq("region", presence.region).eq("location", presence.location);
-        } else {
-            query = query.eq("from_region", presence.fromRegion)
-                .eq("from_location", presence.fromLocation)
-                .eq("to_region", presence.toRegion)
-                .eq("to_location", presence.toLocation);
-        }
-        const visitStart = getRpVisitStart(presence);
-        if (visitStart) query = query.gte("created_at", visitStart);
-
-        const { data, error } = await query;
-        if (error) {
-            console.warn("Не удалось проверить новые RP-сообщения:", error);
-            return;
-        }
-
-        // Один запрос на предметы для всей пачки, а не отдельный запрос на каждое сообщение.
-        const withReplies = await attachRpMessageReplyTargets((data || []).reverse());
+        const rows = await fetchRpMessagesForSpace(presence, { limit: 40 });
+        const withReplies = await attachRpMessageReplyTargets(rows);
         const enriched = await attachRpMessageItemUses(withReplies);
         for (const message of enriched) appendRpMessage(message);
     } finally {
@@ -1536,62 +1492,14 @@ async function subscribeToRpMessages(presence) {
         window.rpMessagesChannel = null;
     }
 
-    window.rpMessagesChannel = window.supabaseClient
-        .channel("lorgus-rp-messages-" + window.activeCharacterId)
-        .on("postgres_changes", {
-            event: "INSERT",
-            schema: "public",
-            table: "rp_messages"
-        }, async payload => {
-            const row = payload.new;
-            const sameLocation = presence.type === "location" &&
-                row.presence_type === "location" &&
-                row.region === presence.region &&
-                row.location === presence.location;
-
-            const sameRoad = presence.type === "road" &&
-                row.presence_type === "road" &&
-                row.from_region === presence.fromRegion &&
-                row.from_location === presence.fromLocation &&
-                row.to_region === presence.toRegion &&
-                row.to_location === presence.toLocation;
-
-            if (!sameLocation && !sameRoad) return;
-            // Игрок видит только сообщения с момента своего текущего входа.
-            if (!isRpMessageInCurrentVisit(row, presence)) return;
-
-            // Re-read the committed row: the reply RPC updates reply_to_id in the same
-            // transaction after the base insert, so the INSERT payload may be an older snapshot.
-            const { data: committedMessage, error: committedError } = await window.supabaseClient
-                .from("rp_messages")
-                .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, characters(name)")
-                .eq("id", row.id)
-                .maybeSingle();
-
-            if (!committedError && committedMessage) {
-                await appendRpMessage((await attachRpMessageReplyTargets([committedMessage]))[0]);
-            } else {
-                const { data: character } = await window.supabaseClient
-                    .from("characters")
-                    .select("name")
-                    .eq("id", row.character_id)
-                    .single();
-                await appendRpMessage({ ...row, characters: character });
-            }
-        })
-        .subscribe((status, error) => {
-            if (status === "CHANNEL_ERROR" || status === "TIMED_OUT" || status === "CLOSED") {
-                console.warn("RP Realtime недоступен; работает резервная проверка сообщений.", status, error || "");
-            }
-        });
-
-    // Realtime для мгновенной доставки + опрос как резерв, если канал не работает.
+    // Не подписываемся на таблицу напрямую: Realtime payload не содержит
+    // выбранный character_id читателя. История приходит только через RPC,
+    // проверяющую владельца и присутствие конкретного персонажа.
     await pollRpMessages(presence);
     window.rpMessagesPollTimer = setInterval(() => {
         if (window.activeRpChatSpace) pollRpMessages(window.activeRpChatSpace);
     }, 3000);
 }
-
 async function sendLocalRpMessage() {
     const input = document.getElementById("lorgus-rp-input");
     if (!input || !window.activeCharacterId || window.rpMessageSending) return;
