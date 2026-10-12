@@ -458,15 +458,12 @@ async function jumpToRpMessage(messageId) {
     const selector = '[data-rp-message-id="' + String(messageId).replace(/"/g, '\\"') + '"]';
     let article = feed.querySelector(selector);
     if (!article && window.supabaseClient) {
-        let query = window.supabaseClient
-            .from("rp_messages")
-            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, characters(name)")
-            .eq("id", messageId);
         const room = window.activeRpChatSpace;
-        if (room?.type === "location") query = query.eq("presence_type", "location").eq("region", room.region).eq("location", room.location);
-        else if (room?.type === "road") query = query.eq("presence_type", "road").eq("from_region", room.fromRegion).eq("from_location", room.fromLocation).eq("to_region", room.toRegion).eq("to_location", room.toLocation);
-        const { data, error } = await query.maybeSingle();
-        if (!error && data) {
+        const rows = room && window.fetchRpMessagesForSpace
+            ? await window.fetchRpMessagesForSpace(room, { messageIds: [Number(messageId)], limit: 1 })
+            : [];
+        const data = rows[0] || null;
+        if (data) {
             await appendRpMessage((await window.attachRpMessageReplyTargets?.([data]) || [data])[0]);
             article = feed.querySelector(selector);
         }
@@ -672,22 +669,20 @@ async function appendRpMessage(message) {
     }).catch(error => console.warn("Не удалось оформить сообщение RP:", error));
 
     const loadUses = Array.isArray(message.item_uses)
-        ? Promise.resolve({ data: message.item_uses, error: null })
-        : window.supabaseClient
-            .from("rp_message_item_uses")
-            .select("item_id, quantity, status, items(name, icon, color, rarity)")
-            .eq("message_id", message.id)
-            .eq("status", "active");
+        ? Promise.resolve(message.item_uses)
+        : window.fetchRpMessageItemUsesForSpace
+            ? window.fetchRpMessageItemUsesForSpace([message.id])
+            : Promise.resolve([]);
     const itemsPromise = loadUses
-        .then(({ data: uses, error }) => {
+        .then(uses => {
             const useBox = article.querySelector(".lorgus-rp-item-uses");
-            if (useBox && !error && uses?.length) {
+            if (useBox && uses?.length) {
                 useBox.innerHTML = uses.map(use => {
                     const item = use.items || {};
                     return '<span class="lorgus-rp-item-use" style="--item-color:' + escapeHtml(item.color || "#d6b36a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong>' + (use.quantity > 1 ? '<small>×' + escapeHtml(String(use.quantity)) + '</small>' : '') + '</span>';
                 }).join("");
             }
-            if (!error) window.cacheRpMessage?.({ ...message, item_uses: uses || [] });
+            window.cacheRpMessage?.({ ...message, item_uses: uses || [] });
         }).catch(error => console.warn("Не удалось загрузить предметы сообщения:", error));
 
     feed.scrollTop = feed.scrollHeight;
