@@ -19049,3 +19049,19 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 }
 /* Region selection never animates, scales, or replaces the map with a veil. */
 .lorgus-region-transition-veil{display:none!important}
+
+
+/* LORGUS: deepen the fog's shadow so the map feels darker and more mysterious. */
+.lorgus-map-page .lorgus-mainmenu-fog{
+  background:
+    radial-gradient(ellipse 46% 34% at 18% 30%,rgba(150,159,151,.20) 0%,rgba(105,119,111,.12) 34%,transparent 72%),
+    radial-gradient(ellipse 52% 38% at 76% 26%,rgba(157,163,151,.18) 0%,rgba(105,117,110,.11) 38%,transparent 73%),
+    radial-gradient(ellipse 60% 42% at 54% 78%,rgba(145,154,146,.17) 0%,rgba(93,105,99,.11) 40%,transparent 75%),
+    radial-gradient(ellipse at 50% 50%,rgba(5,7,6,.36) 0%,rgba(4,5,5,.54) 64%,rgba(1,2,2,.76) 100%)!important;
+}
+.lorgus-map-page .lorgus-mainmenu-fog::before{
+  background:
+    radial-gradient(ellipse 38% 24% at 12% 65%,rgba(169,177,165,.20),transparent 74%),
+    radial-gradient(ellipse 42% 26% at 62% 42%,rgba(162,172,163,.18),transparent 75%),
+    radial-gradient(ellipse 40% 28% at 88% 74%,rgba(150,161,152,.17),transparent 74%)!important;
+}
