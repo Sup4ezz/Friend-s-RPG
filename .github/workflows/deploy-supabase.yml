@@ -2,7 +2,7 @@ name: Deploy Supabase migrations
 
 on:
   push:
-    branches: [supabase-migration-history-repair-in-progress]
+    branches: [main]
     paths:
       - "supabase/migrations/**"
       - "supabase/config.toml"
