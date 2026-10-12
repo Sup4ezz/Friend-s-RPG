@@ -18712,3 +18712,20 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-mail-nav button em{font-style:normal;margin-left:auto;color:#d9bd7b;font-size:11px}
 .lorgus-mail-nav button[hidden],.lorgus-mail-inbox-actions button[hidden]{display:none!important}
 .lorgus-mail-card-top strong{overflow-wrap:anywhere}
+
+/* LORGUS world atlas controls */
+.lorgus-map-region-search{display:flex;align-items:center;gap:8px;margin:10px 0 8px;padding:0 10px;min-height:37px;border:1px solid rgba(190,157,98,.28);background:rgba(12,12,12,.48);color:#c7a65e}
+.lorgus-map-region-search>span{font-size:21px}
+.lorgus-map-region-search input{width:100%;min-width:0;border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;color:#e4d9c3!important;font:inherit;font-size:12px}
+.lorgus-map-region-search input::placeholder{color:#8e8473}
+.lorgus-map-region-filters{display:flex;flex-wrap:wrap;gap:5px;margin:0 0 8px}
+.lorgus-map-region-filters button{flex:1;border:1px solid rgba(190,157,98,.2);background:rgba(16,15,13,.65);padding:6px 5px;color:#a99d87;font:inherit;font-size:10px;cursor:pointer}
+.lorgus-map-region-filters button.active{border-color:rgba(199,166,94,.58);background:rgba(130,96,39,.19);color:#e0c783}
+.lorgus-map-region-list{display:grid;gap:3px}
+.lorgus-map-region-button[hidden],.lorgus-map-region-no-results[hidden]{display:none!important}
+.lorgus-map-region-no-results{padding:13px 8px;text-align:center;color:#a99d87;font-size:11px;line-height:1.5;border:1px dashed rgba(190,157,98,.22)}
+.lorgus-map-zoom-controls{display:flex;align-items:center;gap:5px;margin-top:13px;padding-top:10px;border-top:1px solid rgba(190,157,98,.2)}
+.lorgus-map-zoom-controls>span{margin-right:auto;color:#96866b;font-size:9px;letter-spacing:.12em}
+.lorgus-map-zoom-controls button{min-width:29px;height:28px;border:1px solid rgba(190,157,98,.3);background:rgba(18,17,14,.78);color:#d6bc7e;font:inherit;font-size:13px;cursor:pointer}
+.lorgus-map-zoom-controls button:last-child{padding:0 8px;font-size:10px}
+.lorgus-map-zoom-controls button:hover{border-color:#c7a65e;background:rgba(130,96,39,.2)}
