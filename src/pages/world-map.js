@@ -652,39 +652,19 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
 };
 
 
-// Enter a region as a scene, not as an abrupt replacement of the map.
+// Selecting a region opens its locations directly. The map itself stays still;
+// the fog is an atmospheric layer on the map, never a separate transition screen.
 window.lorgusEnterRegionCinematic = function(region) {
     if (!region || typeof window.renderKingdomLocations !== "function") return;
     if (window.lorgusRegionTransitionActive) return;
     window.lorgusRegionTransitionActive = true;
-
-    const viewport = document.getElementById("lorgus-map-viewport");
-    const labels = document.querySelectorAll("#lorgus-map-marker-layer .lorgus-map-editor-rect");
-    labels.forEach(label => { label.disabled = true; });
-    const veil = document.createElement("div");
-    veil.className = "lorgus-region-transition-veil";
-    veil.innerHTML = '<div class="lorgus-region-transition-mist"></div><div class="lorgus-region-transition-title"><span>ЛОРГУС · ПУТЕШЕСТВИЕ</span><strong></strong><i></i></div>';
-    veil.querySelector("strong").textContent = region;
-    document.body.appendChild(veil);
-
-    requestAnimationFrame(() => veil.classList.add("is-active"));
-
-    window.setTimeout(() => {
-        try {
-            window.renderKingdomLocations(region);
-            const destination = document.getElementById("cabinet-content");
-            destination?.classList.add("lorgus-region-arrival");
-            veil.classList.add("is-leaving");
-        } catch (error) {
-            console.error("[LORGUS] Не удалось открыть край:", error);
-            veil.remove();
-            window.lorgusRegionTransitionActive = false;
-        }
-        window.setTimeout(() => {
-            veil.remove();
-            window.lorgusRegionTransitionActive = false;
-        }, 850);
-    }, 620);
+    try {
+        window.renderKingdomLocations(region);
+    } catch (error) {
+        console.error("[LORGUS] Не удалось открыть край:", error);
+    } finally {
+        window.lorgusRegionTransitionActive = false;
+    }
 };
 
 window.lorgusMainMenuNavigate = function(direction, renderTarget) {
