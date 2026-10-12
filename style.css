@@ -19011,3 +19011,41 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
   animation:none!important;
   will-change:auto!important;
 }
+
+
+/* LORGUS map fog: persistent atmospheric mist over the parchment map, not a transition overlay. */
+.lorgus-map-page .lorgus-mainmenu-fog{
+  z-index:12!important;
+  pointer-events:none!important;
+  background:
+    radial-gradient(ellipse 46% 34% at 18% 30%,rgba(194,202,194,.30) 0%,rgba(161,174,167,.18) 34%,transparent 72%),
+    radial-gradient(ellipse 52% 38% at 76% 26%,rgba(204,208,197,.27) 0%,rgba(156,169,163,.16) 38%,transparent 73%),
+    radial-gradient(ellipse 60% 42% at 54% 78%,rgba(191,200,193,.25) 0%,rgba(145,158,151,.15) 40%,transparent 75%),
+    radial-gradient(ellipse at 50% 50%,rgba(19,23,21,.10) 0%,rgba(9,12,11,.25) 64%,rgba(3,4,4,.48) 100%)!important;
+  animation:lorgus-map-fog-breathe 16s ease-in-out infinite alternate!important;
+}
+.lorgus-map-page .lorgus-mainmenu-fog::before{
+  content:""!important;
+  position:absolute!important;
+  inset:-18%!important;
+  background:
+    radial-gradient(ellipse 38% 24% at 12% 65%,rgba(220,225,213,.30),transparent 74%),
+    radial-gradient(ellipse 42% 26% at 62% 42%,rgba(211,219,211,.27),transparent 75%),
+    radial-gradient(ellipse 40% 28% at 88% 74%,rgba(198,207,199,.25),transparent 74%)!important;
+  filter:blur(19px)!important;
+  animation:lorgus-map-fog-drift 27s ease-in-out infinite alternate!important;
+}
+.lorgus-map-page .lorgus-mainmenu-fog::after{
+  background:radial-gradient(circle 34px at var(--lorgus-mx,50%) var(--lorgus-my,50%),rgba(255,232,184,.16),rgba(235,203,143,.035) 42%,transparent 75%)!important;
+  mix-blend-mode:screen!important;
+}
+@keyframes lorgus-map-fog-breathe{
+  0%{filter:blur(0);background-position:0% 0%,100% 0%,50% 100%,center}
+  100%{filter:blur(2px);background-position:8% 12%,92% 8%,45% 88%,center}
+}
+@keyframes lorgus-map-fog-drift{
+  0%{transform:translate3d(-2%,1%,0) scale(1)}
+  100%{transform:translate3d(3%,-2%,0) scale(1.08)}
+}
+/* Region selection never animates, scales, or replaces the map with a veil. */
+.lorgus-region-transition-veil{display:none!important}
