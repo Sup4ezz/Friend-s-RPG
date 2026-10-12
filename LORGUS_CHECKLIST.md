@@ -1098,3 +1098,16 @@ Commits:
 - [ ] Продолжить аудит SECURITY DEFINER RPC по одной, в первую очередь admin- и lootbox-функции.
 - [ ] Отдельная задача: отклонение заявки должно сохранять причину отказа и дату; изменить RPC и UI согласованно, не ломая текущий процесс модерации.
 - [ ] Leaked-password protection в Supabase Auth требует отдельной настройки и проверки.
+
+
+## Аудит безопасности: привилегии и отказ заявок (2026-10-12)
+
+- [x] Production: `anon` и `authenticated` больше не имеют `MAINTAIN` ни на одной таблице `public`; повторная проверка вернула 0/0.
+- [x] Миграция `20261013000700_revoke_maintain_from_api_roles.sql` добавлена в репозиторий.
+- [x] Установлены безопасные default privileges для таблиц, создаваемых ролью-владельцем `postgres`: `ALTER DEFAULT PRIVILEGES ... REVOKE ALL ON TABLES FROM anon, authenticated`. Повторная проверка ACL больше не показывает эти API-роли в default ACL таблиц роли `postgres`.
+- [x] Исправлена модерация отказа: UI передаёт причину, серверная RPC требует непустую причину и сохраняет её в `review_notes`; триггеры фиксируют статус, дату и запись аудита.
+- [x] В production старый `reject_character_application(uuid)` заменён на `reject_character_application(uuid, text)`; у новой функции EXECUTE есть только у `authenticated`, у `anon` его нет.
+- [x] Добавлены миграции `20261013000800_require_application_rejection_reason.sql` и `20261013000900_harden_postgres_default_table_privileges.sql`.
+- [ ] Подтвердить Supabase Actions для новых миграций и Cloudflare deploy для UI; браузерная регрессия не выполнена.
+- [ ] Продолжить детальную проверку SECURITY DEFINER RPC; выборка админских функций содержит внутренние проверки `is_admin()`, но это не заменяет полный тест каждой функции.
+- [ ] Проверить leaked-password protection в настройках Supabase Auth; настройка пока не изменена.
