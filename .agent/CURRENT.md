@@ -1,5 +1,15 @@
 # LORGUS — текущая итерация
 
+## Текущая точка — аудит безопасности RP (2026-10-12)
+- Production migration `20261012140000_rp_presence_security_audit` применена. Широкая `rp_messages_select_approved_history` и устаревшие политики записи присутствия удалены.
+- Production migration `20261012150000_harden_player_transfers` применена.
+- Проверено запросом к production БД: transfer RPC требуют одобренного персонажа получателя и публичное присутствие с обновлением за последние 90 секунд.
+- Legacy `lorgus_transfer_character_currency(uuid,uuid,text,integer)` закрыта для anon/authenticated; клиентская механика использует `lorgus_transfer_character_currency_in_chat`.
+- Коммиты: `f2a42e0158697db04c7011fbee592faadd11c574` (RP access audit), `74dcc80679dd90a77dbaab104bfc5ffd45e2c2b8` (transfer hardening), `c26e7dcce072c4a5c3181d05f96b0b8856c91f63` (TASKS).
+- Не считать задачу закрытой до browser QA: first-post lock, RP posts/replies, transfer item/currency, admin approve/reject.
+- Следующий шаг: проверить критичные SECURITY DEFINER RPC на обход админских полномочий, затем браузерная регрессия.
+
+
 ## Последняя завершённая работа
 - В production замаскированы семь RP-карточек пантеона под обычных смертных.
 - Мирские имена: Эдрик Вальден (Аэрарис), Илар Вейл (Нечто), Ренар Келл (Ничто), Гарен Торвальд (Солар), Мира Эльден (Лилит), Арманд Роу (Вехаиэль), Каспер Рейн (Малкхор).
