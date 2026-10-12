@@ -18586,3 +18586,65 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
     .lorgus-admin-lootbox-row button[data-lootbox-save] { grid-column: 2; }
     .lorgus-admin-lootbox-row button[data-lootbox-remove] { grid-column: 3; }
 }
+
+
+/* Lootbox contents preview: visible before the player spends the box. */
+.lorgus-lootbox-contents {
+    width: min(100%, 760px);
+    margin: 18px auto 10px;
+    padding: 14px;
+    border: 1px solid rgba(201, 166, 95, .26);
+    border-radius: 12px;
+    background: rgba(12, 10, 9, .76);
+    text-align: left;
+}
+.lorgus-lootbox-contents > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 4px 10px;
+    color: #c9aa6d;
+    font-size: .68rem;
+    letter-spacing: .13em;
+}
+.lorgus-lootbox-contents > header strong { color: #b9a98c; font-size: .62rem; letter-spacing: .06em; }
+.lorgus-lootbox-contents-list { display: grid; gap: 6px; max-height: 230px; overflow-y: auto; }
+.lorgus-lootbox-content-row {
+    display: grid;
+    grid-template-columns: 34px minmax(0, 1fr) 88px;
+    gap: 10px;
+    align-items: center;
+    padding: 9px;
+    border: 1px solid color-mix(in srgb, var(--reward-color, #d7b56d) 25%, transparent);
+    border-radius: 8px;
+    background: rgba(255,255,255,.025);
+}
+.lorgus-lootbox-content-icon {
+    display: grid; place-items: center; width: 32px; height: 32px;
+    border: 1px solid var(--reward-color, #d7b56d); border-radius: 8px;
+    color: var(--reward-color, #d7b56d); font-size: 1.05rem;
+}
+.lorgus-lootbox-content-info { display: flex; flex-direction: column; min-width: 0; gap: 3px; }
+.lorgus-lootbox-content-info strong { color: #f0e4cd; font-size: .85rem; overflow-wrap: anywhere; }
+.lorgus-lootbox-content-info small { color: var(--reward-color, #d7b56d); font-size: .68rem; }
+.lorgus-lootbox-content-info em { color: #b4a58b; font-size: .72rem; font-style: normal; overflow-wrap: anywhere; }
+.lorgus-lootbox-content-chance { color: #e4d1a6; text-align: right; font-size: .9rem; font-variant-numeric: tabular-nums; }
+.lorgus-lootbox-contents-error { color: #e8a19a; }
+.lorgus-admin-lootbox-add { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lorgus-admin-lootbox-add > label { min-width: 0; }
+.lorgus-admin-lootbox-add textarea { width: 100%; box-sizing: border-box; resize: vertical; padding: 10px; border: 1px solid rgba(190,157,94,.32); border-radius: 7px; background: #171513; color: #f0e5d0; font: inherit; }
+.lorgus-admin-lootbox-add [hidden] { display: none !important; }
+.lorgus-admin-lootbox-chance { color: #e4d1a6; text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.lorgus-admin-lootbox-row { grid-template-columns: 36px minmax(0, 1fr) 90px auto; }
+.lorgus-admin-lootbox-name small { line-height: 1.4; }
+.lorgus-lootbox-contents[hidden] { display: none !important; }
+@media (max-width: 640px) {
+    .lorgus-lootbox-contents { padding: 9px; }
+    .lorgus-lootbox-content-row { grid-template-columns: 30px minmax(0, 1fr) 70px; gap: 7px; padding: 7px; }
+    .lorgus-lootbox-content-icon { width: 28px; height: 28px; }
+    .lorgus-lootbox-content-chance { font-size: .78rem; }
+    .lorgus-admin-lootbox-add { grid-template-columns: minmax(0,1fr); }
+    .lorgus-admin-lootbox-row { grid-template-columns: 30px minmax(0,1fr) 72px; }
+    .lorgus-admin-lootbox-chance { grid-column: 2; text-align: left; }
+}
