@@ -1765,9 +1765,16 @@ async function openRpCurrencyTransferPicker(targetCharacterId = null) {
         '<button type="button" class="gold-button lorgus-transfer-confirm"' + (usable.length ? '' : ' disabled') + '>Передать</button></article>';
     document.body.appendChild(overlay); requestAnimationFrame(() => overlay.classList.add("open"));
     const close=()=>overlay.remove(); overlay.querySelector(".lorgus-rp-item-close").addEventListener("click",close); overlay.querySelector(".lorgus-rp-item-backdrop").addEventListener("click",close);
+    const currencySelect=overlay.querySelector(".lorgus-transfer-currency");
+    const amountInput=overlay.querySelector(".lorgus-transfer-amount");
+    currencySelect.addEventListener("change",()=>{
+        const balance=usable.find(row=>row.currency_code===currencySelect.value)?.amount||0;
+        amountInput.max=String(balance);
+        if(Number.parseInt(amountInput.value,10)>balance) amountInput.value=String(balance||1);
+    });
     overlay.querySelector(".lorgus-transfer-confirm").addEventListener("click",async()=>{
-        const target=overlay.querySelector(".lorgus-transfer-target").value, code=overlay.querySelector(".lorgus-transfer-currency").value;
-        const amount=Number.parseInt(overlay.querySelector(".lorgus-transfer-amount").value,10);
+        const target=overlay.querySelector(".lorgus-transfer-target").value, code=currencySelect.value;
+        const amount=Number.parseInt(amountInput.value,10);
         if(!target||!code){ alert("Выбери персонажа и валюту."); return; }
         if(!Number.isSafeInteger(amount)||amount<1){ alert("Укажи целую сумму не меньше 1."); return; }
         const balance=usable.find(x=>x.currency_code===code)?.amount||0;
