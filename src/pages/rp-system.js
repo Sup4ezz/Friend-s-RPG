@@ -1399,6 +1399,31 @@ async function fetchRpMessagesForSpace(presence, options = {}) {
     return rows.map(row => ({ ...row, characters: characterMap[String(row.character_id)] || null }));
 }
 
+window.fetchRpMessagesForSpace = fetchRpMessagesForSpace;
+
+async function fetchRpMessageItemUsesForSpace(messageIds) {
+    const ids = (messageIds || []).filter(Boolean);
+    const presence = window.activeRpChatSpace;
+    if (!ids.length || !presence || !window.activeCharacterId || !window.supabaseClient) return [];
+    const { data, error } = await window.supabaseClient.rpc("get_lorgus_rp_message_item_uses", {
+        p_character_id: window.activeCharacterId,
+        p_presence_type: presence.type,
+        p_region: presence.type === "location" ? presence.region : null,
+        p_location: presence.type === "location" ? presence.location : null,
+        p_from_region: presence.type === "road" ? presence.fromRegion : null,
+        p_from_location: presence.type === "road" ? presence.fromLocation : null,
+        p_to_region: presence.type === "road" ? presence.toRegion : null,
+        p_to_location: presence.type === "road" ? presence.toLocation : null,
+        p_message_ids: ids
+    });
+    if (error) {
+        console.warn("Не удалось безопасно загрузить предметы RP-сообщений:", error);
+        return [];
+    }
+    return data || [];
+}
+window.fetchRpMessageItemUsesForSpace = fetchRpMessageItemUsesForSpace;
+
 async function attachRpMessageReplyTargets(messages) {
     const rows = Array.isArray(messages) ? messages : [];
     const targetIds = [...new Set(rows.map(message => message.reply_to_id).filter(Boolean).map(String))];
@@ -1416,26 +1441,10 @@ async function attachRpMessageReplyTargets(messages) {
 async function attachRpMessageItemUses(messages) {
     const rows = Array.isArray(messages) ? messages : [];
     const ids = rows.map(message => message.id).filter(Boolean);
-    const presence = window.activeRpChatSpace;
-    if (!ids.length || !window.supabaseClient || !presence || !window.activeCharacterId) return rows;
-
-    const { data, error } = await window.supabaseClient.rpc("get_lorgus_rp_message_item_uses", {
-        p_character_id: window.activeCharacterId,
-        p_presence_type: presence.type,
-        p_region: presence.type === "location" ? presence.region : null,
-        p_location: presence.type === "location" ? presence.location : null,
-        p_from_region: presence.type === "road" ? presence.fromRegion : null,
-        p_from_location: presence.type === "road" ? presence.fromLocation : null,
-        p_to_region: presence.type === "road" ? presence.toRegion : null,
-        p_to_location: presence.type === "road" ? presence.toLocation : null,
-        p_message_ids: ids
-    });
-    if (error) {
-        console.warn("Не удалось безопасно загрузить предметы RP-сообщений:", error);
-        return rows;
-    }
+    if (!ids.length) return rows;
+    const uses = await fetchRpMessageItemUsesForSpace(ids);
     const byMessage = {};
-    for (const use of data || []) {
+    for (const use of uses) {
         const key = String(use.message_id);
         (byMessage[key] ||= []).push(use);
     }
