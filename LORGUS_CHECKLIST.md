@@ -1039,3 +1039,17 @@ Commits:
 - Добавлены четыре тематических титула: «Любимец Случая», «Гость За Пределами Дорог», «Собиратель Невозможного», «Покоритель Пространства».
 - Игроку показывается содержимое лутбокса и шанс до открытия через RPC `get_lootbox_contents`. Денежные награды отображаются с названием валюты королевства, а не как медные монеты.
 - [ ] Проверить в браузере отображение списка и шансов и тестовое открытие каждой категории награды. Разовые сюжетные привилегии пока записываются как награды для отыгрыша/согласования с ведущим, а не выполняются автоматически движком.
+
+
+---
+
+# 12.6 RP TRANSFER HARDENING — 2026-10-12
+
+- [x] Production migration `20261012140000_rp_presence_security_audit`: removed broad history-read policy and obsolete direct presence-write policies.
+- [x] Production migration `20261012150000_harden_player_transfers`: item and in-chat currency transfers now require an approved recipient and public presence updated within 90 seconds.
+- [x] Legacy generic currency-transfer RPC revoked for all roles; the current UI uses the in-chat RPC.
+- [x] Queried production function definitions and grants to confirm the new checks are present and legacy RPC is not executable by anon/authenticated.
+- [ ] Browser QA remains: first-post lock; RP post/reply; item/currency transfer in a location and on a road; admin approve/reject.
+- [ ] Continue SECURITY DEFINER review for admin and lootbox RPCs. This audit does not establish that every such RPC has been fully tested.
+
+**Current status:** database changes applied and key definitions verified; interactive/browser regression still pending.
