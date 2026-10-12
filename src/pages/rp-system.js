@@ -1385,7 +1385,9 @@ async function fetchRpMessagesForSpace(presence, options = {}) {
         console.error("Не удалось безопасно загрузить RP-сообщения:", error);
         return [];
     }
-    const rows = data || [];
+    const rows = (data || []).slice().sort((a, b) =>
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
     const characterIds = [...new Set(rows.map(row => row.character_id).filter(Boolean))];
     if (!characterIds.length) return rows;
     const { data: characters, error: characterError } = await window.supabaseClient
