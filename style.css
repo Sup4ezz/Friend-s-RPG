@@ -19065,3 +19065,23 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
     radial-gradient(ellipse 42% 26% at 62% 42%,rgba(162,172,163,.18),transparent 75%),
     radial-gradient(ellipse 40% 28% at 88% 74%,rgba(150,161,152,.17),transparent 74%)!important;
 }
+
+
+/* LORGUS: much deeper map darkness; the cursor's warm light remains visible above it. */
+.lorgus-map-page .lorgus-mainmenu-fog{
+  background:
+    radial-gradient(ellipse 46% 34% at 18% 30%,rgba(105,116,108,.12) 0%,rgba(65,76,70,.07) 34%,transparent 72%),
+    radial-gradient(ellipse 52% 38% at 76% 26%,rgba(112,119,106,.11) 0%,rgba(63,73,67,.07) 38%,transparent 73%),
+    radial-gradient(ellipse 60% 42% at 54% 78%,rgba(96,108,100,.10) 0%,rgba(54,64,58,.06) 40%,transparent 75%),
+    radial-gradient(ellipse at 50% 50%,rgba(1,2,2,.64) 0%,rgba(2,3,3,.76) 58%,rgba(0,0,0,.90) 100%)!important;
+}
+.lorgus-map-page .lorgus-mainmenu-fog::before{
+  background:
+    radial-gradient(ellipse 38% 24% at 12% 65%,rgba(130,140,128,.10),transparent 74%),
+    radial-gradient(ellipse 42% 26% at 62% 42%,rgba(125,136,128,.09),transparent 75%),
+    radial-gradient(ellipse 40% 28% at 88% 74%,rgba(116,128,119,.08),transparent 74%)!important;
+}
+.lorgus-map-page .lorgus-mainmenu-fog::after{
+  background:radial-gradient(circle 52px at var(--lorgus-mx,50%) var(--lorgus-my,50%),rgba(255,222,153,.34) 0%,rgba(255,211,135,.17) 28%,rgba(235,190,112,.06) 56%,transparent 78%)!important;
+  mix-blend-mode:screen!important;
+}
