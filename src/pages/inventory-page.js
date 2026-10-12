@@ -193,7 +193,8 @@ async function renderLorgusInventory() {
     if (error) { grid.innerHTML = '<div class="lorgus-inventory-empty"><h2>Инвентарь недоступен</h2><p>' + escapeHtml(error.message) + '</p></div>'; return; }
     const rows = data || [];
     const backpackRows = rows.filter(row => !row.equipped_slot);
-    document.getElementById("lorgus-inventory-count").textContent = backpackRows.length + (backpackRows.length === 1 ? " предмет" : backpackRows.length >= 2 && backpackRows.length <= 4 ? " предмета" : " предметов");
+    const backpackItemCount = backpackRows.reduce((total, row) => total + Math.max(0, Number(row.quantity) || 0), 0);
+    document.getElementById("lorgus-inventory-count").textContent = backpackItemCount + (backpackItemCount % 10 === 1 && backpackItemCount % 100 !== 11 ? " предмет" : backpackItemCount % 10 >= 2 && backpackItemCount % 10 <= 4 && (backpackItemCount % 100 < 12 || backpackItemCount % 100 > 14) ? " предмета" : " предметов");
     grid.innerHTML = backpackRows.length ? backpackRows.map(row => inventoryItemMarkup(row)).join("") : '<div class="lorgus-inventory-empty"><h2>Рюкзак пуст</h2><p>Перетащи сюда предмет с персонажа, чтобы снять его.</p></div>';
     const renderEquipped = () => document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
         const row = rows.find(r => r.equipped_slot === slot.dataset.equipmentSlot);
