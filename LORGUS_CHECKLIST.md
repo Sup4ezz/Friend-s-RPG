@@ -1053,3 +1053,12 @@ Commits:
 - [ ] Continue SECURITY DEFINER review for admin and lootbox RPCs. This audit does not establish that every such RPC has been fully tested.
 
 **Current status:** database changes applied and key definitions verified; interactive/browser regression still pending.
+
+
+## Исправление административного редактирования (2026-10-12)
+- По ошибке была удалена UI-возможность редактировать одобренную анкету; восстановлена в коммите `94361d48ecd3b0e3d07f36bc94bf3832ada03473`.
+- Удалён ошибочный черновик отзыва EXECUTE у `admin_update_character_application`; сама функция в production не отключалась.
+- Проверена серверная функция в production: она требует `public.is_admin()` и сейчас изменяет имя, расу, возраст, родину, занятие, оружие, характер, предысторию, особые навыки и review_notes.
+- Фамилия и отдельное игровое поле статуса пока не добавлены: сначала нужно сверить реальные колонки `character_applications` и связанные синхронизируемые поля персонажа.
+- Следующая задача аудита: продолжить проверку отдельных SECURITY DEFINER RPC; отдельно остаются admin-only политика записи карты, MAINTAIN grants/default ACL будущих таблиц и настройка leaked-password protection после согласования.
+- Cloudflare deployment и браузерная регрессия после последних коммитов не подтверждены.
