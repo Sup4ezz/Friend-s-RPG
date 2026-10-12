@@ -168,6 +168,27 @@ async function renderLorgusInventory() {
         const row=(currencyRows||[]).find(x=>x.currency_code===code);
         return '<div class="lorgus-wallet-card"><span class="lorgus-wallet-icon">' + escapeHtml(c.icon) + '</span><div><strong>' + escapeHtml(c.name) + '</strong><small>' + escapeHtml(c.kingdom) + ' · 1 золотая = ' + escapeHtml(c.goldRate) + ' экв.</small></div><b>' + escapeHtml(formatLorgusCurrencyAmount(row?.amount || 0)) + '</b></div>';
     }).join("");
+    const specialRewardsSection = document.createElement("section");
+    specialRewardsSection.className = "lorgus-character-special-rewards";
+    specialRewardsSection.innerHTML = '<div class="lorgus-wallet-title"><div><span>НАСЛЕДИЕ</span><h2>Особые награды</h2></div><small>Привилегии и редкие сюрпризы</small></div><div class="lorgus-character-special-rewards-list"><p>Загружаем награды…</p></div>';
+    container.querySelector(".lorgus-inventory-main").appendChild(specialRewardsSection);
+    const specialRewardsList = specialRewardsSection.querySelector(".lorgus-character-special-rewards-list");
+    const { data: specialRewards, error: specialRewardsError } = await window.supabaseClient
+        .from("character_special_rewards")
+        .select("id,reward_type,name,description,rarity,awarded_at")
+        .eq("character_id", character.id)
+        .order("awarded_at", { ascending: false });
+    const specialRarityColors = {common:"#b8a27a",uncommon:"#76b85f",rare:"#5f9fe8",epic:"#a875e8",legendary:"#e0a14a",mythic:"#e45bc7",unique:"#f3e7b0"};
+    if (specialRewardsError) {
+        specialRewardsList.innerHTML = '<p>Не удалось загрузить особые награды.</p>';
+    } else {
+        specialRewardsList.innerHTML = (specialRewards || []).length ? specialRewards.map(reward =>
+            '<article class="lorgus-character-special-reward" style="--reward-color:' + (specialRarityColors[reward.rarity] || "#b8a27a") + '">' +
+                '<span>' + (reward.reward_type === "privilege" ? "♛" : "✦") + '</span><div><strong>' + escapeHtml(reward.name || "Особая награда") + '</strong><small>' + (reward.reward_type === "privilege" ? "ПРИВИЛЕГИЯ" : "ОСОБАЯ НАГРАДА") + ' · ' + escapeHtml(reward.rarity || "common") + '</small><p>' + escapeHtml(reward.description || "") + '</p></div>' +
+            '</article>'
+        ).join("") : '<p>Пока нет особых наград. Возможно, следующая печать хранит твою судьбу.</p>';
+    }
+
     const { data, error } = await loadCharacterInventory(character.id);
     const grid = document.getElementById("lorgus-inventory-grid");
     if (!grid) return;
