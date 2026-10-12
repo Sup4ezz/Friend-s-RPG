@@ -1781,7 +1781,7 @@ async function openRpItemPicker() {
     const existing = document.querySelector(".lorgus-rp-item-overlay"); if (existing) existing.remove();
     const { data, error } = await loadCharacterInventory(window.activeCharacterId);
     if (error) { alert("Не удалось открыть инвентарь:\n\n" + error.message); return; }
-    const usable = (data || []).filter(row => row.quantity > 0);
+    const usable = (data || []).filter(row => row.quantity > 0 && !row.equipped_slot);
     const overlay = document.createElement("div"); overlay.className = "lorgus-rp-item-overlay";
     overlay.innerHTML = '<div class="lorgus-rp-item-backdrop"></div><article class="lorgus-rp-item-picker"><button type="button" class="lorgus-rp-item-close">×</button><span class="lorgus-command-kicker">RP · ИНВЕНТАРЬ</span><h2>Использовать предмет</h2><p>Выбери предметы, которые будут зафиксированы в этом посте.</p><div class="lorgus-rp-item-picker-list">' +
         (usable.length ? usable.map(row => '<button type="button" class="lorgus-rp-item-choice" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(row.items?.color || "#d6b36a") + '"><span class="lorgus-rp-item-choice-icon">' + escapeHtml(row.items?.icon || "◆") + '</span><span><strong>' + escapeHtml(row.items?.name || "Предмет") + '</strong><small>' + escapeHtml(inventoryRarityLabel(row.items?.rarity)) + ' · ' + escapeHtml(inventoryTypeLabel(row.items || {})) + ' · осталось ' + escapeHtml(String(row.quantity)) + '</small></span><i>Добавить</i></button>').join("") : '<div class="lorgus-inventory-empty">Используемых предметов нет.</div>') +
