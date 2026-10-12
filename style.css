@@ -18672,3 +18672,19 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-character-special-reward strong { color:#eee1ca; }
 .lorgus-character-special-reward small { display:block; margin-top:4px; color:var(--reward-color,#b8a27a); font-size:.67rem; letter-spacing:.08em; }
 .lorgus-character-special-reward p { margin:7px 0 0; color:#b9ad98; font-size:.84rem; line-height:1.45; }
+
+
+/* LORGUS inventory toolkit — search, filters and sorting */
+.lorgus-inventory-tools{display:grid;grid-template-columns:minmax(180px,1.5fr) repeat(3,minmax(130px,1fr));gap:9px;margin:0 0 14px;align-items:center}
+.lorgus-inventory-search{display:flex;align-items:center;gap:9px;min-width:0;min-height:42px;padding:0 13px;border:1px solid rgba(190,157,98,.3);background:linear-gradient(135deg,rgba(28,25,20,.92),rgba(12,13,15,.94));color:#cbb581}
+.lorgus-inventory-search>span{font-size:24px;line-height:1}
+.lorgus-inventory-search input{width:100%;min-width:0;border:0!important;outline:0!important;background:transparent!important;box-shadow:none!important;color:#eee4d0!important;font:inherit;font-size:13px}
+.lorgus-inventory-search input::placeholder{color:#8f8778}
+.lorgus-inventory-tools select{width:100%;min-width:0;min-height:42px;padding:0 30px 0 11px;border:1px solid rgba(190,157,98,.3);border-radius:0;background:#171613;color:#d9cba9;font:inherit;font-size:12px;outline:none}
+.lorgus-inventory-tools select:focus,.lorgus-inventory-search:focus-within{border-color:#c7a65e;box-shadow:0 0 0 1px rgba(199,166,94,.18)}
+.lorgus-inventory-item[hidden],.lorgus-inventory-filter-empty[hidden]{display:none!important}
+.lorgus-inventory-item{transition:border-color .18s ease,filter .18s ease,transform .18s ease}
+.lorgus-inventory-item:hover{filter:brightness(1.12);border-color:var(--item-color,#b8a27a)}
+.lorgus-inventory-count-filtered{color:#d7b56d}
+@media(max-width:1000px){.lorgus-inventory-tools{grid-template-columns:repeat(2,minmax(0,1fr))}.lorgus-inventory-search{grid-column:1/-1}}
+@media(max-width:520px){.lorgus-inventory-tools{gap:7px}.lorgus-inventory-tools select{font-size:11px;padding-left:8px}.lorgus-inventory-search,.lorgus-inventory-tools select{min-height:40px}}
