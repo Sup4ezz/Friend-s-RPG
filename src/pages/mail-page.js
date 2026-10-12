@@ -112,41 +112,13 @@ async function loadMailRecipients() {
     const select = document.getElementById("lorgus-mail-recipient");
     if (!select) return;
 
-    // Статус персонажа хранится не в characters, а в character_applications.
-    // Для почты показываем только персонажей с одобренной заявкой.
-    const { data: applications, error: applicationsError } = await window.supabaseClient
-        .from("character_applications")
-        .select("character_id")
-        .eq("status", "approved")
-        .not("character_id", "is", null);
+    // The guarded RPC returns only minimal fields for approved characters.
+    const { data: characters, error } = await window.supabaseClient
+        .rpc("get_lorgus_mail_recipients");
 
-    if (applicationsError) {
-        console.error("Не удалось загрузить одобренные заявки:", applicationsError);
-        select.innerHTML = `<option value="">Не удалось загрузить персонажей: ${escapeHtml(applicationsError.message)}</option>`;
-        return;
-    }
-
-    const characterIds = [...new Set(
-        (applications || [])
-            .map(application => application.character_id)
-            .filter(Boolean)
-            .filter(id => String(id) !== String(window.activeCharacterId))
-    )];
-
-    if (!characterIds.length) {
-        select.innerHTML = '<option value="">Нет доступных адресатов</option>';
-        return;
-    }
-
-    const { data: characters, error: charactersError } = await window.supabaseClient
-        .from("characters")
-        .select("id, name, race")
-        .in("id", characterIds)
-        .order("name", { ascending: true });
-
-    if (charactersError) {
-        console.error("Не удалось загрузить персонажей:", charactersError);
-        select.innerHTML = `<option value="">Не удалось загрузить персонажей: ${escapeHtml(charactersError.message)}</option>`;
+    if (error) {
+        console.error("Не удалось загрузить адресатов:", error);
+        select.innerHTML = `<option value="">Не удалось загрузить персонажей: ${escapeHtml(error.message)}</option>`;
         return;
     }
 
