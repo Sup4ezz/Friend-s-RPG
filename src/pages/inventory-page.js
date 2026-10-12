@@ -49,7 +49,7 @@ function inventoryItemMarkup(row, extraClass = "") {
     const qty = row.quantity > 1 ? "×" + row.quantity : "";
     const equippedLabel = row.equipped_slot ? inventorySlotLabels[row.equipped_slot] : "";
     const isLootbox = item.item_subtype === "lootbox" && !row.equipped_slot;
-    return '<article class="lorgus-inventory-item ' + extraClass + (row.equipped_slot ? ' is-equipped' : '') + (isLootbox ? ' is-lootbox' : '') + '" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '">' +
+    return '<article class="lorgus-inventory-item ' + extraClass + (row.equipped_slot ? ' is-equipped' : '') + (isLootbox ? ' is-lootbox' : '') + '" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" data-item-name="' + escapeHtml(item.name || "Предмет").toLocaleLowerCase("ru-RU") + '" data-item-type="' + escapeHtml(item.item_subtype || item.item_type || "misc") + '" data-item-rarity="' + escapeHtml(item.rarity || "common") + '" data-acquired-at="' + escapeHtml(row.acquired_at || "") + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '">' +
         '<div class="lorgus-inventory-item-icon">' + escapeHtml(item.icon || (isLootbox ? "🎁" : "◆")) + '</div>' +
         '<div class="lorgus-inventory-item-info"><strong>' + escapeHtml(item.name || "Предмет") + '</strong><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ' + escapeHtml(inventoryTypeLabel(item)) + '</small>' + (equippedLabel ? '<em>НАДЕТО · ' + escapeHtml(equippedLabel) + '</em>' : '') + '</div>' +
         '<b class="lorgus-inventory-qty">' + escapeHtml(qty) + '</b>' +
@@ -146,7 +146,7 @@ async function renderLorgusInventory() {
                             <div><span>ХРАНИЛИЩЕ</span><h2>Рюкзак</h2></div>
                             <b id="lorgus-inventory-count">—</b>
                         </div>
-                        <div class="lorgus-inventory-grid" id="lorgus-inventory-grid">
+                        <div class="lorgus-inventory-tools"><label class="lorgus-inventory-search"><span>⌕</span><input id="lorgus-inventory-search" type="search" placeholder="Найти предмет…" autocomplete="off" aria-label="Поиск предметов в рюкзаке"></label><select id="lorgus-inventory-type" aria-label="Фильтр по типу"><option value="">Все типы</option>${Object.entries(inventoryTypeLabels).map(([value,label]) => '<option value="' + escapeHtml(value) + '">' + escapeHtml(label) + '</option>').join("")}</select><select id="lorgus-inventory-rarity" aria-label="Фильтр по редкости"><option value="">Любая редкость</option><option value="common">Обычная</option><option value="uncommon">Необычная</option><option value="rare">Редкая</option><option value="epic">Эпическая</option><option value="legendary">Легендарная</option><option value="mythic">Мифическая</option><option value="unique">Уникальная</option></select><select id="lorgus-inventory-sort" aria-label="Сортировка предметов"><option value="default">По получению</option><option value="name">По названию</option><option value="rarity">По редкости</option><option value="quantity">По количеству</option></select></div>\n                        <div class="lorgus-inventory-grid" id="lorgus-inventory-grid">
                             <div class="lorgus-inventory-empty">Загрузка...</div>
                         </div>
                     </section>
@@ -258,6 +258,47 @@ async function renderLorgusInventory() {
     };
 
     grid.querySelectorAll(".lorgus-inventory-item").forEach(setupDrag);
+
+    // Поиск, фильтры и сортировка работают поверх тех же карточек: состояние
+    // перетаскивания и операции с предметами не теряются при смене фильтра.
+    const searchInput = document.getElementById("lorgus-inventory-search");
+    const typeFilter = document.getElementById("lorgus-inventory-type");
+    const rarityFilter = document.getElementById("lorgus-inventory-rarity");
+    const sortSelect = document.getElementById("lorgus-inventory-sort");
+    const rarityOrder = {common:0,uncommon:1,rare:2,epic:3,legendary:4,mythic:5,unique:6};
+    const applyInventoryTools = () => {
+        const query = (searchInput?.value || "").trim().toLocaleLowerCase("ru-RU");
+        const type = typeFilter?.value || "";
+        const rarity = rarityFilter?.value || "";
+        const cards = [...grid.querySelectorAll(".lorgus-inventory-item")];
+        cards.forEach(card => {
+            const visible = (!query || (card.dataset.itemName || "").includes(query)) &&
+                (!type || card.dataset.itemType === type) &&
+                (!rarity || card.dataset.itemRarity === rarity);
+            card.hidden = !visible;
+        });
+        const visibleCards = cards.filter(card => !card.hidden);
+        const sort = sortSelect?.value || "default";
+        visibleCards.sort((a,b) => {
+            if (sort === "name") return (a.dataset.itemName || "").localeCompare(b.dataset.itemName || "", "ru");
+            if (sort === "rarity") return (rarityOrder[b.dataset.itemRarity] ?? 0) - (rarityOrder[a.dataset.itemRarity] ?? 0);
+            if (sort === "quantity") return (Number(rows.find(r => r.id === b.dataset.inventoryId)?.quantity) || 0) - (Number(rows.find(r => r.id === a.dataset.inventoryId)?.quantity) || 0);
+            return (a.dataset.acquiredAt || "").localeCompare(b.dataset.acquiredAt || "");
+        });
+        visibleCards.forEach(card => grid.appendChild(card));
+        cards.filter(card => card.hidden).forEach(card => grid.appendChild(card));
+        const visibleCount = visibleCards.reduce((sum, card) => sum + Math.max(0, Number(rows.find(r => r.id === card.dataset.inventoryId)?.quantity) || 0), 0);
+        const countNode = document.getElementById("lorgus-inventory-count");
+        if (countNode) countNode.textContent = visibleCount + (visibleCount % 10 === 1 && visibleCount % 100 !== 11 ? " предмет" : visibleCount % 10 >= 2 && visibleCount % 10 <= 4 && (visibleCount % 100 < 12 || visibleCount % 100 > 14) ? " предмета" : " предметов");
+        let empty = grid.querySelector(".lorgus-inventory-filter-empty");
+        if (!visibleCards.length && cards.length) {
+            if (!empty) { empty = document.createElement("div"); empty.className = "lorgus-inventory-empty lorgus-inventory-filter-empty"; empty.innerHTML = "<h2>Ничего не найдено</h2><p>Измени запрос или сбрось фильтры.</p>"; grid.appendChild(empty); }
+            empty.hidden = false;
+        } else if (empty) empty.hidden = true;
+    };
+    [searchInput,typeFilter,rarityFilter,sortSelect].forEach(control => {
+        control?.addEventListener(control === searchInput ? "input" : "change", applyInventoryTools);
+    });
     document.querySelectorAll(".lorgus-equipped-item").forEach(setupDrag);
 
     grid.querySelectorAll("[data-open-lootbox]").forEach(button => {
