@@ -416,7 +416,7 @@ window.openLorgusLootbox = async function(inventoryId) {
         </section>`;
     document.body.appendChild(overlay);
     requestAnimationFrame(() => overlay.classList.add("is-visible"));
-    const close = () => overlay.remove();
+    const close = () => { if (overlay.classList.contains("is-spinning")) return; overlay.remove(); document.querySelectorAll("style[data-lorgus-lootbox-style]").forEach(node => node.remove()); };
     overlay.querySelector(".lorgus-lootbox-close").addEventListener("click", close);
     overlay.querySelector(".lorgus-lootbox-backdrop").addEventListener("click", close);
     const revealButton = overlay.querySelector(".lorgus-lootbox-reveal");
@@ -426,6 +426,77 @@ window.openLorgusLootbox = async function(inventoryId) {
     const rewardBox = overlay.querySelector(".lorgus-lootbox-reward");
     const contentsList = overlay.querySelector(".lorgus-lootbox-contents-list");
     const contentsSection = overlay.querySelector(".lorgus-lootbox-contents");
+    const roulette = document.createElement("section");
+    roulette.className = "lorgus-lootbox-roulette";
+    roulette.hidden = true;
+    roulette.innerHTML = '<div class="lorgus-lootbox-roulette-label">ПЕЧАТЬ ВЫБИРАЕТ НАГРАДУ</div><div class="lorgus-lootbox-reel-window"><div class="lorgus-lootbox-reel-track"></div><i class="lorgus-lootbox-reel-pointer"></i></div><div class="lorgus-lootbox-reel-caption">Слушай, как замедляется печать…</div>';
+    contentsSection.insertAdjacentElement("afterend", roulette);
+    const reelWindow = roulette.querySelector(".lorgus-lootbox-reel-window");
+    const reelTrack = roulette.querySelector(".lorgus-lootbox-reel-track");
+    const reelStyle = document.createElement("style");
+    reelStyle.dataset.lorgusLootboxStyle = "true";
+    reelStyle.textContent = ".lorgus-lootbox-roulette{width:100%;margin:18px 0 8px;position:relative;z-index:2}.lorgus-lootbox-roulette[hidden]{display:none}.lorgus-lootbox-roulette-label,.lorgus-lootbox-reel-caption{text-align:center;color:#b9a77e;font-size:10px;letter-spacing:.18em;text-transform:uppercase}.lorgus-lootbox-reel-window{position:relative;overflow:hidden;width:100%;height:158px;margin:12px 0;border:1px solid rgba(200,166,93,.45);background:linear-gradient(180deg,rgba(4,5,8,.98),rgba(20,17,12,.98));box-shadow:inset 0 0 28px #000,0 0 25px rgba(190,139,52,.12)}.lorgus-lootbox-reel-track{height:100%;display:flex;align-items:stretch;gap:8px;will-change:transform}.lorgus-lootbox-reel-card{box-sizing:border-box;flex:0 0 132px;width:132px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:10px 7px;border:1px solid var(--reward-color,#b8a27a);background:linear-gradient(155deg,rgba(35,31,23,.98),rgba(9,10,12,.98) 72%);box-shadow:inset 0 0 20px rgba(190,139,52,.12);text-align:center}.lorgus-lootbox-reel-card-icon{display:grid;place-items:center;width:48px;height:48px;border:1px solid var(--reward-color,#b8a27a);border-radius:50%;color:var(--reward-color,#b8a27a);font-size:28px;text-shadow:0 0 15px var(--reward-color,#b8a27a);background:rgba(0,0,0,.35)}.lorgus-lootbox-reel-card strong{width:100%;font-size:11px;line-height:1.25;color:#f0e7d2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.lorgus-lootbox-reel-card small{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--reward-color,#b8a27a)}.lorgus-lootbox-reel-pointer{position:absolute;z-index:4;top:0;bottom:0;left:50%;width:3px;transform:translateX(-50%);background:#f6d98b;box-shadow:0 0 7px #ffe9a8,0 0 18px #d99b38;pointer-events:none}.lorgus-lootbox-reel-pointer:before,.lorgus-lootbox-reel-pointer:after{content:'';position:absolute;left:50%;transform:translateX(-50%);border-left:8px solid transparent;border-right:8px solid transparent}.lorgus-lootbox-reel-pointer:before{top:0;border-top:11px solid #f6d98b}.lorgus-lootbox-reel-pointer:after{bottom:0;border-bottom:11px solid #f6d98b}.lorgus-lootbox-overlay.is-spinning .lorgus-lootbox-reel-pointer{animation:lorgusLootboxPointer 150ms ease-in-out infinite alternate}.lorgus-lootbox-overlay.has-reward .lorgus-lootbox-reel-card.is-winner{box-shadow:inset 0 0 28px var(--reward-color),0 0 24px var(--reward-color)}@keyframes lorgusLootboxPointer{from{filter:brightness(.8)}to{filter:brightness(1.8)}}@media(max-width:620px){.lorgus-lootbox-reel-window{height:138px}.lorgus-lootbox-reel-card{flex-basis:112px;width:112px}.lorgus-lootbox-reel-card-icon{width:40px;height:40px;font-size:23px}}";
+    document.head.appendChild(reelStyle);
+    let lootboxAudio = null;
+    let lastReelTick = -1;
+    const playLootboxTone = (frequency, duration, type = "sine", volume = .03, delay = 0) => {
+        try {
+            const AudioCtor = window.AudioContext || window.webkitAudioContext;
+            if (!AudioCtor) return;
+            if (!lootboxAudio) lootboxAudio = new AudioCtor();
+            if (lootboxAudio.state === "suspended") lootboxAudio.resume();
+            const osc = lootboxAudio.createOscillator(), gain = lootboxAudio.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(frequency, lootboxAudio.currentTime + delay);
+            gain.gain.setValueAtTime(.0001, lootboxAudio.currentTime + delay);
+            gain.gain.exponentialRampToValueAtTime(volume, lootboxAudio.currentTime + delay + .008);
+            gain.gain.exponentialRampToValueAtTime(.0001, lootboxAudio.currentTime + delay + duration);
+            osc.connect(gain); gain.connect(lootboxAudio.destination);
+            osc.start(lootboxAudio.currentTime + delay); osc.stop(lootboxAudio.currentTime + delay + duration + .02);
+        } catch (_) {}
+    };
+    const spinLootboxRoulette = async winner => {
+        const pool = Array.isArray(contents) ? contents : [];
+        const matching = pool.find(entry => entry.reward_type === winner.reward_type && String(entry.name || "") === String(winner.name || "") && (entry.reward_type !== "currency" || (entry.currency_code === winner.currency_code && Number(entry.amount) === Number(winner.amount))));
+        const winningCard = matching || winner;
+        const colors = {common:"#b8a27a",uncommon:"#76b85f",rare:"#5f9fe8",epic:"#a875e8",legendary:"#e0a14a",mythic:"#e45bc7",unique:"#f3e7b0"};
+        const rarity = {common:"ОБЫЧНАЯ",uncommon:"НЕОБЫЧНАЯ",rare:"РЕДКАЯ",epic:"ЭПИЧЕСКАЯ",legendary:"ЛЕГЕНДАРНАЯ",mythic:"МИФИЧЕСКАЯ",unique:"УНИКАЛЬНАЯ"};
+        const total = 42, target = 35;
+        const poolWithoutWinner = pool.filter(entry => entry !== matching);
+        const cards = Array.from({length:total}, (_, index) => index === target ? winningCard : (poolWithoutWinner.length ? poolWithoutWinner : pool)[Math.floor(Math.random() * (poolWithoutWinner.length ? poolWithoutWinner.length : pool.length))]);
+        reelTrack.innerHTML = cards.map(entry => '<article class="lorgus-lootbox-reel-card" style="--reward-color:' + escapeHtml(entry.color || colors[entry.rarity] || "#b8a27a") + ';"><span class="lorgus-lootbox-reel-card-icon">' + escapeHtml(entry.icon || "✦") + '</span><strong>' + escapeHtml(entry.name || "Таинственная награда") + '</strong><small>' + escapeHtml(rarity[entry.rarity] || entry.rarity || "НАГРАДА") + '</small></article>').join("");
+        const card = reelTrack.children[target];
+        const gap = parseFloat(getComputedStyle(reelTrack).gap) || 8;
+        const width = card.getBoundingClientRect().width, step = width + gap;
+        const viewportWidth = reelWindow.getBoundingClientRect().width;
+        const endX = Math.round(viewportWidth / 2 - (target * step + width / 2));
+        reelTrack.style.transform = "translateX(0px)";
+        reelTrack.getBoundingClientRect();
+        roulette.hidden = false; contentsSection.hidden = true;
+        overlay.classList.add("is-spinning");
+        playLootboxTone(95,.5,"sawtooth",.035); playLootboxTone(190,.38,"triangle",.025,.04); playLootboxTone(380,.25,"sine",.018,.12);
+        lastReelTick = -1;
+        const duration = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 1000 : 6400;
+        const started = performance.now();
+        const animation = reelTrack.animate([{transform:"translateX(0px)"},{transform:"translateX(" + endX + "px)"}],{duration,easing:"cubic-bezier(.08,.68,.12,1)",fill:"forwards"});
+        let raf;
+        const tick = now => {
+            const progress = Math.min(1,(now-started)/duration), eased = 1-Math.pow(1-progress,4);
+            const position = -endX*eased;
+            const index = Math.floor((position + viewportWidth/2)/step);
+            if (index > lastReelTick) { for (let i=0;i<Math.min(3,index-lastReelTick);i++) { playLootboxTone(720,.035,"square",.018); playLootboxTone(1120,.025,"sine",.009,.005); } lastReelTick=index; }
+            if (progress < 1) raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+        await animation.finished.catch(() => {});
+        cancelAnimationFrame(raf);
+        reelTrack.style.transform = "translateX(" + endX + "px)";
+        overlay.classList.remove("is-spinning"); overlay.classList.add("has-reward");
+        card.classList.add("is-winner");
+        const base = ({common:330,uncommon:392,rare:494,epic:587,legendary:659,mythic:784,unique:988})[winner.rarity] || 440;
+        playLootboxTone(base,.6,"sine",.055); playLootboxTone(base*1.5,.8,"triangle",.035,.09); playLootboxTone(base*2,1,"sine",.022,.18);
+        if (["legendary","mythic","unique"].includes(winner.rarity)) { playLootboxTone(base*.5,.9,"sawtooth",.02,.04); playLootboxTone(base*2.5,1.1,"sine",.028,.25); }
+    };
     const rarityLabels = {common:"Обычная",uncommon:"Необычная",rare:"Редкая",epic:"Эпическая",legendary:"Легендарная",mythic:"Мифическая",unique:"Уникальная"};
     const rewardTypeLabels = {title:"Титул",privilege:"Привилегия",currency:"Деньги",special:"Особая награда"};
     const { data: contents, error: contentsError } = await window.supabaseClient.rpc("get_lootbox_contents", { p_inventory_id: inventoryId });
@@ -455,7 +526,7 @@ window.openLorgusLootbox = async function(inventoryId) {
         subtitle.textContent = "Сокровище выбирается. Не прерывай ритуал.";
         overlay.classList.add("is-opening");
         chest.classList.add("is-shaking");
-        await new Promise(resolve => setTimeout(resolve, 2200));
+        await new Promise(resolve => setTimeout(resolve, 450));
 
         const { data, error } = await window.supabaseClient.rpc("open_character_lootbox", {
             p_inventory_id: inventoryId
@@ -472,6 +543,7 @@ window.openLorgusLootbox = async function(inventoryId) {
         }
 
         const item = data.reward || data;
+        await spinLootboxRoulette(item);
         chest.classList.add("is-open");
         overlay.classList.remove("is-opening");
         overlay.classList.add("has-reward");
