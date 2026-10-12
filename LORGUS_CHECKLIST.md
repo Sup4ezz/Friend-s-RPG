@@ -1075,5 +1075,7 @@ Commits:
 - В production Supabase удалена политика `authenticated users can write world map labels`.
 - Создана политика `admins can write world map labels` для `authenticated` с `USING (coalesce(public.is_admin(), false))` и `WITH CHECK (coalesce(public.is_admin(), false))`.
 - Проверка `pg_policies` подтвердила новую политику записи и сохранённую политику `world map labels are readable` для `anon, authenticated`; чтение карты осталось публичным.
-- Миграция сохранена в репозитории: `supabase/migrations/20261012210000_world_map_labels_admin_only.sql`. Изменение применено напрямую в production SQL; добавление файла в Git само по себе не записывает его в историю миграций Supabase.
+- Миграция сохранена в репозитории: `supabase/migrations/20261012210000_world_map_labels_admin_only.sql`. Политика уже применена напрямую в production SQL; CI должен зафиксировать миграцию в истории при успешном запуске.
+- При первом CI-применении миграция остановилась ожидаемо на уже существующей новой политике (она была применена напрямую в production до добавления файла миграции). Миграция исправлена: теперь удаляет оба возможных имени политики перед созданием admin-only политики. Повторные workflow для коммита `f04df444` запущены; итог пока ожидается.
+
 - Удалён временный черновик `.agent/drafts/world_map_label_positions_admin_only.sql`.
