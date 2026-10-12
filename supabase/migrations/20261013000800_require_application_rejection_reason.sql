@@ -1,4 +1,5 @@
 -- Require a non-empty reason for rejecting an application and persist it.
+DROP FUNCTION IF EXISTS public.reject_character_application(uuid, text);
 DROP FUNCTION IF EXISTS public.reject_character_application(uuid);
 
 CREATE FUNCTION public.reject_character_application(application_id uuid, p_reason text)
