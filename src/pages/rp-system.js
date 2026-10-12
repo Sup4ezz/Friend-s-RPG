@@ -1597,37 +1597,18 @@ async function sendLocalRpMessage() {
             window.clearRpReplyTarget?.();
         }
 
-        // Подписка Realtime добавит сообщение сама. Этот запрос — страховка,
-        // чтобы автор увидел собственный пост сразу, даже если событие задержится.
-        // appendRpMessage защищён от дублей по message.id.
-        let query = window.supabaseClient
-            .from("rp_messages")
-            .select("id, character_id, body, created_at, status, reverted_at, revert_reason, is_admin_post, reply_to_id, characters(name)")
-            .eq("character_id", window.activeCharacterId)
-            .eq("presence_type", chat.type)
-            .eq("body", body)
-            .order("created_at", { ascending: false })
-            .limit(1);
-
-        if (replyTarget) query = query.eq("reply_to_id", replyTarget.id);
-        const visitStart = getRpVisitStart(chat);
-        if (visitStart) query = query.gte("created_at", visitStart);
-        if (chat.type === "location") {
-            query = query.eq("region", chat.region).eq("location", chat.location);
-        } else {
-            query = query.eq("from_region", chat.fromRegion)
-                .eq("from_location", chat.fromLocation)
-                .eq("to_region", chat.toRegion)
-                .eq("to_location", chat.toLocation);
-        }
-
-        const { data: sentMessages, error: fetchError } = await query;
-        if (fetchError) {
-            console.warn("Сообщение отправлено; ожидание события Realtime:", fetchError);
-            return;
-        }
-        if (sentMessages?.[0]) {
-            await appendRpMessage((await attachRpMessageReplyTargets(sentMessages))[0]);
+        // Realtime по таблице отключён: чтение истории идёт только через
+        // серверную проверку выбранного персонажа.
+        const visibleMessages = await fetchRpMessagesForSpace(chat, { limit: 200 });
+        const sentMessage = visibleMessages
+            .filter(message =>
+                String(message.character_id) === String(window.activeCharacterId) &&
+                message.body === body &&
+                (!replyTarget || String(message.reply_to_id) === String(replyTarget.id))
+            )
+            .slice(-1)[0];
+        if (sentMessage) {
+            await appendRpMessage((await attachRpMessageReplyTargets([sentMessage]))[0]);
         }
     } finally {
         window.rpMessageSending = false;
