@@ -524,7 +524,8 @@ window.openLorgusLootbox = async function(inventoryId) {
         revealButton.textContent = "ПЕЧАТЬ РАЗРУШАЕТСЯ…";
         status.textContent = "СВЯЗЬ С СУДЬБОЙ";
         subtitle.textContent = "Сокровище выбирается. Не прерывай ритуал.";
-        overlay.classList.add("is-opening");
+        overlay.classList.add("is-opening", "is-spinning");
+        playLootboxTone(110,.16,"triangle",.03);
         chest.classList.add("is-shaking");
         await new Promise(resolve => setTimeout(resolve, 450));
 
@@ -533,7 +534,7 @@ window.openLorgusLootbox = async function(inventoryId) {
         });
         chest.classList.remove("is-shaking");
         if (error || !data || data.error) {
-            overlay.classList.remove("is-opening");
+            overlay.classList.remove("is-opening", "is-spinning");
             status.textContent = "ПЕЧАТЬ НЕ ПОДДАЛАСЬ";
             subtitle.textContent = error?.message || data?.error || "Не удалось открыть лутбокс.";
             revealButton.disabled = false;
