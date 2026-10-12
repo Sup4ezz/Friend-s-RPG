@@ -1487,24 +1487,21 @@ async function loadRpMessages(presence) {
     const feed = document.getElementById("lorgus-rp-feed");
     if (!feed || !presence) return;
 
-    const cached = readRpMessageCache(presence).filter(message => isRpMessageInCurrentVisit(message, presence));
-    feed.innerHTML = "";
-    if (cached.length) {
-        cached.forEach(message => { appendRpMessage(message); });
-    } else {
-        feed.innerHTML = '<div class="lorgus-messenger-start"><div class="lorgus-messenger-start-mark">✦</div><strong>История ещё не началась</strong><span>Первое сообщение создаст сцену.</span><p>Пиши свободно. Действия, реплики и мысли персонажа будут появляться здесь как настоящая переписка.</p></div>';
-    }
+    // Не показываем даже локальный кэш до серверной проверки выбранного персонажа.
+    feed.innerHTML = '<div class="lorgus-messenger-start"><div class="lorgus-messenger-start-mark">✦</div><strong>Открываем сцену…</strong><span>Проверяем присутствие персонажа.</span></div>';
 
     const fresh = await fetchRpMessagesForSpace(presence, { limit: 200 });
     const withReplies = await attachRpMessageReplyTargets(fresh);
     const enriched = await attachRpMessageItemUses(withReplies);
     writeRpMessageCache(presence, enriched);
-    if (!enriched.length && !cached.length) return;
     feed.innerHTML = "";
+    if (!enriched.length) {
+        feed.innerHTML = '<div class="lorgus-messenger-start"><div class="lorgus-messenger-start-mark">✦</div><strong>История ещё не началась</strong><span>Первое сообщение создаст сцену.</span><p>Пиши свободно. Действия, реплики и мысли персонажа будут появляться здесь как настоящая переписка.</p></div>';
+        return;
+    }
     enriched.forEach(message => { appendRpMessage(message); });
     feed.scrollTop = feed.scrollHeight;
 }
-
 async function pollRpMessages(presence) {
     if (!window.supabaseClient || !presence || window.rpMessagesPolling) return;
     const feed = document.getElementById("lorgus-rp-feed");
