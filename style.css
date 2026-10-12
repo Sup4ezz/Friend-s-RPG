@@ -18688,3 +18688,21 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-inventory-count-filtered{color:#d7b56d}
 @media(max-width:1000px){.lorgus-inventory-tools{grid-template-columns:repeat(2,minmax(0,1fr))}.lorgus-inventory-search{grid-column:1/-1}}
 @media(max-width:520px){.lorgus-inventory-tools{gap:7px}.lorgus-inventory-tools select{font-size:11px;padding-left:8px}.lorgus-inventory-search,.lorgus-inventory-tools select{min-height:40px}}
+
+/* LORGUS mail inbox controls */
+.lorgus-mail-inbox-actions{display:flex;align-items:center;gap:10px}
+.lorgus-mail-inbox-actions button{border:1px solid rgba(190,157,98,.32);background:rgba(20,18,15,.75);color:#cbb581;padding:7px 10px;font:inherit;font-size:11px;cursor:pointer;transition:background .18s,border-color .18s}
+.lorgus-mail-inbox-actions button:hover{border-color:#c7a65e;background:rgba(120,89,39,.2)}
+.lorgus-mail-inbox-actions button:disabled{opacity:.5;cursor:wait}
+.lorgus-mail-tools{display:grid;grid-template-columns:28px minmax(100px,1fr) minmax(125px,.65fr);align-items:center;gap:8px;padding:10px 12px;margin-bottom:12px;border:1px solid rgba(190,157,98,.2);background:rgba(12,12,12,.42)}
+.lorgus-mail-tools>label{font-size:22px;color:#cbb581;text-align:center}
+.lorgus-mail-tools input,.lorgus-mail-tools select{width:100%;min-width:0;min-height:36px;border:1px solid rgba(190,157,98,.24);border-radius:0;padding:0 9px;background:#171613;color:#e4d9c3;font:inherit;font-size:12px;outline:none}
+.lorgus-mail-tools input:focus,.lorgus-mail-tools select:focus{border-color:#c7a65e}
+.lorgus-mail-tools input::placeholder{color:#898173}
+.lorgus-mail-card[hidden],.lorgus-mail-filter-empty[hidden]{display:none!important}
+.lorgus-mail-filter-empty{text-align:center;padding:42px 16px;color:#a99c84;border:1px dashed rgba(190,157,98,.2)}
+.lorgus-mail-filter-empty>span{font-size:30px;color:#c7a65e}
+.lorgus-mail-filter-empty h2{margin:10px 0 5px;color:#e1d3b5;font-size:17px}
+.lorgus-mail-filter-empty p{margin:0;font-size:12px}
+.lorgus-mail-card.unread{border-left:3px solid #c7a65e}
+@media(max-width:600px){.lorgus-mail-tools{grid-template-columns:24px minmax(0,1fr)}.lorgus-mail-tools select{grid-column:2}.lorgus-mail-inbox-actions{gap:6px}.lorgus-mail-inbox-actions button{padding:6px;font-size:10px}}
