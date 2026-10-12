@@ -235,7 +235,7 @@ function bindAdminButtons(container) {
             }
             button.disabled = true;
             button.textContent = "Отклонение...";
-            const { error } = await window.supabaseClient.rpc("reject_character_application", { application_id: applicationId });
+            const { error } = await window.supabaseClient.rpc("reject_character_application", { application_id: applicationId, p_reason: cleanReason });
             if (error) {
                 console.error(error);
                 alert("Не удалось отклонить заявку:\n\n" + error.message);
