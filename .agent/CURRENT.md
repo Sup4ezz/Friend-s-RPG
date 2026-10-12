@@ -72,3 +72,10 @@
 - Applied production migration `restore_rp_message_read_policy` from `supabase/migrations/20261012160000_restore_rp_message_read_policy.sql` successfully.
 - Re-queried `pg_policies`: `rp_messages_select_current_presence` exists for `authenticated`, alongside the admin SELECT policy and current-presence INSERT policy.
 - Policy permits admins, users with no `rp_presence` (pre-first-post reading), and users reading the exact location/road matching their own presence. This is a database-policy verification, not a live browser test.
+
+## Почта — найден и подготовлен следующий security fix (2026-10-12)
+- Production `lorgus_mail` RLS уже проверяет одобренного отправителя и получателя для SELECT/UPDATE; INSERT проверяет владельца отправителя и запрет self-send.
+- Однако authenticated имеет table-level UPDATE, а политика получателя разрешает менять любые поля письма. Также INSERT принимает присланные клиентом `sent_at`/`deliver_at`, поэтому клиент мог подделать время доставки.
+- Подготовлена миграция `supabase/migrations/20261012170000_harden_lorgus_mail.sql`, commit `65c6bca964d999d9cee9a6637930747c83566df0`: сервер назначает отправителя и временные поля, проверяет одобренного получателя, запрещает самописьмо, а получателю оставляет только возможность отметить письмо прочитанным; содержимое и временные поля становятся неизменяемыми.
+- **Не применена к production** — сначала требуется подтверждение владельца.
+- После применения нужен smoke test: отправка письма, блокировка self-send, отказ неутверждённому получателю, время доставки задаёт сервер, прочтение работает, изменение body/deliver_at через REST запрещено.
