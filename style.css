@@ -18770,3 +18770,37 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 @media(max-width:650px){
     .lorgus-map-page .lorgus-map-sidebar{top:44px!important;left:8px!important;bottom:8px!important;width:min(270px,calc(100vw - 16px))!important;max-width:calc(100vw - 16px)!important}
 }
+
+
+/* LORGUS atlas polish: restore the portal mist and keep navigation unobstructed. */
+.lorgus-map-page .lorgus-map-sidebar{
+    left:54px!important;
+    width:270px!important;
+    max-width:calc(100vw - 72px)!important;
+    padding:11px!important;
+    border-color:rgba(190,157,98,.24)!important;
+    background:linear-gradient(155deg,rgba(13,12,10,.80),rgba(7,7,6,.66))!important;
+    box-shadow:0 8px 32px rgba(0,0,0,.34),inset 0 0 22px rgba(190,157,98,.025)!important;
+    backdrop-filter:blur(4px)!important;
+}
+.lorgus-map-page .lorgus-mainmenu-nav{z-index:45!important}
+.lorgus-map-page .lorgus-mainmenu-arrow{z-index:46!important}
+.lorgus-map-page .lorgus-mainmenu-fog{
+    background:radial-gradient(circle 155px at var(--lorgus-mx,50%) var(--lorgus-my,50%),
+      rgba(255,225,160,.02),
+      rgba(230,205,153,.08) 20%,
+      rgba(15,16,14,.24) 43%,
+      rgba(5,6,5,.64) 74%,
+      rgba(3,4,4,.78))!important;
+}
+.lorgus-map-page .lorgus-mainmenu-fog::after{
+    background:radial-gradient(circle 105px at var(--lorgus-mx,50%) var(--lorgus-my,50%),
+      rgba(255,232,184,.22),rgba(235,203,143,.07) 35%,transparent 72%)!important;
+}
+@media(max-width:650px){
+    .lorgus-map-page .lorgus-map-sidebar{
+        left:44px!important;
+        width:min(260px,calc(100vw - 54px))!important;
+        max-width:calc(100vw - 54px)!important;
+    }
+}
