@@ -512,14 +512,22 @@ function renderLorgusWorldMap(container, character) {
                         <button id="lorgus-map-enter-button" class="gold-button lorgus-map-enter-button" type="button" onclick="window.renderKingdomLocations('Атэрон')">Открыть край</button>
 
                         <div class="lorgus-map-regions">
-                            <span class="lorgus-map-regions-title">РЕГИОНЫ</span>
-                            <button class="lorgus-map-region-button active" data-region="Атэрон" type="button" onclick="selectLorgusMapRegion('Атэрон')"><i></i><span>Атэрон</span></button>
-                            <button class="lorgus-map-region-button" data-region="Каэлор" type="button" onclick="selectLorgusMapRegion('Каэлор')"><i></i><span>Каэлор</span></button>
-                            <button class="lorgus-map-region-button" data-region="Ксандр" type="button" onclick="selectLorgusMapRegion('Ксандр')"><i></i><span>Ксандр</span></button>
-                            <button class="lorgus-map-region-button" data-region="Лирэн" type="button" onclick="selectLorgusMapRegion('Лирэн')"><i></i><span>Лирэн</span></button>
-                            <button class="lorgus-map-region-button" data-region="Морвейн" type="button" onclick="selectLorgusMapRegion('Морвейн')"><i></i><span>Морвейн</span></button>
-                            <button class="lorgus-map-region-button" data-region="Святые Земли" type="button" onclick="selectLorgusMapRegion('Святые Земли')"><i></i><span>Святые Земли</span></button>
-                            <button class="lorgus-map-region-button" data-region="Спорные Земли" type="button" onclick="selectLorgusMapRegion('Спорные Земли')"><i></i><span>Спорные Земли</span></button>
+                            <span class="lorgus-map-regions-title">АТЛАС КРАЁВ</span>
+                            <label class="lorgus-map-region-search"><span>⌕</span><input id="lorgus-map-region-search" type="search" placeholder="Найти край…" autocomplete="off" aria-label="Поиск края"></label>
+                            <div class="lorgus-map-region-filters" role="group" aria-label="Фильтр территорий">
+                                <button type="button" class="active" data-map-kind="all">Все</button><button type="button" data-map-kind="kingdom">Королевства</button><button type="button" data-map-kind="neutral">Независимые</button>
+                            </div>
+                            <div class="lorgus-map-region-list">
+                            <button class="lorgus-map-region-button active" data-region="Атэрон" data-map-kind="kingdom" type="button" onclick="selectLorgusMapRegion('Атэрон')"><i></i><span>Атэрон</span></button>
+                            <button class="lorgus-map-region-button" data-region="Каэлор" data-map-kind="kingdom" type="button" onclick="selectLorgusMapRegion('Каэлор')"><i></i><span>Каэлор</span></button>
+                            <button class="lorgus-map-region-button" data-region="Ксандр" data-map-kind="kingdom" type="button" onclick="selectLorgusMapRegion('Ксандр')"><i></i><span>Ксандр</span></button>
+                            <button class="lorgus-map-region-button" data-region="Лирэн" data-map-kind="kingdom" type="button" onclick="selectLorgusMapRegion('Лирэн')"><i></i><span>Лирэн</span></button>
+                            <button class="lorgus-map-region-button" data-region="Морвейн" data-map-kind="kingdom" type="button" onclick="selectLorgusMapRegion('Морвейн')"><i></i><span>Морвейн</span></button>
+                            <button class="lorgus-map-region-button" data-region="Святые Земли" data-map-kind="neutral" type="button" onclick="selectLorgusMapRegion('Святые Земли')"><i></i><span>Святые Земли</span></button>
+                            <button class="lorgus-map-region-button" data-region="Спорные Земли" data-map-kind="neutral" type="button" onclick="selectLorgusMapRegion('Спорные Земли')"><i></i><span>Спорные Земли</span></button>
+                            <div class="lorgus-map-region-no-results" id="lorgus-map-region-no-results" hidden>Край не найден. Попробуй другое название.</div>
+                            </div>
+                            <div class="lorgus-map-zoom-controls" aria-label="Масштаб карты"><span>МАСШТАБ</span><button type="button" onclick="lorgusMapZoom(1.2)" aria-label="Приблизить карту">＋</button><button type="button" onclick="lorgusMapZoom(0.833333)" aria-label="Отдалить карту">−</button><button type="button" onclick="lorgusMapReset()" aria-label="Сбросить масштаб">Сбросить</button></div>
                         </div>
 
                         <div class="lorgus-map-closed">
@@ -534,6 +542,28 @@ function renderLorgusWorldMap(container, character) {
     `;
 
     selectLorgusMapRegion("Атэрон");
+    const regionSearch = document.getElementById("lorgus-map-region-search");
+    const regionButtons = [...container.querySelectorAll(".lorgus-map-region-button")];
+    const kindButtons = [...container.querySelectorAll("[data-map-kind]")].filter(el => el.tagName === "BUTTON");
+    let activeKind = "all";
+    const filterRegions = () => {
+        const query = (regionSearch?.value || "").trim().toLocaleLowerCase("ru-RU");
+        let visible = 0;
+        regionButtons.forEach(button => {
+            const matchesName = (button.dataset.region || "").toLocaleLowerCase("ru-RU").includes(query);
+            const matchesKind = activeKind === "all" || button.dataset.mapKind === activeKind;
+            button.hidden = !(matchesName && matchesKind);
+            if (!button.hidden) visible++;
+        });
+        const empty = document.getElementById("lorgus-map-region-no-results");
+        if (empty) empty.hidden = visible > 0;
+    };
+    regionSearch?.addEventListener("input", filterRegions);
+    kindButtons.forEach(button => button.addEventListener("click", () => {
+        activeKind = button.dataset.mapKind || "all";
+        kindButtons.forEach(item => item.classList.toggle("active", item === button));
+        filterRegions();
+    }));
     initializeLorgusMapViewport();
     renderLorgusMapEditorRects(false);
     bindLorgusMapLabelFallback(document.getElementById("lorgus-map-viewport"));
