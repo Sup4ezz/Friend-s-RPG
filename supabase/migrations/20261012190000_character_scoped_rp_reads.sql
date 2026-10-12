@@ -37,7 +37,7 @@ begin
         raise exception 'CHARACTER_REQUIRED';
     end if;
 
-    if p_presence_type not in ('location', 'road') then
+    if p_presence_type is null or p_presence_type not in ('location', 'road') then
         raise exception 'INVALID_RP_SPACE';
     end if;
 
@@ -135,6 +135,7 @@ create or replace function public.get_lorgus_rp_message_item_uses(
     p_from_location text default null,
     p_to_region text default null,
     p_to_location text default null,
+    p_since timestamptz default null,
     p_message_ids bigint[] default null
 )
 returns table (
@@ -205,6 +206,7 @@ begin
     join public.items i on i.id = u.item_id
     where u.status = 'active'
       and (p_message_ids is null or u.message_id = any(p_message_ids))
+      and (p_since is null or m.created_at >= p_since)
       and m.presence_type = p_presence_type
       and (
           (p_presence_type = 'location'
@@ -220,5 +222,5 @@ begin
 end;
 $function$;
 
-revoke all on function public.get_lorgus_rp_message_item_uses(uuid,text,text,text,text,text,text,text,bigint[]) from public, anon;
+revoke all on function public.get_lorgus_rp_message_item_uses(uuid,text,text,text,text,text,text,text,timestamptz,bigint[]) from public, anon;
 grant execute on function public.get_lorgus_rp_message_item_uses(uuid,text,text,text,text,text,text,text,bigint[]) to authenticated;
