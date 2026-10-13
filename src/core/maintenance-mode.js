@@ -114,10 +114,19 @@
             section.id = "lorgus-maintenance-admin";
             section.className = "admin-section";
             section.innerHTML = `
+              <style>
+                #lorgus-maintenance-admin .lorgus-maintenance-switch{position:relative;display:inline-flex;flex:0 0 46px;width:46px;height:26px}
+                #lorgus-maintenance-admin .lorgus-maintenance-switch input{position:absolute;inset:0;opacity:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2}
+                #lorgus-maintenance-admin .lorgus-maintenance-switch span{position:absolute;inset:0;border:1px solid #65533a;border-radius:20px;background:#29251f;transition:background .18s,border-color .18s}
+                #lorgus-maintenance-admin .lorgus-maintenance-switch span:after{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;border-radius:50%;background:#a99a81;transition:transform .18s,background .18s}
+                #lorgus-maintenance-admin .lorgus-maintenance-switch input:checked+span{background:#745b34;border-color:#b29667}
+                #lorgus-maintenance-admin .lorgus-maintenance-switch input:checked+span:after{transform:translateX(20px);background:#f0dfbd}
+                #lorgus-maintenance-admin .lorgus-maintenance-switch input:focus-visible+span{outline:2px solid #d7b879;outline-offset:3px}
+              </style>
               <div class="admin-section-heading"><div><h2>Заглушка технических работ</h2><p>Закрывает игровой мир для игроков. Администратор сохраняет доступ к панели управления.</p></div></div>
               <div style="display:grid;gap:14px;max-width:760px">
                 <label style="display:flex;align-items:center;gap:12px;cursor:pointer;font-size:17px">
-                  <input id="lorgus-maintenance-enabled" type="checkbox" style="width:20px;height:20px;accent-color:#b29667">
+                  <span class="lorgus-maintenance-switch"><input id="lorgus-maintenance-enabled" type="checkbox" role="switch" aria-label="Включить режим технических работ"><span aria-hidden="true"></span></span>
                   <span><strong>Включить режим технических работ</strong><small style="display:block;opacity:.7;font-size:14px">Игроки увидят заглушку вместо игрового мира.</small></span>
                 </label>
                 <label style="display:grid;gap:6px">Текст заглушки
