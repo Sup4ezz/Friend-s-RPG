@@ -26,8 +26,10 @@
     padding:4px 2px!important;border:0!important;border-radius:0!important;background:transparent!important;
     box-shadow:none!important;color:#c9b98f!important;
   }
-  .lorgus-mainmenu-arrow span{font-size:16px!important;line-height:1!important}
-  .lorgus-mainmenu-arrow b{font-size:9px!important;letter-spacing:.04em!important;white-space:nowrap!important}
+  .lorgus-mainmenu-arrow .lorgus-nav-symbol{display:flex!important;align-items:center!important;justify-content:center!important;width:28px!important;height:25px!important;line-height:1!important;color:#d7b66d!important}
+  .lorgus-mainmenu-arrow .lorgus-nav-symbol svg{display:block!important;width:25px!important;height:25px!important;fill:none!important;stroke:currentColor!important;stroke-width:1.65!important;stroke-linecap:round!important;stroke-linejoin:round!important}
+  .lorgus-mainmenu-arrow b{font-size:9px!important;letter-spacing:.04em!important;white-space:nowrap!important;font-weight:600!important}
+  .lorgus-mainmenu-arrow:focus-visible{outline:1px solid #d7b66d!important;outline-offset:-3px!important}
   .lorgus-mainmenu-arrow:active{color:#f5d995!important;background:rgba(215,182,109,.08)!important}
   .lorgus-map-page{min-height:100dvh!important;padding-bottom:calc(82px + env(safe-area-inset-bottom))!important}
   .lorgus-map-shell{display:block!important;min-height:0!important;width:100%!important}
