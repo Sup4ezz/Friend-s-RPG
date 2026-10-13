@@ -12,49 +12,80 @@ function clean(value: unknown, max = 800): string {
   return String(value ?? "").replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "").trim().slice(0, max);
 }
 
+function escapeHtml(value: unknown, max = 800): string {
+  return clean(value, max)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function formatEvent(type: string, payload: Record<string, unknown>): string {
-  const name = clean(payload.character_name || payload.name || "Неизвестно", 120);
-  const place = [payload.region, payload.location].map(v => clean(v, 100)).filter(Boolean).join(" / ");
+  const name = escapeHtml(payload.character_name || payload.name || "Неизвестно", 120);
+  const place = [payload.region, payload.location].map(v => escapeHtml(v, 100)).filter(Boolean).join(" · ");
   const lines: string[] = [];
+  const field = (label: string, value: unknown, max = 180) =>
+    lines.push("<b>" + label + "</b> " + escapeHtml(value, max));
+  const heading = (icon: string, title: string, subtitle = "") => {
+    lines.push("𓆩 <b>L O R G U S</b> 𓆪", "", icon + " <b>" + title + "</b>");
+    if (subtitle) lines.push("<i>" + subtitle + "</i>");
+    lines.push("━━━━━━━━━━━━━━");
+  };
+  const footer = (label = "Весточка из мира") => {
+    lines.push("", "━━━━━━━━━━━━━━", "<i>" + label + "</i>");
+  };
+
   switch (type) {
     case "character_application":
-      lines.push("🆕 НОВАЯ ЗАЯВКА LORGUS", "", "Персонаж: " + name);
-      if (payload.race) lines.push("Раса: " + clean(payload.race, 80));
-      if (payload.age) lines.push("Возраст: " + clean(payload.age, 20));
-      if (payload.homeland) lines.push("Родина: " + clean(payload.homeland, 100));
-      if (payload.occupation) lines.push("Занятие: " + clean(payload.occupation, 120));
-      lines.push("ID заявки: " + clean(payload.application_id, 50));
+      heading("📜", "НОВАЯ ЗАЯВКА", "На рассмотрение администрации");
+      field("Персонаж:", name);
+      if (payload.race) field("Раса:", payload.race, 80);
+      if (payload.age) field("Возраст:", payload.age, 20);
+      if (payload.homeland) field("Родина:", payload.homeland, 100);
+      if (payload.occupation) field("Занятие:", payload.occupation, 120);
+      field("Заявка:", "#" + clean(payload.application_id, 50));
+      footer("LORGUS · Канцелярия");
       break;
+
     case "rp_message":
-      lines.push("💬 НОВОЕ RP-СООБЩЕНИЕ", "", "Персонаж: " + name);
-      if (place) lines.push("Место: " + place);
-      lines.push("", clean(payload.body, 2800));
-      lines.push("", "Пост #" + clean(payload.message_id, 40));
+      heading("🕯️", "НОВАЯ ЗАПИСЬ В ЛЕТОПИСИ", name);
+      if (place) field("Место:", place, 220);
+      lines.push("", "<blockquote>" + escapeHtml(payload.body, 2800) + "</blockquote>");
+      field("Запись:", "#" + clean(payload.message_id, 40));
+      footer("LORGUS · Голоса мира");
       break;
+
     case "item_used":
-      lines.push("🧪 ПРЕДМЕТ ИСПОЛЬЗОВАН В RP", "", "Персонаж: " + name);
-      lines.push("Предмет: " + clean(payload.item_name || "Неизвестный предмет", 150) + " ×" + clean(payload.quantity || 1, 10));
-      if (place) lines.push("Место: " + place);
-      if (payload.message_id) lines.push("Пост #" + clean(payload.message_id, 40));
-      if (payload.message_excerpt) lines.push("", clean(payload.message_excerpt, 700));
+      heading("⚔️", "ПРЕДМЕТ ИСПОЛЬЗОВАН", name);
+      field("Реликвия:", clean(payload.item_name || "Неизвестный предмет", 150) + " ×" + clean(payload.quantity || 1, 10));
+      if (place) field("Место:", place, 220);
+      if (payload.message_id) field("Запись:", "#" + clean(payload.message_id, 40));
+      if (payload.message_excerpt) lines.push("", "<blockquote>" + escapeHtml(payload.message_excerpt, 700) + "</blockquote>");
+      footer("LORGUS · Движение вещей");
       break;
+
     case "item_transfer":
-      lines.push("🎒 ПЕРЕДАЧА ПРЕДМЕТА", "", "Получатель: " + name);
-      lines.push("Предмет: " + clean(payload.item_name || "Неизвестный предмет", 150) + " ×" + clean(payload.quantity || 1, 10));
-      if (payload.sender_name) lines.push("Отправитель: " + clean(payload.sender_name, 120));
+      heading("🎒", "ПЕРЕДАЧА ПРЕДМЕТА", "Из рук в руки");
+      if (payload.sender_name) field("От кого:", payload.sender_name, 120);
+      field("Кому:", name);
+      field("Предмет:", clean(payload.item_name || "Неизвестный предмет", 150) + " ×" + clean(payload.quantity || 1, 10));
+      footer("LORGUS · Торговые вести");
       break;
+
     case "currency_transfer": {
       const data = payload.data && typeof payload.data === "object" ? payload.data as Record<string, unknown> : {};
-      lines.push("🪙 ПЕРЕДАЧА ВАЛЮТЫ", "");
-      if (data.sender_name) lines.push("Отправитель: " + clean(data.sender_name, 120));
-      if (name !== "Неизвестно") lines.push("Получатель: " + name);
+      heading("🪙", "ДВИЖЕНИЕ МОНЕТ", "Передача средств");
+      if (data.sender_name) field("От кого:", data.sender_name, 120);
+      if (name !== "Неизвестно") field("Кому:", name);
       if (data.amount != null || data.currency_code) {
-        lines.push("Сумма: " + clean(data.amount ?? "", 30) + " " + clean(data.currency_name || data.currency_code || "", 60));
+        field("Сумма:", clean(data.amount ?? "", 30) + " " + clean(data.currency_name || data.currency_code || "", 60));
       } else {
-        lines.push(clean(payload.body || "Получена передача валюты", 700));
+        lines.push("", escapeHtml(payload.body || "Получена передача валюты", 700));
       }
+      footer("LORGUS · Торговые вести");
       break;
     }
+
     case "lootbox_reward": {
       const rarity = clean(payload.rarity || "", 40);
       const rarityNames: Record<string, string> = {
@@ -65,31 +96,51 @@ function formatEvent(type: string, payload: Record<string, unknown>): string {
         common: "▫️", uncommon: "🟩", rare: "🟦", epic: "🟪",
         legendary: "🟨", mythic: "💠", unique: "🌟"
       };
-      lines.push((icons[rarity] || "🎁") + " ЛУТБОКС ОТКРЫТ", "", "Персонаж: " + name);
+      heading(icons[rarity] || "🎁", "СУНДУК РАСКРЫЛ ТАЙНУ", "Судьба улыбнулась персонажу");
+      field("Персонаж:", name);
       const rewardType = clean(payload.reward_type || "", 40);
       if (rewardType === "currency") {
-        lines.push("Награда: " + clean(payload.amount ?? "", 30) + " " + clean(payload.currency_code || "", 40));
+        field("Добыча:", clean(payload.amount ?? "", 30) + " " + clean(payload.currency_code || "", 40));
       } else {
-        lines.push("Награда: " + clean(payload.reward_name || "Неизвестно", 200));
+        field("Добыча:", payload.reward_name || "Неизвестная награда", 200);
       }
-      if (rarity) lines.push("Редкость: " + (rarityNames[rarity] || rarity));
-      if (payload.description) lines.push(clean(payload.description, 700));
-      if (payload.source_lootbox_name) lines.push("Сундук: " + clean(payload.source_lootbox_name, 120));
+      if (rarity) field("Редкость:", rarityNames[rarity] || rarity, 60);
+      if (payload.description) lines.push("", "<blockquote>" + escapeHtml(payload.description, 700) + "</blockquote>");
+      if (payload.source_lootbox_name) field("Сундук:", payload.source_lootbox_name, 120);
+      footer("LORGUS · Дары судьбы");
       break;
     }
-    case "application_review":
-      lines.push("⚖️ ИЗМЕНЁН СТАТУС ЗАЯВКИ", "", "Персонаж: " + name);
-      lines.push("Статус: " + clean(payload.status, 40));
-      if (payload.review_notes) lines.push("Комментарий: " + clean(payload.review_notes, 500));
+
+    case "application_review": {
+      const status = clean(payload.status || "unknown", 40);
+      const statusText: Record<string, string> = {
+        approved: "Одобрена", revision: "Нужны исправления", rejected: "Отклонена", pending: "Ожидает рассмотрения"
+      };
+      const approved = status === "approved";
+      const icon = approved ? "🟢" : status === "rejected" ? "🔴" : "⚖️";
+      heading(icon, "РЕШЕНИЕ ПО ЗАЯВКЕ", name);
+      field("Результат:", statusText[status] || status);
+      if (payload.review_notes) {
+        lines.push("", "<b>Комментарий администрации</b>", "<blockquote>" + escapeHtml(payload.review_notes, 500) + "</blockquote>");
+      }
+      footer("LORGUS · Канцелярия");
       break;
+    }
+
     case "rp_message_reverted":
-      lines.push("↩️ RP-ПОСТ ОТМЕНЁН", "", "Персонаж: " + name);
-      lines.push("Пост #" + clean(payload.message_id, 40));
-      if (payload.revert_reason) lines.push("Причина: " + clean(payload.revert_reason, 500));
-      if (payload.body) lines.push("", clean(payload.body, 800));
+      heading("↩️", "ЗАПИСЬ ИСКЛЮЧЕНА ИЗ ЛЕТОПИСИ", name);
+      field("Запись:", "#" + clean(payload.message_id, 40));
+      if (payload.revert_reason) {
+        lines.push("", "<b>Основание</b>", "<blockquote>" + escapeHtml(payload.revert_reason, 500) + "</blockquote>");
+      }
+      if (payload.body) lines.push("", "<b>Текст записи</b>", "<blockquote>" + escapeHtml(payload.body, 800) + "</blockquote>");
+      footer("LORGUS · Действия администрации");
       break;
+
     default:
-      lines.push("🔔 LORGUS · " + clean(type, 80), "", clean(JSON.stringify(payload), 2000));
+      heading("🔔", "СЛУЖЕБНАЯ ВЕСТЬ", clean(type, 80));
+      lines.push("<pre>" + escapeHtml(JSON.stringify(payload, null, 2), 2000) + "</pre>");
+      footer("LORGUS · Система оповещений");
   }
   return lines.join("\n").slice(0, 3900);
 }
@@ -135,6 +186,7 @@ Deno.serve(async (req: Request) => {
     body: JSON.stringify({
       chat_id: chatId,
       text: formatEvent(clean(event.event_type, 80), event.payload),
+      parse_mode: "HTML",
       disable_web_page_preview: true,
     }),
   });
