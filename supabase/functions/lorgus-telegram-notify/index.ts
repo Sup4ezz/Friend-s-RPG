@@ -43,16 +43,40 @@ function formatEvent(type: string, payload: Record<string, unknown>): string {
       lines.push("Предмет: " + clean(payload.item_name || "Неизвестный предмет", 150) + " ×" + clean(payload.quantity || 1, 10));
       if (payload.sender_name) lines.push("Отправитель: " + clean(payload.sender_name, 120));
       break;
-    case "currency_transfer":
-      lines.push("🪙 ПЕРЕДАЧА ВАЛЮТЫ", "", clean(payload.body || "Получена передача валюты", 700));
+    case "currency_transfer": {
+      const data = payload.data && typeof payload.data === "object" ? payload.data as Record<string, unknown> : {};
+      lines.push("🪙 ПЕРЕДАЧА ВАЛЮТЫ", "");
+      if (data.sender_name) lines.push("Отправитель: " + clean(data.sender_name, 120));
       if (name !== "Неизвестно") lines.push("Получатель: " + name);
+      if (data.amount != null || data.currency_code) {
+        lines.push("Сумма: " + clean(data.amount ?? "", 30) + " " + clean(data.currency_name || data.currency_code || "", 60));
+      } else {
+        lines.push(clean(payload.body || "Получена передача валюты", 700));
+      }
       break;
-    case "lootbox_reward":
-      lines.push("🎁 ЛУТБОКС ОТКРЫТ", "", "Персонаж: " + name);
-      lines.push("Награда: " + clean(payload.reward_name || "Неизвестно", 200));
-      if (payload.rarity) lines.push("Редкость: " + clean(payload.rarity, 40));
+    }
+    case "lootbox_reward": {
+      const rarity = clean(payload.rarity || "", 40);
+      const rarityNames: Record<string, string> = {
+        common: "Обычная", uncommon: "Необычная", rare: "Редкая",
+        epic: "Эпическая", legendary: "Легендарная", mythic: "Мифическая", unique: "Уникальная"
+      };
+      const icons: Record<string, string> = {
+        common: "▫️", uncommon: "🟩", rare: "🟦", epic: "🟪",
+        legendary: "🟨", mythic: "💠", unique: "🌟"
+      };
+      lines.push((icons[rarity] || "🎁") + " ЛУТБОКС ОТКРЫТ", "", "Персонаж: " + name);
+      const rewardType = clean(payload.reward_type || "", 40);
+      if (rewardType === "currency") {
+        lines.push("Награда: " + clean(payload.amount ?? "", 30) + " " + clean(payload.currency_code || "", 40));
+      } else {
+        lines.push("Награда: " + clean(payload.reward_name || "Неизвестно", 200));
+      }
+      if (rarity) lines.push("Редкость: " + (rarityNames[rarity] || rarity));
       if (payload.description) lines.push(clean(payload.description, 700));
+      if (payload.source_lootbox_name) lines.push("Сундук: " + clean(payload.source_lootbox_name, 120));
       break;
+    }
     case "application_review":
       lines.push("⚖️ ИЗМЕНЁН СТАТУС ЗАЯВКИ", "", "Персонаж: " + name);
       lines.push("Статус: " + clean(payload.status, 40));
