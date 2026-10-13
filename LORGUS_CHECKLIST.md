@@ -1139,7 +1139,7 @@ Commits:
 - [x] Администраторы остаются исключением из блокировки; прямые игровые RPC заблокированного обычного пользователя должны завершаться ошибкой `ACCESS_BLOCKED`.
 - [x] SQL-регрессия: временно выбранный обычный аккаунт в рамках одного тестового блока распознавался как заблокированный; RPC записи (`touch_lorgus_rp_presence`) и чтения (`get_lorgus_rp_messages`) обе отклонены с `ACCESS_BLOCKED`; тестовая строка удалена, остаток тестовых записей — 0.
 - [ ] Проверить реальный сценарий заблокированного игрока и попытки RPC из браузера; отдельно проверить снятие блокировки и восстановление доступа.
-- [x] GitHub Actions `Deploy Supabase migrations` и `Deploy LORGUS to Cloudflare Workers` для коммита `d886ea3b1b259bde364d216b2774ed39e4dad0c6` завершились `success`.
+- [x] GitHub Actions `Deploy Supabase migrations` и `Deploy LORGUS to Cloudflare Workers` для коммита `13873abb3839d565d1bef8e4b975a9a7bee1e49c` завершились `success`.
 - [ ] Выполнить браузерную регрессию RP: первое сообщение, закрепление локации, дорога, ответ на сообщение, использование предмета и переводы.
 
 
@@ -1148,4 +1148,5 @@ Commits:
 - [x] Добавлены admin-only RPC `admin_list_lorgus_blacklist`, `admin_block_lorgus_player`, `admin_unblock_lorgus_player`; они проверяют права администратора и не требуют открывать таблицу игроков клиенту.
 - [x] Клиент чёрного списка переведён на RPC; прямые запросы к `players` и прямые INSERT/DELETE в `lorgus_blacklist` убраны.
 - [x] Production migration `20261013062750_admin_blacklist_rpcs.sql` применена; EXECUTE отозван у `PUBLIC/anon`, оставлен authenticated с серверной проверкой admin.
+- [x] SQL-регрессия admin RPC: временно выбранный обычный аккаунт заблокирован через `admin_block_lorgus_player`, распознан серверной проверкой, затем разблокирован через `admin_unblock_lorgus_player`; тестовых записей после проверки не осталось.
 - [ ] Проверить блокировку/разблокировку через реальную админ-панель браузера; затем повторить браузерный RP regression.
