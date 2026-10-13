@@ -13,6 +13,10 @@ on:
       - "README.md"
   workflow_dispatch:
 
+concurrency:
+  group: deploy-lorgus-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
