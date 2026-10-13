@@ -48,7 +48,7 @@
         container.className = "lorgus-codex-page";
         container.innerHTML = '<header class="lorgus-codex-header"><span>ЛОРГУС · ОТКРЫТАЯ ЛЕТОПИСЬ</span><h1>Справочник мира</h1><p>Знания, доступные путешественникам и жителям пяти королевств.</p></header><div class="lorgus-codex-layout"><nav class="lorgus-codex-nav" aria-label="Разделы справочника">' +
             topics.map((topic, i) => '<button type="button" class="lorgus-codex-topic' + (i === topicIndex ? ' active' : '') + '" data-topic="' + i + '"><strong>' + esc(topic.title) + '</strong><small>' + esc(topic.summary) + '</small></button>').join("") +
-            '</nav><article class="lorgus-codex-article"><div class="lorgus-codex-loading">Открываем летопись…</div></article></div><button class="lorgus-codex-back" type="button" onclick="window.lorgusNavigate ? window.lorgusNavigate(\\'/world\\') : window.renderLorgusWorldMapCurrent?.()">← Вернуться к миру</button>';
+            '</nav><article class="lorgus-codex-article"><div class="lorgus-codex-loading">Открываем летопись…</div></article></div><button class="lorgus-codex-back" type="button" onclick="window.lorgusNavigate ? window.lorgusNavigate(\'/world\') : window.renderLorgusWorldMapCurrent?.()">← Вернуться к миру</button>';
         const article = container.querySelector(".lorgus-codex-article");
         const loadTopic = async index => {
             const topic = topics[index];
