@@ -13,11 +13,14 @@ function clean(value: unknown, max = 800): string {
 }
 
 function escapeHtml(value: unknown, max = 800): string {
-  return clean(value, max)
+  const escaped = clean(value, max)
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+  // Clip the escaped output too, so repeated HTML metacharacters cannot
+  // inflate a Telegram message past its limit or leave a broken entity.
+  return escaped.slice(0, max).replace(/&(?:amp|lt|gt|quot|#\d*|#x[\da-f]*)?$/i, "");
 }
 
 function formatEvent(type: string, payload: Record<string, unknown>): string {
