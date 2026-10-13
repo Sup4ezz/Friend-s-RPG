@@ -271,8 +271,15 @@ function renderAuth() {
     `;
 
     showLogin(true);
-    initializeLorgusScene();
-    window.initializeLorgusWebGL();
+    const mobileAuth = window.matchMedia("(max-width: 700px)").matches;
+    if (mobileAuth) {
+        document.querySelector(".lorgus-cinematic-auth")?.classList.add("lorgus-mobile-auth");
+        // The mobile composition is 2D. Do not create canvases or download Three.js.
+        if (window.lorgusSceneCleanup) { window.lorgusSceneCleanup(); window.lorgusSceneCleanup = null; }
+    } else {
+        initializeLorgusScene();
+        window.initializeLorgusWebGL();
+    }
     initializeLorgusAudio();
 }
 
