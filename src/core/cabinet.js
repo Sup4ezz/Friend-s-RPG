@@ -141,6 +141,10 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
                 application.status === "pending"
         );
 
+    const rejectedApplications = applications.filter(
+        application => application.status === "rejected"
+    );
+
     /*
         Восстанавливаем выбранного персонажа после перезагрузки.
         sessionStorage хранит только ID, поэтому самого персонажа
@@ -241,7 +245,8 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
         await renderCharacterSelection(
             container,
             approvedApplications,
-            pendingApplication
+            pendingApplication,
+            rejectedApplications
         );
         return;
     }
@@ -251,6 +256,11 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
             container,
             pendingApplication
         );
+        return;
+    }
+
+    if (rejectedApplications.length > 0) {
+        await renderCharacterSelection(container, [], null, rejectedApplications);
         return;
     }
 
