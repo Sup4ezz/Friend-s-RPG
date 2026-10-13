@@ -2237,9 +2237,29 @@ async function loadAdminItemUseLog(container) {
                 '<div class="admin-item-use-body"><strong>' + escapeHtml(item.name || "Предмет") + '</strong>' +
                 '<span>' + escapeHtml(char.name || "Персонаж") + ' · пост #' + escapeHtml(String(row.message_id)) + ' · ' + escapeHtml(row.used_at ? new Date(row.used_at).toLocaleString("ru-RU") : "—") + '</span>' +
                 '<p>' + escapeHtml(post.body || "") + '</p><small>' + (row.consumed ? "Предмет расходуется" : "Предмет не расходуется") +
-                (row.status === "reverted" ? " · ОТКАТ ВЫПОЛНЕН" : "") + '</small></div>' +
-                '<div class="admin-item-use-action">' + (row.status !== "reverted" ? '<button type="button" data-message-id="' + escapeHtml(String(row.message_id)) + '">Отменить пост</button>' : '<span>Отменено</span>') + '</div></article>';
+                (row.status === "reverted" ? " · ИСПОЛЬЗОВАНИЕ ОТМЕНЕНО" : "") + '</small></div>' +
+                '<div class="admin-item-use-action">' +
+                    (row.status !== "reverted"
+                        ? '<button type="button" data-use-id="' + escapeHtml(String(row.id)) + '">Отменить использование</button><button type="button" data-message-id="' + escapeHtml(String(row.message_id)) + '">Отменить весь пост</button>'
+                        : '<span>Использование отменено</span>') +
+                '</div></article>';
         }).join("") : '<div class="admin-empty"><h2>Ничего не найдено</h2><p>Измени поиск или фильтры журнала.</p></div>';
+
+        list.querySelectorAll("button[data-use-id]").forEach(button => button.addEventListener("click", async () => {
+            const reason = prompt("Почему отменяется использование этого предмета? Сам RP-пост останется в чате.", "");
+            if (reason === null) return;
+            button.disabled = true;
+            const { error } = await window.supabaseClient.rpc("admin_revert_rp_item_use", {
+                p_use_id: button.dataset.useId,
+                p_reason: reason.trim()
+            });
+            if (error) {
+                alert("Не удалось отменить использование предмета:\n\n" + error.message);
+                button.disabled = false;
+                return;
+            }
+            await loadAdminItemUseLog(container);
+        }));
 
         list.querySelectorAll("button[data-message-id]").forEach(button => button.addEventListener("click", async () => {
             const reason = prompt("Почему пост и использование предмета отменяются?", "");
