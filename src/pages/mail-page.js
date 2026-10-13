@@ -158,6 +158,13 @@ async function loadMailInbox() {
     if (!list || !window.activeCharacterId) return;
 
     const folder = window.lorgusMailFolder || "inbox";
+    if (folder !== "sent") {
+        const { error: deliveryError } = await window.supabaseClient.rpc("lorgus_deliver_due_mail");
+        if (deliveryError) {
+            // RLS still hides letters until deliver_at; keep the inbox usable if delivery bookkeeping is unavailable.
+            console.error("Не удалось зафиксировать доставку почты:", deliveryError);
+        }
+    }
     const { data, error } = await window.supabaseClient
         .from("lorgus_mail")
         .select("id, sender_character_id, recipient_character_id, body, method, sent_at, deliver_at, delivered_at, read_at, sender:characters!lorgus_mail_sender_character_id_fkey(name), recipient:characters!lorgus_mail_recipient_character_id_fkey(name)")
