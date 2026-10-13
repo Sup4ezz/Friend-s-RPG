@@ -1775,7 +1775,7 @@ async function openRpCurrencyTransferPicker(targetCharacterId = null) {
     });
     overlay.querySelector(".lorgus-transfer-confirm").addEventListener("click",async()=>{
         const target=overlay.querySelector(".lorgus-transfer-target").value, code=currencySelect.value;
-        const amount=Number.parseInt(amountInput.value,10);
+        const amount=Number(amountInput.value);
         if(!target||!code){ alert("Выбери персонажа и валюту."); return; }
         if(!Number.isSafeInteger(amount)||amount<1){ alert("Укажи целую сумму не меньше 1."); return; }
         const balance=usable.find(x=>x.currency_code===code)?.amount||0;
