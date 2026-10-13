@@ -167,7 +167,7 @@
                     status.textContent = checkbox.checked ? "Заглушка включена. Игроки увидят её в течение 15 секунд." : "Режим технических работ выключен.";
                 } catch (error) {
                     console.error("Unable to save maintenance settings:", error);
-                    status.textContent = "Не удалось сохранить настройки. Проверь права доступа.";
+                    status.textContent = `Ошибка сохранения: ${error?.message || "проверь права доступа"}`;
                 } finally {
                     save.disabled = false;
                 }
