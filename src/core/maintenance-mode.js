@@ -108,7 +108,10 @@
         if (typeof originalRenderAdminApplications !== "function" || originalRenderAdminApplications.__lorgusMaintenanceWrapped) return false;
         const wrapped = async function(container, applications) {
             await originalRenderAdminApplications.call(this, container, applications);
-            if (!container || container.querySelector("#lorgus-maintenance-admin")) return;
+            if (!container) return;
+            // Admin rendering can run against a newly-created container; keep one global toggle only.
+            const previousSection = document.getElementById("lorgus-maintenance-admin");
+            if (previousSection) previousSection.remove();
             let settings;
             try { settings = await readSettings(); }
             catch (error) { console.error("Unable to load maintenance settings:", error); }
