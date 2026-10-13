@@ -1784,7 +1784,10 @@ async function openRpCurrencyTransferPicker(targetCharacterId = null) {
         amountInput.max=String(balance);
         if(Number.parseInt(amountInput.value,10)>balance) amountInput.value=String(balance||1);
     });
-    overlay.querySelector(".lorgus-transfer-confirm").addEventListener("click",async()=>{
+    const currencyTransferButton=overlay.querySelector(".lorgus-transfer-confirm");
+    let currencyTransferPending=false;
+    currencyTransferButton.addEventListener("click",async()=>{
+        if(currencyTransferPending) return;
         const target=overlay.querySelector(".lorgus-transfer-target").value, code=currencySelect.value;
         const amount=Number(amountInput.value);
         if(!target||!code){ alert("Выбери персонажа и валюту."); return; }
@@ -1792,7 +1795,13 @@ async function openRpCurrencyTransferPicker(targetCharacterId = null) {
         const balance=usable.find(x=>x.currency_code===code)?.amount||0;
         if(amount>balance){ alert("Недостаточно валюты."); return; }
         const chat = window.activeRpChatSpace;
-        const { error }=await window.supabaseClient.rpc("lorgus_transfer_character_currency_in_chat",{
+        currencyTransferPending=true;
+        currencyTransferButton.disabled=true;
+        currencyTransferButton.textContent="Передаём…";
+        let transferFailed=false;
+        let transferError=null;
+        try {
+            const result=await window.supabaseClient.rpc("lorgus_transfer_character_currency_in_chat",{
             p_sender_character_id:window.activeCharacterId,
             p_recipient_character_id:target,
             p_currency_code:code,
@@ -1804,8 +1813,10 @@ async function openRpCurrencyTransferPicker(targetCharacterId = null) {
             p_from_location:chat?.type === "road" ? chat.fromLocation : null,
             p_to_region:chat?.type === "road" ? chat.toRegion : null,
             p_to_location:chat?.type === "road" ? chat.toLocation : null
-        });
-        if(error){ console.error(error); alert(transferErrorMessage(error)); return; }
+            });
+            transferError=result.error;
+        } catch(error) { transferFailed=true; transferError=error; }
+        if(transferError){ console.error(transferError); alert(transferFailed ? "Не удалось передать валюту. Проверь соединение и попробуй ещё раз." : transferErrorMessage(transferError)); currencyTransferPending=false; currencyTransferButton.disabled=false; currencyTransferButton.textContent="Передать"; return; }
         close(); await renderLocationParticipantsIfVisible(); alert("Валюта передана.");
     });
 }
