@@ -1,0 +1,119 @@
+/* LORGUS — mobile-first presentation layer.
+   Desktop stays untouched; phones get their own information hierarchy. */
+:root{--lorgus-mobile-ink:#0b0907;--lorgus-mobile-panel:#13100c;--lorgus-mobile-line:rgba(205,166,91,.2);--lorgus-mobile-gold:#d7b66d;--lorgus-mobile-muted:#a99d86}
+@media(max-width:720px){
+  html{width:100%;overflow-x:clip;scroll-padding-top:72px}
+  body{width:100%;max-width:100%;overflow-x:clip;-webkit-text-size-adjust:100%;overscroll-behavior-x:none}
+  #root{width:100%;min-width:0;overflow-x:clip}
+  button,a,input,select,textarea{font-size:16px;touch-action:manipulation}
+  button,a{ -webkit-tap-highlight-color:rgba(215,182,109,.12)}
+  img,canvas,video,svg{max-width:100%}
+  input,select,textarea{min-height:46px}
+  button{min-height:42px}
+  .lorgus-mainmenu-nav{
+    position:fixed!important;inset:auto 0 0!important;z-index:1000!important;
+    display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:0!important;width:100%!important;height:auto!important;min-height:66px!important;
+    padding:7px 5px calc(7px + env(safe-area-inset-bottom))!important;
+    margin:0!important;transform:none!important;border-top:1px solid var(--lorgus-mobile-line)!important;
+    background:rgba(10,8,6,.97)!important;box-shadow:0 -12px 35px rgba(0,0,0,.42)!important;
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+  }
+  .lorgus-mainmenu-arrow{
+    position:static!important;inset:auto!important;transform:none!important;
+    display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;
+    gap:4px!important;width:100%!important;min-width:0!important;height:50px!important;min-height:50px!important;
+    padding:4px 2px!important;border:0!important;border-radius:0!important;background:transparent!important;
+    box-shadow:none!important;color:#c9b98f!important;
+  }
+  .lorgus-mainmenu-arrow span{font-size:16px!important;line-height:1!important}
+  .lorgus-mainmenu-arrow b{font-size:9px!important;letter-spacing:.04em!important;white-space:nowrap!important}
+  .lorgus-mainmenu-arrow:active{color:#f5d995!important;background:rgba(215,182,109,.08)!important}
+  .lorgus-map-page{min-height:100dvh!important;padding-bottom:calc(82px + env(safe-area-inset-bottom))!important}
+  .lorgus-map-shell{display:block!important;min-height:0!important;width:100%!important}
+  .lorgus-map-sidebar{display:none!important}
+  .lorgus-map-main{display:block!important;min-width:0!important;width:100%!important;padding:0 14px 28px!important}
+  .lorgus-map-header{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;padding:23px 2px 18px!important}
+  .lorgus-map-header .lorgus-map-kicker{font-size:9px!important;letter-spacing:.14em!important}
+  .lorgus-map-header h2{font-size:34px!important;line-height:1.05!important;margin:6px 0 0!important}
+  .lorgus-map-header-status{font-size:9px!important;white-space:nowrap!important}
+  /* The map itself is deliberately replaced by the atlas on touch screens. */
+  .lorgus-map-stage{display:block!important;min-width:0!important;width:100%!important}
+  .lorgus-map-frame,.lorgus-map-controls,.lorgus-map-hint,.lorgus-map-zoom-controls{display:none!important}
+  .lorgus-map-inspector{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;max-width:none!important;padding:18px!important;margin:0!important;border:1px solid var(--lorgus-mobile-line)!important;border-radius:5px!important;background:linear-gradient(145deg,rgba(29,23,15,.98),rgba(13,11,8,.98))!important;box-shadow:0 12px 30px rgba(0,0,0,.22)!important}
+  .lorgus-map-selection-symbol{display:none!important}
+  .lorgus-map-inspector h3{font-size:28px!important;margin:3px 0 7px!important}
+  .lorgus-map-inspector p{font-size:14px!important;line-height:1.6!important}
+  .lorgus-map-inspector-meta{margin:10px 0 12px!important}
+  .lorgus-map-enter-button{width:100%!important;min-height:48px!important;margin:8px 0 20px!important}
+  .lorgus-map-regions{width:100%!important;min-width:0!important;margin-top:0!important;padding-top:17px!important;border-top:1px solid var(--lorgus-mobile-line)!important}
+  .lorgus-map-regions-title{display:block!important;margin-bottom:12px!important;font-size:10px!important;letter-spacing:.18em!important}
+  .lorgus-map-region-search{display:flex!important;align-items:center!important;min-height:48px!important;margin-bottom:10px!important}
+  .lorgus-map-region-search input{width:100%!important;min-width:0!important;min-height:46px!important;font-size:16px!important}
+  .lorgus-map-region-filters{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:5px!important;margin:10px 0 12px!important}
+  .lorgus-map-region-filters button{min-width:0!important;padding:8px 4px!important;font-size:11px!important}
+  .lorgus-map-region-list{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  .lorgus-map-region-button{display:flex!important;align-items:center!important;gap:9px!important;min-width:0!important;min-height:54px!important;padding:11px 12px!important;text-align:left!important;border:1px solid rgba(205,166,91,.16)!important;border-radius:3px!important;background:rgba(255,255,255,.018)!important;color:#e4dac4!important}
+  .lorgus-map-region-button span{overflow-wrap:anywhere!important;font-size:13px!important}
+  .lorgus-map-region-button.active{border-color:rgba(215,182,109,.55)!important;background:rgba(215,182,109,.09)!important;color:#f4d994!important}
+  .lorgus-map-closed{margin-top:14px!important}
+  .lorgus-map-page .lorgus-map-editor-mode-hint{display:none!important}
+  .lorgus-command-main{padding:18px 13px calc(90px + env(safe-area-inset-bottom))!important}
+  .lorgus-command-hero,.lorgus-profile-hero{min-height:0!important;display:block!important;padding:22px 18px!important}
+  .lorgus-command-hero h1,.lorgus-profile-hero h1{font-size:clamp(30px,8vw,40px)!important;line-height:1.08!important}
+  .lorgus-command-status{align-items:flex-start!important;margin-top:18px!important}
+  .lorgus-command-grid,.lorgus-command-bottom,.lorgus-character-overview,.lorgus-character-content-grid{grid-template-columns:minmax(0,1fr)!important}
+  .lorgus-command-card,.lorgus-character-card{padding:17px!important}
+  .lorgus-whisper{grid-template-columns:minmax(0,1fr)!important;gap:17px!important;padding:20px 16px!important;margin-top:16px!important}
+  .lorgus-whisper h2{font-size:clamp(27px,7.5vw,34px)!important}
+  .lorgus-whisper-intro{font-size:13px!important;line-height:1.65!important}
+  .lorgus-whisper-reveal{min-height:0!important}
+  .lorgus-global-nav{position:sticky!important;top:0!important;z-index:900!important;display:block!important;padding:6px 10px!important}
+  .lorgus-global-links{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto!important;overscroll-behavior-x:contain!important;scrollbar-width:none!important}
+  .lorgus-global-links::-webkit-scrollbar{display:none!important}
+  .lorgus-global-account{flex-wrap:nowrap!important;gap:8px!important}
+  .lorgus-character-shell{display:block!important;min-width:0!important}
+  .lorgus-character-main{padding:18px 13px calc(88px + env(safe-area-inset-bottom))!important}
+  .lorgus-character-header h1{font-size:clamp(30px,8vw,40px)!important;overflow-wrap:anywhere!important}
+  .lorgus-character-nav{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .lorgus-mail-shell{padding-bottom:calc(78px + env(safe-area-inset-bottom))!important}
+  .lorgus-rp-page{padding-bottom:env(safe-area-inset-bottom)!important}
+  .lorgus-rp-page .lorgus-messenger-shell{height:calc(100dvh - 68px - env(safe-area-inset-bottom))!important;min-height:440px!important}
+  .lorgus-rp-page .lorgus-messenger-composer{padding-bottom:max(10px,env(safe-area-inset-bottom))!important}
+  .character-application,.admin-panel,.welcome-panel{width:calc(100% - 20px)!important;margin:14px auto!important;padding:22px 15px!important}
+  .character-grid{grid-template-columns:minmax(0,1fr)!important}
+  .admin-application-actions{grid-template-columns:minmax(0,1fr)!important}
+  .lorgus-audio-control{display:none!important}
+}
+@media(max-width:420px){
+  .lorgus-map-main{padding-inline:10px!important}
+  .lorgus-map-region-list{grid-template-columns:minmax(0,1fr)!important}
+  .lorgus-map-header h2{font-size:30px!important}
+  .lorgus-mainmenu-arrow b{font-size:8px!important}
+}
+/* Phone login is a deliberate 2D composition; never download or animate the 3D gate there. */
+@media(max-width:700px){
+  .lorgus-mobile-auth{min-height:100svh!important;min-height:100dvh!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:0!important;overflow:hidden!important;padding:24px 16px calc(24px + env(safe-area-inset-bottom))!important;background:radial-gradient(ellipse at 50% 12%,rgba(153,111,43,.16),transparent 45%),linear-gradient(180deg,#100d09,#070605 72%)!important}
+  .lorgus-mobile-auth::before{content:"";position:absolute;inset:12px;border:1px solid rgba(215,182,109,.15);pointer-events:none}
+  .lorgus-mobile-auth::after{content:"✦";position:absolute;top:calc(18px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);font-size:20px;color:rgba(215,182,109,.72)}
+  .lorgus-mobile-auth .lorgus-scene,.lorgus-mobile-auth .lorgus-webgl,.lorgus-mobile-auth .lorgus-vignette,.lorgus-mobile-auth .lorgus-fantasy-stage,.lorgus-mobile-auth .lorgus-auth-whisper{display:none!important}
+  .lorgus-mobile-auth .lorgus-auth-header{position:relative!important;inset:auto!important;display:flex!important;justify-content:center!important;gap:0!important;margin:0 0 32px!important;padding:0!important;border:0!important;background:none!important;font-size:10px!important;letter-spacing:.32em!important;color:rgba(215,182,109,.7)!important}
+  .lorgus-mobile-auth .lorgus-auth-header span:not(:first-child){display:none!important}
+  .lorgus-mobile-auth .lorgus-auth-title{position:relative!important;inset:auto!important;display:block!important;width:100%!important;margin:0 0 24px!important;text-align:center!important;transform:none!important;opacity:1!important}
+  .lorgus-mobile-auth .lorgus-auth-title .title-ghost{display:none!important}
+  .lorgus-mobile-auth .lorgus-auth-title .title-main{display:block!important;font-size:clamp(46px,15vw,68px)!important;line-height:1!important;letter-spacing:.12em!important;color:#e2c783!important;text-shadow:0 3px 0 #5c4522,0 10px 36px rgba(0,0,0,.7)!important}
+  .lorgus-mobile-auth .lorgus-auth-title .title-sub{display:block!important;margin-top:13px!important;font-size:9px!important;letter-spacing:.23em!important;color:#9f8b61!important}
+  .lorgus-mobile-auth .auth-container{position:relative!important;inset:auto!important;z-index:2!important;width:100%!important;max-width:430px!important;margin:0!important;transform:none!important}
+  .lorgus-mobile-auth .auth-panel{width:100%!important;padding:23px 18px!important;border:1px solid rgba(215,182,109,.24)!important;border-radius:4px!important;background:linear-gradient(155deg,rgba(28,23,16,.98),rgba(12,10,8,.99))!important;box-shadow:0 20px 60px rgba(0,0,0,.45)!important;backdrop-filter:none!important}
+  .lorgus-mobile-auth .auth-panel-kicker{justify-content:center!important;gap:8px!important;margin-bottom:21px!important;font-size:9px!important;letter-spacing:.12em!important}
+  .lorgus-mobile-auth .auth-tabs{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:5px!important;margin-bottom:20px!important}
+  .lorgus-mobile-auth .auth-tab{min-height:46px!important;padding:10px 6px!important;font-size:13px!important}
+  .lorgus-mobile-auth .auth-form-container{width:100%!important;min-width:0!important}
+  .lorgus-mobile-auth .auth-form-container input,.lorgus-mobile-auth .auth-form-container button,.lorgus-mobile-auth .auth-form-container select{width:100%!important;min-width:0!important;min-height:48px!important;font-size:16px!important}
+  .lorgus-mobile-auth .lorgus-auth-footer{position:relative!important;inset:auto!important;display:block!important;width:100%!important;max-width:430px!important;margin:22px 0 0!important;padding:0!important;text-align:center!important;font-size:10px!important;line-height:1.7!important;color:rgba(190,174,139,.56)!important}
+  .lorgus-mobile-auth .lorgus-auth-footer span:first-child,.lorgus-mobile-auth .lorgus-auth-footer span:last-child{display:none!important}
+  .lorgus-mobile-auth .lorgus-audio-control{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .lorgus-mobile-auth *{animation:none!important;transition:none!important}
+}
