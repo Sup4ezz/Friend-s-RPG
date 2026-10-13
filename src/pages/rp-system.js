@@ -1595,7 +1595,7 @@ async function sendLocalRpMessage() {
 
         if (error) {
             console.error("Не удалось отправить RP-сообщение:", error);
-            alert("Не удалось отправить сообщение: " + error.message);
+            alert("Не удалось отправить сообщение: " + (error.message === "LOOTBOX_MUST_BE_OPENED" ? "Лутбоксы нужно открывать отдельно из инвентаря." : error.message));
             return;
         }
 
