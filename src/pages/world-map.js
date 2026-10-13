@@ -424,10 +424,18 @@ function renderLorgusWorldMap(container, character) {
 
     container.innerHTML = `
         <nav class="lorgus-mainmenu-nav" aria-label="Навигация">
-            <button type="button" class="lorgus-mainmenu-arrow top" onclick="window.lorgusMainMenuNavigate('top', window.renderLorgusCharacterHub)" aria-label="Персонаж"><span>▲</span><b>ПЕРСОНАЖ</b></button>
-            <button type="button" class="lorgus-mainmenu-arrow bottom" onclick="window.lorgusMainMenuNavigate('bottom', window.renderMail)" aria-label="Письма"><span>▼</span><b>ПИСЬМА</b></button>
-            <button type="button" class="lorgus-mainmenu-arrow left" onclick="window.lorgusOpenRpFromMap()" aria-label="Ролевая"><span>◀</span><b>РОЛЕВАЯ</b></button>
-            <button type="button" class="lorgus-mainmenu-arrow right" onclick="window.lorgusMainMenuNavigate('right', window.renderLorgusCodex)" aria-label="Лорбук"><span>▶</span><b>ЛОРБУК</b></button>
+            <button type="button" class="lorgus-mainmenu-arrow top" onclick="window.lorgusMainMenuNavigate('top', window.renderLorgusCharacterHub)" aria-label="Персонаж">
+                <span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="7.5" r="3.5"/><path d="M4.5 20v-2a7.5 7.5 0 0 1 15 0v2z"/></svg></span><b>ПЕРСОНАЖ</b>
+            </button>
+            <button type="button" class="lorgus-mainmenu-arrow bottom" onclick="window.lorgusMainMenuNavigate('bottom', window.renderMail)" aria-label="Письма">
+                <span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="1.5"/><path d="m4 7 8 6 8-6"/></svg></span><b>ПИСЬМА</b>
+            </button>
+            <button type="button" class="lorgus-mainmenu-arrow left" onclick="window.lorgusOpenRpFromMap()" aria-label="Ролевая">
+                <span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H7l-4 2v-6A7.5 7.5 0 1 1 20 11.5Z"/><path d="M8 10h8M8 13.5h5"/></svg></span><b>РОЛЕВАЯ</b>
+            </button>
+            <button type="button" class="lorgus-mainmenu-arrow right" onclick="window.lorgusMainMenuNavigate('right', window.renderLorgusCodex)" aria-label="Лорбук">
+                <span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 5.5c3.2-1.2 6.1-.8 8.5 1.1v13c-2.4-1.9-5.3-2.3-8.5-1.1z"/><path d="M20.5 5.5c-3.2-1.2-6.1-.8-8.5 1.1v13c2.4-1.9 5.3-2.3 8.5-1.1z"/></svg></span><b>ЛОРБУК</b>
+            </button>
         </nav>
         <div class="lorgus-map-shell">
             <aside class="lorgus-map-sidebar">
