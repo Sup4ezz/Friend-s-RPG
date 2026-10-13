@@ -1740,9 +1740,10 @@ async function openRpTransferPicker(targetCharacterId = null) {
     const itemSelect=overlay.querySelector(".lorgus-transfer-item"), qty=overlay.querySelector(".lorgus-transfer-quantity");
     itemSelect.addEventListener("change",()=>{ const row=usable.find(x=>x.id===itemSelect.value); qty.max=String(row?.quantity||1); qty.value="1"; });
     overlay.querySelector(".lorgus-transfer-confirm").addEventListener("click",async()=>{
-        const target=overlay.querySelector(".lorgus-transfer-target").value, itemId=itemSelect.value, amount=Math.max(1,Number.parseInt(qty.value,10)||1);
+        const target=overlay.querySelector(".lorgus-transfer-target").value, itemId=itemSelect.value, amount=Number(qty.value);
         if(!target||!itemId){ alert("Выбери персонажа и предмет."); return; }
         const row=usable.find(x=>x.id===itemId);
+        if(!Number.isSafeInteger(amount)||amount<1){ alert("Укажи целое количество не меньше 1."); return; }
         if(!row || amount>row.quantity){ alert("Недостаточно предметов."); return; }
         const { error }=await window.supabaseClient.rpc("lorgus_transfer_character_item",{p_sender_character_id:window.activeCharacterId,p_recipient_character_id:target,p_inventory_id:itemId,p_quantity:amount});
         if(error){ console.error(error); alert(transferErrorMessage(error)); return; }
