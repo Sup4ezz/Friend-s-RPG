@@ -182,7 +182,7 @@ async function renderAdminApplications(container, applications) {
         </section>
         <section class="admin-section admin-item-use-management">
             <div class="admin-section-heading">
-                <div><h2>Использование предметов</h2><p>Журнал предметов, использованных в RP-постах. Здесь можно отменить некорректное использование вместе с постом.</p></div>
+                <div><h2>Использование предметов</h2><p>Журнал предметов, использованных в RP-постах. Можно вернуть отдельный предмет, не отменяя сообщение, или отменить весь пост целиком.</p></div>
             </div>
             <div id="admin-item-use-log" class="admin-item-use-log"><div class="admin-empty"><h2>Загрузка журнала...</h2></div></div>
         </section>
