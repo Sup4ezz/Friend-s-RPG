@@ -38,9 +38,9 @@
   .lorgus-map-header h2{font-size:34px!important;line-height:1.05!important;margin:6px 0 0!important}
   .lorgus-map-header-status{font-size:9px!important;white-space:nowrap!important}
   /* The map itself is deliberately replaced by the atlas on touch screens. */
-  .lorgus-map-stage{display:block!important;min-width:0!important;width:100%!important}
+  .lorgus-map-stage{display:flex!important;flex-direction:column!important;gap:0!important;min-width:0!important;width:100%!important}
   .lorgus-map-frame,.lorgus-map-controls,.lorgus-map-hint,.lorgus-map-zoom-controls{display:none!important}
-  .lorgus-map-inspector{display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;max-width:none!important;padding:18px!important;margin:0!important;border:1px solid var(--lorgus-mobile-line)!important;border-radius:5px!important;background:linear-gradient(145deg,rgba(29,23,15,.98),rgba(13,11,8,.98))!important;box-shadow:0 12px 30px rgba(0,0,0,.22)!important}
+  .lorgus-map-inspector{position:relative!important;inset:auto!important;transform:none!important;height:auto!important;max-height:none!important;display:flex!important;flex-direction:column!important;min-width:0!important;width:100%!important;max-width:none!important;padding:18px!important;margin:0!important;border:1px solid var(--lorgus-mobile-line)!important;border-radius:5px!important;background:linear-gradient(145deg,rgba(29,23,15,.98),rgba(13,11,8,.98))!important;box-shadow:0 12px 30px rgba(0,0,0,.22)!important}
   .lorgus-map-selection-symbol{display:none!important}
   .lorgus-map-inspector h3{font-size:28px!important;margin:3px 0 7px!important}
   .lorgus-map-inspector p{font-size:14px!important;line-height:1.6!important}
