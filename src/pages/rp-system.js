@@ -1739,14 +1739,25 @@ async function openRpTransferPicker(targetCharacterId = null) {
     const close=()=>overlay.remove(); overlay.querySelector(".lorgus-rp-item-close").addEventListener("click",close); overlay.querySelector(".lorgus-rp-item-backdrop").addEventListener("click",close);
     const itemSelect=overlay.querySelector(".lorgus-transfer-item"), qty=overlay.querySelector(".lorgus-transfer-quantity");
     itemSelect.addEventListener("change",()=>{ const row=usable.find(x=>x.id===itemSelect.value); qty.max=String(row?.quantity||1); qty.value="1"; });
-    overlay.querySelector(".lorgus-transfer-confirm").addEventListener("click",async()=>{
+    const itemTransferButton=overlay.querySelector(".lorgus-transfer-confirm");
+    let itemTransferPending=false;
+    itemTransferButton.addEventListener("click",async()=>{
+        if(itemTransferPending) return;
         const target=overlay.querySelector(".lorgus-transfer-target").value, itemId=itemSelect.value, amount=Number(qty.value);
         if(!target||!itemId){ alert("Выбери персонажа и предмет."); return; }
         const row=usable.find(x=>x.id===itemId);
         if(!Number.isSafeInteger(amount)||amount<1){ alert("Укажи целое количество не меньше 1."); return; }
         if(!row || amount>row.quantity){ alert("Недостаточно предметов."); return; }
-        const { error }=await window.supabaseClient.rpc("lorgus_transfer_character_item",{p_sender_character_id:window.activeCharacterId,p_recipient_character_id:target,p_inventory_id:itemId,p_quantity:amount});
-        if(error){ console.error(error); alert(transferErrorMessage(error)); return; }
+        itemTransferPending=true;
+        itemTransferButton.disabled=true;
+        itemTransferButton.textContent="Передаём…";
+        let transferFailed=false;
+        let transferError=null;
+        try {
+            const result=await window.supabaseClient.rpc("lorgus_transfer_character_item",{p_sender_character_id:window.activeCharacterId,p_recipient_character_id:target,p_inventory_id:itemId,p_quantity:amount});
+            transferError=result.error;
+        } catch(error) { transferFailed=true; transferError=error; }
+        if(transferError){ console.error(transferError); alert(transferFailed ? "Не удалось передать предмет. Проверь соединение и попробуй ещё раз." : transferErrorMessage(transferError)); itemTransferPending=false; itemTransferButton.disabled=false; itemTransferButton.textContent="Передать"; return; }
         close(); await renderLocationParticipantsIfVisible(); alert("Предмет передан.");
     });
 }
