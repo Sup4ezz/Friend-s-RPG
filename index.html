@@ -2,7 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#100d09">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.webmanifest">
     <title>ЛОРГУС</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -55,5 +60,10 @@
     <script src="/src/core/cinematic.js?v=5"></script>
     <script src="/src/core/blacklist.js?v=3"></script>
     <script src="/src/core/maintenance-mode.js?v=1"></script>
+    <script>
+        if ("serviceWorker" in navigator && location.protocol === "https:") {
+            window.addEventListener("load", () => navigator.serviceWorker.register("/service-worker.js").catch(error => console.warn("LORGUS app install support:", error)));
+        }
+    </script>
 </body>
 </html>
