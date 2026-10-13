@@ -44,7 +44,9 @@ for (const cssPath of [...new Set(cssFiles)]) {
         raw.startsWith("blob:") || raw.startsWith("//") ||
         /^[a-z][a-z0-9+.-]*:/i.test(raw)) continue;
     const pathname = raw.split(/[?#]/, 1)[0];
-    const target = pathname.startsWith("/")\n      ? resolve(root, pathname.replace(/^\\/+/, ""))\n      : resolve(cssPath, "..", pathname);
+    const target = pathname.startsWith("/")
+      ? resolve(root, pathname.replace(/^\/+/, ""))
+      : resolve(cssPath, "..", pathname);
     const rel = relative(root, target);
     if (rel.startsWith("..") || isAbsolute(rel)) {
       failures.push(`${relative(root, cssPath)}: path escapes repository root: ${raw}`);
