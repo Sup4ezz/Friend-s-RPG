@@ -39,6 +39,12 @@ function formatEvent(type: string, payload: Record<string, unknown>): string {
   };
 
   switch (type) {
+    case "telegram_connection_test":
+      heading("🕯️", "ВЕСТОЧКА ИЗ LORGUS", "Связь с миром установлена");
+      lines.push("", escapeHtml(payload.body || "Телеграм-вестник исправен. Новые сообщения будут приходить в оформлении летописи.", 500));
+      footer("LORGUS · Проверка связи");
+      break;
+
     case "character_application":
       heading("📜", "НОВАЯ ЗАЯВКА", "На рассмотрение администрации");
       field("Персонаж:", name);
