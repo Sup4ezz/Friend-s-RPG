@@ -1,0 +1,21 @@
+{
+  "id": "/",
+  "name": "ЛОРГУС — мир живёт",
+  "short_name": "ЛОРГУС",
+  "description": "Тёмный фэнтезийный мир, персонажи и ролевая игра.",
+  "lang": "ru",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080706",
+  "theme_color": "#100d09",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
