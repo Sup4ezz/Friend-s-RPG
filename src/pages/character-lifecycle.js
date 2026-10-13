@@ -1,5 +1,5 @@
 /* LORGUS character selection, creation and submission */
-async function renderCharacterSelection(container, applications, pendingApplication = null) {
+async function renderCharacterSelection(container, applications, pendingApplication = null, rejectedApplications = []) {
     if (lorgusAudioCleanup) { lorgusAudioCleanup(); lorgusAudioCleanup = null; }
     initializeLorgusCharacterSelectionAudio();
 
@@ -146,6 +146,25 @@ async function renderCharacterSelection(container, applications, pendingApplicat
         reviewButton.addEventListener("click", () => { if (window.lorgusCharacterAudioCleanup) window.lorgusCharacterAudioCleanup(); renderPendingApplication(container, pendingApplication); });
         reviewPanel.appendChild(reviewButton);
         grid.appendChild(reviewPanel);
+    }
+
+    for (const application of rejectedApplications) {
+        const rejectionPanel = document.createElement("article");
+        rejectionPanel.className = "character-review-pending-panel character-review-rejected-panel";
+        const date = application.rejected_at ? new Date(application.rejected_at) : null;
+        const dateLabel = date && Number.isFinite(date.getTime())
+            ? date.toLocaleString("ru-RU", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })
+            : "Дата решения не сохранена";
+        rejectionPanel.innerHTML = `
+            <div class="review-panel-mark">!</div>
+            <div>
+                <span>РЕШЕНИЕ АДМИНИСТРАЦИИ · ${escapeHtml(dateLabel)}</span>
+                <h2>Заявка «${escapeHtml(application.name || "Без имени")}» отклонена</h2>
+                <div class="character-review-notes"><strong>Причина отказа</strong><p>${escapeHtml(application.review_notes || "Причина не указана.")}</p></div>
+                <p>Ты можешь учесть замечания и подать новую заявку.</p>
+            </div>
+        `;
+        grid.appendChild(rejectionPanel);
     }
 
     if (applications.length + (pendingApplication ? 1 : 0) < 3) {
