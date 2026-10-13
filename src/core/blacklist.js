@@ -106,17 +106,12 @@
             const status = section.querySelector("#lorgus-blacklist-status");
             const list = section.querySelector("#lorgus-blacklist-list");
             const refresh = async () => {
-                const { data, error } = await db().from("lorgus_blacklist")
-                    .select("user_id,reason,created_at").order("created_at", { ascending: false });
+                const { data, error } = await db().rpc("admin_list_lorgus_blacklist");
                 if (error) { list.textContent = "Не удалось загрузить список: " + error.message; return; }
                 if (!data?.length) { list.innerHTML = "<p>Чёрный список пуст.</p>"; return; }
-                const ids = data.map(row => row.user_id);
-                const { data: players, error: playersError } = await db().from("players").select("id,username").in("id", ids);
-                if (playersError) console.warn("Не удалось получить логины для чёрного списка", playersError);
-                const names = new Map((players || []).map(p => [p.id, p.username]));
                 list.innerHTML = data.map(row => `
                   <div style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid #514637">
-                    <div><strong>${esc(names.get(row.user_id) || row.user_id)}</strong><div style="opacity:.75;font-size:14px">${esc(row.reason || "Причина не указана")}</div></div>
+                    <div><strong>${esc(row.username || row.user_id)}</strong><div style="opacity:.75;font-size:14px">${esc(row.reason || "Причина не указана")}</div></div>
                     <button type="button" class="admin-tool-button" data-unban="${esc(row.user_id)}">Разблокировать</button>
                   </div>`).join("");
             };
@@ -125,20 +120,19 @@
                 const username = section.querySelector("#lorgus-blacklist-username").value.trim();
                 const reason = section.querySelector("#lorgus-blacklist-reason").value.trim();
                 if (!username) { status.textContent = "Укажи логин игрока."; return; }
-                status.textContent = "Поиск аккаунта…";
-                const { data: player, error: playerError } = await db().from("players")
-                    .select("id,username").ilike("username", username).maybeSingle();
-                if (playerError || !player) { status.textContent = "Аккаунт не найден или недоступен для поиска."; return; }
-                const { data: authData, error: authError } = await db().auth.getUser();
-                const currentUserId = authData?.user?.id;
-                if (authError || !currentUserId) { status.textContent = "Не удалось определить администратора. Обнови страницу и попробуй снова."; return; }
-                if (player.id === currentUserId) { status.textContent = "Нельзя заблокировать собственный аккаунт администратора."; return; }
-                const { data: admin, error: adminError } = await db().rpc("is_admin");
-                if (adminError || !admin) { status.textContent = "Недостаточно прав для блокировки."; return; }
-                const { error } = await db().from("lorgus_blacklist").upsert({
-                    user_id: player.id, reason, created_by: currentUserId
-                }, { onConflict: "user_id" });
-                if (error) { status.textContent = "Ошибка блокировки: " + error.message; return; }
+                status.textContent = "Блокировка аккаунта…";
+                const { error } = await db().rpc("admin_block_lorgus_player", {
+                    p_username: username,
+                    p_reason: reason
+                });
+                if (error) {
+                    status.textContent = error.message.includes("PLAYER_NOT_FOUND")
+                        ? "Аккаунт не найден."
+                        : error.message.includes("CANNOT_BLOCK_SELF")
+                            ? "Нельзя заблокировать собственный аккаунт администратора."
+                            : "Ошибка блокировки: " + error.message;
+                    return;
+                }
                 status.textContent = "Пользователь добавлен в чёрный список.";
                 section.querySelector("#lorgus-blacklist-username").value = "";
                 section.querySelector("#lorgus-blacklist-reason").value = "";
@@ -149,7 +143,9 @@
                 const button = event.target.closest("[data-unban]");
                 if (!button) return;
                 button.disabled = true;
-                const { error } = await db().from("lorgus_blacklist").delete().eq("user_id", button.dataset.unban);
+                const { error } = await db().rpc("admin_unblock_lorgus_player", {
+                    p_user_id: button.dataset.unban
+                });
                 if (error) { status.textContent = "Ошибка разблокировки: " + error.message; button.disabled = false; return; }
                 status.textContent = "Блокировка снята.";
                 await refresh();
