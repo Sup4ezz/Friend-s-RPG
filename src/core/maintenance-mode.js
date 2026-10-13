@@ -45,9 +45,10 @@
         return data === true;
     }
 
-    const originalLoadPlayerState = window.loadPlayerState;
-    if (typeof originalLoadPlayerState === "function") {
-        window.loadPlayerState = async function(session, ...args) {
+    function installPlayerGate() {
+        const originalLoadPlayerState = window.loadPlayerState;
+        if (typeof originalLoadPlayerState !== "function" || originalLoadPlayerState.__lorgusMaintenanceWrapped) return false;
+        const wrapped = async function(session, ...args) {
             const result = await originalLoadPlayerState.call(this, session, ...args);
             if (window.lorgusBlacklisted || !session?.user?.id || !db()) return result;
             try {
@@ -61,13 +62,15 @@
                 else window.lorgusMaintenanceActive = false;
             } catch (error) {
                 console.error("LORGUS maintenance check failed:", error);
-                // Fail closed for the player if the maintenance state cannot be verified.
                 const root = document.getElementById("root");
                 if (root) root.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#10100f;color:#d8c8ad;text-align:center"><section><h1>Мир временно недоступен</h1><p>Не удалось проверить состояние мира. Попробуй обновить страницу.</p><button onclick="location.reload()">Повторить</button></section></main>';
                 window.lorgusMaintenanceActive = true;
             }
             return result;
         };
+        wrapped.__lorgusMaintenanceWrapped = true;
+        window.loadPlayerState = wrapped;
+        return true;
     }
 
     async function pollMaintenance() {
@@ -100,9 +103,10 @@
     window.setInterval(pollMaintenance, 15000);
     document.addEventListener("visibilitychange", () => { if (!document.hidden) pollMaintenance(); });
 
-    const originalRenderAdminApplications = window.renderAdminApplications;
-    if (typeof originalRenderAdminApplications === "function") {
-        window.renderAdminApplications = async function(container, applications) {
+    function installAdminToggle() {
+        const originalRenderAdminApplications = window.renderAdminApplications;
+        if (typeof originalRenderAdminApplications !== "function" || originalRenderAdminApplications.__lorgusMaintenanceWrapped) return false;
+        const wrapped = async function(container, applications) {
             await originalRenderAdminApplications.call(this, container, applications);
             if (!container || container.querySelector("#lorgus-maintenance-admin")) return;
             let settings;
@@ -169,5 +173,21 @@
             if (lore?.parentNode) lore.parentNode.insertBefore(section, lore.nextSibling);
             else container.prepend(section);
         };
+        wrapped.__lorgusMaintenanceWrapped = true;
+        window.renderAdminApplications = wrapped;
+        return true;
     }
+
+    function installHooks() {
+        const gateReady = installPlayerGate();
+        const adminReady = installAdminToggle();
+        return gateReady && adminReady;
+    }
+    if (!installHooks()) {
+        const retry = window.setInterval(() => {
+            if (installHooks()) window.clearInterval(retry);
+        }, 250);
+        window.addEventListener("load", installHooks, { once: true });
+    }
+
 })();
