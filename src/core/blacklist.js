@@ -51,6 +51,35 @@
         };
     }
 
+    // Kick an already logged-in player shortly after an administrator blocks them.
+    // This supplements the login gate; it does not replace database RLS.
+    let blacklistPollBusy = false;
+    const checkCurrentSessionBlacklist = async () => {
+        if (blacklistPollBusy || window.lorgusBlacklisted || !db()?.auth) return;
+        blacklistPollBusy = true;
+        try {
+            const { data: sessionData, error: sessionError } = await db().auth.getSession();
+            if (sessionError) throw sessionError;
+            const userId = sessionData?.session?.user?.id;
+            if (!userId) return;
+            const { data: admin, error: adminError } = await db().rpc("is_admin");
+            if (adminError) throw adminError;
+            if (admin) return;
+            const { data, error } = await db().from("lorgus_blacklist")
+                .select("user_id").eq("user_id", userId).maybeSingle();
+            if (error) throw error;
+            if (data) showBlacklistedScreen();
+        } catch (error) {
+            console.warn("LORGUS live blacklist check failed:", error);
+        } finally {
+            blacklistPollBusy = false;
+        }
+    };
+    window.setInterval(checkCurrentSessionBlacklist, 15000);
+    document.addEventListener("visibilitychange", () => {
+        if (!document.hidden) checkCurrentSessionBlacklist();
+    });
+
     // Add a blacklist manager to the existing admin dashboard without replacing it.
     const originalRenderAdminApplications = window.renderAdminApplications;
     if (typeof originalRenderAdminApplications === "function") {
@@ -100,9 +129,14 @@
                 const { data: player, error: playerError } = await db().from("players")
                     .select("id,username").ilike("username", username).maybeSingle();
                 if (playerError || !player) { status.textContent = "Аккаунт не найден или недоступен для поиска."; return; }
-                if (player.id === window.lorgusCurrentUserId) { status.textContent = "Нельзя заблокировать собственный аккаунт администратора."; return; }
+                const { data: authData, error: authError } = await db().auth.getUser();
+                const currentUserId = authData?.user?.id;
+                if (authError || !currentUserId) { status.textContent = "Не удалось определить администратора. Обнови страницу и попробуй снова."; return; }
+                if (player.id === currentUserId) { status.textContent = "Нельзя заблокировать собственный аккаунт администратора."; return; }
+                const { data: admin, error: adminError } = await db().rpc("is_admin");
+                if (adminError || !admin) { status.textContent = "Недостаточно прав для блокировки."; return; }
                 const { error } = await db().from("lorgus_blacklist").upsert({
-                    user_id: player.id, reason, created_by: window.lorgusCurrentUserId
+                    user_id: player.id, reason, created_by: currentUserId
                 }, { onConflict: "user_id" });
                 if (error) { status.textContent = "Ошибка блокировки: " + error.message; return; }
                 status.textContent = "Пользователь добавлен в чёрный список.";
