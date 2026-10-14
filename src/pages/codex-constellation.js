@@ -20,7 +20,7 @@
   const searchToggle=$("button","codex-cosmos-search-toggle","⌕");searchToggle.type="button";searchToggle.setAttribute("aria-label","Поиск по лорбуку");
   const search=$("input","codex-cosmos-search");search.type="search";search.placeholder="Имя, место, понятие…";search.hidden=true;
   const hits=$("div","codex-cosmos-search-results");hits.hidden=true;
-  stage.append(decor,halo,orbit1,orbit2,orbit3,svg,field,core,heading,hint,back,exit,searchToggle,search,hits);root.append(stage);
+  stage.append(decor,halo,orbit1,orbit2,orbit3,svg,field,core,heading,hint,back,exit,searchToggle,search,hits);root.append(stage);stage.addEventListener("pointermove",e=>{const r=stage.getBoundingClientRect();stage.style.setProperty("--pointer-x",(e.clientX-r.left)+"px");stage.style.setProperty("--pointer-y",(e.clientY-r.top)+"px");});
   let mode="closed",activeSection=null;
   const detail=(entry,sectionTitle)=>{
    const overlay=$("div","codex-cosmos-detail-overlay"),panel=$("article","codex-cosmos-detail"),close=$("button","codex-detail-close","×"),body=$("div","codex-detail-body"),trail=[];
@@ -37,7 +37,7 @@
   function place(items,kind){
    clear();const n=items.length||1;
    items.forEach((item,i)=>{const a=-Math.PI/2+i/n*Math.PI*2,r=n>14?(i%2?.46:.36):n>8?.39:.34,x=50+Math.cos(a)*r*100,y=50+Math.sin(a)*r*100;
-    const b=$("button","codex-orbit-node "+(kind==="section"?"codex-orbit-section":"codex-orbit-entry"));b.type="button";b.style.setProperty("--node-x",x+"%");b.style.setProperty("--node-y",y+"%");b.style.setProperty("--node-delay",i*55+"ms");
+    const b=$("button","codex-orbit-node "+(kind==="section"?"codex-orbit-section":"codex-orbit-entry"));b.type="button";b.style.setProperty("--node-x",x+"%");b.style.setProperty("--node-y",y+"%");b.style.setProperty("--flight-x",((x-50)*stage.clientWidth/100)+"px");b.style.setProperty("--flight-y",((y-50)*stage.clientHeight/100)+"px");b.style.setProperty("--node-delay",i*48+"ms");b.style.left="50%";b.style.top="50%";
     const title=item.title||item[0],subtitle=item.desc||item[2]||item[1]||"";b.append($("span","codex-node-star",kind==="section"?(item.icon||"✦"):"✧"),$("span","codex-node-title",title),$("span","codex-node-subtitle",subtitle));b.setAttribute("aria-label",title);
     b.onclick=()=>kind==="section"?(item.id==="archive"?openArchive():openSection(item.id)):detail(item,activeSection.title);field.append(b);
     const line=document.createElementNS("http://www.w3.org/2000/svg","line");line.setAttribute("x1","500");line.setAttribute("y1","350");line.setAttribute("x2",x*10);line.setAttribute("y2",y*7);line.setAttribute("class","codex-cosmos-connector");line.style.animationDelay=i*45+"ms";lines.append(line);
