@@ -267,3 +267,120 @@
 @media(prefers-reduced-motion:reduce){
   .lorgus-mobile-auth *{animation:none!important;transition:none!important}
 }
+
+
+/* LORGUS — polished mobile portal finish */
+@media(max-width:700px){
+  .lorgus-mobile-auth{
+    background:
+      radial-gradient(ellipse at 50% 24%,rgba(171,125,49,.19) 0%,rgba(92,61,25,.08) 24%,transparent 48%),
+      radial-gradient(ellipse at 50% 0%,rgba(206,173,105,.09),transparent 34%),
+      radial-gradient(ellipse at 50% 100%,rgba(105,62,24,.16),transparent 36%),
+      linear-gradient(180deg,#100c08 0%,#0b0907 40%,#050504 100%)!important;
+  }
+  .lorgus-mobile-auth::before{
+    inset:9px!important;
+    border-color:rgba(207,173,104,.24)!important;
+    box-shadow:inset 0 0 55px rgba(0,0,0,.48),0 0 26px rgba(0,0,0,.16)!important;
+  }
+  .lorgus-mobile-auth .lorgus-auth-header{
+    margin-bottom:13px!important;
+    font-size:8px!important;
+    letter-spacing:.42em!important;
+    color:rgba(226,199,139,.78)!important;
+    text-shadow:0 0 18px rgba(206,160,73,.18)!important;
+  }
+  .lorgus-mobile-auth .lorgus-auth-title .title-main{
+    color:#f0dfb7!important;
+    letter-spacing:.12em!important;
+    padding-left:.12em!important;
+    text-shadow:0 1px 0 #73582d,0 5px 14px rgba(0,0,0,.8),0 0 28px rgba(202,155,70,.2)!important;
+  }
+  .lorgus-mobile-auth .lorgus-auth-title .title-sub{
+    margin-top:13px!important;
+    font-size:9px!important;
+    letter-spacing:.25em!important;
+    color:#b6a27c!important;
+  }
+  .lorgus-mobile-auth .lorgus-auth-title::after{
+    width:132px!important;
+    margin-top:17px!important;
+    background:linear-gradient(90deg,transparent,rgba(223,190,120,.88) 45%,rgba(223,190,120,.88) 55%,transparent)!important;
+    box-shadow:0 0 12px rgba(207,162,75,.18)!important;
+  }
+  .lorgus-mobile-auth .auth-panel{
+    border-color:rgba(215,183,117,.34)!important;
+    background:
+      linear-gradient(135deg,rgba(218,185,115,.045),transparent 32%),
+      linear-gradient(155deg,rgba(34,27,18,.985),rgba(15,12,9,.99) 64%,rgba(9,8,6,.995))!important;
+    box-shadow:inset 0 1px rgba(255,239,199,.075),inset 0 0 0 4px rgba(0,0,0,.12),0 20px 52px rgba(0,0,0,.58)!important;
+  }
+  .lorgus-mobile-auth .auth-panel::before{
+    left:27%!important;right:27%!important;
+    background:linear-gradient(90deg,transparent,rgba(239,211,151,.92),transparent)!important;
+    box-shadow:0 0 15px rgba(208,162,78,.22)!important;
+  }
+  .lorgus-mobile-auth .auth-panel-kicker{
+    color:#d0b77f!important;
+    letter-spacing:.16em!important;
+  }
+  .lorgus-mobile-auth .auth-tabs{
+    gap:8px!important;
+    border-bottom-color:rgba(215,183,117,.22)!important;
+  }
+  .lorgus-mobile-auth .auth-tab{
+    min-height:48px!important;
+    border-color:rgba(215,183,117,.22)!important;
+    background:linear-gradient(180deg,rgba(255,255,255,.025),rgba(0,0,0,.22))!important;
+    transition:background .22s ease,border-color .22s ease,color .22s ease!important;
+  }
+  .lorgus-mobile-auth .auth-tab.active{
+    border-color:rgba(230,196,124,.68)!important;
+    background:linear-gradient(180deg,rgba(178,133,54,.25),rgba(92,64,28,.15))!important;
+    box-shadow:inset 0 1px rgba(255,236,187,.12),0 3px 12px rgba(0,0,0,.16)!important;
+  }
+  .lorgus-mobile-auth .auth-form-container .form-heading h2{
+    color:#f0e2c5!important;
+    text-shadow:0 2px 12px rgba(0,0,0,.35)!important;
+  }
+  .lorgus-mobile-auth .auth-form-container .input-wrapper{
+    border-color:rgba(204,171,104,.31)!important;
+    background:linear-gradient(100deg,rgba(0,0,0,.34),rgba(10,8,5,.54))!important;
+    transition:border-color .18s ease,box-shadow .18s ease!important;
+  }
+  .lorgus-mobile-auth .auth-form-container .input-icon{
+    color:#d0ad67!important;
+  }
+  .lorgus-mobile-auth .auth-form-container .input-wrapper:focus-within{
+    border-color:rgba(237,202,126,.86)!important;
+    box-shadow:0 0 0 2px rgba(194,151,72,.1),0 0 20px rgba(194,151,72,.08),inset 0 2px 8px rgba(0,0,0,.22)!important;
+  }
+  .lorgus-mobile-auth .auth-form-container .gold-button.main-button{
+    min-height:54px!important;
+    border-color:#e1c17c!important;
+    background:linear-gradient(180deg,#e5cb8b 0%,#c5a05a 54%,#a77d37 100%)!important;
+    box-shadow:inset 0 1px rgba(255,248,221,.68),inset 0 -1px rgba(87,54,13,.25),0 7px 19px rgba(0,0,0,.3)!important;
+    letter-spacing:.09em!important;
+    transition:filter .18s ease,transform .18s ease,box-shadow .18s ease!important;
+  }
+  .lorgus-mobile-auth .auth-form-container .gold-button.main-button:active{
+    filter:brightness(1.08)!important;
+    box-shadow:inset 0 1px rgba(255,248,221,.5),0 2px 8px rgba(0,0,0,.24)!important;
+  }
+  .lorgus-mobile-auth .lorgus-auth-footer{
+    margin-top:19px!important;
+    color:rgba(197,177,139,.72)!important;
+    letter-spacing:.055em!important;
+  }
+}
+@media(max-width:380px){
+  .lorgus-mobile-auth .lorgus-auth-title .title-main{font-size:clamp(48px,15vw,62px)!important}
+  .lorgus-mobile-auth .lorgus-auth-title .title-sub{font-size:8px!important;letter-spacing:.2em!important}
+}
+@media(prefers-reduced-motion:no-preference) and (max-width:700px){
+  .lorgus-mobile-auth .lorgus-auth-title .title-main{animation:lorgusMobileBrandGlow 6s ease-in-out infinite alternate}
+  @keyframes lorgusMobileBrandGlow{
+    from{text-shadow:0 1px 0 #73582d,0 5px 14px rgba(0,0,0,.8),0 0 20px rgba(202,155,70,.12)}
+    to{text-shadow:0 1px 0 #73582d,0 5px 14px rgba(0,0,0,.8),0 0 34px rgba(202,155,70,.25)}
+  }
+}
