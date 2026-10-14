@@ -348,3 +348,6 @@
 @keyframes codexTitleReveal{0%{opacity:0;transform:translateY(10px);letter-spacing:.12em}100%{opacity:1;transform:translateY(0);letter-spacing:-.025em}}
 @media(max-width:600px){.codex-cosmos:after{background:radial-gradient(180px circle at var(--pointer-x) var(--pointer-y),rgba(211,174,98,.06),transparent 72%)}.codex-orbit-node{animation-duration:.82s}.codex-cosmos-detail:before{inset:5px}}
 @media(prefers-reduced-motion:reduce){.codex-cosmos-core:before,.codex-cosmos-core:after{animation:none!important}.codex-orbit-node{will-change:auto;animation:none!important;opacity:1!important;filter:none!important;transform:translate(calc(-50% + var(--flight-x)),calc(-50% + var(--flight-y)))!important}.codex-cosmos.is-open .codex-cosmos-halo,.codex-cosmos.is-open .codex-cosmos-orbit{animation:none!important}}
+
+/* Uploaded illustrations inside the player-facing codex entry. */
+.codex-detail-illustration{display:block;width:min(100%,560px);max-height:420px;object-fit:contain;margin:18px auto 24px;border:1px solid rgba(211,178,109,.25);background:rgba(0,0,0,.25);box-shadow:0 14px 42px rgba(0,0,0,.28)}
