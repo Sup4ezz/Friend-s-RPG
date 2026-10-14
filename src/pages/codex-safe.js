@@ -157,7 +157,7 @@
     }catch(error){console.error("[LORGUS] Ошибка архива:",error);if(my!==requestId)return;const issue=make("div","lorgus-codex-empty");issue.append(make("h3","","Запись временно недоступна"),make("p","","Основные разделы лорбука работают независимо от внешнего архива."));const retry=make("button","lorgus-codex-inline-back","Попробовать снова");retry.type="button";retry.addEventListener("click",()=>loadDoc(i));issue.append(retry);results.replaceChildren(issue);}
    }
   }
-  sections.forEach(section=>{const b=make("button","lorgus-codex-topic");b.type="button";b.append(make("span","lorgus-codex-topic-icon",section.icon),make("span","lorgus-codex-topic-copy",section.title),make("small","",section.desc));b.addEventListener("click",()=>open(section.id));nav.append(b);buttons.push(b);});
+  sections.forEach(section=>{const b=make("button","lorgus-codex-topic");b.type="button";b.append(make("span","lorgus-codex-topic-icon","✦"),make("span","lorgus-codex-topic-copy",section.title),make("small","",section.desc));b.addEventListener("click",()=>open(section.id));nav.append(b);buttons.push(b);});
   search.addEventListener("input",()=>{
    const q=search.value.trim();
    if(!q){open(activeId);return;}
