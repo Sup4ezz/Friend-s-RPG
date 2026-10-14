@@ -145,6 +145,16 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
         application => application.status === "rejected"
     );
 
+    // Если игрок обновил страницу во время создания новой анкеты,
+    // приоритет у этого экрана, а не у сохранённого активного персонажа/RP.
+    if (sessionStorage.getItem("lorgus_character_creation_mode") === "1") {
+        window.activeCharacterId = null;
+        window.activeCharacter = null;
+        window.activeTitle = null;
+        await renderCharacterApplicationForm(container);
+        return;
+    }
+
     /*
         Восстанавливаем выбранного персонажа после перезагрузки.
         sessionStorage хранит только ID, поэтому самого персонажа
