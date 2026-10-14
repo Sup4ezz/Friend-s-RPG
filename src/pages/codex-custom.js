@@ -11,6 +11,23 @@
     const stripped = key.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\\s+/, "");
     if (stripped && stripped !== key) imageByTitle.set(stripped, url);
   };
+  const findImage = title => {
+    const key = normalizeTitle(title);
+    const stripped = key.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\\s+/, "");
+    const exact = imageByTitle.get(key) || imageByTitle.get(stripped);
+    if (exact) return exact;
+    const tokens = stripped.split(" ").filter(Boolean);
+    if (!tokens.length) return "";
+    const matches = [...imageByTitle.entries()].filter(([candidate]) => {
+      const candidateTokens = candidate.split(" ");
+      return tokens.length === 1
+        ? candidateTokens.length > 1 && candidateTokens.includes(tokens[0])
+        : tokens.every(token => candidateTokens.includes(token));
+    });
+    const urls = [...new Set(matches.map(([, url]) => url))];
+    return urls.length === 1 ? urls[0] : "";
+  };
+  window.LORGUS_CODEX_FIND_IMAGE = findImage;
   let loading = null;
 
   async function loadCustomLore() {
@@ -78,8 +95,7 @@
         const body = panel.querySelector(".codex-detail-body");
         const heading = body?.querySelector("h2");
         const title = heading?.textContent?.trim();
-        const key = normalizeTitle(title);
-        const url = (title && (imageByTitle.get(key) || imageByTitle.get(key.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\\s+/, "")))) || "";
+        const url = title ? findImage(title) : "";
         if (!body || !url) return;
         let img = body.querySelector(":scope > .codex-detail-illustration");
         if (img && img.dataset.source === url) return;
