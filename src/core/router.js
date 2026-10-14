@@ -141,6 +141,11 @@
     }
 
     function renderPath(path, force = false) {
+        if (path === "/codex" && window.activeCharacter?.origin_type === "reincarnated") {
+            window.history.replaceState({ lorgusRoute: "/world" }, "", "/world");
+            lastRenderedPath = null;
+            return renderPath("/world", true);
+        }
         if (!resolveRoute(path) || !canRender()) return false;
         if (!force && lastRenderedPath === path) return true;
 
@@ -171,6 +176,10 @@
 
     function navigate(path, options = {}) {
         if (!resolveRoute(path)) return false;
+        if (path === "/codex" && window.activeCharacter?.origin_type === "reincarnated") {
+            path = "/world";
+            options = { ...options, replace: true };
+        }
 
         const current = normalizePath();
         if (current !== path) {
