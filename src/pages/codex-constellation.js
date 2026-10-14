@@ -28,8 +28,8 @@
    const shut=()=>{overlay.remove();document.removeEventListener("keydown",key);};const key=e=>{if(e.key==="Escape")shut();};close.onclick=shut;overlay.onclick=e=>{if(e.target===overlay)shut();};document.addEventListener("keydown",key);
    function show(node){body.replaceChildren();body.append($("div","codex-detail-kicker",sectionTitle+"  /  "+trail.map(x=>x[0]).concat(node[0]).join("  /  ")),$("h2","",node[0]),$("p","codex-detail-subtitle",node[2]||node[1]||""));
     const imageMap=window.LORGUS_CODEX_IMAGE_BY_TITLE;
-    const imageKey=String(node[0]||"").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/\\.md$/i,"").replace(/[^\\p{L}\\p{N}]+/gu," ").trim();
-    const imageUrl=node[6]||(typeof window.LORGUS_CODEX_FIND_IMAGE==="function"?window.LORGUS_CODEX_FIND_IMAGE(node[0]):(imageMap&&(imageMap.get(imageKey)||imageMap.get(imageKey.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\\s+/,"")))));
+    const imageKey=String(node[0]||"").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/\.md$/i,"").replace(/[^\p{L}\p{N}]+/gu," ").trim();
+    const imageUrl=node[6]||(typeof window.LORGUS_CODEX_FIND_IMAGE==="function"?window.LORGUS_CODEX_FIND_IMAGE(node[0]):(imageMap&&(imageMap.get(imageKey)||imageMap.get(imageKey.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\s+/,"")))));
     if(imageUrl){const illustration=$("img","codex-detail-illustration");illustration.src=imageUrl;illustration.alt="Иллюстрация: "+node[0];body.append(illustration);}
     body.append($("div","codex-detail-rule","✦"),$("p","codex-detail-text",node[3]||"Подробная запись пока не внесена в открытый архив."));
     if(node[4])body.append($("div","codex-detail-meta",node[4]));
