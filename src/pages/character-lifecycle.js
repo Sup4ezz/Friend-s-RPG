@@ -382,6 +382,13 @@ function renderCharacterApplicationForm(container) {
     const root = document.getElementById("root");
     if (!root) return;
 
+    // Создание анкеты — отдельный режим, а не игровая SPA-страница.
+    // Не оставляем в адресной строке /rp или другой старый маршрут:
+    // иначе после F5 роутер попытается восстановить игровой экран.
+    if (window.location.pathname !== "/") {
+        window.history.replaceState({}, "", "/");
+    }
+
     container = document.createElement("main");
     container.id = "cabinet-content";
     container.className = "character-application";
