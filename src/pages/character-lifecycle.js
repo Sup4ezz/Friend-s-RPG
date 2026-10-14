@@ -1027,7 +1027,7 @@ async function submitCharacterApplication(event) {
         !homeland ||
         !personality ||
         !(originType === "reincarnated" ? pastLifeBio && deathReason : backstory) ||
-        !specialSkills ||
+        (originType === "born_in_lorgus" && !specialSkills) ||
         !occupation
     ) {
         setCharacterMessage(
