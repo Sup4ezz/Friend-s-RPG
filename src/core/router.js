@@ -6,7 +6,6 @@
 
 (() => {
     const fallbackRoutes = {
-        "/overview": { page: "overview", render: "renderLorgusOverview", title: "Обзор" },
         "/world": { page: "world", render: "renderLorgusWorldMapCurrent", title: "Мир" },
         "/codex": { page: "codex", render: "renderLorgusCodex", title: "Лорбук" },
         "/character": { page: "character", render: "renderLorgusCharacterHub", title: "Персонаж" },
@@ -227,13 +226,21 @@
     }
 
     function bootCurrentRoute() {
-        const path = normalizePath();
+        let path = normalizePath();
+
+        // Старый /overview больше не существует. Возвращаемся на корень,
+        // чтобы авторизация восстановила выбор/создание персонажа
+        // либо последний игровой экран для уже выбранного персонажа.
+        if (path === "/overview") {
+            window.history.replaceState({}, "", "/");
+            return;
+        }
 
         if (path === "/") return;
 
         if (!resolveRoute(path)) {
             window.history.replaceState({ lorgusRoute: "/world" }, "", "/world");
-            return;
+            path = "/world";
         }
 
         if (canRender()) {
@@ -290,10 +297,9 @@
     // Универсальная кнопка «Назад» на игровых экранах.
     // Поддерживает SPA-маршруты и не отправляет игрока за пределы приложения.
     const BACK_TARGETS = {
-        "/overview": "/world",
-        "/world": "/overview",
+        "/world": "/character",
         "/codex": "/world",
-        "/character": "/overview",
+        "/character": "/world",
         "/rp": "/world",
         "/people": "/character",
         "/mail": "/character",
