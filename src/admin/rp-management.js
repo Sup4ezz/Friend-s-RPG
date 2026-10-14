@@ -254,8 +254,8 @@ if (!window.lorgusGetSignedPhotoUrl) {
                 overlay.innerHTML = `
                     <section class="admin-rp-crop-dialog" role="dialog" aria-modal="true" aria-label="Настройка портрета">
                         <header><strong>Настроить портрет</strong><button type="button" data-crop-cancel aria-label="Закрыть">×</button></header>
-                        <p>Меняй размер персонажа и двигай его внутри рамки. Результат сохранится для всех мест, где показывается портрет.</p>
-                        <div class="admin-rp-crop-stage"><canvas width="440" height="440"></canvas></div>
+                        <p>Меняй размер персонажа и двигай его внутри прямоугольной рамки. Результат сохранится для всех мест, где показывается портрет.</p>
+                        <div class="admin-rp-crop-stage"><canvas width="360" height="440"></canvas></div>
                         <label>Размер персонажа <output data-crop-zoom>100%</output><input data-crop-zoom-range type="range" min="50" max="500" value="100"></label>
                         <label>По горизонтали <output data-crop-x>0</output><input data-crop-x-range type="range" min="-100" max="100" value="0"></label>
                         <label>По вертикали <output data-crop-y>0</output><input data-crop-y-range type="range" min="-100" max="100" value="0"></label>
@@ -276,14 +276,9 @@ if (!window.lorgusGetSignedPhotoUrl) {
                     const x = (W - dw) / 2 + maxX * offsetX / 100;
                     const y = (H - dh) / 2 + maxY * offsetY / 100;
                     ctx.clearRect(0, 0, W, H);
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(W / 2, H / 2, Math.min(W, H) / 2, 0, Math.PI * 2);
-                    ctx.clip();
                     ctx.fillStyle = "#11100d";
                     ctx.fillRect(0, 0, W, H);
                     ctx.drawImage(image, x, y, dw, dh);
-                    ctx.restore();
                     overlay.querySelector("[data-crop-zoom]").textContent = Math.round(zoom * 100) + "%";
                     overlay.querySelector("[data-crop-x]").textContent = offsetX;
                     overlay.querySelector("[data-crop-y]").textContent = offsetY;
@@ -304,13 +299,9 @@ if (!window.lorgusGetSignedPhotoUrl) {
                     output.width = canvas.width;
                     output.height = canvas.height;
                     const outCtx = output.getContext("2d");
-                    outCtx.clearRect(0, 0, output.width, output.height);
-                    outCtx.save();
-                    outCtx.beginPath();
-                    outCtx.arc(output.width / 2, output.height / 2, Math.min(output.width, output.height) / 2, 0, Math.PI * 2);
-                    outCtx.clip();
+                    outCtx.fillStyle = "#11100d";
+                    outCtx.fillRect(0, 0, output.width, output.height);
                     outCtx.drawImage(canvas, 0, 0);
-                    outCtx.restore();
                     output.toBlob(blob => {
                         if (!blob) { alert("Не удалось подготовить изображение."); return; }
                         close(); resolve(blob);
