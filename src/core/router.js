@@ -277,6 +277,81 @@
         return navigate(buildRpRoadPath(presence), options);
     };
 
+
+    // Универсальная кнопка «Назад» на игровых экранах.
+    // Поддерживает SPA-маршруты и не отправляет игрока за пределы приложения.
+    const BACK_TARGETS = {
+        "/overview": "/world",
+        "/world": "/overview",
+        "/codex": "/world",
+        "/character": "/overview",
+        "/rp": "/world",
+        "/people": "/character",
+        "/mail": "/character",
+        "/inventory": "/character"
+    };
+
+    function ensureLorgusBackButton() {
+        const host = document.getElementById("cabinet-content");
+        if (!host || !window.activeCharacter) return;
+        let button = document.getElementById("lorgus-global-back");
+        if (button && button.parentNode) return;
+        button = document.createElement("button");
+        button.id = "lorgus-global-back";
+        button.type = "button";
+        button.className = "lorgus-global-back";
+        button.setAttribute("aria-label", "Назад");
+        button.innerHTML = '<span aria-hidden="true">←</span><b>НАЗАД</b>';
+        button.addEventListener("click", () => {
+            const current = normalizePath();
+            let target = BACK_TARGETS[current];
+            if (/^\\/rp\\/(chat|road)\\//.test(current)) target = "/rp";
+            if (!target) target = "/world";
+            navigate(target);
+        });
+        document.body.appendChild(button);
+    }
+
+    function watchLorgusBackButton() {
+        if (!document.getElementById("lorgus-back-button-style")) {
+            const style = document.createElement("style");
+            style.id = "lorgus-back-button-style";
+            style.textContent = `
+                .lorgus-global-back {
+                    position: fixed; top: max(14px, env(safe-area-inset-top)); left: 14px;
+                    z-index: 1200; display: inline-flex; align-items: center; justify-content: center;
+                    gap: 8px; min-height: 38px; padding: 8px 13px;
+                    border: 1px solid rgba(215,182,109,.38); border-radius: 2px;
+                    background: rgba(10,8,6,.92); color: #e5d2a4;
+                    font: 600 10px/1 Georgia, serif; letter-spacing: .12em;
+                    box-shadow: 0 5px 20px rgba(0,0,0,.24); cursor: pointer;
+                    -webkit-tap-highlight-color: transparent;
+                }
+                .lorgus-global-back span { font: 20px/12px Georgia,serif; color: #d7b66d; }
+                .lorgus-global-back:active { background: rgba(72,53,24,.96); }
+                @media(max-width:720px) {
+                    .lorgus-global-back { top: max(10px, env(safe-area-inset-top)); left: 10px; min-height: 36px; padding: 7px 10px; }
+                    .lorgus-global-back b { font-size: 9px; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+        ensureLorgusBackButton();
+        const host = document.getElementById("cabinet-content");
+        if (host && !host.dataset.lorgusBackObserver) {
+            host.dataset.lorgusBackObserver = "1";
+            new MutationObserver(() => ensureLorgusBackButton()).observe(host, { childList: true, subtree: true });
+        }
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", watchLorgusBackButton);
+    } else {
+        watchLorgusBackButton();
+    }
+    window.addEventListener("popstate", () => ensureLorgusBackButton());
+
+
     if (document.readyState === "loading") {
         document.addEventListener("DOMContentLoaded", bootCurrentRoute, { once: true });
     } else {
