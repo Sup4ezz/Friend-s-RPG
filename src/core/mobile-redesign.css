@@ -393,3 +393,216 @@
   content:none!important;
   display:none!important;
 }
+
+
+/* LORGUS — character selection mobile redesign */
+@media (max-width: 700px) {
+  #root > .game-page:has(.character-selection),
+  .lorgus-cabinet-entering:has(.character-selection) {
+    min-height: 100svh !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+  .character-selection {
+    min-height: 100svh !important;
+    padding: max(76px, calc(env(safe-area-inset-top) + 58px)) 14px calc(92px + env(safe-area-inset-bottom)) !important;
+    background:
+      radial-gradient(ellipse at 50% 13%, rgba(153,111,43,.16), transparent 35%),
+      radial-gradient(ellipse at 50% 60%, rgba(93,63,28,.08), transparent 50%),
+      linear-gradient(180deg,#090806 0%,#0b0907 48%,#050504 100%) !important;
+  }
+  .character-selection::before {
+    background-size: 42px 42px !important;
+    opacity: .42 !important;
+  }
+  .character-selection-glow { filter: blur(65px) !important; opacity: .14 !important; }
+  .character-selection-header {
+    margin: 0 auto 26px !important;
+    padding: 0 2px !important;
+  }
+  .character-selection-brand {
+    gap: 8px !important;
+    margin-bottom: 16px !important;
+    font-size: 10px !important;
+    letter-spacing: .32em !important;
+  }
+  .character-selection-mark { font-size: 13px !important; }
+  .character-selection-kicker {
+    margin-bottom: 10px !important;
+    font-size: 8px !important;
+    line-height: 1.6 !important;
+    letter-spacing: .19em !important;
+  }
+  .character-selection-header h1 {
+    max-width: 420px !important;
+    margin-inline: auto !important;
+    font-size: clamp(32px, 9.3vw, 42px) !important;
+    line-height: 1.03 !important;
+    letter-spacing: .005em !important;
+  }
+  .character-selection-header > p {
+    max-width: 420px !important;
+    margin-top: 12px !important;
+    font-size: 12px !important;
+    line-height: 1.65 !important;
+  }
+  .character-selection-divider {
+    gap: 10px !important;
+    margin-top: 21px !important;
+    font-size: 7px !important;
+    letter-spacing: .19em !important;
+  }
+  .character-selection-stage { width: 100% !important; }
+  .character-selection-grid {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+  .character-selection-grid > .character-card {
+    display: grid !important;
+    grid-template-columns: minmax(104px, 36%) minmax(0, 1fr) !important;
+    min-height: 220px !important;
+    border-color: rgba(213,176,103,.23) !important;
+    border-radius: 2px !important;
+    box-shadow: 0 15px 35px rgba(0,0,0,.38), inset 0 0 0 1px rgba(255,255,255,.015) !important;
+    animation: none !important;
+  }
+  .character-selection-grid > .character-card .character-card-avatar {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 220px !important;
+    border-right: 1px solid rgba(213,176,103,.18) !important;
+    border-bottom: 0 !important;
+  }
+  .character-card-avatar::after {
+    background: linear-gradient(90deg, transparent 65%, rgba(7,6,5,.26) 100%) !important;
+  }
+  .character-card-photo {
+    object-position: center 25% !important;
+    filter: saturate(.78) contrast(1.06) !important;
+    transform: none !important;
+  }
+  .character-selection-grid > .character-card .character-card-body {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 17px 13px 13px !important;
+    background: linear-gradient(145deg,rgba(20,17,12,.98),rgba(7,7,6,.99)) !important;
+  }
+  .character-card-status {
+    gap: 6px !important;
+    margin-bottom: 9px !important;
+    font-size: 7px !important;
+    line-height: 1.45 !important;
+    letter-spacing: .09em !important;
+  }
+  .character-card-status span { flex: 0 0 5px !important; }
+  .character-card h2 {
+    overflow-wrap: anywhere !important;
+    margin-bottom: 5px !important;
+    font-size: clamp(21px, 6vw, 27px) !important;
+    line-height: 1.02 !important;
+  }
+  .character-card p {
+    font-size: 11px !important;
+    line-height: 1.45 !important;
+    overflow-wrap: anywhere !important;
+  }
+  .character-card-body > small {
+    margin-top: 7px !important;
+    font-size: 9px !important;
+    line-height: 1.4 !important;
+    letter-spacing: .035em !important;
+    overflow-wrap: anywhere !important;
+  }
+  .character-select-button {
+    gap: 6px !important;
+    min-height: 42px !important;
+    margin-top: auto !important;
+    padding: 10px 8px !important;
+    font-size: 8px !important;
+    line-height: 1.35 !important;
+    letter-spacing: .07em !important;
+  }
+  .character-select-button b { flex: 0 0 auto !important; font-size: 16px !important; }
+  .character-card-disabled-label {
+    padding: 9px 5px !important;
+    font-size: 8px !important;
+    line-height: 1.4 !important;
+    letter-spacing: .06em !important;
+  }
+  .character-selection-grid > .character-create-card {
+    grid-column: 1 !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    gap: 14px !important;
+    min-height: 94px !important;
+    padding: 18px !important;
+    border-color: rgba(213,176,103,.28) !important;
+    background: linear-gradient(110deg,rgba(177,133,57,.08),rgba(11,10,8,.66)) !important;
+  }
+  .character-create-card .create-plus {
+    width: 42px !important;
+    height: 42px !important;
+    flex: 0 0 42px !important;
+    font-size: 25px !important;
+  }
+  .character-create-card b { font-size: 10px !important; letter-spacing: .12em !important; }
+  .character-create-card small { font-size: 10px !important; line-height: 1.5 !important; }
+  .character-review-pending-panel {
+    grid-column: 1 !important;
+    gap: 12px !important;
+    padding: 17px !important;
+  }
+  .character-review-pending-panel h2 { font-size: 22px !important; line-height: 1.15 !important; }
+  .character-review-pending-panel p { font-size: 12px !important; line-height: 1.6 !important; }
+  .character-review-pending-panel .character-create-button {
+    width: 100% !important;
+    min-height: 46px !important;
+    margin-top: 4px !important;
+  }
+  .character-selection-footer {
+    margin-top: 28px !important;
+    font-size: 7px !important;
+    line-height: 1.7 !important;
+    letter-spacing: .16em !important;
+  }
+  .lorgus-screen-logout {
+    top: max(12px, env(safe-area-inset-top)) !important;
+    right: 14px !important;
+    min-width: 82px !important;
+    min-height: 36px !important;
+    padding: 8px 12px !important;
+    font-size: 9px !important;
+    letter-spacing: .1em !important;
+  }
+  .character-selection-audio {
+    left: 12px !important;
+    bottom: max(12px, env(safe-area-inset-bottom)) !important;
+    padding: 6px 8px !important;
+    gap: 7px !important;
+    font-size: 7px !important;
+    backdrop-filter: blur(14px) !important;
+  }
+  .character-selection-audio button { width: 30px !important; height: 30px !important; }
+}
+@media (max-width: 380px) {
+  .character-selection { padding-inline: 10px !important; }
+  .character-selection-grid { gap: 9px !important; }
+  .character-selection-grid > .character-card {
+    grid-template-columns: minmax(94px, 34%) minmax(0, 1fr) !important;
+    min-height: 208px !important;
+  }
+  .character-selection-grid > .character-card .character-card-avatar { min-height: 208px !important; }
+  .character-selection-grid > .character-card .character-card-body { padding: 14px 10px 11px !important; }
+  .character-card-status { font-size: 6.5px !important; }
+  .character-card h2 { font-size: 21px !important; }
+  .character-select-button { font-size: 7px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .character-selection-grid > .character-card { animation: none !important; transition: none !important; }
+}
