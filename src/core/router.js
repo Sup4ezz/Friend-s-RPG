@@ -337,10 +337,10 @@
             document.head.appendChild(style);
         }
         ensureLorgusBackButton();
-        const host = document.getElementById("cabinet-content");
-        if (host && !host.dataset.lorgusBackObserver) {
-            host.dataset.lorgusBackObserver = "1";
-            new MutationObserver(() => ensureLorgusBackButton()).observe(host, { childList: true, subtree: true });
+        const root = document.getElementById("root") || document.body;
+        if (!window.lorgusBackButtonObserver && root) {
+            window.lorgusBackButtonObserver = new MutationObserver(() => ensureLorgusBackButton());
+            window.lorgusBackButtonObserver.observe(root, { childList: true, subtree: true });
         }
     }
 
