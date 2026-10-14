@@ -6,13 +6,16 @@
 
 (() => {
     const fallbackRoutes = {
-        "/world": { page: "world", render: "renderLorgusWorldMapCurrent", title: "Мир" },
-        "/codex": { page: "codex", render: "renderLorgusCodex", title: "Лорбук" },
+        "/main-page": { page: "world", render: "renderLorgusWorldMapCurrent", title: "Главная" },
+        "/ankets": { page: "applications", render: "renderCharacterApplicationForm", title: "Анкеты" },
+        "/map": { page: "world", render: "renderLorgusWorldMapCurrent", title: "Карта" },
+        "/lorblook": { page: "codex", render: "renderLorgusCodex", title: "Лорбук" },
         "/character": { page: "character", render: "renderLorgusCharacterHub", title: "Персонаж" },
         "/rp": { page: "rp", render: "renderLorgusRpHub", title: "Ролевая" },
         "/people": { page: "people", render: "renderWorldCharacterTracker", title: "Люди" },
         "/mail": { page: "mail", render: "renderMail", title: "Письма" },
-        "/inventory": { page: "inventory", render: "renderLorgusInventory", title: "Инвентарь" }
+        "/inventory": { page: "inventory", render: "renderLorgusInventory", title: "Инвентарь" },
+        "/admin": { page: "admin", render: "loadAdminPanel", title: "Администрирование" }
     };
 
     const ROUTES = window.LORGUS_ROUTES || fallbackRoutes;
@@ -274,11 +277,11 @@
         if (path === "/") return;
 
         if (!resolveRoute(path)) {
-            navigate("/world", { replace: true });
+            navigate("/map", { replace: true });
             return;
         }
 
-        if (canRender()) renderPath(path, true);
+        if (canRender(path)) renderPath(path, true);
         else bootCurrentRoute();
     }
 
@@ -299,8 +302,8 @@
         if (path === "/") return;
 
         if (!resolveRoute(path)) {
-            window.history.replaceState({ lorgusRoute: "/world" }, "", "/world");
-            path = "/world";
+            window.history.replaceState({ lorgusRoute: "/map" }, "", "/map");
+            path = "/map";
         }
 
         if (canRender(path)) {
@@ -365,13 +368,16 @@
     // Универсальная кнопка «Назад» на игровых экранах.
     // Поддерживает SPA-маршруты и не отправляет игрока за пределы приложения.
     const BACK_TARGETS = {
-        "/world": "/character",
-        "/codex": "/world",
-        "/character": "/world",
-        "/rp": "/world",
+        "/main-page": "/map",
+        "/ankets": "/main-page",
+        "/map": "/character",
+        "/lorblook": "/map",
+        "/character": "/map",
+        "/rp": "/map",
         "/people": "/character",
         "/mail": "/character",
-        "/inventory": "/character"
+        "/inventory": "/character",
+        "/admin": "/ankets"
     };
 
     function ensureLorgusBackButton() {
@@ -389,7 +395,7 @@
             const current = normalizePath();
             let target = BACK_TARGETS[current];
             if (/^\/rp\/(chat|road)\//.test(current)) target = "/rp";
-            if (!target) target = "/world";
+            if (!target) target = "/map";
             navigate(target);
         });
         document.body.appendChild(button);
