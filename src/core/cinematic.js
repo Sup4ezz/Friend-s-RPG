@@ -273,7 +273,12 @@ function renderAuth() {
     showLogin(true);
     const mobileAuth = window.matchMedia("(max-width: 700px)").matches;
     if (mobileAuth) {
-        document.querySelector(".lorgus-cinematic-auth")?.classList.add("lorgus-mobile-auth");
+        const authRoot = document.querySelector(".lorgus-cinematic-auth");
+        authRoot?.classList.add("lorgus-mobile-auth");
+        // Keep the brand directly attached to the form on mobile instead of laying it out as a distant page-level element.
+        const mobileTitle = authRoot?.querySelector(".lorgus-auth-title");
+        const authContainer = authRoot?.querySelector(".auth-container");
+        if (mobileTitle && authContainer) authContainer.insertBefore(mobileTitle, authContainer.firstChild);
         // The mobile composition is 2D. Do not create canvases or download Three.js.
         if (window.lorgusSceneCleanup) { window.lorgusSceneCleanup(); window.lorgusSceneCleanup = null; }
     } else {
