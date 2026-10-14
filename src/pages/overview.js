@@ -132,7 +132,7 @@ window.LORGUS_PAGES.overview = {
         const grid = document.querySelector(".lorgus-command-grid");
         if (!grid) return;
 
-        if (!grid.querySelector("[data-lorgus-codex-card]")) {
+        if (window.activeCharacter?.origin_type !== "reincarnated" && !grid.querySelector("[data-lorgus-codex-card]")) {
             const card = document.createElement("article");
             card.className = "lorgus-command-card";
             card.dataset.lorgusCodexCard = "1";
