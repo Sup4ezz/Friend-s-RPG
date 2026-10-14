@@ -25,7 +25,7 @@
     bar.classList.toggle("is-visible", Boolean(active));
 
     let returnArrow = document.querySelector(".lorgus-direction-return");
-    const path = (window.location.pathname || "").replace(/\\/$/, "");
+    const path = (window.location.pathname || "").replace(/\/+$/, "");
     const directions = {
       "/mail": { glyph: "↑", direction: "top", label: "Вернуться на карту из писем" },
       "/character": { glyph: "↓", direction: "bottom", label: "Вернуться на карту из персонажа" },
@@ -40,7 +40,7 @@
         returnArrow.className = "lorgus-direction-return";
         document.body.appendChild(returnArrow);
         returnArrow.addEventListener("click", () => {
-          const current = directions[(window.location.pathname || "").replace(/\\/$/, "")];
+          const current = directions[(window.location.pathname || "").replace(/\/+$/, "")];
           if (!current || typeof window.renderLorgusWorldMapCurrent !== "function") return;
           if (typeof window.lorgusSubpageTransition === "function") {
             window.lorgusSubpageTransition(current.direction, window.renderLorgusWorldMapCurrent);
@@ -74,7 +74,7 @@
         el.getAttribute("title") || "",
         el.value || ""
       ].join(" ").replace(/[←←‹«→\s]+/g, " ").trim().toLocaleUpperCase("ru-RU");
-      if (/(^|\\s)НАЗАД($|\\s)/u.test(label)) {
+      if (/(^|\s)НАЗАД($|\s)/u.test(label)) {
         el.remove();
       }
     });
