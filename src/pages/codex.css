@@ -58,3 +58,62 @@
 .lorgus-codex-back{display:block;margin:15px 0 0 auto}
 @media(max-width:900px){.lorgus-codex-layout{grid-template-columns:190px minmax(0,1fr)}.lorgus-codex-entry-grid{grid-template-columns:1fr}.lorgus-codex-seal{right:30px;opacity:.35}}
 @media(max-width:650px){.lorgus-codex-page{padding:10px}.lorgus-codex-hero{padding:24px 20px;min-height:0}.lorgus-codex-hero h1{font-size:42px}.lorgus-codex-hero p{max-width:100%;font-size:11px}.lorgus-codex-seal{width:54px;height:54px;right:20px;top:30px;transform:rotate(45deg);font-size:22px;opacity:.28}.lorgus-codex-toolbar{align-items:stretch;flex-direction:column}.lorgus-codex-search{width:auto}.lorgus-codex-count{align-self:flex-end}.lorgus-codex-layout{grid-template-columns:minmax(0,1fr)}.lorgus-codex-nav{grid-template-columns:repeat(2,minmax(0,1fr));border-right:0;border-bottom:1px solid var(--codex-line);padding:9px;gap:4px}.lorgus-codex-nav-heading{grid-column:1/-1}.lorgus-codex-topic{padding:9px 7px;grid-template-columns:22px minmax(0,1fr);column-gap:7px}.lorgus-codex-topic-icon{width:22px;height:25px;font-size:15px}.lorgus-codex-topic-copy{font-size:12px}.lorgus-codex-topic small{font-size:8px}.lorgus-codex-main{padding:18px 12px}.lorgus-codex-entry{padding:14px}.lorgus-codex-remote-item{grid-template-columns:28px minmax(0,1fr) 15px}.lorgus-codex-remote-item small{display:none}}
+
+
+/* Readability and interaction pass: coherent engraved marks, larger type, clickable records. */
+.lorgus-codex-page{--codex-paper:#f0e5ce;--codex-muted:#c4b69b;--codex-line:rgba(198,161,92,.28);padding:clamp(12px,2.4vw,28px);font-family:"Lora",Georgia,serif}
+.lorgus-codex-hero{min-height:170px;padding:clamp(22px,3.4vw,38px);background:linear-gradient(105deg,rgba(28,24,18,.98),rgba(12,13,11,.96));border-color:rgba(198,161,92,.34)}
+.lorgus-codex-hero h1{font-size:clamp(42px,5vw,64px);letter-spacing:.01em}
+.lorgus-codex-hero p{max-width:690px;font-size:15px;line-height:1.85;color:#c9bea8}
+.lorgus-codex-eyebrow{font-size:11px;letter-spacing:.2em}
+.lorgus-codex-seal{width:72px;height:72px;font-size:27px}
+.lorgus-codex-search{min-height:50px}
+.lorgus-codex-search input{font-size:15px}
+.lorgus-codex-count{font-size:10px}
+.lorgus-codex-layout{grid-template-columns:minmax(220px,270px) minmax(0,1fr);border-color:rgba(198,161,92,.3)}
+.lorgus-codex-nav{padding:18px 12px;gap:7px}
+.lorgus-codex-nav-heading{font-size:10px}
+.lorgus-codex-topic{padding:14px 11px;cursor:pointer}
+.lorgus-codex-topic-copy{font-size:15px;line-height:1.35}
+.lorgus-codex-topic small{font-size:11px;line-height:1.5;color:#b3a58b}
+.lorgus-codex-topic-icon{width:29px;height:31px;border-radius:2px;font-size:19px}
+.lorgus-codex-main{padding:clamp(20px,3vw,36px)}
+.lorgus-codex-section-header h2{font-size:clamp(32px,3.5vw,42px)}
+.lorgus-codex-section-header p{font-size:14px;line-height:1.75;color:#c4b69b}
+.lorgus-codex-entry-grid{gap:15px}
+.lorgus-codex-entry{display:flex;flex-direction:column;align-items:stretch;min-height:250px;padding:20px 20px 17px;border:1px solid rgba(198,161,92,.23);border-radius:3px;background:linear-gradient(145deg,rgba(37,32,24,.92),rgba(17,17,14,.94));cursor:pointer;outline:none;transition:transform .18s,border-color .18s,background .18s,box-shadow .18s}
+.lorgus-codex-entry:before{width:45px;border-top-width:2px}
+.lorgus-codex-entry:hover,.lorgus-codex-entry:focus-visible{border-color:rgba(218,181,111,.72);background:linear-gradient(145deg,rgba(48,39,25,.98),rgba(20,19,15,.98));transform:translateY(-3px);box-shadow:0 10px 26px rgba(0,0,0,.24),inset 0 0 0 1px rgba(198,161,92,.06)}
+.lorgus-codex-entry-top{justify-content:flex-start;gap:10px;margin-bottom:16px}
+.lorgus-codex-entry-sigil{display:grid;place-items:center;flex:0 0 30px;width:30px;height:30px;border:1px solid rgba(198,161,92,.55);border-radius:50%;color:#d5b26c;font:15px Georgia,serif}
+.lorgus-codex-entry-type{font-size:10px;letter-spacing:.11em;line-height:1.5}
+.lorgus-codex-entry-number{margin-left:auto;font-size:20px}
+.lorgus-codex-entry h3{font-size:clamp(24px,2vw,29px);line-height:1.15;margin-bottom:8px}
+.lorgus-codex-entry-subtitle{font-size:14px!important;line-height:1.65!important;margin-bottom:13px!important;color:#d1b77f!important}
+.lorgus-codex-entry-text{font-size:14px!important;line-height:1.9!important;color:#e0d5c0!important}
+.lorgus-codex-entry-meta{font-size:11px;line-height:1.7;margin-top:16px;padding-top:12px;color:#c6ad7a}
+.lorgus-codex-open{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:auto;padding-top:18px;color:#d7b46d;font-size:12px;letter-spacing:.04em}
+.lorgus-codex-open span{display:grid;place-items:center;width:25px;height:25px;border:1px solid rgba(198,161,92,.34);border-radius:50%;font-size:14px;transition:transform .18s}
+.lorgus-codex-entry:hover .lorgus-codex-open span{transform:translate(2px,-2px)}
+.lorgus-codex-topic,.lorgus-codex-remote-item,.lorgus-codex-inline-back,.lorgus-codex-back{font-family:"Lora",Georgia,serif}
+.lorgus-codex-remote-item{font-size:14px;line-height:1.6;padding:16px;border-radius:2px}
+.lorgus-codex-remote-item small{font-size:12px}
+.lorgus-codex-empty,.lorgus-codex-loading{font-size:15px;line-height:1.9;padding:40px 22px}
+.lorgus-codex-overlay{position:fixed;z-index:100000;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(4,5,4,.82);backdrop-filter:blur(7px);animation:codexFadeIn .16s ease-out}
+.lorgus-codex-dialog{position:relative;width:min(720px,100%);max-height:min(82vh,850px);overflow:auto;padding:clamp(24px,5vw,54px);border:1px solid rgba(198,161,92,.58);outline:1px solid rgba(198,161,92,.12);outline-offset:6px;background:radial-gradient(ellipse at 100% 0%,rgba(139,100,43,.15),transparent 42%),linear-gradient(145deg,#211d16,#10110e 76%);box-shadow:0 30px 100px rgba(0,0,0,.55);color:#f0e5ce}
+.lorgus-codex-dialog-close{position:sticky;float:right;top:0;display:grid;place-items:center;width:40px;height:40px;margin:-12px -12px 10px 15px;border:1px solid rgba(198,161,92,.36);background:rgba(198,161,92,.06);color:#e4c581;font:28px/1 Georgia,serif;cursor:pointer}
+.lorgus-codex-dialog-close:hover{background:rgba(198,161,92,.16)}
+.lorgus-codex-dialog-kicker{padding:5px 0 12px;color:#c5a15e;font-size:10px;letter-spacing:.16em;text-transform:uppercase}
+.lorgus-codex-dialog h2{clear:none;margin:0 0 10px;color:#f3e4c4;font:600 clamp(36px,6vw,52px)/1.05 "Cormorant Garamond",Georgia,serif}
+.lorgus-codex-dialog-subtitle{margin:0;color:#d1b77f;font:italic 17px/1.6 "Cormorant Garamond",Georgia,serif}
+.lorgus-codex-dialog-rule{display:flex;align-items:center;gap:14px;margin:22px 0;color:#c9a45f}
+.lorgus-codex-dialog-rule:before,.lorgus-codex-dialog-rule:after{content:"";height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(198,161,92,.5))}
+.lorgus-codex-dialog-rule:after{background:linear-gradient(90deg,rgba(198,161,92,.5),transparent)}
+.lorgus-codex-dialog-body{margin:0;color:#e8deca;font:16px/2 "Lora",Georgia,serif;white-space:pre-line}
+.lorgus-codex-dialog-meta{margin-top:25px;padding:15px 17px;border-left:2px solid #b9914e;background:rgba(198,161,92,.06);color:#d8c49b;font-size:13px;line-height:1.8}
+.lorgus-codex-dialog-footer{margin-top:32px;padding-top:14px;border-top:1px solid rgba(198,161,92,.2);color:rgba(201,164,95,.58);font-size:9px;letter-spacing:.18em}
+.lorgus-codex-inline-back,.lorgus-codex-back{font-size:12px;padding:12px 16px}
+@keyframes codexFadeIn{from{opacity:0}to{opacity:1}}
+@media(max-width:900px){.lorgus-codex-layout{grid-template-columns:210px minmax(0,1fr)}.lorgus-codex-entry-grid{grid-template-columns:1fr}}
+@media(max-width:650px){.lorgus-codex-page{padding:8px}.lorgus-codex-hero{padding:24px 18px}.lorgus-codex-hero p{font-size:13px;max-width:90%}.lorgus-codex-seal{display:none}.lorgus-codex-layout{grid-template-columns:minmax(0,1fr)}.lorgus-codex-nav{grid-template-columns:repeat(2,minmax(0,1fr));padding:9px}.lorgus-codex-topic-copy{font-size:13px}.lorgus-codex-topic small{font-size:10px}.lorgus-codex-main{padding:20px 12px}.lorgus-codex-entry{min-height:0;padding:18px}.lorgus-codex-entry h3{font-size:28px}.lorgus-codex-entry-text{font-size:14px!important}.lorgus-codex-dialog{padding:26px 20px}.lorgus-codex-dialog-body{font-size:15px;line-height:1.9}.lorgus-codex-remote-item{grid-template-columns:30px minmax(0,1fr) 20px}.lorgus-codex-remote-item small{display:none}}
+@media(prefers-reduced-motion:reduce){.lorgus-codex-entry,.lorgus-codex-topic,.lorgus-codex-open span{transition:none}.lorgus-codex-overlay{animation:none}}
