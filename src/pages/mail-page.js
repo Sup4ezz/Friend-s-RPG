@@ -267,7 +267,6 @@ async function loadMailInbox() {
                 ${unread ? '<button class="lorgus-mail-mark-read" type="button" onclick="markLorgusMailRead(\\'' + escapeHtml(mail.id) + '\\')">Отметить прочитанным</button>' : ""}
             </article>
         `;
-        `;
     }).join("");
 }
 
