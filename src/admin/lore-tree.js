@@ -171,7 +171,7 @@
         if (imageUrl) {
             const img = document.createElement("img");
             img.src = imageUrl;
-            img.alt = "Круглый портрет персонажа";
+            img.alt = "Портрет персонажа";
             avatar.appendChild(img);
         } else {
             avatar.innerHTML = "<span>✦</span>";
@@ -194,7 +194,7 @@
         useButton.textContent = actor ? "Выбрать для поста" : "Подключить к RP и выбрать";
         const uploadLabel = document.createElement("label");
         uploadLabel.className = "lorgus-lore-portrait-upload";
-        uploadLabel.textContent = actor?.photo_path ? "Заменить фото в кружке" : "Загрузить фото в кружок";
+        uploadLabel.textContent = actor?.photo_path ? "Заменить портрет" : "Загрузить фото в кружок";
         const input = document.createElement("input");
         input.type = "file";
         input.accept = "image/png,image/jpeg,image/webp,image/avif";
@@ -249,7 +249,7 @@
                 return;
             }
             if (typeof window.lorgusEditPortraitImage !== "function") {
-                status.textContent = "Редактор круглого портрета ещё не загрузился. Обнови страницу.";
+                status.textContent = "Редактор портрета ещё не загрузился. Обнови страницу.";
                 input.value = "";
                 return;
             }
@@ -262,7 +262,7 @@
                     status.textContent = "Загрузка отменена.";
                     return;
                 }
-                status.textContent = "Сохраняю круглый портрет…";
+                status.textContent = "Сохраняю прямоугольный портрет…";
                 const path = "rp-characters/" + linked.character_id + "/" + Date.now() + "-portrait.png";
                 const uploaded = await client.storage.from("character-applications").upload(path, cropped, {
                     cacheControl: "3600", upsert: false, contentType: "image/png"
@@ -279,11 +279,11 @@
                 avatar.innerHTML = "";
                 const img = document.createElement("img");
                 img.src = signed.data.signedUrl;
-                img.alt = "Круглый портрет персонажа";
+                img.alt = "Портрет персонажа";
                 avatar.appendChild(img);
-                uploadLabel.textContent = "Заменить фото в кружке";
+                uploadLabel.textContent = "Заменить портрет";
                 uploadLabel.appendChild(input);
-                status.textContent = "Готово: круглый портрет сохранён и привязан к персонажу RP.";
+                status.textContent = "Готово: прямоугольный портрет сохранён и привязан к персонажу RP.";
                 window.rpCharacterPhotoCache = window.rpCharacterPhotoCache || {};
                 delete window.rpCharacterPhotoCache[String(linked.character_id)];
             } catch (error) {
