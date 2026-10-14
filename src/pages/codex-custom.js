@@ -63,7 +63,7 @@
           const signed = await client.storage.from("character-applications").createSignedUrl(actor.photo_path, 3600);
           if (signed.error || !signed.data?.signedUrl) return;
           const url = signed.data.signedUrl;
-          const basename = notePath.split("/").pop().replace(/\\.md$/i, "");
+          const basename = notePath.split("/").pop().replace(/\.md$/i, "");
           rememberImage(basename, url);
           if (actor.name) rememberImage(actor.name, url);
         }));
