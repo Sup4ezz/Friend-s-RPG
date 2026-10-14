@@ -101,10 +101,31 @@
   main.append(make("header","lorgus-codex-section-header"));main.firstChild.append(heading,description);main.append(results);layout.append(nav,main);root.append(hero,toolbar,layout);
   const back=make("button","lorgus-codex-back","← Вернуться к карте");back.type="button";back.addEventListener("click",()=>window.lorgusNavigate?window.lorgusNavigate("/map"):window.renderLorgusWorldMapCurrent?.());root.append(back);
   let activeId=startId||"atlas",requestId=0;const buttons=[];
+  function openEntry(entry,sectionTitle){
+   const overlay=make("div","lorgus-codex-overlay");overlay.setAttribute("role","presentation");
+   const panel=make("section","lorgus-codex-dialog");panel.setAttribute("role","dialog");panel.setAttribute("aria-modal","true");panel.setAttribute("aria-label",entry[0]);
+   const close=make("button","lorgus-codex-dialog-close","×");close.type="button";close.setAttribute("aria-label","Закрыть запись");
+   const top=make("div","lorgus-codex-dialog-kicker",sectionTitle+"  /  "+entry[1]);panel.append(close,top,make("h2","",entry[0]),make("p","lorgus-codex-dialog-subtitle",entry[2]),make("div","lorgus-codex-dialog-rule","✦"));
+   panel.append(make("p","lorgus-codex-dialog-body",entry[3]));
+   if(entry[4])panel.append(make("div","lorgus-codex-dialog-meta",entry[4]));
+   const foot=make("div","lorgus-codex-dialog-footer","ЛОРГУС · АРХИВ ЗНАНИЙ");panel.append(foot);overlay.append(panel);root.append(overlay);
+   const shut=()=>{overlay.remove();document.removeEventListener("keydown",keyClose);};
+   const keyClose=ev=>{if(ev.key==="Escape")shut();};close.addEventListener("click",shut);overlay.addEventListener("click",ev=>{if(ev.target===overlay)shut();});document.addEventListener("keydown",keyClose);close.focus();
+  }
   function draw(section,query){
    const q=norm(query),items=section.entries.filter(e=>!q||norm(e.join(" ")).includes(q));results.replaceChildren();
    if(!items.length)results.append(make("div","lorgus-codex-empty","Записей по этому запросу не найдено. Попробуй другое слово."));
-   else {const grid=make("div","lorgus-codex-entry-grid");items.forEach((e,i)=>{const card=make("article","lorgus-codex-entry");const top=make("div","lorgus-codex-entry-top");top.append(make("span","lorgus-codex-entry-type",e[1]),make("span","lorgus-codex-entry-number",String(i+1).padStart(2,"0")));card.append(top,make("h3","",e[0]),make("p","lorgus-codex-entry-subtitle",e[2]),make("p","lorgus-codex-entry-text",e[3]));if(e[4])card.append(make("div","lorgus-codex-entry-meta",e[4]));grid.append(card);});results.append(grid);}
+   else {const grid=make("div","lorgus-codex-entry-grid");items.forEach((e,i)=>{
+    const card=make("article","lorgus-codex-entry");card.tabIndex=0;card.setAttribute("role","button");card.setAttribute("aria-label","Открыть запись: "+e[0]);
+    const top=make("div","lorgus-codex-entry-top"),sigil=make("span","lorgus-codex-entry-sigil","✦");
+    top.append(sigil,make("span","lorgus-codex-entry-type",e[1]),make("span","lorgus-codex-entry-number",String(i+1).padStart(2,"0")));
+    card.append(top,make("h3","",e[0]),make("p","lorgus-codex-entry-subtitle",e[2]),make("p","lorgus-codex-entry-text",e[3]));
+    if(e[4])card.append(make("div","lorgus-codex-entry-meta",e[4]));
+    const open=make("span","lorgus-codex-open","Читать запись");open.append(make("span","","↗"));card.append(open);
+    const show=()=>openEntry(e,section.title);
+    card.addEventListener("click",show);card.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();show();}});
+    grid.append(card);
+   });results.append(grid);}
    count.textContent="ЗАПИСЕЙ: "+items.length;
   }
   async function open(id){
