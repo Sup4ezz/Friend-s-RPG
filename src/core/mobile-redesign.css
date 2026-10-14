@@ -384,3 +384,12 @@
     to{text-shadow:0 1px 0 #73582d,0 5px 14px rgba(0,0,0,.8),0 0 34px rgba(202,155,70,.25)}
   }
 }
+
+
+/* Medieval fantasy interface: remove leftover sci-fi/terminal labels. */
+.lorgus-cinematic-auth .auth-tabs::before,
+.lorgus-cinematic-auth .form-heading p::after,
+.lorgus-cinematic-auth .form-heading h2::before{
+  content:none!important;
+  display:none!important;
+}
