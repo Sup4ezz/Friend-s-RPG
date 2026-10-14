@@ -74,6 +74,12 @@ ${sceneArt ? `<div class="lorgus-rp-scene-art" style="background-image:url('${sc
                         <div><small>ПУТЬ</small><strong>Дороги мира</strong><p>Выбрать новое направление и отправиться в путешествие.</p></div>
                         <b>→</b>
                     </button>
+
+                    <button type="button" class="lorgus-rp-side-card lorgus-rp-flood-card" onclick="window.renderFloodChat?.()">
+                        <span class="lorgus-rp-side-number">04</span>
+                        <div><small>ВНЕ РОЛИ</small><strong>Флуд</strong><p>Общаться с игроками вне ролевых сцен. Сообщения не влияют на путь персонажа.</p></div>
+                        <b>→</b>
+                    </button>
                 </aside>
             </section>
 
