@@ -51,21 +51,20 @@
       });
       // Player-facing static entries are not stored in the custom-entry table.
       // Pull portraits from the existing admin links and attach them to public titles.
-      const linked = await client.from("lorgus_lore_actor_links")
-        .select("note_path,characters(name,photo_path)");
+      const linked = await client.rpc("get_public_lore_actor_portraits");
       if (!linked.error) {
-        await Promise.all((linked.data || []).map(async link => {
-          const notePath = String(link.note_path || "");
-          // Аэрарис is author-only canon and must never be exposed through public lore.
-          if (/АЭРАРИС/i.test(notePath)) return;
-          const actor = Array.isArray(link.characters) ? link.characters[0] : link.characters;
-          if (!actor?.photo_path) return;
+        await Promise.all((linked.data || []).map(async actor => {
+          const notePath = String(actor.note_path || "");
+          if (!actor.photo_path) return;
           const signed = await client.storage.from("character-applications").createSignedUrl(actor.photo_path, 3600);
-          if (signed.error || !signed.data?.signedUrl) return;
+          if (signed.error || !signed.data?.signedUrl) {
+            console.warn("LORGUS portrait URL unavailable:", notePath, signed.error?.message);
+            return;
+          }
           const url = signed.data.signedUrl;
           const basename = notePath.split("/").pop().replace(/\.md$/i, "");
           rememberImage(basename, url);
-          if (actor.name) rememberImage(actor.name, url);
+          if (actor.character_name) rememberImage(actor.character_name, url);
         }));
       } else {
         console.warn("LORGUS lore portraits unavailable:", linked.error.message);
