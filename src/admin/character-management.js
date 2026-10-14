@@ -28,7 +28,9 @@ async function openAdminCharacterRecord(application, container) {
             </div>
             <div class="admin-character-record-story">
                 <section><small>ХАРАКТЕР</small><p>${esc(application.personality)}</p></section>
-                <section><small>ПРЕДЫСТОРИЯ</small><p>${esc(application.backstory)}</p></section>
+                ${application.origin_type === "reincarnated"
+                    ? `<section><small>БИОГРАФИЯ ПРОШЛОЙ ЖИЗНИ</small><p>${esc(application.past_life_bio)}</p></section><section><small>ПРИЧИНА СМЕРТИ</small><p>${esc(application.death_reason)}</p></section>`
+                    : `<section><small>ПРЕДЫСТОРИЯ</small><p>${esc(application.backstory)}</p></section>`}
                 <section><small>ОСОБЫЕ НАВЫКИ</small><p>${esc(application.special_skills)}</p></section>
             </div>
             <div class="admin-character-record-footer">
