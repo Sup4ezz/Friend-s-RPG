@@ -63,8 +63,13 @@
           }
           const url = signed.data.signedUrl;
           const basename = notePath.split("/").pop().replace(/\.md$/i, "");
-          rememberImage(basename, url);
-          if (actor.character_name) rememberImage(actor.character_name, url);
+          // RP photos are circular-avatar crops in some existing records.
+          // Keep a full lore illustration from lorgus_lore_media whenever one matches;
+          // use the RP photo only as a fallback for entries without a lore image.
+          if (!findImage(basename)) rememberImage(basename, url);
+          if (actor.character_name && !findImage(actor.character_name)) {
+            rememberImage(actor.character_name, url);
+          }
         }));
       } else {
         console.warn("LORGUS lore portraits unavailable:", linked.error.message);
