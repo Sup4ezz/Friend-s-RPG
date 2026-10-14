@@ -17,7 +17,7 @@ async function openAdminCharacterRecord(application, container) {
                     <span class="admin-character-record-kicker">ЛЕТОПИСЬ ЛОРГУСА · ПОЛНАЯ ЗАПИСЬ #${esc(application.id)}</span>
                     <h2>${esc(application.name)}</h2>
                     <p>${esc(application.race)} · ${esc(application.homeland)}</p>
-                    <span class="admin-character-record-status">${application.origin_type === "reincarnated" ? "РЕИНКАРНИРОВАННЫЙ · БЕЗ ЛОРБУКА" : "РОЖДЁН В ЛОРГУСЕ"}</span>
+                    <span class="admin-character-record-status">ОДОБРЕН · ${application.origin_type === "reincarnated" ? "РЕИНКАРНИРОВАННЫЙ · БЕЗ ЛОРБУКА" : "РОЖДЁН В ЛОРГУСЕ"}</span>
                 </div>
             </div>
             <div class="admin-character-record-facts">
