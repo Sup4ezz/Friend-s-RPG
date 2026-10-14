@@ -212,6 +212,11 @@
     }
 
     function handlePopState() {
+        if (sessionStorage.getItem("lorgus_character_creation_mode") === "1") {
+            if (window.location.pathname !== "/") window.history.replaceState({}, "", "/");
+            if (bootTimer) { window.clearInterval(bootTimer); bootTimer = null; }
+            return;
+        }
         const path = normalizePath();
 
         if (path === "/") return;
@@ -226,6 +231,17 @@
     }
 
     function bootCurrentRoute() {
+        // Пока игрок заполняет анкету, никакой сохранённый SPA-маршрут
+        // (включая уже запущенный таймер /rp) не должен перехватывать экран.
+        if (sessionStorage.getItem("lorgus_character_creation_mode") === "1") {
+            if (bootTimer) {
+                window.clearInterval(bootTimer);
+                bootTimer = null;
+            }
+            if (window.location.pathname !== "/") window.history.replaceState({}, "", "/");
+            return;
+        }
+
         let path = normalizePath();
 
         // Старый /overview больше не существует. Возвращаемся на корень,
@@ -253,6 +269,14 @@
         let attempts = 0;
         bootTimer = window.setInterval(() => {
             attempts += 1;
+
+            // Режим создания мог включиться уже после старта таймера.
+            if (sessionStorage.getItem("lorgus_character_creation_mode") === "1") {
+                window.clearInterval(bootTimer);
+                bootTimer = null;
+                if (window.location.pathname !== "/") window.history.replaceState({}, "", "/");
+                return;
+            }
 
             if (canRender()) {
                 window.clearInterval(bootTimer);
