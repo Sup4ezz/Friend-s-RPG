@@ -14,7 +14,7 @@ window.renderLorgusCharacterCanvas = async function (characterId) {
     let user;
     let board = { version: 1, blocks: [], connections: [] };
     let tx = 80, ty = 55, zoom = 1;
-    let dirty = false, saveTimer = null, saving = false, connectFrom = null, connectMode = false;
+    let dirty = false, saveTimer = null, saving = false, revision = 0, connectFrom = null, connectMode = false;
     let pan = null, drag = null;
 
     const setStatus = (text, kind = "") => {
@@ -52,6 +52,7 @@ window.renderLorgusCharacterCanvas = async function (characterId) {
 
     const queueSave = () => {
         dirty = true;
+        revision++;
         setStatus("Есть несохранённые изменения…", "pending");
         clearTimeout(saveTimer);
         saveTimer = setTimeout(save, 700);
@@ -60,6 +61,7 @@ window.renderLorgusCharacterCanvas = async function (characterId) {
         clearTimeout(saveTimer);
         if (saving || !dirty) return;
         saving = true;
+        const savedRevision = revision;
         setStatus("Сохраняем…", "pending");
         const payload = { ...board, viewport: { tx, ty, zoom } };
         const { error: saveError } = await db.from("character_canvases").upsert({
@@ -71,9 +73,9 @@ window.renderLorgusCharacterCanvas = async function (characterId) {
             setStatus("Не удалось сохранить. Проверь доступ к персонажу.", "error");
             return;
         }
-        dirty = false;
-        setStatus("Сохранено", "ok");
-        if (dirty) saveTimer = setTimeout(save, 200);
+        dirty = revision !== savedRevision;
+        if (dirty) { setStatus("Сохраняем последние изменения…", "pending"); saveTimer = setTimeout(save, 200); }
+        else setStatus("Сохранено", "ok");
     }
 
     const findBlock = blockId => board.blocks.find(block => block.id === blockId);
@@ -167,6 +169,19 @@ window.renderLorgusCharacterCanvas = async function (characterId) {
                 board.connections = board.connections.filter(link => link.from !== block.id && link.to !== block.id);
                 renderBlocks(); drawLinks(); queueSave();
             });
+            if (typeof ResizeObserver !== "undefined") {
+                let lastWidth = Math.max(220, Number(block.width) || 270);
+                let lastHeight = Math.max(150, Number(block.height) || 190);
+                const observer = new ResizeObserver(entries => {
+                    const rect = entries[0]?.contentRect;
+                    if (!rect || rect.width < 220 || rect.height < 150) return;
+                    if (Math.abs(rect.width - lastWidth) < 2 && Math.abs(rect.height - lastHeight) < 2) return;
+                    lastWidth = Math.round(rect.width); lastHeight = Math.round(rect.height);
+                    block.width = lastWidth; block.height = lastHeight;
+                    drawLinks(); queueSave();
+                });
+                observer.observe(article);
+            }
             article.addEventListener("pointerdown", event => {
                 if (connectMode) {
                     if (event.target.closest("input,textarea,button")) return;
