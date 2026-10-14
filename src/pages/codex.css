@@ -403,6 +403,7 @@
 
 
 /* Final specificity override for the player-facing codex portrait. */
+/* Show the complete uploaded portrait; never inherit avatar shaping. */
 html body #root #cabinet-content .codex-cosmos-detail .codex-detail-body > img.codex-detail-illustration{
   display:block!important;
   position:relative!important;
