@@ -3,17 +3,17 @@
   const db = () => window.supabaseClient;
   const publicUrl = path => path ? db()?.storage.from("lorgus-lore-images").getPublicUrl(path).data?.publicUrl || "" : "";
   const imageByTitle = new Map();
-  const normalizeTitle = value => String(value || "").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/\\.md$/i, "").replace(/[^\\p{L}\\p{N}]+/gu, " ").trim();
+  const normalizeTitle = value => String(value || "").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\.md$/i, "").replace(/[^\p{L}\p{N}]+/gu, " ").trim();
   const rememberImage = (title, url) => {
     if (!title || !url) return;
     const key = normalizeTitle(title);
     if (key) imageByTitle.set(key, url);
-    const stripped = key.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\\s+/, "");
+    const stripped = key.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\s+/, "");
     if (stripped && stripped !== key) imageByTitle.set(stripped, url);
   };
   const findImage = title => {
     const key = normalizeTitle(title);
-    const stripped = key.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\\s+/, "");
+    const stripped = key.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\s+/, "");
     const exact = imageByTitle.get(key) || imageByTitle.get(stripped);
     if (exact) return exact;
     const tokens = stripped.split(" ").filter(Boolean);
@@ -44,7 +44,7 @@
       const mediaResult = await client.from("lorgus_lore_media").select("note_path,image_path");
       if (!mediaResult.error) (mediaResult.data || []).forEach(media => {
         const url = publicUrl(media.image_path);
-        const basename = String(media.note_path || "").split("/").pop().replace(/\\.md$/i, "");
+        const basename = String(media.note_path || "").split("/").pop().replace(/\.md$/i, "");
         rememberImage(basename, url);
         const parts = String(media.note_path || "").split("/").filter(Boolean);
         if (parts.length > 1) rememberImage(parts[parts.length - 2] + " " + basename, url);
