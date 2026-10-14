@@ -389,6 +389,9 @@ function renderCharacterApplicationForm(container) {
         window.history.replaceState({}, "", "/");
     }
 
+    // Сохраняем режим создания анкеты: после F5 нельзя восстанавливать старый RP-экран.
+    sessionStorage.setItem("lorgus_character_creation_mode", "1");
+
     container = document.createElement("main");
     container.id = "cabinet-content";
     container.className = "character-application";
@@ -1198,6 +1201,7 @@ async function submitCharacterApplication(event) {
     if (typeof window.clearLorgusCharacterDraft === "function") {
         window.clearLorgusCharacterDraft();
     }
+    sessionStorage.removeItem("lorgus_character_creation_mode");
 
     const pendingApplication = {
         id: applicationId,
