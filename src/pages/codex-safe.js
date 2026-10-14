@@ -187,6 +187,7 @@
    fl();p.push(s);
   }fp();fl();
  }
+ window.LORGUS_CODEX_SECTIONS=sections; window.LORGUS_CODEX_DOCS=docs; window.LORGUS_CODEX_REMOTE={base:remoteBase,vault};
  async function render(startId){
   const root=document.getElementById("cabinet-content");if(!root)return;
   root.className="lorgus-codex-page";root.replaceChildren();
