@@ -1,0 +1,24 @@
+/* Shared account controls for every LORGUS game block */
+.lorgus-global-utility{
+  position:fixed;top:18px;right:22px;z-index:100000;
+  display:none;align-items:center;gap:9px;
+  padding:7px;border:1px solid rgba(201,169,103,.32);
+  border-radius:10px;background:rgba(13,15,17,.88);
+  box-shadow:0 10px 32px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)
+}
+.lorgus-global-utility.is-visible{display:flex}
+.lorgus-global-utility button{
+  min-height:37px;padding:0 14px;border:1px solid rgba(201,169,103,.28);
+  border-radius:6px;background:rgba(201,169,103,.055);color:#e6d4ad;
+  font:600 10px/1.2 inherit;letter-spacing:.12em;text-transform:uppercase;
+  cursor:pointer;transition:background .18s,border-color .18s,color .18s
+}
+.lorgus-global-utility button:hover{background:rgba(201,169,103,.15);border-color:rgba(201,169,103,.65);color:#fff1d0}
+.lorgus-global-utility .lorgus-global-notifications{display:flex;align-items:center;gap:8px}
+.lorgus-global-utility .lorgus-global-notifications span{font-size:17px;line-height:1}
+.lorgus-character-back,.lorgus-mail-back,.lorgus-subpage-back-arrow{display:none!important}
+@media(max-width:600px){
+ .lorgus-global-utility{top:10px;right:10px;gap:5px;padding:5px;border-radius:8px}
+ .lorgus-global-utility button{min-height:34px;padding:0 10px;font-size:9px;letter-spacing:.08em}
+}
