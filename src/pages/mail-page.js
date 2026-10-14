@@ -264,10 +264,14 @@ async function loadMailInbox() {
                     <div class="lorgus-mail-route-track"><span style="width:${progress}%"></span></div>
                     <small class="lorgus-mail-card-eta">${deliveryLabel}</small>
                 </div>
-                ${unread ? '<button class="lorgus-mail-mark-read" type="button" onclick="markLorgusMailRead(\\'' + escapeHtml(mail.id) + '\\')">Отметить прочитанным</button>' : ""}
+                ${unread ? '<button class="lorgus-mail-mark-read" type="button" data-mail-read-id="' + escapeHtml(mail.id) + '">Отметить прочитанным</button>' : ""}
             </article>
         `;
     }).join("");
+
+    list.querySelectorAll("[data-mail-read-id]").forEach(button => {
+        button.addEventListener("click", () => markLorgusMailRead(button.dataset.mailReadId));
+    });
 }
 
 function switchLorgusMailFolder(folder) {
