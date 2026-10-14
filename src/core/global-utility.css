@@ -11,7 +11,7 @@
 .lorgus-global-utility button{
   min-height:37px;padding:0 14px;border:1px solid rgba(201,169,103,.28);
   border-radius:6px;background:rgba(201,169,103,.055);color:#e6d4ad;
-  font:600 10px/1.2 inherit;letter-spacing:.12em;text-transform:uppercase;
+  font-family:inherit;font-size:10px;font-weight:600;line-height:1.2;letter-spacing:.12em;text-transform:uppercase;
   cursor:pointer;transition:background .18s,border-color .18s,color .18s
 }
 .lorgus-global-utility button:hover{background:rgba(201,169,103,.15);border-color:rgba(201,169,103,.65);color:#fff1d0}
