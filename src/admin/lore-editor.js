@@ -199,7 +199,19 @@
   function addImageToDocument(notePath,path) {
     if(!doc)return;
     const article=doc.querySelector(".lorgus-lore-document-body");
-    if(!article)return;
+    if(!article){
+      if(!doc.dataset.loreImageWait){
+        doc.dataset.loreImageWait="1";
+        const observer=new MutationObserver(()=>{
+          if(doc.querySelector(".lorgus-lore-document-body")){
+            observer.disconnect();delete doc.dataset.loreImageWait;addImageToDocument(notePath,path);
+          }
+        });
+        observer.observe(doc,{childList:true,subtree:true});
+        setTimeout(()=>{observer.disconnect();delete doc.dataset.loreImageWait;},8000);
+      }
+      return;
+    }
     let panel=doc.querySelector(".lorgus-lore-attached-image");
     if(!panel){panel=$("figure","lorgus-lore-attached-image");article.insertAdjacentElement("beforebegin",panel);}
     panel.replaceChildren();const img=$("img","");img.src=imageUrl(path);img.alt="Иллюстрация к записи";panel.append(img,$("figcaption","",notePath.split("/").pop().replace(/\.md$/i,"")));
