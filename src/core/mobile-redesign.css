@@ -98,9 +98,9 @@
   .lorgus-mobile-auth{
     position:relative!important;isolation:isolate!important;box-sizing:border-box!important;
     min-height:100svh!important;min-height:100dvh!important;width:100%!important;
-    display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;
+    display:flex!important;flex-direction:column!important;justify-content:flex-start!important;align-items:center!important;
     gap:0!important;overflow-x:clip!important;overflow-y:auto!important;
-    padding:clamp(30px,6svh,58px) 20px calc(28px + env(safe-area-inset-bottom))!important;
+    padding:clamp(48px,9svh,76px) 20px calc(28px + env(safe-area-inset-bottom))!important;
     color:#eee2c8!important;
     background:
       radial-gradient(ellipse at 50% 15%,rgba(139,99,42,.24),transparent 39%),
@@ -131,8 +131,8 @@
   }
   .lorgus-mobile-auth .lorgus-auth-header span:not(:first-child){display:none!important}
   .lorgus-mobile-auth .lorgus-auth-title{
-    position:relative!important;inset:auto!important;display:block!important;width:100%!important;
-    margin:0 0 29px!important;padding:0!important;text-align:center!important;transform:none!important;opacity:1!important;
+    position:relative!important;inset:auto!important;display:block!important;flex:0 0 auto!important;align-self:stretch!important;width:100%!important;
+    margin:0 0 16px!important;padding:0!important;text-align:center!important;transform:none!important;translate:none!important;animation:none!important;opacity:1!important;
   }
   .lorgus-mobile-auth .lorgus-auth-title::after{
     content:"";display:block;width:104px;height:1px;margin:19px auto 0;
@@ -152,7 +152,7 @@
     letter-spacing:.22em!important;color:#a99a79!important;
   }
   .lorgus-mobile-auth .auth-container{
-    position:relative!important;inset:auto!important;z-index:2!important;flex:0 0 auto!important;
+    position:relative!important;inset:auto!important;z-index:2!important;flex:0 0 auto!important;align-self:center!important;
     width:100%!important;max-width:390px!important;min-width:0!important;
     margin:0!important;padding:0!important;transform:none!important;
   }
