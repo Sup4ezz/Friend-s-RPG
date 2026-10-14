@@ -169,9 +169,14 @@ function getMailMethodDetails(method) {
 
 function formatMailRemaining(deliverAt) {
     const remaining = new Date(deliverAt).getTime() - Date.now();
-    if (!Number.isFinite(remaining) || remaining <= 0) return "доставка ожидается";
+    if (!Number.isFinite(remaining) || remaining <= 0) return "ожидает доставки";
     const minutes = Math.ceil(remaining / 60000);
-    if (minutes < 60) return "прибытие через " + minutes + (minutes === 1 ? " минуту" : minutes < 5 ? " минуты" : " минут");
+    if (minutes < 60) {
+        const lastTwo = minutes % 100;
+        const last = minutes % 10;
+        const word = lastTwo >= 11 && lastTwo <= 14 ? "минут" : last === 1 ? "минуту" : last >= 2 && last <= 4 ? "минуты" : "минут";
+        return "прибытие через " + minutes + " " + word;
+    }
     const hours = Math.floor(minutes / 60);
     const rest = minutes % 60;
     return "прибытие через " + hours + " ч" + (rest ? " " + rest + " мин" : "");
@@ -185,6 +190,11 @@ function updateMailDeliveryPreview() {
 }
 
 function updateMailCountdowns() {
+    if (!document.querySelector(".lorgus-mail-page")) {
+        if (window.lorgusMailEtaTimer) clearInterval(window.lorgusMailEtaTimer);
+        window.lorgusMailEtaTimer = null;
+        return;
+    }
     document.querySelectorAll("#lorgus-mail-inbox-list [data-mail-deliver-at]").forEach(card => {
         const eta = card.querySelector(".lorgus-mail-card-eta");
         if (eta && card.dataset.mailState !== "delivered") eta.textContent = formatMailRemaining(card.dataset.mailDeliverAt);
@@ -370,7 +380,7 @@ async function sendLorgusMail() {
 
     bodyInput.value = "";
     if (status) status.textContent = methodDetails.label + " отправлен. Ожидаемый срок доставки — около " + methodDetails.minutes + " мин.";
-    await loadMailInbox();
+    switchLorgusMailFolder("sent");
 }
 
 async function markLorgusMailRead(mailId) {
