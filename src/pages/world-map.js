@@ -676,6 +676,16 @@ window.lorgusEnterRegionCinematic = function(region) {
 };
 
 window.lorgusMainMenuNavigate = function(direction, renderTarget) {
+    const routeByDirection = {
+        top: "/character",
+        bottom: "/mail",
+        left: "/rp",
+        right: "/lorblook"
+    };
+    const route = routeByDirection[direction];
+    if (route && typeof window.lorgusNavigate === "function") {
+        return window.lorgusSubpageTransition(direction, () => window.lorgusNavigate(route));
+    }
     return window.lorgusSubpageTransition(direction, renderTarget);
 };
 
