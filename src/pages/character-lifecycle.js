@@ -468,7 +468,7 @@ function renderCharacterApplicationForm(container) {
                     </section>
 
                     <section class="character-creation-panel origin-panel">
-                        <div class="creation-panel-heading"><span>02</span><div><small>ПРОИСХОЖДЕНИЕ</small><h2>Откуда ты?</h2></div></div>
+                        <div class="creation-panel-heading"><span>02</span><div><small>ПРОИСХОЖДЕНИЕ</small><h2 data-origin-heading>Откуда ты?</h2></div></div>
                         <div class="creation-origin-picker">
                             <div class="creation-origin-kingdoms">
                                 <button type="button" class="origin-kingdom active" data-kingdom="Атэрон"><b>АТЭРОН</b><small>ЗЕМЛИ ЗНАНИЙ</small></button>
@@ -478,10 +478,10 @@ function renderCharacterApplicationForm(container) {
                                 <button type="button" class="origin-kingdom" data-kingdom="Морвейн"><b>МОРВЕЙН</b><small>ПОСЛЕДНИЙ ПУТЬ</small></button>
                             </div>
                             <div class="creation-origin-location-wrap">
-                                <div class="creation-origin-location-head"><span id="origin-kingdom-label">АТЭРОН</span><small>ВЫБЕРИ МЕСТО РОЖДЕНИЯ</small></div>
+                                <div class="creation-origin-location-head"><span id="origin-kingdom-label">АТЭРОН</span><small data-origin-location-hint>ВЫБЕРИ МЕСТО РОЖДЕНИЯ</small></div>
                                 <div id="creation-origin-locations" class="creation-origin-locations"></div>
                             </div>
-                            <label class="creation-wide-field"><span>Родина</span><input id="character-homeland" type="text" list="character-homelands" placeholder="Выбери место выше" required readonly></label>
+                            <label class="creation-wide-field"><span data-origin-homeland-label>Родина</span><input id="character-homeland" type="text" list="character-homelands" placeholder="Выбери место выше" required readonly></label>
                         </div>
                         <datalist id="character-homelands">
                             <option value="Примум"></option><option value="Хелион"></option><option value="Арджент"></option><option value="Аврора"></option><option value="Фин"></option><option value="Святые Земли"></option><option value="Спорные Земли"></option>
@@ -491,7 +491,9 @@ function renderCharacterApplicationForm(container) {
                     <section class="character-creation-panel story-panel">
                         <div class="creation-panel-heading"><span>03</span><div><small>ИСТОРИЯ</small><h2>Что сделало тебя тобой?</h2></div></div>
                         <label class="creation-wide-field"><span>Характер</span><textarea id="character-personality" required placeholder="Как ты думаешь, говоришь и поступаешь?"></textarea></label>
-                        <label class="creation-wide-field"><span>Предыстория</span><textarea id="character-backstory" required placeholder="Что произошло до того, как твоя история началась?"></textarea></label>
+                        <label class="creation-wide-field" data-origin-field="born"><span>Предыстория</span><textarea id="character-backstory" required placeholder="Что произошло до того, как твоя история началась?"></textarea></label>
+                        <label class="creation-wide-field" data-origin-field="reincarnated" hidden><span>Биография прошлой жизни</span><textarea id="character-past-life-bio" placeholder="Кем ты был до перерождения? Где жил, чем занимался, что оставил после себя?"></textarea></label>
+                        <label class="creation-wide-field" data-origin-field="reincarnated" hidden><span>Причина смерти</span><textarea id="character-death-reason" placeholder="Как оборвалась твоя предыдущая жизнь?"></textarea></label>
                         <div class="creation-fields">
                             <label><span>Особые навыки</span><textarea id="character-skills" required placeholder="Что ты умеешь?"></textarea></label>
                             <label><span>Предпочитаемое оружие <em>необязательно</em></span><input id="character-weapon" type="text" placeholder="Если есть"></label>
@@ -533,6 +535,32 @@ function renderCharacterApplicationForm(container) {
         originWarning?.remove();
         container.querySelector('input[name="character-origin-type"]')?.focus();
     });
+
+    const originRadios = container.querySelectorAll('input[name="character-origin-type"]');
+    const updateOriginFields = () => {
+        const origin = container.querySelector('input[name="character-origin-type"]:checked')?.value || "born_in_lorgus";
+        const reincarnated = origin === "reincarnated";
+        container.querySelectorAll('[data-origin-field="born"]').forEach(field => {
+            field.hidden = reincarnated;
+            field.querySelectorAll("input, textarea, select").forEach(input => { input.required = !reincarnated; });
+        });
+        container.querySelectorAll('[data-origin-field="reincarnated"]').forEach(field => {
+            field.hidden = !reincarnated;
+            field.querySelectorAll("input, textarea, select").forEach(input => { input.required = reincarnated; });
+        });
+        const heading = container.querySelector("[data-origin-heading]");
+        const locationHint = container.querySelector("[data-origin-location-hint]");
+        const homelandLabel = container.querySelector("[data-origin-homeland-label]");
+        if (heading) heading.textContent = reincarnated ? "Где ты очнулся?" : "Откуда ты?";
+        if (locationHint) locationHint.textContent = reincarnated ? "ВЫБЕРИ МЕСТО, ГДЕ ТЫ ОЧНУЛСЯ" : "ВЫБЕРИ МЕСТО РОЖДЕНИЯ";
+        if (homelandLabel) homelandLabel.textContent = reincarnated ? "Место появления в Лоргусе" : "Родина";
+        const intro = container.querySelector(".character-creation-intro p");
+        if (intro) intro.textContent = reincarnated
+            ? "Твоя прежняя жизнь закончилась. Теперь предстоит рассказать, кем ты был и как оказался в Лоргусе."
+            : "Не создавай анкету. Создай человека, эльфа, дварфа — того, чья жизнь уже началась до первого шага.";
+    };
+    originRadios.forEach(radio => radio.addEventListener("change", updateOriginFields));
+    updateOriginFields();
 
     initializeCharacterPortraitCrop();
 
@@ -943,6 +971,12 @@ async function submitCharacterApplication(event) {
     const backstory =
         document.getElementById("character-backstory").value.trim();
 
+    const pastLifeBio =
+        document.getElementById("character-past-life-bio").value.trim();
+
+    const deathReason =
+        document.getElementById("character-death-reason").value.trim();
+
     const specialSkills =
         document.getElementById("character-skills").value.trim();
 
@@ -961,7 +995,7 @@ async function submitCharacterApplication(event) {
         !age ||
         !homeland ||
         !personality ||
-        !backstory ||
+        !(originType === "reincarnated" ? pastLifeBio && deathReason : backstory) ||
         !specialSkills ||
         !occupation
     ) {
@@ -1094,7 +1128,9 @@ async function submitCharacterApplication(event) {
             age,
             homeland,
             personality,
-            backstory,
+            backstory: originType === "reincarnated" ? null : backstory,
+            past_life_bio: originType === "reincarnated" ? pastLifeBio : null,
+            death_reason: originType === "reincarnated" ? deathReason : null,
             special_skills: specialSkills,
             preferred_weapon:
                 preferredWeapon || null,
@@ -1134,7 +1170,9 @@ async function submitCharacterApplication(event) {
         age,
         homeland,
         personality,
-        backstory,
+        backstory: originType === "reincarnated" ? null : backstory,
+        past_life_bio: originType === "reincarnated" ? pastLifeBio : null,
+        death_reason: originType === "reincarnated" ? deathReason : null,
         special_skills: specialSkills,
         preferred_weapon: preferredWeapon || null,
         occupation,
