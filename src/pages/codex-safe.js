@@ -90,6 +90,10 @@
         flushList();
     }
     async function render() {
+        if (window.activeCharacter?.origin_type === "reincarnated") {
+            window.lorgusNavigate?.("/world", { replace: true });
+            return;
+        }
         const container = document.getElementById("cabinet-content");
         if (!container) return;
         container.className = "lorgus-codex-page";
