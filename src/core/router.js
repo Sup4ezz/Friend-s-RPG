@@ -293,7 +293,7 @@
 
     function ensureLorgusBackButton() {
         const host = document.getElementById("cabinet-content");
-        if (!host || !window.activeCharacter) return;
+        if (!host || !window.activeCharacter) { document.getElementById("lorgus-global-back")?.remove(); return; }
         let button = document.getElementById("lorgus-global-back");
         if (button && button.parentNode) return;
         button = document.createElement("button");
@@ -305,7 +305,7 @@
         button.addEventListener("click", () => {
             const current = normalizePath();
             let target = BACK_TARGETS[current];
-            if (/^\\/rp\\/(chat|road)\\//.test(current)) target = "/rp";
+            if (/^\/rp\/(chat|road)\//.test(current)) target = "/rp";
             if (!target) target = "/world";
             navigate(target);
         });
