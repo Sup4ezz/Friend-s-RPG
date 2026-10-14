@@ -143,6 +143,8 @@ window.renderLorgusCharacterCanvas = async function (characterId) {
     }
     function renderBlocks() {
         world.querySelectorAll(".lorgus-canvas-block").forEach(el => el.remove());
+        const emptyHint = world.querySelector(".lorgus-canvas-empty-hint");
+        if (emptyHint) emptyHint.hidden = board.blocks.length > 0;
         board.blocks.forEach(block => {
             const article = document.createElement("article");
             article.className = "lorgus-canvas-block lorgus-canvas-block-" + (["text", "list", "card"].includes(block.type) ? block.type : "text");
