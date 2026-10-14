@@ -49,10 +49,17 @@ async function renderLorgusCharacterHub() {
                         <div class="lorgus-character-panel-head"><div><span>ИСТОРИЯ</span><strong>Личная хроника</strong></div><b>⌁</b></div>
                         <p class="lorgus-character-placeholder">События жизни и последствия решений персонажа появятся здесь.</p>
                     </article>
+                    <article class="lorgus-character-panel lorgus-character-wide lorgus-notes-panel">
+                        <div class="lorgus-character-panel-head"><div><span>ЛИЧНЫЙ АРХИВ</span><strong>Мои заметки</strong></div><button type="button" class="lorgus-notes-add" data-notes-add>＋ Новая заметка</button></div>
+                        <p class="lorgus-notes-privacy">Только для тебя. Записывай зацепки, имена, долги и планы персонажа.</p>
+                        <div class="lorgus-notes-list"><div class="lorgus-ability-empty">Открываем архив…</div></div>
+                        <div class="lorgus-notes-feedback" role="status" aria-live="polite"></div>
+                    </article>
                 </section>
             </main>
         </div>`.replaceAll("__NAME__", name).replaceAll("__RACE__", race).replaceAll("__HOMELAND__", homeland).replaceAll("__STATUS__", statusLabel).replace("__TITLE__", window.renderTitleBadge(window.activeTitle, "lorgus-profile-title") || "<strong>Без титула</strong>");
     const abilities = await window.loadCharacterAbilities(c.id);
     const list = container.querySelector(".lorgus-ability-list");
     if (list) list.innerHTML = window.renderAbilityList(abilities);
+    await window.renderLorgusPlayerNotes?.(c.id);
 }
