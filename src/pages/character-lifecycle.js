@@ -404,25 +404,22 @@ function renderCharacterApplicationForm(container) {
                 .character-origin-warning-card p { max-width:480px; margin:0 auto 14px; color:rgba(234,220,189,.78); font-size:14px; line-height:1.7; }
                 .character-origin-warning-card strong { color:#f1cb80; }
                 .character-origin-warning-card button { margin-top:16px; padding:13px 20px; border:1px solid rgba(213,178,103,.65); background:rgba(103,75,34,.28); color:#f0dfba; font:600 11px Georgia,serif; letter-spacing:.1em; cursor:pointer; }
-                .character-origin-choice { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-bottom:24px; }
-                .character-origin-choice label { display:flex; flex-direction:column; gap:8px; padding:20px; min-height:128px; border:1px solid rgba(213,178,103,.25); background:rgba(7,7,6,.45); cursor:pointer; transition:border-color .18s,background .18s; }
-                .character-origin-choice label:has(input:checked) { border-color:#d4b06c; background:rgba(112,79,34,.2); box-shadow:inset 0 0 0 1px rgba(212,176,108,.2); }
-                .character-origin-choice input { accent-color:#d4b06c; }
-                .character-origin-choice strong { color:#f0dfba; font:600 17px Georgia,serif; }
-                .character-origin-choice small { color:rgba(234,220,189,.65); font-size:12px; line-height:1.5; }
-                @media(max-width:560px) { .character-origin-choice { grid-template-columns:1fr; } .character-origin-choice label { min-height:0; } }
+                .character-origin-warning { display:none !important; }
+                .character-origin-choice, .origin-type-panel { display:none !important; }
+                .character-origin-choice input { position:absolute; opacity:0; pointer-events:none; }
+                .character-origin-gateway { width:min(1040px,100%); margin:0 auto 36px; }
+                .character-origin-gateway h2 { margin:0 0 10px; color:#f4e6c7; font:600 clamp(26px,4vw,40px)/1.1 Georgia,serif; text-align:center; }
+                .character-origin-gateway > p { margin:0 auto 28px; max-width:600px; color:rgba(234,220,189,.7); text-align:center; line-height:1.7; }
+                .character-origin-cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:22px; }
+                .character-origin-card { min-height:290px; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-end; padding:clamp(24px,4vw,40px); border:1px solid rgba(213,178,103,.38); background:linear-gradient(160deg,rgba(36,28,17,.88),rgba(5,5,4,.97)); color:#eadcbd; text-align:left; cursor:pointer; transition:transform .2s,border-color .2s,background .2s; }
+                .character-origin-card:hover { transform:translateY(-4px); border-color:#e1bf79; background:linear-gradient(160deg,rgba(74,52,24,.9),rgba(5,5,4,.97)); }
+                .character-origin-card .origin-card-mark { margin-bottom:auto; color:#d4b06c; font-size:32px; }
+                .character-origin-card strong { display:block; margin:28px 0 10px; color:#f4e6c7; font:600 clamp(22px,3vw,30px)/1.1 Georgia,serif; }
+                .character-origin-card small { color:rgba(234,220,189,.7); font-size:13px; line-height:1.7; }
+                .character-origin-card em { margin-top:22px; color:#e3bd76; font:600 10px Georgia,serif; letter-spacing:.18em; font-style:normal; }
+                .character-creation-form.origin-form-locked { display:none !important; }
+                @media(max-width:650px) { .character-origin-cards { grid-template-columns:1fr; } .character-origin-card { min-height:220px; } }
             </style>
-            <div class="character-origin-warning" role="dialog" aria-modal="true" aria-labelledby="character-origin-warning-title">
-                <section class="character-origin-warning-card">
-                    <div class="mark" aria-hidden="true">✦</div>
-                    <span class="eyebrow">ПРЕЖДЕ ЧЕМ НАЧАТЬ</span>
-                    <h2 id="character-origin-warning-title">Важное предупреждение</h2>
-                    <p>У персонажей с происхождением <strong>«Реинкарнированный» нет доступа к Лорбуку</strong>. Это ограничение действует для выбранного персонажа и не снимается обычной сменой страницы или переходом по прямой ссылке.</p>
-                    <p>Прочитай предупреждение сейчас. Только после подтверждения появится выбор происхождения.</p>
-                    <button type="button" class="character-origin-warning-continue">Я понял, перейти к выбору</button>
-                </section>
-            </div>
-
             <div class="character-creation-atmosphere" aria-hidden="true">
                 <div class="creation-void"></div>
                 <div class="creation-rift"><i></i><b></b></div>
@@ -446,7 +443,25 @@ function renderCharacterApplicationForm(container) {
                     <div class="character-creation-line"><i></i><b>ТВОЙ ПУТЬ НАЧИНАЕТСЯ ЗДЕСЬ</b><i></i></div>
                 </section>
 
-                <form id="character-application-form" class="character-creation-form" onsubmit="submitCharacterApplication(event)">
+                <section class="character-origin-gateway" aria-labelledby="origin-gateway-title">
+                    <h2 id="origin-gateway-title">Выбери начало своей истории</h2>
+                    <p>Выбери происхождение — и откроется отдельная анкета с подходящими вопросами.</p>
+                    <div class="character-origin-cards">
+                        <button type="button" class="character-origin-card" data-pick-origin="reincarnated">
+                            <span class="origin-card-mark">☽</span>
+                            <strong>Реинкарнированный</strong>
+                            <small>Ты прожил другую жизнь и оказался в Лоргусе после смерти. Анкета спросит о прежней жизни и причине смерти. Лорбук для этого персонажа закрыт.</small>
+                            <em>ВЫБРАТЬ ЭТОТ ПУТЬ　→</em>
+                        </button>
+                        <button type="button" class="character-origin-card" data-pick-origin="born_in_lorgus">
+                            <span class="origin-card-mark">✦</span>
+                            <strong>Рождённый в Лоргусе</strong>
+                            <small>Твоя жизнь началась в этом мире. Анкета будет о родине, предыстории, характере и навыках. Лорбук доступен.</small>
+                            <em>ВЫБРАТЬ ЭТОТ ПУТЬ　→</em>
+                        </button>
+                    </div>
+                </section>
+                <form id="character-application-form" class="character-creation-form origin-form-locked" onsubmit="submitCharacterApplication(event)">
                     <section class="character-creation-panel origin-type-panel">
                         <div class="creation-panel-heading"><span>00</span><div><small>ПУТЬ ДУШИ</small><h2>Как ты оказался в Лоргусе?</h2></div></div>
                         <div class="character-origin-choice">
@@ -530,13 +545,9 @@ function renderCharacterApplicationForm(container) {
         </div>
     `;
 
-    const originWarning = container.querySelector(".character-origin-warning");
-    container.querySelector(".character-origin-warning-continue")?.addEventListener("click", () => {
-        originWarning?.remove();
-        container.querySelector('input[name="character-origin-type"]')?.focus();
-    });
-
     const originRadios = container.querySelectorAll('input[name="character-origin-type"]');
+    const originGateway = container.querySelector(".character-origin-gateway");
+    const applicationForm = container.querySelector("#character-application-form");
     const updateOriginFields = () => {
         const origin = container.querySelector('input[name="character-origin-type"]:checked')?.value || "born_in_lorgus";
         const reincarnated = origin === "reincarnated";
@@ -565,6 +576,20 @@ function renderCharacterApplicationForm(container) {
             ? "Твоя прежняя жизнь закончилась. Теперь предстоит рассказать, кем ты был и как оказался в Лоргусе."
             : "Не создавай анкету. Создай человека, эльфа, дварфа — того, чья жизнь уже началась до первого шага.";
     };
+    const chooseOrigin = origin => {
+        const radio = container.querySelector('input[name="character-origin-type"][value="' + origin + '"]');
+        if (!radio) return;
+        radio.checked = true;
+        updateOriginFields();
+        if (originGateway) originGateway.hidden = true;
+        if (applicationForm) {
+            applicationForm.classList.remove("origin-form-locked");
+            applicationForm.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+    };
+    container.querySelectorAll("[data-pick-origin]").forEach(card => {
+        card.addEventListener("click", () => chooseOrigin(card.dataset.pickOrigin));
+    });
     originRadios.forEach(radio => radio.addEventListener("change", updateOriginFields));
     updateOriginFields();
 
