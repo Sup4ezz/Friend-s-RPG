@@ -74,13 +74,39 @@
         el.getAttribute("title") || "",
         el.value || ""
       ].join(" ").replace(/[←←‹«→\s]+/g, " ").trim().toLocaleUpperCase("ru-RU");
-      if (/(^|\s)НАЗАД($|\s)/u.test(label)) {
-        el.remove();
-      }
+      if (/(^|\s)НАЗАД($|\s)/u.test(label)) el.remove();
     });
   }
-  function refresh() { removeBackButtons(); ensureToolbar(); }
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", refresh, { once: true });
-  else refresh();
-  new MutationObserver(refresh).observe(document.documentElement, { childList: true, subtree: true });
+
+  function refresh() {
+    removeBackButtons();
+    ensureToolbar();
+  }
+
+  // SPA-страницы создают сотни DOM-узлов за один переход. Не сканируем
+  // весь документ на каждую пачку MutationObserver — объединяем работу в один кадр.
+  let refreshQueued = false;
+  function scheduleRefresh() {
+    if (refreshQueued) return;
+    refreshQueued = true;
+    window.requestAnimationFrame(() => {
+      refreshQueued = false;
+      refresh();
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", refresh, { once: true });
+  } else {
+    refresh();
+  }
+  const observer = new MutationObserver(records => {
+    // Изменения только внутри служебной панели не требуют повторного полного сканирования.
+    const relevant = records.some(record => {
+      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
+      return !target?.closest(".lorgus-global-utility,.lorgus-direction-return");
+    });
+    if (relevant) scheduleRefresh();
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
 })();
