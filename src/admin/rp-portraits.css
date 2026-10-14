@@ -32,3 +32,30 @@
 .admin-rp-crop-stage{width:min(100%,320px);aspect-ratio:1;margin:14px auto;padding:0;border:0;background:transparent;position:relative;overflow:visible}
 .admin-rp-crop-stage:before{content:"";position:absolute;inset:0;border:2px solid #d6b36a;border-radius:50%;pointer-events:none;z-index:1;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 22px rgba(214,179,106,.12)}
 .admin-rp-crop-stage canvas{display:block;width:100%;height:auto;aspect-ratio:1;border-radius:50%;background:#11100d}
+
+
+/* Rectangular crop editor: override the legacy circular avatar preview. */
+.admin-rp-crop-stage{
+  width:min(100%,300px)!important;
+  aspect-ratio:9/11!important;
+  height:auto!important;
+  padding:0!important;
+  border:1px solid rgba(214,179,106,.35)!important;
+  background:#0a0907!important;
+  overflow:hidden!important;
+}
+.admin-rp-crop-stage:before{
+  content:none!important;
+  display:none!important;
+}
+.admin-rp-crop-stage canvas{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  aspect-ratio:9/11!important;
+  border-radius:0!important;
+  clip-path:none!important;
+  -webkit-clip-path:none!important;
+  mask:none!important;
+  -webkit-mask:none!important;
+}
