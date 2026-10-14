@@ -120,7 +120,15 @@
    }
   }
   sections.forEach(section=>{const b=make("button","lorgus-codex-topic");b.type="button";b.append(make("span","lorgus-codex-topic-icon",section.icon),make("span","lorgus-codex-topic-copy",section.title),make("small","",section.desc));b.addEventListener("click",()=>open(section.id));nav.append(b);buttons.push(b);});
-  search.addEventListener("input",()=>{const section=sections.find(s=>s.id===activeId);if(!section.remote)draw(section,search.value);else{const q=norm(search.value);results.querySelectorAll(".lorgus-codex-remote-item").forEach((b,i)=>b.hidden=!norm(docs[i].join(" ")).includes(q));}});
+  search.addEventListener("input",()=>{
+   const q=search.value.trim();
+   if(!q){open(activeId);return;}
+   const needle=norm(q),all=[];
+   sections.filter(s=>!s.remote).forEach(s=>s.entries.forEach(entry=>{if(norm(entry.join(" ")).includes(needle))all.push([entry[0],s.title+" · "+entry[1],entry[2],entry[3],entry[4]]);}));
+   docs.forEach(doc=>{if(norm(doc.join(" ")).includes(needle))all.push([doc[0],"Архивный документ",doc[2],"Документ из исходного архива. Открой раздел «Архив летописца», чтобы прочитать его полностью.",doc[1]]);});
+   heading.textContent="Результаты поиска";description.textContent="Совпадения во всех открытых разделах лорбука.";buttons.forEach(b=>b.classList.remove("active"));
+   draw({entries:all},needle);
+  });
   await open(activeId);
  }
  window.renderLorgusCodex=render;window.LORGUS_PAGES=window.LORGUS_PAGES||{};window.LORGUS_PAGES.codex={render:()=>render("atlas")};
