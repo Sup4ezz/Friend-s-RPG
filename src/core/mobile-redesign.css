@@ -606,3 +606,52 @@
 @media (prefers-reduced-motion: reduce) {
   .character-selection-grid > .character-card { animation: none !important; transition: none !important; }
 }
+
+
+/* LORGUS mobile recovery: keep the world landing screen visible after character selection. */
+@media (max-width: 720px) {
+  #root > .game-page,
+  #cabinet-content.lorgus-map-page,
+  .lorgus-map-page,
+  .lorgus-map-page .lorgus-map-shell,
+  .lorgus-map-page .lorgus-map-main,
+  .lorgus-map-page .lorgus-map-header,
+  .lorgus-map-page .lorgus-map-stage,
+  .lorgus-map-page .lorgus-map-inspector {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  #cabinet-content.lorgus-map-page {
+    display: block !important;
+    position: relative !important;
+    min-height: 100svh !important;
+    height: auto !important;
+    overflow: visible !important;
+    color: #e8dcc2 !important;
+    background: #090806 !important;
+  }
+  .lorgus-map-page .lorgus-map-main {
+    min-height: 100svh !important;
+    color: #e8dcc2 !important;
+    background: #090806 !important;
+  }
+  .lorgus-map-page .lorgus-map-header,
+  .lorgus-map-page .lorgus-map-stage,
+  .lorgus-map-page .lorgus-map-inspector,
+  .lorgus-map-page .lorgus-map-regions,
+  .lorgus-map-page .lorgus-map-region-list {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  .lorgus-map-page .lorgus-map-inspector {
+    display: flex !important;
+    color: #e8dcc2 !important;
+    background: linear-gradient(145deg, #1d170f, #0d0b08) !important;
+  }
+  .lorgus-map-page .lorgus-map-inspector h3,
+  .lorgus-map-page .lorgus-map-inspector p,
+  .lorgus-map-page .lorgus-map-regions-title,
+  .lorgus-map-page .lorgus-map-region-button {
+    color: #e8dcc2 !important;
+  }
+}
