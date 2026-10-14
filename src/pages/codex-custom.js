@@ -3,6 +3,14 @@
   const db = () => window.supabaseClient;
   const publicUrl = path => path ? db()?.storage.from("lorgus-lore-images").getPublicUrl(path).data?.publicUrl || "" : "";
   const imageByTitle = new Map();
+  const normalizeTitle = value => String(value || "").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").replace(/\\.md$/i, "").replace(/[^\\p{L}\\p{N}]+/gu, " ").trim();
+  const rememberImage = (title, url) => {
+    if (!title || !url) return;
+    const key = normalizeTitle(title);
+    if (key) imageByTitle.set(key, url);
+    const stripped = key.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\\s+/, "");
+    if (stripped && stripped !== key) imageByTitle.set(stripped, url);
+  };
   let loading = null;
 
   async function loadCustomLore() {
@@ -15,14 +23,23 @@
         .eq("is_published", true).order("sort_order").order("title");
       if (result.error) { console.warn("LORGUS custom lore unavailable:", result.error.message); return; }
       const rows = result.data || [];
-      const byId = new Map(rows.map(row => [row.id, row]));
+      imageByTitle.clear();
+      const mediaResult = await client.from("lorgus_lore_media").select("note_path,image_path");
+      if (!mediaResult.error) (mediaResult.data || []).forEach(media => {
+        const url = publicUrl(media.image_path);
+        const basename = String(media.note_path || "").split("/").pop().replace(/\\.md$/i, "");
+        rememberImage(basename, url);
+        const parts = String(media.note_path || "").split("/").filter(Boolean);
+        if (parts.length > 1) rememberImage(parts[parts.length - 2] + " " + basename, url);
+      });
       const kids = new Map();
       rows.forEach(row => { const key = row.parent_id || ""; if (!kids.has(key)) kids.set(key, []); kids.get(key).push(row); });
       const toEntry = row => {
         const childRows = kids.get(row.id) || [];
         const entry = [row.title, row.kind === "tree" ? "Древо Лоргуса" : "Сущность", row.subtitle || "", row.body || "", "", childRows.map(toEntry)];
         const url = publicUrl(row.image_path);
-        if (url) imageByTitle.set(row.title, url);
+        if (url) rememberImage(row.title, url);
+        entry.push(url || "");
         return entry;
       };
       const sections = window.LORGUS_CODEX_SECTIONS || [];
@@ -32,8 +49,8 @@
         const children = kids.get(root.id) || [];
         const entries = children.map(toEntry);
         if (children.length && (root.body || root.image_path)) {
-          const intro = [root.title, "Описание древа", root.subtitle || "", root.body || "", "", []];
-          if (root.image_path) imageByTitle.set(root.title, publicUrl(root.image_path));
+          const intro = [root.title, "Описание древа", root.subtitle || "", root.body || "", "", [], publicUrl(root.image_path)];
+          if (root.image_path) rememberImage(root.title, publicUrl(root.image_path));
           entries.unshift(intro);
         }
         const section = {
@@ -43,9 +60,10 @@
           desc: root.subtitle || "Дополнительные знания мира Лоргуса",
           entries: entries.length ? entries : [toEntry(root)]
         };
-        if (root.image_path) imageByTitle.set(root.title, publicUrl(root.image_path));
+        if (root.image_path) rememberImage(root.title, publicUrl(root.image_path));
         if (!sections.some(existing => existing.id === section.id)) sections.push(section);
       });
+      window.LORGUS_CODEX_IMAGE_BY_TITLE = imageByTitle;
       window.LORGUS_CODEX_SECTIONS = sections;
     })().finally(() => { loading = null; });
     return loading;
@@ -60,7 +78,8 @@
         const body = panel.querySelector(".codex-detail-body");
         const heading = body?.querySelector("h2");
         const title = heading?.textContent?.trim();
-        const url = title && imageByTitle.get(title);
+        const key = normalizeTitle(title);
+        const url = (title && (imageByTitle.get(key) || imageByTitle.get(key.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\\s+/, "")))) || "";
         if (!body || !url) return;
         let img = body.querySelector(":scope > .codex-detail-illustration");
         if (img && img.dataset.source === url) return;
