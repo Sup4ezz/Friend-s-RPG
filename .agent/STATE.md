@@ -49,3 +49,10 @@ P0-аудит серверной целостности RP presence и всех 
 - Список выбора персонажа запрашивает записи и подписанные URL портретов параллельно.
 - Добавлен src/core/mobile-performance.css для упрощённых мобильных раскладок и уменьшения дорогих визуальных эффектов.
 - Браузерная проверка не выполнялась. Не считать всю оптимизацию завершённой: далее нужны регрессия экранов, разделение глобальных ресурсов и оптимизация тяжёлых изображений.
+
+
+## UI iteration — mail and character dossier (2026-10-14)
+- Mail UI exposes the two server-supported methods: pigeon = 5 minutes, courier = 20 minutes. The client no longer submits `sent_at` / `deliver_at`; the existing database trigger remains authoritative. Sent folder opens after a successful send. Countdown and route progress are presentation-only and derived from server timestamps.
+- Character dossier now uses an editorial dark-fantasy hierarchy and existing profile fields. New CSS files are loaded by `index.html`.
+- JavaScript syntax validation passed for `src/pages/mail-page.js` and `src/pages/character-hub.js`. No browser or production smoke test yet.
+- Missing data model discovered: no `familiars` / `slaves` columns or corresponding relation table in current Supabase schema. Keep this as an explicit blocker; do not show fabricated data.
