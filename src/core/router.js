@@ -198,11 +198,6 @@
 
     function renderPath(path, force = false) {
         path = applyCanonicalPath(path);
-        if (path === "/lorblook" && window.activeCharacter?.origin_type === "reincarnated") {
-            window.history.replaceState({ lorgusRoute: "/map" }, "", "/map");
-            lastRenderedPath = null;
-            return renderPath("/map", true);
-        }
         if (!resolveRoute(path) || !canRender(path)) return false;
         if (!force && lastRenderedPath === path) return true;
 
@@ -234,10 +229,6 @@
     function navigate(path, options = {}) {
         path = canonicalPath(path);
         if (!resolveRoute(path)) return false;
-        if (path === "/lorblook" && window.activeCharacter?.origin_type === "reincarnated") {
-            path = "/map";
-            options = { ...options, replace: true };
-        }
 
         const current = normalizePath();
         if (current !== path) {
