@@ -136,8 +136,7 @@
           newImagePath=path;
         }
         const auth=await db.auth.getUser(); if(auth.error)throw auth.error;
-        const payload={id,kind:row.kind,parent_id:row.parent_id||null,title:name.value.trim(),subtitle:subtitle.value.trim(),body:body.value,is_published:published.checked,image_path:newImagePath,sort_order:Number(row.sort_order)||0,updated_by:auth.data.user.id};
-        if(!row.id)payload.created_by=auth.data.user.id;
+        const payload={id,kind:row.kind,parent_id:row.parent_id||null,title:name.value.trim(),subtitle:subtitle.value.trim(),body:body.value,is_published:published.checked,image_path:newImagePath,sort_order:Number(row.sort_order)||0,created_by:row.created_by||auth.data.user.id,updated_by:auth.data.user.id};
         const saved=await db.from("lorgus_lore_custom_entries").upsert(payload,{onConflict:"id"}).select("*").single();
         if(saved.error)throw saved.error;
         const index=customEntries.findIndex(x=>x.id===saved.data.id);
