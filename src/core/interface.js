@@ -240,7 +240,6 @@ window.openLorgusUpdateLog = openLorgusUpdateLog;
 
 function renderLorgusInterfaceNav(active = "world") {
     const items = [
-        ["overview", "⌂", "Обзор", "/overview"],
         ["world", "✦", "Мир", "/world"],
         ["character", "♙", "Персонаж", "/character"],
         ["rp", "◈", "Ролевая", "/rp"],
@@ -269,49 +268,6 @@ function renderLorgusInterfaceNav(active = "world") {
                 <button type="button" class="lorgus-global-logout" onclick="logout()">ВЫЙТИ</button>
             </div>
         </nav>
-    `;
-}
-
-function renderLorgusOverview() {
-    const container = document.getElementById("cabinet-content");
-    const character = window.activeCharacter;
-    if (!container || !character) return;
-
-    const name = escapeHtml(character.name || "Без имени");
-    const race = escapeHtml(character.race || "Раса не указана");
-    const homeland = escapeHtml(character.homeland || "Родина не указана");
-    const presence = window.activeRpPresence;
-    const place = presence?.type === "location" ? presence.location : presence?.type === "road" ? "В пути" : "Не определено";
-
-    container.className = "lorgus-command-page";
-    container.innerHTML = `
-        ${renderLorgusInterfaceNav("overview")}
-        <main class="lorgus-command-main">
-            <section class="lorgus-command-hero">
-                <div>
-                    <span class="lorgus-command-kicker">ЛОРГУС · ЛИЧНАЯ ХРОНИКА</span>
-                    <h1>${name}</h1>
-                    <p>${race} · Родина: ${homeland}</p>
-                </div>
-                <div class="lorgus-command-status"><i></i><span>МИР ПРОДОЛЖАЕТСЯ</span><small>Даже когда тебя нет</small></div>
-            </section>
-            <section class="lorgus-command-grid">
-                <article class="lorgus-command-card command-location">
-                    <span>ФИЗИЧЕСКОЕ ПОЛОЖЕНИЕ</span><strong>${escapeHtml(place)}</strong>
-                    <small>Положение персонажа фиксируется только ролевым действием.</small>
-                    <button type="button" onclick="renderLorgusWorldMapCurrent()">Открыть карту →</button>
-                </article>
-                <article class="lorgus-command-card"><span>ПЕРСОНАЖ</span><strong>История и состояние</strong><small>Характеристики, навыки, снаряжение, деньги и биография.</small><button type="button" onclick="renderLorgusCharacterHub()">Открыть досье →</button></article>
-                <article class="lorgus-command-card"><span>РОЛЕВАЯ</span><strong>Текущая сцена</strong><small>Место, участники, сообщения и последствия действий.</small><button type="button" onclick="renderLorgusRpHub()">Войти в RP →</button></article>
-                <article class="lorgus-command-card"><span>СВЯЗИ</span><strong>Люди мира</strong><small>Знакомства, отношения и персонажи, находящиеся рядом с историей.</small><button type="button" onclick="renderWorldCharacterTracker()">Люди мира →</button></article>
-                <article class="lorgus-command-card"><span>ЛЕТОПИСЬ</span><strong>Обновления ЛОРГУСА</strong><small>Новые версии, изменения мира и сообщения от создателей проекта.</small><button type="button" onclick="openLorgusUpdateLog()">Открыть летопись →</button></article>
-                <article class="lorgus-command-card command-mail"><span>ПОСЛАНИЯ</span><strong>Письма</strong><small>Связь с другими персонажами независимо от расстояния.</small><button type="button" onclick="renderMail()">Открыть почту →</button></article>
-            </section>
-            <section class="lorgus-command-bottom">
-                <div><span class="lorgus-command-kicker">ПРИНЦИП ЛОРГУСА</span><h2>Ты не главный герой этого мира.</h2><p>Королевства принимают решения, торговцы ведут дела, люди рождаются и умирают, армии двигаются, а слухи распространяются — независимо от того, смотришь ли ты на это.</p></div>
-                <div class="lorgus-command-metrics"><div><b>07</b><span>КРАЁВ</span></div><div><b>∞</b><span>ИСТОРИЙ</span></div><div><b>01</b><span>ТВОЯ ЖИЗНЬ</span></div></div>
-            </section>
-        </main>
     `;
 }
 
@@ -695,7 +651,6 @@ window.refreshLorgusNotificationBadge = refreshLorgusNotificationBadge;
 window.formatLorgusNotificationTime = formatLorgusNotificationTime;
 window.openLorgusNotifications = openLorgusNotifications;
 window.renderLorgusInterfaceNav = renderLorgusInterfaceNav;
-window.renderLorgusOverview = renderLorgusOverview;
 window.renderLorgusWorldMapCurrent = renderLorgusWorldMapCurrent;
 window.appendRpMessage = appendRpMessage;
 
