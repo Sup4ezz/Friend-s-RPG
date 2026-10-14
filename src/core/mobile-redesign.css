@@ -153,8 +153,10 @@
   }
   .lorgus-mobile-auth .auth-container{
     position:relative!important;inset:auto!important;z-index:2!important;flex:0 0 auto!important;align-self:center!important;
-    width:100%!important;max-width:390px!important;min-width:0!important;
-    margin:0!important;padding:0!important;transform:none!important;
+    display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;
+    grid-template-columns:minmax(0,1fr)!important;grid-template-rows:none!important;gap:0!important;
+    width:100%!important;max-width:390px!important;min-width:0!important;height:auto!important;min-height:0!important;
+    margin:0!important;padding:0!important;transform:none!important;translate:none!important;
   }
   .lorgus-mobile-auth .auth-panel{
     position:relative!important;box-sizing:border-box!important;width:100%!important;min-width:0!important;
