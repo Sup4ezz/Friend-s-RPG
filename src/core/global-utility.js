@@ -25,10 +25,24 @@
     bar.classList.toggle("is-visible", Boolean(active));
   }
   function removeBackButtons() {
-    document.querySelectorAll(".lorgus-character-back,.lorgus-mail-back,.lorgus-subpage-back-arrow").forEach(el => el.remove());
-    document.querySelectorAll("button,a,[role='button']").forEach(el => {
-      if (el.classList.contains("lorgus-global-logout") || el.classList.contains("lorgus-global-notifications")) return;
-      if ((el.textContent || "").trim().replace(/\s+/g, " ").toLocaleUpperCase("ru-RU") === "НАЗАД") el.remove();
+    document.querySelectorAll(
+      ".lorgus-character-back,.lorgus-mail-back,.lorgus-subpage-back-arrow," +
+      ".back-button,.back-btn,.btn-back,[class*='back-button'],[class*='back-btn']"
+    ).forEach(el => {
+      if (!el.closest(".lorgus-global-utility")) el.remove();
+    });
+
+    document.querySelectorAll("button,a,[role='button'],input[type='button'],input[type='submit']").forEach(el => {
+      if (el.closest(".lorgus-global-utility")) return;
+      const label = [
+        el.textContent || "",
+        el.getAttribute("aria-label") || "",
+        el.getAttribute("title") || "",
+        el.value || ""
+      ].join(" ").replace(/[←←‹«→\s]+/g, " ").trim().toLocaleUpperCase("ru-RU");
+      if (/(^|\\s)НАЗАД($|\\s)/u.test(label)) {
+        el.remove();
+      }
     });
   }
   function refresh() { removeBackButtons(); ensureToolbar(); }
