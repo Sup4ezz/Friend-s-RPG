@@ -240,12 +240,12 @@ window.openLorgusUpdateLog = openLorgusUpdateLog;
 
 function renderLorgusInterfaceNav(active = "world") {
     const items = [
-        ["world", "✦", "Мир", "/world"],
+        ["world", "✦", "Мир", "/map"],
         ["character", "♙", "Персонаж", "/character"],
         ["rp", "◈", "Ролевая", "/rp"],
         ["people", "♧", "Люди", "/people"],
         ["mail", "✉", "Письма", "/mail"],
-        ["codex", "▤", "Лорбук", "/codex"]
+        ["codex", "▤", "Лорбук", "/lorblook"]
     ].filter(([id]) => id !== "codex" || window.activeCharacter?.origin_type !== "reincarnated");
     window.setTimeout(() => refreshLorgusNotificationBadge(), 0);
 
