@@ -17,9 +17,34 @@
 
     const ROUTES = window.LORGUS_ROUTES || fallbackRoutes;
     const PAGES = window.LORGUS_PAGES || {};
-    const ACTION_TO_ROUTE = Object.fromEntries(
-        Object.entries(ROUTES).map(([path, route]) => [route.render + "()", path])
-    );
+    const ACTION_TO_ROUTE = {
+        "renderLorgusWorldMapCurrent()": "/map",
+        "renderLorgusCodex()": "/lorblook",
+        "renderLorgusCharacterHub()": "/character",
+        "renderLorgusRpHub()": "/rp",
+        "renderWorldCharacterTracker()": "/people",
+        "renderMail()": "/mail",
+        "renderLorgusInventory()": "/inventory"
+    };
+
+    const LEGACY_PATHS = {
+        "/overview": "/main-page",
+        "/world": "/map",
+        "/codex": "/lorblook"
+    };
+
+    function canonicalPath(path) {
+        const clean = normalizePath(path);
+        return LEGACY_PATHS[clean] || clean;
+    }
+
+    function applyCanonicalPath(path) {
+        const canonical = canonicalPath(path);
+        if (normalizePath(path) !== canonical) {
+            window.history.replaceState({ lorgusRoute: canonical }, "", canonical);
+        }
+        return canonical;
+    }
 
     let navigating = false;
     let bootTimer = null;
@@ -30,8 +55,12 @@
         return clean === "/" ? "/" : clean;
     }
 
-    function canRender() {
-        return Boolean(window.activeCharacter && document.getElementById("cabinet-content"));
+    function canRender(path = normalizePath()) {
+        const hasContainer = Boolean(document.getElementById("cabinet-content"));
+        if (!hasContainer) return false;
+        if (path === "/ankets") return true;
+        if (path === "/admin") return Boolean(window.lorgusIsAdmin);
+        return Boolean(window.activeCharacter);
     }
 
     function parseRpChatPath(path) {
@@ -99,6 +128,27 @@
         const route = resolveRoute(path);
         if (!route) return null;
 
+        if (route.page === "applications") {
+            return {
+                render() {
+                    const container = document.getElementById("cabinet-content");
+                    if (!container) return;
+                    if (window.lorgusIsAdmin) return window.loadAdminPanel?.(container);
+                    return window.renderCharacterApplicationForm?.(container);
+                }
+            };
+        }
+
+        if (route.page === "admin") {
+            return {
+                render() {
+                    const container = document.getElementById("cabinet-content");
+                    if (!container || !window.lorgusIsAdmin) return;
+                    return window.loadAdminPanel?.(container);
+                }
+            };
+        }
+
         if (route.page === "rp-chat") {
             const chat = parseRpChatPath(path);
             return {
@@ -140,12 +190,13 @@
     }
 
     function renderPath(path, force = false) {
-        if (path === "/codex" && window.activeCharacter?.origin_type === "reincarnated") {
-            window.history.replaceState({ lorgusRoute: "/world" }, "", "/world");
+        path = applyCanonicalPath(path);
+        if (path === "/lorblook" && window.activeCharacter?.origin_type === "reincarnated") {
+            window.history.replaceState({ lorgusRoute: "/map" }, "", "/map");
             lastRenderedPath = null;
-            return renderPath("/world", true);
+            return renderPath("/map", true);
         }
-        if (!resolveRoute(path) || !canRender()) return false;
+        if (!resolveRoute(path) || !canRender(path)) return false;
         if (!force && lastRenderedPath === path) return true;
 
         const page = resolvePage(path);
@@ -174,9 +225,10 @@
     }
 
     function navigate(path, options = {}) {
+        path = canonicalPath(path);
         if (!resolveRoute(path)) return false;
-        if (path === "/codex" && window.activeCharacter?.origin_type === "reincarnated") {
-            path = "/world";
+        if (path === "/lorblook" && window.activeCharacter?.origin_type === "reincarnated") {
+            path = "/map";
             options = { ...options, replace: true };
         }
 
@@ -217,7 +269,7 @@
             if (bootTimer) { window.clearInterval(bootTimer); bootTimer = null; }
             return;
         }
-        const path = normalizePath();
+        const path = applyCanonicalPath(normalizePath());
 
         if (path === "/") return;
 
@@ -242,15 +294,7 @@
             return;
         }
 
-        let path = normalizePath();
-
-        // Старый /overview больше не существует. Возвращаемся на корень,
-        // чтобы авторизация восстановила выбор/создание персонажа
-        // либо последний игровой экран для уже выбранного персонажа.
-        if (path === "/overview") {
-            window.history.replaceState({}, "", "/");
-            return;
-        }
+        let path = applyCanonicalPath(normalizePath());
 
         if (path === "/") return;
 
@@ -259,7 +303,7 @@
             path = "/world";
         }
 
-        if (canRender()) {
+        if (canRender(path)) {
             renderPath(path, true);
             return;
         }
@@ -278,7 +322,7 @@
                 return;
             }
 
-            if (canRender()) {
+            if (canRender(path)) {
                 window.clearInterval(bootTimer);
                 bootTimer = null;
                 renderPath(path, true);
