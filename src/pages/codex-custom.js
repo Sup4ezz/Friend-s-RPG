@@ -117,10 +117,15 @@
         const title = heading?.textContent?.trim();
         const url = title ? findImage(title) : "";
         if (!body || !url) return;
+        // An image explicitly attached to this entry (node[6]) is authoritative.
+        // Never replace it with a fuzzy title match: that can show another character's portrait.
         let img = body.querySelector(":scope > .codex-detail-illustration");
-        if (img && img.dataset.source === url) return;
-        if (!img) { img = document.createElement("img"); img.className = "codex-detail-illustration"; img.alt = "Иллюстрация: " + title; }
-        img.dataset.source = url; img.src = url;
+        if (img) return;
+        img = document.createElement("img");
+        img.className = "codex-detail-illustration";
+        img.alt = "Иллюстрация: " + title;
+        img.dataset.source = url;
+        img.src = url;
         img.style.setProperty("display", "block", "important");
         img.style.setProperty("width", "100%", "important");
         img.style.setProperty("max-width", "100%", "important");
