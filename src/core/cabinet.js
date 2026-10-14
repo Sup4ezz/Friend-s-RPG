@@ -222,6 +222,23 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
                 */
                 const restoredPresence = window.activeRpPresence;
 
+                // После входа не оставляем игровой экран на корневом URL:
+                // восстанавливаем конкретный RP-маршрут либо главную страницу.
+                if (window.lorgusRouter && window.lorgusRouter.currentPath === "/") {
+                    if (restoredPresence?.type === "location") {
+                        window.lorgusNavigateChat?.(
+                            restoredPresence.region,
+                            restoredPresence.location,
+                            { replace: true }
+                        );
+                    } else if (restoredPresence?.type === "road") {
+                        window.lorgusNavigateRoadChat?.(restoredPresence, { replace: true });
+                    } else {
+                        window.lorgusNavigate?.("/main-page", { replace: true });
+                    }
+                    return;
+                }
+
                 if (restoredPresence?.type === "location") {
                     await renderLocationChats(
                         restoredPresence.location,
