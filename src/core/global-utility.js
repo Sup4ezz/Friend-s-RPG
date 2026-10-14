@@ -12,14 +12,7 @@
       bar = document.createElement("div");
       bar.className = "lorgus-global-utility";
       bar.setAttribute("aria-label", "Действия аккаунта");
-      bar.innerHTML = '<button type="button" class="lorgus-global-map" aria-label="На карту">НА КАРТУ</button><button type="button" class="lorgus-global-notifications" aria-label="Уведомления"><span aria-hidden="true">♢</span> УВЕДОМЛЕНИЯ</button><button type="button" class="lorgus-global-logout">ВЫЙТИ</button>';
-      bar.querySelector(".lorgus-global-map").addEventListener("click", () => {
-        if (typeof window.lorgusSubpageTransition === "function" && typeof window.renderLorgusWorldMapCurrent === "function") {
-          window.lorgusSubpageTransition("top", window.renderLorgusWorldMapCurrent);
-        } else if (typeof window.renderLorgusWorldMapCurrent === "function") {
-          window.renderLorgusWorldMapCurrent();
-        }
-      });
+      bar.innerHTML = '<button type="button" class="lorgus-global-notifications" aria-label="Уведомления"><span aria-hidden="true">♢</span> УВЕДОМЛЕНИЯ</button><button type="button" class="lorgus-global-logout">ВЫЙТИ</button>';
       bar.querySelector(".lorgus-global-notifications").addEventListener("click", () => {
         if (typeof window.openLorgusNotifications === "function") window.openLorgusNotifications();
       });
@@ -30,6 +23,39 @@
     }
     const active = document.querySelector(ROOTS);
     bar.classList.toggle("is-visible", Boolean(active));
+
+    let returnArrow = document.querySelector(".lorgus-direction-return");
+    const path = (window.location.pathname || "").replace(/\\/$/, "");
+    const directions = {
+      "/mail": { glyph: "↑", direction: "top", label: "Вернуться на карту из писем" },
+      "/character": { glyph: "↓", direction: "bottom", label: "Вернуться на карту из персонажа" },
+      "/lorblook": { glyph: "←", direction: "left", label: "Вернуться на карту из лорбука" },
+      "/rp": { glyph: "→", direction: "right", label: "Вернуться на карту из ролевой" }
+    };
+    const config = directions[path];
+    if (config && active) {
+      if (!returnArrow) {
+        returnArrow = document.createElement("button");
+        returnArrow.type = "button";
+        returnArrow.className = "lorgus-direction-return";
+        document.body.appendChild(returnArrow);
+        returnArrow.addEventListener("click", () => {
+          const current = directions[(window.location.pathname || "").replace(/\\/$/, "")];
+          if (!current || typeof window.renderLorgusWorldMapCurrent !== "function") return;
+          if (typeof window.lorgusSubpageTransition === "function") {
+            window.lorgusSubpageTransition(current.direction, window.renderLorgusWorldMapCurrent);
+          } else {
+            window.renderLorgusWorldMapCurrent();
+          }
+        });
+      }
+      returnArrow.textContent = config.glyph;
+      returnArrow.setAttribute("aria-label", config.label);
+      returnArrow.title = config.label;
+      returnArrow.hidden = false;
+    } else if (returnArrow) {
+      returnArrow.hidden = true;
+    }
   }
   function removeBackButtons() {
     document.querySelectorAll(
