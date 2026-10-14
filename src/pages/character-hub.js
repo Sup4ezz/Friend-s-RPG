@@ -1,68 +1,144 @@
-/* LORGUS character dossier */
+/* LORGUS character dossier — redesigned as an illustrated character sheet */
 async function renderLorgusCharacterHub() {
     const container = document.getElementById("cabinet-content");
     const c = window.activeCharacter;
     if (!container || !c) return;
-    const esc = window.escapeHtml;
+
+    const esc = value => window.escapeHtml ? window.escapeHtml(value ?? "") : String(value ?? "");
     const name = esc(c.name || "Без имени");
     const race = esc(c.race || "Раса не указана");
     const homeland = esc(c.homeland || "Родина не указана");
+    const occupation = esc(c.occupation || "Не указано");
     const status = String(c.status || "ACTIVE").toUpperCase();
     const statusLabel = status === "ACTIVE" ? "АКТИВЕН" : status;
+    const titleMarkup = window.renderTitleBadge?.(window.activeTitle, "lorgus-profile-title") || '<strong class="lorgus-character-no-title">Без титула</strong>';
+    const story = (label, value, empty) => `
+        <article class="lorgus-character-story-card">
+            <span class="lorgus-character-card-kicker">${label}</span>
+            <p>${value ? esc(value) : '<span class="lorgus-character-muted">' + empty + '</span>'}</p>
+        </article>`;
+
     container.className = "lorgus-character-page";
     container.innerHTML = `
         <div class="lorgus-character-shell">
             <aside class="lorgus-character-sidebar">
-                <div class="lorgus-character-brand"><span>LORGUS</span><small>ДОСЬЕ ПЕРСОНАЖА</small></div>
-                <div class="lorgus-character-portrait" aria-hidden="true"><div class="lorgus-character-portrait-ring"></div><div class="lorgus-character-portrait-mark">✦</div></div>
-                <div class="lorgus-character-identity"><span>ПЕРСОНАЖ</span><strong>__NAME__</strong><small>__RACE__</small></div>
+                <a class="lorgus-character-brand" href="/main-page" aria-label="LORGUS — на карту">
+                    <span class="lorgus-character-brand-mark">✦</span>
+                    <span><b>LORGUS</b><small>ЛЕТОПИСЬ ЖИВОГО МИРА</small></span>
+                </a>
+                <div class="lorgus-character-portrait" aria-label="Портрет персонажа">
+                    <div class="lorgus-character-portrait-halo"></div>
+                    <div class="lorgus-character-portrait-inner"><span>✦</span></div>
+                    <div class="lorgus-character-portrait-caption">ЛИЧНОЕ ДОСЬЕ</div>
+                </div>
+                <div class="lorgus-character-identity">
+                    <span>ТВОЙ ПЕРСОНАЖ</span>
+                    <strong>${name}</strong>
+                    <small>${race}</small>
+                </div>
+                <div class="lorgus-character-sidebar-rule"><span>✦</span></div>
                 <nav class="lorgus-character-nav" aria-label="Разделы персонажа">
-                    <button type="button" class="active"><span>◈</span> Досье</button>
-                    <button type="button" onclick="window.renderLorgusInventory?.()"><span>◇</span> Снаряжение</button>
-                    <button type="button" onclick="window.renderMail?.()"><span>✉</span> Письма</button>
-                    <button type="button" onclick="window.renderLorgusRpHub?.()"><span>◆</span> Ролевая</button>
+                    <button type="button" class="active" aria-current="page"><span>◈</span><b>Досье</b><i>01</i></button>
+                    <button type="button" onclick="window.renderLorgusInventory?.()"><span>◇</span><b>Снаряжение</b><i>02</i></button>
+                    <button type="button" onclick="window.renderMail?.()"><span>✉</span><b>Письма</b><i>03</i></button>
+                    <button type="button" onclick="window.renderLorgusRpHub?.()"><span>⌁</span><b>Ролевая</b><i>04</i></button>
                 </nav>
-                <button type="button" class="lorgus-character-back" onclick="window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
-                    <span>↓</span><div><b>ВЕРНУТЬСЯ НА КАРТУ</b><small>Продолжить путь</small></div>
+                <button type="button" class="lorgus-character-back" onclick="window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent)">
+                    <span>←</span><span><b>ВЕРНУТЬСЯ В МИР</b><small>Продолжить путь</small></span>
                 </button>
             </aside>
+
             <main class="lorgus-character-main">
                 <header class="lorgus-character-header">
-                    <div><span class="lorgus-command-kicker">ЛИЧНОЕ ДОСЬЕ</span><h1>__NAME__</h1><p>__RACE__ <i>·</i> __HOMELAND__</p></div>
-                    <div class="lorgus-character-header-actions"><span class="lorgus-character-status"><i></i>__STATUS__</span><button type="button" class="lorgus-character-title-button" onclick="window.openTitlePicker()">ВЫБРАТЬ ТИТУЛ</button></div>
+                    <div class="lorgus-character-heading">
+                        <div class="lorgus-character-breadcrumb"><span>ЛОРГУС</span><i>／</i><span>ПЕРСОНАЖ</span></div>
+                        <h1>${name}</h1>
+                        <p>${race}<i>·</i>${homeland}</p>
+                    </div>
+                    <div class="lorgus-character-header-actions">
+                        <span class="lorgus-character-status"><i></i><span>${statusLabel}</span></span>
+                        <button type="button" class="lorgus-character-title-button" onclick="window.openTitlePicker()"><span>✦</span> Выбрать титул</button>
+                    </div>
                 </header>
-                <section class="lorgus-character-overview">
-                    <article class="lorgus-character-card"><span class="lorgus-character-card-kicker">ПРОИСХОЖДЕНИЕ</span><strong>__HOMELAND__</strong><small>Место, с которым связан персонаж</small></article>
-                    <article class="lorgus-character-card"><span class="lorgus-character-card-kicker">СОСТОЯНИЕ</span><strong>__STATUS__</strong><small>Текущий статус персонажа</small></article>
-                    <article class="lorgus-character-card lorgus-character-title-card"><span class="lorgus-character-card-kicker">ТИТУЛ</span><div class="lorgus-character-title-value">__TITLE__</div><small>Принадлежность и признание</small></article>
+
+                <section class="lorgus-character-hero">
+                    <div class="lorgus-character-hero-art" aria-hidden="true"><span class="lorgus-character-hero-sigil">✦</span><span class="lorgus-character-hero-orbit"></span></div>
+                    <div class="lorgus-character-hero-copy">
+                        <span class="lorgus-character-card-kicker">ЗАПИСЬ В ЛЕТОПИСИ</span>
+                        <h2>${name}</h2>
+                        <p>${occupation}</p>
+                        <div class="lorgus-character-hero-tags"><span>${race}</span><i>·</i><span>${homeland}</span></div>
+                    </div>
+                    <div class="lorgus-character-hero-title"><small>ТИТУЛ</small><div class="lorgus-character-title-value">${titleMarkup}</div></div>
                 </section>
+
+                <section class="lorgus-character-overview" aria-label="Краткая сводка">
+                    <article class="lorgus-character-card">
+                        <span class="lorgus-character-card-index">I</span><span class="lorgus-character-card-kicker">ПРОИСХОЖДЕНИЕ</span>
+                        <strong>${homeland}</strong><small>Земля, с которой начинается твоя история</small>
+                    </article>
+                    <article class="lorgus-character-card">
+                        <span class="lorgus-character-card-index">II</span><span class="lorgus-character-card-kicker">СОСТОЯНИЕ</span>
+                        <strong>${statusLabel}</strong><small>Текущее положение персонажа</small>
+                    </article>
+                    <article class="lorgus-character-card">
+                        <span class="lorgus-character-card-index">III</span><span class="lorgus-character-card-kicker">РОД ЗАНЯТИЙ</span>
+                        <strong>${occupation}</strong><small>То, чем персонаж известен миру</small>
+                    </article>
+                </section>
+
                 <section class="lorgus-character-content-grid">
                     <article class="lorgus-character-panel lorgus-character-abilities">
-                        <div class="lorgus-character-panel-head"><div><span>СПОСОБНОСТИ</span><strong>Подтверждённые способности</strong></div><b>✦</b></div>
-                        <div class="lorgus-ability-list"><div class="lorgus-ability-empty">Загрузка...</div></div>
+                        <div class="lorgus-character-panel-head"><div><span>МАСТЕРСТВО</span><strong>Способности и умения</strong></div><b>✧</b></div>
+                        <p class="lorgus-character-panel-intro">Подтверждённые умения, которыми персонаж действительно владеет.</p>
+                        <div class="lorgus-ability-list"><div class="lorgus-ability-empty">Загрузка способностей…</div></div>
                     </article>
-                    <article class="lorgus-character-panel">
-                        <div class="lorgus-character-panel-head"><div><span>ОТНОШЕНИЯ</span><strong>Связи персонажа</strong></div><b>∞</b></div>
-                        <p class="lorgus-character-placeholder">Доверие, дружба, вражда, семья, долги и обещания.</p>
+                    <article class="lorgus-character-panel lorgus-character-status-panel">
+                        <div class="lorgus-character-panel-head"><div><span>ПОЛОЖЕНИЕ</span><strong>Сведения о персонаже</strong></div><b>⌖</b></div>
+                        <dl class="lorgus-character-fact-list">
+                            <div><dt>Имя</dt><dd>${name}</dd></div>
+                            <div><dt>Раса</dt><dd>${race}</dd></div>
+                            <div><dt>Родина</dt><dd>${homeland}</dd></div>
+                            <div><dt>Занятие</dt><dd>${occupation}</dd></div>
+                        </dl>
                     </article>
-                    <article class="lorgus-character-panel lorgus-character-wide">
-                        <div class="lorgus-character-panel-head"><div><span>ИСТОРИЯ</span><strong>Личная хроника</strong></div><b>⌁</b></div>
-                        <p class="lorgus-character-placeholder">События жизни и последствия решений персонажа появятся здесь.</p>
+                    <article class="lorgus-character-panel lorgus-character-wide lorgus-character-biography">
+                        <div class="lorgus-character-panel-head"><div><span>ЖИЗНЕННЫЙ ПУТЬ</span><strong>История и характер</strong></div><b>⌁</b></div>
+                        <div class="lorgus-character-story-grid">
+                            ${story("ХАРАКТЕР", c.personality, "Характер пока не описан.")}
+                            ${story("ПРЕДЫСТОРИЯ", c.backstory, "Предыстория пока не записана.")}
+                            ${story("ОСОБЫЕ НАВЫКИ", c.special_skills, "Особые навыки не указаны.")}
+                        </div>
                     </article>
                     <article class="lorgus-character-panel lorgus-character-wide lorgus-notes-panel">
-                        <div class="lorgus-character-panel-head"><div><span>ЛИЧНЫЙ АРХИВ</span><strong>Доска персонажа</strong></div><span class="lorgus-canvas-status" role="status" aria-live="polite">Открываем доску…</span></div>
+                        <div class="lorgus-character-panel-head">
+                            <div><span>ЛИЧНЫЙ АРХИВ</span><strong>Доска персонажа</strong><p>Заметки, связи и нити личной истории.</p></div>
+                            <span class="lorgus-canvas-status" role="status" aria-live="polite">Открываем архив…</span>
+                        </div>
                         <div class="lorgus-canvas-toolbar" aria-label="Инструменты доски">
                             <button type="button" data-canvas-add="text">＋ Запись</button><button type="button" data-canvas-add="list">＋ Список</button><button type="button" data-canvas-add="card">＋ Карточка</button>
-                            <span class="lorgus-canvas-toolbar-separator"></span><button type="button" data-canvas-connect>↗ Создать связь</button><span class="lorgus-canvas-toolbar-separator"></span>
-                            <button type="button" data-canvas-zoom-out aria-label="Уменьшить масштаб">−</button><span class="lorgus-canvas-zoom" data-canvas-zoom>100%</span><button type="button" data-canvas-zoom-in aria-label="Увеличить масштаб">＋</button><button type="button" data-canvas-fit>⌗ Вся доска</button><button type="button" data-canvas-save>Сохранить</button>
+                            <span class="lorgus-canvas-toolbar-separator"></span><button type="button" data-canvas-connect>↗ Связать</button><span class="lorgus-canvas-toolbar-separator"></span>
+                            <button type="button" data-canvas-zoom-out aria-label="Уменьшить масштаб">−</button><span class="lorgus-canvas-zoom" data-canvas-zoom>100%</span><button type="button" data-canvas-zoom-in aria-label="Увеличить масштаб">＋</button><button type="button" data-canvas-fit>Вся доска</button><button type="button" data-canvas-save>Сохранить</button>
                         </div>
-                        <div class="lorgus-canvas-viewport" aria-label="Свободная доска персонажа"><div class="lorgus-canvas-world"><svg class="lorgus-canvas-links" aria-label="Связи между блоками"></svg><div class="lorgus-canvas-empty-hint">Твоя личная карта мыслей.<br>Создавай блоки и соединяй нити истории.</div></div></div>
+                        <div class="lorgus-canvas-viewport" aria-label="Свободная доска персонажа"><div class="lorgus-canvas-world"><svg class="lorgus-canvas-links" aria-label="Связи между блоками"></svg><div class="lorgus-canvas-empty-hint">Здесь можно собрать свою историю.<br>Добавляй записи и соединяй важные события.</div></div></div>
                     </article>
                 </section>
             </main>
-        </div>`.replaceAll("__NAME__", name).replaceAll("__RACE__", race).replaceAll("__HOMELAND__", homeland).replaceAll("__STATUS__", statusLabel).replace("__TITLE__", window.renderTitleBadge(window.activeTitle, "lorgus-profile-title") || "<strong>Без титула</strong>");
-    const abilities = await window.loadCharacterAbilities(c.id);
+        </div>`;
+
+    const portrait = container.querySelector(".lorgus-character-portrait-inner");
+    try {
+        const photoUrl = await window.getRpCharacterPhoto?.(c.id);
+        if (photoUrl && portrait && container.isConnected) {
+            portrait.innerHTML = '<img src="' + esc(photoUrl) + '" alt="Портрет ' + name + '">';
+            portrait.classList.add("has-photo");
+        }
+    } catch (error) {
+        console.warn("Не удалось загрузить портрет персонажа:", error);
+    }
+
+    const abilities = await window.loadCharacterAbilities?.(c.id) || [];
     const list = container.querySelector(".lorgus-ability-list");
-    if (list) list.innerHTML = window.renderAbilityList(abilities);
+    if (list) list.innerHTML = window.renderAbilityList?.(abilities) || '<div class="lorgus-ability-empty">Подтверждённых способностей пока нет.</div>';
     await window.renderLorgusCharacterCanvas?.(c.id);
 }
