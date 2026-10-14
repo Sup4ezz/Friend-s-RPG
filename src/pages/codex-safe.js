@@ -268,7 +268,7 @@
    const q=search.value.trim();
    if(!q){open(activeId);return;}
    const needle=norm(q),all=[];
-   sections.filter(s=>!s.remote).forEach(s=>s.entries.forEach(entry=>{if(norm(entry.join(" ")).includes(needle))all.push([entry[0],s.title+" · "+entry[1],entry[2],entry[3],entry[4]]);}));
+   const visit=(entries,sectionTitle)=>entries.forEach(entry=>{if(norm(entry.slice(0,5).join(" ")).includes(needle))all.push([entry[0],sectionTitle+" · "+entry[1],entry[2],entry[3],entry[4],entry[5]]);if(Array.isArray(entry[5]))visit(entry[5],sectionTitle+" · "+entry[0]);});sections.filter(s=>!s.remote).forEach(s=>visit(s.entries,s.title));
    docs.forEach(doc=>{if(norm(doc.join(" ")).includes(needle))all.push([doc[0],"Архивный документ",doc[2],"Документ из исходного архива. Открой раздел «Архив летописца», чтобы прочитать его полностью.",doc[1]]);});
    heading.textContent="Результаты поиска";description.textContent="Совпадения во всех открытых разделах лорбука.";buttons.forEach(b=>b.classList.remove("active"));
    draw({entries:all},needle);
