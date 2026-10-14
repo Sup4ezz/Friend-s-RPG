@@ -400,3 +400,25 @@
    height:clamp(240px,40vh,380px) !important;
  }
 }
+
+
+/* Final specificity override for the player-facing codex portrait. */
+html body #root #cabinet-content .codex-cosmos-detail .codex-detail-body > img.codex-detail-illustration{
+  display:block!important;
+  position:relative!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:100%!important;
+  height:clamp(280px,46vh,500px)!important;
+  min-height:0!important;
+  max-height:none!important;
+  aspect-ratio:auto!important;
+  object-fit:cover!important;
+  object-position:center 24%!important;
+  border-radius:0!important;
+  clip-path:inset(0)!important;
+  -webkit-clip-path:inset(0)!important;
+  mask-image:none!important;
+  -webkit-mask-image:none!important;
+  overflow:visible!important;
+}
