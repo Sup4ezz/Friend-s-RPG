@@ -1,0 +1,39 @@
+/* LORGUS admin lore editor */
+.lorgus-lore-editor-toolbar{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:0 0 16px;padding:10px;border:1px solid rgba(203,169,100,.16);background:rgba(0,0,0,.18)}
+.lorgus-lore-editor-toolbar .lorgus-lore-editor-status{grid-column:1/-1;color:rgba(225,211,180,.55);font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.lorgus-lore-editor-status.is-error{color:#e39a83}
+.lorgus-lore-editor-action{display:inline-flex;align-items:center;justify-content:center;min-height:37px;padding:8px 12px;border:1px solid rgba(203,169,100,.3);border-radius:3px;background:rgba(0,0,0,.25);color:#dfd0ad;font:inherit;font-size:11px;cursor:pointer}
+.lorgus-lore-editor-action:hover{border-color:rgba(220,184,102,.65);background:rgba(215,176,98,.1)}
+.lorgus-lore-editor-action.is-primary{background:linear-gradient(135deg,#c8a15a,#8d6a31);border-color:#d7b56f;color:#171109;font-weight:700}
+.lorgus-lore-editor-action.is-danger{color:#d99883;border-color:rgba(180,92,70,.4)}
+.lorgus-lore-editor-action:disabled{opacity:.45;cursor:not-allowed}
+.lorgus-lore-custom-line{display:flex;align-items:center;gap:3px;min-width:0}
+.lorgus-lore-custom-line>.lorgus-lore-node-button{flex:1;min-width:0}
+.lorgus-lore-custom-node .lorgus-lore-node-button.is-unpublished{opacity:.48}
+.lorgus-lore-custom-edit{flex:0 0 25px;width:25px;height:28px;padding:0;border:1px solid transparent;background:transparent;color:rgba(215,176,98,.55);cursor:pointer}
+.lorgus-lore-custom-edit:hover{border-color:rgba(215,176,98,.3);color:#f0dba9}
+.lorgus-lore-editor-panel{max-width:900px;margin:0 auto;padding:clamp(18px,3vw,36px);border:1px solid rgba(203,169,100,.23);background:linear-gradient(145deg,rgba(34,28,18,.62),rgba(7,7,6,.65));box-shadow:0 18px 50px rgba(0,0,0,.18)}
+.lorgus-lore-editor-kicker{color:#c9a45f;font-size:9px;letter-spacing:.22em}
+.lorgus-lore-editor-panel>h2{margin:10px 0 22px;color:#efdfb9;font:600 clamp(26px,3vw,36px)/1.15 "Cormorant Garamond",Georgia,serif}
+.lorgus-lore-editor-help{display:block;margin:0 0 18px;color:rgba(218,207,183,.5);font-size:11px;overflow-wrap:anywhere}
+.lorgus-lore-editor-form{display:grid;gap:15px}
+.lorgus-lore-editor-field{display:grid;gap:7px}
+.lorgus-lore-editor-field>span{color:#c9a45f;font-size:9px;letter-spacing:.17em}
+.lorgus-lore-editor-field input,.lorgus-lore-editor-field textarea{box-sizing:border-box;width:100%;padding:12px 13px;border:1px solid rgba(203,169,100,.24);border-radius:2px;outline:none;background:rgba(0,0,0,.32);color:#e8dcc2;font:inherit;font-size:13px;line-height:1.65}
+.lorgus-lore-editor-field input:focus,.lorgus-lore-editor-field textarea:focus{border-color:rgba(220,184,102,.7);box-shadow:0 0 0 2px rgba(215,176,98,.06)}
+.lorgus-lore-editor-field textarea{resize:vertical;min-height:170px}
+.lorgus-lore-editor-publish{display:flex;align-items:center;gap:9px;color:#d8c7a3;font-size:12px}
+.lorgus-lore-editor-publish input{accent-color:#c8a15a;width:16px;height:16px}
+.lorgus-lore-editor-image{display:grid;grid-template-columns:minmax(100px,180px) minmax(0,1fr);align-items:center;gap:12px;padding:12px;border:1px solid rgba(203,169,100,.18);background:rgba(0,0,0,.18)}
+.lorgus-lore-editor-image>img,.lorgus-lore-static-preview{width:100%;max-height:220px;aspect-ratio:4/5;object-fit:cover;border:1px solid rgba(203,169,100,.22);background:#100e0a}
+.lorgus-lore-editor-image>img[hidden],.lorgus-lore-static-preview[hidden]{display:none}
+.lorgus-lore-editor-image-actions{display:none}
+.lorgus-lore-editor-image>small{color:rgba(225,211,180,.55);font-size:10px;overflow-wrap:anywhere}
+.lorgus-lore-editor-upload{display:inline-flex;align-items:center;justify-content:center;justify-self:start;padding:10px 13px;border:1px solid rgba(203,169,100,.38);background:rgba(176,135,54,.13);color:#e9d4a5;font-size:11px;cursor:pointer}
+.lorgus-lore-editor-upload:hover{background:rgba(176,135,54,.25)}
+.lorgus-lore-editor-upload input{max-width:100%;font-size:10px}
+.lorgus-lore-editor-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.lorgus-lore-attached-image{max-width:640px;margin:18px 0 26px}
+.lorgus-lore-attached-image img{display:block;width:100%;max-height:520px;object-fit:contain;border:1px solid rgba(203,169,100,.25);background:rgba(0,0,0,.25)}
+.lorgus-lore-attached-image figcaption{margin-top:7px;color:rgba(225,211,180,.4);font-size:10px;letter-spacing:.08em}
+@media(max-width:620px){.lorgus-lore-editor-toolbar{grid-template-columns:1fr}.lorgus-lore-editor-toolbar .lorgus-lore-editor-status{grid-column:auto}.lorgus-lore-editor-image{grid-template-columns:minmax(0,1fr)}.lorgus-lore-editor-image>img{max-width:180px}}
