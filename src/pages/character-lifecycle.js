@@ -382,11 +382,9 @@ function renderCharacterApplicationForm(container) {
     const root = document.getElementById("root");
     if (!root) return;
 
-    // Создание анкеты — отдельный режим, а не игровая SPA-страница.
-    // Не оставляем в адресной строке /rp или другой старый маршрут:
-    // иначе после F5 роутер попытается восстановить игровой экран.
-    if (window.location.pathname !== "/") {
-        window.history.replaceState({}, "", "/");
+    // Создание анкеты имеет собственный адрес, который сохраняется при F5.
+    if (window.location.pathname !== "/ankets") {
+        window.history.replaceState({ lorgusRoute: "/ankets" }, "", "/ankets");
     }
 
     // Сохраняем режим создания анкеты: после F5 нельзя восстанавливать старый RP-экран.
