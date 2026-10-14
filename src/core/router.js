@@ -61,7 +61,10 @@
     function canRender(path = normalizePath()) {
         const hasContainer = Boolean(document.getElementById("cabinet-content"));
         if (!hasContainer) return false;
-        if (path === "/ankets") return true;
+        if (path === "/ankets") {
+            return window.lorgusIsAdmin === true ||
+                sessionStorage.getItem("lorgus_character_creation_mode") === "1";
+        }
         if (path === "/admin") return Boolean(window.lorgusIsAdmin);
         return Boolean(window.activeCharacter);
     }
