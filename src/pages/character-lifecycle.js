@@ -395,6 +395,34 @@ function renderCharacterApplicationForm(container) {
     root.replaceChildren(container);
     container.innerHTML = `
         <div class="character-creation-scene" style="display:block;visibility:visible;opacity:1;">
+            <style>
+                .character-origin-warning { position:fixed; inset:0; z-index:5000; display:grid; place-items:center; padding:22px; background:rgba(3,3,3,.92); backdrop-filter:blur(12px); }
+                .character-origin-warning-card { width:min(620px,100%); padding:clamp(24px,4vw,42px); border:1px solid rgba(213,178,103,.48); background:linear-gradient(145deg,rgba(31,25,17,.99),rgba(8,8,7,.99)); box-shadow:0 24px 90px #000; color:#eadcbd; text-align:center; }
+                .character-origin-warning-card .mark { color:#d4b06c; font-size:26px; }
+                .character-origin-warning-card .eyebrow { display:block; margin:12px 0; color:#c6a15c; font:600 10px/1.4 Georgia,serif; letter-spacing:.22em; }
+                .character-origin-warning-card h2 { margin:0 0 16px; color:#f4e6c7; font:600 clamp(26px,4vw,38px)/1.05 Georgia,serif; }
+                .character-origin-warning-card p { max-width:480px; margin:0 auto 14px; color:rgba(234,220,189,.78); font-size:14px; line-height:1.7; }
+                .character-origin-warning-card strong { color:#f1cb80; }
+                .character-origin-warning-card button { margin-top:16px; padding:13px 20px; border:1px solid rgba(213,178,103,.65); background:rgba(103,75,34,.28); color:#f0dfba; font:600 11px Georgia,serif; letter-spacing:.1em; cursor:pointer; }
+                .character-origin-choice { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-bottom:24px; }
+                .character-origin-choice label { display:flex; flex-direction:column; gap:8px; padding:20px; min-height:128px; border:1px solid rgba(213,178,103,.25); background:rgba(7,7,6,.45); cursor:pointer; transition:border-color .18s,background .18s; }
+                .character-origin-choice label:has(input:checked) { border-color:#d4b06c; background:rgba(112,79,34,.2); box-shadow:inset 0 0 0 1px rgba(212,176,108,.2); }
+                .character-origin-choice input { accent-color:#d4b06c; }
+                .character-origin-choice strong { color:#f0dfba; font:600 17px Georgia,serif; }
+                .character-origin-choice small { color:rgba(234,220,189,.65); font-size:12px; line-height:1.5; }
+                @media(max-width:560px) { .character-origin-choice { grid-template-columns:1fr; } .character-origin-choice label { min-height:0; } }
+            </style>
+            <div class="character-origin-warning" role="dialog" aria-modal="true" aria-labelledby="character-origin-warning-title">
+                <section class="character-origin-warning-card">
+                    <div class="mark" aria-hidden="true">✦</div>
+                    <span class="eyebrow">ПРЕЖДЕ ЧЕМ НАЧАТЬ</span>
+                    <h2 id="character-origin-warning-title">Важное предупреждение</h2>
+                    <p>У персонажей с происхождением <strong>«Реинкарнированный» нет доступа к Лорбуку</strong>. Это ограничение действует для выбранного персонажа и не снимается обычной сменой страницы или переходом по прямой ссылке.</p>
+                    <p>Прочитай предупреждение сейчас. Только после подтверждения появится выбор происхождения.</p>
+                    <button type="button" class="character-origin-warning-continue">Я понял, перейти к выбору</button>
+                </section>
+            </div>
+
             <div class="character-creation-atmosphere" aria-hidden="true">
                 <div class="creation-void"></div>
                 <div class="creation-rift"><i></i><b></b></div>
@@ -419,6 +447,13 @@ function renderCharacterApplicationForm(container) {
                 </section>
 
                 <form id="character-application-form" class="character-creation-form" onsubmit="submitCharacterApplication(event)">
+                    <section class="character-creation-panel origin-type-panel">
+                        <div class="creation-panel-heading"><span>00</span><div><small>ПУТЬ ДУШИ</small><h2>Как ты оказался в Лоргусе?</h2></div></div>
+                        <div class="character-origin-choice">
+                            <label><input type="radio" name="character-origin-type" value="reincarnated" required><strong>Реинкарнированный</strong><small>Ты пришёл в этот мир после другой жизни. Лорбук для этого персонажа будет недоступен.</small></label>
+                            <label><input type="radio" name="character-origin-type" value="born_in_lorgus" required><strong>Рождённый в Лоргусе</strong><small>Твоя жизнь началась в Лоргусе. Сохраняется обычный доступ к Лорбуку.</small></label>
+                        </div>
+                    </section>
                     <section class="character-creation-panel identity-panel">
                         <div class="creation-panel-heading"><span>01</span><div><small>ЛИЧНОСТЬ</small><h2>Кто ты?</h2></div></div>
                         <div class="creation-fields">
@@ -493,6 +528,12 @@ function renderCharacterApplicationForm(container) {
         </div>
     `;
 
+    const originWarning = container.querySelector(".character-origin-warning");
+    container.querySelector(".character-origin-warning-continue")?.addEventListener("click", () => {
+        originWarning?.remove();
+        container.querySelector('input[name="character-origin-type"]')?.focus();
+    });
+
     initializeCharacterPortraitCrop();
 
     // Локальный черновик анкеты. Он переживает повторный рендер кабинета,
@@ -506,6 +547,10 @@ function renderCharacterApplicationForm(container) {
             try {
                 const draft = {};
                 characterForm.querySelectorAll("input, textarea, select").forEach(field => {
+                    if (field.type === "radio") {
+                        if (field.checked) draft[field.name] = field.value;
+                        return;
+                    }
                     if (!field.id || field.type === "file") return;
                     draft[field.id] = field.value;
                 });
@@ -521,6 +566,10 @@ function renderCharacterApplicationForm(container) {
                 if (!raw) return;
                 const draft = JSON.parse(raw);
                 characterForm.querySelectorAll("input, textarea, select").forEach(field => {
+                    if (field.type === "radio") {
+                        field.checked = draft[field.name] === field.value;
+                        return;
+                    }
                     if (!field.id || field.type === "file") return;
                     if (Object.prototype.hasOwnProperty.call(draft, field.id)) {
                         field.value = draft[field.id] ?? "";
@@ -870,6 +919,12 @@ async function submitCharacterApplication(event) {
         return;
     }
 
+    const originType = document.querySelector('input[name="character-origin-type"]:checked')?.value || "";
+    if (!["reincarnated", "born_in_lorgus"].includes(originType)) {
+        setCharacterMessage("Сначала выбери происхождение персонажа.", "error");
+        return;
+    }
+
     const name =
         document.getElementById("character-name").value.trim();
 
@@ -1033,6 +1088,7 @@ async function submitCharacterApplication(event) {
         .insert({
             id: applicationId,
             player_id: user.id,
+            origin_type: originType,
             name,
             race,
             age,
@@ -1072,6 +1128,7 @@ async function submitCharacterApplication(event) {
     const pendingApplication = {
         id: applicationId,
         player_id: user.id,
+        origin_type: originType,
         name,
         race,
         age,
