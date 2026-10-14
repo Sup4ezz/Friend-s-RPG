@@ -14,7 +14,7 @@ function renderPendingApplication(container, application) {
                 <div class="welcome-symbol">✦</div>
                 <h1>${esc(application.name) || "Анкета персонажа"}</h1>
                 <p>${application.status === "revision_required" ? "Администрация запросила исправления." : "Твоя анкета находится на рассмотрении."}</p>
-                <p class="character-origin-edit-label">${reincarnated ? "РЕИНКАРНИРОВАННЫЙ · БЕЗ ЛОРБУКА" : "РОЖДЁН В ЛОРГУСЕ"}</p>
+                <p class="character-origin-edit-label">${reincarnated ? "РЕИНКАРНИРОВАННЫЙ" : "РОЖДЁН В ЛОРГУСЕ"}</p>
             </div>
             ${reviewNotes}
             <form id="character-application-form" onsubmit="updateCharacterApplication(event, '${esc(application.id)}')">
