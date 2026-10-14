@@ -246,7 +246,7 @@ function renderLorgusInterfaceNav(active = "world") {
         ["people", "♧", "Люди", "/people"],
         ["mail", "✉", "Письма", "/mail"],
         ["codex", "▤", "Лорбук", "/lorblook"]
-    ].filter(([id]) => id !== "codex" || window.activeCharacter?.origin_type !== "reincarnated");
+    ];
     window.setTimeout(() => refreshLorgusNotificationBadge(), 0);
 
     return `
