@@ -26,6 +26,7 @@
   }
   function removeBackButtons() {
     document.querySelectorAll(
+      "#lorgus-global-back,.lorgus-global-back," +
       ".lorgus-character-back,.lorgus-mail-back,.lorgus-subpage-back-arrow," +
       ".back-button,.back-btn,.btn-back,[class*='back-button'],[class*='back-btn']"
     ).forEach(el => {
