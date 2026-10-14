@@ -328,12 +328,12 @@ async function selectCharacter(container, characterId) {
     sessionStorage.setItem("lorgus_active_character_id", character.id);
     localStorage.setItem("lorgus_active_character_id", character.id);
     await initializeRpPresence(character);
-    if (window.lorgusRouter && window.lorgusRouter.navigate("/world", { replace: true })) {
+    if (window.lorgusRouter && window.lorgusRouter.navigate("/map", { replace: true })) {
         return;
     }
 
     // После выбора персонажа игровой вход всегда ведёт на карту мира.
-    window.history.replaceState({ lorgusRoute: "/world" }, "", "/world");
+    window.history.replaceState({ lorgusRoute: "/map" }, "", "/map");
     if (typeof window.renderLorgusWorldMapCurrent === "function") {
         window.renderLorgusWorldMapCurrent();
         return;
