@@ -12,7 +12,14 @@
       bar = document.createElement("div");
       bar.className = "lorgus-global-utility";
       bar.setAttribute("aria-label", "Действия аккаунта");
-      bar.innerHTML = '<button type="button" class="lorgus-global-notifications" aria-label="Уведомления"><span aria-hidden="true">♢</span> УВЕДОМЛЕНИЯ</button><button type="button" class="lorgus-global-logout">ВЫЙТИ</button>';
+      bar.innerHTML = '<button type="button" class="lorgus-global-map" aria-label="На карту">НА КАРТУ</button><button type="button" class="lorgus-global-notifications" aria-label="Уведомления"><span aria-hidden="true">♢</span> УВЕДОМЛЕНИЯ</button><button type="button" class="lorgus-global-logout">ВЫЙТИ</button>';
+      bar.querySelector(".lorgus-global-map").addEventListener("click", () => {
+        if (typeof window.lorgusSubpageTransition === "function" && typeof window.renderLorgusWorldMapCurrent === "function") {
+          window.lorgusSubpageTransition("top", window.renderLorgusWorldMapCurrent);
+        } else if (typeof window.renderLorgusWorldMapCurrent === "function") {
+          window.renderLorgusWorldMapCurrent();
+        }
+      });
       bar.querySelector(".lorgus-global-notifications").addEventListener("click", () => {
         if (typeof window.openLorgusNotifications === "function") window.openLorgusNotifications();
       });
