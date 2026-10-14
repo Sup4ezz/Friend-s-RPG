@@ -50,10 +50,13 @@ async function renderLorgusCharacterHub() {
                         <p class="lorgus-character-placeholder">События жизни и последствия решений персонажа появятся здесь.</p>
                     </article>
                     <article class="lorgus-character-panel lorgus-character-wide lorgus-notes-panel">
-                        <div class="lorgus-character-panel-head"><div><span>ЛИЧНЫЙ АРХИВ</span><strong>Мои заметки</strong></div><button type="button" class="lorgus-notes-add" data-notes-add>＋ Новая заметка</button></div>
-                        <p class="lorgus-notes-privacy">Только для тебя. Записывай зацепки, имена, долги и планы персонажа.</p>
-                        <div class="lorgus-notes-list"><div class="lorgus-ability-empty">Открываем архив…</div></div>
-                        <div class="lorgus-notes-feedback" role="status" aria-live="polite"></div>
+                        <div class="lorgus-character-panel-head"><div><span>ЛИЧНЫЙ АРХИВ</span><strong>Доска персонажа</strong></div><span class="lorgus-canvas-status" role="status" aria-live="polite">Открываем доску…</span></div>
+                        <div class="lorgus-canvas-toolbar" aria-label="Инструменты доски">
+                            <button type="button" data-canvas-add="text">＋ Запись</button><button type="button" data-canvas-add="list">＋ Список</button><button type="button" data-canvas-add="card">＋ Карточка</button>
+                            <span class="lorgus-canvas-toolbar-separator"></span><button type="button" data-canvas-connect>↗ Создать связь</button><span class="lorgus-canvas-toolbar-separator"></span>
+                            <button type="button" data-canvas-zoom-out aria-label="Уменьшить масштаб">−</button><span class="lorgus-canvas-zoom" data-canvas-zoom>100%</span><button type="button" data-canvas-zoom-in aria-label="Увеличить масштаб">＋</button><button type="button" data-canvas-fit>⌗ Вся доска</button><button type="button" data-canvas-save>Сохранить</button>
+                        </div>
+                        <div class="lorgus-canvas-viewport" aria-label="Свободная доска персонажа"><div class="lorgus-canvas-world"><svg class="lorgus-canvas-links" aria-label="Связи между блоками"></svg><div class="lorgus-canvas-empty-hint">Твоя личная карта мыслей.<br>Создавай блоки и соединяй нити истории.</div></div></div>
                     </article>
                 </section>
             </main>
@@ -61,5 +64,5 @@ async function renderLorgusCharacterHub() {
     const abilities = await window.loadCharacterAbilities(c.id);
     const list = container.querySelector(".lorgus-ability-list");
     if (list) list.innerHTML = window.renderAbilityList(abilities);
-    await window.renderLorgusPlayerNotes?.(c.id);
+    await window.renderLorgusCharacterCanvas?.(c.id);
 }
