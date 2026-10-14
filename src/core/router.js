@@ -62,7 +62,8 @@
         const hasContainer = Boolean(document.getElementById("cabinet-content"));
         if (!hasContainer) return false;
         if (path === "/ankets") {
-            return window.lorgusIsAdmin === true ||
+            return Boolean(window.activeCharacter) ||
+                window.lorgusIsAdmin === true ||
                 sessionStorage.getItem("lorgus_character_creation_mode") === "1";
         }
         if (path === "/admin") return Boolean(window.lorgusIsAdmin);
