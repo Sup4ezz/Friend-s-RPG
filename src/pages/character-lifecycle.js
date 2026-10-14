@@ -489,7 +489,7 @@ function renderCharacterApplicationForm(container) {
                     </section>
 
                     <section class="character-creation-panel story-panel">
-                        <div class="creation-panel-heading"><span>03</span><div><small>ИСТОРИЯ</small><h2>Что сделало тебя тобой?</h2></div></div>
+                        <div class="creation-panel-heading"><span>03</span><div><small data-origin-story-heading>ИСТОРИЯ</small><h2 data-origin-story-title>Что сделало тебя тобой?</h2></div></div>
                         <label class="creation-wide-field"><span>Характер</span><textarea id="character-personality" required placeholder="Как ты думаешь, говоришь и поступаешь?"></textarea></label>
                         <label class="creation-wide-field" data-origin-field="born"><span>Предыстория</span><textarea id="character-backstory" required placeholder="Что произошло до того, как твоя история началась?"></textarea></label>
                         <label class="creation-wide-field" data-origin-field="reincarnated" hidden><span>Биография прошлой жизни</span><textarea id="character-past-life-bio" placeholder="Кем ты был до перерождения? Где жил, чем занимался, что оставил после себя?"></textarea></label>
@@ -548,6 +548,10 @@ function renderCharacterApplicationForm(container) {
             field.hidden = !reincarnated;
             field.querySelectorAll("input, textarea, select").forEach(input => { input.required = reincarnated; });
         });
+        const storyHeading = container.querySelector("[data-origin-story-heading]");
+        const storyTitle = container.querySelector("[data-origin-story-title]");
+        if (storyHeading) storyHeading.textContent = reincarnated ? "ПРОШЛАЯ ЖИЗНЬ" : "ИСТОРИЯ";
+        if (storyTitle) storyTitle.textContent = reincarnated ? "Кем ты был до перерождения?" : "Что сделало тебя тобой?";
         const heading = container.querySelector("[data-origin-heading]");
         const locationHint = container.querySelector("[data-origin-location-hint]");
         const homelandLabel = container.querySelector("[data-origin-homeland-label]");
