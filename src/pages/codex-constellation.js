@@ -26,7 +26,12 @@
    const overlay=$("div","codex-cosmos-detail-overlay"),panel=$("article","codex-cosmos-detail"),close=$("button","codex-detail-close","×"),body=$("div","codex-detail-body"),trail=[];
    close.type="button";close.setAttribute("aria-label","Закрыть запись");panel.append(close,body);overlay.append(panel);stage.append(overlay);
    const shut=()=>{overlay.remove();document.removeEventListener("keydown",key);};const key=e=>{if(e.key==="Escape")shut();};close.onclick=shut;overlay.onclick=e=>{if(e.target===overlay)shut();};document.addEventListener("keydown",key);
-   function show(node){body.replaceChildren();body.append($("div","codex-detail-kicker",sectionTitle+"  /  "+trail.map(x=>x[0]).concat(node[0]).join("  /  ")),$("h2","",node[0]),$("p","codex-detail-subtitle",node[2]||node[1]||""),$("div","codex-detail-rule","✦"),$("p","codex-detail-text",node[3]||"Подробная запись пока не внесена в открытый архив."));
+   function show(node){body.replaceChildren();body.append($("div","codex-detail-kicker",sectionTitle+"  /  "+trail.map(x=>x[0]).concat(node[0]).join("  /  ")),$("h2","",node[0]),$("p","codex-detail-subtitle",node[2]||node[1]||""));
+    const imageMap=window.LORGUS_CODEX_IMAGE_BY_TITLE;
+    const imageKey=String(node[0]||"").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").replace(/\\.md$/i,"").replace(/[^\\p{L}\\p{N}]+/gu," ").trim();
+    const imageUrl=node[6]||(imageMap&&(imageMap.get(imageKey)||imageMap.get(imageKey.replace(/^(король|королева|профессор|архивариус|доктор|мастер|наставник|дом|граф|графиня|князь|княгиня)\\s+/,""))));
+    if(imageUrl){const illustration=$("img","codex-detail-illustration");illustration.src=imageUrl;illustration.alt="Иллюстрация: "+node[0];body.append(illustration);}
+    body.append($("div","codex-detail-rule","✦"),$("p","codex-detail-text",node[3]||"Подробная запись пока не внесена в открытый архив."));
     if(node[4])body.append($("div","codex-detail-meta",node[4]));
     if(Array.isArray(node[5])&&node[5].length){body.append($("div","codex-detail-subhead","ВНУТРИ ЭТОЙ ЗАПИСИ · "+String(node[5].length).padStart(2,"0")));const list=$("div","codex-detail-children");node[5].forEach((child,i)=>{const b=$("button","codex-detail-child"),copy=$("span","codex-child-copy");b.type="button";copy.append($("strong","",child[0]),$("small","",child[2]||child[1]||""));b.append($("span","codex-child-number",String(i+1).padStart(2,"0")),copy,$("span","codex-child-arrow","↗"));b.onclick=()=>{trail.push(node);show(child);};list.append(b);});body.append(list);}
     if(trail.length){const b=$("button","codex-detail-back","← Назад");b.type="button";b.onclick=()=>show(trail.pop());body.append(b);}
