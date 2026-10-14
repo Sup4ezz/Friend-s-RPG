@@ -433,9 +433,9 @@ function renderLorgusWorldMap(container, character) {
             <button type="button" class="lorgus-mainmenu-arrow left" onclick="window.lorgusOpenRpFromMap()" aria-label="Ролевая">
                 <span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H7l-4 2v-6A7.5 7.5 0 1 1 20 11.5Z"/><path d="M8 10h8M8 13.5h5"/></svg></span><b>РОЛЕВАЯ</b>
             </button>
-            ${window.activeCharacter?.origin_type === "reincarnated" ? "" : `<button type="button" class="lorgus-mainmenu-arrow right" onclick="window.lorgusMainMenuNavigate('right', window.renderLorgusCodex)" aria-label="Лорбук">
+            <button type="button" class="lorgus-mainmenu-arrow right" onclick="window.lorgusMainMenuNavigate('right', window.renderLorgusCodex)" aria-label="Лорбук">
                 <span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 5.5c3.2-1.2 6.1-.8 8.5 1.1v13c-2.4-1.9-5.3-2.3-8.5-1.1z"/><path d="M20.5 5.5c-3.2-1.2-6.1-.8-8.5 1.1v13c2.4-1.9 5.3-2.3 8.5-1.1z"/></svg></span><b>ЛОРБУК</b>
-            </button>`}
+            </button>
         </nav>
         <div class="lorgus-map-shell">
             <aside class="lorgus-map-sidebar">
