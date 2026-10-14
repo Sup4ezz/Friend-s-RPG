@@ -30,12 +30,18 @@
       const roots = rows.filter(row => row.kind === "tree" && !row.parent_id);
       roots.forEach(root => {
         const children = kids.get(root.id) || [];
+        const entries = children.map(toEntry);
+        if (children.length && (root.body || root.image_path)) {
+          const intro = [root.title, "Описание древа", root.subtitle || "", root.body || "", "", []];
+          if (root.image_path) imageByTitle.set(root.title, publicUrl(root.image_path));
+          entries.unshift(intro);
+        }
         const section = {
           id: "custom-lore-" + root.id,
           title: root.title,
           icon: "✧",
           desc: root.subtitle || "Дополнительные знания мира Лоргуса",
-          entries: children.length ? children.map(toEntry) : [toEntry(root)]
+          entries: entries.length ? entries : [toEntry(root)]
         };
         if (root.image_path) imageByTitle.set(root.title, publicUrl(root.image_path));
         if (!sections.some(existing => existing.id === section.id)) sections.push(section);
