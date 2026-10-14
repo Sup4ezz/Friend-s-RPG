@@ -215,3 +215,26 @@
  .lorgus-codex-dialog{padding:25px 19px}
  .lorgus-codex-dialog-body{font-size:15px;line-height:1.95}
 }
+
+/* Deep archive entries: nested index cards and readable family / animal trees. */
+.lorgus-codex-dialog-content{min-width:0}
+.lorgus-codex-subhead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:30px 0 11px;padding-bottom:10px;border-bottom:1px solid rgba(210,176,110,.24);color:#d2b06e;font-size:10px;letter-spacing:.22em}
+.lorgus-codex-subhead span:last-child{font:20px "Cormorant Garamond",Georgia,serif;color:rgba(210,176,110,.55)}
+.lorgus-codex-subentries{display:grid;gap:8px;margin:0 0 18px}
+.lorgus-codex-subentry{display:grid;grid-template-columns:34px minmax(0,1fr) 24px;align-items:center;gap:13px;width:100%;padding:15px 16px;border:1px solid rgba(210,176,110,.2);background:linear-gradient(110deg,rgba(210,176,110,.055),rgba(255,255,255,.012));color:#eee2ca;text-align:left;cursor:pointer;font:inherit;transition:border-color .18s,background .18s,transform .18s}
+.lorgus-codex-subentry:hover,.lorgus-codex-subentry:focus-visible{outline:none;border-color:rgba(222,187,113,.56);background:linear-gradient(110deg,rgba(210,176,110,.12),rgba(255,255,255,.025));transform:translateX(2px)}
+.lorgus-codex-subentry-number{display:grid;place-items:center;width:30px;height:30px;border:1px solid rgba(210,176,110,.28);color:#d2b06e;font:18px "Cormorant Garamond",Georgia,serif}
+.lorgus-codex-subentry-copy{display:grid;gap:4px;min-width:0}
+.lorgus-codex-subentry-copy strong{font:600 22px/1.1 "Cormorant Garamond",Georgia,serif;color:#f0e2c3;overflow-wrap:anywhere}
+.lorgus-codex-subentry-copy small{font:11px/1.6 "Lora",Georgia,serif;color:rgba(230,218,190,.65)}
+.lorgus-codex-subentry-arrow{color:#d2b06e;font-size:19px;text-align:right;transition:transform .18s}
+.lorgus-codex-subentry:hover .lorgus-codex-subentry-arrow{transform:translate(2px,-2px)}
+.lorgus-codex-dialog-content>.lorgus-codex-inline-back{margin-top:10px;border:1px solid rgba(210,176,110,.3);background:rgba(210,176,110,.055);color:#e1c486;cursor:pointer}
+.lorgus-codex-dialog-content>.lorgus-codex-inline-back:hover{background:rgba(210,176,110,.12)}
+@media(max-width:650px){
+ .lorgus-codex-subentry{grid-template-columns:29px minmax(0,1fr) 18px;gap:9px;padding:12px 10px}
+ .lorgus-codex-subentry-number{width:27px;height:27px;font-size:16px}
+ .lorgus-codex-subentry-copy strong{font-size:20px}
+ .lorgus-codex-subentry-copy small{font-size:10px}
+ .lorgus-codex-subhead{margin-top:24px}
+}
