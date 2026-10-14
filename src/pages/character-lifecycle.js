@@ -584,14 +584,26 @@ function renderCharacterApplicationForm(container) {
             ? "Твоя прежняя жизнь закончилась. Теперь предстоит рассказать, кем ты был и как оказался в Лоргусе."
             : "Не создавай анкету. Создай человека, эльфа, дварфа — того, чья жизнь уже началась до первого шага.";
     };
+    // Это два последовательных экрана: до выбора происхождения форма полностью скрыта.
+    if (applicationForm) applicationForm.style.setProperty("display", "none", "important");
+
     const chooseOrigin = origin => {
         const radio = container.querySelector('input[name="character-origin-type"][value="' + origin + '"]');
         if (!radio) return;
         radio.checked = true;
         updateOriginFields();
-        if (originGateway) originGateway.hidden = true;
+
+        // Не оставляем выбор над формой даже если глобальные CSS переопределяют [hidden].
+        if (originGateway) {
+            originGateway.hidden = true;
+            originGateway.style.setProperty("display", "none", "important");
+        }
+        const intro = container.querySelector(".character-creation-intro");
+        if (intro) intro.style.setProperty("display", "none", "important");
+
         if (applicationForm) {
             applicationForm.classList.remove("origin-form-locked");
+            applicationForm.style.setProperty("display", "block", "important");
             applicationForm.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     };
