@@ -121,6 +121,19 @@
         if (img && img.dataset.source === url) return;
         if (!img) { img = document.createElement("img"); img.className = "codex-detail-illustration"; img.alt = "Иллюстрация: " + title; }
         img.dataset.source = url; img.src = url;
+        img.style.setProperty("display", "block", "important");
+        img.style.setProperty("width", "100%", "important");
+        img.style.setProperty("max-width", "100%", "important");
+        img.style.setProperty("height", "clamp(280px,46vh,500px)", "important");
+        img.style.setProperty("max-height", "none", "important");
+        img.style.setProperty("aspect-ratio", "auto", "important");
+        img.style.setProperty("object-fit", "cover", "important");
+        img.style.setProperty("border-radius", "0", "important");
+        img.style.setProperty("clip-path", "none", "important");
+        img.style.setProperty("-webkit-clip-path", "none", "important");
+        img.style.setProperty("mask", "none", "important");
+        img.style.setProperty("-webkit-mask", "none", "important");
+        img.style.setProperty("margin", "20px 0 28px", "important");
         const rule = body.querySelector(".codex-detail-rule");
         if (rule) body.insertBefore(img, rule); else body.insertBefore(img, body.firstChild);
       });
