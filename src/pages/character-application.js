@@ -1,37 +1,45 @@
 /* LORGUS character application editor */
 function renderPendingApplication(container, application) {
     container.className = "character-application";
+    const esc = value => window.escapeHtml(value ?? "");
+    const reincarnated = application.origin_type === "reincarnated";
     const reviewNotes = application.review_notes
-        ? `<div class="character-review-notes"><h3>Правки от администрации</h3><p>${window.escapeHtml(application.review_notes)}</p></div>`
+        ? `<div class="character-review-notes"><h3>Правки от администрации</h3><p>${esc(application.review_notes)}</p></div>`
         : "";
 
     container.innerHTML = `
-        <button type="button" class="lorgus-screen-window.logout" onclick="window.logout()">ВЫХОД</button>
+        <button type="button" class="lorgus-screen-logout" onclick="window.logout()">ВЫХОД</button>
         <div class="character-creation-shell character-edit-shell">
-        <div class="character-header">
-            <div class="welcome-symbol">✦</div>
-            <h1>${window.escapeHtml(application.name)}</h1>
-            <p>Твоя анкета находится на рассмотрении.</p>
-        </div>
-        ${reviewNotes}
-        <form id="character-application-form" onsubmit="updateCharacterApplication(event, '${application.id}')">
-            <div class="character-grid">
-                <div class="character-field"><label>Имя персонажа</label><input id="character-name" type="text" value="${window.escapeHtml(application.name)}" required></div>
-                <div class="character-field"><label>Раса</label><input id="character-race" type="text" value="${window.escapeHtml(application.race)}" required></div>
-                <div class="character-field"><label>Возраст</label><input id="character-age" type="number" min="1" max="1000" value="${application.age}" required></div>
-                <div class="character-field"><label>Родина</label><input id="character-homeland" type="text" value="${window.escapeHtml(application.homeland)}" required></div>
-                <div class="character-field full"><label>Характер</label><textarea id="character-personality" required>${window.escapeHtml(application.personality)}</textarea></div>
-                <div class="character-field full"><label>Предыстория</label><textarea id="character-backstory" required>${window.escapeHtml(application.backstory)}</textarea></div>
-                <div class="character-field full"><label>Особые навыки</label><textarea id="character-skills" required>${window.escapeHtml(application.special_skills)}</textarea></div>
-                <div class="character-field"><label>Предпочитаемое оружие</label><input id="character-weapon" type="text" value="${window.escapeHtml(application.preferred_weapon || "")}"></div>
-                <div class="character-field"><label>Род занятий</label><input id="character-occupation" type="text" value="${window.escapeHtml(application.occupation)}" required></div>
+            <div class="character-header">
+                <div class="welcome-symbol">✦</div>
+                <h1>${esc(application.name) || "Анкета персонажа"}</h1>
+                <p>${application.status === "revision_required" ? "Администрация запросила исправления." : "Твоя анкета находится на рассмотрении."}</p>
+                <p class="character-origin-edit-label">${reincarnated ? "РЕИНКАРНИРОВАННЫЙ · БЕЗ ЛОРБУКА" : "РОЖДЁН В ЛОРГУСЕ"}</p>
             </div>
-            <div id="character-message" class="character-message"></div>
-            <button type="submit" class="gold-button character-submit">Сохранить исправления и отправить на проверку</button>
-        </form>
-            </div>
+            ${reviewNotes}
+            <form id="character-application-form" onsubmit="updateCharacterApplication(event, '${esc(application.id)}')">
+                <input type="hidden" id="character-origin-type" value="${reincarnated ? "reincarnated" : "born_in_lorgus"}">
+                <div class="character-grid">
+                    <div class="character-field"><label for="character-name">Имя персонажа</label><input id="character-name" name="name" type="text" value="${esc(application.name)}" required></div>
+                    <div class="character-field"><label for="character-race">Раса</label><input id="character-race" name="race" type="text" value="${esc(application.race)}" required></div>
+                    <div class="character-field"><label for="character-age">Возраст</label><input id="character-age" name="age" type="number" min="1" max="1000" value="${esc(application.age)}" required></div>
+                    <div class="character-field"><label for="character-homeland">Родина</label><input id="character-homeland" name="homeland" type="text" value="${esc(application.homeland)}" required></div>
+                    <div class="character-field full"><label for="character-personality">Характер</label><textarea id="character-personality" name="personality" required>${esc(application.personality)}</textarea></div>
+                    ${reincarnated
+                        ? `
+                            <div class="character-field full"><label for="character-past-life-bio">Предыдущая жизнь</label><textarea id="character-past-life-bio" name="past_life_bio" required>${esc(application.past_life_bio)}</textarea></div>
+                            <div class="character-field full"><label for="character-death-reason">Причина смерти</label><textarea id="character-death-reason" name="death_reason" required>${esc(application.death_reason)}</textarea></div>
+                        `
+                        : `<div class="character-field full"><label for="character-backstory">Предыстория</label><textarea id="character-backstory" name="backstory" required>${esc(application.backstory)}</textarea></div>`}
+                    <div class="character-field full"><label for="character-skills">Особые навыки</label><textarea id="character-skills" name="special_skills" required>${esc(application.special_skills)}</textarea></div>
+                    <div class="character-field"><label for="character-weapon">Предпочитаемое оружие</label><input id="character-weapon" name="preferred_weapon" type="text" value="${esc(application.preferred_weapon)}"></div>
+                    <div class="character-field"><label for="character-occupation">Род занятий</label><input id="character-occupation" name="occupation" type="text" value="${esc(application.occupation)}" required></div>
+                </div>
+                <div id="character-message" class="character-message"></div>
+                <button type="submit" class="gold-button character-submit">Сохранить исправления и отправить на проверку</button>
+            </form>
         </div>
-        `;
+    `;
 }
 
 async function updateCharacterApplication(event, applicationId) {
@@ -48,13 +56,19 @@ async function updateCharacterApplication(event, applicationId) {
         age: Number(document.getElementById("character-age").value),
         homeland: document.getElementById("character-homeland").value.trim(),
         personality: document.getElementById("character-personality").value.trim(),
-        backstory: document.getElementById("character-backstory").value.trim(),
+        backstory: document.getElementById("character-backstory")?.value.trim() || null,
+        past_life_bio: document.getElementById("character-past-life-bio")?.value.trim() || null,
+        death_reason: document.getElementById("character-death-reason")?.value.trim() || null,
+        origin_type: document.getElementById("character-origin-type")?.value || "born_in_lorgus",
         special_skills: document.getElementById("character-skills").value.trim(),
         preferred_weapon: document.getElementById("character-weapon").value.trim() || null,
         occupation: document.getElementById("character-occupation").value.trim(),
     };
 
-    if (!values.name || !values.race || !values.age || !values.homeland || !values.personality || !values.backstory || !values.special_skills || !values.occupation) {
+    const storyIsMissing = values.origin_type === "reincarnated"
+        ? (!values.past_life_bio || !values.death_reason)
+        : !values.backstory;
+    if (!values.name || !values.race || !values.age || !values.homeland || !values.personality || storyIsMissing || !values.special_skills || !values.occupation) {
         window.setCharacterMessage("Заполни все обязательные поля.", "error");
         return;
     }
