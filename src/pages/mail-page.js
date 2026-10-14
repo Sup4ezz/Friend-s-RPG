@@ -40,7 +40,7 @@ async function renderMail() {
 
                 <div class="lorgus-mail-sidebar-note">
                     <span>ПОЧТОВЫЙ ПУТЬ</span>
-                    <p>Послания не появляются у адресата мгновенно. Голубь действительно должен добраться до цели.</p>
+                    <p>Каждое послание проходит свой путь. Срок зависит от выбранного способа доставки.</p>
                 </div>
 
                 <button type="button" class="lorgus-mail-back" onclick="window.lorgusSubpageTransition('top', window.renderLorgusWorldMapCurrent)">
@@ -92,10 +92,14 @@ async function renderMail() {
                             <textarea id="lorgus-mail-body" rows="12" maxlength="10000" placeholder="Начни писать…"></textarea>
 
                             <div class="lorgus-mail-compose-bottom">
-                                <div>
+                                <label class="lorgus-mail-method-picker" for="lorgus-mail-method">
                                     <span class="lorgus-mail-method">✦</span>
-                                    <div><strong>Голубиная почта</strong><small>Доставка занимает около 5 минут</small></div>
-                                </div>
+                                    <span><strong>Способ доставки</strong><small id="lorgus-mail-eta-preview">Голубь · около 5 мин.</small></span>
+                                    <select id="lorgus-mail-method" aria-label="Способ доставки">
+                                        <option value="pigeon">Голубь · 5 минут</option>
+                                        <option value="courier">Курьер · 20 минут</option>
+                                    </select>
+                                </label>
                                 <button class="lorgus-mail-send" type="button" onclick="sendLorgusMail()">
                                     <span>Отправить</span><b>➜</b>
                                 </button>
@@ -115,6 +119,10 @@ async function renderMail() {
     document.getElementById("lorgus-mail-read-all")?.addEventListener("click", markAllLorgusMailRead);
     document.getElementById("lorgus-mail-folder-inbox")?.addEventListener("click", () => switchLorgusMailFolder("inbox"));
     document.getElementById("lorgus-mail-folder-sent")?.addEventListener("click", () => switchLorgusMailFolder("sent"));
+    document.getElementById("lorgus-mail-method")?.addEventListener("change", updateMailDeliveryPreview);
+    if (window.lorgusMailEtaTimer) clearInterval(window.lorgusMailEtaTimer);
+    window.lorgusMailEtaTimer = setInterval(updateMailCountdowns, 30000);
+    updateMailDeliveryPreview();
 }
 
 async function loadMailRecipients() {
@@ -150,6 +158,36 @@ function formatMailDate(value) {
         month: "2-digit",
         hour: "2-digit",
         minute: "2-digit"
+    });
+}
+
+function getMailMethodDetails(method) {
+    return method === "courier"
+        ? { label: "Курьер", duration: 20 * 60 * 1000, minutes: 20, icon: "✉" }
+        : { label: "Голубь", duration: 5 * 60 * 1000, minutes: 5, icon: "🕊" };
+}
+
+function formatMailRemaining(deliverAt) {
+    const remaining = new Date(deliverAt).getTime() - Date.now();
+    if (!Number.isFinite(remaining) || remaining <= 0) return "доставка ожидается";
+    const minutes = Math.ceil(remaining / 60000);
+    if (minutes < 60) return "прибытие через " + minutes + (minutes === 1 ? " минуту" : minutes < 5 ? " минуты" : " минут");
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+    return "прибытие через " + hours + " ч" + (rest ? " " + rest + " мин" : "");
+}
+
+function updateMailDeliveryPreview() {
+    const method = document.getElementById("lorgus-mail-method")?.value || "pigeon";
+    const details = getMailMethodDetails(method);
+    const preview = document.getElementById("lorgus-mail-eta-preview");
+    if (preview) preview.textContent = details.label + " · около " + details.minutes + " мин.";
+}
+
+function updateMailCountdowns() {
+    document.querySelectorAll("#lorgus-mail-inbox-list [data-mail-deliver-at]").forEach(card => {
+        const eta = card.querySelector(".lorgus-mail-card-eta");
+        if (eta && card.dataset.mailState !== "delivered") eta.textContent = formatMailRemaining(card.dataset.mailDeliverAt);
     });
 }
 
@@ -203,19 +241,32 @@ async function loadMailInbox() {
         const unread = inboxMode && !mail.read_at && delivered;
         const contact = inboxMode ? sender : recipient;
 
+        const method = getMailMethodDetails(mail.method);
+        const deliveryLabel = delivered
+            ? "Доставлено " + formatMailDate(mail.delivered_at || mail.deliver_at)
+            : formatMailRemaining(mail.deliver_at);
+        const progress = delivered ? 100 : Math.max(3, Math.min(96,
+            ((now - new Date(mail.sent_at).getTime()) /
+            Math.max(1, new Date(mail.deliver_at).getTime() - new Date(mail.sent_at).getTime())) * 100
+        ));
+
         return `
-            <article class="lorgus-mail-card ${unread ? "unread" : ""}" data-mail-id="${escapeHtml(mail.id)}" data-mail-sender="${escapeHtml(contact.toLocaleLowerCase("ru-RU"))}" data-mail-body="${escapeHtml(mail.body.toLocaleLowerCase("ru-RU"))}" data-mail-state="${delivered ? "delivered" : "transit"}" data-mail-unread="${unread ? "true" : "false"}">
+            <article class="lorgus-mail-card ${unread ? "unread" : ""} ${delivered ? "delivered" : "in-transit"}" data-mail-id="${escapeHtml(mail.id)}" data-mail-sender="${escapeHtml(contact.toLocaleLowerCase("ru-RU"))}" data-mail-body="${escapeHtml(mail.body.toLocaleLowerCase("ru-RU"))}" data-mail-state="${delivered ? "delivered" : "transit"}" data-mail-unread="${unread ? "true" : "false"}" data-mail-deliver-at="${escapeHtml(mail.deliver_at || "")}">
                 <div class="lorgus-mail-card-top">
                     <strong>${inboxMode ? "От: " : "Кому: "}${escapeHtml(contact)}</strong>
-                    <span>${delivered ? "Доставлено" : "В пути"}</span>
+                    <span class="lorgus-mail-state"><i></i>${delivered ? "Доставлено" : "В пути"}</span>
                 </div>
                 <div class="lorgus-mail-card-meta">
-                    ${mail.method === "pigeon" ? "🕊 Голубь" : "✉ Письмо"} · отправлено ${formatMailDate(mail.sent_at)}
-                    ${delivered ? " · доставлено " + formatMailDate(mail.delivered_at || mail.deliver_at) : " · прибудет " + formatMailDate(mail.deliver_at)}
+                    <span>${method.icon} ${method.label}</span><span>Отправлено ${formatMailDate(mail.sent_at)}</span>
                 </div>
                 <p>${escapeHtml(mail.body)}</p>
-                ${unread ? '<button class="character-secondary-button" type="button" onclick="markLorgusMailRead(\'' + escapeHtml(mail.id) + '\')">Прочитано</button>' : ""}
+                <div class="lorgus-mail-card-route">
+                    <div class="lorgus-mail-route-track"><span style="width:${progress}%"></span></div>
+                    <small class="lorgus-mail-card-eta">${deliveryLabel}</small>
+                </div>
+                ${unread ? '<button class="lorgus-mail-mark-read" type="button" onclick="markLorgusMailRead(\\'' + escapeHtml(mail.id) + '\\')">Отметить прочитанным</button>' : ""}
             </article>
+        `;
         `;
     }).join("");
 }
@@ -295,8 +346,8 @@ async function sendLorgusMail() {
     const { data: userData } = await window.supabaseClient.auth.getUser();
     if (!userData?.user) return;
 
-    const now = new Date();
-    const deliverAt = new Date(now.getTime() + 5 * 60 * 1000);
+    const method = document.getElementById("lorgus-mail-method")?.value === "courier" ? "courier" : "pigeon";
+    const methodDetails = getMailMethodDetails(method);
 
     const { error } = await window.supabaseClient
         .from("lorgus_mail")
@@ -305,9 +356,7 @@ async function sendLorgusMail() {
             sender_player_id: userData.user.id,
             recipient_character_id: recipient,
             body,
-            method: "pigeon",
-            sent_at: now.toISOString(),
-            deliver_at: deliverAt.toISOString()
+            method
         });
 
     if (error) {
@@ -317,7 +366,8 @@ async function sendLorgusMail() {
     }
 
     bodyInput.value = "";
-    if (status) status.textContent = "Голубь отправлен. Письмо прибудет позже.";
+    if (status) status.textContent = methodDetails.label + " отправлен. Ожидаемый срок доставки — около " + methodDetails.minutes + " мин.";
+    await loadMailInbox();
 }
 
 async function markLorgusMailRead(mailId) {
