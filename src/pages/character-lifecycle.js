@@ -494,7 +494,7 @@ function renderCharacterApplicationForm(container) {
                         <label class="creation-wide-field" data-origin-field="born"><span>Предыстория</span><textarea id="character-backstory" required placeholder="Что произошло до того, как твоя история началась?"></textarea></label>
                         <label class="creation-wide-field" data-origin-field="reincarnated" hidden><span>Биография прошлой жизни</span><textarea id="character-past-life-bio" placeholder="Кем ты был до перерождения? Где жил, чем занимался, что оставил после себя?"></textarea></label>
                         <label class="creation-wide-field" data-origin-field="reincarnated" hidden><span>Причина смерти</span><textarea id="character-death-reason" placeholder="Как оборвалась твоя предыдущая жизнь?"></textarea></label>
-                        <div class="creation-fields">
+                        <div class="creation-fields" data-origin-field="born">
                             <label><span>Особые навыки</span><textarea id="character-skills" required placeholder="Что ты умеешь?"></textarea></label>
                             <label><span>Предпочитаемое оружие <em>необязательно</em></span><input id="character-weapon" type="text" placeholder="Если есть"></label>
                         </div>
@@ -542,10 +542,12 @@ function renderCharacterApplicationForm(container) {
         const reincarnated = origin === "reincarnated";
         container.querySelectorAll('[data-origin-field="born"]').forEach(field => {
             field.hidden = reincarnated;
+            field.style.display = reincarnated ? "none" : "";
             field.querySelectorAll("input, textarea, select").forEach(input => { input.required = !reincarnated; });
         });
         container.querySelectorAll('[data-origin-field="reincarnated"]').forEach(field => {
             field.hidden = !reincarnated;
+            field.style.display = reincarnated ? "" : "none";
             field.querySelectorAll("input, textarea, select").forEach(input => { input.required = reincarnated; });
         });
         const storyHeading = container.querySelector("[data-origin-story-heading]");
