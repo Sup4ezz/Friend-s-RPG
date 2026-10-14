@@ -268,7 +268,7 @@
 
     function handlePopState() {
         if (sessionStorage.getItem("lorgus_character_creation_mode") === "1") {
-            if (window.location.pathname !== "/") window.history.replaceState({}, "", "/");
+            if (window.location.pathname !== "/ankets") window.history.replaceState({ lorgusRoute: "/ankets" }, "", "/ankets");
             if (bootTimer) { window.clearInterval(bootTimer); bootTimer = null; }
             return;
         }
@@ -293,7 +293,7 @@
                 window.clearInterval(bootTimer);
                 bootTimer = null;
             }
-            if (window.location.pathname !== "/") window.history.replaceState({}, "", "/");
+            if (window.location.pathname !== "/ankets") window.history.replaceState({ lorgusRoute: "/ankets" }, "", "/ankets");
             return;
         }
 
@@ -321,7 +321,7 @@
             if (sessionStorage.getItem("lorgus_character_creation_mode") === "1") {
                 window.clearInterval(bootTimer);
                 bootTimer = null;
-                if (window.location.pathname !== "/") window.history.replaceState({}, "", "/");
+                if (window.location.pathname !== "/ankets") window.history.replaceState({ lorgusRoute: "/ankets" }, "", "/ankets");
                 return;
             }
 
