@@ -118,10 +118,19 @@
                         map.style.setProperty("transform","none","important");
                         return;
                     }
-                    const notice = document.createElement("div");
-                    notice.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:24px;background:#100d09;color:#eee2c8;font:16px/1.6 Georgia,serif;text-align:center";
-                    notice.innerHTML = `<section style="width:min(100%,440px);padding:28px 20px;background:#19150f;border:1px solid #80663b"><h1 style="color:#d7b66d;margin-top:0">Не удалось загрузить карту</h1><p>Приложение не восстановило персонажа или не запустило карту. Чёрный экран убран — попробуй перезапустить загрузку.</p><button type="button" onclick="location.href='/map?reload=' + Date.now()" style="min-height:48px;padding:12px 20px;background:#d7b66d;color:#17110a;border:0;font-weight:bold">Перезагрузить карту</button></section>`;
-                    document.body.appendChild(notice);
+                    // Do not replace the entire app with a false failure screen while
+                    // Supabase is still restoring the active character. Retry the route first.
+                    if (window.activeCharacter && window.lorgusRouter) {
+                        window.lorgusRouter.bootCurrentRoute();
+                        window.setTimeout(() => {
+                            const retryMap = document.querySelector("#cabinet-content .lorgus-map-page");
+                            if (retryMap) {
+                                retryMap.style.setProperty("visibility","visible","important");
+                                retryMap.style.setProperty("opacity","1","important");
+                                retryMap.style.setProperty("display","block","important");
+                            }
+                        }, 2500);
+                    }
                 }, 1800);
             }, 6500);
         })();
