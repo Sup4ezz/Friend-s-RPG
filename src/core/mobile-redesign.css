@@ -862,3 +862,29 @@
     min-width: 0 !important;
   }
 }
+
+
+/* LORGUS mobile map visibility fix: preserve the dark fog without blacking out the map. */
+@media (max-width: 720px) {
+  .lorgus-map-page .lorgus-map-image {
+    filter: saturate(.82) sepia(.04) contrast(1.04) brightness(.88) blur(.2px) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  .lorgus-map-page .lorgus-mainmenu-fog {
+    background: radial-gradient(ellipse at 50% 45%, rgba(8,10,9,.12) 0%, rgba(5,7,6,.24) 52%, rgba(1,2,2,.52) 100%) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  .lorgus-map-page .lorgus-mainmenu-fog::before {
+    background: radial-gradient(ellipse 48% 30% at 18% 38%, rgba(165,174,162,.18), transparent 74%), radial-gradient(ellipse 48% 34% at 76% 30%, rgba(155,168,160,.16), transparent 75%), radial-gradient(ellipse 48% 32% at 55% 78%, rgba(145,158,150,.14), transparent 74%) !important;
+    opacity: .85 !important;
+  }
+  .lorgus-map-page #lorgus-map-viewport,
+  .lorgus-map-page #lorgus-map-world,
+  .lorgus-map-page .lorgus-map-stage,
+  .lorgus-map-page .lorgus-map-frame {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}
