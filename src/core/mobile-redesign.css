@@ -705,3 +705,43 @@
 @media (prefers-reduced-motion: reduce) {
   .lorgus-portal-transition, .lorgus-eye-transition { animation:none !important; }
 }
+
+
+/* Mobile: remove the map-stage wrapper and all map canvas effects. Keep the region atlas usable. */
+@media (max-width: 720px) {
+  .lorgus-map-stage {
+    display: contents !important;
+    position: static !important;
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    animation: none !important;
+    perspective: none !important;
+    isolation: auto !important;
+  }
+  .lorgus-map-frame,
+  .lorgus-map-atmosphere,
+  .lorgus-map-world,
+  .lorgus-map-image-wrap,
+  .lorgus-map-overlay,
+  .lorgus-map-surface-hint,
+  .lorgus-map-controls,
+  .lorgus-map-hint,
+  .lorgus-map-zoom-controls {
+    display: none !important;
+    animation: none !important;
+    filter: none !important;
+  }
+  .lorgus-map-inspector {
+    display: flex !important;
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    width: 100% !important;
+    max-width: none !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+}
