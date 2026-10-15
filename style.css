@@ -19141,3 +19141,55 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
 .lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-workspace{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;min-height:0}
 .lorgus-character-main > .lorgus-inventory-inline-view .lorgus-equipment-stage,.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-grid-wrap{min-width:0}
 @media(max-width:1000px){.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-workspace{grid-template-columns:minmax(0,1fr)!important}}
+
+
+/* Character equipment inherits the warm gold-and-umber palette of the dossier. */
+.lorgus-character-main > .lorgus-inventory-inline-view,
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-main{
+    color:#eee3cd!important;
+    background:#0b0907!important;
+}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-header{
+    background:linear-gradient(180deg,rgba(35,26,13,.96),rgba(16,12,7,.94))!important;
+    border-bottom-color:rgba(215,182,109,.18)!important;
+}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-header h1,
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-panel-head h2,
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-wallet-title h2{
+    color:#e9d8b2!important;
+}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-kicker,
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-header p,
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-panel-head span,
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-item-info small,
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-wallet-card small{
+    color:#9b8967!important;
+}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-workspace{
+    background:rgba(215,182,109,.12)!important;
+}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-equipment-stage,
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-grid-wrap{
+    background:linear-gradient(145deg,#1b150c,#0d0a06)!important;
+}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-equipment-slot{
+    border-color:rgba(215,182,109,.2)!important;
+    background:rgba(7,6,4,.62)!important;
+}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-equipment-slot>span{
+    color:#9c895f!important;
+}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-item,
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-wallet-card{
+    border-color:rgba(215,182,109,.15)!important;
+    background:rgba(215,182,109,.025)!important;
+}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-item-info strong,
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-wallet-card strong{
+    color:#e5d7bb!important;
+}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-item:hover,
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-equipment-slot:hover{
+    border-color:rgba(215,182,109,.58)!important;
+    background:rgba(215,182,109,.07)!important;
+}
