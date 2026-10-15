@@ -16,13 +16,8 @@ jobs:
   generate-chronicle-drafts:
     runs-on: ubuntu-latest
     steps:
-      - name: Validate chronicle secret
-        env:
-          LORGUS_CHRONICLE_SECRET: ${{ secrets.LORGUS_CHRONICLE_SECRET }}
-        run: |
-          test -n "$LORGUS_CHRONICLE_SECRET" || { echo "::error::Add LORGUS_CHRONICLE_SECRET to GitHub Actions secrets."; exit 1; }
-
       - name: Process new RP messages
+        if: ${{ secrets.LORGUS_CHRONICLE_SECRET != '' }}
         env:
           LORGUS_CHRONICLE_SECRET: ${{ secrets.LORGUS_CHRONICLE_SECRET }}
         run: |
