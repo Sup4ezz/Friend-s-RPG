@@ -459,21 +459,14 @@
             button.classList.add("is-selected");
             doc.innerHTML = '<div class="lorgus-lore-document-loading"><span class="lorgus-lore-spinner"></span><p>Открываю запись…</p></div>';
             try {
-                let response = await fetch(encodePath(ROOT + file), { cache: "no-cache" });
-                let markdown = "";
-                if (response.ok) {
-                    markdown = await response.text();
-                }
-                // SPA fallback can return index.html with HTTP 200 for missing .md assets.
-                // Detect that case and retrieve the actual source from the public GitHub repo.
-                if (!response.ok || /<\s*!doctype\s+html|<html[\s>]/i.test(markdown.slice(0, 500))) {
-                    const rawUrl = "https://raw.githubusercontent.com/Sup4ezz/Friend-s-RPG/main/" + encodePath("Obsidian Vault/Obsidian Vault/" + file);
-                    response = await fetch(rawUrl, { cache: "no-cache" });
-                    if (!response.ok) throw new Error("Не удалось загрузить файл: HTTP " + response.status);
-                    markdown = await response.text();
-                    if (/^\s*<\s*!doctype\s+html|^\s*<html[\s>]/i.test(markdown.slice(0, 500))) {
-                        throw new Error("Вместо Markdown получен HTML");
-                    }
+                // Всегда читаем исходный Markdown из GitHub: статическая копия в деплое
+                // может отставать, потому что Obsidian Vault исключён из deploy workflow.
+                const rawUrl = "https://raw.githubusercontent.com/Sup4ezz/Friend-s-RPG/main/" + encodePath("Obsidian Vault/Obsidian Vault/" + file);
+                const response = await fetch(rawUrl, { cache: "no-store" });
+                if (!response.ok) throw new Error("Не удалось загрузить файл из GitHub: HTTP " + response.status);
+                const markdown = await response.text();
+                if (/^\s*<\s*!doctype\s+html|^\s*<html[\s>]/i.test(markdown.slice(0, 500))) {
+                    throw new Error("Вместо Markdown получен HTML");
                 }
                 doc.innerHTML = '<div class="lorgus-lore-document-head"><span>ЛОРГУС · ЛЕТОПИСЬ</span><h2>' + esc(button.querySelector(".lorgus-lore-node-label")?.textContent || "Запись") + '</h2><small>' + esc(file.replace(/\.md$/i, "").replaceAll("/", " / ")) + '</small></div><div class="lorgus-lore-document-body">' + renderMarkdown(markdown.replace(new RegExp(String.fromCharCode(96).repeat(3) + "moc[\\s\\S]*?" + String.fromCharCode(96).repeat(3), "gi"), "")) + '</div>';
                 await renderLorePortrait(file, markdown, doc);
