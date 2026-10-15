@@ -1,16 +1,26 @@
 /* LORGUS RP hub */
 // Единая точка возврата из ролевой: URL и экран карты всегда должны совпадать.
 window.lorgusReturnToMapFromRp = function() {
+    // Снимаем зависший флаг старого перехода: он мог блокировать повторный клик.
+    window.lorgusMainMenuNavigating = false;
+    delete document.documentElement.dataset.lorgusTransition;
+
     const openMap = () => {
-        if (window.location.pathname.replace(/\/+$/, "") !== "/map") {
-            window.history.pushState({ lorgusRoute: "/map" }, "", "/map");
+        // Маршрут меняется только через SPA-роутер, который сам синхронизирует URL.
+        const opened = typeof window.lorgusNavigate === "function"
+            ? window.lorgusNavigate("/map")
+            : false;
+
+        // Резервный путь на случай, если роутер ещё не загрузился.
+        if (!opened) {
+            window.history.replaceState({ lorgusRoute: "/map" }, "", "/map");
+            if (typeof window.renderLorgusWorldMapCurrent === "function") {
+                window.renderLorgusWorldMapCurrent();
+            }
         }
-        if (typeof window.lorgusNavigate === "function") {
-            window.lorgusNavigate("/map", { replace: true });
-        } else if (typeof window.renderLorgusWorldMapCurrent === "function") {
-            window.renderLorgusWorldMapCurrent();
-        }
+        return opened;
     };
+
     if (typeof window.lorgusSubpageTransition === "function") {
         return window.lorgusSubpageTransition("right", openMap);
     }
