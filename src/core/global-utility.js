@@ -10,7 +10,7 @@
 
     // A portal/eye overlay must never survive a reload or a return from the
     // mobile browser background; either layer covers the whole screen in black.
-    document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition")
+    document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay")
       .forEach(overlay => overlay.remove());
     window.lorgusPortalOverlay = null;
   };
