@@ -56,3 +56,9 @@ P0-аудит серверной целостности RP presence и всех 
 - Character dossier now uses an editorial dark-fantasy hierarchy and existing profile fields. New CSS files are loaded by `index.html`.
 - JavaScript syntax validation passed for `src/pages/mail-page.js` and `src/pages/character-hub.js`. No browser or production smoke test yet.
 - Missing data model discovered: no `familiars` / `slaves` columns or corresponding relation table in current Supabase schema. Keep this as an explicit blocker; do not show fabricated data.
+
+
+## Оптимизация SPA-навигации — 2026-10-14
+- В `src/core/global-utility.js` MutationObserver теперь объединяет повторные проверки в один кадр и игнорирует изменения внутри служебных элементов.
+- Commit `5cd666722a31bf08c4b32c900f8c67ab534ba7f8`; GitHub Actions deploy завершился успешно.
+- Browser QA переходов ещё не выполнен; не считать устранение зависаний подтверждённым до проверки карты, персонажа, писем, RP и Лорбука.
