@@ -28,7 +28,7 @@
     const path = (window.location.pathname || "").replace(/\/+$/, "");
     const directions = {
       "/mail": { direction: "top", label: "Вернуться на карту из писем", path: "M12 20V4M5 11l7-7 7 7" },
-      "/character": { direction: "bottom", label: "Вернуться на карту из персонажа", path: "M12 4v16M5 13l7 7 7-7" },
+      "/character": { direction: "top", label: "Вернуться на карту из персонажа", path: "M12 20V4M5 11l7-7 7 7" },
       "/lorblook": { direction: "left", label: "Вернуться на карту из лорбука", path: "M20 12H4M11 5l-7 7 7 7" },
       "/rp": { direction: "right", label: "Вернуться на карту из ролевой", path: "M4 12h16M13 5l7 7-7 7" }
     };
