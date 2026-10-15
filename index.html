@@ -80,8 +80,13 @@
             if (!/^\/(map|world|main-page)\/?$/.test(location.pathname)) return;
             window.setTimeout(() => {
                 document.querySelectorAll(
-                    ".lorgus-portal-transition,.lorgus-eye-transition,.lorgus-region-transition-veil,.lorgus-transition-screen,.lorgus-scene-transition-overlay,.lorgus-transition-overlay"
-                ).forEach(el => el.remove());
+                    "[class*='transition'],[id*='transition'],[class*='portal'],[id*='portal'],[class*='veil'],[id*='veil'],[class*='blackout'],[id*='blackout'],[class*='overlay'],[id*='overlay']"
+                ).forEach(el => {
+                    if (el.id === "root" || el.id === "cabinet-content" || el.classList.contains("lorgus-map-page")) return;
+                    const style = getComputedStyle(el);
+                    const rect = el.getBoundingClientRect();
+                    if (style.position === "fixed" || style.position === "absolute" || rect.width >= innerWidth * 0.8 && rect.height >= innerHeight * 0.8) el.remove();
+                });
                 document.documentElement.classList.remove("lorgus-transition-active","lorgus-scene-transitioning");
                 document.body.classList.remove("lorgus-transition-active","lorgus-scene-transitioning");
                 document.documentElement.style.setProperty("background","#100d09","important");
@@ -104,7 +109,15 @@
                     try { window.renderLorgusWorldMapCurrent(); } catch (e) { console.error("Map recovery failed",e); }
                 }
                 window.setTimeout(() => {
-                    if (document.querySelector("#cabinet-content .lorgus-map-page")) return;
+                    const map = document.querySelector("#cabinet-content .lorgus-map-page");
+                    if (map) {
+                        map.style.setProperty("visibility","visible","important");
+                        map.style.setProperty("opacity","1","important");
+                        map.style.setProperty("display","block","important");
+                        map.style.setProperty("filter","none","important");
+                        map.style.setProperty("transform","none","important");
+                        return;
+                    }
                     const notice = document.createElement("div");
                     notice.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:24px;background:#100d09;color:#eee2c8;font:16px/1.6 Georgia,serif;text-align:center";
                     notice.innerHTML = `<section style="width:min(100%,440px);padding:28px 20px;background:#19150f;border:1px solid #80663b"><h1 style="color:#d7b66d;margin-top:0">Не удалось загрузить карту</h1><p>Приложение не восстановило персонажа или не запустило карту. Чёрный экран убран — попробуй перезапустить загрузку.</p><button type="button" onclick="location.href='/map?reload=' + Date.now()" style="min-height:48px;padding:12px 20px;background:#d7b66d;color:#17110a;border:0;font-weight:bold">Перезагрузить карту</button></section>`;
