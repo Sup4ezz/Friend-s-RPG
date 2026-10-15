@@ -19133,3 +19133,11 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
   color:#e6c0b7;
 }
 .codex-chronicle-review button:disabled{opacity:.55;cursor:wait;}
+
+/* Equipment is a local view inside the character dossier, not a separate page. */
+.lorgus-character-main > .lorgus-inventory-inline-view{min-width:0;min-height:0;height:auto!important;overflow:visible!important;background:transparent!important}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-main{height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;background:transparent!important;padding:0!important}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-header{position:relative;top:auto;padding:18px 24px}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-workspace{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;min-height:0}
+.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-equipment-stage,.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-grid-wrap{min-width:0}
+@media(max-width:1000px){.lorgus-character-main > .lorgus-inventory-inline-view .lorgus-inventory-workspace{grid-template-columns:minmax(0,1fr)!important}}
