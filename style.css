@@ -19095,3 +19095,41 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
   filter:blur(1.5px)!important;
 }
 .lorgus-map-page .lorgus-map-image-wrap.cursor-lit .lorgus-mainmenu-fog::after{opacity:1!important;}
+
+
+/* LORGUS — AI chronicle review controls */
+.codex-chronicle-review{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  margin:22px 0 8px;
+  padding:16px;
+  border:1px solid rgba(202,177,126,.28);
+  background:rgba(18,16,14,.56);
+}
+.codex-chronicle-review-note{
+  flex:1 1 100%;
+  margin:0 0 4px;
+  color:rgba(235,224,201,.76);
+  font-size:.88rem;
+  line-height:1.5;
+}
+.codex-chronicle-review button{
+  min-height:40px;
+  padding:9px 15px;
+  border:1px solid rgba(202,177,126,.42);
+  background:rgba(202,177,126,.08);
+  color:#eee1c4;
+  cursor:pointer;
+  font:inherit;
+}
+.codex-chronicle-review .codex-chronicle-approve{
+  border-color:rgba(151,184,126,.56);
+  color:#d8e8c7;
+}
+.codex-chronicle-review .codex-chronicle-reject{
+  border-color:rgba(173,112,97,.48);
+  color:#e6c0b7;
+}
+.codex-chronicle-review button:disabled{opacity:.55;cursor:wait;}
