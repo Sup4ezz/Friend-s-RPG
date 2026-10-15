@@ -54,7 +54,7 @@ function renderLorgusRpHub() {
             <i></i><i></i><i></i><i></i>
         </div>
 
-        <button type="button" class="lorgus-subpage-back-arrow right" data-route="/map" data-transition="right" aria-label="Вернуться на карту">
+        <button type="button" class="lorgus-subpage-back-arrow right" onclick="window.location.href='/map'" aria-label="Вернуться на карту">
             <span>▶</span><b>КАРТА</b>
         </button>
 
