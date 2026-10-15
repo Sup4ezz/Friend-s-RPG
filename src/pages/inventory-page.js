@@ -65,10 +65,20 @@ async function loadCharacterInventory(characterId) {
 }
 
 async function renderLorgusInventory() {
-    const container = document.getElementById("cabinet-content");
+    const pageRoot = document.getElementById("cabinet-content");
     const character = window.activeCharacter;
-    if (!container || !character) return;
-    container.className = "lorgus-inventory-page";
+    if (!pageRoot || !character) return;
+    const characterMain = pageRoot.querySelector(".lorgus-character-main");
+    const inlineMode = Boolean(characterMain && window.location.pathname.replace(/\/+$/, "") === "/character");
+    let container = pageRoot;
+    if (inlineMode) {
+        characterMain.querySelector(".lorgus-inventory-main")?.remove();
+        container = document.createElement("div");
+        container.className = "lorgus-inventory-page lorgus-inventory-inline-staging";
+        container.style.cssText = "position:absolute;left:-100000px;top:0;width:min(1500px,100vw);";
+        pageRoot.appendChild(container);
+    }
+    container.className = inlineMode ? "lorgus-inventory-page lorgus-inventory-inline-staging" : "lorgus-inventory-page";
     container.innerHTML = `
         <div class="lorgus-inventory-shell">
             <aside class="lorgus-inventory-sidebar">
@@ -419,6 +429,17 @@ async function renderLorgusInventory() {
     });
 
     document.addEventListener("dragend", clearDragFeedback, { once: true });
+
+    if (inlineMode) {
+        const inlineInventory = container.querySelector(".lorgus-inventory-main");
+        if (inlineInventory) {
+            inlineInventory.classList.add("lorgus-character-inline-equipment");
+            inlineInventory.querySelector(".lorgus-inventory-header-meta")?.remove();
+            characterMain.querySelector(".lorgus-inventory-main")?.remove();
+            characterMain.appendChild(inlineInventory);
+        }
+        container.remove();
+    }
 }
 
 
