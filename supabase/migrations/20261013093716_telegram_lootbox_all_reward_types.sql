@@ -1,0 +1,3 @@
+-- Production-history placeholder: this version was applied directly to the production database.
+-- The maintained implementation is tracked in 20261013220000_telegram_lootbox_all_reward_types.sql.
+-- Intentionally empty so local migration history matches production without replaying old DDL.
