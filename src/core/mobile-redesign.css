@@ -888,3 +888,5 @@
     opacity: 1 !important;
   }
 }
+
+@media (max-width: 720px) { .lorgus-map-page .lorgus-mainmenu-fog, .lorgus-map-page .lorgus-map-atmosphere { display: none !important; } .lorgus-map-page .lorgus-map-image { display:block !important; visibility:visible !important; opacity:1 !important; filter:none !important; position:relative !important; z-index:30 !important; width:100% !important; height:auto !important; min-height:50vh !important; object-fit:contain !important; } .lorgus-map-page .lorgus-map-world { position:relative !important; z-index:29 !important; opacity:1 !important; visibility:visible !important; } .lorgus-map-page #lorgus-map-viewport { background:#17140e !important; } }
