@@ -606,3 +606,102 @@
 @media (prefers-reduced-motion: reduce) {
   .character-selection-grid > .character-card { animation: none !important; transition: none !important; }
 }
+
+/* =========================================================
+   LORGUS — cross-page mobile safety layer
+   Shared by every route, including account pages and admin.
+   ========================================================= */
+@media (max-width: 720px) {
+  html, body { max-width:100%; overflow-x:hidden; }
+  body { min-width:320px; min-height:100dvh; }
+  #root, #cabinet-content, .game-page, .lorgus-cabinet,
+  .lorgus-page, .page-container, .cabinet-content {
+    width:100%; max-width:100%; min-width:0;
+  }
+  #root { overflow-x:clip; }
+  #cabinet-content { padding-bottom:calc(84px + env(safe-area-inset-bottom)); }
+  main, section, article, aside, header, footer, form, fieldset,
+  .panel, .card, .modal, .dialog, .lorgus-panel, .auth-panel,
+  .error-panel, .lorgus-codex-page, .lorgus-mail-page,
+  .lorgus-character-page, .lorgus-inventory-page, .lorgus-rp-page,
+  .lorgus-admin-page, .admin-panel {
+    min-width:0; max-width:100%;
+  }
+  img, video, canvas, iframe { max-width:100%; }
+  pre, code, .lorgus-lore-text, .lorgus-description,
+  .character-description, .message-content, .mail-body {
+    overflow-wrap:anywhere; word-break:normal;
+  }
+  input, select, textarea { width:100%; max-width:100%; min-width:0; }
+  button, [role="button"], a { max-width:100%; }
+  table { max-width:100%; }
+  .table-wrap, .table-responsive, .admin-table-wrap, .lorgus-table-wrap {
+    max-width:100%; overflow-x:auto; -webkit-overflow-scrolling:touch;
+  }
+  .modal, [role="dialog"], .lorgus-modal, .lorgus-dialog,
+  .admin-modal, .lorgus-popup {
+    max-width:calc(100vw - 20px) !important;
+    max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important;
+    overflow:auto;
+  }
+  .lorgus-global-utility { top:max(8px,env(safe-area-inset-top)); right:8px; }
+  .lorgus-mainmenu-nav { padding-bottom:calc(7px + env(safe-area-inset-bottom)) !important; }
+  .lorgus-map-page, .lorgus-character-page, .lorgus-mail-page,
+  .lorgus-inventory-page, .lorgus-codex-page, .lorgus-rp-page,
+  .lorgus-admin-page { padding-bottom:calc(88px + env(safe-area-inset-bottom)) !important; }
+  .lorgus-map-shell, .lorgus-character-shell, .lorgus-mail-shell,
+  .lorgus-inventory-shell, .lorgus-codex-shell, .lorgus-rp-shell,
+  .lorgus-admin-shell, .lorgus-world-shell, .lorgus-character-content-grid,
+  .lorgus-command-grid, .lorgus-command-bottom, .lorgus-character-overview {
+    grid-template-columns:minmax(0,1fr) !important;
+    width:100% !important; min-width:0 !important;
+  }
+  .lorgus-map-main, .lorgus-character-main, .lorgus-mail-main,
+  .lorgus-inventory-main, .lorgus-codex-main, .lorgus-rp-main,
+  .lorgus-admin-main, .lorgus-world-browser {
+    width:100% !important; min-width:0 !important; max-width:100% !important;
+  }
+  .lorgus-mail-workspace, .lorgus-mail-inbox, .lorgus-mail-editor,
+  .lorgus-inventory-grid, .lorgus-codex-grid, .lorgus-admin-grid {
+    min-width:0 !important; max-width:100% !important;
+  }
+  .lorgus-mail-workspace { display:flex !important; flex-direction:column !important; }
+  .lorgus-mail-sidebar { max-width:100%; }
+  .lorgus-rp-page .lorgus-messenger-shell { grid-template-columns:minmax(0,1fr) !important; }
+  .lorgus-rp-page .lorgus-messenger-sidebar { max-width:100%; }
+  .lorgus-rp-page .lorgus-messenger-feed { min-width:0 !important; max-width:100%; }
+  .lorgus-rp-page .lorgus-messenger-composer { position:sticky; bottom:0; }
+  .lorgus-rp-page .lorgus-messenger-composer textarea { min-height:44px; max-height:30dvh; }
+  .lorgus-codex-page img, .lorgus-character-page img,
+  .lorgus-inventory-page img, .lorgus-admin-page img { height:auto; }
+  .lorgus-admin-page .admin-table, .lorgus-admin-page table { font-size:12px; }
+  .lorgus-admin-page th, .lorgus-admin-page td { padding:8px 7px; }
+  .lorgus-admin-page input, .lorgus-admin-page select,
+  .lorgus-admin-page textarea { min-height:42px; }
+  .lorgus-admin-page .admin-sidebar { position:static !important; width:100% !important; }
+  .lorgus-character-header, .lorgus-map-header, .lorgus-mail-header,
+  .lorgus-codex-header, .lorgus-inventory-header, .lorgus-rp-header {
+    flex-wrap:wrap; gap:10px; min-width:0;
+  }
+  .lorgus-character-header h1, .lorgus-map-header h1,
+  .lorgus-map-header h2, .lorgus-mail-header h1,
+  .lorgus-codex-header h1, .lorgus-inventory-header h1,
+  .lorgus-rp-header h1 { overflow-wrap:anywhere; }
+  .lorgus-global-utility { max-width:calc(100vw - 16px); }
+  .lorgus-global-utility button { white-space:nowrap; }
+}
+@media (max-width: 420px) {
+  #cabinet-content { padding-inline:0; }
+  .lorgus-map-main, .lorgus-character-main, .lorgus-mail-main,
+  .lorgus-inventory-main, .lorgus-codex-main, .lorgus-rp-main,
+  .lorgus-admin-main { padding-inline:10px !important; }
+  .lorgus-global-utility { gap:4px; padding:4px; }
+  .lorgus-global-utility button { padding-inline:8px; font-size:8px; }
+  .lorgus-map-region-list { grid-template-columns:minmax(0,1fr) !important; }
+  .lorgus-admin-page .admin-toolbar, .lorgus-admin-page .admin-actions {
+    display:flex; flex-wrap:wrap; gap:7px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lorgus-portal-transition, .lorgus-eye-transition { animation:none !important; }
+}
