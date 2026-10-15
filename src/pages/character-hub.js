@@ -38,7 +38,7 @@ async function renderLorgusCharacterHub() {
                 </div>
                 <div class="lorgus-character-sidebar-rule"><span>✦</span></div>
                 <nav class="lorgus-character-nav" aria-label="Разделы персонажа">
-                    <button type="button" class="active" aria-current="page"><span>◈</span><b>Досье</b><i>01</i></button>
+                    <button type="button" class="active" aria-current="page" data-character-local-view="dossier"><span>◈</span><b>Досье</b><i>01</i></button>
                     <button type="button" data-character-local-view="inventory"><span>◇</span><b>Снаряжение</b><i>02</i></button>
                 </nav>
                 <button type="button" class="lorgus-character-back" onclick="window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent)">
@@ -151,6 +151,28 @@ if (!window.__lorgusCharacterLocalViewsBound) {
         event.preventDefault();
         event.stopPropagation();
         const view = button.getAttribute("data-character-local-view");
-        if (view === "inventory") window.renderLorgusInventory?.();
+        const root = document.getElementById("cabinet-content");
+        const main = root?.querySelector(".lorgus-character-main");
+        if (!root || !main) return;
+        let dossier = main.querySelector(":scope > .lorgus-character-dossier-view");
+        if (!dossier) {
+            dossier = document.createElement("div");
+            dossier.className = "lorgus-character-dossier-view";
+            while (main.firstChild) dossier.appendChild(main.firstChild);
+            main.appendChild(dossier);
+        }
+        root.querySelectorAll("[data-character-local-view]").forEach(item => {
+            const active = item.getAttribute("data-character-local-view") === view;
+            item.classList.toggle("active", active);
+            if (active) item.setAttribute("aria-current", "page");
+            else item.removeAttribute("aria-current");
+        });
+        if (view === "dossier") {
+            main.querySelector(".lorgus-inventory-main")?.remove();
+            dossier.hidden = false;
+        } else if (view === "inventory") {
+            dossier.hidden = true;
+            window.renderLorgusInventory?.();
+        }
     }, true);
 }
