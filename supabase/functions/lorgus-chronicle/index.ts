@@ -31,10 +31,10 @@ Deno.serve(async (req: Request) => {
   const expected = Deno.env.get("LORGUS_CHRONICLE_SECRET") || "";
   const provided = req.headers.get("x-lorgus-cron-secret") || "";
   if (!constantTimeEqual(expected, provided)) return json({ error: "Unauthorized" }, 401);
-  const openAiKey = Deno.env.get("OPENAI_API_KEY") || "";
+  const geminiKey = Deno.env.get("GEMINI_API_KEY") || "";
   const dbUrl = Deno.env.get("SUPABASE_URL") || "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (!openAiKey || !dbUrl || !serviceKey) return json({ error: "Missing OpenAI or Supabase runtime configuration" }, 503);
+  if (!geminiKey || !dbUrl || !serviceKey) return json({ error: "Missing Gemini API key or Supabase runtime configuration" }, 503);
 
   const db = createClient(dbUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   const { data: state, error: stateError } = await db.from("lorgus_chronicle_state")
@@ -83,19 +83,21 @@ Deno.serve(async (req: Request) => {
     "Ответ строго JSON-объект: {\"events\":[{\"title\":\"...\",\"subtitle\":\"...\",\"body\":\"...\",\"source_message_ids\":[123],\"importance\":1}]}. importance — целое от 1 до 5. Не включай id, которых нет во входных данных."
   ].join("\n");
 
-  const completion = await fetch("https://api.openai.com/v1/chat/completions", {
+  const completion = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
     method: "POST",
-    headers: { "authorization": "Bearer " + openAiKey, "content-type": "application/json" },
+    headers: { "x-goog-api-key": geminiKey, "content-type": "application/json" },
     body: JSON.stringify({
-      model: "gpt-4o-mini", temperature: 0.2, response_format: { type: "json_object" },
-      messages: [{ role: "system", content: systemPrompt }, { role: "user", content: JSON.stringify({ messages: facts }) }],
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ role: "user", parts: [{ text: JSON.stringify({ messages: facts }) }] }],
+      generationConfig: { temperature: 0.2, responseMimeType: "application/json" },
     }),
   });
-  if (!completion.ok) return json({ error: "OpenAI request failed", status: completion.status, detail: (await completion.text()).slice(0, 400) }, 502);
+  if (!completion.ok) return json({ error: "Gemini API request failed", status: completion.status, detail: (await completion.text()).slice(0, 400) }, 502);
   const completionJson = await completion.json();
+  const generatedText = completionJson?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || "").join("") || "";
   let parsed: { events?: GeneratedEvent[] };
-  try { parsed = JSON.parse(completionJson?.choices?.[0]?.message?.content || "{}"); }
-  catch { return json({ error: "AI returned invalid JSON; cursor was not advanced" }, 502); }
+  try { parsed = JSON.parse(generatedText || "{}"); }
+  catch { return json({ error: "Gemini returned invalid JSON; cursor was not advanced" }, 502); }
   if (!Array.isArray(parsed.events)) return json({ error: "AI response has no events array" }, 502);
 
   const allowedIds = new Set(facts.map((f) => f.id));
@@ -120,7 +122,7 @@ Deno.serve(async (req: Request) => {
     const { error } = await db.from("lorgus_chronicle_entries").upsert({
       title: draft.title, subtitle: draft.subtitle, body: draft.body, event_date: draft.event_date,
       source_message_ids: draft.source_message_ids, event_fingerprint, importance: draft.importance,
-      status: "pending_review", model: "gpt-4o-mini",
+      status: "pending_review", model: "gemini-2.5-flash",
     }, { onConflict: "event_fingerprint", ignoreDuplicates: true });
     if (error) return json({ error: "Could not save chronicle draft" }, 500);
   }
