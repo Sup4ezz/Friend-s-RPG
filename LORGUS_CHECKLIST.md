@@ -1346,3 +1346,11 @@ Commits:
 - GitHub Actions на коммите f482b41 подтвердили успешные Cloudflare deployment и Supabase migrations. Новые commits 251a9d9 и b6a559e содержат исправление Лорбука и обновление ссылки; после них требуется проверить новые deployment runs.
 - Браузерный smoke-test из этой среды не выполнялся: доступный инструмент не предоставляет интерактивный браузер, а production URL не удалось открыть через web preview. Не считать тесты выше пройденными до ручного выполнения.
 - Следующая конкретная задача: проверить свежий Cloudflare deployment, затем выполнить docs/LAUNCH_SMOKE_TEST.md с обычным игроком и отдельно с администратором; P0-блокеры — неправильная навигация, обход RP-presence, доступ обычного игрока к админским действиям, ошибка отправки/чтения сообщений.
+
+## 2026-10-15 — дополнительная проверка production Supabase
+- Запущены Security и Performance advisors.
+- Security advisor показывает 6 таблиц с RLS без политик: admins, application_reviews, lootbox_rewards, lorgus_chronicle_state, lorgus_lore_portraits, lorgus_telegram_outbox. Проверка grants подтвердила, что для всех шести у ролей anon и authenticated нет SELECT/INSERT/UPDATE; это закрытые таблицы, не открывать их добавлением общих политик.
+- Проверены 31 SECURITY DEFINER RPC с именами admin_* и EXECUTE для authenticated: у всех 31 в теле функции найден guard is_admin/admin_required. Это статический аудит текстовых guard-ов, а не доказательство корректности каждой функции во всех сценариях.
+- Security advisor также предупреждает о 54 SECURITY DEFINER RPC, доступных authenticated, и расширении pg_net в public. Не отзывать grants массово: многие RPC являются штатными клиентскими endpoints; требуется отдельная проверка каждой функции, прежде чем менять доступ.
+- В deploy-lorgus.yml добавлено paths-ignore для docs/**, чтобы изменения документации не запускали production deployment.
+- Никаких изменений production SQL/RLS в этой итерации не выполнялось.
