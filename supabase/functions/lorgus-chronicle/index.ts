@@ -47,13 +47,22 @@ Deno.serve(async (req: Request) => {
   if (messagesError) return json({ error: "Could not read RP messages" }, 500);
   if (!messages || messages.length === 0) return json({ ok: true, processed: 0, drafts_created: 0, message: "No new RP messages" });
 
-  const typedMessages = messages as RpMessage[];
-  const characterIds = [...new Set(typedMessages.map((m) => m.character_id).filter(Boolean))];
+  const batchMessages = messages as RpMessage[];
+  const activeMessages = batchMessages.filter((m) => m.status === "active" && String(m.body || "").trim().length > 0);
+  if (activeMessages.length === 0) {
+    const skippedCursor = Number(batchMessages[batchMessages.length - 1].id);
+    const { error: skipError } = await db.from("lorgus_chronicle_state").update({
+      last_message_id: skippedCursor, updated_at: new Date().toISOString(),
+    }).eq("singleton", true);
+    if (skipError) return json({ error: "Could not advance cursor past inactive messages" }, 500);
+    return json({ ok: true, processed: batchMessages.length, drafts_created: 0, last_message_id: skippedCursor, message: "No active RP posts in batch" });
+  }
+  const characterIds = [...new Set(activeMessages.map((m) => m.character_id).filter(Boolean))];
   const { data: characters } = characterIds.length
     ? await db.from("characters").select("id, name").in("id", characterIds)
     : { data: [] as { id: string; name: string }[] };
   const characterNames = new Map((characters || []).map((c: { id: string; name: string }) => [c.id, c.name]));
-  const facts = typedMessages.map((m) => ({
+  const facts = activeMessages.map((m) => ({
     id: Number(m.id), time: m.created_at,
     character: characterNames.get(m.character_id) || "Неизвестный персонаж",
     region: m.region || "", location: m.location || "", kind: m.presence_type || "",
@@ -116,10 +125,10 @@ Deno.serve(async (req: Request) => {
     if (error) return json({ error: "Could not save chronicle draft" }, 500);
   }
 
-  const newCursor = Number(typedMessages[typedMessages.length - 1].id);
+  const newCursor = Number(batchMessages[batchMessages.length - 1].id);
   const { error: cursorError } = await db.from("lorgus_chronicle_state").update({
     last_message_id: newCursor, updated_at: new Date().toISOString(),
   }).eq("singleton", true);
   if (cursorError) return json({ error: "Drafts saved but cursor update failed; retry is safe" }, 500);
-  return json({ ok: true, processed: typedMessages.length, drafts_created: drafts.length, last_message_id: newCursor, status: "pending_review" });
+  return json({ ok: true, processed: batchMessages.length, analyzed: activeMessages.length, drafts_created: drafts.length, last_message_id: newCursor, status: "pending_review" });
 });
