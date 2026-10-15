@@ -98,7 +98,7 @@
                 }
                 window.setTimeout(() => {
                     if (document.querySelector("#cabinet-content .lorgus-map-page")) return;
-                    root.innerHTML = '<main style="box-sizing:border-box;min-height:100dvh;width:100%;display:flex;align-items:center;justify-content:center;padding:24px;background:#100d09;color:#eee2c8;font:16px/1.6 Georgia,serif;text-align:center"><section style="width:min(100%,440px);padding:28px 20px;background:#19150f;border:1px solid #80663b"><h1 style="color:#d7b66d;margin-top:0">Не удалось загрузить карту</h1><p>Приложение не восстановило персонажа или не запустило карту. Чёрный экран убран — попробуй перезапустить загрузку.</p><button type="button" onclick="location.href='/map?reload=' + Date.now()" style="min-height:48px;padding:12px 20px;background:#d7b66d;color:#17110a;border:0;font-weight:bold">Перезагрузить карту</button></section></main>';
+                    root.innerHTML = `<main style="box-sizing:border-box;min-height:100dvh;width:100%;display:flex;align-items:center;justify-content:center;padding:24px;background:#100d09;color:#eee2c8;font:16px/1.6 Georgia,serif;text-align:center"><section style="width:min(100%,440px);padding:28px 20px;background:#19150f;border:1px solid #80663b"><h1 style="color:#d7b66d;margin-top:0">Не удалось загрузить карту</h1><p>Приложение не восстановило персонажа или не запустило карту. Чёрный экран убран — попробуй перезапустить загрузку.</p><button type="button" onclick="location.href='/map?reload=' + Date.now()" style="min-height:48px;padding:12px 20px;background:#d7b66d;color:#17110a;border:0;font-weight:bold">Перезагрузить карту</button></section></main>`;
                 }, 1800);
             }, 6500);
         })();
