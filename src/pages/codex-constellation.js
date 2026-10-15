@@ -1,7 +1,7 @@
 /* LORGUS — interactive constellation codex */
 (() => {
  const $=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
- const norm=s=>String(s||"").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
+ const norm=s=>String(s||"").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
  const royalLore={
   "дом аркейн":"Дом Аркейн (Атэрон)/Дом Аркейн.md",
   "дом фалькрейн":"Дом Фалькрейн (Каэлор)/Дом Фалькрейн (Каэлор).md",
