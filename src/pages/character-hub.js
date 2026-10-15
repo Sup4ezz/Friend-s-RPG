@@ -39,9 +39,9 @@ async function renderLorgusCharacterHub() {
                 <div class="lorgus-character-sidebar-rule"><span>✦</span></div>
                 <nav class="lorgus-character-nav" aria-label="Разделы персонажа">
                     <button type="button" class="active" aria-current="page"><span>◈</span><b>Досье</b><i>01</i></button>
-                    <button type="button" onclick="window.renderLorgusInventory?.()"><span>◇</span><b>Снаряжение</b><i>02</i></button>
-                    <button type="button" onclick="window.renderMail?.()"><span>✉</span><b>Письма</b><i>03</i></button>
-                    <button type="button" onclick="window.renderLorgusRpHub?.()"><span>⌁</span><b>Ролевая</b><i>04</i></button>
+                    <button type="button" data-character-local-view="inventory"><span>◇</span><b>Снаряжение</b><i>02</i></button>
+                    <button type="button" data-character-local-view="mail"><span>✉</span><b>Письма</b><i>03</i></button>
+                    <button type="button" data-character-local-view="rp"><span>⌁</span><b>Ролевая</b><i>04</i></button>
                 </nav>
                 <button type="button" class="lorgus-character-back" onclick="window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent)">
                     <span>←</span><span><b>ВЕРНУТЬСЯ В МИР</b><small>Продолжить путь</small></span>
@@ -141,4 +141,20 @@ async function renderLorgusCharacterHub() {
     const list = container.querySelector(".lorgus-ability-list");
     if (list) list.innerHTML = window.renderAbilityList?.(abilities) || '<div class="lorgus-ability-empty">Подтверждённых способностей пока нет.</div>';
     await window.renderLorgusCharacterCanvas?.(c.id);
+}
+
+
+// Внутренние разделы карточки персонажа открываются без смены URL и без редиректа роутера.
+if (!window.__lorgusCharacterLocalViewsBound) {
+    window.__lorgusCharacterLocalViewsBound = true;
+    document.addEventListener("click", event => {
+        const button = event.target.closest?.("[data-character-local-view]");
+        if (!button) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const view = button.getAttribute("data-character-local-view");
+        if (view === "inventory") window.renderLorgusInventory?.();
+        else if (view === "mail") window.renderMail?.();
+        else if (view === "rp") window.renderLorgusRpHub?.();
+    }, true);
 }
