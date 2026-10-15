@@ -20,8 +20,10 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
     if (preserveCurrentScene) {
         cabinet.classList.add("preparing");
     }
-    cabinet.style.opacity = "0";
-    cabinet.style.pointerEvents = "none";
+    // A direct mobile page load must never leave the entire cabinet invisible
+    // while Supabase restores the player. Only transition-overlays start hidden.
+    cabinet.style.opacity = preserveCurrentScene ? "0" : "1";
+    cabinet.style.pointerEvents = preserveCurrentScene ? "none" : "";
     cabinet.innerHTML = `
         <section id="cabinet-content"></section>
     `;
@@ -39,7 +41,20 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
     }
 
     window.lorgusIsAdmin = false;
-    await loadPlayerState(session, forceCharacterSelection);
+    try {
+        await loadPlayerState(session, forceCharacterSelection);
+    } catch (error) {
+        console.error("LORGUS: не удалось восстановить экран игрока:", error);
+        const content = document.getElementById("cabinet-content");
+        if (content && !content.children.length) {
+            content.innerHTML = `
+                <section style="max-width:560px;margin:12vh auto;padding:28px 22px;color:#e9dfca;background:#15110c;border:1px solid rgba(215,182,109,.35);font:16px/1.6 Georgia,serif">
+                    <h2 style="margin-top:0;color:#d7b66d">Не удалось открыть мир</h2>
+                    <p>Не получилось восстановить данные персонажа. Проверь соединение и попробуй ещё раз.</p>
+                    <button type="button" onclick="location.reload()" style="min-height:46px;padding:10px 18px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Повторить загрузку</button>
+                </section>`;
+        }
+    }
 
     // Админская панель — самостоятельный экран. Не заменяем её SPA-маршрутом
     // персонажа, если у администратора сохранён активный персонаж.
