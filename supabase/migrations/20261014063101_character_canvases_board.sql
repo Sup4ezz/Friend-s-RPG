@@ -1,0 +1,3 @@
+-- Production-history placeholder: this version was applied directly to the production database.
+-- The maintained schema is tracked in 20261014130000_character_canvases.sql.
+-- Intentionally empty to preserve the existing production migration history.
