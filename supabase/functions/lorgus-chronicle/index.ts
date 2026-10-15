@@ -83,7 +83,7 @@ Deno.serve(async (req: Request) => {
     "Ответ строго JSON-объект: {\"events\":[{\"title\":\"...\",\"subtitle\":\"...\",\"body\":\"...\",\"source_message_ids\":[123],\"importance\":1}]}. importance — целое от 1 до 5. Не включай id, которых нет во входных данных."
   ].join("\n");
 
-  const completion = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent", {
+  const completion = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent", {
     method: "POST",
     headers: { "x-goog-api-key": geminiKey, "content-type": "application/json" },
     body: JSON.stringify({
@@ -122,7 +122,7 @@ Deno.serve(async (req: Request) => {
     const { error } = await db.from("lorgus_chronicle_entries").upsert({
       title: draft.title, subtitle: draft.subtitle, body: draft.body, event_date: draft.event_date,
       source_message_ids: draft.source_message_ids, event_fingerprint, importance: draft.importance,
-      status: "pending_review", model: "gemini-2.5-flash",
+      status: "pending_review", model: "gemini-3.8-flash",
     }, { onConflict: "event_fingerprint", ignoreDuplicates: true });
     if (error) return json({ error: "Could not save chronicle draft" }, 500);
   }
