@@ -745,3 +745,33 @@
     max-height: none !important;
   }
 }
+
+
+/* MOBILE BLACK-SCREEN HOTFIX: cinematic and View Transition layers must never cover the game. */
+@media (max-width: 720px) {
+  .lorgus-portal-transition,
+  .lorgus-eye-transition,
+  .lorgus-region-transition-veil,
+  .lorgus-transition-screen,
+  .lorgus-scene-transition-overlay,
+  .lorgus-transition-overlay {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    animation: none !important;
+    transition: none !important;
+    pointer-events: none !important;
+  }
+  html[data-lorgus-transition] {
+    overflow: auto !important;
+  }
+  html::view-transition,
+  html::view-transition-group(*),
+  html::view-transition-image-pair(*),
+  html::view-transition-old(*),
+  html::view-transition-new(*) {
+    animation: none !important;
+    display: none !important;
+    visibility: hidden !important;
+  }
+}
