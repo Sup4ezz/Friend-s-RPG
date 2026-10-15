@@ -77,6 +77,8 @@
     <script>
         // Last-resort mobile /map recovery. This runs independently of app.js.
         (() => {
+            // На мобильных карта не используется; роутер сам перенаправляет /map на главную.
+            if (matchMedia("(max-width: 720px)").matches) return;
             if (!/^\/(map|world)\/?$/.test(location.pathname)) return;
             window.setTimeout(() => {
                 document.querySelectorAll(
