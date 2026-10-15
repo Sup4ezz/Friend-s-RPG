@@ -49,11 +49,29 @@
       returnButton.onclick = () => {
         const currentPath = (window.location.pathname || "").replace(/\/+$/, "");
         const current = directions[currentPath];
-        if (!current || typeof window.renderLorgusWorldMapCurrent !== "function") return;
+        if (!current) return;
+
+        const openMap = () => {
+          if (typeof window.lorgusNavigate === "function") {
+            window.lorgusNavigate("/map");
+          } else {
+            window.history.pushState({ lorgusRoute: "/map" }, "", "/map");
+            if (typeof window.renderLorgusWorldMapCurrent === "function") {
+              window.renderLorgusWorldMapCurrent();
+            } else {
+              window.location.assign("/map");
+            }
+          }
+        };
+
+        // Переход должен менять и экран, и URL. Раньше здесь вызывался
+        // только рендер карты, поэтому адрес оставался на старой странице.
+        window.lorgusMainMenuNavigating = false;
+        delete document.documentElement.dataset.lorgusTransition;
         if (typeof window.lorgusSubpageTransition === "function") {
-          window.lorgusSubpageTransition(current.direction, window.renderLorgusWorldMapCurrent);
+          window.lorgusSubpageTransition(current.direction, openMap);
         } else {
-          window.renderLorgusWorldMapCurrent();
+          openMap();
         }
       };
       nav.hidden = false;
