@@ -88,6 +88,13 @@
     if(node[4])body.append($("div","codex-detail-meta",node[4]));
     if(Array.isArray(node[5])&&node[5].length){body.append($("div","codex-detail-subhead","ВНУТРИ ЭТОЙ ЗАПИСИ · "+String(node[5].length).padStart(2,"0")));const list=$("div","codex-detail-children");node[5].forEach((child,i)=>{const b=$("button","codex-detail-child"),copy=$("span","codex-child-copy");b.type="button";copy.append($("strong","",child[0]),$("small","",child[2]||child[1]||""));b.append($("span","codex-child-number",String(i+1).padStart(2,"0")),copy,$("span","codex-child-arrow","↗"));b.onclick=()=>{trail.push(node);show(child);};list.append(b);});body.append(list);}
     if(trail.length){const b=$("button","codex-detail-back","← Назад");b.type="button";b.onclick=()=>show(trail.pop());body.append(b);}
+    if(activeSection?.id==="chronicle"&&node[6]&&node[7]==="pending_review"){
+     const controls=$("div","codex-chronicle-review"),label=$("p","codex-chronicle-review-note","Черновик не виден игрокам, пока администратор не подтвердит его.");
+     const approve=$("button","codex-chronicle-approve","Внести в летопись"),reject=$("button","codex-chronicle-reject","Отклонить");
+     approve.type="button";reject.type="button";
+     const review=async status=>{const client=window.supabaseClient;if(!client){label.textContent="Нет подключения к Supabase.";return;}approve.disabled=true;reject.disabled=true;label.textContent="Сохраняем решение…";const {data:{user}}=await client.auth.getUser();const {error}=await client.from("lorgus_chronicle_entries").update({status,reviewed_by:user?.id||null,reviewed_at:new Date().toISOString(),updated_at:new Date().toISOString()}).eq("id",node[6]);if(error){label.textContent="Не удалось сохранить решение. Проверь права администратора и попробуй снова.";approve.disabled=false;reject.disabled=false;return;}openSection("chronicle");};
+     approve.onclick=()=>void review("approved");reject.onclick=()=>void review("rejected");controls.append(label,approve,reject);body.append(controls);
+    }
     body.append($("div","codex-detail-footer","ЛОРГУС · АРХИВ ЗНАНИЙ"));
     void appendRoyalLore(body,node);
    }show(entry);
@@ -104,7 +111,20 @@
   }
   function setCore(title,caption){core.querySelector(".codex-core-label").textContent=title;core.querySelector(".codex-core-caption").textContent=caption;core.setAttribute("aria-expanded",String(mode!=="closed"));}
   function openSections(){mode="sections";activeSection=null;stage.classList.remove("is-closed","is-entry-view");stage.classList.add("is-open","is-section-view");heading.querySelector("h1").textContent="Лорбук";heading.querySelector("p").textContent="Выбери нить знания — и архив развернётся вокруг неё.";hint.textContent="ВЫБЕРИ РАЗДЕЛ";back.hidden=true;setCore("ЛОРГУС","АРХИВ ЗНАНИЙ");const items=sections.filter(s=>!s.remote).map(s=>({id:s.id,title:s.title,icon:s.icon,desc:s.desc}));items.push({id:"archive",title:"Архив летописца",icon:"▤",desc:"Исходные документы мира"});place(items,"section");}
-  function openSection(id){activeSection=sections.find(s=>s.id===id)||sections[0];mode="entries";stage.classList.remove("is-section-view","is-closed");stage.classList.add("is-open","is-entry-view");heading.querySelector("h1").textContent=activeSection.title;heading.querySelector("p").textContent=activeSection.desc;hint.textContent="ВЫБЕРИ ЗАПИСЬ";back.hidden=false;setCore("НАЗАД","К РАЗДЕЛАМ");place(activeSection.entries,"entry");}
+  async function openSection(id){
+   activeSection=sections.find(s=>s.id===id)||sections[0];mode="entries";stage.classList.remove("is-section-view","is-closed");stage.classList.add("is-open","is-entry-view");
+   heading.querySelector("h1").textContent=activeSection.title;heading.querySelector("p").textContent=activeSection.desc;hint.textContent=id==="chronicle"?"ЛЕТОПИСЬ · ПОДТВЕРЖДЁННОЕ И ЧЕРНОВИКИ":"ВЫБЕРИ ЗАПИСЬ";back.hidden=false;setCore("НАЗАД","К РАЗДЕЛАМ");
+   if(id!=="chronicle"){place(activeSection.entries,"entry");return;}
+   place([["Загружаем летопись","Архив","Читаем записи…","Подожди мгновение."]],"entry");
+   const client=window.supabaseClient;
+   if(!client){activeSection.entries=[["Летопись недоступна","Ошибка подключения","", "Не удалось подключиться к архиву. Попробуй открыть раздел позже."]];place(activeSection.entries,"entry");return;}
+   const {data,error}=await client.from("lorgus_chronicle_entries").select("id,title,subtitle,body,event_date,importance,status").order("event_date",{ascending:false}).limit(80);
+   if(activeSection?.id!=="chronicle")return;
+   if(error){activeSection.entries=[["Летопись недоступна","Ошибка архива","", "Не удалось загрузить летопись. Попробуй позже."]];}
+   else if(!data?.length){activeSection.entries=[["Пока тихо","Нет записей","", "Летописец пока не обнаружил событий, достойных хроники. Когда в игре произойдёт нечто значимое, здесь появится черновик для проверки."]];}
+   else {activeSection.entries=data.map(row=>[row.title,row.status==="approved"?"Запись летописи":"Черновик · требует проверки",new Date(row.event_date).toLocaleDateString("ru-RU",{year:"numeric",month:"long",day:"numeric"}),row.body,(row.status==="approved"?"Опубликовано":"Только администрация")+" · важность "+row.importance,null,row.id,row.status]);}
+   place(activeSection.entries,"entry");
+  }
   function openArchive(){activeSection={title:"Архив летописца",desc:"Исходные документы мира",entries:[]};mode="entries";stage.classList.remove("is-section-view","is-closed");stage.classList.add("is-open","is-entry-view");heading.querySelector("h1").textContent=activeSection.title;heading.querySelector("p").textContent=activeSection.desc;hint.textContent="ВЫБЕРИ РУКОПИСЬ";back.hidden=false;setCore("НАЗАД","К РАЗДЕЛАМ");place(docs.map((d,i)=>[d[0],"Архивный документ",d[2],"",d[1],null]),"entry");field.querySelectorAll(".codex-orbit-entry").forEach((b,i)=>{b.onclick=()=>loadDoc(i);});}
   async function loadDoc(i){const d=docs[i];const fake=[d[0],"Архивный документ",d[2],"Загружаем исходную рукопись…",d[1]];detail(fake,"Архив летописца");const overlay=stage.querySelector(".codex-cosmos-detail-overlay"),body=overlay?.querySelector(".codex-detail-body");if(!body)return;try{const res=await fetch(remote.base+remote.vault+d[1].split("/").map(encodeURIComponent).join("/"),{cache:"no-cache"});if(!res.ok)throw Error("HTTP "+res.status);const text=await res.text();body.querySelector(".codex-detail-text").textContent=text.slice(0,24000);}catch(e){body.querySelector(".codex-detail-text").textContent="Рукопись временно недоступна. Попробуй открыть её позже.";}}
   core.onclick=()=>{if(mode==="closed"){openSections();return;}if(mode==="entries"){openSections();return;}mode="closed";stage.classList.remove("is-open","is-section-view","is-entry-view");stage.classList.add("is-closed");clear();setCore("ЛОРГУС","АРХИВ ЗНАНИЙ");hint.textContent="НАЖМИ НА СВЕЧЕНИЕ";};
