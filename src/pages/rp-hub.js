@@ -2,7 +2,7 @@
 // Единая точка возврата из ролевой: URL и экран карты всегда должны совпадать.
 window.lorgusReturnToMapFromRp = function() {
     const openMap = () => {
-        if (window.location.pathname.replace(/\\/+$/, "") !== "/map") {
+        if (window.location.pathname.replace(/\/+$/, "") !== "/map") {
             window.history.pushState({ lorgusRoute: "/map" }, "", "/map");
         }
         if (typeof window.lorgusNavigate === "function") {
