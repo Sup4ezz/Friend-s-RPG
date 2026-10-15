@@ -40,8 +40,6 @@ async function renderLorgusCharacterHub() {
                 <nav class="lorgus-character-nav" aria-label="Разделы персонажа">
                     <button type="button" class="active" aria-current="page"><span>◈</span><b>Досье</b><i>01</i></button>
                     <button type="button" data-character-local-view="inventory"><span>◇</span><b>Снаряжение</b><i>02</i></button>
-                    <button type="button" data-character-local-view="mail"><span>✉</span><b>Письма</b><i>03</i></button>
-                    <button type="button" data-character-local-view="rp"><span>⌁</span><b>Ролевая</b><i>04</i></button>
                 </nav>
                 <button type="button" class="lorgus-character-back" onclick="window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent)">
                     <span>←</span><span><b>ВЕРНУТЬСЯ В МИР</b><small>Продолжить путь</small></span>
@@ -154,7 +152,5 @@ if (!window.__lorgusCharacterLocalViewsBound) {
         event.stopPropagation();
         const view = button.getAttribute("data-character-local-view");
         if (view === "inventory") window.renderLorgusInventory?.();
-        else if (view === "mail") window.renderMail?.();
-        else if (view === "rp") window.renderLorgusRpHub?.();
     }, true);
 }
