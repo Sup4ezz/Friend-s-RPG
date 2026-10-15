@@ -21,7 +21,7 @@ jobs:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       LORGUS_CHRONICLE_SECRET: ${{ secrets.LORGUS_CHRONICLE_SECRET }}
 
     steps:
@@ -51,11 +51,11 @@ jobs:
         run: supabase migration list --linked
 
       - name: Configure and deploy AI chronicle
-        if: ${{ env.OPENAI_API_KEY != '' && env.LORGUS_CHRONICLE_SECRET != '' }}
+        if: ${{ env.GEMINI_API_KEY != '' && env.LORGUS_CHRONICLE_SECRET != '' }}
         run: |
-          supabase secrets set --project-ref "$SUPABASE_PROJECT_ID" "OPENAI_API_KEY=$OPENAI_API_KEY" "LORGUS_CHRONICLE_SECRET=$LORGUS_CHRONICLE_SECRET"
+          supabase secrets set --project-ref "$SUPABASE_PROJECT_ID" "GEMINI_API_KEY=$GEMINI_API_KEY" "LORGUS_CHRONICLE_SECRET=$LORGUS_CHRONICLE_SECRET"
           supabase functions deploy lorgus-chronicle --project-ref "$SUPABASE_PROJECT_ID"
 
       - name: Explain skipped AI chronicle deployment
-        if: ${{ env.OPENAI_API_KEY == '' || env.LORGUS_CHRONICLE_SECRET == '' }}
-        run: echo "::warning::AI chronicle not deployed. Add OPENAI_API_KEY and LORGUS_CHRONICLE_SECRET to GitHub Actions secrets, then run this workflow manually."
+        if: ${{ env.GEMINI_API_KEY == '' || env.LORGUS_CHRONICLE_SECRET == '' }}
+        run: echo "::warning::AI chronicle not deployed. Add GEMINI_API_KEY and LORGUS_CHRONICLE_SECRET to GitHub Actions secrets, then run this workflow manually."
