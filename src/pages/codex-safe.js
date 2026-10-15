@@ -350,12 +350,12 @@
     if(trail.length){const back=make("button","lorgus-codex-inline-back","← Назад к предыдущему разделу");back.type="button";back.addEventListener("click",()=>renderNode(trail.pop(),title));content.append(back);}
     const foot=make("div","lorgus-codex-dialog-footer","ЛОРГУС · АРХИВ ЗНАНИЙ");content.append(foot);
     panel.setAttribute("aria-label",node[0]);
+    void appendCharacterNote(content,node);
    }
    const shut=()=>{overlay.remove();document.removeEventListener("keydown",keyClose);};
    const keyClose=ev=>{if(ev.key==="Escape")shut();};
    close.addEventListener("click",shut);overlay.addEventListener("click",ev=>{if(ev.target===overlay)shut();});document.addEventListener("keydown",keyClose);
    renderNode(entry,sectionTitle);close.focus();
-   void appendCharacterNote(content,entry);
 
   }
   function draw(section,query){
