@@ -774,3 +774,16 @@ function lorgusMapReset() {
 }
 
 /* Последняя декларация заменяет старый экран выбора королевств. */
+
+// Router entry point for /map and /main-page. Keep the legacy renderer
+// behind this stable global so direct links render the actual map on mobile too.
+window.renderLorgusWorldMapCurrent = function renderLorgusWorldMapCurrent() {
+    const container = document.getElementById("cabinet-content");
+    const character = window.activeCharacter;
+    if (!container || !character) {
+        console.warn("[LORGUS] Карта пока не открыта: контейнер или активный персонаж отсутствует.");
+        return false;
+    }
+    renderLorgusWorldMap(container, character);
+    return true;
+};
