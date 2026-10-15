@@ -1354,3 +1354,11 @@ Commits:
 - Security advisor также предупреждает о 54 SECURITY DEFINER RPC, доступных authenticated, и расширении pg_net в public. Не отзывать grants массово: многие RPC являются штатными клиентскими endpoints; требуется отдельная проверка каждой функции, прежде чем менять доступ.
 - В deploy-lorgus.yml добавлено paths-ignore для docs/**, чтобы изменения документации не запускали production deployment.
 - Никаких изменений production SQL/RLS в этой итерации не выполнялось.
+
+## 2026-10-15 — дополнительная проверка production Supabase
+- Запущены Security и Performance advisors.
+- У шести таблиц с включённой RLS и без пользовательских политик (`admins`, `application_reviews`, `lootbox_rewards`, `lorgus_chronicle_state`, `lorgus_lore_portraits`, `lorgus_telegram_outbox`) проверены права: у `anon` и `authenticated` нет SELECT/INSERT/UPDATE. Не добавлять общие политики ради устранения предупреждения.
+- Статически проверены 31 административные RPC, доступные authenticated: у всех в определении найдена проверка `is_admin` / `ADMIN_REQUIRED`. Это первичный фильтр, а не доказательство корректности каждого сценария.
+- Advisor отдельно предупреждает о 54 привилегированных RPC, доступных authenticated, и расширении `pg_net` в `public`. Не отзывать права массово: сначала проверять каждую RPC и её использование интерфейсом.
+- В этой итерации production SQL/RLS не менялся.
+- В `.github/workflows/deploy-lorgus.yml` добавлено исключение `docs/**`, чтобы изменения только документации не запускали production deployment.
