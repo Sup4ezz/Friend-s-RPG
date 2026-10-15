@@ -16302,7 +16302,7 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-map-image-wrap.cursor-lit .lorgus-mainmenu-fog::after{opacity:1}
 .lorgus-mainmenu-nav{position:absolute;inset:0;z-index:20;pointer-events:none}
 .lorgus-mainmenu-arrow{position:absolute;display:flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;border:0;background:transparent;color:rgba(232,214,177,.13);font-family:var(--title-font);cursor:pointer;pointer-events:auto;text-shadow:0 0 12px rgba(0,0,0,.95);transition:color .3s ease,filter .3s ease,transform .3s ease}
-.lorgus-mainmenu-arrow b{position:absolute;opacity:0;color:#ead5a3;font-size:9px;font-weight:500;letter-spacing:.22em;white-space:nowrap;text-shadow:0 2px 12px #000;transition:opacity .3s ease}
+.lorgus-mainmenu-arrow b{position:absolute;opacity:0;color:#ead5a3;font-size:14px;font-weight:600;letter-spacing:.16em;white-space:nowrap;text-shadow:0 2px 12px #000;transition:opacity .3s ease}
 .lorgus-mainmenu-arrow:hover{color:rgba(241,220,175,.95);filter:drop-shadow(0 0 10px rgba(230,195,125,.55))}
 .lorgus-mainmenu-arrow:hover b{opacity:1}
 .lorgus-mainmenu-arrow.top{top:9px;left:50%;transform:translateX(-50%)}
@@ -16317,7 +16317,7 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-mainmenu-arrow.bottom:hover{transform:translateX(-50%) translateY(-2px)}
 .lorgus-mainmenu-arrow.left:hover{transform:translateY(-50%) translateX(2px)}
 .lorgus-mainmenu-arrow.right:hover{transform:translateY(-50%) translateX(-2px)}
-@media(max-width:760px){.lorgus-mainmenu-arrow{width:30px;height:30px}.lorgus-mainmenu-arrow b{font-size:8px}}
+@media(max-width:760px){.lorgus-mainmenu-arrow{width:30px;height:30px}.lorgus-mainmenu-arrow b{font-size:11px}}
 
 
 /* Temporary world-map label editor */
@@ -16492,9 +16492,9 @@ body:has(#root > #cabinet-content.character-application){
 .lorgus-subpage-back-arrow b{
     writing-mode:vertical-rl;
     transform:rotate(180deg);
-    font-size:9px;
-    font-weight:500;
-    letter-spacing:.22em;
+    font-size:13px;
+    font-weight:600;
+    letter-spacing:.16em;
 }
 
 .lorgus-subpage-back-arrow:hover{
