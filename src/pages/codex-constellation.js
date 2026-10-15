@@ -1,7 +1,60 @@
 /* LORGUS — interactive constellation codex */
 (() => {
  const $=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
- const norm=s=>String(s||"").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+ const norm=s=>String(s||"").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"");
+ const royalLore={
+  "дом аркейн":"Дом Аркейн (Атэрон)/Дом Аркейн.md",
+  "дом фалькрейн":"Дом Фалькрейн (Каэлор)/Дом Фалькрейн (Каэлор).md",
+  "дом гринвельд":"Дом Гринвельд (Лирэн)/Дом Гринвельд.md",
+  "дом кальери":"Дом Кальери (Ксандр)/Дом Кальери.md",
+  "дом вальмонт":"Дом Вальмонт (Морвейн)/Дом Вальмонт (Морвейн).md",
+  "эдмунд iv":"Дом Аркейн (Атэрон)/Эдмунд Аркейн IV.md",
+  "королева лиандра":"Дом Аркейн (Атэрон)/Лиандра Аркейн.md",
+  "кассиан":"Дом Аркейн (Атэрон)/Кассиан Аркейн.md",
+  "адриан":"Дом Аркейн (Атэрон)/Адриан Аркейн.md",
+  "селена":"Дом Аркейн (Атэрон)/Селена Аркейн.md",
+  "леонард i фалькрейн":"Дом Фалькрейн (Каэлор)/Леонард I Фалькрейн.md",
+  "изольда фалькрейн":"Дом Фалькрейн (Каэлор)/Изольда Фалькрейн.md",
+  "рейнар фалькрейн":"Дом Фалькрейн (Каэлор)/Рейнар Фалькрейн.md",
+  "селестра i гринвельд":"Дом Гринвельд (Лирэн)/Селестра I Гринвельд.md",
+  "эдгар гринвельд":"Дом Гринвельд (Лирэн)/Эдгар Гринвельд.md",
+  "эвелина гринвельд":"Дом Гринвельд (Лирэн)/Эвелина Гринвельд.md",
+  "кайрен гринвельд":"Дом Гринвельд (Лирэн)/Кайрен Гринвельд.md",
+  "леон гринвельд":"Дом Гринвельд (Лирэн)/Леон Гринвельд.md",
+  "лиара гринвельд":"Дом Гринвельд (Лирэн)/Лиара Гринвельд.md",
+  "мариэль гринвельд":"Дом Гринвельд (Лирэн)/Мариэль Гринвельд.md",
+  "элиан гринвельд":"Дом Гринвельд (Лирэн)/Элиан Гринвельд.md",
+  "марцелл кальери i собиратель":"Дом Кальери (Ксандр)/Марцелл Кальери I «Собиратель».md",
+  "лукреция кальери":"Дом Кальери (Ксандр)/Лукреция Кальери.md",
+  "виолетта кальери":"Дом Кальери (Ксандр)/Виолетта Кальери.md",
+  "дамиан кальери":"Дом Кальери (Ксандр)/Дамиан Кальери.md",
+  "альдрен iv вальмонт":"Дом Вальмонт (Морвейн)/Альдрен IV Вальмонт.md",
+  "элеонора вальмонт":"Дом Вальмонт (Морвейн)/Элеонора Вальмонт.md"
+ };
+ const royalKey=value=>norm(value).replace(/[«»"]/g,"").replace(/\\s+/g," ").trim();
+ async function appendRoyalLore(body,node){
+  const file=royalLore[royalKey(node[0])];if(!file)return;
+  const section=$("section","codex-royal-lore"),title=$("h3","","Полная летопись"),status=$("p","codex-royal-lore-status","Читаем запись из архива…");
+  section.append(title,status);
+  const footer=body.querySelector(".codex-detail-footer");body.insertBefore(section,footer||null);
+  try{
+   const path="Obsidian%20Vault/Obsidian%20Vault/%D0%9D%D0%9F%D0%A1/%D0%9A%D0%BE%D1%80%D0%BE%D0%BB%D0%B5%D0%B2%D1%81%D0%BA%D0%B8%D0%B5%20%D1%81%D0%B5%D0%BC%D1%8C%D0%B8/";
+   const url="https://raw.githubusercontent.com/Sup4ezz/Friend-s-RPG/main/"+path+file.split("/").map(encodeURIComponent).join("/");
+   const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error("HTTP "+response.status);
+   let source=await response.text();if(/^\\s*<!doctype html|^\\s*<html[\\s>]/i.test(source.slice(0,500)))throw new Error("Получен HTML вместо Markdown");
+   if(!body.isConnected)return;
+   source=source.replace(/^---[\\s\\S]*?---\\s*/,"").replace(/\\[\\[([^\\]|]+)\\|([^\\]]+)\\]\\]/g,"$2").replace(/\\[\\[([^\\]]+)\\]\\]/g,"$1").replace(/\\*\\*(.+?)\\*\\*/g,"$1").replace(/\\*(.+?)\\*/g,"$1");
+   const article=$("div","codex-royal-lore-content");let paragraph=[];
+   const flush=()=>{if(paragraph.length){article.append($("p","",paragraph.join(" ")));paragraph=[];}};
+   for(const raw of source.replace(/\\r/g,"").split("\\n")){
+    const line=raw.trim();if(!line){flush();continue;}
+    const heading=line.match(/^(#{1,4})\\s+(.+)$/);if(heading){flush();article.append($(heading[1].length<=2?"h4":"h5","",heading[2]));continue;}
+    if(/^[-*]\\s+/.test(line)){flush();article.append($("p","codex-royal-lore-list", "• "+line.replace(/^[-*]\\s+/,"")));continue;}
+    paragraph.push(line);
+   }
+   flush();section.replaceChildren(title,article);
+  }catch(error){console.warn("[LORGUS] Не удалось загрузить летопись:",error);if(body.isConnected)section.replaceChildren(title,$("p","codex-royal-lore-status","Полная летопись временно недоступна. Краткая запись сохранена."));}
+ }
  function render(startId){
   const root=document.getElementById("cabinet-content"),sections=window.LORGUS_CODEX_SECTIONS||[],docs=window.LORGUS_CODEX_DOCS||[],remote=window.LORGUS_CODEX_REMOTE||{};
   if(!root||!sections.length)return;
@@ -36,6 +89,7 @@
     if(Array.isArray(node[5])&&node[5].length){body.append($("div","codex-detail-subhead","ВНУТРИ ЭТОЙ ЗАПИСИ · "+String(node[5].length).padStart(2,"0")));const list=$("div","codex-detail-children");node[5].forEach((child,i)=>{const b=$("button","codex-detail-child"),copy=$("span","codex-child-copy");b.type="button";copy.append($("strong","",child[0]),$("small","",child[2]||child[1]||""));b.append($("span","codex-child-number",String(i+1).padStart(2,"0")),copy,$("span","codex-child-arrow","↗"));b.onclick=()=>{trail.push(node);show(child);};list.append(b);});body.append(list);}
     if(trail.length){const b=$("button","codex-detail-back","← Назад");b.type="button";b.onclick=()=>show(trail.pop());body.append(b);}
     body.append($("div","codex-detail-footer","ЛОРГУС · АРХИВ ЗНАНИЙ"));
+    void appendRoyalLore(body,node);
    }show(entry);
   };
   function clear(){field.replaceChildren();lines.replaceChildren();}
