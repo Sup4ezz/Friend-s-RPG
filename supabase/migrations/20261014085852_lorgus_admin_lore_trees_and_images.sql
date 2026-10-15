@@ -1,0 +1,3 @@
+-- Production-history placeholder: this version was applied directly to the production database.
+-- The maintained schema is tracked in 20261014090000_lorgus_admin_lore_trees_and_images.sql.
+-- Intentionally empty to preserve the existing production migration history.
