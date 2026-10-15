@@ -775,3 +775,52 @@
     visibility: hidden !important;
   }
 }
+
+
+/* FINAL MOBILE RP COMPOSER OVERRIDE — force a genuinely tall writing area. */
+@media (max-width: 650px) {
+  .lorgus-rp-page .lorgus-messenger-composer {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) 44px !important;
+    grid-template-rows: auto auto !important;
+    align-items: end !important;
+    gap: 8px !important;
+    padding: 8px 10px max(8px, env(safe-area-inset-bottom)) !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-input-wrap {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 180px !important;
+    min-height: 180px !important;
+    max-height: 36dvh !important;
+    align-self: stretch !important;
+  }
+  .lorgus-rp-page #lorgus-rp-input,
+  .lorgus-rp-page .lorgus-messenger-input-wrap textarea,
+  .lorgus-rp-page .lorgus-messenger-composer textarea {
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    height: 180px !important;
+    min-height: 180px !important;
+    max-height: 36dvh !important;
+    padding: 12px 14px !important;
+    overflow-y: auto !important;
+    resize: vertical !important;
+    line-height: 1.5 !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-send {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    align-self: end !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-composer-tools {
+    grid-column: 1 / -1 !important;
+    grid-row: 2 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+}
