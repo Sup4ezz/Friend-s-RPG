@@ -690,3 +690,235 @@
     position: relative !important;
     z-index: 3 !important;
 }
+
+
+/* LORGUS RP — mobile-first layout correction (2026-10-15).
+   Keep the conversation inside the visible viewport and preserve usable composer controls. */
+@media (max-width: 650px) {
+  html, body { max-width: 100%; overflow-x: hidden; }
+  #root { min-width: 0; max-width: 100%; }
+  .lorgus-rp-page {
+    width: 100% !important;
+    height: calc(100vh - 54px) !important;
+    height: calc(100dvh - 54px) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-shell {
+    position: relative !important;
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    border-left: 0 !important;
+    border-right: 0 !important;
+    border-radius: 0 !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-main {
+    display: grid !important;
+    grid-template-rows: auto minmax(0, 1fr) auto auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-sidebar {
+    z-index: 20 !important;
+    position: absolute !important;
+    inset: 0 auto 0 0 !important;
+    width: min(86vw, 330px) !important;
+    max-width: calc(100% - 44px) !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    transform: translateX(-110%);
+    transition: transform .22s ease !important;
+    box-shadow: 18px 0 48px rgba(0,0,0,.55) !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-sidebar.mobile-open {
+    transform: translateX(0) !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-header {
+    min-width: 0 !important;
+    min-height: 62px !important;
+    padding: 7px 9px !important;
+    gap: 8px !important;
+    overflow: hidden !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-header-photo {
+    width: 40px !important;
+    height: 40px !important;
+    flex: 0 0 40px !important;
+    border-radius: 9px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-header-info {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    overflow: hidden !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-header-info h1 {
+    overflow-wrap: anywhere !important;
+    font-size: clamp(14px, 4vw, 17px) !important;
+    line-height: 1.12 !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-header-info p {
+    overflow: hidden !important;
+    margin-top: 3px !important;
+    font-size: 9px !important;
+    line-height: 1.25 !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-header-actions {
+    display: flex !important;
+    flex: 0 0 auto !important;
+    gap: 4px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-header-actions button {
+    display: inline-grid !important;
+    place-items: center !important;
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    font-size: 16px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-feed {
+    min-width: 0 !important;
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 13px 9px 18px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-message {
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    gap: 8px !important;
+    margin: 0 0 16px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-message-avatar {
+    width: 36px !important;
+    height: 42px !important;
+    flex: 0 0 36px !important;
+    margin-top: 2px !important;
+    border-radius: 7px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-message-content {
+    width: calc(100% - 44px) !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 44px) !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-message-meta {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    min-width: 0 !important;
+    gap: 4px 7px !important;
+    padding: 0 2px 6px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-message-meta strong {
+    overflow-wrap: anywhere !important;
+    font-size: 12px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-message-meta time {
+    font-size: 10px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-bubble {
+    min-width: 0 !important;
+    padding: 10px 11px !important;
+    border-radius: 3px 11px 11px 11px !important;
+    overflow-wrap: anywhere !important;
+    word-break: normal !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-bubble p {
+    margin: 0 !important;
+    font-size: 14px !important;
+    line-height: 1.62 !important;
+    overflow-wrap: anywhere !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-composer {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: flex-end !important;
+    gap: 6px !important;
+    min-width: 0 !important;
+    padding: 7px 8px max(7px, env(safe-area-inset-bottom)) !important;
+  }
+  .lorgus-rp-page .lorgus-rp-reply-preview {
+    min-width: 0 !important;
+    padding: 7px 8px !important;
+    gap: 7px !important;
+  }
+  .lorgus-rp-page .lorgus-rp-reply-preview-copy { min-width: 0 !important; }
+  .lorgus-rp-page .lorgus-rp-reply-preview-copy strong,
+  .lorgus-rp-page .lorgus-rp-reply-preview-copy span { max-width: 100% !important; font-size: 11px !important; }
+  .lorgus-rp-page .lorgus-messenger-composer-tools {
+    display: flex !important;
+    flex: 0 0 100% !important;
+    order: 3 !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-composer-tools button {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    font-size: 16px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-input-wrap {
+    flex: 1 1 0 !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    order: 1 !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-input-wrap textarea {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    max-height: 24dvh !important;
+    padding: 10px 11px !important;
+    font-size: 16px !important;
+    line-height: 1.45 !important;
+    resize: none !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-send {
+    flex: 0 0 42px !important;
+    order: 2 !important;
+    width: 42px !important;
+    min-width: 42px !important;
+    height: 42px !important;
+    padding: 0 !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-footer {
+    min-width: 0 !important;
+    min-height: 22px !important;
+    padding: 3px 8px !important;
+    font-size: 9px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-start {
+    width: calc(100% - 24px) !important;
+    margin: 18px auto !important;
+    padding: 22px 15px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-start strong { font-size: 22px !important; }
+  .lorgus-rp-page .lorgus-messenger-start p { font-size: 13px !important; }
+}
+@media (max-width: 380px) {
+  .lorgus-rp-page .lorgus-messenger-header-info h1 { font-size: 13px !important; }
+  .lorgus-rp-page .lorgus-messenger-header-actions button { width: 30px !important; min-width: 30px !important; }
+  .lorgus-rp-page .lorgus-messenger-message-avatar { width: 31px !important; flex-basis: 31px !important; height: 37px !important; }
+  .lorgus-rp-page .lorgus-messenger-message-content { width: calc(100% - 39px) !important; max-width: calc(100% - 39px) !important; }
+}
