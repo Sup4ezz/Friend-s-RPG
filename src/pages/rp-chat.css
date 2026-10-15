@@ -1182,3 +1182,23 @@
     margin: 0 !important;
   }
 }
+
+
+/* Mobile RP composer: give the message field real vertical writing space. */
+@media (max-width: 650px) {
+  .lorgus-rp-page .lorgus-messenger-composer {
+    align-items: flex-end !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-input-wrap {
+    align-self: stretch !important;
+    min-height: 104px !important;
+  }
+  .lorgus-rp-page .lorgus-messenger-input-wrap textarea,
+  .lorgus-rp-page .lorgus-messenger-composer textarea {
+    height: 104px !important;
+    min-height: 104px !important;
+    max-height: 32dvh !important;
+    overflow-y: auto !important;
+    line-height: 1.5 !important;
+  }
+}
