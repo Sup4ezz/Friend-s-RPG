@@ -19,8 +19,11 @@ jobs:
       LORGUS_CHRONICLE_SECRET: ${{ secrets.LORGUS_CHRONICLE_SECRET }}
     steps:
       - name: Process new RP messages
-        if: ${{ env.LORGUS_CHRONICLE_SECRET != '' }}
         run: |
+          if [ -z "$LORGUS_CHRONICLE_SECRET" ]; then
+            echo "Chronicle is idle until LORGUS_CHRONICLE_SECRET is configured."
+            exit 0
+          fi
           curl --fail-with-body --silent --show-error \
             --request POST \
             --url "https://dxdxnttpznoekaiecrlv.supabase.co/functions/v1/lorgus-chronicle" \
