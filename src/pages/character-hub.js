@@ -122,7 +122,12 @@ async function renderLorgusCharacterHub() {
                     </article>
                 </section>
             </main>
-        </div>`;
+        </div>
+        <nav class="lorgus-mainmenu-nav lorgus-character-return-nav" aria-label="Навигация по миру">
+            <button type="button" class="lorgus-mainmenu-arrow bottom" aria-label="Вернуться на карту из персонажа" title="Вернуться на карту из персонажа" onclick="window.lorgusSubpageTransition ? window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent) : window.renderLorgusWorldMapCurrent?.()">
+                <span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v16M5 13l7 7 7-7"/></svg></span><b>КАРТА</b>
+            </button>
+        </nav>`;
 
     const portrait = container.querySelector(".lorgus-character-portrait-inner");
     try {
