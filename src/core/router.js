@@ -6,7 +6,7 @@
 
 (() => {
     const fallbackRoutes = {
-        "/main-page": { page: "world", render: "renderLorgusWorldMapCurrent", title: "Главная" },
+        "/main-page": { page: "character", render: "renderLorgusCharacterHub", title: "Главная" },
         "/ankets": { page: "applications", render: "renderCharacterApplicationForm", title: "Анкеты" },
         "/map": { page: "world", render: "renderLorgusWorldMapCurrent", title: "Карта" },
         "/lorblook": { page: "codex", render: "renderLorgusCodex", title: "Лорбук" },
