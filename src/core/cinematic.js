@@ -134,6 +134,19 @@ function render(session) {
         const authScene = document.querySelector(".lorgus-cinematic-auth");
 
         if (authScene && !window.lorgusPortalEntering && !window.lorgusPortalDepartureAligning) {
+            // На телефонах кинематографическое закрытие экрана может остаться поверх
+            // страницы при восстановлении вкладки или медленной загрузке кабинета.
+            // На мобильном сразу открываем кабинет без полноэкранной чёрной пелены.
+            if (window.matchMedia("(max-width: 720px)").matches) {
+                window.lorgusPortalEntering = false;
+                window.lorgusPortalDepartureAligning = false;
+                document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition").forEach(el => el.remove());
+                window.lorgusPortalOverlay = null;
+                authScene.remove();
+                window.renderCabinet(session);
+                return;
+            }
+
             // UI уходит и камера начинает полёт из ЕЁ текущего положения.
             // Никакого отдельного transition-screen между сценами нет.
             window.lorgusPortalDepartureAligning = false;
