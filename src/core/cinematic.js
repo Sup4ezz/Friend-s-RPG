@@ -155,22 +155,44 @@ function render(session) {
 
                     eyeTransition = createLorgusEyeTransition();
 
-                    // Пока веки сомкнуты, кабинет спокойно готовится под ними.
-                    await window.renderCabinet(session, true, true);
+                    // Не оставляем чёрные веки поверх игры, если загрузка кабинета
+                    // зависла на мобильном устройстве или завершилась ошибкой.
+                    const releasePortalScene = () => {
+                        window.lorgusPortalEntering = false;
+                        if (window.lorgusSceneCleanup) {
+                            const cleanup = window.lorgusSceneCleanup;
+                            window.lorgusSceneCleanup = null;
+                            try { cleanup(); } catch (cleanupError) {
+                                console.warn("LORGUS: ошибка очистки кинематографической сцены:", cleanupError);
+                            }
+                        }
+                    };
+                    const emergencyReveal = window.setTimeout(() => {
+                        console.warn("LORGUS: аварийно снимаем экран перехода после долгой загрузки.");
+                        releasePortalScene();
+                        if (eyeTransition && eyeTransition.isConnected) {
+                            eyeTransition.classList.remove("closed");
+                            eyeTransition.classList.add("open");
+                            window.setTimeout(() => eyeTransition?.remove(), 650);
+                        }
+                    }, 8000);
 
-                    window.lorgusPortalEntering = false;
+                    try {
+                        // Пока веки сомкнуты, кабинет спокойно готовится под ними.
+                        await window.renderCabinet(session, true, true);
+                    } catch (error) {
+                        console.error("LORGUS: не удалось подготовить кабинет под переходом:", error);
+                    } finally {
+                        window.clearTimeout(emergencyReveal);
+                        releasePortalScene();
 
-                    if (window.lorgusSceneCleanup) {
-                        const cleanup = window.lorgusSceneCleanup;
-                        window.lorgusSceneCleanup = null;
-                        cleanup();
+                        // Даже при ошибке загрузки открываем глаза и убираем слой.
+                        if (eyeTransition && eyeTransition.isConnected) {
+                            eyeTransition.classList.remove("closed");
+                            eyeTransition.classList.add("open");
+                            window.setTimeout(() => eyeTransition?.remove(), 650);
+                        }
                     }
-
-                    // Открываем глаза уже на новой локации.
-                    eyeTransition.classList.remove("closed");
-                    eyeTransition.classList.add("open");
-
-                    window.setTimeout(() => eyeTransition.remove(), 620);
                 }, 760);
             }, 620);
 
