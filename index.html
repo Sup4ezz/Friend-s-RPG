@@ -77,7 +77,7 @@
     <script>
         // Last-resort mobile /map recovery. This runs independently of app.js.
         (() => {
-            if (!/^\/(map|world|main-page)\/?$/.test(location.pathname)) return;
+            if (!/^\/(map|world)\/?$/.test(location.pathname)) return;
             window.setTimeout(() => {
                 document.querySelectorAll(
                     "[class*='transition'],[id*='transition'],[class*='portal'],[id*='portal'],[class*='veil'],[id*='veil'],[class*='blackout'],[id*='blackout'],[class*='overlay'],[id*='overlay']"
