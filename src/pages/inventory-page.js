@@ -435,8 +435,11 @@ async function renderLorgusInventory() {
         if (inlineInventory) {
             inlineInventory.classList.add("lorgus-character-inline-equipment");
             inlineInventory.querySelector(".lorgus-inventory-header-meta")?.remove();
-            characterMain.querySelector(".lorgus-inventory-main")?.remove();
-            characterMain.appendChild(inlineInventory);
+            const inlineView = document.createElement("div");
+            inlineView.className = "lorgus-inventory-page lorgus-inventory-inline-view";
+            inlineView.appendChild(inlineInventory);
+            characterMain.querySelector(".lorgus-inventory-inline-view")?.remove();
+            characterMain.appendChild(inlineView);
         }
         container.remove();
     }
