@@ -7,6 +7,12 @@
     delete document.documentElement.dataset.lorgusTransition;
     document.documentElement.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
     document.body?.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
+
+    // A portal/eye overlay must never survive a reload or a return from the
+    // mobile browser background; either layer covers the whole screen in black.
+    document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition")
+      .forEach(overlay => overlay.remove());
+    window.lorgusPortalOverlay = null;
   };
   recoverScene();
   window.addEventListener("pageshow", recoverScene);
