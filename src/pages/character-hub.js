@@ -41,9 +41,7 @@ async function renderLorgusCharacterHub() {
                     <button type="button" class="active" aria-current="page" data-character-local-view="dossier"><span>◈</span><b>Досье</b><i>01</i></button>
                     <button type="button" data-character-local-view="inventory"><span>◇</span><b>Снаряжение</b><i>02</i></button>
                 </nav>
-                <button type="button" class="lorgus-character-back" onclick="window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent)">
-                    <span>←</span><span><b>ВЕРНУТЬСЯ В МИР</b><small>Продолжить путь</small></span>
-                </button>
+                <button type="button" class="lorgus-character-map-button" onclick="window.lorgusSubpageTransition ? window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent) : window.renderLorgusWorldMapCurrent?.()">Вернуться на карту</button>
             </aside>
 
             <main class="lorgus-character-main">
@@ -123,11 +121,7 @@ async function renderLorgusCharacterHub() {
                 </section>
             </main>
         </div>
-        <nav class="lorgus-mainmenu-nav lorgus-character-return-nav" aria-label="Навигация по миру">
-            <button type="button" class="lorgus-mainmenu-arrow bottom" aria-label="Вернуться на карту из персонажа" title="Вернуться на карту из персонажа" onclick="window.lorgusSubpageTransition ? window.lorgusSubpageTransition('bottom', window.renderLorgusWorldMapCurrent) : window.renderLorgusWorldMapCurrent?.()">
-                <span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v16M5 13l7 7 7-7"/></svg></span><b>КАРТА</b>
-            </button>
-        </nav>`;
+`;
 
     const portrait = container.querySelector(".lorgus-character-portrait-inner");
     try {
