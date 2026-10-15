@@ -31,7 +31,7 @@
   "альдрен iv вальмонт":"Дом Вальмонт (Морвейн)/Альдрен IV Вальмонт.md",
   "элеонора вальмонт":"Дом Вальмонт (Морвейн)/Элеонора Вальмонт.md"
  };
- const royalKey=value=>norm(value).replace(/[«»"]/g,"").replace(/\\s+/g," ").trim();
+ const royalKey=value=>norm(value).replace(/[«»"]/g,"").replace(/\s+/g," ").trim();
  async function appendRoyalLore(body,node){
   const file=royalLore[royalKey(node[0])];if(!file)return;
   const section=$("section","codex-royal-lore"),title=$("h3","","Полная летопись"),status=$("p","codex-royal-lore-status","Читаем запись из архива…");
@@ -41,15 +41,15 @@
    const path="Obsidian%20Vault/Obsidian%20Vault/%D0%9D%D0%9F%D0%A1/%D0%9A%D0%BE%D1%80%D0%BE%D0%BB%D0%B5%D0%B2%D1%81%D0%BA%D0%B8%D0%B5%20%D1%81%D0%B5%D0%BC%D1%8C%D0%B8/";
    const url="https://raw.githubusercontent.com/Sup4ezz/Friend-s-RPG/main/"+path+file.split("/").map(encodeURIComponent).join("/");
    const response=await fetch(url,{cache:"no-store"});if(!response.ok)throw new Error("HTTP "+response.status);
-   let source=await response.text();if(/^\\s*<!doctype html|^\\s*<html[\\s>]/i.test(source.slice(0,500)))throw new Error("Получен HTML вместо Markdown");
+   let source=await response.text();if(/^\s*<!doctype html|^\s*<html[\s>]/i.test(source.slice(0,500)))throw new Error("Получен HTML вместо Markdown");
    if(!body.isConnected)return;
-   source=source.replace(/^---[\\s\\S]*?---\\s*/,"").replace(/\\[\\[([^\\]|]+)\\|([^\\]]+)\\]\\]/g,"$2").replace(/\\[\\[([^\\]]+)\\]\\]/g,"$1").replace(/\\*\\*(.+?)\\*\\*/g,"$1").replace(/\\*(.+?)\\*/g,"$1");
+   source=source.replace(/^---[\s\S]*?---\s*/,"").replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,"$2").replace(/\[\[([^\]]+)\]\]/g,"$1").replace(/\*\*(.+?)\*\*/g,"$1").replace(/\*(.+?)\*/g,"$1");
    const article=$("div","codex-royal-lore-content");let paragraph=[];
    const flush=()=>{if(paragraph.length){article.append($("p","",paragraph.join(" ")));paragraph=[];}};
-   for(const raw of source.replace(/\\r/g,"").split("\\n")){
+   for(const raw of source.replace(/\r/g,"").split("\n")){
     const line=raw.trim();if(!line){flush();continue;}
-    const heading=line.match(/^(#{1,4})\\s+(.+)$/);if(heading){flush();article.append($(heading[1].length<=2?"h4":"h5","",heading[2]));continue;}
-    if(/^[-*]\\s+/.test(line)){flush();article.append($("p","codex-royal-lore-list", "• "+line.replace(/^[-*]\\s+/,"")));continue;}
+    const heading=line.match(/^(#{1,4})\s+(.+)$/);if(heading){flush();article.append($(heading[1].length<=2?"h4":"h5","",heading[2]));continue;}
+    if(/^[-*]\s+/.test(line)){flush();article.append($("p","codex-royal-lore-list", "• "+line.replace(/^[-*]\s+/,"")));continue;}
     paragraph.push(line);
    }
    flush();section.replaceChildren(title,article);
