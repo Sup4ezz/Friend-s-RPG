@@ -6,6 +6,7 @@
     ".lorgus-character-view", ".lorgus-character-details",
     ".lorgus-codex-page", "[class*='lorgus-codex']"
   ].join(",");
+
   function ensureToolbar() {
     let bar = document.querySelector(".lorgus-global-utility");
     if (!bar) {
@@ -24,39 +25,46 @@
     const active = document.querySelector(ROOTS);
     bar.classList.toggle("is-visible", Boolean(active));
 
-    let returnArrow = document.querySelector(".lorgus-direction-return");
     const path = (window.location.pathname || "").replace(/\/+$/, "");
     const directions = {
-      "/mail": { glyph: "↑", direction: "top", label: "Вернуться на карту из писем" },
-      "/character": { glyph: "↓", direction: "bottom", label: "Вернуться на карту из персонажа" },
-      "/lorblook": { glyph: "←", direction: "left", label: "Вернуться на карту из лорбука" },
-      "/rp": { glyph: "→", direction: "right", label: "Вернуться на карту из ролевой" }
+      "/mail": { direction: "top", label: "Вернуться на карту из писем", path: "M12 20V4M5 11l7-7 7 7" },
+      "/character": { direction: "bottom", label: "Вернуться на карту из персонажа", path: "M12 4v16M5 13l7 7 7-7" },
+      "/lorblook": { direction: "left", label: "Вернуться на карту из лорбука", path: "M20 12H4M11 5l-7 7 7 7" },
+      "/rp": { direction: "right", label: "Вернуться на карту из ролевой", path: "M4 12h16M13 5l7 7-7 7" }
     };
     const config = directions[path];
+    let nav = document.querySelector(".lorgus-subpage-nav");
+
+    // На подстраницах сохраняем ту же направленную навигацию, что и на карте:
+    // кнопка занимает своё направление, а не висит отдельной панелью сверху.
     if (config && active) {
-      if (!returnArrow) {
-        returnArrow = document.createElement("button");
-        returnArrow.type = "button";
-        returnArrow.className = "lorgus-direction-return";
-        document.body.appendChild(returnArrow);
-        returnArrow.addEventListener("click", () => {
-          const current = directions[(window.location.pathname || "").replace(/\/+$/, "")];
-          if (!current || typeof window.renderLorgusWorldMapCurrent !== "function") return;
-          if (typeof window.lorgusSubpageTransition === "function") {
-            window.lorgusSubpageTransition(current.direction, window.renderLorgusWorldMapCurrent);
-          } else {
-            window.renderLorgusWorldMapCurrent();
-          }
-        });
+      if (!nav) {
+        nav = document.createElement("nav");
+        nav.className = "lorgus-mainmenu-nav lorgus-subpage-nav";
+        nav.setAttribute("aria-label", "Навигация по миру");
+        document.body.appendChild(nav);
       }
-      returnArrow.textContent = config.glyph;
-      returnArrow.setAttribute("aria-label", config.label);
-      returnArrow.title = config.label;
-      returnArrow.hidden = false;
-    } else if (returnArrow) {
-      returnArrow.hidden = true;
+      nav.innerHTML = '<button type="button" class="lorgus-mainmenu-arrow ' + config.direction + '" aria-label="' + config.label + '" title="' + config.label + '"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="' + config.path + '"/></svg></span><b>КАРТА</b></button>';
+      const returnButton = nav.querySelector("button");
+      returnButton.onclick = () => {
+        const currentPath = (window.location.pathname || "").replace(/\/+$/, "");
+        const current = directions[currentPath];
+        if (!current || typeof window.renderLorgusWorldMapCurrent !== "function") return;
+        if (typeof window.lorgusSubpageTransition === "function") {
+          window.lorgusSubpageTransition(current.direction, window.renderLorgusWorldMapCurrent);
+        } else {
+          window.renderLorgusWorldMapCurrent();
+        }
+      };
+      nav.hidden = false;
+    } else if (nav) {
+      nav.remove();
     }
+
+    // Удаляем кнопку старого дизайна, если она осталась в уже открытой SPA-странице.
+    document.querySelectorAll(".lorgus-direction-return").forEach(el => el.remove());
   }
+
   function removeBackButtons() {
     document.querySelectorAll(
       "#lorgus-global-back,.lorgus-global-back," +
@@ -67,13 +75,13 @@
     });
 
     document.querySelectorAll("button,a,[role='button'],input[type='button'],input[type='submit']").forEach(el => {
-      if (el.closest(".lorgus-global-utility")) return;
+      if (el.closest(".lorgus-global-utility,.lorgus-subpage-nav")) return;
       const label = [
         el.textContent || "",
         el.getAttribute("aria-label") || "",
         el.getAttribute("title") || "",
         el.value || ""
-      ].join(" ").replace(/[←←‹«→\s]+/g, " ").trim().toLocaleUpperCase("ru-RU");
+      ].join(" ").replace(/[←‹«→\s]+/g, " ").trim().toLocaleUpperCase("ru-RU");
       if (/(^|\s)НАЗАД($|\s)/u.test(label)) el.remove();
     });
   }
@@ -83,8 +91,7 @@
     ensureToolbar();
   }
 
-  // SPA-страницы создают сотни DOM-узлов за один переход. Не сканируем
-  // весь документ на каждую пачку MutationObserver — объединяем работу в один кадр.
+  // SPA-страницы создают сотни DOM-узлов за один переход. Объединяем обновления в один кадр.
   let refreshQueued = false;
   function scheduleRefresh() {
     if (refreshQueued) return;
@@ -101,10 +108,9 @@
     refresh();
   }
   const observer = new MutationObserver(records => {
-    // Изменения только внутри служебной панели не требуют повторного полного сканирования.
     const relevant = records.some(record => {
       const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
-      return !target?.closest(".lorgus-global-utility,.lorgus-direction-return");
+      return !target?.closest(".lorgus-global-utility,.lorgus-subpage-nav,.lorgus-direction-return");
     });
     if (relevant) scheduleRefresh();
   });
