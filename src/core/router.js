@@ -38,6 +38,10 @@
 
     function canonicalPath(path) {
         const clean = normalizePath(path);
+        // На мобильных отдельная карта не используется: /map ведёт на главный экран.
+        if (clean === "/map" && window.matchMedia("(max-width: 720px)").matches) {
+            return "/main-page";
+        }
         return LEGACY_PATHS[clean] || clean;
     }
 
