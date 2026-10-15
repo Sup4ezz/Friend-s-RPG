@@ -14,7 +14,7 @@ window.supabaseClient = null;
 if (window.matchMedia("(max-width: 900px)").matches) {
     window.setTimeout(() => {
         const path = window.location.pathname.replace(/\/+$/, "") || "/";
-        if (path !== "/map" && path !== "/main-page" && path !== "/world") return;
+        if (path !== "/map" && path !== "/world") return;
 
         document.querySelectorAll(
             ".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay"
