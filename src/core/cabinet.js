@@ -40,6 +40,20 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
         root.appendChild(cabinet);
     }
 
+    // Mobile recovery guard: avoid an indefinitely empty cabinet if route/state restoration stalls.
+    const mobileRecoveryTimer = window.setTimeout(() => {
+        if (!cabinet.isConnected) return;
+        const content = cabinet.querySelector("#cabinet-content");
+        if (!content || content.children.length) return;
+        document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay").forEach(el => el.remove());
+        window.lorgusPortalEntering = false;
+        window.lorgusPortalDepartureAligning = false;
+        cabinet.style.opacity = "1";
+        cabinet.style.visibility = "visible";
+        cabinet.style.pointerEvents = "auto";
+        content.innerHTML = '<section style="max-width:560px;margin:12vh auto;padding:28px 22px;color:#e9dfca;background:#15110c;border:1px solid rgba(215,182,109,.35);font:16px/1.6 Georgia,serif"><h2 style="margin-top:0;color:#d7b66d">Мир не загрузился</h2><p>Загрузка данных персонажа или карты зависла. Приложение остановилось до отрисовки карты.</p><button type="button" onclick="location.reload()" style="min-height:46px;padding:10px 18px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Повторить загрузку</button></section>';
+    }, 10000);
+
     window.lorgusIsAdmin = false;
     try {
         await loadPlayerState(session, forceCharacterSelection);
@@ -55,6 +69,8 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
                 </section>`;
         }
     }
+
+    window.clearTimeout(mobileRecoveryTimer);
 
     // Админская панель — самостоятельный экран. Не заменяем её SPA-маршрутом
     // персонажа, если у администратора сохранён активный персонаж.
