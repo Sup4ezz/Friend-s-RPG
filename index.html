@@ -79,7 +79,6 @@
         (() => {
             if (!/^\/(map|world|main-page)\/?$/.test(location.pathname)) return;
             window.setTimeout(() => {
-                if (document.querySelector("#cabinet-content .lorgus-map-page")) return;
                 document.querySelectorAll(
                     ".lorgus-portal-transition,.lorgus-eye-transition,.lorgus-region-transition-veil,.lorgus-transition-screen,.lorgus-scene-transition-overlay,.lorgus-transition-overlay"
                 ).forEach(el => el.remove());
@@ -89,16 +88,27 @@
                 document.body.style.setProperty("background","#100d09","important");
                 const root = document.getElementById("root");
                 if (!root) return;
+                [root, ...root.querySelectorAll(".game-page,#cabinet-content,.lorgus-cabinet-entering,.lorgus-map-page,.lorgus-map-shell,.lorgus-map-main")].forEach(el => {
+                    el.style.setProperty("visibility","visible","important");
+                    el.style.setProperty("opacity","1","important");
+                    el.style.setProperty("filter","none","important");
+                    el.style.setProperty("transform","none","important");
+                    el.style.setProperty("display","block","important");
+                });
                 root.style.setProperty("min-height","100dvh","important");
-                root.style.setProperty("visibility","visible","important");
-                root.style.setProperty("opacity","1","important");
+                root.style.setProperty("position","relative","important");
+                root.style.setProperty("z-index","1","important");
                 const cabinet = document.getElementById("cabinet-content");
-                if (cabinet && window.activeCharacter && typeof window.renderLorgusWorldMapCurrent === "function") {
+                if (cabinet && window.activeCharacter && typeof window.renderLorgusWorldMapCurrent === "function" &&
+                    !cabinet.querySelector(".lorgus-map-page")) {
                     try { window.renderLorgusWorldMapCurrent(); } catch (e) { console.error("Map recovery failed",e); }
                 }
                 window.setTimeout(() => {
                     if (document.querySelector("#cabinet-content .lorgus-map-page")) return;
-                    root.innerHTML = `<main style="box-sizing:border-box;min-height:100dvh;width:100%;display:flex;align-items:center;justify-content:center;padding:24px;background:#100d09;color:#eee2c8;font:16px/1.6 Georgia,serif;text-align:center"><section style="width:min(100%,440px);padding:28px 20px;background:#19150f;border:1px solid #80663b"><h1 style="color:#d7b66d;margin-top:0">Не удалось загрузить карту</h1><p>Приложение не восстановило персонажа или не запустило карту. Чёрный экран убран — попробуй перезапустить загрузку.</p><button type="button" onclick="location.href='/map?reload=' + Date.now()" style="min-height:48px;padding:12px 20px;background:#d7b66d;color:#17110a;border:0;font-weight:bold">Перезагрузить карту</button></section></main>`;
+                    const notice = document.createElement("div");
+                    notice.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:24px;background:#100d09;color:#eee2c8;font:16px/1.6 Georgia,serif;text-align:center";
+                    notice.innerHTML = `<section style="width:min(100%,440px);padding:28px 20px;background:#19150f;border:1px solid #80663b"><h1 style="color:#d7b66d;margin-top:0">Не удалось загрузить карту</h1><p>Приложение не восстановило персонажа или не запустило карту. Чёрный экран убран — попробуй перезапустить загрузку.</p><button type="button" onclick="location.href='/map?reload=' + Date.now()" style="min-height:48px;padding:12px 20px;background:#d7b66d;color:#17110a;border:0;font-weight:bold">Перезагрузить карту</button></section>`;
+                    document.body.appendChild(notice);
                 }, 1800);
             }, 6500);
         })();
