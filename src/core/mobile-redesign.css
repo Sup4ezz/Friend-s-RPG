@@ -890,3 +890,15 @@
 }
 
 @media (max-width: 720px) { .lorgus-map-page .lorgus-mainmenu-fog, .lorgus-map-page .lorgus-map-atmosphere { display: none !important; } .lorgus-map-page .lorgus-map-image { display:block !important; visibility:visible !important; opacity:1 !important; filter:none !important; position:relative !important; z-index:30 !important; width:100% !important; height:auto !important; min-height:50vh !important; object-fit:contain !important; } .lorgus-map-page .lorgus-map-world { position:relative !important; z-index:29 !important; opacity:1 !important; visibility:visible !important; } .lorgus-map-page #lorgus-map-viewport { background:#17140e !important; } }
+
+/* Mobile emergency: the map frame inherited 100% heights from a zero-height parent. */
+@media (max-width: 720px) {
+  .lorgus-map-page { height:auto !important; min-height:100dvh !important; overflow:visible !important; }
+  .lorgus-map-page .lorgus-map-shell { display:block !important; height:auto !important; min-height:100dvh !important; overflow:visible !important; }
+  .lorgus-map-page .lorgus-map-main { display:block !important; height:auto !important; min-height:100dvh !important; overflow:visible !important; }
+  .lorgus-map-page .lorgus-map-stage { display:block !important; height:auto !important; min-height:0 !important; }
+  .lorgus-map-page .lorgus-map-frame { display:block !important; position:relative !important; height:70dvh !important; min-height:420px !important; max-height:none !important; overflow:hidden !important; }
+  .lorgus-map-page #lorgus-map-viewport { display:block !important; position:absolute !important; inset:0 !important; width:100% !important; height:100% !important; min-height:420px !important; }
+  .lorgus-map-page #lorgus-map-world { position:absolute !important; inset:0 !important; width:100% !important; height:100% !important; }
+  .lorgus-map-page .lorgus-map-image { display:block !important; width:100% !important; height:100% !important; min-height:0 !important; object-fit:contain !important; }
+}
