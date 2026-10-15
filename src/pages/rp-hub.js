@@ -1,4 +1,21 @@
 /* LORGUS RP hub */
+// Единая точка возврата из ролевой: URL и экран карты всегда должны совпадать.
+window.lorgusReturnToMapFromRp = function() {
+    const openMap = () => {
+        if (window.location.pathname.replace(/\\/+$/, "") !== "/map") {
+            window.history.pushState({ lorgusRoute: "/map" }, "", "/map");
+        }
+        if (typeof window.lorgusNavigate === "function") {
+            window.lorgusNavigate("/map", { replace: true });
+        } else if (typeof window.renderLorgusWorldMapCurrent === "function") {
+            window.renderLorgusWorldMapCurrent();
+        }
+    };
+    if (typeof window.lorgusSubpageTransition === "function") {
+        return window.lorgusSubpageTransition("right", openMap);
+    }
+    return openMap();
+};
 function renderLorgusRpHub() {
     const container = document.getElementById("cabinet-content");
     if (!container || !window.activeCharacter) return;
@@ -27,7 +44,7 @@ function renderLorgusRpHub() {
             <i></i><i></i><i></i><i></i>
         </div>
 
-        <button type="button" class="lorgus-subpage-back-arrow right" onclick="window.lorgusSubpageTransition ? window.lorgusSubpageTransition('right', () => window.lorgusNavigate ? window.lorgusNavigate('/map') : window.renderLorgusWorldMapCurrent?.()) : (window.lorgusNavigate ? window.lorgusNavigate('/map') : window.renderLorgusWorldMapCurrent?.())" aria-label="Вернуться на карту">
+        <button type="button" class="lorgus-subpage-back-arrow right" onclick="window.lorgusReturnToMapFromRp()" aria-label="Вернуться на карту">
             <span>▶</span><b>КАРТА</b>
         </button>
 
