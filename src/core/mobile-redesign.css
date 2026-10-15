@@ -719,10 +719,30 @@
     perspective: none !important;
     isolation: auto !important;
   }
-  .lorgus-map-frame,
-  .lorgus-map-atmosphere,
+  /* Keep the actual map visible on phones; only remove cinematic overlays. */
+  .lorgus-map-frame {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    height: min(54dvh, 460px) !important;
+    min-height: 300px !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    transform: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
   .lorgus-map-world,
-  .lorgus-map-image-wrap,
+  .lorgus-map-image-wrap {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    animation: none !important;
+    filter: none !important;
+  }
+  .lorgus-map-atmosphere,
   .lorgus-map-overlay,
   .lorgus-map-surface-hint,
   .lorgus-map-controls,
