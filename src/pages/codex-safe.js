@@ -267,7 +267,7 @@
   "альдрен iv вальмонт":"Дом Вальмонт (Морвейн)/Альдрен IV Вальмонт.md",
   "элеонора вальмонт":"Дом Вальмонт (Морвейн)/Элеонора Вальмонт.md"
  };
- const characterNoteKey = value => norm(value).replace(/[«»"]/g,"").replace(/\\s+/g," ").trim();
+ const characterNoteKey = value => norm(value).replace(/[«»"]/g,"").replace(/\s+/g," ").trim();
  async function appendCharacterNote(content,node) {
   const file=characterNotes[characterNoteKey(node[0])];
   if(!file)return;
@@ -279,13 +279,13 @@
    const response=await fetch(url,{cache:"no-store"});
    if(!response.ok)throw new Error("HTTP "+response.status);
    const source=await response.text();
-   if(/^\\s*<!doctype html|^\\s*<html[\\s>]/i.test(source.slice(0,500)))throw new Error("HTML вместо Markdown");
+   if(/^\s*<!doctype html|^\s*<html[\s>]/i.test(source.slice(0,500)))throw new Error("HTML вместо Markdown");
    if(!content.isConnected)return;
    const body=make("div","lorgus-codex-markdown");
-   const cleaned=source.replace(/^---[\\s\\S]*?---\\s*/,"")
-    .replace(/\\[\\[([^\\]|]+)\\|([^\\]]+)\\]\\]/g,"$2")
-    .replace(/\\[\\[([^\\]]+)\\]\\]/g,"$1")
-    .replace(/\\*\\*(.+?)\\*\\*/g,"$1").replace(/\\*(.+?)\\*/g,"$1");
+   const cleaned=source.replace(/^---[\s\S]*?---\s*/,"")
+    .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,"$2")
+    .replace(/\[\[([^\]]+)\]\]/g,"$1")
+    .replace(/\*\*(.+?)\*\*/g,"$1").replace(/\*(.+?)\*/g,"$1");
    renderMarkdown(body,cleaned);
    section.replaceChildren(make("h3","","Полная летопись персонажа"),body);
   } catch(error) {
