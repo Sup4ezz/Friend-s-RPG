@@ -1,5 +1,18 @@
 /* Persistent utility controls shared by LORGUS game pages. */
 (() => {
+  // Сбрасываем незавершённое состояние сцены после перезагрузки/возврата из фона.
+  // Иначе мобильный браузер может оставить страницу затемнённой и заблокировать стрелку.
+  const recoverScene = () => {
+    window.lorgusMainMenuNavigating = false;
+    delete document.documentElement.dataset.lorgusTransition;
+    document.documentElement.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
+    document.body?.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
+  };
+  recoverScene();
+  window.addEventListener("pageshow", recoverScene);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") recoverScene();
+  });
   const ROOTS = [
     ".lorgus-map-page", ".lorgus-character-page", ".lorgus-mail-page",
     ".lorgus-inventory-page", ".lorgus-subpage-container",
