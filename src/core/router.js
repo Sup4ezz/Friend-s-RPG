@@ -258,6 +258,17 @@
         event.preventDefault();
         event.stopPropagation();
         event.stopImmediatePropagation();
+
+        // Navigation arrows with data-transition use the same SPA router,
+        // but keep the directional scene transition. Clear stale animation locks
+        // first so a previous interrupted transition cannot swallow this click.
+        const direction = button.getAttribute("data-transition");
+        if (direction && typeof window.lorgusSubpageTransition === "function") {
+            window.lorgusMainMenuNavigating = false;
+            delete document.documentElement.dataset.lorgusTransition;
+            window.lorgusSubpageTransition(direction, () => navigate(path));
+            return;
+        }
         navigate(path);
     }
 
