@@ -69,3 +69,11 @@ P0-аудит серверной целостности RP presence и всех 
 - Последний подтверждённый deployment до этих изменений — commit f482b41; после 251a9d9/b6a559e необходимо проверить новые Actions.
 - Ручная браузерная проверка остаётся обязательной: интерактивного browser tool здесь нет. Не утверждать, что launch QA завершён.
 - Следующий шаг: проверить свежие workflow runs, затем провести production smoke-test с обычным тестовым аккаунтом и отдельно админом.
+
+## Production database check — 2026-10-15
+- Security/Performance advisors checked.
+- Six RLS-enabled tables without user policies have no SELECT/INSERT/UPDATE grants for anon or authenticated; do not add broad policies.
+- Static screening of 31 admin RPCs callable by authenticated found an is_admin / ADMIN_REQUIRED guard in each. This is not a full proof of every authorization path.
+- Advisor still reports 54 privileged RPCs callable by authenticated and pg_net in public. Do not revoke permissions in bulk; review individual functions first.
+- No production SQL changes made.
+- deploy-lorgus.yml now ignores docs/** for documentation-only changes.
