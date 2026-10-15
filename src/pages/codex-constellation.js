@@ -118,7 +118,7 @@
    place([["Загружаем летопись","Архив","Читаем записи…","Подожди мгновение."]],"entry");
    const client=window.supabaseClient;
    if(!client){activeSection.entries=[["Летопись недоступна","Ошибка подключения","", "Не удалось подключиться к архиву. Попробуй открыть раздел позже."]];place(activeSection.entries,"entry");return;}
-   const {data,error}=await client.from("lorgus_chronicle_entries").select("id,title,subtitle,body,event_date,importance,status").order("event_date",{ascending:false}).limit(80);
+   const {data,error}=await client.from("lorgus_chronicle_entries").select("id,title,subtitle,body,event_date,importance,status").in("status",["approved","pending_review"]).order("event_date",{ascending:false}).limit(80);
    if(activeSection?.id!=="chronicle")return;
    if(error){activeSection.entries=[["Летопись недоступна","Ошибка архива","", "Не удалось загрузить летопись. Попробуй позже."]];}
    else if(!data?.length){activeSection.entries=[["Пока тихо","Нет записей","", "Летописец пока не обнаружил событий, достойных хроники. Когда в игре произойдёт нечто значимое, здесь появится черновик для проверки."]];}
