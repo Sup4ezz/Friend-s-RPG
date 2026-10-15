@@ -27,7 +27,7 @@ function renderLorgusRpHub() {
             <i></i><i></i><i></i><i></i>
         </div>
 
-        <button type="button" class="lorgus-subpage-back-arrow right" onclick="window.lorgusSubpageTransition('right', window.renderLorgusWorldMapCurrent)" aria-label="Вернуться на карту">
+        <button type="button" class="lorgus-subpage-back-arrow right" onclick="window.lorgusSubpageTransition ? window.lorgusSubpageTransition('right', () => window.lorgusNavigate ? window.lorgusNavigate('/map') : window.renderLorgusWorldMapCurrent?.()) : (window.lorgusNavigate ? window.lorgusNavigate('/map') : window.renderLorgusWorldMapCurrent?.())" aria-label="Вернуться на карту">
             <span>▶</span><b>КАРТА</b>
         </button>
 
