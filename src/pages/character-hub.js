@@ -168,7 +168,7 @@ if (!window.__lorgusCharacterLocalViewsBound) {
             else item.removeAttribute("aria-current");
         });
         if (view === "dossier") {
-            main.querySelector(".lorgus-inventory-main")?.remove();
+            main.querySelector(".lorgus-inventory-inline-view")?.remove();
             dossier.hidden = false;
         } else if (view === "inventory") {
             dossier.hidden = true;
