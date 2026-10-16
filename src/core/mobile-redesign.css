@@ -792,7 +792,16 @@
   .lorgus-region-transition-veil,
   .lorgus-transition-screen,
   .lorgus-scene-transition-overlay,
-  .lorgus-transition-overlay {
+  .lorgus-transition-overlay,
+  .lorgus-veil,
+  .lorgus-transition-veil,
+  .lorgus-scene-veil,
+  .lorgus-loading-veil,
+  .lorgus-mobile-veil,
+  .lorgus-portal-veil,
+  .lorgus-fog-veil,
+  .lorgus-transition-curtain,
+  .lorgus-scene-curtain {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
