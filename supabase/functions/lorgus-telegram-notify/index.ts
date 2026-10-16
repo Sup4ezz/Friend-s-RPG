@@ -136,6 +136,20 @@ function formatEvent(type: string, payload: Record<string, unknown>): string {
       break;
     }
 
+    case "client_error_report": {
+      heading("🚨", "ОШИБКА ПРИЛОЖЕНИЯ", clean(payload.route || "Неизвестный раздел", 160));
+      field("Игрок:", payload.username || "Неизвестен", 120);
+      field("Персонаж:", payload.character_name || "не указан", 120);
+      field("Отчёт:", "#" + clean(payload.report_id || "", 40), 60);
+      lines.push("", "<b>Ошибка</b>", "<blockquote>" + escapeHtml(payload.message || "Текст ошибки отсутствует", 1200) + "</blockquote>");
+      if (payload.stack) lines.push("", "<b>Стек</b>", "<pre>" + escapeHtml(payload.stack, 1100) + "</pre>");
+      if (payload.diagnostics) lines.push("", "<b>Диагностика</b>", "<pre>" + escapeHtml(typeof payload.diagnostics === "string" ? payload.diagnostics : JSON.stringify(payload.diagnostics, null, 2), 900) + "</pre>");
+      if (payload.viewport) field("Экран:", payload.viewport, 100);
+      if (payload.user_agent) field("Браузер:", payload.user_agent, 180);
+      footer("LORGUS · Аварийные сообщения");
+      break;
+    }
+
     case "rp_message_reverted":
       heading("↩️", "ЗАПИСЬ ИСКЛЮЧЕНА ИЗ ЛЕТОПИСИ", name);
       field("Запись:", "#" + clean(payload.message_id, 40));
