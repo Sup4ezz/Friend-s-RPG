@@ -304,8 +304,21 @@
         const button = event.target.closest?.("button, a");
         if (!button) return;
 
-        const path = button.getAttribute("data-route") ||
+        let path = button.getAttribute("data-route") ||
             routeForAction(button.getAttribute("onclick"));
+
+        // On phones, the four bottom direction buttons must route directly.
+        // Their inline handlers call the legacy cinematic transition wrapper;
+        // bypass it here so an interrupted animation can never blank the page.
+        if (!path &&
+            window.matchMedia("(max-width: 720px)").matches &&
+            button.classList.contains("lorgus-mainmenu-arrow") &&
+            button.closest(".lorgus-mainmenu-nav")) {
+            if (button.classList.contains("top")) path = "/character";
+            else if (button.classList.contains("bottom")) path = "/mail";
+            else if (button.classList.contains("left")) path = "/rp";
+            else if (button.classList.contains("right")) path = "/lorblook";
+        }
 
         if (!path || !window.activeCharacter) return;
 
