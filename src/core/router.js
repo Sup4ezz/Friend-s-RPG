@@ -200,6 +200,38 @@
         return typeof legacy === "function" ? { render: legacy } : null;
     }
 
+    function recoverMobileRouteSurface() {
+        if (!window.matchMedia("(max-width: 720px)").matches) return;
+        // Нижняя мобильная панель вызывает роутер напрямую, минуя анимацию стрелок.
+        // Снимаем оставшиеся блокировки переходов и возвращаем видимость игровому слою.
+        delete document.documentElement.dataset.lorgusTransition;
+        window.lorgusMainMenuNavigating = false;
+        document.querySelectorAll(
+            ".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, " +
+            ".lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay"
+        ).forEach(el => el.remove());
+
+        const root = document.getElementById("root");
+        const cabinet = root?.querySelector(".game-page");
+        const content = document.getElementById("cabinet-content");
+        [root, cabinet, content].filter(Boolean).forEach(el => {
+            el.style.setProperty("visibility", "visible", "important");
+            el.style.setProperty("opacity", "1", "important");
+            el.style.setProperty("filter", "none", "important");
+            el.style.setProperty("pointer-events", "auto", "important");
+        });
+        if (content) {
+            content.querySelectorAll(
+                ".lorgus-character-page, .lorgus-mail-page, .lorgus-codex-page, " +
+                ".lorgus-rp-page, .lorgus-rp-page-container"
+            ).forEach(el => {
+                el.style.setProperty("visibility", "visible", "important");
+                el.style.setProperty("opacity", "1", "important");
+                el.style.setProperty("filter", "none", "important");
+            });
+        }
+    }
+
     function renderPath(path, force = false) {
         path = applyCanonicalPath(path);
         if (!resolveRoute(path) || !canRender(path)) return false;
@@ -215,13 +247,23 @@
         lastRenderedPath = path;
 
         try {
+            recoverMobileRouteSurface();
             const result = page.render();
-            if (result && typeof result.catch === "function") {
-                result.catch(error => console.error("LORGUS router navigation error:", error));
+            if (result && typeof result.then === "function") {
+                result.then(() => {
+                    requestAnimationFrame(recoverMobileRouteSurface);
+                }).catch(error => {
+                    console.error("LORGUS router navigation error:", error);
+                    lastRenderedPath = null;
+                    recoverMobileRouteSurface();
+                });
+            } else {
+                requestAnimationFrame(recoverMobileRouteSurface);
             }
         } catch (error) {
             console.error("LORGUS router render error:", error);
             lastRenderedPath = null;
+            recoverMobileRouteSurface();
             return false;
         } finally {
             window.setTimeout(() => { navigating = false; }, 0);
