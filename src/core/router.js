@@ -299,26 +299,34 @@
     }
 
     function interceptGlobalNavigation(event) {
-        if (navigating) return;
-
         const button = event.target.closest?.("button, a");
         if (!button) return;
 
         let path = button.getAttribute("data-route") ||
             routeForAction(button.getAttribute("onclick"));
 
-        // On phones, the four bottom direction buttons must route directly.
-        // Their inline handlers call the legacy cinematic transition wrapper;
-        // bypass it here so an interrupted animation can never blank the page.
-        if (!path &&
-            window.matchMedia("(max-width: 720px)").matches &&
-            button.classList.contains("lorgus-mainmenu-arrow") &&
-            button.closest(".lorgus-mainmenu-nav")) {
-            if (button.classList.contains("top")) path = "/character";
-            else if (button.classList.contains("bottom")) path = "/mail";
-            else if (button.classList.contains("left")) path = "/rp";
-            else if (button.classList.contains("right")) path = "/lorblook";
+        // Mobile fallback: avoid the SPA/cinematic stack entirely for the four
+        // primary game destinations. A full route load lets bootCurrentRoute()
+        // restore the active character and render from a clean document.
+        if (window.matchMedia("(max-width: 720px)").matches) {
+            if (!path && button.classList.contains("lorgus-mainmenu-arrow") &&
+                button.closest(".lorgus-mainmenu-nav")) {
+                if (button.classList.contains("top")) path = "/character";
+                else if (button.classList.contains("bottom")) path = "/mail";
+                else if (button.classList.contains("left")) path = "/rp";
+                else if (button.classList.contains("right")) path = "/lorblook";
+            }
+
+            if (path && ["/map", "/main-page", "/character", "/mail", "/rp", "/lorblook"].includes(path)) {
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+                window.location.assign(path === "/map" ? "/main-page" : path);
+                return;
+            }
         }
+
+        if (navigating) return;
 
         if (!path || !window.activeCharacter) return;
 
