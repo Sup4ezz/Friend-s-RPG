@@ -240,9 +240,35 @@
         }
     }
 
+    function showMobileRouteFailure(path, reason, error) {
+        if (!window.matchMedia("(max-width: 720px)").matches) return;
+        let panel = document.getElementById("lorgus-mobile-route-failure");
+        if (!panel) {
+            panel = document.createElement("section");
+            panel.id = "lorgus-mobile-route-failure";
+            panel.setAttribute("role", "alert");
+            panel.style.cssText = "position:fixed;inset:0;z-index:2147483646;display:grid;place-content:center;gap:14px;padding:24px;background:#100e0b;color:#eee3ce;font:16px/1.55 Georgia,serif;text-align:center;overflow:auto";
+            panel.innerHTML = '<div style="color:#d7b66d;font-size:12px;letter-spacing:.16em">LORGUS · ВОССТАНОВЛЕНИЕ</div><h1 style="margin:0;color:#e0c47f;font-size:25px">Страница не загрузилась</h1><p data-lorgus-failure-reason style="margin:0 auto;max-width:440px"></p><pre data-lorgus-failure-details style="white-space:pre-wrap;overflow-wrap:anywhere;margin:0 auto;max-width:440px;color:#b9ad98;font:12px/1.5 monospace"></pre><div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap"><button type="button" data-lorgus-retry style="min-height:44px;padding:10px 18px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Перезагрузить</button><button type="button" data-lorgus-home style="min-height:44px;padding:10px 18px;background:#211b12;color:#e8d8b4;border:1px solid #65502b">На главную</button></div>';
+            panel.querySelector("[data-lorgus-retry]").addEventListener("click", () => window.location.reload());
+            panel.querySelector("[data-lorgus-home]").addEventListener("click", () => window.location.assign("/main-page"));
+            document.body.appendChild(panel);
+        }
+        panel.querySelector("[data-lorgus-failure-reason]").textContent = reason;
+        const details = [
+            "Маршрут: " + String(path || window.location.pathname),
+            "Контейнер: " + (document.getElementById("cabinet-content") ? "есть" : "отсутствует"),
+            "Персонаж восстановлен: " + (window.activeCharacter ? "да" : "нет"),
+            "Сохранённый ID: " + (sessionStorage.getItem("lorgus_active_character_id") || localStorage.getItem("lorgus_active_character_id") || "нет"),
+            error ? "Ошибка: " + String(error.message || error) : ""
+        ].filter(Boolean);
+        panel.querySelector("[data-lorgus-failure-details]").textContent = details.join("\n");
+    }
+
     function renderPath(path, force = false) {
         path = applyCanonicalPath(path);
-        if (!resolveRoute(path) || !canRender(path)) return false;
+        if (!resolveRoute(path)) return false;
+        if (!canRender(path)) return false;
+        document.getElementById("lorgus-mobile-route-failure")?.remove();
         if (!force && lastRenderedPath === path) return true;
 
         const page = resolvePage(path);
@@ -264,6 +290,7 @@
                     console.error("LORGUS router navigation error:", error);
                     lastRenderedPath = null;
                     recoverMobileRouteSurface();
+                    showMobileRouteFailure(path, "Ошибка во время отрисовки страницы.", error);
                 });
             } else {
                 requestAnimationFrame(recoverMobileRouteSurface);
@@ -272,6 +299,7 @@
             console.error("LORGUS router render error:", error);
             lastRenderedPath = null;
             recoverMobileRouteSurface();
+            showMobileRouteFailure(path, "Страница завершилась с ошибкой при отрисовке.", error);
             return false;
         } finally {
             window.setTimeout(() => { navigating = false; }, 0);
@@ -416,6 +444,7 @@
             if (attempts >= 150) {
                 window.clearInterval(bootTimer);
                 bootTimer = null;
+                showMobileRouteFailure(path, "Не удалось восстановить активного персонажа за 15 секунд. Это причина пустого экрана, а не проблема анимации.");
             }
         }, 100);
     }
