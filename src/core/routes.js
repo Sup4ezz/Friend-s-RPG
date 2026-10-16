@@ -1,6 +1,6 @@
 /* LORGUS canonical route manifest: every major screen has a stable URL. */
 window.LORGUS_ROUTES = Object.freeze({
-    "/main-page": { page: "character", render: "renderLorgusCharacterHub", title: "Главная" },
+    "/main-page": { page: "world", render: "renderLorgusWorldMapCurrent", title: "Главная" },
     "/ankets": { page: "applications", render: "renderCharacterApplicationForm", title: "Анкеты" },
     "/map": { page: "world", render: "renderLorgusWorldMapCurrent", title: "Карта" },
     "/lorblook": { page: "codex", render: "renderLorgusCodex", title: "Лорбук" },
