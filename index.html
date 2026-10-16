@@ -101,7 +101,32 @@
             const reveal = () => {
                 document.documentElement.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
                 document.body.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
-                document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil").forEach(el => el.remove());
+                delete document.documentElement.dataset.lorgusTransition;
+
+                // Stop container pseudo-elements from recreating a full-screen veil on mobile.
+                if (!document.getElementById("lorgus-character-mobile-reveal-style")) {
+                    const style = document.createElement("style");
+                    style.id = "lorgus-character-mobile-reveal-style";
+                    style.textContent = "html::before,html::after,body::before,body::after,#root::before,#root::after,.game-page::before,.game-page::after,#cabinet-content::before,#cabinet-content::after{content:none!important;display:none!important;animation:none!important;transition:none!important}";
+                    document.head.appendChild(style);
+                }
+
+                // Remove named transition layers plus any unknown fixed full-screen overlay
+                // that sits above the actual character page.
+                document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil, [class*='blackout'], [id*='blackout'], [class*='curtain'], [id*='curtain']").forEach(el => el.remove());
+                const page = document.querySelector("#cabinet-content " + target.selector);
+                document.querySelectorAll("body *").forEach(el => {
+                    if (el === page || el.contains(page) || page?.contains(el) ||
+                        el.id === "root" || el.id === "cabinet-content" ||
+                        el.id === "lorgus-global-utility" || el.id === "lorgus-mobile-emergency" ||
+                        el.matches(".lorgus-global-utility,.lorgus-mainmenu-nav,.lorgus-subpage-nav")) return;
+                    const style = getComputedStyle(el);
+                    const rect = el.getBoundingClientRect();
+                    const coversScreen = rect.width >= innerWidth * 0.8 && rect.height >= innerHeight * 0.8;
+                    const elevated = style.position === "fixed" || style.position === "absolute";
+                    const z = Number.parseInt(style.zIndex, 10);
+                    if (coversScreen && elevated && (Number.isNaN(z) || z >= 5)) el.remove();
+                });
                 const root = document.getElementById("root");
                 const cabinet = root && root.querySelector(".game-page");
                 const host = document.getElementById("cabinet-content");
