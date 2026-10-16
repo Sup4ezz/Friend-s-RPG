@@ -75,6 +75,93 @@
         }
     </script>
     <script>
+        // Independent mobile route recovery. This watchdog deliberately lives in index.html
+        // so it still runs when the SPA router or a page adapter fails.
+        (() => {
+            const path = (location.pathname.replace(/\\/+$/, "") || "/");
+            const targets = {
+                "/character": { selector: ".lorgus-character-page", render: "renderLorgusCharacterHub" },
+                "/mail": { selector: ".lorgus-mail-page", render: "renderMail" },
+                "/rp": { selector: ".lorgus-rp-page-container, .lorgus-rp-page, .lorgus-rp-hub", render: "renderLorgusRpHub" },
+                "/lorblook": { selector: ".lorgus-codex-page", render: "renderLorgusCodex" }
+            };
+            const target = targets[path];
+            if (!target || !matchMedia("(max-width: 720px)").matches) return;
+
+            const visiblePageExists = () => !!document.querySelector("#cabinet-content " + target.selector);
+            const reveal = () => {
+                document.documentElement.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
+                document.body.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
+                document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay").forEach(el => el.remove());
+                const root = document.getElementById("root");
+                const cabinet = root && root.querySelector(".game-page");
+                const host = document.getElementById("cabinet-content");
+                [root, cabinet, host].filter(Boolean).forEach(el => {
+                    el.style.setProperty("visibility", "visible", "important");
+                    el.style.setProperty("opacity", "1", "important");
+                    el.style.setProperty("display", "block", "important");
+                    el.style.setProperty("filter", "none", "important");
+                    el.style.setProperty("transform", "none", "important");
+                    el.style.setProperty("pointer-events", "auto", "important");
+                });
+                if (cabinet) {
+                    cabinet.classList.remove("preparing");
+                    cabinet.style.position = "relative";
+                    cabinet.style.inset = "auto";
+                    cabinet.style.zIndex = "1";
+                }
+            };
+
+            window.setTimeout(async () => {
+                if (visiblePageExists()) return;
+                reveal();
+
+                // First retry the registered renderer directly if player state is already available.
+                try {
+                    if (window.activeCharacter && typeof window[target.render] === "function" && document.getElementById("cabinet-content")) {
+                        await window[target.render]();
+                    }
+                } catch (error) {
+                    console.error("LORGUS mobile emergency renderer:", error);
+                }
+
+                if (visiblePageExists()) { reveal(); return; }
+
+                // If startup never restored the cabinet, request the auth session and restart
+                // the normal render path once instead of leaving a black screen indefinitely.
+                try {
+                    if (window.supabaseClient?.auth && typeof window.render === "function") {
+                        const result = await window.supabaseClient.auth.getSession();
+                        await window.render(result?.data?.session || null);
+                    }
+                } catch (error) {
+                    console.error("LORGUS mobile emergency startup retry:", error);
+                }
+
+                window.setTimeout(() => {
+                    if (visiblePageExists()) { reveal(); return; }
+                    reveal();
+                    if (document.getElementById("lorgus-mobile-emergency")) return;
+                    const panel = document.createElement("section");
+                    panel.id = "lorgus-mobile-emergency";
+                    panel.style.cssText = "position:fixed;inset:0;z-index:2147483647;display:grid;align-content:center;justify-items:center;gap:14px;padding:24px;overflow:auto;background:#100e0b;color:#eee3ce;font:16px/1.55 Georgia,serif;text-align:center";
+                    const host = document.getElementById("cabinet-content");
+                    const details = [
+                        "Раздел: " + path,
+                        "Кабинет: " + (host ? "создан" : "не создан"),
+                        "Персонаж: " + (window.activeCharacter ? "восстановлен" : "не восстановлен"),
+                        "Supabase: " + (window.supabaseClient ? "подключён" : "не подключён"),
+                        "Обработчик: " + (typeof window[target.render] === "function" ? "найден" : "не найден")
+                    ];
+                    panel.innerHTML = '<div style="color:#d7b66d;letter-spacing:.14em;font-size:12px">ЛОРГУС · АВАРИЙНОЕ ВОССТАНОВЛЕНИЕ</div><h1 style="margin:0;color:#e0c47f;font-size:24px">Раздел не открылся</h1><p style="max-width:440px;margin:0">Приложение автоматически повторило загрузку. Состояние системы ниже — экран больше не останется пустым.</p><pre style="max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;font:12px/1.6 monospace;color:#c7b99f"></pre><button type="button" style="min-height:48px;padding:12px 22px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Перезагрузить раздел</button>';
+                    panel.querySelector("pre").textContent = details.join("\n");
+                    panel.querySelector("button").addEventListener("click", () => location.reload());
+                    document.body.appendChild(panel);
+                }, 4000);
+            }, 5000);
+        })();
+    </script>
+    <script>
         // Last-resort mobile /map recovery. This runs independently of app.js.
         (() => {
             // На мобильных карта не используется; роутер сам перенаправляет /map на главную.
