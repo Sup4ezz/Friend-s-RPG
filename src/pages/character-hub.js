@@ -6,6 +6,14 @@ async function renderLorgusCharacterHub() {
     let container = document.getElementById("cabinet-content");
     let c = window.activeCharacter;
 
+    // Немедленно создаём распознаваемую оболочку страницы. На мобильном устройстве
+    // восстановление персонажа может задержаться; watchdog роутера не должен принять
+    // обычное ожидание за отказ рендера и перекрыть страницу аварийным экраном.
+    if (container && !container.querySelector(".lorgus-character-page")) {
+        container.className = "lorgus-character-page";
+        container.innerHTML = '<div class="lorgus-character-shell"><main style="max-width:560px;margin:10vh auto;padding:28px 22px;color:#e9dfca;background:#15110c;border:1px solid rgba(215,182,109,.35);font:16px/1.6 Georgia,serif"><h2 style="margin-top:0;color:#d7b66d">Открываем досье</h2><p>Восстанавливаем сведения о персонаже…</p></main></div>';
+    }
+
     // Мобильный холодный запуск может вызвать обработчик раньше, чем кабинет
     // завершит восстановление сессии. Ждём дольше аварийного таймера роутера,
     // чтобы не завершиться молча без DOM-элемента страницы.
