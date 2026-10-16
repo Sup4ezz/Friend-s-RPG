@@ -101,7 +101,7 @@
             const reveal = () => {
                 document.documentElement.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
                 document.body.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
-                document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay").forEach(el => el.remove());
+                document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil").forEach(el => el.remove());
                 const root = document.getElementById("root");
                 const cabinet = root && root.querySelector(".game-page");
                 const host = document.getElementById("cabinet-content");
