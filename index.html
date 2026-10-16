@@ -97,7 +97,15 @@
                 window.__lorgusEmergencyError = String(reason?.stack || reason?.message || reason || "Необработанная ошибка Promise");
             });
 
-            const visiblePageExists = () => !!document.querySelector("#cabinet-content " + target.selector);
+            // Некоторые рендереры назначают класс страницы самому #cabinet-content,
+            // а не его дочернему элементу. Учитываем оба варианта, иначе watchdog
+            // ошибочно показывает аварию даже после успешной отрисовки.
+            const getPageElement = () => {
+                const host = document.getElementById("cabinet-content");
+                if (!host) return null;
+                return host.matches(target.selector) ? host : host.querySelector(target.selector);
+            };
+            const visiblePageExists = () => !!getPageElement();
             const reveal = () => {
                 document.documentElement.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
                 document.body.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
@@ -114,7 +122,7 @@
                 // Remove named transition layers plus any unknown fixed full-screen overlay
                 // that sits above the actual character page.
                 document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil, [class*='blackout'], [id*='blackout'], [class*='curtain'], [id*='curtain']").forEach(el => el.remove());
-                const page = document.querySelector("#cabinet-content " + target.selector);
+                const page = getPageElement();
                 document.querySelectorAll("body *").forEach(el => {
                     if (el === page || el.contains(page) || page?.contains(el) ||
                         el.id === "root" || el.id === "cabinet-content" ||
@@ -190,7 +198,7 @@
                         "Персонаж: " + (window.activeCharacter ? "восстановлен" : "не восстановлен"),
                         "Supabase: " + (window.supabaseClient ? "подключён" : "не подключён"),
                         "Обработчик: " + (typeof window[target.render] === "function" ? "найден" : "не найден"),
-                        "Элемент раздела: " + (document.querySelector("#cabinet-content " + target.selector) ? "создан" : "не создан"),
+                        "Элемент раздела: " + (visiblePageExists() ? "создан" : "не создан"),
                         "Последняя ошибка: " + (window.__lorgusEmergencyError || "ошибка не перехвачена; возможен сбой внутри обработчика")
                     ];
                     panel.innerHTML = '<div style="color:#d7b66d;letter-spacing:.14em;font-size:12px">ЛОРГУС · АВАРИЙНОЕ ВОССТАНОВЛЕНИЕ</div><h1 style="margin:0;color:#e0c47f;font-size:24px">Раздел не открылся</h1><p style="max-width:440px;margin:0">Приложение не смогло открыть раздел. Можно отправить отчёт администратору или попробовать ещё раз.</p><pre style="max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;font:12px/1.6 monospace;color:#c7b99f"></pre><p data-report-result role="status" style="max-width:440px;margin:0;color:#d7b66d"></p><div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button type="button" data-send-report style="min-height:48px;padding:12px 22px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Отправить</button><button type="button" data-reload-page style="min-height:48px;padding:12px 22px;background:#211b12;color:#eee3ce;border:1px solid #66502c;font-weight:700">Перезагрузить</button></div>';
