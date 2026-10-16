@@ -132,8 +132,10 @@
                     const rect = el.getBoundingClientRect();
                     const coversScreen = rect.width >= innerWidth * 0.8 && rect.height >= innerHeight * 0.8;
                     const elevated = style.position === "fixed" || style.position === "absolute";
-                    const z = Number.parseInt(style.zIndex, 10);
-                    if (coversScreen && elevated && (Number.isNaN(z) || z >= 5)) el.remove();
+                    // On the direct character route, even low-z fullscreen layers can
+                    // dim the whole page. The page and its ancestors were excluded above,
+                    // so remove any remaining fullscreen fixed/absolute sibling layer.
+                    if (coversScreen && elevated) el.remove();
                 });
                 const root = document.getElementById("root");
                 const cabinet = root && root.querySelector(".game-page");
