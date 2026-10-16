@@ -911,7 +911,7 @@
     background: #080705 !important;
   }
   .lorgus-map-page::before {
-    content: "L O R G U S\\A\\AМИР ЖДЁТ ТВОЕГО ПУТИ\\A\\A✦";
+    content: "";
     white-space: pre;
     position: fixed !important;
     inset: 0 !important;
