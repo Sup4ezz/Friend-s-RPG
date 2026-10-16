@@ -137,6 +137,7 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
     } else if (isAdmin) {
         window.lorgusIsAdmin = true;
         await window.loadAdminPanel(container);
+        window.attachLorgusClientErrorReports?.();
         return;
     }
 
