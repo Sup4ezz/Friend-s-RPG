@@ -161,6 +161,15 @@
                 }
             };
 
+            // A transition can be re-created asynchronously by the router/auth lifecycle
+            // after the first reveal pass. Repeat recovery briefly during direct mobile loads.
+            // This watchdog is scoped to /character and stops after the startup window.
+            [1200, 2800, 5200, 9000].forEach(delay => {
+                window.setTimeout(() => {
+                    if (location.pathname.replace(/\\/+$/, "") === "/character") reveal();
+                }, delay);
+            });
+
             window.setTimeout(async () => {
                 // Always remove stale transition veils first, even when the page content
                 // exists underneath them. Otherwise mobile can remain covered forever.
