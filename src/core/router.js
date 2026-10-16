@@ -205,7 +205,15 @@
         // Нижняя мобильная панель вызывает роутер напрямую, минуя анимацию стрелок.
         // Снимаем оставшиеся блокировки переходов и возвращаем видимость игровому слою.
         delete document.documentElement.dataset.lorgusTransition;
+        document.documentElement.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
+        document.body?.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
         window.lorgusMainMenuNavigating = false;
+        window.lorgusPortalEntering = false;
+        window.lorgusPortalDepartureAligning = false;
+        if (window.lorgusPortalOverlay) {
+            window.lorgusPortalOverlay.remove?.();
+            window.lorgusPortalOverlay = null;
+        }
         document.querySelectorAll(
             ".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, " +
             ".lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay"
