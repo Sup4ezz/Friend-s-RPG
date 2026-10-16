@@ -932,6 +932,127 @@
       radial-gradient(ellipse at 50% 100%, rgba(87,57,25,.12), transparent 42%),
       linear-gradient(180deg, #0d0a07 0%, #080705 60%, #050504 100%) !important;
   }
+  .lorgus-map-page .lorgus-mobile-home {
+    position: fixed !important;
+    inset: 7dvh 18px 104px !important;
+    z-index: 5 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: clamp(16px, 3.5dvh, 28px) !important;
+    box-sizing: border-box !important;
+    padding: 18px 10px !important;
+    overflow-y: auto !important;
+    color: #e8dcc1 !important;
+    text-align: center !important;
+    background: transparent !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-heading {
+    width: 100% !important;
+    max-width: 420px !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-eyebrow,
+  .lorgus-map-page .lorgus-mobile-home-label {
+    display: block !important;
+    color: #b9a16e !important;
+    font: 600 10px/1.5 Georgia, serif !important;
+    letter-spacing: .22em !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-heading h1 {
+    margin: 8px 0 10px !important;
+    color: #e7d3a3 !important;
+    font: 500 clamp(38px, 11vw, 58px)/1 Georgia, "Times New Roman", serif !important;
+    letter-spacing: .20em !important;
+    text-indent: .20em !important;
+    text-shadow: 0 2px 24px rgba(196,150,73,.22) !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-heading p {
+    max-width: 320px !important;
+    margin: 0 auto !important;
+    color: rgba(225,214,190,.76) !important;
+    font: 14px/1.65 Georgia, serif !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-character {
+    width: min(100%, 360px) !important;
+    box-sizing: border-box !important;
+    padding: 17px 16px 14px !important;
+    border-top: 1px solid rgba(190,157,91,.42) !important;
+    border-bottom: 1px solid rgba(190,157,91,.28) !important;
+    background: linear-gradient(90deg, transparent, rgba(91,67,35,.16) 18%, rgba(91,67,35,.16) 82%, transparent) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-character > strong {
+    color: #f0e5ce !important;
+    font: 500 23px/1.25 Georgia, serif !important;
+    overflow-wrap: anywhere !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-character > span:not(.lorgus-mobile-home-label) {
+    color: rgba(225,214,190,.72) !important;
+    font: 12px/1.5 Georgia, serif !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-character i {
+    color: #b9a16e !important;
+    font-style: normal !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-location {
+    margin-top: 8px !important;
+    display: grid !important;
+    grid-template-columns: 7px auto !important;
+    align-items: center !important;
+    justify-content: center !important;
+    column-gap: 7px !important;
+    row-gap: 3px !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-status-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    background: #8b9a68 !important;
+    box-shadow: 0 0 9px rgba(139,154,104,.45) !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-location > span:nth-child(2) {
+    color: #b9a16e !important;
+    font: 600 9px/1.4 Georgia, serif !important;
+    letter-spacing: .12em !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-location b {
+    grid-column: 1 / -1 !important;
+    color: #e8dcc1 !important;
+    font: 14px/1.5 Georgia, serif !important;
+    font-weight: 500 !important;
+    overflow-wrap: anywhere !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-facts {
+    width: min(100%, 360px) !important;
+    display: grid !important;
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 8px !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-facts > div {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 5px !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-facts strong {
+    color: #d9c18d !important;
+    font: 400 25px/1 Georgia, serif !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-facts span {
+    max-width: 100px !important;
+    color: rgba(225,214,190,.65) !important;
+    font: 8px/1.5 Georgia, serif !important;
+    letter-spacing: .08em !important;
+  }
+  .lorgus-map-page .lorgus-mobile-home-hint {
+    margin: 0 !important;
+    color: rgba(225,214,190,.48) !important;
+    font: italic 12px/1.5 Georgia, serif !important;
+  }
   .lorgus-map-page .lorgus-mainmenu-nav {
     position: fixed !important;
     inset: auto 0 0 !important;
