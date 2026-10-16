@@ -121,7 +121,7 @@
 
                 // Remove named transition layers plus any unknown fixed full-screen overlay
                 // that sits above the actual character page.
-                document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil, [class*='blackout'], [id*='blackout'], [class*='curtain'], [id*='curtain']").forEach(el => el.remove());
+                document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-cinematic-auth, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-portal-transition-veil, .lorgus-portal-transition-core, .lorgus-portal-transition-ring, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil, [class*='blackout'], [id*='blackout'], [class*='curtain'], [id*='curtain']").forEach(el => el.remove());
                 const page = getPageElement();
                 document.querySelectorAll("body *").forEach(el => {
                     if (el === page || el.contains(page) || page?.contains(el) ||
@@ -138,13 +138,14 @@
                 const root = document.getElementById("root");
                 const cabinet = root && root.querySelector(".game-page");
                 const host = document.getElementById("cabinet-content");
-                [root, cabinet, host].filter(Boolean).forEach(el => {
+                [document.documentElement, document.body, root, cabinet, host].filter(Boolean).forEach(el => {
                     el.style.setProperty("visibility", "visible", "important");
                     el.style.setProperty("opacity", "1", "important");
                     el.style.setProperty("display", "block", "important");
                     el.style.setProperty("filter", "none", "important");
                     el.style.setProperty("transform", "none", "important");
                     el.style.setProperty("pointer-events", "auto", "important");
+                    el.style.setProperty("mix-blend-mode", "normal", "important");
                 });
                 if (cabinet) {
                     cabinet.classList.remove("preparing");
