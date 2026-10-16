@@ -23,14 +23,30 @@ async function renderLorgusCharacterHub() {
         return;
     }
 
-    const esc = value => window.escapeHtml ? window.escapeHtml(value ?? "") : String(value ?? "");
+    const esc = value => {
+        try {
+            return window.escapeHtml ? window.escapeHtml(value ?? "") : String(value ?? "");
+        } catch (error) {
+            console.error("LORGUS character page: ошибка экранирования текста:", error);
+            return String(value ?? "").replace(/[&<>"']/g, char => ({
+                "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+            })[char]);
+        }
+    };
     const name = esc(c.name || "Без имени");
     const race = esc(c.race || "Раса не указана");
     const homeland = esc(c.homeland || "Родина не указана");
     const occupation = esc(c.occupation || "Не указано");
     const status = String(c.status || "ACTIVE").toUpperCase();
     const statusLabel = status === "ACTIVE" ? "АКТИВЕН" : status;
-    const titleMarkup = window.renderTitleBadge?.(window.activeTitle, "lorgus-profile-title") || '<strong class="lorgus-character-no-title">Без титула</strong>';
+    let titleMarkup = '<strong class="lorgus-character-no-title">Без титула</strong>';
+    try {
+        titleMarkup = window.renderTitleBadge?.(window.activeTitle, "lorgus-profile-title") || titleMarkup;
+    } catch (error) {
+        // A broken title badge must never prevent the entire character page from rendering.
+        window.__lorgusEmergencyError = "renderTitleBadge: " + String(error?.stack || error?.message || error);
+        console.error("LORGUS character page: не удалось отрисовать титул:", error);
+    }
     const story = (label, value, empty) => `
         <article class="lorgus-character-story-card">
             <span class="lorgus-character-card-kicker">${label}</span>
