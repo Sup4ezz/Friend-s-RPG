@@ -154,7 +154,7 @@
 
                 // First retry the registered renderer directly if player state is already available.
                 try {
-                    if (window.activeCharacter && typeof window[target.render] === "function" && document.getElementById("cabinet-content")) {
+                    if (typeof window[target.render] === "function" && document.getElementById("cabinet-content")) {
                         await window[target.render]();
                     }
                 } catch (error) {
