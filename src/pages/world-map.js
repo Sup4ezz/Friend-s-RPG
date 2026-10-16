@@ -740,6 +740,20 @@ window.lorgusSubpageTransition = function(direction, renderTarget) {
         window.lorgusMainMenuNavigating = false;
     };
 
+    // На мобильных View Transition вместе с CSS-отключением снимков сцены
+    // мог скрыть и старый, и новый экран, оставляя чёрную страницу.
+    // На телефонах рендерим целевую страницу напрямую — без скрывающего слоя.
+    if (window.matchMedia("(max-width: 720px)").matches) {
+        try {
+            renderTarget();
+        } catch (error) {
+            console.error("[LORGUS] Не удалось открыть мобильный экран:", error);
+        } finally {
+            finish();
+        }
+        return;
+    }
+
     window.lorgusMainMenuNavigating = true;
     document.documentElement.dataset.lorgusTransition = direction;
 
