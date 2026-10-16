@@ -310,6 +310,8 @@
         // Некоторые старые адаптеры могут завершиться без ошибки, ничего не отрисовав.
         if (window.matchMedia("(max-width: 720px)").matches &&
             ["/character", "/mail", "/rp", "/lorblook"].includes(path)) {
+            // Allow async character/session restoration to finish on a cold mobile load.
+            // The character renderer may wait up to 7s for the cabinet and active character.
             window.setTimeout(() => {
                 if (normalizePath() !== path) return;
                 const host = document.getElementById("cabinet-content");
@@ -348,7 +350,7 @@
                         );
                     }
                 }, 1200);
-            }, 700);
+            }, 8500);
         }
 
         return true;
