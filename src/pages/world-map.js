@@ -722,12 +722,12 @@ function showLorgusMapEditorMode(container) {
 window.lorgusSubpageTransition = function(direction, renderTarget) {
     if (typeof renderTarget !== "function") return;
 
-    // Не оставляем навигацию заблокированной после неудачной/прерванной
-    // анимации. Кнопка всегда должна иметь возможность открыть сцену.
-    if (window.lorgusMainMenuNavigating && !document.documentElement.dataset.lorgusTransition) {
-        window.lorgusMainMenuNavigating = false;
-    }
-    if (window.lorgusMainMenuNavigating) return;
+    // Не позволяем зависшему/оборванному переходу блокировать все следующие
+    // нажатия. Сначала снимаем старую блокировку, затем выполняем новый переход.
+    // Особенно важно для Firefox и мобильных браузеров, где View Transition
+    // может не завершиться после смены вкладки или прерывания анимации.
+    window.lorgusMainMenuNavigating = false;
+    delete document.documentElement.dataset.lorgusTransition;
 
     const container = document.getElementById("cabinet-content");
     if (!container) {
