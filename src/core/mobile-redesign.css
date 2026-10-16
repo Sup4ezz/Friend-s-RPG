@@ -902,3 +902,47 @@
   .lorgus-map-page #lorgus-map-world { position:absolute !important; inset:0 !important; width:100% !important; height:100% !important; }
   .lorgus-map-page .lorgus-map-image { display:block !important; width:100% !important; height:100% !important; min-height:0 !important; object-fit:contain !important; }
 }
+
+
+/* Mobile main menu: keep a visible scene when the map canvas is hidden. */
+@media (max-width: 720px) {
+  .lorgus-map-page {
+    isolation: isolate !important;
+    background: #080705 !important;
+  }
+  .lorgus-map-page::before {
+    content: "L O R G U S\\A\\AМИР ЖДЁТ ТВОЕГО ПУТИ\\A\\A✦";
+    white-space: pre;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px 16px 100px !important;
+    box-sizing: border-box !important;
+    pointer-events: none !important;
+    text-align: center !important;
+    color: #d7b66d !important;
+    font: 500 12px/2.2 Georgia, "Times New Roman", serif !important;
+    letter-spacing: .22em !important;
+    text-shadow: 0 0 24px rgba(215,182,109,.24) !important;
+    background:
+      radial-gradient(ellipse at 50% 43%, rgba(120,83,35,.18) 0%, rgba(48,33,17,.09) 24%, transparent 55%),
+      radial-gradient(ellipse at 50% 100%, rgba(87,57,25,.12), transparent 42%),
+      linear-gradient(180deg, #0d0a07 0%, #080705 60%, #050504 100%) !important;
+  }
+  .lorgus-map-page .lorgus-mainmenu-nav {
+    position: fixed !important;
+    inset: auto 0 0 !important;
+    z-index: 1000 !important;
+    display: grid !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  .lorgus-map-page .lorgus-mainmenu-arrow {
+    visibility: visible !important;
+    opacity: 1 !important;
+    color: #d7c8a6 !important;
+  }
+}
