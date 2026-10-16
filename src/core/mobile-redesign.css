@@ -894,7 +894,7 @@
 /* Mobile emergency: the map frame inherited 100% heights from a zero-height parent. */
 @media (max-width: 720px) {
   .lorgus-map-page { height:auto !important; min-height:100dvh !important; overflow:visible !important; }
-  .lorgus-map-page .lorgus-map-shell { display:block !important; height:auto !important; min-height:100dvh !important; overflow:visible !important; }
+  .lorgus-map-page .lorgus-map-shell { display:none !important; height:0 !important; min-height:0 !important; overflow:hidden !important; }
   .lorgus-map-page .lorgus-map-main { display:block !important; height:auto !important; min-height:100dvh !important; overflow:visible !important; }
   .lorgus-map-page .lorgus-map-stage { display:block !important; height:auto !important; min-height:0 !important; }
   .lorgus-map-page .lorgus-map-frame { display:block !important; position:relative !important; height:70dvh !important; min-height:420px !important; max-height:none !important; overflow:hidden !important; }
