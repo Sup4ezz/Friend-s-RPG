@@ -409,15 +409,14 @@ async function initializeLorgusGlobalOnlineStats() {
     const client = window.supabaseClient;
     if (!client) return;
 
-    const paint = (online, inRp) => {
-        const totalEl = document.getElementById("lorgus-online-total");
+    const paint = (online, activeCharacters, totalApplications) => {
+        const onlineEl = document.getElementById("lorgus-online-total");
         const rpEl = document.getElementById("lorgus-online-rp");
-        const awayEl = document.getElementById("lorgus-online-away");
-        if (!totalEl || !rpEl || !awayEl) return;
-        const rpCount = Math.min(online, inRp);
-        totalEl.textContent = String(online);
-        rpEl.textContent = String(rpCount);
-        awayEl.textContent = String(Math.max(0, online - rpCount));
+        const applicationsEl = document.getElementById("lorgus-online-away");
+        if (!onlineEl || !rpEl || !applicationsEl) return;
+        onlineEl.textContent = String(online);
+        rpEl.textContent = String(activeCharacters);
+        applicationsEl.textContent = String(totalApplications);
     };
 
     const refresh = async () => {
@@ -427,18 +426,25 @@ async function initializeLorgusGlobalOnlineStats() {
         const onlineIds = new Set(Object.keys(state).map(String));
         try {
             const cutoff = new Date(Date.now() - 90000).toISOString();
-            const { data, error } = await client
-                .from("rp_presence")
-                .select("player_id, updated_at")
-                .eq("visibility", "public")
-                .gte("updated_at", cutoff);
+            const [{ data, error }, { count: applicationsCount, error: applicationsError }] = await Promise.all([
+                client
+                    .from("rp_presence")
+                    .select("player_id, character_id, updated_at")
+                    .eq("visibility", "public")
+                    .gte("updated_at", cutoff),
+                client
+                    .from("characters")
+                    .select("id", { count: "exact", head: true })
+            ]);
             if (error) throw error;
-            const activeInRp = new Set(
+            if (applicationsError) throw applicationsError;
+            const activeCharacters = new Set(
                 (data || [])
-                    .map(row => String(row.player_id || ""))
-                    .filter(id => id && onlineIds.has(id))
+                    .filter(row => onlineIds.has(String(row.player_id || "")))
+                    .map(row => String(row.character_id || ""))
+                    .filter(Boolean)
             );
-            paint(onlineIds.size, activeInRp.size);
+            paint(onlineIds.size, activeCharacters.size, applicationsCount || 0);
         } catch (error) {
             console.warn("[LORGUS] Не удалось обновить счётчики онлайна:", error);
             const totalEl = document.getElementById("lorgus-online-total");
@@ -531,9 +537,9 @@ function renderLorgusWorldMap(container, character) {
                 </div>
             </section>
             <section class="lorgus-mobile-home-facts" aria-label="Активность игроков">
-                <div><strong id="lorgus-online-total">—</strong><span>ОНЛАЙН</span></div>
-                <div><strong id="lorgus-online-rp">—</strong><span>В РОЛЕВОЙ</span></div>
-                <div><strong id="lorgus-online-away">—</strong><span>ВНЕ РОЛЕВОЙ</span></div>
+                <div><strong id="lorgus-online-away">—</strong><span>АНКЕТЫ В МИРЕ</span></div>
+                <div><strong id="lorgus-online-total">—</strong><span>СЕЙЧАС ОНЛАЙН</span></div>
+                <div><strong id="lorgus-online-rp">—</strong><span>АКТИВНЫЕ ПЕРСОНАЖИ</span></div>
             </section>
             <p class="lorgus-mobile-home-hint">Выберите направление, чтобы продолжить свой путь.</p>
         </main>
