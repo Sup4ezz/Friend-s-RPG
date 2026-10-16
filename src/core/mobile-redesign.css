@@ -1067,3 +1067,36 @@
     color: #d7c8a6 !important;
   }
 }
+
+
+/* Mobile subpage recovery: never leave SPA content hidden behind a transition snapshot. */
+@media (max-width: 720px) {
+  #root, #cabinet-content {
+    display: block !important;
+    position: relative !important;
+    min-height: 100dvh !important;
+    height: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    overflow: visible !important;
+    background: #080705 !important;
+  }
+  .lorgus-character-page,
+  .lorgus-mail-page,
+  .lorgus-codex-page,
+  .lorgus-subpage-container,
+  .lorgus-rp-page-container {
+    display: block !important;
+    position: relative !important;
+    min-height: 100dvh !important;
+    height: auto !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+    overflow: visible !important;
+    background-color: #080705 !important;
+  }
+}
