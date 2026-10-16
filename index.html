@@ -124,7 +124,11 @@
                 document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-cinematic-auth, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-portal-transition-veil, .lorgus-portal-transition-core, .lorgus-portal-transition-ring, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil, [class*='blackout'], [id*='blackout'], [class*='curtain'], [id*='curtain']").forEach(el => el.remove());
                 const page = getPageElement();
                 document.querySelectorAll("body *").forEach(el => {
-                    if (el === page || el.contains(page) || page?.contains(el) ||
+                    // Do not skip page descendants wholesale: on this route the page can
+                    // itself be #cabinet-content, which would otherwise exempt every veil
+                    // nested inside it from detection. Full-screen positioned descendants
+                    // are checked below and removed if they cover the page.
+                    if (el === page || el.contains(page) ||
                         el.id === "root" || el.id === "cabinet-content" ||
                         el.id === "lorgus-global-utility" || el.id === "lorgus-mobile-emergency" ||
                         el.matches(".lorgus-global-utility,.lorgus-mainmenu-nav,.lorgus-subpage-nav")) return;
