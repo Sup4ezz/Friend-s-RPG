@@ -109,7 +109,7 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
             window.setTimeout(() => {
                 const host = document.getElementById("cabinet-content");
                 if (!cabinet.isConnected || !host || host.children.length || !window.activeCharacter) return;
-                const path = window.location.pathname.replace(/\\/+$/, "") || "/";
+                const path = window.location.pathname.replace(/\/+$/, "") || "/";
                 const renderers = {
                     "/character": window.renderLorgusCharacterHub,
                     "/mail": window.renderMail,
