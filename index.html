@@ -161,14 +161,41 @@
                 }
             };
 
-            // A transition can be re-created asynchronously by the router/auth lifecycle
-            // after the first reveal pass. Repeat recovery briefly during direct mobile loads.
-            // This watchdog is scoped to /character and stops after the startup window.
-            [1200, 2800, 5200, 9000].forEach(delay => {
+            // Recover after late transitions, and also catch a veil recreated after startup.
+            [700, 1400, 2400, 4000, 6500, 9000, 14000, 22000, 30000].forEach(delay => {
                 window.setTimeout(() => {
                     if (location.pathname.replace(/\/+$/, "") === "/character") reveal();
                 }, delay);
             });
+
+            // Some transition code inserts its overlay after the first cleanup. Watch only
+            // newly inserted nodes; ordinary page updates must not repeatedly rewrite the UI.
+            const veilSelector = ".lorgus-portal-transition,.lorgus-eye-transition,.lorgus-cinematic-auth," +
+                ".lorgus-region-transition-veil,.lorgus-transition-screen,.lorgus-scene-transition-overlay," +
+                ".lorgus-transition-overlay,.lorgus-portal-transition-veil,.lorgus-portal-transition-core," +
+                ".lorgus-portal-transition-ring,.lorgus-veil,.lorgus-transition-veil,.lorgus-scene-veil," +
+                ".lorgus-loading-veil,.lorgus-mobile-veil,[class*='blackout'],[id*='blackout']," +
+                "[class*='curtain'],[id*='curtain']";
+            const isNewVeil = node => {
+                if (!(node instanceof Element)) return false;
+                if (node.matches(veilSelector) || node.querySelector(veilSelector)) return true;
+                if (node.matches("#root,.game-page,#cabinet-content,#lorgus-global-utility,.lorgus-mainmenu-nav,.lorgus-subpage-nav")) return false;
+                const css = getComputedStyle(node);
+                const rect = node.getBoundingClientRect();
+                return (css.position === "fixed" || css.position === "absolute") &&
+                    rect.width >= innerWidth * 0.8 && rect.height >= innerHeight * 0.8 &&
+                    !node.contains(getPageElement());
+            };
+            const veilObserver = new MutationObserver(records => {
+                if (location.pathname.replace(/\/+$/, "") !== "/character") {
+                    veilObserver.disconnect();
+                    return;
+                }
+                if (records.some(record => Array.from(record.addedNodes).some(isNewVeil))) {
+                    reveal();
+                }
+            });
+            veilObserver.observe(document.body, { childList: true, subtree: true });
 
             window.setTimeout(async () => {
                 // Always remove stale transition veils first, even when the page content
