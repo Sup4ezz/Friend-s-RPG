@@ -337,8 +337,7 @@
         // primary game destinations. A full route load lets bootCurrentRoute()
         // restore the active character and render from a clean document.
         if (window.matchMedia("(max-width: 720px)").matches) {
-            if (!path && button.classList.contains("lorgus-mainmenu-arrow") &&
-                button.closest(".lorgus-mainmenu-nav")) {
+            if (!path && button.classList.contains("lorgus-mainmenu-arrow")) {
                 if (button.classList.contains("top")) path = "/character";
                 else if (button.classList.contains("bottom")) path = "/mail";
                 else if (button.classList.contains("left")) path = "/rp";
