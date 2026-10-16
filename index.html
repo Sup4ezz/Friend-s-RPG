@@ -166,7 +166,7 @@
             // This watchdog is scoped to /character and stops after the startup window.
             [1200, 2800, 5200, 9000].forEach(delay => {
                 window.setTimeout(() => {
-                    if (location.pathname.replace(/\\/+$/, "") === "/character") reveal();
+                    if (location.pathname.replace(/\/+$/, "") === "/character") reveal();
                 }, delay);
             });
 
