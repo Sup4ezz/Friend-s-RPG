@@ -122,8 +122,10 @@
             };
 
             window.setTimeout(async () => {
-                if (visiblePageExists()) return;
+                // Always remove stale transition veils first, even when the page content
+                // exists underneath them. Otherwise mobile can remain covered forever.
                 reveal();
+                if (visiblePageExists()) return;
 
                 // First retry the registered renderer directly if player state is already available.
                 try {
