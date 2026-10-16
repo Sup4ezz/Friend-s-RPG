@@ -274,6 +274,7 @@
         const page = resolvePage(path);
         if (!page) {
             console.warn("LORGUS router: page not found:", path);
+            showMobileRouteFailure(path, "Роутер не нашёл обработчик этой страницы. Это ошибка загрузки приложения, а не проблема персонажа.");
             return false;
         }
 
@@ -303,6 +304,51 @@
             return false;
         } finally {
             window.setTimeout(() => { navigating = false; }, 0);
+        }
+
+        // На мобильном устройстве проверяем, что маршрут действительно создал экран.
+        // Некоторые старые адаптеры могут завершиться без ошибки, ничего не отрисовав.
+        if (window.matchMedia("(max-width: 720px)").matches &&
+            ["/character", "/mail", "/rp", "/lorblook"].includes(path)) {
+            window.setTimeout(() => {
+                if (normalizePath() !== path) return;
+                const host = document.getElementById("cabinet-content");
+                const pageSelectors = {
+                    "/character": ".lorgus-character-page .lorgus-character-shell",
+                    "/mail": ".lorgus-mail-page .lorgus-mail-shell",
+                    "/rp": ".lorgus-rp-page, .lorgus-rp-page-container, .lorgus-rp-hub",
+                    "/lorblook": ".lorgus-codex-page"
+                };
+                const rendered = host && host.querySelector(pageSelectors[path]);
+                if (rendered) {
+                    recoverMobileRouteSurface();
+                    return;
+                }
+                const route = resolveRoute(path);
+                const directRenderer = route && window[route.render];
+                if (typeof directRenderer === "function" && window.activeCharacter) {
+                    try {
+                        const result = directRenderer();
+                        if (result && typeof result.catch === "function") {
+                            result.catch(error => showMobileRouteFailure(path, "Повторная отрисовка страницы завершилась ошибкой.", error));
+                        }
+                    } catch (error) {
+                        showMobileRouteFailure(path, "Повторная отрисовка страницы завершилась ошибкой.", error);
+                    }
+                }
+                window.setTimeout(() => {
+                    if (normalizePath() !== path) return;
+                    const latestHost = document.getElementById("cabinet-content");
+                    const latestRendered = latestHost && latestHost.querySelector(pageSelectors[path]);
+                    if (!latestRendered) {
+                        showMobileRouteFailure(
+                            path,
+                            "Скрипты открылись, но содержимое раздела не появилось. Ниже — состояние приложения для точного исправления.",
+                            null
+                        );
+                    }
+                }, 1200);
+            }, 700);
         }
 
         return true;

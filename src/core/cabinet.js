@@ -70,13 +70,7 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
         }
     }
 
-    // Не отменяем страховочный экран, пока реальный экран не появился в DOM.
-    // При прямом открытии /character, /mail, /rp или /lorblook загрузка персонажа
-    // может завершиться раньше, чем роутер успеет отрисовать страницу.
-    const loadedContent = document.getElementById("cabinet-content");
-    if (loadedContent?.children.length) {
-        window.clearTimeout(mobileRecoveryTimer);
-    }
+    window.clearTimeout(mobileRecoveryTimer);
 
     // Админская панель — самостоятельный экран. Не заменяем её SPA-маршрутом
     // персонажа, если у администратора сохранён активный персонаж.
@@ -102,33 +96,6 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
         window.lorgusRouter.currentPath !== "/"
     ) {
         window.lorgusRouter.bootCurrentRoute();
-
-        // Last-resort retry for mobile direct routes. If the router boot timer
-        // was started before character restoration, it can leave an empty host.
-        if (window.matchMedia("(max-width: 720px)").matches) {
-            window.setTimeout(() => {
-                const host = document.getElementById("cabinet-content");
-                if (!cabinet.isConnected || !host || host.children.length || !window.activeCharacter) return;
-                const path = window.location.pathname.replace(/\/+$/, "") || "/";
-                const renderers = {
-                    "/character": window.renderLorgusCharacterHub,
-                    "/mail": window.renderMail,
-                    "/rp": window.renderLorgusRpHub,
-                    "/lorblook": window.renderLorgusCodex
-                };
-                const renderer = renderers[path];
-                if (typeof renderer === "function") {
-                    try {
-                        const result = renderer();
-                        if (result && typeof result.catch === "function") {
-                            result.catch(error => console.error("[LORGUS] Повторная отрисовка маршрута не удалась:", error));
-                        }
-                    } catch (error) {
-                        console.error("[LORGUS] Повторная отрисовка маршрута не удалась:", error);
-                    }
-                }
-            }, 900);
-        }
     }
 
     if (previousScene && previousScene.parentNode === root) {
