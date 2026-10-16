@@ -58,7 +58,7 @@
     <script src="/src/pages/inventory.js?v=2"></script>
     <script src="/src/pages/inventory-page.js?v=16"></script>
     <script src="/src/admin/rp-management.js?v=11"></script>
-    <script src="/src/admin/applications.js?v=11"></script>
+    <script src="/src/admin/applications.js?v=12"></script>
     <script src="/src/admin/lore-tree.js?v=11"></script>
     <script src="/src/admin/lore-editor.js?v=2"></script>
     <script src="/src/admin/character-tools.js?v=3"></script>
@@ -87,6 +87,15 @@
             };
             const target = targets[path];
             if (!target || !matchMedia("(max-width: 720px)").matches) return;
+
+            // Keep the original browser exception so the player can send it to the admin.
+            window.addEventListener("error", event => {
+                window.__lorgusEmergencyError = String(event.error?.stack || event.message || "Неизвестная ошибка JavaScript");
+            });
+            window.addEventListener("unhandledrejection", event => {
+                const reason = event.reason;
+                window.__lorgusEmergencyError = String(reason?.stack || reason?.message || reason || "Необработанная ошибка Promise");
+            });
 
             const visiblePageExists = () => !!document.querySelector("#cabinet-content " + target.selector);
             const reveal = () => {
@@ -157,9 +166,54 @@
                         "Элемент раздела: " + (document.querySelector("#cabinet-content " + target.selector) ? "создан" : "не создан"),
                         "Последняя ошибка: " + (window.__lorgusEmergencyError || "ошибка не перехвачена; возможен сбой внутри обработчика")
                     ];
-                    panel.innerHTML = '<div style="color:#d7b66d;letter-spacing:.14em;font-size:12px">ЛОРГУС · АВАРИЙНОЕ ВОССТАНОВЛЕНИЕ</div><h1 style="margin:0;color:#e0c47f;font-size:24px">Раздел не открылся</h1><p style="max-width:440px;margin:0">Приложение автоматически повторило загрузку. Состояние системы ниже — экран больше не останется пустым.</p><pre style="max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;font:12px/1.6 monospace;color:#c7b99f"></pre><button type="button" style="min-height:48px;padding:12px 22px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Перезагрузить раздел</button>';
+                    panel.innerHTML = '<div style="color:#d7b66d;letter-spacing:.14em;font-size:12px">ЛОРГУС · АВАРИЙНОЕ ВОССТАНОВЛЕНИЕ</div><h1 style="margin:0;color:#e0c47f;font-size:24px">Раздел не открылся</h1><p style="max-width:440px;margin:0">Приложение не смогло открыть раздел. Можно отправить отчёт администратору или попробовать ещё раз.</p><pre style="max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;font:12px/1.6 monospace;color:#c7b99f"></pre><p data-report-result role="status" style="max-width:440px;margin:0;color:#d7b66d"></p><div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center"><button type="button" data-send-report style="min-height:48px;padding:12px 22px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Отправить</button><button type="button" data-reload-page style="min-height:48px;padding:12px 22px;background:#211b12;color:#eee3ce;border:1px solid #66502c;font-weight:700">Перезагрузить</button></div>';
                     panel.querySelector("pre").textContent = details.join("\n");
-                    panel.querySelector("button").addEventListener("click", () => location.reload());
+                    panel.querySelector("[data-reload-page]").addEventListener("click", () => location.reload());
+                    panel.querySelector("[data-send-report]").addEventListener("click", async event => {
+                        const button = event.currentTarget;
+                        const resultLine = panel.querySelector("[data-report-result]");
+                        button.disabled = true;
+                        button.textContent = "Отправляем…";
+                        resultLine.textContent = "";
+                        try {
+                            const client = window.supabaseClient;
+                            if (!client?.auth || !client?.from) throw new Error("Нет подключения к службе отправки отчётов. Перезагрузи страницу и попробуй снова.");
+                            const auth = await client.auth.getSession();
+                            if (auth.error) throw auth.error;
+                            const user = auth.data?.session?.user;
+                            if (!user?.id) throw new Error("Сессия игрока не найдена. Войди в аккаунт и повтори отправку.");
+                            const character = window.activeCharacter || {};
+                            const errorText = window.__lorgusEmergencyError || "Обработчик найден, но раздел не создался; ошибка не перехвачена.";
+                            const report = {
+                                user_id: user.id,
+                                username: String(window.lorgusCurrentUsername || user.user_metadata?.username || user.email || "Игрок").slice(0, 160),
+                                character_id: character.id || null,
+                                character_name: String(character.name || "").slice(0, 160) || null,
+                                route: path,
+                                message: String(errorText).slice(0, 8000),
+                                stack: String(window.__lorgusEmergencyError || "").slice(0, 16000),
+                                diagnostics: {
+                                    state: details,
+                                    handler: target.render,
+                                    pageElementExists: visiblePageExists(),
+                                    cabinetExists: !!document.getElementById("cabinet-content"),
+                                    characterRestored: !!window.activeCharacter,
+                                    supabaseConnected: !!window.supabaseClient,
+                                    timestamp: new Date().toISOString()
+                                },
+                                user_agent: String(navigator.userAgent || "").slice(0, 1000),
+                                viewport: String(window.innerWidth + "x" + window.innerHeight + " / DPR " + (window.devicePixelRatio || 1)).slice(0, 100)
+                            };
+                            const { error } = await client.from("client_error_reports").insert(report);
+                            if (error) throw error;
+                            button.textContent = "Отправлено";
+                            resultLine.textContent = "Отчёт отправлен администратору. Спасибо — это поможет исправить ошибку.";
+                        } catch (error) {
+                            button.disabled = false;
+                            button.textContent = "Отправить";
+                            resultLine.textContent = "Не удалось отправить отчёт: " + String(error?.message || error);
+                        }
+                    });
                     document.body.appendChild(panel);
                 }, 4000);
             }, 5000);
