@@ -433,8 +433,9 @@ async function initializeLorgusGlobalOnlineStats() {
                     .eq("visibility", "public")
                     .gte("updated_at", cutoff),
                 client
-                    .from("characters")
+                    .from("character_applications")
                     .select("id", { count: "exact", head: true })
+                    .eq("status", "approved")
             ]);
             if (error) throw error;
             if (applicationsError) throw applicationsError;
