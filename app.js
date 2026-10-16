@@ -83,8 +83,20 @@ async function initialize() {
 
         window.render(session);
 
+        // getSession() above already rendered the current session. Supabase then
+        // emits INITIAL_SESSION when the listener is attached; ignore that exact
+        // duplicate so two renderCabinet() calls cannot replace each other's DOM.
         supabase.auth.onAuthStateChange(
-            (_event, newSession) => window.render(newSession)
+            (event, newSession) => {
+                if (
+                    event === "INITIAL_SESSION" &&
+                    newSession?.user?.id === session?.user?.id &&
+                    newSession?.access_token === session?.access_token
+                ) {
+                    return;
+                }
+                window.render(newSession);
+            }
         );
 
     } catch (error) {
