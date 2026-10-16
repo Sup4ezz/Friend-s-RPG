@@ -593,6 +593,7 @@ window.initAdminSectionCollapse = function(container) {
         section.querySelector("[data-report-refresh]").addEventListener("click", () => loadClientErrorReports(section));
         loadClientErrorReports(section);
     }
+    window.attachLorgusClientErrorReports = attach;
     const start = () => {
         attach();
         const root = document.getElementById("root") || document.body;
