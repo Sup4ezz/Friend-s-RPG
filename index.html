@@ -122,6 +122,7 @@
                         await window[target.render]();
                     }
                 } catch (error) {
+                    window.__lorgusEmergencyError = "Повторный обработчик: " + String(error?.stack || error?.message || error);
                     console.error("LORGUS mobile emergency renderer:", error);
                 }
 
@@ -135,6 +136,7 @@
                         await window.render(result?.data?.session || null);
                     }
                 } catch (error) {
+                    window.__lorgusEmergencyError = "Повторный запуск приложения: " + String(error?.stack || error?.message || error);
                     console.error("LORGUS mobile emergency startup retry:", error);
                 }
 
@@ -151,7 +153,9 @@
                         "Кабинет: " + (host ? "создан" : "не создан"),
                         "Персонаж: " + (window.activeCharacter ? "восстановлен" : "не восстановлен"),
                         "Supabase: " + (window.supabaseClient ? "подключён" : "не подключён"),
-                        "Обработчик: " + (typeof window[target.render] === "function" ? "найден" : "не найден")
+                        "Обработчик: " + (typeof window[target.render] === "function" ? "найден" : "не найден"),
+                        "Элемент раздела: " + (document.querySelector("#cabinet-content " + target.selector) ? "создан" : "не создан"),
+                        "Последняя ошибка: " + (window.__lorgusEmergencyError || "ошибка не перехвачена; возможен сбой внутри обработчика")
                     ];
                     panel.innerHTML = '<div style="color:#d7b66d;letter-spacing:.14em;font-size:12px">ЛОРГУС · АВАРИЙНОЕ ВОССТАНОВЛЕНИЕ</div><h1 style="margin:0;color:#e0c47f;font-size:24px">Раздел не открылся</h1><p style="max-width:440px;margin:0">Приложение автоматически повторило загрузку. Состояние системы ниже — экран больше не останется пустым.</p><pre style="max-width:100%;white-space:pre-wrap;overflow-wrap:anywhere;text-align:left;font:12px/1.6 monospace;color:#c7b99f"></pre><button type="button" style="min-height:48px;padding:12px 22px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Перезагрузить раздел</button>';
                     panel.querySelector("pre").textContent = details.join("\n");
