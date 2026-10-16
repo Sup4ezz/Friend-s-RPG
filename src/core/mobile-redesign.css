@@ -932,6 +932,31 @@
       radial-gradient(ellipse at 50% 100%, rgba(87,57,25,.12), transparent 42%),
       linear-gradient(180deg, #0d0a07 0%, #080705 60%, #050504 100%) !important;
   }
+  /* Visible central fantasy portal: decorative scene, no placeholder copy. */
+  .lorgus-map-page::after {
+    content: "" !important;
+    position: fixed !important;
+    left: 50% !important;
+    top: 43% !important;
+    width: min(68vw, 320px) !important;
+    aspect-ratio: 1 / 1 !important;
+    transform: translate(-50%, -50%) rotate(-8deg) !important;
+    z-index: 2 !important;
+    pointer-events: none !important;
+    border: 1px solid rgba(190, 157, 91, .42) !important;
+    border-radius: 50% !important;
+    box-shadow:
+      0 0 0 8px rgba(190,157,91,.035),
+      0 0 0 9px rgba(190,157,91,.16),
+      0 0 0 25px rgba(190,157,91,.025),
+      0 0 48px rgba(153,104,39,.19),
+      inset 0 0 38px rgba(153,104,39,.10) !important;
+    background:
+      radial-gradient(circle at 50% 50%, rgba(214,181,111,.13) 0 1px, transparent 2px),
+      radial-gradient(ellipse at 50% 50%, transparent 0 35%, rgba(190,157,91,.10) 35.5% 36%, transparent 36.5% 53%, rgba(190,157,91,.22) 53.5% 54%, transparent 54.5%),
+      conic-gradient(from 15deg, transparent 0 9%, rgba(190,157,91,.42) 9.2% 9.6%, transparent 9.8% 24%, rgba(190,157,91,.28) 24.2% 24.6%, transparent 24.8% 49%, rgba(190,157,91,.35) 49.2% 49.6%, transparent 49.8% 74%, rgba(190,157,91,.28) 74.2% 74.6%, transparent 74.8% 100%) !important;
+    opacity: .9 !important;
+  }
   .lorgus-map-page .lorgus-mainmenu-nav {
     position: fixed !important;
     inset: auto 0 0 !important;
