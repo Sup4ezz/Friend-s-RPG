@@ -5,21 +5,38 @@ async function renderLorgusCharacterHub() {
     // асинхронно. Не завершаем рендер молча, если роутер вызвал страницу раньше.
     let container = document.getElementById("cabinet-content");
     let c = window.activeCharacter;
+
+    // Мобильный холодный запуск может вызвать обработчик раньше, чем кабинет
+    // завершит восстановление сессии. Ждём дольше аварийного таймера роутера,
+    // чтобы не завершиться молча без DOM-элемента страницы.
     if (!container || !c) {
-        const deadline = Date.now() + 7000;
+        const deadline = Date.now() + 18000;
         while (Date.now() < deadline && (!container || !c)) {
             await new Promise(resolve => window.setTimeout(resolve, 100));
             container = document.getElementById("cabinet-content");
             c = window.activeCharacter;
         }
     }
+
+    // Если оболочка кабинета так и не создалась, создаём безопасный контейнер
+    // в существующей игровой оболочке, чтобы ошибка не превращалась в пустой экран.
     if (!container) {
-        console.error("LORGUS character page: #cabinet-content не появился после ожидания.");
+        const parent = document.querySelector("#root .game-page") || document.getElementById("root") || document.body;
+        if (parent) {
+            container = document.createElement("div");
+            container.id = "cabinet-content";
+            parent.appendChild(container);
+        }
+    }
+    if (!container) {
+        window.__lorgusEmergencyError = "Не удалось создать #cabinet-content: отсутствуют body и корень приложения.";
+        console.error("LORGUS character page: невозможно создать контейнер страницы.");
         return;
     }
     if (!c) {
         container.className = "lorgus-character-page";
-        container.innerHTML = '<section style="max-width:560px;margin:10vh auto;padding:28px 22px;color:#e9dfca;background:#15110c;border:1px solid rgba(215,182,109,.35);font:16px/1.6 Georgia,serif"><h2 style="margin-top:0;color:#d7b66d">Персонаж ещё загружается</h2><p>Не удалось восстановить данные персонажа для этого раздела.</p><button type="button" onclick="location.reload()" style="min-height:46px;padding:10px 18px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Повторить загрузку</button></section>';
+        container.innerHTML = '<div class="lorgus-character-shell"><main style="max-width:560px;margin:10vh auto;padding:28px 22px;color:#e9dfca;background:#15110c;border:1px solid rgba(215,182,109,.35);font:16px/1.6 Georgia,serif"><h2 style="margin-top:0;color:#d7b66d">Персонаж ещё загружается</h2><p>Не удалось восстановить данные персонажа для этого раздела.</p><button type="button" onclick="location.reload()" style="min-height:46px;padding:10px 18px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Повторить загрузку</button></main></div>';
+        window.__lorgusEmergencyError = "Кабинет создан, но window.activeCharacter не восстановлен за 18 секунд.";
         console.error("LORGUS character page: активный персонаж не восстановлен после ожидания.");
         return;
     }
