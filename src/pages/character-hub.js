@@ -1,5 +1,6 @@
 /* LORGUS character dossier — redesigned as an illustrated character sheet */
 async function renderLorgusCharacterHub() {
+    try {
     // При прямом открытии мобильного маршрута кабинет и персонаж восстанавливаются
     // асинхронно. Не завершаем рендер молча, если роутер вызвал страницу раньше.
     let container = document.getElementById("cabinet-content");
@@ -173,6 +174,17 @@ async function renderLorgusCharacterHub() {
     const list = container.querySelector(".lorgus-ability-list");
     if (list) list.innerHTML = window.renderAbilityList?.(abilities) || '<div class="lorgus-ability-empty">Подтверждённых способностей пока нет.</div>';
     await window.renderLorgusCharacterCanvas?.(c.id);
+
+    } catch (error) {
+        console.error("LORGUS character page render failed:", error);
+        const host = document.getElementById("cabinet-content");
+        if (host) {
+            const details = String(error?.stack || error?.message || error || "Неизвестная ошибка");
+            host.className = "lorgus-character-page";
+            host.innerHTML = '<section style="max-width:700px;margin:5vh auto;padding:24px;color:#eee3ce;background:#15110c;border:1px solid #7b3c32;font:15px/1.6 Georgia,serif;overflow-wrap:anywhere"><h2 style="color:#e0a08a;margin-top:0">Не удалось открыть персонажа</h2><p>Возникла ошибка при создании страницы. Текст ошибки сохранён для диагностики.</p><pre style="white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.5 monospace;color:#d8c7b4">' + String(details).replace(/[&<>]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[ch]) + '</pre><button type="button" onclick="location.reload()" style="min-height:44px;padding:10px 18px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Повторить загрузку</button></section>';
+        }
+        window.__lorgusEmergencyError = String(error?.stack || error?.message || error);
+    }
 }
 
 
