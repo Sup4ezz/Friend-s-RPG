@@ -546,3 +546,60 @@ window.initAdminSectionCollapse = function(container) {
         });
     });
 };
+
+/* LORGUS client error reports — admin-only via Supabase RLS */
+(() => {
+    const esc = value => window.escapeHtml ? window.escapeHtml(String(value ?? "")) : String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+    let loading = false;
+    async function loadClientErrorReports(section) {
+        if (loading || !window.supabaseClient) return;
+        loading = true;
+        const list = section.querySelector("[data-client-error-list]");
+        if (list) list.innerHTML = '<p style="color:#bcae92">Загружаем отчёты…</p>';
+        try {
+            const { data, error } = await window.supabaseClient.from("client_error_reports").select("*").order("created_at", { ascending: false }).limit(50);
+            if (error) throw error;
+            if (!list) return;
+            if (!data?.length) { list.innerHTML = '<p style="color:#bcae92">Отчётов пока нет.</p>'; return; }
+            list.innerHTML = data.map(report => {
+                const diagnostics = typeof report.diagnostics === "string" ? report.diagnostics : JSON.stringify(report.diagnostics || {}, null, 2);
+                return '<article style="padding:16px;margin:12px 0;background:#17130e;border:1px solid #4b3a21;color:#e8dcc4">' +
+                    '<div style="display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap"><strong style="color:#e2c47c">' + esc(report.route) + '</strong><span>' + esc(new Date(report.created_at).toLocaleString("ru-RU")) + '</span></div>' +
+                    '<p><b>Игрок:</b> ' + esc(report.username || "Неизвестен") + ' · <b>Персонаж:</b> ' + esc(report.character_name || "не указан") + ' · <b>Статус:</b> ' + esc(report.status) + '</p>' +
+                    '<p style="white-space:pre-wrap;overflow-wrap:anywhere"><b>Ошибка:</b> ' + esc(report.message || "Текст не передан") + '</p>' +
+                    '<details style="margin:10px 0"><summary style="cursor:pointer">Технические подробности</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere;max-height:320px;overflow:auto;font-size:12px">' + esc("Диагностика:\n" + diagnostics + "\n\nСтек:\n" + (report.stack || "нет") + "\n\nБраузер: " + (report.user_agent || "неизвестен") + "\nЭкран: " + (report.viewport || "неизвестен")) + '</pre></details>' +
+                    '<label style="display:flex;gap:8px;align-items:center">Статус <select data-report-status="' + esc(report.id) + '" style="padding:8px;background:#211b12;color:#f0e5d1;border:1px solid #66502c"><option value="new"' + (report.status === "new" ? " selected" : "") + '>Новый</option><option value="reviewed"' + (report.status === "reviewed" ? " selected" : "") + '>Просмотрен</option><option value="resolved"' + (report.status === "resolved" ? " selected" : "") + '>Исправлен</option></select></label>' +
+                    '</article>';
+            }).join("");
+            list.querySelectorAll("[data-report-status]").forEach(select => select.addEventListener("change", async () => {
+                const { error } = await window.supabaseClient.from("client_error_reports").update({ status: select.value }).eq("id", select.dataset.reportStatus);
+                if (error) { alert("Не удалось изменить статус: " + error.message); return; }
+                select.closest("article").querySelector("p").innerHTML = select.closest("article").querySelector("p").innerHTML.replace(/<b>Статус:<\/b> [^<]*/, "<b>Статус:</b> " + esc(select.value));
+            }));
+        } catch (error) {
+            if (list) list.innerHTML = '<p style="color:#e49b87">Не удалось загрузить отчёты: ' + esc(error.message || error) + '</p>';
+        } finally { loading = false; }
+    }
+    function attach() {
+        if (!window.lorgusIsAdmin) return;
+        const panel = document.querySelector("#cabinet-content .admin-panel");
+        if (!panel || panel.querySelector("#admin-client-error-reports")) return;
+        const section = document.createElement("section");
+        section.id = "admin-client-error-reports";
+        section.className = "admin-section";
+        section.innerHTML = '<div class="admin-section-heading"><div><h2>Ошибки приложения</h2><p>Отчёты, которые игроки отправили с аварийного экрана.</p></div><button type="button" class="admin-tool-button" data-report-refresh>↻ Обновить</button></div><div data-client-error-list><p>Загрузка…</p></div>';
+        const firstSection = panel.querySelector(".admin-section");
+        if (firstSection) panel.insertBefore(section, firstSection); else panel.appendChild(section);
+        section.querySelector("[data-report-refresh]").addEventListener("click", () => loadClientErrorReports(section));
+        loadClientErrorReports(section);
+    }
+    const start = () => {
+        attach();
+        const root = document.getElementById("root") || document.body;
+        if (root && !window.lorgusErrorReportsObserver) {
+            window.lorgusErrorReportsObserver = new MutationObserver(attach);
+            window.lorgusErrorReportsObserver.observe(root, { childList: true, subtree: true });
+        }
+    };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start, { once: true }); else start();
+})();
