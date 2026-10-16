@@ -437,6 +437,29 @@ function renderLorgusWorldMap(container, character) {
                 <span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3.5 5.5c3.2-1.2 6.1-.8 8.5 1.1v13c-2.4-1.9-5.3-2.3-8.5-1.1z"/><path d="M20.5 5.5c-3.2-1.2-6.1-.8-8.5 1.1v13c2.4-1.9 5.3-2.3 8.5-1.1z"/></svg></span><b>ЛОРБУК</b>
             </button>
         </nav>
+        <main class="lorgus-mobile-home" aria-label="Главная страница мира">
+            <header class="lorgus-mobile-home-heading">
+                <span class="lorgus-mobile-home-eyebrow">ХРОНИКИ СЕМИ КРАЁВ</span>
+                <h1>LORGUS</h1>
+                <p>Мир, в котором вера определяет власть, а древняя правда скрыта от смертных.</p>
+            </header>
+            <section class="lorgus-mobile-home-character" aria-label="Ваш персонаж">
+                <span class="lorgus-mobile-home-label">ВАШ ПУТЬ</span>
+                <strong>${name}</strong>
+                <span>${race} <i aria-hidden="true">·</i> ${homeland}</span>
+                <div class="lorgus-mobile-home-location">
+                    <span class="lorgus-mobile-home-status-dot" aria-hidden="true"></span>
+                    <span>МЕСТОПОЛОЖЕНИЕ</span>
+                    <b>${window.escapeHtml(currentLocation)}</b>
+                </div>
+            </section>
+            <section class="lorgus-mobile-home-facts" aria-label="О мире">
+                <div><strong>7</strong><span>КРАЁВ НА КАРТЕ</span></div>
+                <div><strong>6</strong><span>БОЖЕСТВ ПАНТЕОНА</span></div>
+                <div><strong>1</strong><span>СКРЫТАЯ ИСТИНА</span></div>
+            </section>
+            <p class="lorgus-mobile-home-hint">Выберите направление, чтобы продолжить свой путь.</p>
+        </main>
         <div class="lorgus-map-shell">
             <aside class="lorgus-map-sidebar">
                 <div class="lorgus-map-brand">
