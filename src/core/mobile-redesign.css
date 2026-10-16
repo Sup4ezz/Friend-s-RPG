@@ -32,7 +32,7 @@
   .lorgus-mainmenu-arrow:focus-visible{outline:1px solid #d7b66d!important;outline-offset:-3px!important}
   .lorgus-mainmenu-arrow:active{color:#f5d995!important;background:rgba(215,182,109,.08)!important}
   .lorgus-map-page{min-height:100dvh!important;padding-bottom:calc(82px + env(safe-area-inset-bottom))!important}
-  .lorgus-map-shell{display:block!important;min-height:0!important;width:100%!important}
+  .lorgus-map-shell{display:none!important;min-height:0!important;width:100%!important}
   .lorgus-map-sidebar{display:none!important}
   .lorgus-map-main{display:block!important;min-width:0!important;width:100%!important;padding:0 14px 28px!important}
   .lorgus-map-header{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;padding:23px 2px 18px!important}
