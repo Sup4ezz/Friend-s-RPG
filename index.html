@@ -78,7 +78,7 @@
         // Independent mobile route recovery. This watchdog deliberately lives in index.html
         // so it still runs when the SPA router or a page adapter fails.
         (() => {
-            const path = (location.pathname.replace(/\\/+$/, "") || "/");
+            const path = (location.pathname.replace(/\/+$/, "") || "/");
             const targets = {
                 "/character": { selector: ".lorgus-character-page", render: "renderLorgusCharacterHub" },
                 "/mail": { selector: ".lorgus-mail-page", render: "renderMail" },
