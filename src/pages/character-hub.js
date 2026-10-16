@@ -1,8 +1,27 @@
 /* LORGUS character dossier — redesigned as an illustrated character sheet */
 async function renderLorgusCharacterHub() {
-    const container = document.getElementById("cabinet-content");
-    const c = window.activeCharacter;
-    if (!container || !c) return;
+    // При прямом открытии мобильного маршрута кабинет и персонаж восстанавливаются
+    // асинхронно. Не завершаем рендер молча, если роутер вызвал страницу раньше.
+    let container = document.getElementById("cabinet-content");
+    let c = window.activeCharacter;
+    if (!container || !c) {
+        const deadline = Date.now() + 7000;
+        while (Date.now() < deadline && (!container || !c)) {
+            await new Promise(resolve => window.setTimeout(resolve, 100));
+            container = document.getElementById("cabinet-content");
+            c = window.activeCharacter;
+        }
+    }
+    if (!container) {
+        console.error("LORGUS character page: #cabinet-content не появился после ожидания.");
+        return;
+    }
+    if (!c) {
+        container.className = "lorgus-character-page";
+        container.innerHTML = '<section style="max-width:560px;margin:10vh auto;padding:28px 22px;color:#e9dfca;background:#15110c;border:1px solid rgba(215,182,109,.35);font:16px/1.6 Georgia,serif"><h2 style="margin-top:0;color:#d7b66d">Персонаж ещё загружается</h2><p>Не удалось восстановить данные персонажа для этого раздела.</p><button type="button" onclick="location.reload()" style="min-height:46px;padding:10px 18px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Повторить загрузку</button></section>';
+        console.error("LORGUS character page: активный персонаж не восстановлен после ожидания.");
+        return;
+    }
 
     const esc = value => window.escapeHtml ? window.escapeHtml(value ?? "") : String(value ?? "");
     const name = esc(c.name || "Без имени");
