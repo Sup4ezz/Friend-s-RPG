@@ -405,6 +405,83 @@ function handleLorgusMapSurfaceClick(event) {
     }
 }
 
+async function initializeLorgusGlobalOnlineStats() {
+    const client = window.supabaseClient;
+    if (!client) return;
+
+    const paint = (online, inRp) => {
+        const totalEl = document.getElementById("lorgus-online-total");
+        const rpEl = document.getElementById("lorgus-online-rp");
+        const awayEl = document.getElementById("lorgus-online-away");
+        if (!totalEl || !rpEl || !awayEl) return;
+        const rpCount = Math.min(online, inRp);
+        totalEl.textContent = String(online);
+        rpEl.textContent = String(rpCount);
+        awayEl.textContent = String(Math.max(0, online - rpCount));
+    };
+
+    const refresh = async () => {
+        const channel = window.lorgusGlobalOnlineChannel;
+        if (!channel) return;
+        const state = channel.presenceState();
+        const onlineIds = new Set(Object.keys(state).map(String));
+        try {
+            const cutoff = new Date(Date.now() - 90000).toISOString();
+            const { data, error } = await client
+                .from("rp_presence")
+                .select("player_id, updated_at")
+                .eq("visibility", "public")
+                .gte("updated_at", cutoff);
+            if (error) throw error;
+            const activeInRp = new Set(
+                (data || [])
+                    .map(row => String(row.player_id || ""))
+                    .filter(id => id && onlineIds.has(id))
+            );
+            paint(onlineIds.size, activeInRp.size);
+        } catch (error) {
+            console.warn("[LORGUS] Не удалось обновить счётчики онлайна:", error);
+            const totalEl = document.getElementById("lorgus-online-total");
+            if (totalEl && totalEl.textContent === "—") {
+                totalEl.textContent = String(onlineIds.size);
+            }
+        }
+    };
+
+    window.lorgusGlobalOnlineStatsRefresh = refresh;
+    if (window.lorgusGlobalOnlineChannel) {
+        await refresh();
+        return;
+    }
+
+    try {
+        const { data, error } = await client.auth.getUser();
+        if (error || !data?.user?.id) return;
+        const playerId = String(data.user.id);
+        const channel = client.channel("lorgus-global-online", {
+            config: { presence: { key: playerId } }
+        });
+        window.lorgusGlobalOnlineChannel = channel;
+        channel
+            .on("presence", { event: "sync" }, () => { void refresh(); })
+            .on("presence", { event: "join" }, () => { void refresh(); })
+            .on("presence", { event: "leave" }, () => { void refresh(); })
+            .subscribe(async status => {
+                if (status === "SUBSCRIBED") {
+                    await channel.track({ player_id: playerId, joined_at: new Date().toISOString() });
+                    await refresh();
+                }
+            });
+        if (!window.lorgusGlobalOnlineRefreshTimer) {
+            window.lorgusGlobalOnlineRefreshTimer = setInterval(() => {
+                void window.lorgusGlobalOnlineStatsRefresh?.();
+            }, 15000);
+        }
+    } catch (error) {
+        console.warn("[LORGUS] Не удалось подключить общий онлайн:", error);
+    }
+}
+
 function renderLorgusWorldMap(container, character) {
     if (!container || !character) return;
 
@@ -453,10 +530,10 @@ function renderLorgusWorldMap(container, character) {
                     <b>${window.escapeHtml(currentLocation)}</b>
                 </div>
             </section>
-            <section class="lorgus-mobile-home-facts" aria-label="О мире">
-                <div><strong>7</strong><span>КРАЁВ НА КАРТЕ</span></div>
-                <div><strong>6</strong><span>БОЖЕСТВ ПАНТЕОНА</span></div>
-                <div><strong>1</strong><span>СКРЫТАЯ ИСТИНА</span></div>
+            <section class="lorgus-mobile-home-facts" aria-label="Активность игроков">
+                <div><strong id="lorgus-online-total">—</strong><span>ОНЛАЙН</span></div>
+                <div><strong id="lorgus-online-rp">—</strong><span>В РОЛЕВОЙ</span></div>
+                <div><strong id="lorgus-online-away">—</strong><span>ВНЕ РОЛЕВОЙ</span></div>
             </section>
             <p class="lorgus-mobile-home-hint">Выберите направление, чтобы продолжить свой путь.</p>
         </main>
@@ -614,6 +691,7 @@ function renderLorgusWorldMap(container, character) {
         showLorgusMapEditorMode(container);
     }
     initializeLorgusMainMenuLight();
+    void initializeLorgusGlobalOnlineStats();
 }
 
 function showLorgusMapEditorMode(container) {
