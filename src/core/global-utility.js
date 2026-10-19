@@ -47,6 +47,36 @@
     const path = (window.location.pathname || "").replace(/\/+$/, "") || "/";
     const route = /^\/rp\/(chat|road)\//.test(path) ? "/rp" : path;
 
+    // В Лорбуке возврат на карту должен находиться над содержимым, а не сбоку.
+    const codexRoot = document.querySelector(".lorgus-codex-page");
+    let codexMapReturn = document.querySelector(".lorgus-codex-map-return-top");
+    if (route === "/lorblook" && codexRoot) {
+      if (!codexMapReturn) {
+        codexMapReturn = document.createElement("button");
+        codexMapReturn.type = "button";
+        codexMapReturn.className = "lorgus-codex-map-return-top";
+        codexMapReturn.textContent = "← Вернуться к карте";
+        codexMapReturn.setAttribute("aria-label", "Вернуться к карте");
+        codexMapReturn.addEventListener("click", () => {
+          if (typeof window.lorgusNavigate === "function") window.lorgusNavigate("/main-page");
+          else window.location.assign("/main-page");
+        });
+      }
+      if (codexMapReturn.parentElement !== codexRoot || codexRoot.firstElementChild !== codexMapReturn) {
+        codexRoot.insertBefore(codexMapReturn, codexRoot.firstChild);
+      }
+      Object.assign(codexMapReturn.style, {
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        minHeight: "42px", margin: "0 0 16px", padding: "10px 16px",
+        border: "1px solid rgba(196, 160, 91, .65)", borderRadius: "3px",
+        background: "rgba(24, 19, 13, .94)", color: "#e8d2a0",
+        font: "600 13px/1.3 Georgia, serif", letterSpacing: ".04em",
+        cursor: "pointer", position: "relative", zIndex: "3", maxWidth: "100%"
+      });
+    } else {
+      codexMapReturn?.remove();
+    }
+
     const sectionPaths = new Set(["/mail", "/character", "/lorblook", "/rp"]);
     let nav = document.querySelector(".lorgus-subpage-nav");
     if (sectionPaths.has(route) && active) {
