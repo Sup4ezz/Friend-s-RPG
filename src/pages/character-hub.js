@@ -191,7 +191,38 @@ async function renderLorgusCharacterHub() {
         const photoUrl = await window.getRpCharacterPhoto?.(c.id);
         if (renderToken !== window.__lorgusCharacterRenderToken || !container.isConnected) return;
         if (photoUrl && portrait && container.isConnected) {
-            portrait.innerHTML = '<img src="' + esc(photoUrl) + '" alt="Портрет ' + name + '">';
+            const image = document.createElement("img");
+            image.alt = "Портрет " + name;
+            image.decoding = "async";
+            image.loading = "eager";
+            image.referrerPolicy = "no-referrer";
+            image.src = photoUrl;
+            image.addEventListener("error", async () => {
+                // Signed Supabase URLs can expire while a mobile browser suspends the tab.
+                // Evict the stale URL and request a fresh one exactly once.
+                if (image.dataset.refreshAttempted === "1") {
+                    image.remove();
+                    portrait.classList.remove("has-photo");
+                    return;
+                }
+                image.dataset.refreshAttempted = "1";
+                const cache = window.rpCharacterPhotoCache;
+                if (cache) delete cache[String(c.id)];
+                try {
+                    const refreshedUrl = await window.getRpCharacterPhoto?.(c.id);
+                    if (refreshedUrl && image.isConnected && refreshedUrl !== image.src) {
+                        image.src = refreshedUrl;
+                    } else if (image.isConnected) {
+                        image.remove();
+                        portrait.classList.remove("has-photo");
+                    }
+                } catch (refreshError) {
+                    console.warn("Не удалось обновить ссылку на портрет:", refreshError);
+                    image.remove();
+                    portrait.classList.remove("has-photo");
+                }
+            }, { once: true });
+            portrait.replaceChildren(image);
             portrait.classList.add("has-photo");
         }
     } catch (error) {
