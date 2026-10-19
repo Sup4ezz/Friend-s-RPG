@@ -373,3 +373,24 @@
   }
   .lorgus-mail-page .lorgus-mail-main { width:100%!important; box-sizing:border-box!important; }
 }
+
+
+/* Remove the parent cabinet gutters that can still frame the fixed mail view. */
+@media (max-width:720px) {
+  body:has(#cabinet-content.lorgus-mail-page) {
+    margin:0!important;padding:0!important;overflow:hidden!important;
+  }
+  body:has(#cabinet-content.lorgus-mail-page) #root,
+  body:has(#cabinet-content.lorgus-mail-page) .game-page,
+  body:has(#cabinet-content.lorgus-mail-page) #cabinet-content {
+    width:100vw!important;max-width:none!important;min-width:0!important;
+    margin:0!important;padding:0!important;border:0!important;border-radius:0!important;
+    transform:none!important;filter:none!important;perspective:none!important;
+    contain:none!important;box-sizing:border-box!important;
+  }
+  body:has(#cabinet-content.lorgus-mail-page) #cabinet-content.lorgus-mail-page {
+    left:0!important;right:0!important;top:0!important;bottom:0!important;
+    inset:0!important;width:100vw!important;height:100dvh!important;
+    min-height:100dvh!important;max-width:none!important;
+  }
+}
