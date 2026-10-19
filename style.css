@@ -19622,3 +19622,86 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
     .lorgus-equipped-item strong { flex: 1 1 60px; overflow-wrap: anywhere; }
     .lorgus-equipped-item-remove { flex-basis: 38px; width: 38px; height: 38px; }
 }
+
+
+/* Inventory actions — restrained, diegetic LORGUS styling */
+.lorgus-inventory-action-button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    min-height: 36px;
+    padding: 7px 11px;
+    border: 1px solid rgba(177,139,72,.32);
+    border-left-color: rgba(214,179,106,.68);
+    border-radius: 0;
+    background: linear-gradient(110deg, rgba(120,83,34,.14), rgba(13,11,8,.34));
+    color: #cbb27b;
+    font-family: var(--title-font, Georgia, serif);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,.3);
+    transition: border-color .18s ease, background .18s ease, color .18s ease;
+}
+.lorgus-inventory-action-button::before {
+    content: "✧";
+    color: #9f7c42;
+    font-size: 14px;
+    line-height: 1;
+}
+.lorgus-inventory-action-button:hover,
+.lorgus-inventory-action-button:focus-visible {
+    border-color: rgba(214,179,106,.72);
+    border-left-color: #e1c27e;
+    background: linear-gradient(110deg, rgba(160,113,45,.23), rgba(30,23,14,.58));
+    color: #f0dca7;
+    outline: none;
+}
+.lorgus-inventory-action-button:active { background: rgba(214,179,106,.2); }
+.lorgus-inventory-action-button:disabled,
+.lorgus-equipped-item-remove:disabled { opacity: .48; cursor: wait; }
+.lorgus-equipped-item-remove {
+    display: inline-grid;
+    place-items: center;
+    flex: 0 0 34px;
+    width: 34px;
+    height: 34px;
+    margin-left: auto;
+    padding: 0;
+    border: 1px solid rgba(177,139,72,.28);
+    border-radius: 0;
+    background: linear-gradient(145deg, rgba(90,61,28,.12), rgba(0,0,0,.28));
+    color: #a9956a;
+    font-family: var(--title-font, Georgia, serif);
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: border-color .18s ease, background .18s ease, color .18s ease;
+}
+.lorgus-equipped-item-remove:hover,
+.lorgus-equipped-item-remove:focus-visible {
+    border-color: rgba(214,179,106,.72);
+    background: rgba(120,83,34,.2);
+    color: #f0dca7;
+    outline: none;
+}
+@media (max-width: 720px) {
+    .lorgus-inventory-action-button {
+        min-height: 42px;
+        padding: 8px 10px;
+        gap: 5px;
+        font-size: 11px;
+        letter-spacing: .06em;
+    }
+    .lorgus-equipped-item-remove {
+        flex-basis: 40px;
+        width: 40px;
+        height: 40px;
+    }
+}
