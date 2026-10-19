@@ -155,6 +155,16 @@
                     el.style.setProperty("pointer-events", "auto", "important");
                     el.style.setProperty("mix-blend-mode", "normal", "important");
                 });
+                // The down-arrow is appended directly to body, so it can remain visible
+                // while #root is trapped in a lower stacking context. Raise the actual app
+                // above any stale sibling veil and keep navigation controls on top.
+                if (root) {
+                    root.style.setProperty("position", "relative", "important");
+                    root.style.setProperty("z-index", "2147483000", "important");
+                    root.style.setProperty("isolation", "auto", "important");
+                }
+                document.getElementById("lorgus-global-back")?.style.setProperty("z-index", "2147483647", "important");
+                document.getElementById("lorgus-global-utility")?.style.setProperty("z-index", "2147483647", "important");
                 const activePage = getPageElement();
                 [activePage, activePage?.firstElementChild, activePage?.querySelector(".lorgus-character-shell")].filter(Boolean).forEach(el => {
                     el.style.setProperty("visibility", "visible", "important");
