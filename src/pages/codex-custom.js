@@ -165,21 +165,44 @@
           root.addEventListener(type, () => { root.dataset.lorgusCodexInteracted = "1"; }, { passive: true });
         });
       }
-      const rendered = original(startId);
+      const fallback = () => {
+        console.error("[LORGUS] Constellation renderer failed; opening accessible archive fallback.");
+        const safeRender = window.renderLorgusCodexFallback;
+        if (typeof safeRender === "function") return safeRender(startId || "atlas");
+        if (root && !root.querySelector(".codex-cosmos, .lorgus-codex-layout")) {
+          root.className = "lorgus-codex-page";
+          root.replaceChildren();
+          const title = document.createElement("h1");
+          title.textContent = "Лорбук";
+          const message = document.createElement("p");
+          message.textContent = "Интерактивный атлас временно недоступен. Перезагрузи страницу или вернись позже.";
+          root.append(title, message);
+        }
+      };
+      let rendered;
+      try {
+        rendered = original(startId);
+      } catch (error) {
+        console.error("[LORGUS] Codex render error:", error);
+        return fallback();
+      }
       installImageObserver();
       loadCustomLore().then(() => {
-        // If custom entries arrived after the initial render, refresh the atlas only
-        // while the player has not started interacting with it.
         const sections = window.LORGUS_CODEX_SECTIONS || [];
         if (sections.length > initialSectionCount &&
             window.location.pathname.replace(/\/+$/, "") === "/lorblook" &&
             root?.isConnected && root.dataset.lorgusCodexInteracted !== "1") {
-          original(startId);
-          installImageObserver();
+          try { original(startId); installImageObserver(); }
+          catch (error) { console.warn("[LORGUS] Atlas refresh skipped:", error); }
         }
       }).catch(error => {
         console.warn("LORGUS custom lore deferred:", error);
       });
+      if (rendered && typeof rendered.then === "function") {
+        return rendered.catch(error => { console.error("[LORGUS] Async codex render error:", error); return fallback(); });
+      }
+      if (root && !root.querySelector(".codex-cosmos, .lorgus-codex-layout") &&
+          !root.querySelector(".lorgus-codex-hero")) return fallback();
       return rendered;
     };
     window.LORGUS_PAGES = window.LORGUS_PAGES || {};
