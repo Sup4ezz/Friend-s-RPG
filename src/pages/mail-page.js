@@ -33,7 +33,7 @@ async function renderMail() {
                     <button type="button" id="lorgus-mail-folder-sent">
                         <span>➤</span><strong>Отправленные</strong>
                     </button>
-                    <button type="button" onclick="document.getElementById('lorgus-mail-recipient')?.focus()">
+                    <button type="button" id="lorgus-mail-folder-compose">
                         <span>✎</span><strong>Новое письмо</strong>
                     </button>
                 </nav>
@@ -119,6 +119,7 @@ async function renderMail() {
     document.getElementById("lorgus-mail-read-all")?.addEventListener("click", markAllLorgusMailRead);
     document.getElementById("lorgus-mail-folder-inbox")?.addEventListener("click", () => switchLorgusMailFolder("inbox"));
     document.getElementById("lorgus-mail-folder-sent")?.addEventListener("click", () => switchLorgusMailFolder("sent"));
+    document.getElementById("lorgus-mail-folder-compose")?.addEventListener("click", showLorgusMailCompose);
     document.getElementById("lorgus-mail-method")?.addEventListener("change", updateMailDeliveryPreview);
     if (window.lorgusMailEtaTimer) clearInterval(window.lorgusMailEtaTimer);
     window.lorgusMailEtaTimer = setInterval(updateMailCountdowns, 30000);
@@ -284,7 +285,20 @@ async function loadMailInbox() {
     });
 }
 
+function showLorgusMailCompose() {
+    const page = document.querySelector(".lorgus-mail-page");
+    if (!page) return;
+    page.classList.add("lorgus-mail-mobile-compose-active");
+    document.getElementById("lorgus-mail-folder-inbox")?.classList.remove("active");
+    document.getElementById("lorgus-mail-folder-sent")?.classList.remove("active");
+    document.getElementById("lorgus-mail-folder-compose")?.classList.add("active");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.setTimeout(() => document.getElementById("lorgus-mail-recipient")?.focus({ preventScroll: true }), 180);
+}
+
 function switchLorgusMailFolder(folder) {
+    document.querySelector(".lorgus-mail-page")?.classList.remove("lorgus-mail-mobile-compose-active");
+    document.getElementById("lorgus-mail-folder-compose")?.classList.remove("active");
     window.lorgusMailFolder = folder === "sent" ? "sent" : "inbox";
     document.getElementById("lorgus-mail-folder-inbox")?.classList.toggle("active", window.lorgusMailFolder === "inbox");
     document.getElementById("lorgus-mail-folder-sent")?.classList.toggle("active", window.lorgusMailFolder === "sent");
