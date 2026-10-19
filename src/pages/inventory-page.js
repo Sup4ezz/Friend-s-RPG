@@ -53,7 +53,7 @@ function inventoryItemMarkup(row, extraClass = "") {
         '<div class="lorgus-inventory-item-icon">' + escapeHtml(item.icon || (isLootbox ? "🎁" : "◆")) + '</div>' +
         '<div class="lorgus-inventory-item-info"><strong>' + escapeHtml(item.name || "Предмет") + '</strong><small>' + escapeHtml(inventoryRarityLabel(item.rarity)) + ' · ' + escapeHtml(inventoryTypeLabel(item)) + '</small>' + (equippedLabel ? '<em>НАДЕТО · ' + escapeHtml(equippedLabel) + '</em>' : '') + '</div>' +
         '<b class="lorgus-inventory-qty">' + escapeHtml(qty) + '</b>' +
-        (isLootbox ? '<button type="button" class="lorgus-lootbox-open-button" data-open-lootbox="' + escapeHtml(row.id) + '">ОТКРЫТЬ</button>' : '') + '</article>';
+        (isLootbox ? '<button type="button" class="lorgus-lootbox-open-button" data-open-lootbox="' + escapeHtml(row.id) + '">ОТКРЫТЬ</button>' : (!row.equipped_slot && item.equipment_slot ? '<button type="button" class="lorgus-inventory-action-button" data-equip-item="' + escapeHtml(row.id) + '" data-equip-slot="' + escapeHtml(item.equipment_slot) + '">НАДЕТЬ</button>' : '')) + '</article>';
 }
 
 async function loadCharacterInventory(characterId) {
@@ -209,9 +209,38 @@ async function renderLorgusInventory() {
     const renderEquipped = () => document.querySelectorAll(".lorgus-equipment-slot").forEach(slot => {
         const row = rows.find(r => r.equipped_slot === slot.dataset.equipmentSlot);
         const item = row?.items; const box = slot.querySelector(".lorgus-equipment-slot-item");
-        box.innerHTML = row && item ? '<div class="lorgus-equipped-item" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong></div>' : "";
+        box.innerHTML = row && item ? '<div class="lorgus-equipped-item" draggable="true" data-inventory-id="' + escapeHtml(row.id) + '" style="--item-color:' + escapeHtml(item.color || "#b8a27a") + '"><span>' + escapeHtml(item.icon || "◆") + '</span><strong>' + escapeHtml(item.name || "Предмет") + '</strong><button type="button" class="lorgus-equipped-item-remove" data-unequip-item="' + escapeHtml(row.id) + '" aria-label="Снять ' + escapeHtml(item.name || "предмет") + '" title="Снять предмет">×</button></div>' : "";
     });
     renderEquipped();
+
+    // Кнопки действий — альтернатива перетаскиванию, особенно удобная на телефоне.
+    // Используем те же серверные RPC, что и drag-and-drop, чтобы правила экипировки не расходились.
+    const runInventoryAction = async (button, action) => {
+        if (!button || button.disabled) return;
+        const inventoryId = button.dataset.equipItem || button.dataset.unequipItem;
+        const row = rows.find(item => String(item.id) === String(inventoryId));
+        if (!row) return;
+        button.disabled = true;
+        button.setAttribute("aria-busy", "true");
+        const result = action === "equip"
+            ? await window.supabaseClient.rpc("equip_character_item", { p_inventory_id: inventoryId, p_slot: button.dataset.equipSlot || row.items?.equipment_slot })
+            : await window.supabaseClient.rpc("unequip_character_item", { p_inventory_id: inventoryId });
+        if (result.error) {
+            console.error(action === "equip" ? "Не удалось надеть предмет:" : "Не удалось снять предмет:", result.error);
+            button.disabled = false;
+            button.removeAttribute("aria-busy");
+            button.title = result.error.message || "Не удалось выполнить действие";
+            return;
+        }
+        await renderLorgusInventory();
+    };
+    container.querySelectorAll("[data-equip-item]").forEach(button => button.addEventListener("click", event => {
+        event.preventDefault(); event.stopPropagation(); runInventoryAction(button, "equip");
+    }));
+    container.querySelectorAll("[data-unequip-item]").forEach(button => button.addEventListener("click", event => {
+        event.preventDefault(); event.stopPropagation(); runInventoryAction(button, "unequip");
+    }));
+
     const getDraggedInventoryId = event => {
         const fromState = window.lorgusDraggedInventoryId;
         if (fromState) return fromState;
