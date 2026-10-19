@@ -101,7 +101,7 @@ async function renderLorgusInventory() {
 
                 <nav class="lorgus-inventory-nav">
                     <button class="active" type="button"><span>◈</span> Снаряжение</button>
-                    <button type="button" onclick="window.lorgusSubpageTransition?.('left', window.renderLorgusWorldMapCurrent)"><span>⌂</span> Карта мира</button>
+                    <button type="button" onclick="window.lorgusSubpageTransition ? window.lorgusSubpageTransition('left', () => window.lorgusNavigate?.('/main-page')) : window.lorgusNavigate?.('/main-page')"><span>⌂</span> Главная</button>
                 </nav>
 
                 <div class="lorgus-inventory-sidebar-note">
@@ -109,8 +109,8 @@ async function renderLorgusInventory() {
                     <p>Перетаскивай предметы между рюкзаком и подходящими ячейками снаряжения.</p>
                 </div>
 
-                <button type="button" class="lorgus-inventory-back" onclick="window.lorgusSubpageTransition?.('left', window.renderLorgusWorldMapCurrent)">
-                    <span>←</span> ВЕРНУТЬСЯ НА КАРТУ
+                <button type="button" class="lorgus-inventory-back" onclick="window.lorgusSubpageTransition ? window.lorgusSubpageTransition('left', () => window.lorgusNavigate?.('/main-page')) : window.lorgusNavigate?.('/main-page')">
+                    <span>←</span> ВЕРНУТЬСЯ НА ГЛАВНУЮ
                 </button>
             </aside>
 
