@@ -19252,3 +19252,299 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
     border-color:rgba(215,182,109,.48)!important;
     background:linear-gradient(145deg,rgba(56,41,20,.86),rgba(20,14,8,.96))!important;
 }
+
+
+/* LORGUS — mobile character dossier usability pass (keeps the recovery watchdog untouched) */
+@media (max-width: 720px) {
+  .lorgus-character-page,
+  .lorgus-character-shell {
+    width: 100%;
+    min-width: 0;
+    min-height: 100dvh;
+    overflow-x: clip;
+  }
+  .lorgus-character-shell {
+    display: flex;
+    flex-direction: column;
+  }
+  .lorgus-character-sidebar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand brand"
+      "portrait identity"
+      "nav nav"
+      "map map";
+    align-items: center;
+    gap: 10px 14px;
+    min-height: 0;
+    padding: 14px 16px 12px;
+    border-right: 0;
+    border-bottom: 1px solid rgba(214,179,106,.18);
+  }
+  .lorgus-character-brand {
+    grid-area: brand;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 0 12px;
+  }
+  .lorgus-character-brand-mark { flex: 0 0 auto; }
+  .lorgus-character-brand b { font-size: 22px; }
+  .lorgus-character-brand small {
+    margin-top: 4px;
+    font-size: 8px;
+    letter-spacing: .14em;
+  }
+  .lorgus-character-portrait {
+    grid-area: portrait;
+    display: grid;
+    width: 76px;
+    height: 76px;
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid rgba(214,179,106,.42);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 25%, rgba(214,179,106,.17), #100d08 72%);
+  }
+  .lorgus-character-portrait-halo,
+  .lorgus-character-portrait-caption { display: none; }
+  .lorgus-character-portrait-inner {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 50%;
+  }
+  .lorgus-character-portrait-inner img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .lorgus-character-portrait-inner > span { font-size: 28px; }
+  .lorgus-character-identity {
+    grid-area: identity;
+    min-width: 0;
+    padding: 4px 0;
+    text-align: left;
+  }
+  .lorgus-character-identity span {
+    font-size: 9px;
+    letter-spacing: .14em;
+  }
+  .lorgus-character-identity strong {
+    overflow-wrap: anywhere;
+    font-size: clamp(20px, 6vw, 27px);
+    line-height: 1.12;
+  }
+  .lorgus-character-identity small { font-size: 12px; }
+  .lorgus-character-sidebar-rule { display: none; }
+  .lorgus-character-nav {
+    grid-area: nav;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+  .lorgus-character-nav button {
+    min-width: 0;
+    min-height: 46px;
+    justify-content: flex-start;
+    gap: 9px;
+    padding: 10px 12px;
+    border: 1px solid rgba(214,179,106,.16);
+    border-radius: 8px;
+    font-size: 12px;
+    letter-spacing: .02em;
+  }
+  .lorgus-character-nav button span {
+    display: inline-block;
+    width: 16px;
+    font-size: 15px;
+  }
+  .lorgus-character-nav button i {
+    margin-left: auto;
+    font-size: 10px;
+    font-style: normal;
+    opacity: .6;
+  }
+  .lorgus-character-map-button {
+    grid-area: map;
+    width: 100%;
+    min-height: 46px;
+    margin: 0;
+    padding: 11px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+  }
+  .lorgus-character-main {
+    width: 100%;
+    min-width: 0;
+    padding: 22px 14px calc(36px + env(safe-area-inset-bottom));
+  }
+  .lorgus-character-header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding-bottom: 18px;
+  }
+  .lorgus-character-breadcrumb { font-size: 9px; }
+  .lorgus-character-header h1 {
+    margin: 8px 0 6px;
+    font-size: clamp(32px, 9vw, 46px);
+    line-height: 1.03;
+    overflow-wrap: anywhere;
+  }
+  .lorgus-character-header p {
+    font-size: 12px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .lorgus-character-header-actions {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+  }
+  .lorgus-character-status {
+    min-height: 38px;
+    padding: 9px 10px;
+    font-size: 10px;
+  }
+  .lorgus-character-title-button {
+    min-height: 42px;
+    padding: 10px 12px;
+    font-size: 11px;
+  }
+  .lorgus-character-hero {
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+    padding: 17px 14px;
+    border-radius: 10px;
+  }
+  .lorgus-character-hero-art {
+    width: 38px;
+    height: 38px;
+    min-height: 0;
+  }
+  .lorgus-character-hero-copy { min-width: 0; }
+  .lorgus-character-hero-copy h2 {
+    margin: 5px 0 4px;
+    font-size: clamp(21px, 6vw, 28px);
+    line-height: 1.1;
+    overflow-wrap: anywhere;
+  }
+  .lorgus-character-hero-copy p,
+  .lorgus-character-hero-tags { font-size: 11px; line-height: 1.5; overflow-wrap: anywhere; }
+  .lorgus-character-hero-title {
+    grid-column: 2;
+    min-width: 0;
+    margin-top: 2px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(214,179,106,.14);
+  }
+  .lorgus-character-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .lorgus-character-card {
+    min-width: 0;
+    min-height: 0;
+    padding: 13px 12px;
+    border-radius: 8px;
+  }
+  .lorgus-character-card:last-child { grid-column: 1 / -1; }
+  .lorgus-character-card strong {
+    margin-top: 8px;
+    font-size: clamp(17px, 4.8vw, 22px);
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+  }
+  .lorgus-character-card small {
+    display: block;
+    margin-top: 6px;
+    font-size: 11px;
+    line-height: 1.45;
+  }
+  .lorgus-character-content-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .lorgus-character-panel {
+    min-width: 0;
+    min-height: 0;
+    padding: 16px 13px;
+    border-radius: 9px;
+  }
+  .lorgus-character-panel-head { gap: 10px; padding-bottom: 12px; }
+  .lorgus-character-panel-head strong {
+    font-size: 19px;
+    line-height: 1.2;
+  }
+  .lorgus-character-panel-intro { font-size: 12px; line-height: 1.55; }
+  .lorgus-character-fact-list > div {
+    display: grid;
+    grid-template-columns: minmax(76px, .7fr) minmax(0, 1.3fr);
+    gap: 12px;
+    padding: 11px 0;
+  }
+  .lorgus-character-fact-list dt { font-size: 11px; }
+  .lorgus-character-fact-list dd {
+    min-width: 0;
+    margin: 0;
+    font-size: 12px;
+    overflow-wrap: anywhere;
+  }
+  .lorgus-character-story-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 9px;
+    margin-top: 12px;
+  }
+  .lorgus-character-story-card { min-width: 0; padding: 13px; }
+  .lorgus-character-story-card p { font-size: 13px; line-height: 1.65; overflow-wrap: anywhere; }
+  .lorgus-character-page .lorgus-ability-list {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .lorgus-character-page .lorgus-ability-list > * { min-width: 0; overflow-wrap: anywhere; }
+  .lorgus-character-page .lorgus-notes-panel { overflow: hidden; }
+  .lorgus-character-page .lorgus-canvas-toolbar {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 7px;
+    max-width: 100%;
+    margin: 12px -2px;
+    padding: 3px 2px 8px;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .lorgus-character-page .lorgus-canvas-toolbar button {
+    flex: 0 0 auto;
+    min-height: 40px;
+    white-space: nowrap;
+  }
+  .lorgus-character-page .lorgus-canvas-viewport {
+    min-height: 300px;
+    max-height: 58dvh;
+    border-radius: 7px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+@media (max-width: 380px) {
+  .lorgus-character-sidebar { padding-right: 12px; padding-left: 12px; }
+  .lorgus-character-main { padding-right: 10px; padding-left: 10px; }
+  .lorgus-character-portrait { width: 64px; height: 64px; }
+  .lorgus-character-nav button { padding: 9px; font-size: 11px; }
+  .lorgus-character-overview { grid-template-columns: minmax(0, 1fr); }
+  .lorgus-character-card:last-child { grid-column: auto; }
+}
