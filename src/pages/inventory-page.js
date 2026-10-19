@@ -70,6 +70,8 @@ async function renderLorgusInventory() {
     if (!pageRoot || !character) return;
     const characterMain = pageRoot.querySelector(".lorgus-character-main");
     const inlineMode = Boolean(characterMain && window.location.pathname.replace(/\/+$/, "") === "/character");
+    // Preserve the selected local tab when refreshing inventory after equip/unequip.
+    const keepInlineInventoryOpen = Boolean(inlineMode && characterMain.querySelector(".lorgus-character-dossier-view")?.hidden);
     let container = pageRoot;
     if (inlineMode) {
         characterMain.querySelector(".lorgus-inventory-main")?.remove();
@@ -471,6 +473,16 @@ async function renderLorgusInventory() {
             characterMain.appendChild(inlineView);
         }
         container.remove();
+        if (keepInlineInventoryOpen) {
+            const dossierView = characterMain.querySelector(".lorgus-character-dossier-view");
+            if (dossierView) dossierView.hidden = true;
+            characterMain.querySelectorAll("[data-character-local-view]").forEach(tab => {
+                const active = tab.getAttribute("data-character-local-view") === "inventory";
+                tab.classList.toggle("active", active);
+                if (active) tab.setAttribute("aria-current", "page");
+                else tab.removeAttribute("aria-current");
+            });
+        }
     }
 }
 
