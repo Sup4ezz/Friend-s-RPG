@@ -57,10 +57,10 @@
         document.body.appendChild(nav);
       }
       nav.innerHTML = `
-        <button type="button" class="lorgus-mainmenu-arrow top" data-route="/character" aria-label="Персонаж" title="Персонаж"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20V4M5 11l7-7 7 7"/></svg></span><b>ПЕРСОНАЖ</b></button>
-        <button type="button" class="lorgus-mainmenu-arrow bottom" data-route="/mail" aria-label="Письма" title="Письма"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v16M5 13l7 7 7-7"/></svg></span><b>ПИСЬМА</b></button>
-        <button type="button" class="lorgus-mainmenu-arrow left" data-route="/rp" aria-label="Ролевая" title="Ролевая"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 12H4M11 5l-7 7 7 7"/></svg></span><b>РОЛЕВАЯ</b></button>
-        <button type="button" class="lorgus-mainmenu-arrow right" data-route="/lorblook" aria-label="Лорбук" title="Лорбук"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h16M13 5l7 7-7 7"/></svg></span><b>ЛОРБУК</b></button>
+        <button type="button" class="lorgus-mainmenu-arrow top" data-route="/character" data-transition="top" aria-label="Персонаж" title="Персонаж"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20V4M5 11l7-7 7 7"/></svg></span><b>ПЕРСОНАЖ</b></button>
+        <button type="button" class="lorgus-mainmenu-arrow bottom" data-route="/mail" data-transition="bottom" aria-label="Письма" title="Письма"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v16M5 13l7 7 7-7"/></svg></span><b>ПИСЬМА</b></button>
+        <button type="button" class="lorgus-mainmenu-arrow left" data-route="/rp" data-transition="left" aria-label="Ролевая" title="Ролевая"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 12H4M11 5l-7 7 7 7"/></svg></span><b>РОЛЕВАЯ</b></button>
+        <button type="button" class="lorgus-mainmenu-arrow right" data-route="/lorblook" data-transition="right" aria-label="Лорбук" title="Лорбук"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h16M13 5l7 7-7 7"/></svg></span><b>ЛОРБУК</b></button>
       `;
       nav.hidden = false;
       nav.querySelectorAll("button[data-route]").forEach(button => {
