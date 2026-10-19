@@ -554,7 +554,7 @@ async function appendRpMessage(message) {
             '<div class="lorgus-messenger-bubble">' +
                 (message.reply_to_id && message.reply_to ? '<button type="button" class="lorgus-rp-reply-quote" data-reply-target-id="' + escapeHtml(String(message.reply_to_id)) + '">' +
                     '<span class="lorgus-rp-reply-quote-mark">↩</span><span class="lorgus-rp-reply-quote-content"><strong>' + escapeHtml(message.reply_to.characters?.name || "Без имени") + '</strong><span>' + escapeHtml(String(message.reply_to.body || "").replace(/\s+/g, " ").slice(0, 180)) + '</span></span></button>' : '') +
-                '' + renderedMessageBody + ' +
+                renderedMessageBody +
                 (message.status === "reverted" ? '<div class="lorgus-rp-reverted-mark">Пост отменён администрацией' + (message.revert_reason ? ' · ' + escapeHtml(message.revert_reason) : '') + '</div>' : '') +
                 '<div class="lorgus-rp-item-uses"></div>' +
             '</div>' +
