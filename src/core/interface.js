@@ -525,6 +525,21 @@ async function appendRpMessage(message) {
 
     const mine = String(message.character_id) === String(window.activeCharacterId);
     const adminPost = Boolean(message.is_admin_post);
+    const multiActorPrefix = "[[LORGUS_MULTI_ACTOR_V1]]";
+    let multiActorPost = null;
+    if (adminPost && typeof message.body === "string" && message.body.startsWith(multiActorPrefix)) {
+        try {
+            const parsed = JSON.parse(message.body.slice(multiActorPrefix.length));
+            if (Array.isArray(parsed.actors) && parsed.actors.length) multiActorPost = parsed.actors;
+        } catch (error) {
+            console.warn("Не удалось прочитать составной RP-пост:", error);
+        }
+    }
+    const renderedMessageBody = multiActorPost
+        ? '<div class="lorgus-multi-actor-post">' + multiActorPost.map(actor =>
+            '<section class="lorgus-multi-actor-segment"><strong>' + escapeHtml(actor.name || "Персонаж") + '</strong><p>' + escapeHtml(actor.body || "").replace(/\\n/g, "<br>") + '</p></section>'
+          ).join("") + '</div>'
+        : '<p>' + escapeHtml(message.body) + '</p>';
     const article = document.createElement("article");
     article.className = "lorgus-messenger-message" + (mine ? " mine" : "") + (adminPost ? " admin-authored" : "") + (message.status === "reverted" ? " reverted" : "");
     article.dataset.rpMessageId = message.id;
@@ -539,7 +554,7 @@ async function appendRpMessage(message) {
             '<div class="lorgus-messenger-bubble">' +
                 (message.reply_to_id && message.reply_to ? '<button type="button" class="lorgus-rp-reply-quote" data-reply-target-id="' + escapeHtml(String(message.reply_to_id)) + '">' +
                     '<span class="lorgus-rp-reply-quote-mark">↩</span><span class="lorgus-rp-reply-quote-content"><strong>' + escapeHtml(message.reply_to.characters?.name || "Без имени") + '</strong><span>' + escapeHtml(String(message.reply_to.body || "").replace(/\s+/g, " ").slice(0, 180)) + '</span></span></button>' : '') +
-                '<p>' + escapeHtml(message.body) + '</p>' +
+                '' + renderedMessageBody + ' +
                 (message.status === "reverted" ? '<div class="lorgus-rp-reverted-mark">Пост отменён администрацией' + (message.revert_reason ? ' · ' + escapeHtml(message.revert_reason) : '') + '</div>' : '') +
                 '<div class="lorgus-rp-item-uses"></div>' +
             '</div>' +
