@@ -155,6 +155,19 @@
   const original = window.renderLorgusCodex;
   if (typeof original === "function") {
     window.renderLorgusCodex = function(startId) {
+      // On phones, use the resilient accessible archive instead of the heavier
+      // constellation renderer. This avoids a blank recovery screen when its
+      // animation/layout setup fails on a narrow viewport.
+      if (window.matchMedia("(max-width: 720px)").matches &&
+          typeof window.renderLorgusCodexFallback === "function") {
+        try {
+          const result = window.renderLorgusCodexFallback(startId || "atlas");
+          Promise.resolve(result).catch(error => console.error("[LORGUS] Mobile archive render failed:", error));
+          return result;
+        } catch (error) {
+          console.error("[LORGUS] Mobile archive render error:", error);
+        }
+      }
       // Render the built-in lorebook immediately. Custom Supabase lore is optional:
       // a slow or stalled request must never leave /lorblook blank.
       const root = document.getElementById("cabinet-content");
