@@ -36,6 +36,9 @@ async function renderMail() {
                     <button type="button" id="lorgus-mail-folder-compose">
                         <span>✎</span><strong>Новое письмо</strong>
                     </button>
+                    <button type="button" id="lorgus-mail-go-home" onclick="window.location.assign('/main-page')">
+                        <span>⌂</span><strong>Главная</strong>
+                    </button>
                 </nav>
 
                 <div class="lorgus-mail-sidebar-note">
