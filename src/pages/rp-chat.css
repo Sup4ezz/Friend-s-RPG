@@ -1754,3 +1754,123 @@
   .lorgus-rp-page .lorgus-messenger-send { width:42px !important; height:42px !important; flex:0 0 42px !important; border-radius:50% !important; }
   .lorgus-rp-page .lorgus-messenger-footer { display:none !important; }
 }
+
+
+/* Mobile pass 2: tighten the RP hub, remove cramped/overlapping layout, preserve chat viewport */
+@media (max-width: 650px) {
+  #cabinet-content.lorgus-rp-page-container {
+    position: relative !important;
+    display: block !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    min-height: 100svh !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: calc(env(safe-area-inset-top) + 62px) 16px calc(env(safe-area-inset-bottom) + 24px) !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+  #cabinet-content.lorgus-rp-page-container *,
+  #cabinet-content.lorgus-rp-page-container *::before,
+  #cabinet-content.lorgus-rp-page-container *::after { box-sizing: border-box !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-subpage-back-arrow.right {
+    top: calc(env(safe-area-inset-top) + 10px) !important;
+    left: 16px !important;
+    min-height: 36px !important;
+    padding: 7px 10px !important;
+    border-radius: 5px !important;
+  }
+  #cabinet-content.lorgus-rp-page-container .lorgus-subpage-utility {
+    top: calc(env(safe-area-inset-top) + 10px) !important;
+    right: 14px !important;
+    max-width: calc(100% - 128px) !important;
+    gap: 5px !important;
+  }
+  #cabinet-content.lorgus-rp-page-container .lorgus-subpage-username { max-width: 72px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-subpage-notifications,
+  #cabinet-content.lorgus-rp-page-container .lorgus-subpage-logout {
+    min-width: 31px !important;
+    width: auto !important;
+    min-height: 32px !important;
+    height: 32px !important;
+    padding: 5px 7px !important;
+    border-radius: 4px !important;
+  }
+  #cabinet-content.lorgus-rp-page-container .lorgus-subpage-shell.lorgus-rp-page {
+    display: block !important;
+    position: relative !important;
+    width: 100% !important;
+    max-width: 560px !important;
+    min-width: 0 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-hero {
+    padding: 5px 0 19px !important;
+    margin: 0 !important;
+  }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-eyebrow { font-size: 9px !important; letter-spacing: .18em !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-hero h1 {
+    margin: 8px 0 3px !important;
+    font-size: clamp(35px, 10.5vw, 46px) !important;
+    line-height: 1.02 !important;
+    letter-spacing: -.015em !important;
+  }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-hero p { margin-top: 7px !important; font-size: 13px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-command-grid { gap: 10px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-scene {
+    min-height: 0 !important;
+    padding: 15px !important;
+    gap: 0 !important;
+    border-radius: 7px !important;
+    background:
+      radial-gradient(ellipse at 90% 8%, rgba(197,157,82,.13), transparent 44%),
+      linear-gradient(145deg, #242017 0%, #171613 58%, #111214 100%) !important;
+    box-shadow: inset 0 1px rgba(255,238,199,.06), 0 9px 24px rgba(0,0,0,.22) !important;
+  }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-scene-art { opacity: .16 !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-scene-center { padding: 22px 0 20px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-scene-center h2 {
+    margin: 8px 0 5px !important;
+    font-size: clamp(28px, 8vw, 36px) !important;
+    line-height: 1.04 !important;
+  }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-scene-center p { font-size: 12px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-rule { margin: 14px 0 10px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-enter {
+    min-height: 48px !important;
+    border-radius: 5px !important;
+    font-size: 10px !important;
+    letter-spacing: .1em !important;
+  }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-side { gap: 8px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-side-card {
+    grid-template-columns: 26px minmax(0,1fr) 16px !important;
+    gap: 10px !important;
+    min-height: 0 !important;
+    padding: 13px 12px !important;
+    border-radius: 6px !important;
+    background: linear-gradient(120deg, rgba(35,32,26,.98), rgba(19,20,20,.98)) !important;
+  }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-side-number { font-size: 19px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-side-card strong { font-size: 18px !important; line-height: 1.12 !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-side-card p { margin-top: 4px !important; font-size: 11px !important; line-height: 1.45 !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-footer {
+    margin-top: 17px !important;
+    padding-top: 13px !important;
+    gap: 6px 9px !important;
+  }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-footer > span:first-child { font-size: 8px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-footer strong { overflow-wrap: anywhere !important; font-size: 11px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-footer > span:last-child { font-size: 10px !important; line-height: 1.5 !important; }
+}
+@media (max-width: 380px) {
+  #cabinet-content.lorgus-rp-page-container { padding-left: 12px !important; padding-right: 12px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-subpage-back-arrow.right { left: 12px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-subpage-utility { right: 12px !important; }
+  #cabinet-content.lorgus-rp-page-container .lorgus-rp-side-card { grid-template-columns: 22px minmax(0,1fr) 13px !important; gap: 8px !important; padding: 12px 10px !important; }
+}
