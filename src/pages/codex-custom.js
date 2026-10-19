@@ -157,9 +157,27 @@
     window.renderLorgusCodex = function(startId) {
       // Render the built-in lorebook immediately. Custom Supabase lore is optional:
       // a slow or stalled request must never leave /lorblook blank.
+      const root = document.getElementById("cabinet-content");
+      const initialSectionCount = (window.LORGUS_CODEX_SECTIONS || []).length;
+      if (root && root.dataset.lorgusCodexInteractionWatch !== "1") {
+        root.dataset.lorgusCodexInteractionWatch = "1";
+        ["pointerdown", "click", "input", "keydown"].forEach(type => {
+          root.addEventListener(type, () => { root.dataset.lorgusCodexInteracted = "1"; }, { passive: true });
+        });
+      }
       const rendered = original(startId);
       installImageObserver();
-      loadCustomLore().catch(error => {
+      loadCustomLore().then(() => {
+        // If custom entries arrived after the initial render, refresh the atlas only
+        // while the player has not started interacting with it.
+        const sections = window.LORGUS_CODEX_SECTIONS || [];
+        if (sections.length > initialSectionCount &&
+            window.location.pathname.replace(/\/+$/, "") === "/lorblook" &&
+            root?.isConnected && root.dataset.lorgusCodexInteracted !== "1") {
+          original(startId);
+          installImageObserver();
+        }
+      }).catch(error => {
         console.warn("LORGUS custom lore deferred:", error);
       });
       return rendered;
