@@ -1651,3 +1651,106 @@
   .lorgus-rp-page .lorgus-messenger-message-avatar { width: 24px !important; height: 24px !important; flex-basis: 24px !important; }
   .lorgus-rp-page .lorgus-messenger-message-content { max-width: calc(100% - 31px) !important; }
 }
+
+
+/* LORGUS RP — dedicated mobile layout: immersive hub + readable messenger */
+@media (max-width: 650px) {
+  .lorgus-rp-page-container {
+    box-sizing: border-box !important;
+    width: 100% !important;
+    min-height: 100dvh !important;
+    height: auto !important;
+    padding: max(58px, calc(env(safe-area-inset-top) + 48px)) 14px calc(26px + env(safe-area-inset-bottom)) !important;
+    overflow: visible !important;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(169, 122, 48, .16), transparent 42%),
+      linear-gradient(180deg, #17130d 0%, #0c0d0e 46%, #090a0b 100%) !important;
+  }
+  .lorgus-rp-page-container .lorgus-rp-atmosphere { position: absolute !important; inset: 0 0 auto !important; height: 260px !important; pointer-events: none !important; opacity: .35 !important; }
+  .lorgus-rp-page-container .lorgus-subpage-back-arrow.right {
+    position: absolute !important; top: max(10px, env(safe-area-inset-top)) !important; left: 12px !important; right: auto !important;
+    display: inline-flex !important; align-items: center !important; gap: 8px !important;
+    min-height: 38px !important; padding: 8px 12px !important; border: 1px solid rgba(214,181,112,.3) !important;
+    border-radius: 3px !important; background: rgba(15,13,10,.88) !important; color: #e8d3a3 !important;
+    font-size: 10px !important; letter-spacing: .13em !important; z-index: 8 !important;
+  }
+  .lorgus-rp-page-container .lorgus-subpage-back-arrow.right span { font-size: 10px !important; }
+  .lorgus-rp-page-container .lorgus-subpage-utility {
+    position: absolute !important; top: max(10px, env(safe-area-inset-top)) !important; right: 12px !important;
+    display: flex !important; align-items: center !important; gap: 7px !important; max-width: 58% !important;
+    min-height: 38px !important; padding: 0 !important; background: transparent !important; z-index: 8 !important;
+  }
+  .lorgus-rp-page-container .lorgus-subpage-username { max-width: 82px !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; font-size: 10px !important; }
+  .lorgus-rp-page-container .lorgus-subpage-notifications,
+  .lorgus-rp-page-container .lorgus-subpage-logout { min-width: 34px !important; min-height: 34px !important; padding: 6px !important; font-size: 10px !important; }
+  .lorgus-rp-page-container .lorgus-subpage-shell.lorgus-rp-page {
+    box-sizing: border-box !important; width: 100% !important; height: auto !important; min-height: 0 !important;
+    margin: 0 !important; padding: 0 !important; overflow: visible !important; background: transparent !important;
+  }
+  .lorgus-rp-page-container .lorgus-rp-hero { padding: 14px 2px 24px !important; text-align: left !important; }
+  .lorgus-rp-page-container .lorgus-rp-eyebrow { display: flex !important; align-items: center !important; gap: 8px !important; font-size: 9px !important; letter-spacing: .2em !important; color: #c8a66b !important; }
+  .lorgus-rp-page-container .lorgus-rp-hero h1 { margin: 9px 0 4px !important; font-family: "Cormorant Garamond", Georgia, serif !important; font-size: clamp(39px, 12vw, 54px) !important; line-height: .98 !important; font-weight: 500 !important; letter-spacing: .015em !important; color: #f0e1bf !important; }
+  .lorgus-rp-page-container .lorgus-rp-hero p { max-width: 260px !important; margin: 9px 0 0 !important; color: #a79a80 !important; font-size: 12px !important; line-height: 1.6 !important; }
+  .lorgus-rp-page-container .lorgus-rp-command-grid { display: grid !important; grid-template-columns: minmax(0,1fr) !important; gap: 12px !important; }
+  .lorgus-rp-page-container .lorgus-rp-scene {
+    position: relative !important; min-height: 310px !important; display: flex !important; flex-direction: column !important;
+    justify-content: space-between !important; padding: 17px !important; overflow: hidden !important;
+    border: 1px solid rgba(204,166,99,.3) !important; border-radius: 4px !important;
+    background: linear-gradient(145deg, rgba(43,34,21,.96), rgba(17,17,16,.98) 65%, rgba(10,11,12,.99)) !important;
+    box-shadow: inset 0 1px rgba(255,236,193,.07), 0 16px 36px rgba(0,0,0,.25) !important;
+  }
+  .lorgus-rp-page-container .lorgus-rp-scene::after { content:""; position:absolute; inset:0 0 auto; height:2px; background:linear-gradient(90deg,transparent,#c8a66b,transparent); opacity:.8; pointer-events:none; }
+  .lorgus-rp-page-container .lorgus-rp-scene-top { position: relative !important; z-index: 1 !important; display:flex !important; align-items:center !important; justify-content:space-between !important; gap:8px !important; }
+  .lorgus-rp-page-container .lorgus-rp-state { font-size:9px !important; letter-spacing:.12em !important; }
+  .lorgus-rp-page-container .lorgus-rp-scene-index { color:rgba(222,190,125,.42) !important; font-family:Georgia,serif !important; font-size:25px !important; }
+  .lorgus-rp-page-container .lorgus-rp-scene-art { position:absolute !important; inset:0 !important; opacity:.24 !important; background-position:center !important; background-size:cover !important; mask-image:linear-gradient(180deg,#000,transparent 92%) !important; }
+  .lorgus-rp-page-container .lorgus-rp-scene-center { position:relative !important; z-index:1 !important; padding:28px 0 25px !important; }
+  .lorgus-rp-page-container .lorgus-rp-label { color:#bca16c !important; font-size:9px !important; letter-spacing:.18em !important; }
+  .lorgus-rp-page-container .lorgus-rp-scene-center h2 { margin:9px 0 4px !important; color:#f0e4ca !important; font:500 clamp(29px,8vw,38px)/1.05 "Cormorant Garamond",Georgia,serif !important; overflow-wrap:anywhere !important; }
+  .lorgus-rp-page-container .lorgus-rp-scene-center p { margin:0 !important; color:#b4a78e !important; font-size:12px !important; line-height:1.6 !important; }
+  .lorgus-rp-page-container .lorgus-rp-rule { width:64px !important; height:1px !important; margin:19px 0 12px !important; background:linear-gradient(90deg,#c7a363,transparent) !important; }
+  .lorgus-rp-page-container .lorgus-rp-scene-center strong { color:#e0c58c !important; font-size:12px !important; letter-spacing:.04em !important; }
+  .lorgus-rp-page-container .lorgus-rp-enter { position:relative !important; z-index:2 !important; display:flex !important; justify-content:space-between !important; align-items:center !important; gap:12px !important; width:100% !important; min-height:49px !important; padding:0 15px !important; border:1px solid rgba(226,193,125,.5) !important; border-radius:2px !important; background:linear-gradient(100deg,#c5a263,#9b753d) !important; color:#17120a !important; font-size:10px !important; font-weight:800 !important; letter-spacing:.12em !important; }
+  .lorgus-rp-page-container .lorgus-rp-enter b { font-size:20px !important; font-weight:400 !important; }
+  .lorgus-rp-page-container .lorgus-rp-side { display:grid !important; grid-template-columns:minmax(0,1fr) !important; gap:9px !important; }
+  .lorgus-rp-page-container .lorgus-rp-side-card { display:grid !important; grid-template-columns:30px minmax(0,1fr) 16px !important; align-items:center !important; gap:11px !important; width:100% !important; min-height:86px !important; padding:14px !important; text-align:left !important; border:1px solid rgba(206,174,111,.17) !important; border-radius:3px !important; background:linear-gradient(110deg,rgba(31,28,22,.96),rgba(16,17,17,.98)) !important; color:#e8ddc6 !important; }
+  .lorgus-rp-page-container .lorgus-rp-side-number { align-self:start !important; color:#b89a60 !important; font:20px/1 "Cormorant Garamond",Georgia,serif !important; }
+  .lorgus-rp-page-container .lorgus-rp-side-card small { display:block !important; margin-bottom:4px !important; color:#b89a60 !important; font-size:8px !important; letter-spacing:.16em !important; }
+  .lorgus-rp-page-container .lorgus-rp-side-card strong { display:block !important; color:#eee2c9 !important; font:600 19px/1.15 "Cormorant Garamond",Georgia,serif !important; }
+  .lorgus-rp-page-container .lorgus-rp-side-card p { margin:5px 0 0 !important; color:#a69c88 !important; font-size:11px !important; line-height:1.5 !important; }
+  .lorgus-rp-page-container .lorgus-rp-side-card > b { color:#c6a76c !important; font-size:18px !important; font-weight:400 !important; }
+  .lorgus-rp-page-container .lorgus-rp-footer { display:grid !important; grid-template-columns:auto 1fr !important; gap:7px 10px !important; align-items:center !important; margin:20px 0 0 !important; padding:15px 2px 0 !important; border-top:1px solid rgba(205,171,104,.18) !important; }
+  .lorgus-rp-page-container .lorgus-rp-footer > span:first-child { color:#b89b65 !important; font-size:8px !important; letter-spacing:.14em !important; }
+  .lorgus-rp-page-container .lorgus-rp-footer strong { color:#e5d6b5 !important; font-size:11px !important; }
+  .lorgus-rp-page-container .lorgus-rp-footer i { display:none !important; }
+  .lorgus-rp-page-container .lorgus-rp-footer > span:last-child { grid-column:1/-1 !important; color:#8f8878 !important; font-size:10px !important; line-height:1.6 !important; }
+  
+  /* Messenger: app-like full-height screen, compact top bar, wide readable bubbles */
+  .lorgus-rp-page:not(.lorgus-rp-page-container) { width:100% !important; max-width:100vw !important; height:100dvh !important; min-height:0 !important; margin:0 !important; border-radius:0 !important; overflow:hidden !important; }
+  .lorgus-rp-page .lorgus-messenger-shell { position:relative !important; display:block !important; width:100% !important; height:100% !important; min-height:0 !important; border:0 !important; border-radius:0 !important; }
+  .lorgus-rp-page .lorgus-messenger-main { display:grid !important; grid-template-rows:62px minmax(0,1fr) auto !important; width:100% !important; height:100% !important; min-width:0 !important; }
+  .lorgus-rp-page .lorgus-messenger-header { min-height:62px !important; box-sizing:border-box !important; padding:7px 12px !important; gap:10px !important; background:rgba(19,18,15,.98) !important; }
+  .lorgus-rp-page .lorgus-messenger-header-photo { width:42px !important; height:42px !important; flex:0 0 42px !important; border-radius:50% !important; }
+  .lorgus-rp-page .lorgus-messenger-header-info { min-width:0 !important; flex:1 1 auto !important; }
+  .lorgus-rp-page .lorgus-messenger-header-info h1 { overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; font-size:16px !important; line-height:1.15 !important; }
+  .lorgus-rp-page .lorgus-messenger-header-info p { overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; margin-top:3px !important; font-size:10px !important; }
+  .lorgus-rp-page .lorgus-messenger-header-actions { gap:5px !important; }
+  .lorgus-rp-page .lorgus-messenger-header-actions button { width:35px !important; height:35px !important; border-radius:50% !important; }
+  .lorgus-rp-page .lorgus-messenger-feed { min-height:0 !important; padding:18px 11px calc(16px + env(safe-area-inset-bottom)) !important; overscroll-behavior:contain !important; background:radial-gradient(ellipse at 50% 0,rgba(179,139,68,.055),transparent 60%),#0d0f11 !important; }
+  .lorgus-rp-page .lorgus-messenger-message { display:flex !important; gap:8px !important; width:100% !important; margin:0 0 17px !important; }
+  .lorgus-rp-page .lorgus-messenger-message-avatar { width:30px !important; height:30px !important; flex:0 0 30px !important; margin-top:2px !important; border-radius:50% !important; }
+  .lorgus-rp-page .lorgus-messenger-message-content { min-width:0 !important; width:auto !important; max-width:calc(100% - 38px) !important; flex:1 1 auto !important; }
+  .lorgus-rp-page .lorgus-messenger-message-meta { min-height:0 !important; padding:0 4px 5px !important; gap:7px !important; flex-wrap:wrap !important; }
+  .lorgus-rp-page .lorgus-messenger-message-meta strong { font-size:12px !important; }
+  .lorgus-rp-page .lorgus-messenger-message-meta time { font-size:9px !important; }
+  .lorgus-rp-page .lorgus-messenger-bubble { padding:11px 13px !important; border-radius:3px 14px 14px 14px !important; box-shadow:0 5px 16px rgba(0,0,0,.13) !important; }
+  .lorgus-rp-page .lorgus-messenger-bubble p { font-size:14px !important; line-height:1.65 !important; overflow-wrap:anywhere !important; }
+  .lorgus-rp-page .lorgus-messenger-message.mine .lorgus-messenger-bubble { border-radius:14px 3px 14px 14px !important; }
+  .lorgus-rp-page .lorgus-messenger-composer { display:flex !important; align-items:flex-end !important; gap:7px !important; padding:9px 10px calc(9px + env(safe-area-inset-bottom)) !important; background:#171613 !important; }
+  .lorgus-rp-page .lorgus-messenger-composer-tools { gap:4px !important; }
+  .lorgus-rp-page .lorgus-messenger-composer-tools button { width:35px !important; height:35px !important; border-radius:50% !important; font-size:15px !important; }
+  .lorgus-rp-page .lorgus-messenger-input-wrap { min-width:0 !important; flex:1 1 auto !important; border-radius:16px !important; }
+  .lorgus-rp-page .lorgus-messenger-input-wrap textarea { display:block !important; box-sizing:border-box !important; width:100% !important; min-height:48px !important; max-height:140px !important; padding:12px 13px !important; font-size:14px !important; line-height:1.5 !important; resize:none !important; }
+  .lorgus-rp-page .lorgus-messenger-send { width:42px !important; height:42px !important; flex:0 0 42px !important; border-radius:50% !important; }
+  .lorgus-rp-page .lorgus-messenger-footer { display:none !important; }
+}
