@@ -104,7 +104,7 @@ async function renderLorgusCharacterHub() {
                     <button type="button" class="active" aria-current="page" data-character-local-view="dossier"><span>◈</span><b>Досье</b><i>01</i></button>
                     <button type="button" data-character-local-view="inventory"><span>◇</span><b>Снаряжение</b><i>02</i></button>
                 </nav>
-                <button type="button" class="lorgus-character-map-button" onclick="window.lorgusSubpageTransition ? window.lorgusSubpageTransition('bottom', () => window.lorgusNavigate ? window.lorgusNavigate('/map') : window.renderLorgusWorldMapCurrent?.()) : (window.lorgusNavigate ? window.lorgusNavigate('/map') : window.renderLorgusWorldMapCurrent?.())">Вернуться на карту</button>
+                <button type="button" class="lorgus-character-map-button" onclick="window.lorgusSubpageTransition ? window.lorgusSubpageTransition('bottom', () => window.lorgusNavigate ? window.lorgusNavigate('/main-page') : window.lorgusNavigate?.('/main-page')) : window.lorgusNavigate?.('/main-page')">Вернуться на главную</button>
             </aside>
 
             <main class="lorgus-character-main">
