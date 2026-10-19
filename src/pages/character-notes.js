@@ -9,6 +9,13 @@ window.renderLorgusCharacterCanvas = async function (characterId) {
     const status = panel.querySelector(".lorgus-canvas-status");
     const world = panel.querySelector(".lorgus-canvas-world");
     const svg = panel.querySelector(".lorgus-canvas-links");
+    // The character sheet must remain usable even if a stale/partial DOM is present.
+    // Canvas helpers dereference these nodes, so bail out before any async work if missing.
+    if (!toolbar || !world || !svg) {
+        console.warn("LORGUS canvas: required board elements are missing; skipping canvas render.");
+        if (status) { status.textContent = "Доска временно недоступна. Обнови страницу."; status.dataset.kind = "error"; }
+        return;
+    }
     const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
     const id = () => (window.crypto?.randomUUID?.() || ("b" + Date.now().toString(36) + Math.random().toString(36).slice(2)));
     let user;
