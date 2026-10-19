@@ -198,7 +198,17 @@ async function renderLorgusCharacterHub() {
     const abilities = await window.loadCharacterAbilities?.(c.id) || [];
     const list = container.querySelector(".lorgus-ability-list");
     if (list) list.innerHTML = window.renderAbilityList?.(abilities) || '<div class="lorgus-ability-empty">Подтверждённых способностей пока нет.</div>';
-    await window.renderLorgusCharacterCanvas?.(c.id);
+    // The personal canvas is optional; its failure must never blank the whole dossier.
+    try {
+        await window.renderLorgusCharacterCanvas?.(c.id);
+    } catch (canvasError) {
+        console.error("LORGUS character canvas failed independently:", canvasError);
+        const canvasStatus = container.querySelector(".lorgus-canvas-status");
+        if (canvasStatus) {
+            canvasStatus.textContent = "Доска временно недоступна";
+            canvasStatus.dataset.kind = "error";
+        }
+    }
 
     } catch (error) {
         console.error("LORGUS character page render failed:", error);
