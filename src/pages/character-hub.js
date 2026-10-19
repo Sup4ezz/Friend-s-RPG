@@ -1,5 +1,7 @@
 /* LORGUS character dossier — redesigned as an illustrated character sheet */
 async function renderLorgusCharacterHub() {
+    const renderToken = (window.__lorgusCharacterRenderToken || 0) + 1;
+    window.__lorgusCharacterRenderToken = renderToken;
     try {
     // При прямом открытии мобильного маршрута кабинет и персонаж восстанавливаются
     // асинхронно. Не завершаем рендер молча, если роутер вызвал страницу раньше.
@@ -187,6 +189,7 @@ async function renderLorgusCharacterHub() {
     const portrait = container.querySelector(".lorgus-character-portrait-inner");
     try {
         const photoUrl = await window.getRpCharacterPhoto?.(c.id);
+        if (renderToken !== window.__lorgusCharacterRenderToken || !container.isConnected) return;
         if (photoUrl && portrait && container.isConnected) {
             portrait.innerHTML = '<img src="' + esc(photoUrl) + '" alt="Портрет ' + name + '">';
             portrait.classList.add("has-photo");
@@ -196,11 +199,12 @@ async function renderLorgusCharacterHub() {
     }
 
     const abilities = await window.loadCharacterAbilities?.(c.id) || [];
+    if (renderToken !== window.__lorgusCharacterRenderToken || !container.isConnected) return;
     const list = container.querySelector(".lorgus-ability-list");
     if (list) list.innerHTML = window.renderAbilityList?.(abilities) || '<div class="lorgus-ability-empty">Подтверждённых способностей пока нет.</div>';
     // The personal canvas is optional; its failure must never blank the whole dossier.
     try {
-        await window.renderLorgusCharacterCanvas?.(c.id);
+        await window.renderLorgusCharacterCanvas?.(c.id, container);
     } catch (canvasError) {
         console.error("LORGUS character canvas failed independently:", canvasError);
         const canvasStatus = container.querySelector(".lorgus-canvas-status");
