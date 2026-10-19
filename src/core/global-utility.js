@@ -44,56 +44,45 @@
     const active = document.querySelector(ROOTS);
     bar.classList.toggle("is-visible", Boolean(active));
 
-    const path = (window.location.pathname || "").replace(/\/+$/, "");
-    const directions = {
-      "/mail": { direction: "top", label: "Вернуться на карту из писем", path: "M12 20V4M5 11l7-7 7 7" },
-      "/character": { direction: "bottom", label: "Вернуться на карту из персонажа", path: "M12 4v16M5 13l7 7 7-7" },
-      "/lorblook": { direction: "left", label: "Вернуться на карту из лорбука", path: "M20 12H4M11 5l-7 7 7 7" },
-      "/rp": { direction: "right", label: "Вернуться на карту из ролевой", path: "M4 12h16M13 5l7 7-7 7" }
-    };
-    const config = directions[path];
-    let nav = document.querySelector(".lorgus-subpage-nav");
+    const path = (window.location.pathname || "").replace(/\/+$/, "") || "/";
+    const route = /^\/rp\/(chat|road)\//.test(path) ? "/rp" : path;
+    const active = document.querySelector(ROOTS);
+    bar.classList.toggle("is-visible", Boolean(active));
 
-    // На подстраницах сохраняем ту же направленную навигацию, что и на карте:
-    // кнопка занимает своё направление, а не висит отдельной панелью сверху.
-    if (config && active) {
+    const sectionPaths = new Set(["/mail", "/character", "/lorblook", "/rp"]);
+    let nav = document.querySelector(".lorgus-subpage-nav");
+    if (sectionPaths.has(route) && active) {
       if (!nav) {
         nav = document.createElement("nav");
         nav.className = "lorgus-mainmenu-nav lorgus-subpage-nav";
         nav.setAttribute("aria-label", "Навигация по миру");
         document.body.appendChild(nav);
       }
-      nav.innerHTML = '<button type="button" class="lorgus-mainmenu-arrow ' + config.direction + '" aria-label="' + config.label + '" title="' + config.label + '"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="' + config.path + '"/></svg></span><b>КАРТА</b></button>';
-      const returnButton = nav.querySelector("button");
-      returnButton.onclick = () => {
-        const currentPath = (window.location.pathname || "").replace(/\/+$/, "");
-        const current = directions[currentPath];
-        if (!current) return;
-
-        const openMap = () => {
-          if (typeof window.lorgusNavigate === "function") {
-            window.lorgusNavigate("/map");
-          } else {
-            window.history.pushState({ lorgusRoute: "/map" }, "", "/map");
-            if (typeof window.renderLorgusWorldMapCurrent === "function") {
-              window.renderLorgusWorldMapCurrent();
-            } else {
-              window.location.assign("/map");
-            }
-          }
-        };
-
-        // Переход должен менять и экран, и URL. Раньше здесь вызывался
-        // только рендер карты, поэтому адрес оставался на старой странице.
-        window.lorgusMainMenuNavigating = false;
-        delete document.documentElement.dataset.lorgusTransition;
-        if (typeof window.lorgusSubpageTransition === "function") {
-          window.lorgusSubpageTransition(current.direction, openMap);
-        } else {
-          openMap();
-        }
-      };
+      nav.innerHTML = `
+        <button type="button" class="lorgus-mainmenu-arrow top" data-route="/character" aria-label="Персонаж" title="Персонаж"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 20V4M5 11l7-7 7 7"/></svg></span><b>ПЕРСОНАЖ</b></button>
+        <button type="button" class="lorgus-mainmenu-arrow bottom" data-route="/mail" aria-label="Письма" title="Письма"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v16M5 13l7 7 7-7"/></svg></span><b>ПИСЬМА</b></button>
+        <button type="button" class="lorgus-mainmenu-arrow left" data-route="/rp" aria-label="Ролевая" title="Ролевая"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 12H4M11 5l-7 7 7 7"/></svg></span><b>РОЛЕВАЯ</b></button>
+        <button type="button" class="lorgus-mainmenu-arrow right" data-route="/lorblook" aria-label="Лорбук" title="Лорбук"><span class="lorgus-nav-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h16M13 5l7 7-7 7"/></svg></span><b>ЛОРБУК</b></button>
+      `;
       nav.hidden = false;
+      nav.querySelectorAll("button[data-route]").forEach(button => {
+        button.addEventListener("click", event => {
+          // Router's capture handler performs clean full-page navigation on phones.
+          if (window.matchMedia("(max-width: 720px)").matches) return;
+          event.preventDefault();
+          const target = button.dataset.route;
+          const direction = ["top", "bottom", "left", "right"].find(name => button.classList.contains(name)) || "right";
+          const openTarget = () => {
+            if (typeof window.lorgusNavigate === "function") window.lorgusNavigate(target);
+            else window.location.assign(target);
+          };
+          if (typeof window.lorgusSubpageTransition === "function") {
+            window.lorgusSubpageTransition(direction, openTarget);
+          } else {
+            openTarget();
+          }
+        });
+      });
     } else if (nav) {
       nav.remove();
     }
