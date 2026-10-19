@@ -46,8 +46,6 @@
 
     const path = (window.location.pathname || "").replace(/\/+$/, "") || "/";
     const route = /^\/rp\/(chat|road)\//.test(path) ? "/rp" : path;
-    const active = document.querySelector(ROOTS);
-    bar.classList.toggle("is-visible", Boolean(active));
 
     const sectionPaths = new Set(["/mail", "/character", "/lorblook", "/rp"]);
     let nav = document.querySelector(".lorgus-subpage-nav");
