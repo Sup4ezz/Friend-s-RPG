@@ -2151,3 +2151,63 @@
   #cabinet-content.lorgus-rp-page .lorgus-messenger-message-avatar { width:26px !important; height:26px !important; flex-basis:26px !important; }
   #cabinet-content.lorgus-rp-page .lorgus-messenger-message-content { max-width:calc(100% - 34px) !important; }
 }
+
+
+/* Admin-only multi-character RP post composer */
+.lorgus-admin-multi-actor-trigger {
+  display: inline-flex !important; align-items:center !important; justify-content:center !important;
+  width:42px !important; height:42px !important; min-width:42px !important;
+  border:1px solid rgba(222,188,116,.45) !important; border-radius:50% !important;
+  color:#f0d69a !important; background:linear-gradient(145deg,rgba(177,135,57,.24),rgba(28,25,19,.96)) !important;
+  font-size:20px !important; cursor:pointer !important; box-shadow:0 0 16px rgba(192,151,71,.1);
+}
+.lorgus-admin-multi-actor-trigger:hover { background:rgba(190,151,79,.25) !important; }
+.lorgus-admin-multi-actor-overlay {
+  position:fixed; inset:0; z-index:100000; display:flex; align-items:center; justify-content:center;
+  padding:18px; background:rgba(4,5,7,.82); backdrop-filter:blur(9px);
+}
+.lorgus-admin-multi-actor-dialog {
+  display:flex; flex-direction:column; gap:14px; width:min(720px,100%); max-height:min(90dvh,900px);
+  padding:20px; overflow:hidden; color:#e9e0ce; background:linear-gradient(145deg,#211e18,#101214 75%);
+  border:1px solid rgba(211,177,105,.35); border-radius:10px; box-shadow:0 28px 90px rgba(0,0,0,.65);
+}
+.lorgus-admin-multi-actor-dialog header { display:flex; align-items:flex-start; justify-content:space-between; gap:14px; }
+.lorgus-admin-multi-actor-dialog header small { color:#c5a86c; font-size:9px; letter-spacing:.18em; }
+.lorgus-admin-multi-actor-dialog header h2 { margin:5px 0; color:#f0dfb8; font:600 28px/1.1 "Cormorant Garamond",Georgia,serif; }
+.lorgus-admin-multi-actor-dialog header p { margin:0; color:#b5ac9a; font-size:12px; line-height:1.5; }
+.lorgus-admin-multi-actor-dialog [data-multi-close] { flex:0 0 34px; width:34px; height:34px; border:1px solid rgba(211,177,105,.22); border-radius:50%; color:#e7d5ae; background:#171715; font-size:23px; }
+.lorgus-admin-multi-search { display:grid; gap:6px; color:#a9956d; font-size:9px; letter-spacing:.12em; }
+.lorgus-admin-multi-search input { box-sizing:border-box; width:100%; min-height:42px; padding:10px 12px; color:#f0e7d7; background:#0d0f10; border:1px solid rgba(211,177,105,.22); border-radius:5px; font-size:14px; letter-spacing:normal; }
+.lorgus-admin-multi-list { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; max-height:190px; overflow:auto; }
+.lorgus-admin-multi-option { display:flex; align-items:center; gap:9px; min-width:0; padding:9px; border:1px solid rgba(211,177,105,.12); border-radius:5px; background:rgba(255,255,255,.025); cursor:pointer; }
+.lorgus-admin-multi-option.is-selected { border-color:rgba(218,180,100,.58); background:rgba(174,132,54,.14); }
+.lorgus-admin-multi-option input { accent-color:#c8a15a; }
+.lorgus-admin-multi-option-mark { color:#d4b36d; }
+.lorgus-admin-multi-option span:last-child { display:grid; gap:3px; min-width:0; }
+.lorgus-admin-multi-option strong { overflow:hidden; color:#eee2c9; font-size:12px; text-overflow:ellipsis; }
+.lorgus-admin-multi-option small { color:#a89a7e; font-size:10px; }
+.lorgus-admin-multi-fields { display:grid; gap:10px; overflow:auto; min-height:0; }
+.lorgus-admin-multi-fields > p,.lorgus-admin-multi-empty { margin:0; color:#9d9587; font-size:12px; }
+.lorgus-admin-multi-field { display:grid; gap:6px; }
+.lorgus-admin-multi-field > span { display:flex; align-items:baseline; justify-content:space-between; gap:10px; }
+.lorgus-admin-multi-field strong { color:#e5c787; font-size:13px; }
+.lorgus-admin-multi-field small { color:#8f887b; font-size:10px; }
+.lorgus-admin-multi-field textarea { box-sizing:border-box; width:100%; min-height:76px; padding:10px 12px; resize:vertical; color:#eee7d9; background:#0c0e10; border:1px solid rgba(211,177,105,.22); border-radius:6px; font:13px/1.55 Lora,Georgia,serif; }
+.lorgus-admin-multi-actor-dialog footer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding-top:12px; border-top:1px solid rgba(211,177,105,.16); }
+.lorgus-admin-multi-actor-dialog footer span { color:#a89b81; font-size:11px; }
+.lorgus-admin-multi-actor-dialog footer button { min-height:42px; padding:10px 16px; color:#17120a; background:linear-gradient(135deg,#e0c27f,#a77b3c); border:0; border-radius:5px; font-size:11px; font-weight:700; letter-spacing:.05em; }
+.lorgus-admin-multi-actor-dialog footer button:disabled { opacity:.4; cursor:not-allowed; }
+.lorgus-multi-actor-post { display:grid; gap:12px; }
+.lorgus-multi-actor-segment { padding:11px 13px; border-left:2px solid rgba(211,177,105,.55); background:rgba(0,0,0,.13); }
+.lorgus-multi-actor-segment > strong { display:block; margin-bottom:6px; color:#e3c783; font:600 16px/1.2 "Cormorant Garamond",Georgia,serif; }
+.lorgus-messenger-bubble .lorgus-multi-actor-segment p { margin:0; white-space:pre-wrap; overflow-wrap:anywhere; }
+@media (max-width:650px) {
+  .lorgus-admin-multi-actor-trigger { width:34px !important; height:34px !important; min-width:34px !important; font-size:17px !important; }
+  .lorgus-admin-multi-actor-overlay { align-items:flex-end; padding:0; }
+  .lorgus-admin-multi-actor-dialog { width:100%; max-height:94dvh; padding:15px 12px calc(12px + env(safe-area-inset-bottom)); gap:11px; border-radius:14px 14px 0 0; }
+  .lorgus-admin-multi-actor-dialog header h2 { font-size:25px; }
+  .lorgus-admin-multi-list { grid-template-columns:1fr; max-height:145px; }
+  .lorgus-admin-multi-option { padding:8px; }
+  .lorgus-admin-multi-fields { max-height:35dvh; }
+  .lorgus-admin-multi-actor-dialog footer button { padding:10px 11px; }
+}
