@@ -115,7 +115,9 @@
                 if (!document.getElementById("lorgus-character-mobile-reveal-style")) {
                     const style = document.createElement("style");
                     style.id = "lorgus-character-mobile-reveal-style";
-                    style.textContent = "html::before,html::after,body::before,body::after,#root::before,#root::after,.game-page::before,.game-page::after,#cabinet-content::before,#cabinet-content::after,.lorgus-region-arrival::before,.lorgus-region-arrival::after{content:none!important;display:none!important;animation:none!important;transition:none!important}";
+                    style.textContent = "html::before,html::after,body::before,body::after,#root::before,#root::after,.game-page::before,.game-page::after,#cabinet-content::before,#cabinet-content::after,.lorgus-character-page::before,.lorgus-character-page::after,.lorgus-character-shell::before,.lorgus-character-shell::after,.lorgus-region-arrival::before,.lorgus-region-arrival::after{content:none!important;display:none!important;animation:none!important;transition:none!important}" +
+                        "body .lorgus-portal-transition,body .lorgus-eye-transition,body .lorgus-cinematic-auth,body .lorgus-region-transition-veil,body .lorgus-transition-screen,body .lorgus-scene-transition-overlay,body .lorgus-transition-overlay,body .lorgus-portal-transition-veil,body .lorgus-portal-transition-core,body .lorgus-portal-transition-ring,body .lorgus-veil,body .lorgus-transition-veil,body .lorgus-scene-veil,body .lorgus-loading-veil,body .lorgus-mobile-veil{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;animation:none!important;transition:none!important}";
+
                     document.head.appendChild(style);
                 }
 
