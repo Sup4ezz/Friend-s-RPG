@@ -380,7 +380,16 @@
                 event.preventDefault();
                 event.stopPropagation();
                 event.stopImmediatePropagation();
-                window.location.assign(path === "/map" ? "/main-page" : path);
+
+                // Keep mobile navigation inside the SPA. A full document reload
+                // reruns every script and repeats session/character restoration
+                // on every tap, making ordinary section changes unnecessarily slow.
+                const target = path === "/map" ? "/main-page" : path;
+                const opened = navigate(target);
+                if (!opened) {
+                    // Preserve a safety net for a genuinely unavailable SPA route.
+                    window.location.assign(target);
+                }
                 return;
             }
         }
