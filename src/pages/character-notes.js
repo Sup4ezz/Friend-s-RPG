@@ -1,21 +1,31 @@
 /* LORGUS freeform character canvas — private board per character. */
 window.renderLorgusCharacterCanvas = async function (characterId) {
-    const panel = document.querySelector(".lorgus-notes-panel");
+    // A route transition can briefly leave an old/partial notes panel in the DOM.
+    // Pick the fully rendered panel rather than the first matching stale element.
+    const panels = [...document.querySelectorAll("#cabinet-content .lorgus-notes-panel, .lorgus-notes-panel")];
+    const panel = panels.find(candidate =>
+        candidate.querySelector(".lorgus-canvas-viewport") &&
+        candidate.querySelector(".lorgus-canvas-toolbar") &&
+        candidate.querySelector(".lorgus-canvas-world") &&
+        candidate.querySelector(".lorgus-canvas-links")
+    ) || null;
     const viewport = panel?.querySelector(".lorgus-canvas-viewport");
     const db = window.supabaseClient;
-    if (!panel || !viewport || !db || !characterId) return;
+    if (!panel || !viewport || !db || !characterId) {
+        if (panels.length) console.warn("LORGUS canvas: no complete board panel found", panels.map(candidate => ({
+            connected: candidate.isConnected,
+            toolbar: !!candidate.querySelector(".lorgus-canvas-toolbar"),
+            viewport: !!candidate.querySelector(".lorgus-canvas-viewport"),
+            world: !!candidate.querySelector(".lorgus-canvas-world"),
+            links: !!candidate.querySelector(".lorgus-canvas-links")
+        })));
+        return;
+    }
 
     const toolbar = panel.querySelector(".lorgus-canvas-toolbar");
     const status = panel.querySelector(".lorgus-canvas-status");
     const world = panel.querySelector(".lorgus-canvas-world");
     const svg = panel.querySelector(".lorgus-canvas-links");
-    // The character sheet must remain usable even if a stale/partial DOM is present.
-    // Canvas helpers dereference these nodes, so bail out before any async work if missing.
-    if (!toolbar || !world || !svg) {
-        console.warn("LORGUS canvas: required board elements are missing; skipping canvas render.");
-        if (status) { status.textContent = "Доска временно недоступна. Обнови страницу."; status.dataset.kind = "error"; }
-        return;
-    }
     const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[ch]));
     const id = () => (window.crypto?.randomUUID?.() || ("b" + Date.now().toString(36) + Math.random().toString(36).slice(2)));
     let user;
