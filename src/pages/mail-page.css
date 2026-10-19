@@ -78,3 +78,71 @@
 @keyframes lorgus-mail-spin{to{transform:rotate(360deg)}}
 @media(max-width:1050px){.lorgus-mail-page .lorgus-mail-shell{grid-template-columns:200px minmax(0,1fr)!important}.lorgus-mail-page .lorgus-mail-workspace{grid-template-columns:minmax(0,1fr)!important}.lorgus-mail-page .lorgus-mail-list{max-height:440px}}
 @media(max-width:720px){.lorgus-mail-page .lorgus-mail-shell{display:block!important;min-height:100vh!important;padding-bottom:calc(82px + env(safe-area-inset-bottom))!important}.lorgus-mail-page .lorgus-mail-sidebar{display:block!important;padding:12px!important;border-right:0!important;border-bottom:1px solid rgba(215,182,109,.18)!important}.lorgus-mail-page .lorgus-mail-sidebar-character{display:none!important}.lorgus-mail-page .lorgus-mail-nav{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:4px!important;margin-top:12px}.lorgus-mail-page .lorgus-mail-nav button{display:flex!important;justify-content:center!important;gap:6px!important;min-width:0!important;padding:8px 4px!important;font-size:10px!important}.lorgus-mail-page .lorgus-mail-nav button em{display:none}.lorgus-mail-page .lorgus-mail-sidebar-note,.lorgus-mail-page .lorgus-mail-back{display:none!important}.lorgus-mail-page .lorgus-mail-main{padding:18px 11px 28px!important}.lorgus-mail-page .lorgus-mail-header{align-items:flex-start!important}.lorgus-mail-page .lorgus-mail-header h1{font-size:37px!important}.lorgus-mail-page .lorgus-mail-header-meta>span{display:none}.lorgus-mail-page .lorgus-mail-workspace{gap:12px!important;padding-top:12px!important}.lorgus-mail-page .lorgus-mail-panel-head{padding:13px!important}.lorgus-mail-page .lorgus-mail-panel-head h2{font-size:23px!important}.lorgus-mail-page .lorgus-mail-inbox-actions{gap:6px}.lorgus-mail-page .lorgus-mail-inbox-actions button{font-size:8px}.lorgus-mail-page .lorgus-mail-card{padding:14px 12px}.lorgus-mail-page .lorgus-mail-card-route{grid-template-columns:minmax(0,1fr);gap:6px}.lorgus-mail-page .lorgus-mail-card-eta{text-align:left}.lorgus-mail-page .lorgus-mail-form{padding:13px!important}.lorgus-mail-page .lorgus-mail-form>textarea{min-height:160px}.lorgus-mail-page .lorgus-mail-method-picker{padding:13px!important}}
+
+
+/* Mobile mail: inbox-first navigation, comfortable reading, and thumb-friendly controls. */
+@media (max-width: 720px) {
+  .lorgus-mail-page { width:100%; min-width:0; overflow-x:clip; }
+  .lorgus-mail-page .lorgus-mail-shell {
+    min-height:100dvh!important;
+    border-left:0!important;border-right:0!important;
+    padding-bottom:calc(76px + env(safe-area-inset-bottom))!important;
+  }
+  .lorgus-mail-page .lorgus-mail-sidebar { padding:12px 12px 10px!important; }
+  .lorgus-mail-page .lorgus-mail-brand-mark { width:34px;height:34px; }
+  .lorgus-mail-page .lorgus-mail-brand strong { font-size:20px; }
+  .lorgus-mail-page .lorgus-mail-nav { grid-template-columns:repeat(3,minmax(0,1fr))!important; }
+  .lorgus-mail-page .lorgus-mail-nav button {
+    min-height:44px!important;border:1px solid rgba(215,182,109,.13)!important;
+    border-radius:3px!important;font-size:11px!important;white-space:nowrap;
+  }
+  .lorgus-mail-page .lorgus-mail-nav button.active {
+    border-color:rgba(215,182,109,.5)!important;
+    background:linear-gradient(180deg,rgba(215,182,109,.14),rgba(215,182,109,.045))!important;
+  }
+  .lorgus-mail-page .lorgus-mail-main { padding:16px 10px 24px!important; }
+  .lorgus-mail-page .lorgus-mail-header { padding-bottom:14px!important;gap:8px!important; }
+  .lorgus-mail-page .lorgus-mail-header h1 { font-size:clamp(32px,9vw,39px)!important; }
+  .lorgus-mail-page .lorgus-mail-kicker { font-size:8px!important;letter-spacing:.14em!important; }
+  .lorgus-mail-page .lorgus-mail-header-meta button { min-height:40px;padding:8px!important; }
+  .lorgus-mail-page .lorgus-mail-workspace { display:block!important;padding-top:12px!important; }
+  .lorgus-mail-page .lorgus-mail-inbox,.lorgus-mail-page .lorgus-mail-compose { width:100%; }
+  .lorgus-mail-page .lorgus-mail-list { max-height:none!important;overflow:visible!important; }
+  .lorgus-mail-page .lorgus-mail-panel-head { align-items:center!important;padding:13px 12px!important; }
+  .lorgus-mail-page .lorgus-mail-panel-head h2 { font-size:24px!important; }
+  .lorgus-mail-page .lorgus-mail-inbox-actions b { font-size:10px; }
+  .lorgus-mail-page .lorgus-mail-inbox-actions button { min-height:36px;padding:7px!important; }
+  .lorgus-mail-page .lorgus-mail-tools { grid-template-columns:22px minmax(0,1fr)!important;padding:10px!important; }
+  .lorgus-mail-page .lorgus-mail-tools input,
+  .lorgus-mail-page .lorgus-mail-tools select { min-height:42px!important;font-size:13px!important; }
+  .lorgus-mail-page .lorgus-mail-card { padding:15px 12px!important; }
+  .lorgus-mail-page .lorgus-mail-card-top { align-items:flex-start!important;gap:8px!important; }
+  .lorgus-mail-page .lorgus-mail-card-top>strong { font-size:13px!important;line-height:1.45; }
+  .lorgus-mail-page .lorgus-mail-state { margin-top:2px;font-size:9px!important; }
+  .lorgus-mail-page .lorgus-mail-card-meta { font-size:10px!important; }
+  .lorgus-mail-page .lorgus-mail-card>p { margin:11px 0!important;font-size:14px!important;line-height:1.7!important; }
+  .lorgus-mail-page .lorgus-mail-card-route { grid-template-columns:minmax(0,1fr)!important;gap:7px!important; }
+  .lorgus-mail-page .lorgus-mail-route-track { height:3px!important; }
+  .lorgus-mail-page .lorgus-mail-card-eta { font-size:10px!important;text-align:left!important; }
+  .lorgus-mail-page .lorgus-mail-mark-read { min-height:40px!important;padding:9px 12px!important;font-size:11px!important; }
+  .lorgus-mail-page .lorgus-mail-compose { margin-top:12px; }
+  .lorgus-mail-page .lorgus-mail-form { padding:14px 12px!important; }
+  .lorgus-mail-page .lorgus-mail-form>label { margin-bottom:8px!important;font-size:9px!important; }
+  .lorgus-mail-page .lorgus-mail-form>select { min-height:48px!important;margin-bottom:18px!important;font-size:14px!important; }
+  .lorgus-mail-page .lorgus-mail-form>textarea {
+    min-height:clamp(220px,36dvh,360px)!important;max-height:52dvh;
+    resize:vertical;font-size:16px!important;line-height:1.7!important;
+    padding:13px!important;margin-bottom:18px!important;
+  }
+  .lorgus-mail-page .lorgus-mail-method-picker { padding:13px 11px!important; }
+  .lorgus-mail-page .lorgus-mail-method-picker select { min-height:46px!important;font-size:14px!important; }
+  .lorgus-mail-page .lorgus-mail-send { min-height:50px!important;padding:14px!important;font-size:13px!important; }
+  .lorgus-mail-page .lorgus-mail-status { overflow-wrap:anywhere;font-size:12px!important; }
+  .lorgus-mail-page.lorgus-mail-mobile-compose-active .lorgus-mail-inbox { display:none!important; }
+  .lorgus-mail-page.lorgus-mail-mobile-compose-active .lorgus-mail-compose { display:block!important;margin-top:0!important; }
+  .lorgus-mail-page:not(.lorgus-mail-mobile-compose-active) .lorgus-mail-compose { display:none!important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lorgus-mail-page .lorgus-mail-route-track>span,
+  .lorgus-mail-page .lorgus-mail-loading>span { animation:none!important;transition:none!important; }
+}
