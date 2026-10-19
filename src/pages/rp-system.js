@@ -1675,7 +1675,6 @@ async function subscribeToRpMessages(presence) {
     }, 3000);
 }
 async function sendLocalRpMessage() {
-    setupAdminMultiActorComposer(container, window.activeRpChatSpace);
     const input = document.getElementById("lorgus-rp-input");
     if (!input || !window.activeCharacterId || window.rpMessageSending) return;
 
