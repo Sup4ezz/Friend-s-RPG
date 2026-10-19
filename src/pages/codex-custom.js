@@ -154,10 +154,15 @@
 
   const original = window.renderLorgusCodex;
   if (typeof original === "function") {
-    window.renderLorgusCodex = async function(startId) {
-      await loadCustomLore();
+    window.renderLorgusCodex = function(startId) {
+      // Render the built-in lorebook immediately. Custom Supabase lore is optional:
+      // a slow or stalled request must never leave /lorblook blank.
+      const rendered = original(startId);
       installImageObserver();
-      return original(startId);
+      loadCustomLore().catch(error => {
+        console.warn("LORGUS custom lore deferred:", error);
+      });
+      return rendered;
     };
     window.LORGUS_PAGES = window.LORGUS_PAGES || {};
     window.LORGUS_PAGES.codex = { render: () => window.renderLorgusCodex("atlas") };
