@@ -913,6 +913,11 @@
 }
 
 
+/* Desktop must never show the mobile-only home overlay over the world map. */
+.lorgus-map-page .lorgus-mobile-home {
+  display: none !important;
+}
+
 /* Mobile main menu: keep a visible scene when the map canvas is hidden. */
 @media (max-width: 720px) {
   .lorgus-map-page {
