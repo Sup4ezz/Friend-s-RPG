@@ -701,6 +701,7 @@ async function renderRoadChat(presence, fromRoute = false) {
         </div>
     `;
 
+    setupAdminMultiActorComposer(container, window.activeRpChatSpace);
     const input = document.getElementById("lorgus-rp-input");
     if (input) {
         input.addEventListener("input", () => {
@@ -1191,6 +1192,125 @@ async function openRpCharacterQuickCard(characterId, anchorElement = null) {
     requestAnimationFrame(() => panel.classList.add("open"));
 }
 
+
+/* Admin multi-actor post composer: one database post, multiple character voices. */
+async function setupAdminMultiActorComposer(container, presence) {
+    if (!container || !window.supabaseClient || !presence) return;
+    const { data: isAdmin, error } = await window.supabaseClient.rpc("is_admin");
+    if (error || !isAdmin) return;
+    const actions = container.querySelector(".lorgus-messenger-header-actions");
+    if (!actions || actions.querySelector(".lorgus-admin-multi-actor-trigger")) return;
+    const trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.className = "lorgus-admin-multi-actor-trigger";
+    trigger.title = "Опубликовать пост от нескольких персонажей";
+    trigger.setAttribute("aria-label", "Пост от нескольких персонажей");
+    trigger.textContent = "♛";
+    actions.prepend(trigger);
+    trigger.addEventListener("click", () => openAdminMultiActorComposer(presence));
+}
+
+async function openAdminMultiActorComposer(presence) {
+    document.querySelector(".lorgus-admin-multi-actor-overlay")?.remove();
+    const { data, error } = await window.supabaseClient
+        .from("lorgus_nrp_characters")
+        .select("character_id,characters(id,name,race,kingdom,location,occupation,photo_path)")
+        .eq("is_active", true)
+        .order("created_at", { ascending: false });
+    if (error) {
+        alert("Не удалось загрузить список RP-персонажей: " + error.message);
+        return;
+    }
+    const rows = (data || []).filter(row => row.characters?.id);
+    if (!rows.length) {
+        alert("Нет активных RP-персонажей, которыми управляет администрация.");
+        return;
+    }
+    const overlay = document.createElement("div");
+    overlay.className = "lorgus-admin-multi-actor-overlay";
+    overlay.innerHTML = `
+      <section class="lorgus-admin-multi-actor-dialog" role="dialog" aria-modal="true" aria-label="Пост от нескольких персонажей">
+        <header><div><small>АДМИНИСТРАТИВНАЯ ПУБЛИКАЦИЯ</small><h2>Один пост — несколько лиц</h2><p>Выбери персонажей и напиши отдельную часть поста для каждого. Всё уйдёт одним сообщением в текущий чат.</p></div><button type="button" data-multi-close aria-label="Закрыть">×</button></header>
+        <label class="lorgus-admin-multi-search">НАЙТИ ПЕРСОНАЖА<input type="search" data-multi-search placeholder="Имя, раса или королевство…"></label>
+        <div class="lorgus-admin-multi-list" data-multi-list></div>
+        <div class="lorgus-admin-multi-fields" data-multi-fields><p>Выбери одного или нескольких персонажей.</p></div>
+        <footer><span data-multi-count>0 персонажей выбрано</span><button type="button" data-multi-send disabled>Опубликовать пост ↗</button></footer>
+      </section>`;
+    document.body.appendChild(overlay);
+    const list = overlay.querySelector("[data-multi-list]");
+    const fields = overlay.querySelector("[data-multi-fields]");
+    const search = overlay.querySelector("[data-multi-search]");
+    const count = overlay.querySelector("[data-multi-count]");
+    const send = overlay.querySelector("[data-multi-send]");
+    const selected = new Map();
+    const esc = value => window.escapeHtml ? window.escapeHtml(String(value ?? "")) : String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+    const renderList = () => {
+        const q = search.value.trim().toLocaleLowerCase("ru-RU");
+        const matches = rows.filter(row => {
+            const c = row.characters || {};
+            return !q || [c.name,c.race,c.kingdom,c.location,c.occupation].some(v => String(v || "").toLocaleLowerCase("ru-RU").includes(q));
+        });
+        list.innerHTML = matches.map(row => {
+            const c = row.characters, id = String(row.character_id), checked = selected.has(id);
+            return `<label class="lorgus-admin-multi-option ${checked ? "is-selected" : ""}"><input type="checkbox" data-multi-id="${esc(id)}" ${checked ? "checked" : ""}><span class="lorgus-admin-multi-option-mark">✦</span><span><strong>${esc(c.name || "Без имени")}</strong><small>${esc([c.race,c.kingdom].filter(Boolean).join(" · ") || "RP-персонаж")}</small></span></label>`;
+        }).join("") || '<p class="lorgus-admin-multi-empty">Ничего не найдено.</p>';
+        list.querySelectorAll("[data-multi-id]").forEach(input => input.addEventListener("change", () => {
+            const id = input.dataset.multiId, row = rows.find(item => String(item.character_id) === id);
+            if (input.checked) selected.set(id, { id, name: row.characters.name || "Без имени", body: selected.get(id)?.body || "" });
+            else selected.delete(id);
+            renderList(); renderFields();
+        }));
+    };
+    const renderFields = () => {
+        const chosen = Array.from(selected.values());
+        count.textContent = chosen.length + (chosen.length === 1 ? " персонаж выбран" : chosen.length >= 2 && chosen.length <= 4 ? " персонажа выбрано" : " персонажей выбрано");
+        send.disabled = !chosen.length || chosen.some(actor => !actor.body.trim());
+        fields.innerHTML = chosen.length ? chosen.map(actor => `<label class="lorgus-admin-multi-field"><span><strong>${esc(actor.name)}</strong><small>Действие, реплика или описание</small></span><textarea data-multi-body="${esc(actor.id)}" rows="4" maxlength="9000" placeholder="Что делает или говорит ${esc(actor.name)}?">${esc(actor.body)}</textarea></label>`).join("") : "<p>Выбери одного или нескольких персонажей.</p>";
+        fields.querySelectorAll("[data-multi-body]").forEach(textarea => textarea.addEventListener("input", () => {
+            const actor = selected.get(textarea.dataset.multiBody);
+            if (actor) actor.body = textarea.value;
+            send.disabled = !selected.size || Array.from(selected.values()).some(item => !item.body.trim());
+        }));
+    };
+    const close = () => overlay.remove();
+    overlay.querySelector("[data-multi-close]").addEventListener("click", close);
+    overlay.addEventListener("click", event => { if (event.target === overlay) close(); });
+    search.addEventListener("input", renderList);
+    send.addEventListener("click", async () => {
+        const actors = Array.from(selected.values()).map(actor => ({ id: actor.id, name: actor.name, body: actor.body.trim() }));
+        if (!actors.length || actors.some(actor => !actor.body)) return;
+        const payload = "[[LORGUS_MULTI_ACTOR_V1]]" + JSON.stringify({ actors });
+        if (payload.length > 10000) {
+            alert("Пост слишком длинный. Сократи текст, чтобы он помещался в лимит RP.");
+            return;
+        }
+        send.disabled = true;
+        send.textContent = "Публикация…";
+        const chat = presence;
+        const { error: sendError } = await window.supabaseClient.rpc("admin_send_nrp_rp_message", {
+            p_nrp_character_id: actors[0].id,
+            p_presence_type: chat.type,
+            p_region: chat.type === "location" ? chat.region : null,
+            p_location: chat.type === "location" ? chat.location : null,
+            p_from_region: chat.type === "road" ? chat.fromRegion : null,
+            p_from_location: chat.type === "road" ? chat.fromLocation : null,
+            p_to_region: chat.type === "road" ? chat.toRegion : null,
+            p_to_location: chat.type === "road" ? chat.toLocation : null,
+            p_body: payload
+        });
+        if (sendError) {
+            alert("Не удалось опубликовать пост: " + sendError.message);
+            send.disabled = false;
+            send.textContent = "Опубликовать пост ↗";
+            return;
+        }
+        close();
+        if (window.activeRpChatSpace) await loadRpMessages(window.activeRpChatSpace);
+    });
+    renderList();
+    renderFields();
+}
+
 async function renderLocationChats(locationName, regionName, alreadyPresent = false, fromRoute = false) {
     window.clearRpReplyTarget?.();
     if (!fromRoute && window.lorgusNavigateChat) {
@@ -1313,6 +1433,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
         </div>
     `;
 
+    setupAdminMultiActorComposer(container, window.activeRpChatSpace);
     const input = document.getElementById("lorgus-rp-input");
     if (input) {
         input.addEventListener("input", () => {
@@ -1554,6 +1675,7 @@ async function subscribeToRpMessages(presence) {
     }, 3000);
 }
 async function sendLocalRpMessage() {
+    setupAdminMultiActorComposer(container, window.activeRpChatSpace);
     const input = document.getElementById("lorgus-rp-input");
     if (!input || !window.activeCharacterId || window.rpMessageSending) return;
 
