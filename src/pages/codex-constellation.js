@@ -57,7 +57,21 @@
  }
  function render(startId){
   const root=document.getElementById("cabinet-content"),sections=window.LORGUS_CODEX_SECTIONS||[],docs=window.LORGUS_CODEX_DOCS||[],remote=window.LORGUS_CODEX_REMOTE||{};
-  if(!root||!sections.length)return;
+  if(!root)return;
+  // The route must never silently render nothing if the lore data bundle has not initialized yet.
+  if(!sections.length){
+    const fallback=[{id:"atlas",title:"Атлас мира",icon:"✦",desc:"Королевства и земли",entries:[
+      ["Атэрон","Королевство","Земля знаний","Королевство, где ценят учёность, историю и сохранение наследия.","Примум · дом Аркейн"],
+      ["Каэлор","Королевство","Земля металла и мастерства","Горные земли кузниц и шахт; здесь особенно ценят ремесло.","Дом Фалькрейн"],
+      ["Ксандр","Королевство","Торговля и договоры","Могущество королевства держится на торговых путях, банках и обязательствах.","Дом Гринвельд"],
+      ["Лирэн","Королевство","Леса и плодородие","Земли лесов, садов и природных традиций.","Дом Кальери"],
+      ["Морвейн","Королевство","Туманные долины","Северные земли, известные туманом и паломническими дорогами.","Паломничество"],
+      ["Святые Земли","Нейтральная территория","Место переговоров","Здесь встречаются монархи и главы церквей.","Нейтралитет"],
+      ["Спорные Земли","Независимые земли","Поселения между границами","Пограничные территории вне прямой власти королевств.","Вольные поселения"],
+      ["Геена","Закрытый континент","За пределами обычных путей","Опасный отдельный континент, закрытый для обычного посещения.","Закрытая территория"]
+    ]}];
+    window.LORGUS_CODEX_SECTIONS=fallback;
+  }
   root.className="lorgus-codex-page lorgus-codex-constellation";root.replaceChildren();
   const stage=$("section","codex-cosmos");stage.setAttribute("aria-label","Интерактивный архив Лоргуса");
   const decor=$("div","codex-cosmos-dust");decor.setAttribute("aria-hidden","true");
