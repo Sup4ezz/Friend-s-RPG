@@ -1,8 +1,9 @@
 /* LORGUS freeform character canvas — private board per character. */
-window.renderLorgusCharacterCanvas = async function (characterId) {
-    // A route transition can briefly leave an old/partial notes panel in the DOM.
-    // Pick the fully rendered panel rather than the first matching stale element.
-    const panels = [...document.querySelectorAll("#cabinet-content .lorgus-notes-panel, .lorgus-notes-panel")];
+window.renderLorgusCharacterCanvas = async function (characterId, pageContainer = null) {
+    // Prefer the exact page instance that requested the canvas. Concurrent mobile route
+    // renders can leave detached or partial panels elsewhere in the document.
+    const scope = pageContainer?.isConnected ? pageContainer : document;
+    const panels = [...scope.querySelectorAll(".lorgus-notes-panel")];
     const panel = panels.find(candidate =>
         candidate.querySelector(".lorgus-canvas-viewport") &&
         candidate.querySelector(".lorgus-canvas-toolbar") &&
@@ -12,7 +13,7 @@ window.renderLorgusCharacterCanvas = async function (characterId) {
     const viewport = panel?.querySelector(".lorgus-canvas-viewport");
     const db = window.supabaseClient;
     if (!panel || !viewport || !db || !characterId) {
-        if (panels.length) console.warn("LORGUS canvas: no complete board panel found", panels.map(candidate => ({
+        if (panels.length && pageContainer?.isConnected) console.warn("LORGUS canvas: no complete board panel found in current character page", panels.map(candidate => ({
             connected: candidate.isConnected,
             toolbar: !!candidate.querySelector(".lorgus-canvas-toolbar"),
             viewport: !!candidate.querySelector(".lorgus-canvas-viewport"),
