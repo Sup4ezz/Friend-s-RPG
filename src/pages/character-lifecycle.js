@@ -76,8 +76,36 @@ async function renderCharacterSelection(container, applications, pendingApplicat
             image.src = photoUrl;
             image.alt = character.name || "Персонаж";
             image.className = "character-card-photo";
-            image.loading = "lazy";
+            // Character cards are few; eagerly load portraits so mobile browsers
+            // don't leave them blank while the animated card grid is entering view.
+            image.loading = "eager";
             image.decoding = "async";
+            image.addEventListener("error", async () => {
+                if (image.dataset.refreshAttempted === "1") {
+                    image.remove();
+                    avatar.classList.add("character-card-placeholder");
+                    avatar.innerHTML = "<span>✦</span>";
+                    return;
+                }
+                image.dataset.refreshAttempted = "1";
+                try {
+                    const { data: refreshed, error: refreshError } = await window.supabaseClient.storage
+                        .from("character-applications")
+                        .createSignedUrl(application.photo_path, 60 * 60);
+                    if (!refreshError && refreshed?.signedUrl && image.isConnected) {
+                        image.src = refreshed.signedUrl;
+                    } else if (image.isConnected) {
+                        image.remove();
+                        avatar.classList.add("character-card-placeholder");
+                        avatar.innerHTML = "<span>✦</span>";
+                    }
+                } catch (refreshError) {
+                    console.warn("Не удалось обновить ссылку на портрет:", refreshError);
+                    image.remove();
+                    avatar.classList.add("character-card-placeholder");
+                    avatar.innerHTML = "<span>✦</span>";
+                }
+            }, { once: true });
             avatar.appendChild(image);
         } else {
             avatar.classList.add("character-card-placeholder");
