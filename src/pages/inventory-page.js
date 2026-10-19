@@ -234,7 +234,28 @@ async function renderLorgusInventory() {
             button.title = result.error.message || "Не удалось выполнить действие";
             return;
         }
-        await renderLorgusInventory();
+        // Обновляем только данные рюкзака и ячейки экипировки — не пересоздаём страницу.
+        const { data: updatedRows, error: refreshError } = await loadCharacterInventory(character.id);
+        if (refreshError) {
+            console.error("Не удалось обновить состояние экипировки:", refreshError);
+            button.disabled = false;
+            button.removeAttribute("aria-busy");
+            return;
+        }
+        rows.splice(0, rows.length, ...(updatedRows || []));
+        const updatedBackpackRows = rows.filter(item => !item.equipped_slot);
+        const updatedCount = updatedBackpackRows.reduce((total, item) => total + Math.max(0, Number(item.quantity) || 0), 0);
+        const countNode = container.querySelector("#lorgus-inventory-count");
+        if (countNode) countNode.textContent = updatedCount + (updatedCount % 10 === 1 && updatedCount % 100 !== 11 ? " предмет" : updatedCount % 10 >= 2 && updatedCount % 10 <= 4 && (updatedCount % 100 < 12 || updatedCount % 100 > 14) ? " предмета" : " предметов");
+        grid.innerHTML = updatedBackpackRows.length ? updatedBackpackRows.map(item => inventoryItemMarkup(item)).join("") : '<div class="lorgus-inventory-empty"><h2>Рюкзак пуст</h2><p>Здесь будут храниться твои вещи. Надетые предметы отображаются в ячейках экипировки.</p></div>';
+        grid.querySelectorAll(".lorgus-inventory-item").forEach(setupDrag);
+        renderEquipped();
+        container.querySelectorAll("[data-equip-item]").forEach(actionButton => actionButton.addEventListener("click", event => {
+            event.preventDefault(); event.stopPropagation(); runInventoryAction(actionButton, "equip");
+        }));
+        container.querySelectorAll("[data-unequip-item]").forEach(actionButton => actionButton.addEventListener("click", event => {
+            event.preventDefault(); event.stopPropagation(); runInventoryAction(actionButton, "unequip");
+        }));
     };
     container.querySelectorAll("[data-equip-item]").forEach(button => button.addEventListener("click", event => {
         event.preventDefault(); event.stopPropagation(); runInventoryAction(button, "equip");
