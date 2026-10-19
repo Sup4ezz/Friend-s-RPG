@@ -130,10 +130,10 @@
                     // itself be #cabinet-content, which would otherwise exempt every veil
                     // nested inside it from detection. Full-screen positioned descendants
                     // are checked below and removed if they cover the page.
-                    if (el === page || el.contains(page) ||
+                    if (el === page ||
                         el.id === "root" || el.id === "cabinet-content" ||
                         el.id === "lorgus-global-utility" || el.id === "lorgus-mobile-emergency" ||
-                        el.matches(".lorgus-global-utility,.lorgus-mainmenu-nav,.lorgus-subpage-nav")) return;
+                        el.matches(".game-page,.lorgus-global-utility,.lorgus-mainmenu-nav,.lorgus-subpage-nav")) return;
                     const style = getComputedStyle(el);
                     const rect = el.getBoundingClientRect();
                     const coversScreen = rect.width >= innerWidth * 0.8 && rect.height >= innerHeight * 0.8;
@@ -154,6 +154,16 @@
                     el.style.setProperty("transform", "none", "important");
                     el.style.setProperty("pointer-events", "auto", "important");
                     el.style.setProperty("mix-blend-mode", "normal", "important");
+                });
+                const activePage = getPageElement();
+                [activePage, activePage?.firstElementChild, activePage?.querySelector(".lorgus-character-shell")].filter(Boolean).forEach(el => {
+                    el.style.setProperty("visibility", "visible", "important");
+                    el.style.setProperty("opacity", "1", "important");
+                    el.style.setProperty("filter", "none", "important");
+                    el.style.setProperty("transform", "none", "important");
+                    el.style.setProperty("display", "block", "important");
+                    el.style.setProperty("position", "relative", "important");
+                    el.style.setProperty("z-index", "2", "important");
                 });
                 if (cabinet) {
                     cabinet.classList.remove("preparing");
