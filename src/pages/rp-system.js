@@ -2279,6 +2279,15 @@ async function openAdminCharacterInventory(application, container) {
         const amount=(gold*10000)+(silver*100)+bronze;
         const { error }=await window.supabaseClient.rpc("admin_grant_character_currency",{p_character_id:characterId,p_currency_code:code,p_amount:amount});
         if(error){ alert("Не удалось изменить валюту:\n\n"+error.message); return; }
+        const notifyResult = await window.supabaseClient.rpc("admin_notify_character_grant", {
+            p_character_id: characterId,
+            p_reward_kind: "currency",
+            p_reward_name: lorgusCurrencies[code]?.name || code,
+            p_quantity: 1,
+            p_currency_code: code,
+            p_amount: amount
+        });
+        if (notifyResult.error) console.error("Валюта выдана, но уведомление игроку не создано:", notifyResult.error);
         await refreshCurrency();
         panel.querySelector(".lorgus-admin-currency-gold").value="0";
         panel.querySelector(".lorgus-admin-currency-silver").value="0";
@@ -2314,6 +2323,16 @@ async function openAdminCharacterInventory(application, container) {
             alert("Не удалось выдать предмет:\n\n" + error.message);
             return;
         }
+
+        const notifyResult = await window.supabaseClient.rpc("admin_notify_character_grant", {
+            p_character_id: characterId,
+            p_reward_kind: "item",
+            p_reward_name: name,
+            p_quantity: quantity,
+            p_currency_code: null,
+            p_amount: null
+        });
+        if (notifyResult.error) console.error("Предмет выдан, но уведомление игроку не создано:", notifyResult.error);
 
         nameInput.value = "";
         rarityInput.value = "common";
