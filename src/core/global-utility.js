@@ -10,7 +10,7 @@
 
     // A portal/eye overlay must never survive a reload or a return from the
     // mobile browser background; either layer covers the whole screen in black.
-    document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-cinematic-auth, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-portal-transition-veil, .lorgus-portal-transition-core, .lorgus-portal-transition-ring, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil")
+    document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-portal-transition-veil, .lorgus-portal-transition-core, .lorgus-portal-transition-ring, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil")
       .forEach(overlay => overlay.remove());
     window.lorgusPortalOverlay = null;
   };
@@ -168,7 +168,7 @@
   // Это не затрагивает панели уведомлений/диалогов и не зависит от того, с какого маршрута вошли.
   const veilObserver = new MutationObserver(() => {
     if (!window.matchMedia("(max-width: 720px)").matches) return;
-    const veils = document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-cinematic-auth, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-portal-transition-veil, .lorgus-portal-transition-core, .lorgus-portal-transition-ring, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil");
+    const veils = document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-portal-transition-veil, .lorgus-portal-transition-core, .lorgus-portal-transition-ring, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil");
     veils.forEach(el => el.remove());
     document.documentElement.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
     document.body.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
