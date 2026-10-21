@@ -105,6 +105,7 @@ async function renderLorgusCharacterHub() {
                     <button type="button" data-character-local-view="inventory"><span>◇</span><b>Снаряжение</b><i>02</i></button>
                 </nav>
                 <button type="button" class="lorgus-character-map-button" onclick="window.lorgusSubpageTransition ? window.lorgusSubpageTransition('bottom', () => window.lorgusNavigate ? window.lorgusNavigate('/main-page') : window.lorgusNavigate?.('/main-page')) : window.lorgusNavigate?.('/main-page')">Вернуться на главную</button>
+                <button type="button" class="lorgus-character-map-button" data-request-character-deletion style="margin-top:8px;border-color:#8b5145;color:#e0a08a">Удалить персонажа</button>
             </aside>
 
             <main class="lorgus-character-main">
@@ -290,5 +291,66 @@ if (!window.__lorgusCharacterLocalViewsBound) {
             dossier.hidden = true;
             window.renderLorgusInventory?.();
         }
+    }, true);
+}
+
+
+// Player-facing character deletion is a request, never an immediate delete.
+if (!window.__lorgusCharacterDeletionBound) {
+    window.__lorgusCharacterDeletionBound = true;
+    document.addEventListener("click", async event => {
+        const trigger = event.target.closest?.("[data-request-character-deletion]");
+        if (!trigger) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const character = window.activeCharacter;
+        if (!character?.id || !window.supabaseClient) {
+            alert("Не удалось определить активного персонажа. Перезагрузи страницу и попробуй снова.");
+            return;
+        }
+        const expected = "Я согласен и удаляю " + character.name;
+        const overlay = document.createElement("div");
+        overlay.style.cssText = "position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(5,4,3,.88);backdrop-filter:blur(8px)";
+        const panel = document.createElement("section");
+        panel.style.cssText = "width:min(560px,100%);max-height:90dvh;overflow:auto;padding:24px;border:1px solid #7d5540;border-radius:14px;background:linear-gradient(145deg,#211911,#100d09);color:#eadfc8;font:16px/1.55 Georgia,serif;box-shadow:0 24px 90px #000";
+        panel.innerHTML = '<div style="font-size:11px;letter-spacing:.18em;color:#c7a66a">ЛОРГУС · ЛИЧНОЕ ДОСЬЕ</div><h2 style="margin:8px 0;color:#e0a08a;font-size:25px">Удаление персонажа</h2><p>Это <b>запрос администрации</b>, а не мгновенное удаление. До решения администратора персонаж остаётся в мире. При одобрении он будет архивирован, а история сохранится.</p><p>Чтобы подтвердить намерение, перепиши фразу <b>точно, без кавычек и точки</b>:</p><div data-exact-phrase style="padding:12px;margin:12px 0;border:1px solid #59472c;border-radius:8px;background:#100d09;color:#e7c981;overflow-wrap:anywhere"></div><label style="display:block;margin:12px 0 6px;color:#b9a88b;font-size:13px" for="lorgus-delete-confirm">Подтверждение</label><textarea id="lorgus-delete-confirm" rows="3" autocomplete="off" spellcheck="false" style="width:100%;box-sizing:border-box;resize:vertical;padding:12px;border:1px solid #655235;border-radius:8px;background:#100d09;color:#eadfc8;font:16px/1.5 Georgia,serif"></textarea><p data-delete-status role="status" style="min-height:24px;color:#c7a66a;font-size:13px"></p><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button type="button" data-delete-cancel style="padding:10px 14px;border:1px solid #59472c;border-radius:8px;background:#272016;color:#eadfc8">Отмена</button><button type="button" data-delete-submit disabled style="padding:10px 14px;border:1px solid #8b5145;border-radius:8px;background:#48211c;color:#ffe5d9;font-weight:700;opacity:.5">Отправить запрос</button></div>';
+        panel.querySelector("[data-exact-phrase]").textContent = expected;
+        overlay.appendChild(panel);
+        document.body.appendChild(overlay);
+        const input = panel.querySelector("#lorgus-delete-confirm");
+        const submit = panel.querySelector("[data-delete-submit]");
+        const status = panel.querySelector("[data-delete-status]");
+        const close = () => overlay.remove();
+        panel.querySelector("[data-delete-cancel]").addEventListener("click", close);
+        overlay.addEventListener("click", e => { if (e.target === overlay) close(); });
+        input.addEventListener("input", () => {
+            const valid = input.value === expected;
+            submit.disabled = !valid;
+            submit.style.opacity = valid ? "1" : ".5";
+            status.textContent = input.value && !valid ? "Фраза должна полностью совпадать, включая имя персонажа." : "";
+        });
+        submit.addEventListener("click", async () => {
+            if (input.value !== expected || submit.disabled) return;
+            submit.disabled = true;
+            submit.textContent = "Отправляем…";
+            status.textContent = "Создаём запрос для администрации…";
+            const { error } = await window.supabaseClient.rpc("request_character_deletion", {
+                p_character_id: character.id,
+                p_confirmation_text: input.value
+            });
+            if (error) {
+                submit.disabled = false;
+                submit.textContent = "Отправить запрос";
+                status.textContent = error.message === "DELETION_REQUEST_ALREADY_PENDING"
+                    ? "Запрос на удаление этого персонажа уже ожидает решения."
+                    : error.message === "CONFIRMATION_TEXT_MISMATCH"
+                        ? "Текст подтверждения не совпадает."
+                        : "Не удалось отправить запрос: " + error.message;
+                return;
+            }
+            panel.innerHTML = '<div style="font-size:11px;letter-spacing:.18em;color:#c7a66a">ЛОРГУС · КАНЦЕЛЯРИЯ</div><h2 style="color:#c4dda4">Запрос отправлен</h2><p>Запрос на архивирование персонажа передан администрации.</p><p>Персонаж пока не удалён и остаётся доступен до решения администратора.</p><div style="display:flex;justify-content:flex-end"><button type="button" data-delete-close style="padding:10px 14px;border:1px solid #94743c;border-radius:8px;background:#d9bb76;color:#171108;font-weight:700">Понятно</button></div>';
+            panel.querySelector("[data-delete-close]").addEventListener("click", close);
+        });
+        input.focus();
     }, true);
 }
