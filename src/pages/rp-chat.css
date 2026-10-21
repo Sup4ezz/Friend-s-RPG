@@ -2211,3 +2211,19 @@
   .lorgus-admin-multi-fields { max-height:35dvh; }
   .lorgus-admin-multi-actor-dialog footer button { padding:10px 11px; }
 }
+
+/* Wide-screen RP: scale the real messenger layout and post column. */
+@media (min-width: 1600px) {
+ .lorgus-rp-page { width:100%!important; height:calc(100dvh - 76px)!important; min-height:0!important; }
+ .lorgus-rp-page .lorgus-messenger-shell { grid-template-columns:340px minmax(0,1fr)!important; }
+ .lorgus-rp-page .lorgus-messenger-sidebar { min-width:0; }
+ .lorgus-rp-page .lorgus-messenger-feed { padding-inline:clamp(32px,3vw,90px)!important; }
+ .lorgus-rp-page .lorgus-messenger-message { width:min(1500px,100%)!important; max-width:1500px!important; }
+ .lorgus-rp-page .lorgus-messenger-message-content { width:min(1250px,calc(100% - 92px))!important; max-width:1250px!important; }
+}
+@media (min-width: 2400px) {
+ .lorgus-rp-page .lorgus-messenger-shell { grid-template-columns:380px minmax(0,1fr)!important; }
+ .lorgus-rp-page .lorgus-messenger-feed { padding-inline:clamp(70px,4vw,130px)!important; }
+ .lorgus-rp-page .lorgus-messenger-message { width:min(1800px,100%)!important; max-width:1800px!important; }
+ .lorgus-rp-page .lorgus-messenger-message-content { width:min(1550px,calc(100% - 92px))!important; max-width:1550px!important; }
+}
