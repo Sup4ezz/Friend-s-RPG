@@ -567,13 +567,26 @@ async function arriveAtDestination() {
         return;
     }
 
-    const destination = await saveRpPresence({
-        type: "location",
-        location: presence.toLocation,
-        region: presence.toRegion,
-        enteredAt: new Date().toISOString(),
-        visibility: presence.visibility || "public"
-    });
+    let destination;
+    try {
+        destination = await saveRpPresence({
+            type: "location",
+            location: presence.toLocation,
+            region: presence.toRegion,
+            enteredAt: new Date().toISOString(),
+            visibility: presence.visibility || "public"
+        });
+    } catch (error) {
+        const message = String(error?.message || error || "");
+        if (message.includes("ROAD_POSTS_REQUIRED")) {
+            alert("Система не засчитала нужное количество опубликованных сообщений на этой дороге.");
+        } else if (message.includes("LOCATION_ENTRY_REQUIRES_CURRENT_ROAD")) {
+            alert("Для входа в город требуется завершить дорожный путь или использовать действующую привилегию перемещения.");
+        } else {
+            alert("Не удалось завершить путь: " + message);
+        }
+        return;
+    }
 
     if (destination) {
         if (window.lorgusNavigateChat) {
