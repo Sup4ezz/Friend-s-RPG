@@ -508,6 +508,30 @@ async function startTravel(fromLocation, fromRegion, toLocation, toRegion) {
     if (road) renderRoadChat(road);
 }
 
+async function useRoadBypass(fromLocation, fromRegion, toLocation, toRegion) {
+    const presence = await getRpPresence();
+    if (!presence || presence.type !== "location" || presence.location !== fromLocation || presence.region !== fromRegion) {
+        alert("Местоположение персонажа изменилось. Обнови карту и попробуй снова.");
+        return;
+    }
+    if (!window.confirm("Использовать привилегию перемещения без дороги и сразу перейти в «" + toLocation + "»?")) return;
+    try {
+        const destination = await saveRpPresence({
+            type: "location",
+            location: toLocation,
+            region: toRegion,
+            enteredAt: new Date().toISOString(),
+            visibility: presence.visibility || "public"
+        });
+        if (destination) {
+            if (window.lorgusNavigateChat) window.lorgusNavigateChat(destination.region, destination.location, { replace: true });
+            else await renderLocationChats(destination.location, destination.region, true, true);
+        }
+    } catch (error) {
+        alert("Привилегия не сработала: " + String(error?.message || error));
+    }
+}
+
 async function arriveAtDestination() {
     const presence = await getRpPresence();
     if (!presence || presence.type !== "road") return;
@@ -612,6 +636,19 @@ async function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion
             item.location !== requested.location || item.region !== requested.region
         )]
         : destinations;
+    const characterId = window.activeCharacterId || window.activeCharacter?.id;
+    let hasRoadBypass = false;
+    if (characterId && window.supabaseClient) {
+        const [rewardResult, abilityResult] = await Promise.all([
+            window.supabaseClient.from("character_special_rewards").select("name,description").eq("character_id", characterId),
+            window.supabaseClient.from("character_abilities").select("abilities(name,description)").eq("character_id", characterId)
+        ]);
+        const grants = [
+            ...(rewardResult.data || []).flatMap(row => [row.name, row.description]),
+            ...(abilityResult.data || []).flatMap(row => [row.abilities?.name, row.abilities?.description])
+        ].filter(Boolean).join(" ").toLocaleLowerCase("ru-RU");
+        hasRoadBypass = /перемещение минуя дорогу|шаг сквозь карту|тайный проход/.test(grants);
+    }
 
     container.className = "lorgus-road-page";
     container.innerHTML = `
@@ -649,16 +686,19 @@ async function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion
                         const subtitle = locationData?.[1] || regionData?.subtitle || item.region;
                         const art = window.getLorgusRpLocationArt?.(item.location) || "";
                         return `
-                        <button class="lorgus-road-destination ${item.location === toLocation && item.region === toRegion ? "selected" : ""}" type="button"
-                            onclick="startTravel('${escapeHtml(fromLocation)}','${escapeHtml(fromRegion)}','${escapeHtml(item.location)}','${escapeHtml(item.region)}')">
-                            <span class="lorgus-road-destination-art"${art ? ` style="background-image:url('${art}')"` : ""}></span>
-                            <span class="lorgus-road-destination-content">
-                                <span class="lorgus-road-destination-kicker">${escapeHtml(item.travelType === "sea" ? "МОРСКОЙ ПУТЬ" : "СУХОПУТНЫЙ ПУТЬ")}</span>
-                                <strong>${escapeHtml(item.location)}</strong>
-                                <small>${escapeHtml(subtitle)}</small>
-                                <p>${escapeHtml(description)}</p>
-                            </span>
-                        </button>
+                        <div class="lorgus-road-destination-wrap">
+                          <button class="lorgus-road-destination ${item.location === toLocation && item.region === toRegion ? "selected" : ""}" type="button"
+                              onclick="startTravel('${escapeHtml(fromLocation)}','${escapeHtml(fromRegion)}','${escapeHtml(item.location)}','${escapeHtml(item.region)}')">
+                              <span class="lorgus-road-destination-art"${art ? ` style="background-image:url('${art}')"` : ""}></span>
+                              <span class="lorgus-road-destination-content">
+                                  <span class="lorgus-road-destination-kicker">${escapeHtml(item.travelType === "sea" ? "МОРСКОЙ ПУТЬ" : "СУХОПУТНЫЙ ПУТЬ")}</span>
+                                  <strong>${escapeHtml(item.location)}</strong>
+                                  <small>${escapeHtml(subtitle)}</small>
+                                  <p>${escapeHtml(description)}</p>
+                              </span>
+                          </button>
+                          ${hasRoadBypass ? `<button class="character-secondary-button lorgus-road-bypass-button" type="button" onclick="useRoadBypass('${escapeHtml(fromLocation)}','${escapeHtml(fromRegion)}','${escapeHtml(item.location)}','${escapeHtml(item.region)}')">Переместиться без дороги</button>` : ""}
+                        </div>
                     `;
                     }).join("")}
                 </div>
