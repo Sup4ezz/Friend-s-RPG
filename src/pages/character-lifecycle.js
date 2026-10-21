@@ -41,7 +41,7 @@ async function renderCharacterSelection(container, applications, pendingApplicat
         ? await window.supabaseClient.from("characters").select("*").in("id", characterIds)
         : { data: [], error: null };
     if (charactersError) console.error("Не удалось загрузить персонажей:", charactersError);
-    const characterById = new Map((characters || []).map(character => [String(character.id), character]));
+    const characterById = new Map((characters || []).filter(character => String(character.status || "ACTIVE").toUpperCase() !== "ARCHIVED").map(character => [String(character.id), character]));
 
     const characterEntries = await Promise.all(applications.map(async application => {
         const character = characterById.get(String(application.character_id));
