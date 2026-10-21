@@ -512,6 +512,59 @@ async function arriveAtDestination() {
     const presence = await getRpPresence();
     if (!presence || presence.type !== "road") return;
 
+    const db = window.supabaseClient;
+    const characterId = window.activeCharacterId || window.activeCharacter?.id;
+    if (!db || !characterId) {
+        alert("Не удалось проверить дорожный путь. Обнови страницу и попробуй снова.");
+        return;
+    }
+
+    // Дорожное требование считается по реально опубликованным сообщениям именно
+    // этого персонажа на текущем маршруте, а не по открытиям/просмотрам чата.
+    const { count: roadPosts, error: postsError } = await db
+        .from("rp_messages")
+        .select("id", { count: "exact", head: true })
+        .eq("character_id", characterId)
+        .eq("presence_type", "road")
+        .eq("status", "active")
+        .eq("from_region", presence.fromRegion)
+        .eq("from_location", presence.fromLocation)
+        .eq("to_region", presence.toRegion)
+        .eq("to_location", presence.toLocation);
+    if (postsError) {
+        alert("Не удалось проверить сообщения на дороге: " + postsError.message);
+        return;
+    }
+
+    const [{ data: inventory, error: inventoryError }, { data: abilities, error: abilitiesError }] = await Promise.all([
+        db.from("character_inventory").select("items(name,item_type,item_subtype)").eq("character_id", characterId),
+        db.from("character_abilities").select("abilities(name,description)").eq("character_id", characterId)
+    ]);
+    if (inventoryError || abilitiesError) {
+        alert("Не удалось проверить коня и привилегии. Попробуй ещё раз.");
+        return;
+    }
+    const hasHorse = (inventory || []).some(row => {
+        const item = row.items || {};
+        const text = [item.name, item.item_type, item.item_subtype].join(" ").toLocaleLowerCase("ru-RU");
+        return /кон[ьи]|лошад|скакун|horse|mount/.test(text);
+    });
+    const canBypassRoad = (abilities || []).some(row => {
+        const ability = row.abilities || {};
+        const text = [ability.name, ability.description].join(" ").toLocaleLowerCase("ru-RU");
+        return text.includes("перемещение минуя дорогу");
+    });
+    const requiredPosts = canBypassRoad ? 0 : hasHorse ? 1 : 2;
+    if (Number(roadPosts || 0) < requiredPosts) {
+        const left = requiredPosts - Number(roadPosts || 0);
+        alert(canBypassRoad
+            ? "Привилегия не распознана системой. Обратись к администрации."
+            : hasHorse
+                ? "Чтобы въехать в город с конём, нужно опубликовать ещё " + left + (left === 1 ? " сообщение на дороге." : " сообщения на дороге.")
+                : "Путь ещё не завершён: нужно опубликовать ещё " + left + (left === 1 ? " сообщение на дороге." : " сообщения на дороге."));
+        return;
+    }
+
     const destination = await saveRpPresence({
         type: "location",
         location: presence.toLocation,
@@ -521,8 +574,6 @@ async function arriveAtDestination() {
     });
 
     if (destination) {
-        // Replace the road URL instead of leaving a stale source-location route
-        // behind in browser history.
         if (window.lorgusNavigateChat) {
             window.lorgusNavigateChat(destination.region, destination.location, { replace: true });
         } else {
