@@ -523,7 +523,7 @@ async function appendRpMessage(message) {
     const empty = feed.querySelector(".lorgus-messenger-start");
     if (empty) empty.remove();
 
-    const mine = String(message.character_id) === String(window.activeCharacterId);
+    const mine = !Boolean(message.is_admin_post) && String(message.character_id) === String(window.activeCharacterId);
     const adminPost = Boolean(message.is_admin_post);
     const multiActorPrefix = "[[LORGUS_MULTI_ACTOR_V1]]";
     let multiActorPost = null;
@@ -545,10 +545,10 @@ async function appendRpMessage(message) {
     article.dataset.rpMessageId = message.id;
     article.dataset.createdAt = message.created_at || "";
     const time = new Date(message.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-    const author = message.characters?.name || "Без имени";
+    const author = adminPost ? "Администрация" : (message.characters?.name || "Без имени");
 
     article.innerHTML =
-        '<button type="button" class="lorgus-messenger-message-avatar" aria-label="Открыть карточку персонажа: ' + escapeHtml(author) + '"><span>✦</span></button>' +
+        (adminPost ? '<div class="lorgus-messenger-message-avatar admin-avatar" aria-label="Пост администрации"><span>✦</span></div>' : '<button type="button" class="lorgus-messenger-message-avatar" aria-label="Открыть карточку персонажа: ' + escapeHtml(author) + '"><span>✦</span></button>') +
         '<div class="lorgus-messenger-message-content">' +
             '<div class="lorgus-messenger-message-meta"><strong>' + escapeHtml(author) + '</strong>' + (adminPost ? '<span class="lorgus-admin-post-badge" title="Пост опубликован администрацией">✦ АДМИНИСТРАЦИЯ</span>' : '') + '<time>' + escapeHtml(time) + '</time></div>' +
             '<div class="lorgus-messenger-bubble">' +
@@ -601,13 +601,13 @@ async function appendRpMessage(message) {
     const characterLink = article.querySelector(".lorgus-messenger-message-meta strong");
     if (characterLink) characterLink.addEventListener("click", openCharacterCard(characterLink));
     const avatarButton = article.querySelector(".lorgus-messenger-message-avatar");
-    if (avatarButton) avatarButton.addEventListener("click", openCharacterCard(avatarButton));
+    if (avatarButton && !adminPost) avatarButton.addEventListener("click", openCharacterCard(avatarButton));
 
     // Текст появляется сразу. Портреты, титулы и использованные предметы догружаются параллельно.
-    const photoAndTitle = Promise.all([
+    const photoAndTitle = (adminPost ? Promise.resolve([null, null]) : Promise.all([
         getRpCharacterPhoto(message.character_id),
         getRpCharacterActiveTitle(message.character_id)
-    ]).then(([photo, activeTitle]) => {
+    ])).then(([photo, activeTitle]) => {
         if (!article.isConnected) return;
         if (activeTitle) {
             article.classList.add("has-active-title");
