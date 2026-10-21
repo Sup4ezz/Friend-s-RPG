@@ -1360,17 +1360,27 @@ async function setupAdminMultiActorComposer(container, presence) {
 
 async function openAdminMultiActorComposer(presence) {
     document.querySelector(".lorgus-admin-multi-actor-overlay")?.remove();
-    const { data, error } = await window.supabaseClient
-        .from("character_applications")
-        .select("character_id,characters(id,name,race,kingdom,location,occupation,photo_path)")
-        .eq("status", "approved")
-        .not("character_id", "is", null)
-        .order("created_at", { ascending: false });
-    if (error) {
-        alert("Не удалось загрузить список RP-персонажей: " + error.message);
+    const [applicationsResult, nrpResult] = await Promise.all([
+        window.supabaseClient
+            .from("character_applications")
+            .select("character_id,characters(id,name,race,kingdom,location,occupation,photo_path)")
+            .eq("status", "approved")
+            .not("character_id", "is", null)
+            .order("created_at", { ascending: false }),
+        window.supabaseClient
+            .from("lorgus_nrp_characters")
+            .select("character_id,characters(id,name,race,kingdom,location,occupation,photo_path)")
+            .eq("is_active", true)
+            .order("created_at", { ascending: false })
+    ]);
+    if (applicationsResult.error || nrpResult.error) {
+        alert("Не удалось загрузить список персонажей: " + (applicationsResult.error || nrpResult.error).message);
         return;
     }
-    const rows = (data || []).filter(row => row.characters?.id);
+    const rows = [...new Map([
+        ...(nrpResult.data || []),
+        ...(applicationsResult.data || [])
+    ].filter(row => row.characters?.id).map(row => [String(row.character_id), row])).values()];
     if (!rows.length) {
         alert("Нет одобренных персонажей, доступных для общей сцены.");
         return;
