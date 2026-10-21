@@ -19772,3 +19772,27 @@ button.lorgus-multi-actor-participant:hover,button.lorgus-multi-actor-participan
     width: min(2600px, calc(100% - 160px));
   }
 }
+
+/* Wide-screen layouts: target the real page wrappers used by the app. */
+@media (min-width:1600px) {
+ #cabinet-content.lorgus-world-page,.lorgus-world-page,.lorgus-game-page,.character-profile-page,.character-selection,.character-application,.admin-panel {
+  box-sizing:border-box;width:calc(100% - 64px);max-width:2200px;
+ }
+ .lorgus-world-shell { grid-template-columns:320px minmax(0,1fr);gap:24px; }
+ .lorgus-game-layout { grid-template-columns:360px minmax(0,1fr);gap:28px; }
+ .lorgus-world-browser { min-width:0; }
+ .lorgus-region-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
+ .lorgus-location-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (min-width:2400px) {
+ #cabinet-content.lorgus-world-page,.lorgus-world-page,.lorgus-game-page,.character-profile-page,.character-selection,.character-application,.admin-panel {
+  width:calc(100% - 112px);max-width:2800px;
+ }
+ .lorgus-world-shell { grid-template-columns:360px minmax(0,1fr);gap:30px; }
+ .lorgus-game-layout { grid-template-columns:400px minmax(0,1fr);gap:32px; }
+}
+@media (min-width:3000px) {
+ #cabinet-content.lorgus-world-page,.lorgus-world-page,.lorgus-game-page,.character-profile-page,.character-selection,.character-application,.admin-panel {
+  width:calc(100% - 160px);max-width:3040px;
+ }
+}
