@@ -1245,6 +1245,16 @@ async function openRpCharacterQuickCard(characterId, anchorElement = null) {
     }
 
     const photo = await getRpCharacterPhoto(character.id);
+    const { data: livePresence } = await window.supabaseClient
+        .from("rp_presence")
+        .select("presence_type,region,location,from_region,from_location,to_region,to_location,updated_at")
+        .eq("character_id", character.id)
+        .maybeSingle();
+    const liveLocationLabel = livePresence?.presence_type === "road"
+        ? `В пути: ${livePresence.from_location}, ${livePresence.from_region} → ${livePresence.to_location}, ${livePresence.to_region}`
+        : livePresence?.location && livePresence?.region
+            ? `${livePresence.location}, ${livePresence.region}`
+            : character.location || "Не указано";
     const { data: equippedItems } = await window.supabaseClient
         .from("character_inventory")
         .select("equipped_slot,quantity,items(name,item_type,item_subtype)")
@@ -1272,7 +1282,7 @@ async function openRpCharacterQuickCard(characterId, anchorElement = null) {
             '<div><small>ВОЗРАСТ</small><strong>' + esc(character.age ? character.age + " лет" : "Не указан") + '</strong></div>' +
             '<div><small>ЗАНЯТИЕ</small><strong>' + esc(character.occupation || "Не указано") + '</strong></div>' +
             '<div><small>РОДИНА</small><strong>' + esc(character.homeland || "Не указана") + '</strong></div>' +
-            '<div><small>МЕСТО</small><strong>' + esc(character.location || "Не указано") + '</strong></div>' +
+            '<div><small>МЕСТО / МАРШРУТ</small><strong>' + esc(liveLocationLabel) + '</strong></div>' +
         '</div>' +
         (character.personality ? '<div class="lorgus-rp-character-card-story"><small>ХАРАКТЕР И ПОВЕДЕНИЕ</small><p>' + esc(character.personality) + '</p></div>' : '<div class="lorgus-rp-character-card-story muted"><p>О характере пока ничего не известно.</p></div>') +
         equipmentHtml +
