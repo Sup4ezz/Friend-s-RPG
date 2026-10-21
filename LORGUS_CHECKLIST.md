@@ -1372,6 +1372,8 @@ Commits:
 - [x] Request submission uses `request_character_deletion(uuid,text)`, checks character ownership server-side and does not immediately delete the character.
 - [x] Added admin queue in the mini-app for pending character deletion requests.
 - [x] Added `characters.status` with `ACTIVE/ARCHIVED`; admin approval archives the character and hides its RP presence while retaining history. Archived characters are hidden from character selection and do not consume the 3-character application limit.
+- [x] Database triggers reject new RP messages, presence changes and outgoing mail from archived characters; archive enforcement is not UI-only.
 - [x] SQL migrations applied to Supabase project `dxdxnttpznoekaiecrlv` and committed under `supabase/migrations/20261021150000_joint_rp_posts_and_character_deletion_requests.sql` and `supabase/migrations/20261021151000_archive_characters_after_deletion_request.sql`.
-- [ ] Verify GitHub Actions / Cloudflare deployment for the new `admin.html`, `src/pages/character-hub.js`, and `src/pages/character-lifecycle.js` changes.
+- [ ] Verify the latest Cloudflare deployment after the final admin mini-app copy change.
+- [ ] Resolve pre-existing Supabase migration-history drift: production reports remote versions `20261016072146`, `20261016083914`, `20261021064040`, `20261021065722`, `20261021065809` missing from the local migration directory. The new SQL was applied directly and verified in production; do not blindly repair/revert remote history.
 - [ ] Browser-test one joint post, exact-text deletion request, admin approve/reject, archived character hiding, and slot reopening.
