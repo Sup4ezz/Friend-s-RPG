@@ -14,7 +14,7 @@ returns public.rp_messages
 language plpgsql
 security definer
 set search_path = public
-as $$
+as $lorgus$
 declare
     caller uuid := auth.uid();
     payload jsonb;
@@ -98,7 +98,7 @@ begin
 
     return result_row;
 end;
-$;
+$lorgus$;
 
 revoke all on function public.admin_send_multi_character_rp_message(uuid,text,text,text,text,text,text,text,text) from public, anon;
 grant execute on function public.admin_send_multi_character_rp_message(uuid,text,text,text,text,text,text,text,text) to authenticated;
