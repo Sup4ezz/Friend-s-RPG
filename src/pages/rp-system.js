@@ -1216,8 +1216,8 @@ async function setupAdminMultiActorComposer(container, presence) {
     const trigger = document.createElement("button");
     trigger.type = "button";
     trigger.className = "lorgus-admin-multi-actor-trigger";
-    trigger.title = "Опубликовать пост от нескольких персонажей";
-    trigger.setAttribute("aria-label", "Пост от нескольких персонажей");
+    trigger.title = "Массовый пост — отыгрыш нескольких НПС";
+    trigger.setAttribute("aria-label", "Массовый пост: несколько персонажей");
     trigger.textContent = "♛";
     actions.prepend(trigger);
     trigger.addEventListener("click", () => openAdminMultiActorComposer(presence));
@@ -1243,19 +1243,29 @@ async function openAdminMultiActorComposer(presence) {
     overlay.className = "lorgus-admin-multi-actor-overlay";
     overlay.innerHTML = `
       <section class="lorgus-admin-multi-actor-dialog" role="dialog" aria-modal="true" aria-label="Пост от нескольких персонажей">
-        <header><div><small>АДМИНИСТРАТИВНАЯ ПУБЛИКАЦИЯ</small><h2>Один пост — несколько лиц</h2><p>Выбери персонажей и напиши отдельную часть поста для каждого. Всё уйдёт одним сообщением в текущий чат.</p></div><button type="button" data-multi-close aria-label="Закрыть">×</button></header>
+        <header><div><small>МАССОВЫЙ RP-ПОСТ</small><h2>Одна публикация — несколько персонажей</h2><p>Выбери всех НПС, за которых отыгрываешь, и напиши каждому реплики, действия и реакции. Всё появится в чате одним постом. Текст полностью контролируешь ты.</p></div><button type="button" data-multi-close aria-label="Закрыть">×</button></header>
         <label class="lorgus-admin-multi-search">НАЙТИ ПЕРСОНАЖА<input type="search" data-multi-search placeholder="Имя, раса или королевство…"></label>
         <div class="lorgus-admin-multi-list" data-multi-list></div>
         <div class="lorgus-admin-multi-fields" data-multi-fields><p>Выбери одного или нескольких персонажей.</p></div>
-        <footer><span data-multi-count>0 персонажей выбрано</span><button type="button" data-multi-send disabled>Опубликовать пост ↗</button></footer>
+        <footer><span data-multi-count>0 персонажей выбрано</span><span data-multi-length>0 / 10000 символов</span><button type="button" data-multi-send disabled>Опубликовать единый пост ↗</button></footer>
       </section>`;
     document.body.appendChild(overlay);
     const list = overlay.querySelector("[data-multi-list]");
     const fields = overlay.querySelector("[data-multi-fields]");
     const search = overlay.querySelector("[data-multi-search]");
     const count = overlay.querySelector("[data-multi-count]");
+    const length = overlay.querySelector("[data-multi-length]");
     const send = overlay.querySelector("[data-multi-send]");
     const selected = new Map();
+    const updatePostStatus = () => {
+        const actors = Array.from(selected.values()).map(actor => ({ id: actor.id, name: actor.name, body: actor.body.trim() }));
+        const payloadLength = ("[[LORGUS_MULTI_ACTOR_V1]]" + JSON.stringify({ actors })).length;
+        if (length) length.textContent = payloadLength.toLocaleString("ru-RU") + " / 10000 символов";
+        const tooLong = payloadLength > 10000;
+        if (length) length.style.color = tooLong ? "#e58b78" : "";
+        send.disabled = !actors.length || actors.some(actor => !actor.body) || tooLong;
+        send.title = tooLong ? "Сократи текст: общий размер поста превышает лимит RP." : "";
+    };
     const esc = value => window.escapeHtml ? window.escapeHtml(String(value ?? "")) : String(value ?? "").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
     const renderList = () => {
         const q = search.value.trim().toLocaleLowerCase("ru-RU");
@@ -1277,13 +1287,13 @@ async function openAdminMultiActorComposer(presence) {
     const renderFields = () => {
         const chosen = Array.from(selected.values());
         count.textContent = chosen.length + (chosen.length === 1 ? " персонаж выбран" : chosen.length >= 2 && chosen.length <= 4 ? " персонажа выбрано" : " персонажей выбрано");
-        send.disabled = !chosen.length || chosen.some(actor => !actor.body.trim());
         fields.innerHTML = chosen.length ? chosen.map(actor => `<label class="lorgus-admin-multi-field"><span><strong>${esc(actor.name)}</strong><small>Действие, реплика или описание</small></span><textarea data-multi-body="${esc(actor.id)}" rows="4" maxlength="9000" placeholder="Что делает или говорит ${esc(actor.name)}?">${esc(actor.body)}</textarea></label>`).join("") : "<p>Выбери одного или нескольких персонажей.</p>";
         fields.querySelectorAll("[data-multi-body]").forEach(textarea => textarea.addEventListener("input", () => {
             const actor = selected.get(textarea.dataset.multiBody);
             if (actor) actor.body = textarea.value;
-            send.disabled = !selected.size || Array.from(selected.values()).some(item => !item.body.trim());
+            updatePostStatus();
         }));
+        updatePostStatus();
     };
     const close = () => overlay.remove();
     overlay.querySelector("[data-multi-close]").addEventListener("click", close);
