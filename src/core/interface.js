@@ -535,27 +535,31 @@ async function appendRpMessage(message) {
             console.warn("Не удалось прочитать составной RP-пост:", error);
         }
     }
+    const isSharedScene = Boolean(multiActorPost && multiActorPost.mode === "shared_scene");
+    const visualAdminPost = adminPost && !isSharedScene;
     const renderedMessageBody = multiActorPost
         ? '<div class="lorgus-multi-actor-post">' +
-            '<div class="lorgus-multi-actor-participants">' + multiActorPost.actors.map(actor =>
-              '<span class="lorgus-multi-actor-participant" title="' + escapeHtml(actor.name || "Персонаж") + '">✦ ' + escapeHtml(actor.name || "Персонаж") + '</span>'
-            ).join("") + '</div>' +
-            (multiActorPost.body !== null
-              ? '<p class="lorgus-multi-actor-shared-body">' + escapeHtml(multiActorPost.body).replace(/\\n/g, "<br>") + '</p>'
-              : multiActorPost.actors.map(actor => '<section class="lorgus-multi-actor-segment"><strong>' + escapeHtml(actor.name || "Персонаж") + '</strong><p>' + escapeHtml(actor.body || "").replace(/\\n/g, "<br>") + '</p></section>').join("")) +
+            (isSharedScene
+              ? '<p class="lorgus-multi-actor-shared-body">' + escapeHtml(multiActorPost.body || "").replace(/\\n/g, "<br>") + '</p>'
+              : '<div class="lorgus-multi-actor-participants">' + multiActorPost.actors.map(actor =>
+                  '<button type="button" class="lorgus-multi-actor-participant" data-multi-character-id="' + escapeHtml(actor.id || "") + '">' + escapeHtml(actor.name || "Персонаж") + '</button>'
+                ).join("") + '</div>' +
+                multiActorPost.actors.map(actor => '<section class="lorgus-multi-actor-segment"><strong>' + escapeHtml(actor.name || "Персонаж") + '</strong><p>' + escapeHtml(actor.body || "").replace(/\\n/g, "<br>") + '</p></section>').join("")) +
           '</div>'
         : '<p>' + escapeHtml(message.body) + '</p>';
     const article = document.createElement("article");
-    article.className = "lorgus-messenger-message" + (mine ? " mine" : "") + (adminPost ? " admin-authored" : "") + (message.status === "reverted" ? " reverted" : "");
+    article.className = "lorgus-messenger-message" + (mine ? " mine" : "") + (visualAdminPost ? " admin-authored" : "") + (message.status === "reverted" ? " reverted" : "");
     article.dataset.rpMessageId = message.id;
     article.dataset.createdAt = message.created_at || "";
     const time = new Date(message.created_at).toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
-    const author = adminPost ? "Администрация" : (message.characters?.name || "Без имени");
+    const author = isSharedScene ? multiActorPost.actors.map(actor => actor.name || "Персонаж").join(" · ") : (adminPost ? "Администрация" : (message.characters?.name || "Без имени"));
 
     article.innerHTML =
-        (adminPost ? '<div class="lorgus-messenger-message-avatar admin-avatar" aria-label="Пост администрации"><span>✦</span></div>' : '<button type="button" class="lorgus-messenger-message-avatar" aria-label="Открыть карточку персонажа: ' + escapeHtml(author) + '"><span>✦</span></button>') +
+        (isSharedScene
+            ? '<div class="lorgus-multi-actor-avatars">' + multiActorPost.actors.map(actor => '<button type="button" class="lorgus-messenger-message-avatar" data-multi-character-id="' + escapeHtml(actor.id || "") + '" aria-label="Открыть карточку персонажа: ' + escapeHtml(actor.name || "Персонаж") + '"><span>' + escapeHtml((actor.name || "✦").slice(0,1)) + '</span></button>').join("") + '</div>'
+            : visualAdminPost ? '<div class="lorgus-messenger-message-avatar admin-avatar" aria-label="Пост администрации"><span>✦</span></div>' : '<button type="button" class="lorgus-messenger-message-avatar" aria-label="Открыть карточку персонажа: ' + escapeHtml(author) + '"><span>✦</span></button>') +
         '<div class="lorgus-messenger-message-content">' +
-            '<div class="lorgus-messenger-message-meta"><strong>' + escapeHtml(author) + '</strong>' + (adminPost ? '<span class="lorgus-admin-post-badge" title="Пост опубликован администрацией">✦ АДМИНИСТРАЦИЯ</span>' : '') + '<time>' + escapeHtml(time) + '</time></div>' +
+            '<div class="lorgus-messenger-message-meta"><strong>' + escapeHtml(author) + '</strong>' + (visualAdminPost ? '<span class="lorgus-admin-post-badge" title="Пост опубликован администрацией">✦ АДМИНИСТРАЦИЯ</span>' : '') + '<time>' + escapeHtml(time) + '</time></div>' +
             '<div class="lorgus-messenger-bubble">' +
                 (message.reply_to_id && message.reply_to ? '<button type="button" class="lorgus-rp-reply-quote" data-reply-target-id="' + escapeHtml(String(message.reply_to_id)) + '">' +
                     '<span class="lorgus-rp-reply-quote-mark">↩</span><span class="lorgus-rp-reply-quote-content"><strong>' + escapeHtml(message.reply_to.characters?.name || "Без имени") + '</strong><span>' + escapeHtml(String(message.reply_to.body || "").replace(/\s+/g, " ").slice(0, 180)) + '</span></span></button>' : '') +
@@ -606,7 +610,14 @@ async function appendRpMessage(message) {
     const characterLink = article.querySelector(".lorgus-messenger-message-meta strong");
     if (characterLink) characterLink.addEventListener("click", openCharacterCard(characterLink));
     const avatarButton = article.querySelector(".lorgus-messenger-message-avatar");
-    if (avatarButton && !adminPost) avatarButton.addEventListener("click", openCharacterCard(avatarButton));
+    if (avatarButton && !visualAdminPost && !isSharedScene) avatarButton.addEventListener("click", openCharacterCard(avatarButton));
+    article.querySelectorAll("[data-multi-character-id]").forEach(button => {
+        button.addEventListener("click", event => {
+            event.preventDefault();
+            event.stopPropagation();
+            window.openRpCharacterQuickCard?.(button.dataset.multiCharacterId, button);
+        });
+    });
 
     // Текст появляется сразу. Портреты, титулы и использованные предметы догружаются параллельно.
     const photoAndTitle = (adminPost ? Promise.resolve([null, null]) : Promise.all([
