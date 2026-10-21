@@ -1190,6 +1190,16 @@ async function openRpCharacterQuickCard(characterId, anchorElement = null) {
     }
 
     const photo = await getRpCharacterPhoto(character.id);
+    const { data: equippedItems } = await window.supabaseClient
+        .from("character_inventory")
+        .select("equipped_slot,quantity,items(name,item_type,item_subtype)")
+        .eq("character_id", character.id)
+        .not("equipped_slot", "is", null);
+    const equipmentHtml = (equippedItems || []).length
+        ? '<div class="lorgus-rp-character-card-story"><small>ЭКИПИРОВКА</small><div class="lorgus-rp-character-card-equipment">' +
+            equippedItems.map(row => '<div><span>' + escapeHtml(row.equipped_slot || "Снаряжение") + '</span><strong>' + escapeHtml(row.items?.name || "Предмет") + '</strong></div>').join("") +
+          '</div></div>'
+        : '<div class="lorgus-rp-character-card-story muted"><small>ЭКИПИРОВКА</small><p>Нет сведений об экипированных предметах.</p></div>';
     const esc = value => escapeHtml(value ?? "—");
     const titleHtml = title
         ? '<div class="lorgus-rp-character-card-title">' + renderTitleBadge(title, "lorgus-public-title") + '</div>'
@@ -1209,9 +1219,17 @@ async function openRpCharacterQuickCard(characterId, anchorElement = null) {
             '<div><small>РОДИНА</small><strong>' + esc(character.homeland || "Не указана") + '</strong></div>' +
             '<div><small>МЕСТО</small><strong>' + esc(character.location || "Не указано") + '</strong></div>' +
         '</div>' +
-        (character.personality ? '<div class="lorgus-rp-character-card-story"><small>ХАРАКТЕР И ПОВЕДЕНИЕ</small><p>' + esc(character.personality) + '</p></div>' : '<div class="lorgus-rp-character-card-story muted"><p>О характере пока ничего не известно.</p></div>');
+        (character.personality ? '<div class="lorgus-rp-character-card-story"><small>ХАРАКТЕР И ПОВЕДЕНИЕ</small><p>' + esc(character.personality) + '</p></div>' : '<div class="lorgus-rp-character-card-story muted"><p>О характере пока ничего не известно.</p></div>') +
+        equipmentHtml +
+        '<div class="lorgus-rp-character-card-actions"><button type="button" class="lorgus-rp-character-card-action" data-open-character-lorebook>Открыть в Лорбуке</button></div>';
 
     panel.querySelector(".lorgus-rp-character-card-close").addEventListener("click", close);
+    panel.querySelector("[data-open-character-lorebook]")?.addEventListener("click", () => {
+        close();
+        if (typeof window.renderLorgusCodex === "function") window.renderLorgusCodex(character.name);
+        else if (window.lorgusNavigate) window.lorgusNavigate("/lorblook");
+        else location.hash = "/lorblook";
+    });
 
     // Карточка показывается сразу; проверки доступных действий идут в фоне.
     if (String(character.id) !== String(window.activeCharacterId)) {
