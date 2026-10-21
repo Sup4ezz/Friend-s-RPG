@@ -457,3 +457,20 @@ html body #root #cabinet-content .codex-cosmos-detail .codex-detail-body > img.c
  html body #root #cabinet-content .codex-cosmos-detail .codex-detail-body>img.codex-detail-illustration{height:auto!important;max-height:none!important;object-fit:contain!important;margin:16px 0 20px!important}
 }
 @media(max-width:380px){.codex-cosmos{padding-left:11px!important;padding-right:11px!important}.codex-cosmos.is-open,.codex-cosmos.is-section-view,.codex-cosmos.is-entry-view{padding-left:11px!important;padding-right:11px!important}.codex-node-title{font-size:15px!important}.codex-cosmos-back,.codex-cosmos-exit{font-size:9px!important;padding:10px!important}}
+
+/* Wide-screen codex: use the desktop canvas instead of tablet-sized columns. */
+@media (min-width: 1600px) {
+ .lorgus-codex-page { width:100%; box-sizing:border-box; padding:clamp(28px,2.2vw,58px); }
+ .lorgus-codex-hero { padding:clamp(42px,3.4vw,76px); min-height:220px; }
+ .lorgus-codex-layout { grid-template-columns:minmax(270px,320px) minmax(0,1fr); min-height:calc(100dvh - 360px); }
+ .lorgus-codex-main { min-width:0; padding:clamp(28px,2.4vw,64px); }
+ .lorgus-codex-entry-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+}
+@media (min-width: 2400px) {
+ .lorgus-codex-page { padding:54px clamp(56px,3vw,100px); }
+ .lorgus-codex-hero { min-height:260px; padding:72px; }
+ .lorgus-codex-layout { grid-template-columns:360px minmax(0,1fr); min-height:calc(100dvh - 400px); }
+ .lorgus-codex-main { padding:56px clamp(50px,3vw,90px); }
+ .lorgus-codex-entry-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
+}
+@media (min-width: 3000px) { .lorgus-codex-page { padding-inline:clamp(80px,4vw,140px); } }
