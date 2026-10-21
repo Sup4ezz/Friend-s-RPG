@@ -42,7 +42,7 @@ function renderLorgusRpHub() {
         ? "window.enterLocationRp(" + JSON.stringify(p.location) + "," + JSON.stringify(p.region) + ")"
         : isRoad
             ? "window.renderRoadChat(window.activeRpPresence)"
-            : "window.renderLorgusWorldMapCurrent()";
+            : "window.renderLorgusRpPlacePicker()";
 
     const stateLabel = isLocation ? "СЦЕНА ДОСТУПНА" : isRoad ? "ПЕРСОНАЖ В ПУТИ" : "СЦЕНА НЕ НАЧАТА";
     const stateClass = isLocation ? "live" : isRoad ? "road" : "empty";
@@ -119,6 +119,50 @@ ${sceneArt ? `<div class="lorgus-rp-scene-art" style="background-image:url('${sc
         </main>
     `;
 }
+// First-time RP entry: choose a region directly instead of returning to the mobile home screen.
+function renderLorgusRpPlacePicker() {
+    const container = document.getElementById("cabinet-content");
+    if (!container || !window.activeCharacter) return;
+
+    const regions = Object.entries(window.LORGUS_LOCATIONS || LORGUS_LOCATIONS || {});
+    container.className = "lorgus-world-page lorgus-region-arrival lorgus-rp-place-picker";
+    container.innerHTML = `
+        <div class="lorgus-world-shell">
+            <aside class="lorgus-world-sidebar">
+                <div class="lorgus-world-sidebar-symbol">✦</div>
+                <div class="lorgus-world-sidebar-label">РОЛЕВАЯ · ПЕРВЫЙ ШАГ</div>
+                <div class="lorgus-world-sidebar-name">${window.escapeHtml(window.activeCharacter.name || "Персонаж")}</div>
+                <p class="lorgus-world-sidebar-meta">Выбери край, в котором начнётся путь персонажа.</p>
+                <button class="character-secondary-button lorgus-world-sidebar-button" type="button" onclick="window.renderLorgusRpHub?.()">
+                    ← Вернуться в ролевую
+                </button>
+            </aside>
+            <main class="lorgus-world-browser">
+                <header class="lorgus-world-header">
+                    <span class="lorgus-world-kicker">НАЧАЛО ПУТИ</span>
+                    <h1>Выбрать место</h1>
+                    <p>Сначала выбери край мира, затем конкретную локацию. Главное меню открывать не нужно.</p>
+                </header>
+                <section class="lorgus-world-section">
+                    <div class="lorgus-world-section-title">КРАЯ МИРА</div>
+                    <div class="lorgus-location-grid">
+                        ${regions.map(([regionName, region]) => `
+                            <button class="lorgus-location-card" type="button" onclick='window.renderKingdomLocations(${JSON.stringify(regionName)})'>
+                                <span class="lorgus-location-card-mark" aria-hidden="true"><span class="lorgus-location-card-glyph"></span></span>
+                                <strong>${window.escapeHtml(regionName)}</strong>
+                                <small>${window.escapeHtml(region.subtitle || "Край мира")}</small>
+                                <p>${window.escapeHtml(region.description || "Выбрать локацию в этом крае.")}</p>
+                                <span class="lorgus-location-card-access">Выбрать край →</span>
+                            </button>
+                        `).join("")}
+                    </div>
+                </section>
+            </main>
+        </div>
+    `;
+}
+window.renderLorgusRpPlacePicker = renderLorgusRpPlacePicker;
+
 // Explicit global export: world-map.js passes this renderer into the navigation handler.
 window.renderLorgusRpHub = renderLorgusRpHub;
 
