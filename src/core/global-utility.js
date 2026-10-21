@@ -10,7 +10,7 @@
 
     // A portal/eye overlay must never survive a reload or a return from the
     // mobile browser background; either layer covers the whole screen in black.
-    document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay")
+    document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-portal-transition-veil, .lorgus-portal-transition-core, .lorgus-portal-transition-ring, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil")
       .forEach(overlay => overlay.remove());
     window.lorgusPortalOverlay = null;
   };
@@ -79,7 +79,10 @@
 
     const sectionPaths = new Set(["/mail", "/character", "/lorblook", "/rp"]);
     let nav = document.querySelector(".lorgus-subpage-nav");
-    if (sectionPaths.has(route) && active) {
+    // На телефонах навигация стрелками отключена: используются только штатные кнопки внизу.
+    if (window.matchMedia("(max-width: 720px)").matches) {
+      nav?.remove();
+    } else if (sectionPaths.has(route) && active) {
       if (!nav) {
         nav = document.createElement("nav");
         nav.className = "lorgus-mainmenu-nav lorgus-subpage-nav";
@@ -161,6 +164,19 @@
   } else {
     refresh();
   }
+  // Если переходный слой создаётся уже после загрузки страницы, сразу убираем его.
+  // Это не затрагивает панели уведомлений/диалогов и не зависит от того, с какого маршрута вошли.
+  const veilObserver = new MutationObserver(() => {
+    if (!window.matchMedia("(max-width: 720px)").matches) return;
+    const veils = document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-portal-transition-veil, .lorgus-portal-transition-core, .lorgus-portal-transition-ring, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil");
+    veils.forEach(el => el.remove());
+    document.documentElement.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
+    document.body.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
+    delete document.documentElement.dataset.lorgusTransition;
+    window.lorgusPortalOverlay = null;
+  });
+  if (document.body) veilObserver.observe(document.body, { childList: true, subtree: true });
+
   const observer = new MutationObserver(records => {
     const relevant = records.some(record => {
       const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;

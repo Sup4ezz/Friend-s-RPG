@@ -1114,3 +1114,37 @@
     background-color: #080705 !important;
   }
 }
+
+
+/* Mobile fix: subpages use the bottom navigation, never the legacy directional arrows. */
+@media (max-width: 720px) {
+  body .lorgus-subpage-nav,
+  body .lorgus-mainmenu-nav.lorgus-subpage-nav,
+  body .lorgus-subpage-nav .lorgus-mainmenu-arrow {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  body .lorgus-portal-transition,
+  body .lorgus-eye-transition,
+  body .lorgus-region-transition-veil,
+  body .lorgus-transition-screen,
+  body .lorgus-scene-transition-overlay,
+  body .lorgus-transition-overlay,
+  body .lorgus-portal-transition-veil,
+  body .lorgus-portal-transition-core,
+  body .lorgus-portal-transition-ring,
+  body .lorgus-veil,
+  body .lorgus-transition-veil,
+  body .lorgus-scene-veil,
+  body .lorgus-loading-veil,
+  body .lorgus-mobile-veil {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
