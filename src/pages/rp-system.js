@@ -551,6 +551,7 @@ async function arriveAtDestination() {
         .eq("character_id", characterId)
         .eq("presence_type", "road")
         .eq("status", "active")
+        .gte("created_at", presence.startedAt || new Date().toISOString())
         .eq("from_region", presence.fromRegion)
         .eq("from_location", presence.fromLocation)
         .eq("to_region", presence.toRegion)
