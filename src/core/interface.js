@@ -617,6 +617,16 @@ async function appendRpMessage(message) {
             event.stopPropagation();
             window.openRpCharacterQuickCard?.(button.dataset.multiCharacterId, button);
         });
+        if (button.classList.contains("lorgus-messenger-message-avatar")) {
+            Promise.resolve(window.getRpCharacterPhoto?.(button.dataset.multiCharacterId)).then(photo => {
+                if (!photo || !button.isConnected) return;
+                const img = document.createElement("img");
+                img.src = photo;
+                img.alt = "";
+                img.loading = "lazy";
+                button.replaceChildren(img);
+            }).catch(() => {});
+        }
     });
 
     // Текст появляется сразу. Портреты, титулы и использованные предметы догружаются параллельно.
