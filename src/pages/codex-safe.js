@@ -353,7 +353,8 @@
   const heading=make("h2",""),description=make("p",""),results=make("div","lorgus-codex-results");
   main.append(make("header","lorgus-codex-section-header"));main.firstChild.append(heading,description);main.append(results);layout.append(nav,main);root.append(hero,toolbar,layout);
   const back=make("button","lorgus-codex-back","← Вернуться к карте");back.type="button";back.addEventListener("click",()=>window.lorgusNavigate?window.lorgusNavigate("/map"):window.renderLorgusWorldMapCurrent?.());root.append(back);
-  let activeId=startId||"atlas",requestId=0;const buttons=[];
+  const requestedEntry = String(startId || "").trim();
+  let activeId="atlas",requestId=0;const buttons=[];
   function openEntry(entry,sectionTitle){
    const overlay=make("div","lorgus-codex-overlay");overlay.setAttribute("role","presentation");
    const panel=make("section","lorgus-codex-dialog");panel.setAttribute("role","dialog");panel.setAttribute("aria-modal","true");panel.setAttribute("aria-label",entry[0]);
@@ -428,6 +429,13 @@
    draw({entries:all},needle);
   });
   await open(activeId);
+  if (requestedEntry && requestedEntry !== "atlas" && !sections.some(section => section.id === requestedEntry)) {
+   search.value = requestedEntry;
+   search.dispatchEvent(new Event("input", { bubbles: true }));
+  } else if (sections.some(section => section.id === requestedEntry)) {
+   activeId = requestedEntry;
+   await open(activeId);
+  }
  }
  window.renderLorgusCodexFallback=render;window.renderLorgusCodex=render;window.LORGUS_PAGES=window.LORGUS_PAGES||{};window.LORGUS_PAGES.codex={render:()=>render("atlas")};
 })();
