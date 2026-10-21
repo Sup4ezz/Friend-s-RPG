@@ -1114,4 +1114,38 @@
     background-color: #080705 !important;
   }
 }
-\n\n/* Mobile fix: subpages use the bottom navigation, never the legacy directional arrows. */\n@media (max-width: 720px) {\n  body .lorgus-subpage-nav,\n  body .lorgus-mainmenu-nav.lorgus-subpage-nav,\n  body .lorgus-subpage-nav .lorgus-mainmenu-arrow {\n    display: none !important;\n    visibility: hidden !important;\n    opacity: 0 !important;\n    pointer-events: none !important;\n  }\n  body .lorgus-portal-transition,\n  body .lorgus-eye-transition,\n  body .lorgus-cinematic-auth,\n  body .lorgus-region-transition-veil,\n  body .lorgus-transition-screen,\n  body .lorgus-scene-transition-overlay,\n  body .lorgus-transition-overlay,\n  body .lorgus-portal-transition-veil,\n  body .lorgus-portal-transition-core,\n  body .lorgus-portal-transition-ring,\n  body .lorgus-veil,\n  body .lorgus-transition-veil,\n  body .lorgus-scene-veil,\n  body .lorgus-loading-veil,\n  body .lorgus-mobile-veil {\n    display: none !important;\n    visibility: hidden !important;\n    opacity: 0 !important;\n    pointer-events: none !important;\n    animation: none !important;\n    transition: none !important;\n  }\n}\n
+
+
+/* Mobile fix: subpages use the bottom navigation, never the legacy directional arrows. */
+@media (max-width: 720px) {
+  body .lorgus-subpage-nav,
+  body .lorgus-mainmenu-nav.lorgus-subpage-nav,
+  body .lorgus-subpage-nav .lorgus-mainmenu-arrow {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+  body .lorgus-portal-transition,
+  body .lorgus-eye-transition,
+  body .lorgus-cinematic-auth,
+  body .lorgus-region-transition-veil,
+  body .lorgus-transition-screen,
+  body .lorgus-scene-transition-overlay,
+  body .lorgus-transition-overlay,
+  body .lorgus-portal-transition-veil,
+  body .lorgus-portal-transition-core,
+  body .lorgus-portal-transition-ring,
+  body .lorgus-veil,
+  body .lorgus-transition-veil,
+  body .lorgus-scene-veil,
+  body .lorgus-loading-veil,
+  body .lorgus-mobile-veil {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
