@@ -79,7 +79,10 @@
 
     const sectionPaths = new Set(["/mail", "/character", "/lorblook", "/rp"]);
     let nav = document.querySelector(".lorgus-subpage-nav");
-    // На телефонах навигация стрелками отключена: используются только штатные кнопки внизу.\n    if (window.matchMedia("(max-width: 720px)").matches) {\n      nav?.remove();\n    } else if (sectionPaths.has(route) && active) {
+    // На телефонах навигация стрелками отключена: используются только штатные кнопки внизу.
+    if (window.matchMedia("(max-width: 720px)").matches) {
+      nav?.remove();
+    } else if (sectionPaths.has(route) && active) {
       if (!nav) {
         nav = document.createElement("nav");
         nav.className = "lorgus-mainmenu-nav lorgus-subpage-nav";
@@ -161,7 +164,20 @@
   } else {
     refresh();
   }
-  // Если переходный слой создаётся уже после загрузки страницы, сразу убираем его.\n  // Это не затрагивает панели уведомлений/диалогов и не зависит от того, с какого маршрута вошли.\n  const veilObserver = new MutationObserver(() => {\n    if (!window.matchMedia("(max-width: 720px)").matches) return;\n    const veils = document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-cinematic-auth, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-portal-transition-veil, .lorgus-portal-transition-core, .lorgus-portal-transition-ring, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil");\n    veils.forEach(el => el.remove());\n    document.documentElement.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");\n    document.body.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");\n    delete document.documentElement.dataset.lorgusTransition;\n    window.lorgusPortalOverlay = null;\n  });\n  if (document.body) veilObserver.observe(document.body, { childList: true, subtree: true });\n\n  const observer = new MutationObserver(records => {
+  // Если переходный слой создаётся уже после загрузки страницы, сразу убираем его.
+  // Это не затрагивает панели уведомлений/диалогов и не зависит от того, с какого маршрута вошли.
+  const veilObserver = new MutationObserver(() => {
+    if (!window.matchMedia("(max-width: 720px)").matches) return;
+    const veils = document.querySelectorAll(".lorgus-portal-transition, .lorgus-eye-transition, .lorgus-cinematic-auth, .lorgus-region-transition-veil, .lorgus-transition-screen, .lorgus-scene-transition-overlay, .lorgus-transition-overlay, .lorgus-portal-transition-veil, .lorgus-portal-transition-core, .lorgus-portal-transition-ring, .lorgus-veil, .lorgus-transition-veil, .lorgus-scene-veil, .lorgus-loading-veil, .lorgus-mobile-veil");
+    veils.forEach(el => el.remove());
+    document.documentElement.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
+    document.body.classList.remove("lorgus-transition-active", "lorgus-scene-transitioning");
+    delete document.documentElement.dataset.lorgusTransition;
+    window.lorgusPortalOverlay = null;
+  });
+  if (document.body) veilObserver.observe(document.body, { childList: true, subtree: true });
+
+  const observer = new MutationObserver(records => {
     const relevant = records.some(record => {
       const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
       return !target?.closest(".lorgus-global-utility,.lorgus-subpage-nav,.lorgus-direction-return");
