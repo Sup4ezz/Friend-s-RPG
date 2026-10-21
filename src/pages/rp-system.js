@@ -678,7 +678,6 @@ async function renderRoadChat(presence, fromRoute = false) {
                         <p><span class="online-dot"></span> Путь · <b id="lorgus-rp-online-count">1</b> участник</p>
                     </div>
                     <div class="lorgus-messenger-header-actions">
-                        <button type="button" title="Выйти на дорогу" aria-label="Выйти на дорогу" onclick="openLorgusTravelPicker()">↗</button>
                         <button type="button" title="Участники" onclick="document.querySelector('.lorgus-messenger-sidebar')?.classList.toggle('mobile-open')">☷</button>
                         <button type="button" title="Обновить" onclick="renderRoadChat(window.activeRpPresence)">↻</button>
                     </div>
@@ -1411,6 +1410,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
                         <p><span class="online-dot"></span> ${region} · <b id="lorgus-rp-online-count">1</b> участник</p>
                     </div>
                     <div class="lorgus-messenger-header-actions">
+                        <button type="button" title="Выйти на дорогу" aria-label="Выйти на дорогу" onclick="openLorgusTravelPicker()">↗</button>
                         <button type="button" title="Участники" onclick="document.querySelector('.lorgus-messenger-sidebar')?.classList.toggle('mobile-open')">☷</button>
                         <button type="button" title="Обновить" onclick="renderLocationChats('${locationName.replace(/'/g, "\\'")}','${regionName.replace(/'/g, "\\'")}',true)">↻</button>
                     </div>
