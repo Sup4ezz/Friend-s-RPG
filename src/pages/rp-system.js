@@ -1297,9 +1297,10 @@ async function setupAdminMultiActorComposer(container, presence) {
 async function openAdminMultiActorComposer(presence) {
     document.querySelector(".lorgus-admin-multi-actor-overlay")?.remove();
     const { data, error } = await window.supabaseClient
-        .from("lorgus_nrp_characters")
+        .from("character_applications")
         .select("character_id,characters(id,name,race,kingdom,location,occupation,photo_path)")
-        .eq("is_active", true)
+        .eq("status", "approved")
+        .not("character_id", "is", null)
         .order("created_at", { ascending: false });
     if (error) {
         alert("Не удалось загрузить список RP-персонажей: " + error.message);
@@ -1307,7 +1308,7 @@ async function openAdminMultiActorComposer(presence) {
     }
     const rows = (data || []).filter(row => row.characters?.id);
     if (!rows.length) {
-        alert("Нет активных RP-персонажей, которыми управляет администрация.");
+        alert("Нет одобренных персонажей, доступных для общей сцены.");
         return;
     }
     const overlay = document.createElement("div");
@@ -1379,8 +1380,8 @@ async function openAdminMultiActorComposer(presence) {
         send.disabled = true;
         send.textContent = "Публикация…";
         const chat = presence;
-        const { error: sendError } = await window.supabaseClient.rpc("admin_send_nrp_rp_message", {
-            p_nrp_character_id: actors[0].id,
+        const { error: sendError } = await window.supabaseClient.rpc("admin_send_multi_character_rp_message", {
+            p_character_id: actors[0].id,
             p_presence_type: chat.type,
             p_region: chat.type === "location" ? chat.region : null,
             p_location: chat.type === "location" ? chat.location : null,
