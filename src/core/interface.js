@@ -530,15 +530,20 @@ async function appendRpMessage(message) {
     if (adminPost && typeof message.body === "string" && message.body.startsWith(multiActorPrefix)) {
         try {
             const parsed = JSON.parse(message.body.slice(multiActorPrefix.length));
-            if (Array.isArray(parsed.actors) && parsed.actors.length) multiActorPost = parsed.actors;
+            if (Array.isArray(parsed.actors) && parsed.actors.length) multiActorPost = { actors: parsed.actors, body: typeof parsed.body === "string" ? parsed.body : null, mode: parsed.mode || "legacy" };
         } catch (error) {
             console.warn("Не удалось прочитать составной RP-пост:", error);
         }
     }
     const renderedMessageBody = multiActorPost
-        ? '<div class="lorgus-multi-actor-post">' + multiActorPost.map(actor =>
-            '<section class="lorgus-multi-actor-segment"><strong>' + escapeHtml(actor.name || "Персонаж") + '</strong><p>' + escapeHtml(actor.body || "").replace(/\\n/g, "<br>") + '</p></section>'
-          ).join("") + '</div>'
+        ? '<div class="lorgus-multi-actor-post">' +
+            '<div class="lorgus-multi-actor-participants">' + multiActorPost.actors.map(actor =>
+              '<span class="lorgus-multi-actor-participant" title="' + escapeHtml(actor.name || "Персонаж") + '">✦ ' + escapeHtml(actor.name || "Персонаж") + '</span>'
+            ).join("") + '</div>' +
+            (multiActorPost.body !== null
+              ? '<p class="lorgus-multi-actor-shared-body">' + escapeHtml(multiActorPost.body).replace(/\\n/g, "<br>") + '</p>'
+              : multiActorPost.actors.map(actor => '<section class="lorgus-multi-actor-segment"><strong>' + escapeHtml(actor.name || "Персонаж") + '</strong><p>' + escapeHtml(actor.body || "").replace(/\\n/g, "<br>") + '</p></section>').join("")) +
+          '</div>'
         : '<p>' + escapeHtml(message.body) + '</p>';
     const article = document.createElement("article");
     article.className = "lorgus-messenger-message" + (mine ? " mine" : "") + (adminPost ? " admin-authored" : "") + (message.status === "reverted" ? " reverted" : "");
