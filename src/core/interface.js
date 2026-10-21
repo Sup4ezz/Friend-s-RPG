@@ -540,7 +540,7 @@ async function appendRpMessage(message) {
     const renderedMessageBody = multiActorPost
         ? '<div class="lorgus-multi-actor-post">' +
             (isSharedScene
-              ? '<p class="lorgus-multi-actor-shared-body">' + escapeHtml(multiActorPost.body || "").replace(/\\n/g, "<br>") + '</p>'
+              ? '<p class="lorgus-multi-actor-shared-body">' + escapeHtml(multiActorPost.body || "").replace(/\n/g, "<br>") + '</p>'
               : '<div class="lorgus-multi-actor-participants">' + multiActorPost.actors.map(actor =>
                   '<button type="button" class="lorgus-multi-actor-participant" data-multi-character-id="' + escapeHtml(actor.id || "") + '">' + escapeHtml(actor.name || "Персонаж") + '</button>'
                 ).join("") + '</div>' +
