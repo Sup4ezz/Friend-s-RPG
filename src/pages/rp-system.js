@@ -536,11 +536,12 @@ async function arriveAtDestination() {
         return;
     }
 
-    const [{ data: inventory, error: inventoryError }, { data: abilities, error: abilitiesError }] = await Promise.all([
+    const [{ data: inventory, error: inventoryError }, { data: abilities, error: abilitiesError }, { data: rewards, error: rewardsError }] = await Promise.all([
         db.from("character_inventory").select("items(name,item_type,item_subtype)").eq("character_id", characterId),
-        db.from("character_abilities").select("abilities(name,description)").eq("character_id", characterId)
+        db.from("character_abilities").select("abilities(name,description),source_note").eq("character_id", characterId),
+        db.from("character_special_rewards").select("name,description").eq("character_id", characterId)
     ]);
-    if (inventoryError || abilitiesError) {
+    if (inventoryError || abilitiesError || rewardsError) {
         alert("Не удалось проверить коня и привилегии. Попробуй ещё раз.");
         return;
     }
@@ -549,11 +550,12 @@ async function arriveAtDestination() {
         const text = [item.name, item.item_type, item.item_subtype].join(" ").toLocaleLowerCase("ru-RU");
         return /кон[ьи]|лошад|скакун|horse|mount/.test(text);
     });
-    const canBypassRoad = (abilities || []).some(row => {
+    const canBypassRoad = [...(abilities || []).map(row => {
         const ability = row.abilities || {};
-        const text = [ability.name, ability.description].join(" ").toLocaleLowerCase("ru-RU");
-        return text.includes("перемещение минуя дорогу");
-    });
+        return [ability.name, ability.description, row.source_note].join(" ");
+    }), ...(rewards || []).map(row => [row.name, row.description].join(" "))].some(value =>
+        value.toLocaleLowerCase("ru-RU").includes("перемещение минуя дорогу")
+    );
     const requiredPosts = canBypassRoad ? 0 : hasHorse ? 1 : 2;
     if (Number(roadPosts || 0) < requiredPosts) {
         const left = requiredPosts - Number(roadPosts || 0);
