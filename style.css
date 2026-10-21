@@ -19730,3 +19730,45 @@ button.lorgus-multi-actor-participant:hover,button.lorgus-multi-actor-participan
  .lorgus-multi-actor-avatars .lorgus-messenger-message-avatar{width:30px;height:30px;flex-basis:30px}
  .lorgus-rp-character-card-equipment>div{align-items:flex-start}
 }
+
+
+
+/* LORGUS desktop and ultrawide layout corrections */
+@media (min-width: 1600px) {
+  .lorgus-rp-page {
+    width: min(1900px, calc(100% - 64px));
+  }
+  .lorgus-rp-shell {
+    grid-template-columns: 340px minmax(0, 1fr);
+  }
+  .lorgus-character-shell {
+    grid-template-columns: 310px minmax(0, 1fr);
+  }
+  .lorgus-character-sidebar {
+    padding-right: 26px;
+    padding-left: 26px;
+  }
+  .lorgus-map-shell {
+    grid-template-columns: 320px minmax(0, 1fr);
+  }
+}
+@media (min-width: 2400px) {
+  .lorgus-rp-page {
+    width: min(2240px, calc(100% - 112px));
+    margin-top: 30px;
+  }
+  .lorgus-rp-shell {
+    grid-template-columns: 370px minmax(0, 1fr);
+  }
+  .lorgus-character-shell {
+    grid-template-columns: 340px minmax(0, 1fr);
+  }
+  .lorgus-map-shell {
+    grid-template-columns: 360px minmax(0, 1fr);
+  }
+}
+@media (min-width: 3000px) {
+  .lorgus-rp-page {
+    width: min(2600px, calc(100% - 160px));
+  }
+}
