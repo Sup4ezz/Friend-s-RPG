@@ -90,9 +90,15 @@ begin
         nullif(trim(p_location),''), nullif(trim(p_from_region),''), nullif(trim(p_from_location),''),
         nullif(trim(p_to_region),''), nullif(trim(p_to_location),''), trim(p_body), 'active', true
     ) returning * into result_row;
+
+    insert into public.rp_message_participants(message_id, character_id)
+    select result_row.id, (actor->>'id')::uuid
+    from jsonb_array_elements(payload->'actors') actor
+    on conflict (message_id, character_id) do nothing;
+
     return result_row;
 end;
-$$;
+$;
 
 revoke all on function public.admin_send_multi_character_rp_message(uuid,text,text,text,text,text,text,text,text) from public, anon;
 grant execute on function public.admin_send_multi_character_rp_message(uuid,text,text,text,text,text,text,text,text) to authenticated;
