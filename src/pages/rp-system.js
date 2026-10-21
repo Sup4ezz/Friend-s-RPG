@@ -563,7 +563,7 @@ async function arriveAtDestination() {
     const [{ data: inventory, error: inventoryError }, { data: abilities, error: abilitiesError }, { data: rewards, error: rewardsError }] = await Promise.all([
         db.from("character_inventory").select("items(name,item_type,item_subtype)").eq("character_id", characterId),
         db.from("character_abilities").select("abilities(name,description),source_note").eq("character_id", characterId),
-        db.from("character_special_rewards").select("name,description").eq("character_id", characterId)
+        db.from("character_special_rewards").select("name,description,used_at").eq("character_id", characterId).is("used_at", null)
     ]);
     if (inventoryError || abilitiesError || rewardsError) {
         alert("Не удалось проверить коня и привилегии. Попробуй ещё раз.");
@@ -640,7 +640,7 @@ async function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion
     let hasRoadBypass = false;
     if (characterId && window.supabaseClient) {
         const [rewardResult, abilityResult] = await Promise.all([
-            window.supabaseClient.from("character_special_rewards").select("name,description").eq("character_id", characterId),
+            window.supabaseClient.from("character_special_rewards").select("name,description,used_at").eq("character_id", characterId).is("used_at", null),
             window.supabaseClient.from("character_abilities").select("abilities(name,description)").eq("character_id", characterId)
         ]);
         const grants = [
