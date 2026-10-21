@@ -423,3 +423,17 @@
     max-width: 2800px !important;
   }
 }
+
+/* Wide-screen mail workspace: remove the legacy 1600px cap on large displays. */
+@media (min-width: 1600px) {
+  .lorgus-mail-page { width: 100%; min-width: 0; }
+  .lorgus-mail-page .lorgus-mail-shell { width: calc(100% - 64px) !important; max-width: 2200px !important; grid-template-columns: 290px minmax(0, 1fr) !important; margin-inline: auto !important; }
+  .lorgus-mail-page .lorgus-mail-main { min-width: 0 !important; padding-inline: clamp(28px, 2.5vw, 60px) !important; }
+  .lorgus-mail-page .lorgus-mail-workspace { grid-template-columns: minmax(0, 1.1fr) minmax(340px, .9fr) !important; gap: 24px !important; }
+}
+@media (min-width: 2400px) {
+  .lorgus-mail-page .lorgus-mail-shell { width: calc(100% - 112px) !important; max-width: 2800px !important; grid-template-columns: 340px minmax(0, 1fr) !important; }
+  .lorgus-mail-page .lorgus-mail-main { padding-inline: clamp(48px, 3vw, 90px) !important; }
+  .lorgus-mail-page .lorgus-mail-workspace { gap: 32px !important; }
+}
+@media (min-width: 3000px) { .lorgus-mail-page .lorgus-mail-shell { width: calc(100% - 160px) !important; max-width: 3040px !important; } }
