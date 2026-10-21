@@ -460,6 +460,19 @@ async function enterLocationRp(locationName, regionName) {
     await renderLocationChats(locationName, regionName, false);
 }
 
+function openLorgusTravelPicker() {
+    const presence = window.activeRpChatSpace || window.activeRpPresence;
+    if (presence?.type === "location") {
+        renderTravelScreen(presence.location, presence.region);
+        return;
+    }
+    if (presence?.type === "road") {
+        renderRoadChat(presence);
+        return;
+    }
+    alert("Сначала войди в RP-локацию.");
+}
+
 async function startTravel(fromLocation, fromRegion, toLocation, toRegion) {
     const presence = await getRpPresence();
 
@@ -1397,6 +1410,7 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
                         <p><span class="online-dot"></span> ${region} · <b id="lorgus-rp-online-count">1</b> участник</p>
                     </div>
                     <div class="lorgus-messenger-header-actions">
+                        <button type="button" title="Выйти на дорогу" aria-label="Выйти на дорогу" onclick="openLorgusTravelPicker()">↗</button>
                         <button type="button" title="Участники" onclick="document.querySelector('.lorgus-messenger-sidebar')?.classList.toggle('mobile-open')">☷</button>
                         <button type="button" title="Обновить" onclick="renderLocationChats('${locationName.replace(/'/g, "\\'")}','${regionName.replace(/'/g, "\\'")}',true)">↻</button>
                     </div>
