@@ -1009,7 +1009,7 @@ async function submitCharacterApplication(event) {
 
     const { data: existingApplications, error: countError } = await window.supabaseClient
         .from("character_applications")
-        .select("id,status")
+        .select("id,status,character_id")
         .eq("player_id", user.id);
 
     if (countError) {
@@ -1017,8 +1017,24 @@ async function submitCharacterApplication(event) {
         return;
     }
 
-    const characterCount = (existingApplications || []).filter(
-        application => application.status !== "rejected"
+    const approvedIds = (existingApplications || [])
+        .filter(application => application.status === "approved" && application.character_id)
+        .map(application => application.character_id);
+    const { data: approvedCharacters, error: characterStatusError } = approvedIds.length
+        ? await window.supabaseClient.from("characters").select("id,status").in("id", approvedIds)
+        : { data: [], error: null };
+
+    if (characterStatusError) {
+        setCharacterMessage("Не удалось проверить архивные персонажи: " + characterStatusError.message, "error");
+        return;
+    }
+
+    const archivedIds = new Set((approvedCharacters || [])
+        .filter(character => String(character.status || "ACTIVE").toUpperCase() === "ARCHIVED")
+        .map(character => String(character.id)));
+    const characterCount = (existingApplications || []).filter(application =>
+        application.status !== "rejected" &&
+        !(application.status === "approved" && application.character_id && archivedIds.has(String(application.character_id)))
     ).length;
 
     if (characterCount >= 3) {
