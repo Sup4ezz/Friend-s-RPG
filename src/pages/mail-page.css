@@ -395,3 +395,31 @@
     min-height:100dvh!important;max-width:none!important;
   }
 }
+
+
+
+/* Mail workspace scaling for ultrawide monitors */
+@media (min-width: 1600px) {
+  .lorgus-mail-page .lorgus-mail-shell {
+    width: calc(100% - 64px) !important;
+    max-width: 2100px !important;
+    grid-template-columns: 280px minmax(0, 1fr) !important;
+  }
+  .lorgus-mail-page .lorgus-mail-main {
+    min-width: 0 !important;
+    padding-right: clamp(24px, 2.2vw, 52px) !important;
+    padding-left: clamp(24px, 2.2vw, 52px) !important;
+  }
+}
+@media (min-width: 2400px) {
+  .lorgus-mail-page .lorgus-mail-shell {
+    width: calc(100% - 112px) !important;
+    max-width: 2500px !important;
+    grid-template-columns: 320px minmax(0, 1fr) !important;
+  }
+}
+@media (min-width: 3000px) {
+  .lorgus-mail-page .lorgus-mail-shell {
+    max-width: 2800px !important;
+  }
+}
