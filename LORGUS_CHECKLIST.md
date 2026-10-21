@@ -1362,3 +1362,16 @@ Commits:
 - Advisor отдельно предупреждает о 54 привилегированных RPC, доступных authenticated, и расширении `pg_net` в `public`. Не отзывать права массово: сначала проверять каждую RPC и её использование интерфейсом.
 - В этой итерации production SQL/RLS не менялся.
 - В `.github/workflows/deploy-lorgus.yml` добавлено исключение `docs/**`, чтобы изменения только документации не запускали production deployment.
+
+
+# 13. JOINT RP POSTS + CHARACTER DELETION REQUESTS — 2026-10-21
+
+- [x] Admin mini-app multi-character reply changed to one shared textarea and one administrative post; selected characters are stored in `rp_message_participants`.
+- [x] New admin-only RPC `admin_send_lorgus_joint_rp_post(uuid[], bigint, text)` writes one post linked to the selected active parent post; it requires at least two characters and marks the post `is_admin_post=true`.
+- [x] Player dossier now has `Удалить персонажа`; it requires exact confirmation text `Я согласен и удаляю <ИМЯ_ПЕРСОНАЖА>`.
+- [x] Request submission uses `request_character_deletion(uuid,text)`, checks character ownership server-side and does not immediately delete the character.
+- [x] Added admin queue in the mini-app for pending character deletion requests.
+- [x] Added `characters.status` with `ACTIVE/ARCHIVED`; admin approval archives the character and hides its RP presence while retaining history. Archived characters are hidden from character selection and do not consume the 3-character application limit.
+- [x] SQL migrations applied to Supabase project `dxdxnttpznoekaiecrlv` and committed under `supabase/migrations/20261021150000_joint_rp_posts_and_character_deletion_requests.sql` and `supabase/migrations/20261021151000_archive_characters_after_deletion_request.sql`.
+- [ ] Verify GitHub Actions / Cloudflare deployment for the new `admin.html`, `src/pages/character-hub.js`, and `src/pages/character-lifecycle.js` changes.
+- [ ] Browser-test one joint post, exact-text deletion request, admin approve/reject, archived character hiding, and slot reopening.
