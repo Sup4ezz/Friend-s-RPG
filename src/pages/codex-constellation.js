@@ -145,7 +145,16 @@
   back.onclick=openSections;
   searchToggle.onclick=()=>{search.hidden=!search.hidden;if(!search.hidden)search.focus();else hits.hidden=true;};
   search.oninput=()=>{const q=norm(search.value.trim());hits.replaceChildren();if(!q){hits.hidden=true;return;}const found=[];const visit=(entries,title)=>entries.forEach(e=>{if(norm(e.slice(0,5).join(" ")).includes(q))found.push({entry:e,title});if(Array.isArray(e[5]))visit(e[5],title+" / "+e[0]);});sections.filter(s=>!s.remote).forEach(s=>visit(s.entries,s.title));docs.forEach((d,i)=>{if(norm(d.join(" ")).includes(q))found.push({doc:i,title:"Архив летописца"});});found.slice(0,20).forEach(hit=>{const b=$("button","codex-search-hit");b.type="button";b.append($("strong","",hit.entry?hit.entry[0]:docs[hit.doc][0]),$("small","",hit.title));b.onclick=()=>hit.entry?detail(hit.entry,hit.title):loadDoc(hit.doc);hits.append(b);});if(!found.length)hits.append($("p","codex-search-none","Ничего не найдено."));hits.hidden=false;};
-  stage.classList.add("is-closed");if(startId&&startId!=="atlas"){openSections();if(sections.some(s=>s.id===startId))openSection(startId);}
+  stage.classList.add("is-closed");
+  if(startId&&startId!=="atlas"){
+   openSections();
+   if(sections.some(s=>s.id===startId)) openSection(startId);
+   else {
+    searchToggle.click();
+    search.value=String(startId);
+    search.dispatchEvent(new Event("input",{bubbles:true}));
+   }
+  }
  }
  window.renderLorgusCodex=render;window.LORGUS_PAGES=window.LORGUS_PAGES||{};window.LORGUS_PAGES.codex={render:()=>render("atlas")};
 })();
