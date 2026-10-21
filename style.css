@@ -19705,3 +19705,28 @@ html[data-lorgus-transition="bottom"]::view-transition-new(root){
         height: 40px;
     }
 }
+
+
+/* LORGUS shared RP scenes, participant chips and travel privilege action */
+.lorgus-multi-actor-avatars{display:flex;flex:0 0 auto;align-items:flex-start;gap:5px;max-width:150px;flex-wrap:wrap}
+.lorgus-multi-actor-avatars .lorgus-messenger-message-avatar{width:34px;height:34px;flex-basis:34px}
+.lorgus-multi-actor-participants{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 10px}
+button.lorgus-multi-actor-participant{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border:1px solid rgba(214,179,106,.28);border-radius:999px;background:rgba(214,179,106,.07);color:#ddc88f;font:inherit;font-size:12px;cursor:pointer}
+button.lorgus-multi-actor-participant:hover,button.lorgus-multi-actor-participant:focus-visible{border-color:rgba(224,191,121,.8);background:rgba(214,179,106,.14);outline:none}
+.lorgus-multi-actor-post{min-width:0}
+.lorgus-multi-actor-shared-body{margin:0;white-space:normal;overflow-wrap:anywhere;line-height:1.65}
+.lorgus-multi-actor-segment{padding:8px 0;border-top:1px solid rgba(214,179,106,.12)}
+.lorgus-multi-actor-segment p{margin:5px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.lorgus-rp-character-card-equipment{display:grid;gap:5px;margin-top:7px}
+.lorgus-rp-character-card-equipment>div{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:6px 8px;border:1px solid rgba(214,179,106,.12);border-radius:6px;background:rgba(0,0,0,.15)}
+.lorgus-rp-character-card-equipment span{color:#9c8d75;font-size:10px}
+.lorgus-rp-character-card-equipment strong{color:#e2d5bc;font-size:11px;text-align:right}
+.lorgus-road-destination-wrap{min-width:0;display:flex;flex-direction:column;gap:7px}
+.lorgus-road-destination-wrap .lorgus-road-destination{width:100%}
+.lorgus-road-bypass-button{align-self:flex-start;max-width:100%;padding:9px 13px;border:1px solid rgba(214,179,106,.45);border-radius:6px;background:rgba(214,179,106,.09);color:#ddc88f;cursor:pointer}
+.lorgus-road-bypass-button:hover,.lorgus-road-bypass-button:focus-visible{border-color:#ddc88f;background:rgba(214,179,106,.17);outline:none}
+@media(max-width:600px){
+ .lorgus-multi-actor-avatars{max-width:76px;gap:3px}
+ .lorgus-multi-actor-avatars .lorgus-messenger-message-avatar{width:30px;height:30px;flex-basis:30px}
+ .lorgus-rp-character-card-equipment>div{align-items:flex-start}
+}
