@@ -570,10 +570,18 @@ async function arriveAtDestination() {
         alert("Не удалось проверить коня и привилегии. Попробуй ещё раз.");
         return;
     }
-    const hasHorse = (inventory || []).some(row => {
+    const hasMount = (inventory || []).some(row => {
         const item = row.items || {};
-        const text = [item.name, item.item_type, item.item_subtype].join(" ").toLocaleLowerCase("ru-RU");
-        return /кон[ьи]|лошад|скакун|horse|mount/.test(text);
+        const nameAndType = [item.name, item.item_type, item.item_subtype]
+            .filter(Boolean)
+            .join(" ")
+            .toLocaleLowerCase("ru-RU");
+        const subtype = String(item.item_subtype || "").trim().toLocaleLowerCase("ru-RU");
+
+        // Mount is a category: a horse, wolf, griffin or another riding creature
+        // qualifies when its catalog item is marked with the "mount" subtype.
+        return /^(mount|maunt|маунт|ездовое_животное|riding_animal)$/.test(subtype)
+            || /кон[ьи]|лошад|скакун|грифон|ездов|маунт|mount|horse/.test(nameAndType);
     });
     const canBypassRoad = [...(abilities || []).map(row => {
         const ability = row.abilities || {};
@@ -581,7 +589,7 @@ async function arriveAtDestination() {
     }), ...(rewards || []).map(row => [row.name, row.description].join(" "))].some(value =>
         value.toLocaleLowerCase("ru-RU").includes("перемещение минуя дорогу")
     );
-    const requiredPosts = canBypassRoad ? 0 : hasHorse ? 1 : 2;
+    const requiredPosts = canBypassRoad ? 0 : hasMount ? 1 : 2;
     if (Number(roadPosts || 0) < requiredPosts) {
         const left = requiredPosts - Number(roadPosts || 0);
         alert(canBypassRoad
