@@ -4,7 +4,7 @@ if (!window.lorgusGetSignedPhotoUrl) {
         const entries = new Map(), queue = [];
         let active = 0;
         const runNext = () => {
-            while (active < 2 && queue.length) {
+            while (active < 6 && queue.length) {
                 const job = queue.shift(); active++;
                 window.supabaseClient.storage.from("character-applications").createSignedUrl(job.path, 3600)
                     .then(({ data, error }) => {
@@ -112,15 +112,6 @@ async function renderAdminApplications(container, applications) {
     container.className = "admin-panel";
 
     window.adminApplications = applications;
-
-    for (const application of applications) {
-        if (!application.photo_path) {
-            application.photo_url = null;
-            continue;
-        }
-
-        application.photo_url = await window.lorgusGetSignedPhotoUrl(application.photo_path);
-    }
 
     const pending = applications.filter(a => a.status === "pending");
     const approved = applications.filter(a => a.status === "approved");
@@ -271,6 +262,18 @@ async function renderAdminApplications(container, applications) {
     });
 
     renderList();
+
+    // Не блокируем первый показ админки ожиданием всех подписанных URL фотографий.
+    // Подтягиваем их после отрисовки и обновляем только список заявок.
+    void Promise.all(applications.map(async application => {
+        application.photo_url = application.photo_path
+            ? await window.lorgusGetSignedPhotoUrl(application.photo_path)
+            : null;
+    })).then(() => {
+        if (container.isConnected) renderList();
+    }).catch(error => {
+        console.warn("Не удалось загрузить фотографии заявок:", error);
+    });
 
     // Каталог персонажей: фильтрация, сортировка, постраничный просмотр и экспорт.
     const characterList = container.querySelector("#admin-character-list");
