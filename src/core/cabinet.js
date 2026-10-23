@@ -40,7 +40,10 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
         root.appendChild(cabinet);
     }
 
-    // Mobile recovery guard: avoid an indefinitely empty cabinet if route/state restoration stalls.
+    // Boot-stage diagnostics: a pending Supabase Promise does not throw to the console.
+    window.lorgusBootStage = "создание кабинета";
+
+    // Mobile recovery guard: report which awaited operation stalled instead of guessing.
     const mobileRecoveryTimer = window.setTimeout(() => {
         if (!cabinet.isConnected) return;
         const content = cabinet.querySelector("#cabinet-content");
@@ -51,11 +54,14 @@ async function renderCabinet(session, preserveCurrentScene = false, forceCharact
         cabinet.style.opacity = "1";
         cabinet.style.visibility = "visible";
         cabinet.style.pointerEvents = "auto";
-        content.innerHTML = '<section style="max-width:560px;margin:12vh auto;padding:28px 22px;color:#e9dfca;background:#15110c;border:1px solid rgba(215,182,109,.35);font:16px/1.6 Georgia,serif"><h2 style="margin-top:0;color:#d7b66d">Мир не загрузился</h2><p>Загрузка данных персонажа или карты зависла. Приложение остановилось до отрисовки карты.</p><button type="button" onclick="location.reload()" style="min-height:46px;padding:10px 18px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Повторить загрузку</button></section>';
+        const bootStage = window.lorgusBootStage || "этап не определён";
+        content.innerHTML = '<section style="max-width:560px;margin:12vh auto;padding:28px 22px;color:#e9dfca;background:#15110c;border:1px solid rgba(215,182,109,.35);font:16px/1.6 Georgia,serif"><h2 style="margin-top:0;color:#d7b66d">Мир не загрузился</h2><p>Загрузка остановилась на этапе: <strong>' + window.escapeHtml(bootStage) + '</strong>.</p><p>Это помогает отличить зависший запрос от ошибки отрисовки.</p><button type="button" onclick="location.reload()" style="min-height:46px;padding:10px 18px;background:#d7b66d;color:#17110a;border:0;font-weight:700">Повторить загрузку</button></section>';
+        console.error("LORGUS: запуск завис на этапе:", bootStage);
     }, 10000);
 
     window.lorgusIsAdmin = false;
     try {
+        window.lorgusBootStage = "загрузка состояния пользователя";
         await loadPlayerState(session, forceCharacterSelection);
     } catch (error) {
         console.error("LORGUS: не удалось восстановить экран игрока:", error);
@@ -124,6 +130,7 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
 
     if (!container) return;
 
+    window.lorgusBootStage = "проверка прав администратора (Supabase RPC is_admin)";
     const {
         data: isAdmin,
         error: adminError
@@ -136,6 +143,7 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
         );
     } else if (isAdmin) {
         window.lorgusIsAdmin = true;
+        window.lorgusBootStage = "загрузка заявок админки";
         await window.loadAdminPanel(container);
         window.attachLorgusClientErrorReports?.();
         return;
