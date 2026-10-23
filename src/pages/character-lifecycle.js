@@ -485,8 +485,8 @@ function renderCharacterApplicationForm(container) {
                     <div class="character-origin-cards">
                         <button type="button" class="character-origin-card" data-pick-origin="reincarnated">
                             <span class="origin-card-mark">☽</span>
-                            <strong>Реинкарнированный</strong>
-                            <small>Ты прожил другую жизнь и оказался в Лоргусе после смерти. Анкета спросит о прежней жизни и причине смерти. Лорбук для этого персонажа закрыт.</small>
+                            <strong>Путник из другого мира</strong>
+                            <small>Ты пришёл в Лоргус из другого мира. Ты не знаешь местную историю, народы и порядки; лорбук будет закрыт. Анкета спросит о твоей прошлой жизни и причине смерти.</small>
                             <em>ВЫБРАТЬ ЭТОТ ПУТЬ　→</em>
                         </button>
                         <button type="button" class="character-origin-card" data-pick-origin="born_in_lorgus">
@@ -500,8 +500,8 @@ function renderCharacterApplicationForm(container) {
                 <form id="character-application-form" class="character-creation-form origin-form-locked" onsubmit="submitCharacterApplication(event)">
                     <section class="character-creation-panel origin-type-panel">
                         <div class="creation-panel-heading"><span>00</span><div><small>ПУТЬ ДУШИ</small><h2>Как ты оказался в Лоргусе?</h2></div></div>
-                        <div class="character-origin-choice">
-                            <label><input type="radio" name="character-origin-type" value="reincarnated" required><strong>Реинкарнированный</strong><small>Ты пришёл в этот мир после другой жизни. Лорбук для этого персонажа будет недоступен.</small></label>
+                        <div class="character-origin-warning" role="note"><strong>Важно перед выбором</strong><p>«Путник из другого мира» — это персонаж, пришедший из совершенно другого мира, а не человек, который просто переродился в Лоргусе. Он не знает местный лор, а доступ к лорбуку закрыт: сведения о мире нужно узнавать в самой игре. Если хочешь заранее изучить мир и пользоваться лорбуком, выбери «Рождённый в Лоргусе».</p></div>\n                        <div class="character-origin-choice">
+                            <label><input type="radio" name="character-origin-type" value="reincarnated" required><strong>Путник из другого мира</strong><small>Ты родом из другого мира и оказался в Лоргусе после смерти в прежнем мире. Местный лор тебе неизвестен, а лорбук будет недоступен — мир предстоит изучать в игре.</small></label>
                             <label><input type="radio" name="character-origin-type" value="born_in_lorgus" required><strong>Рождённый в Лоргусе</strong><small>Твоя жизнь началась в Лоргусе. Сохраняется обычный доступ к Лорбуку.</small></label>
                         </div>
                     </section>
