@@ -30,6 +30,42 @@
 <body>
     <div id="root"></div>
     <script src="/src/core/utils.js?v=2"></script>
+    <script>
+        // LORGUS emergency transport recovery: retry only idempotent Supabase reads
+        // after transient browser fetch failures (including QUIC/HTTP3 resets).
+        // Never retry application writes, inventory changes, or other mutations.
+        (() => {
+            if (window.__lorgusSupabaseFetchRecovery) return;
+            const nativeFetch = window.fetch.bind(window);
+            const safeRpcReads = new Set(["is_admin", "admin_list_character_application_usernames", "admin_list_lorgus_blacklist"]);
+            window.fetch = async function(input, init) {
+                const request = input instanceof Request ? input : null;
+                const url = String(request ? request.url : input);
+                if (!url.startsWith("https://dxdxnttpznoekaiecrlv.supabase.co/")) {
+                    return nativeFetch(input, init);
+                }
+                const method = String(init?.method || request?.method || "GET").toUpperCase();
+                const pathname = (() => { try { return new URL(url).pathname; } catch (_) { return ""; } })();
+                const safeRead = method === "GET" ||
+                    (method === "POST" && pathname.startsWith("/rest/v1/rpc/") &&
+                     safeRpcReads.has(pathname.slice("/rest/v1/rpc/".length)));
+                if (!safeRead) return nativeFetch(input, init);
+                let lastError;
+                for (let attempt = 0; attempt < 3; attempt++) {
+                    try {
+                        const response = await nativeFetch(input, init);
+                        if (response.ok || response.status < 500 || attempt === 2) return response;
+                        lastError = new Error("Supabase read returned HTTP " + response.status);
+                    } catch (error) {
+                        lastError = error;
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 250 * (attempt + 1)));
+                }
+                throw lastError;
+            };
+            window.__lorgusSupabaseFetchRecovery = true;
+        })();
+    </script>
     <script type="module" src="/app.js?v=43"></script>
     <!-- LORGUS SPA core | deploy-sync-2026-10-08 -->
     <script src="/src/core/routes.js?v=6"></script>
