@@ -53,7 +53,7 @@
                 let lastError;
                 for (let attempt = 0; attempt < 3; attempt++) {
                     try {
-                        const response = await nativeFetch(input, init);
+                        const response = await nativeFetch(request ? request.clone() : input, init);
                         if (response.ok || response.status < 500 || attempt === 2) return response;
                         lastError = new Error("Supabase read returned HTTP " + response.status);
                     } catch (error) {
