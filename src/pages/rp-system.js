@@ -1172,48 +1172,61 @@ function buildRpFallbackPortrait(character) {
 async function getRpCharacterPhoto(characterId) {
     if (!characterId || !window.supabaseClient) return null;
     window.rpCharacterPhotoCache = window.rpCharacterPhotoCache || {};
+    window.rpCharacterPhotoPending = window.rpCharacterPhotoPending || {};
     const key = String(characterId);
     if (Object.prototype.hasOwnProperty.call(window.rpCharacterPhotoCache, key)) {
         return window.rpCharacterPhotoCache[key];
     }
+    // Many messages in one RP history belong to the same character. Reuse the
+    // in-flight request so a 200-message history does not launch hundreds of
+    // duplicate character/storage queries before the first request finishes.
+    if (window.rpCharacterPhotoPending[key]) return window.rpCharacterPhotoPending[key];
 
-    const { data: character } = await window.supabaseClient
-        .from("characters")
-        .select("photo_path,name,race,occupation,kingdom")
-        .eq("id", characterId)
-        .maybeSingle();
-
-    let photoPath = character?.photo_path || null;
-    if (!photoPath) {
-        const { data: application } = await window.supabaseClient
-            .from("character_applications")
-            .select("photo_path")
-            .eq("character_id", characterId)
-            .eq("status", "approved")
-            .limit(1)
+    const pending = (async () => {
+        const { data: character } = await window.supabaseClient
+            .from("characters")
+            .select("photo_path,name,race,occupation,kingdom")
+            .eq("id", characterId)
             .maybeSingle();
-        photoPath = application?.photo_path || null;
-    }
 
-    if (photoPath) {
-        const { data: photoData, error: photoError } = await window.supabaseClient
-            .storage
-            .from("character-applications")
-            .createSignedUrl(photoPath, 60 * 60);
-        if (!photoError && photoData?.signedUrl) {
-            window.rpCharacterPhotoCache[key] = photoData.signedUrl;
-            return photoData.signedUrl;
+        let photoPath = character?.photo_path || null;
+        if (!photoPath) {
+            const { data: application } = await window.supabaseClient
+                .from("character_applications")
+                .select("photo_path")
+                .eq("character_id", characterId)
+                .eq("status", "approved")
+                .limit(1)
+                .maybeSingle();
+            photoPath = application?.photo_path || null;
         }
-    }
 
-    // Seeded RP actors have no uploaded image yet. Give them a distinct
-    // illustrated portrait instead of an empty star; a real upload always wins.
-    // The RP actor registry is admin-only, so do not depend on reading it
-    // from a player's browser. Every character without an uploaded image gets
-    // a distinct generated fantasy portrait; uploaded photos take precedence.
-    const fallback = character ? buildRpFallbackPortrait(character) : null;
-    window.rpCharacterPhotoCache[key] = fallback;
-    return fallback;
+        if (photoPath) {
+            const { data: photoData, error: photoError } = await window.supabaseClient
+                .storage
+                .from("character-applications")
+                .createSignedUrl(photoPath, 60 * 60);
+            if (!photoError && photoData?.signedUrl) {
+                window.rpCharacterPhotoCache[key] = photoData.signedUrl;
+                return photoData.signedUrl;
+            }
+        }
+
+        // Seeded RP actors have no uploaded image yet. Give them a distinct
+        // illustrated portrait instead of an empty star; a real upload always wins.
+        // The RP actor registry is admin-only, so do not depend on reading it
+        // from a player's browser. Every character without an uploaded image gets
+        // a distinct generated fantasy portrait; uploaded photos take precedence.
+        const fallback = character ? buildRpFallbackPortrait(character) : null;
+        window.rpCharacterPhotoCache[key] = fallback;
+        return fallback;
+    })();
+    window.rpCharacterPhotoPending[key] = pending;
+    try {
+        return await pending;
+    } finally {
+        delete window.rpCharacterPhotoPending[key];
+    }
 }
 
 async function openRpCharacterQuickCard(characterId, anchorElement = null) {
