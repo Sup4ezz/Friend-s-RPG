@@ -44,9 +44,9 @@ async function loadAdminPanel(container) {
     window.lorgusBootStage = "админка: запрос списка анкет character_applications";
     let applications = null;
     let error = null;
-    // QUIC/HTTP3 transport failures can leave a PostgREST request unresolved
-    // even when DevTools reports a 200 response. Retry the read-only queue query
-    // with a fresh builder; never modify application data during recovery.
+    // A slow or reset connection must not replace the entire admin experience
+    // with a dead-end error. Give the read more time, retry once, and preserve
+    // a usable retry screen if Supabase is genuinely unreachable.
     for (let attempt = 1; attempt <= 2; attempt++) {
         try {
             const result = await Promise.race([
@@ -55,8 +55,8 @@ async function loadAdminPanel(container) {
                     .select("*")
                     .order("id", { ascending: false }),
                 new Promise((_, reject) => setTimeout(
-                    () => reject(new Error("Supabase не ответил за 4 секунды.")),
-                    4000
+                    () => reject(new Error("Supabase не ответил за 12 секунд.")),
+                    12000
                 ))
             ]);
             if (result.error) throw result.error;
@@ -68,26 +68,38 @@ async function loadAdminPanel(container) {
             console.warn(`LORGUS: запрос анкет не удался (попытка ${attempt}/2):`, requestError);
             if (attempt < 2) {
                 window.lorgusBootStage = `админка: повтор запроса анкет (${attempt + 1}/2)`;
-                await new Promise(resolve => setTimeout(resolve, attempt * 500));
+                await new Promise(resolve => setTimeout(resolve, 800));
             }
         }
     }
 
     if (error) {
-        console.error(
-            "Ошибка загрузки заявок:",
-            error
-        );
-
-        container.className = "welcome-panel";
-
+        console.error("Ошибка загрузки заявок:", error);
+        container.className = "admin-panel";
         container.innerHTML = `
-            <div class="welcome-symbol">!</div>
-            <h1>Ошибка загрузки</h1>
-            <p>${window.escapeHtml(error.message || "Не удалось загрузить заявки.")}</p><button type="button" id="admin-retry-load">Повторить загрузку</button>
+            <div class="admin-dashboard-head">
+                <div>
+                    <div class="admin-kicker">✦ ЛОРГУС · ПАНЕЛЬ УПРАВЛЕНИЯ</div>
+                    <h1>Администрация</h1>
+                    <p>Соединение с хранилищем анкет временно недоступно. Игровые данные не изменены.</p>
+                </div>
+                <div class="admin-head-actions">
+                    <button type="button" class="admin-tool-button" id="admin-retry-load">↻ Повторить загрузку</button>
+                    <button type="button" class="window.logout-button admin-logout-button" onclick="logout()">Выйти</button>
+                </div>
+            </div>
+            <section class="admin-section">
+                <h2>Не удалось загрузить очередь анкет</h2>
+                <p>${window.escapeHtml(error.message || "Supabase временно не отвечает.")}</p>
+                <p>Оставь эту страницу открытой и повтори запрос. Это безопасное чтение: анкеты не отправляются и не меняются.</p>
+            </section>
         `;
-
-        container.querySelector("#admin-retry-load")?.addEventListener("click", () => loadAdminPanel(container));
+        container.querySelector("#admin-retry-load")?.addEventListener("click", async event => {
+            const button = event.currentTarget;
+            button.disabled = true;
+            button.textContent = "↻ Подключаемся…";
+            await loadAdminPanel(container);
+        });
         return;
     }
 
