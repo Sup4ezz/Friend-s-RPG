@@ -39,11 +39,21 @@
                         }
                     }
                 } catch (error) {
-                    console.error("LORGUS blacklist check failed:", error);
-                    const root = document.getElementById("root");
-                    if (root) root.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#10100f;color:#d8c8ad;text-align:center"><section><h1>Не удалось проверить доступ</h1><p>Доступ к миру временно закрыт. Попробуйте обновить страницу позже.</p><button onclick="location.reload()">Повторить</button></section></main>';
-                    window.lorgusBlacklisted = true;
-                    return;
+                    const message = String(error?.message || error || "");
+                    const isNetworkFailure = error instanceof TypeError ||
+                        /failed to fetch|connection reset|networkerror|load failed|http2_ping_failed/i.test(message);
+                    if (isNetworkFailure) {
+                        // A transient network outage must not permanently lock the player out.
+                        // The normal player-state loader will still perform its own checks.
+                        console.warn("LORGUS blacklist check temporarily unavailable; continuing startup:", error);
+                        window.lorgusBlacklisted = false;
+                    } else {
+                        console.error("LORGUS blacklist check failed:", error);
+                        const root = document.getElementById("root");
+                        if (root) root.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#10100f;color:#d8c8ad;text-align:center"><section><h1>Не удалось проверить доступ</h1><p>Доступ к миру временно закрыт. Попробуйте обновить страницу позже.</p><button onclick="location.reload()">Повторить</button></section></main>';
+                        window.lorgusBlacklisted = true;
+                        return;
+                    }
                 }
             }
             window.lorgusBlacklisted = false;
