@@ -31,6 +31,44 @@
     <div id="root"></div>
     <script src="/src/core/utils.js?v=2"></script>
     <script>
+        // Route signed character images through the LORGUS Worker. This avoids
+        // direct browser-to-Supabase Storage connection resets without changing
+        // signed URLs, storage permissions, or application data.
+        (() => {
+            const workerProxy = "https://friend-s-rpg.staskarr23.workers.dev/api/storage-proxy?url=";
+            const rewriteImageUrl = value => {
+                if (typeof value !== "string" || !value) return value;
+                try {
+                    const target = new URL(value, document.baseURI);
+                    if (
+                        target.hostname === "dxdxnttpznoekaiecrlv.supabase.co" &&
+                        target.pathname.startsWith("/storage/v1/object/sign/character-applications/") &&
+                        target.searchParams.has("token")
+                    ) {
+                        return workerProxy + encodeURIComponent(target.href);
+                    }
+                } catch (_) {}
+                return value;
+            };
+            const srcDescriptor = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, "src");
+            if (srcDescriptor?.get && srcDescriptor?.set && !window.__lorgusImageProxyInstalled) {
+                Object.defineProperty(HTMLImageElement.prototype, "src", {
+                    configurable: srcDescriptor.configurable,
+                    enumerable: srcDescriptor.enumerable,
+                    get: srcDescriptor.get,
+                    set(value) { srcDescriptor.set.call(this, rewriteImageUrl(value)); }
+                });
+                const originalSetAttribute = Element.prototype.setAttribute;
+                Element.prototype.setAttribute = function(name, value) {
+                    if (this instanceof HTMLImageElement && String(name).toLowerCase() === "src") {
+                        value = rewriteImageUrl(String(value));
+                    }
+                    return originalSetAttribute.call(this, name, value);
+                };
+                window.__lorgusImageProxyInstalled = true;
+            }
+        })();
+
         // LORGUS emergency transport recovery: retry only idempotent Supabase reads
         // after transient browser fetch failures (including QUIC/HTTP3 resets).
         // Never retry application writes, inventory changes, or other mutations.
