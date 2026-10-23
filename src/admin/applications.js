@@ -448,10 +448,22 @@ function renderAdminApplication(application) {
                         ${window.escapeHtml(application.personality)}
                     </span>
 
+                    ${application.origin_type === "reincarnated" ? `
+                    <span>
+                        <strong>Биография прошлой жизни:</strong>
+                        ${window.escapeHtml(application.past_life_bio || "Не заполнена")}
+                    </span>
+                    <span>
+                        <strong>Причина смерти:</strong>
+                        ${window.escapeHtml(application.death_reason || "Не указана")}
+                    </span>
+                    ` : `
                     <span>
                         <strong>Предыстория:</strong>
-                        ${window.escapeHtml(application.backstory)}
+                        ${window.escapeHtml(application.backstory || "Не заполнена")}
                     </span>
+                    `}
+
 
                     <span>
                         <strong>Особые навыки:</strong>
