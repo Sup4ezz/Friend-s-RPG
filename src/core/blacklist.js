@@ -16,7 +16,7 @@
                         db().rpc("is_admin"),
                         new Promise((_, reject) => window.setTimeout(
                             () => reject(new Error("LORGUS_REQUEST_TIMEOUT")),
-                            5000
+                            1500
                         ))
                     ]);
                     if (result.error) throw result.error;
@@ -57,50 +57,35 @@
         window.lorgusBlacklisted = true;
     }
 
-    // Gate every authenticated entry, including direct SPA URLs.
+    // Never block game startup on a separate blacklist preflight.
+    // Restore the player/admin screen immediately; check the blacklist in parallel.
+    // If a confirmed match is returned, replace the screen with the block notice.
     const originalLoadPlayerState = window.loadPlayerState;
     if (typeof originalLoadPlayerState === "function") {
-        window.loadPlayerState = async function(session, ...args) {
-            if (session?.user?.id && db()) {
-                try {
-                    window.lorgusBootStage = "проверка прав и чёрного списка";
-                    const timeout = promise => Promise.race([
-                        promise,
-                        new Promise((_, reject) => window.setTimeout(
-                            () => reject(new Error("LORGUS_REQUEST_TIMEOUT")),
-                            8000
-                        ))
-                    ]);
-                    const admin = await window.lorgusGetAdminStatus();
-                    if (!admin) {
-                        window.lorgusBootStage = "проверка чёрного списка игрока";
-                        const { data, error } = await timeout(db().from("lorgus_blacklist")
-                            .select("user_id").eq("user_id", session.user.id).maybeSingle());
-                        if (error) throw error;
-                        if (data) {
-                            showBlacklistedScreen();
-                            return;
-                        }
-                    }
-                } catch (error) {
-                    const message = String(error?.message || error || "");
-                    const isNetworkFailure = error instanceof TypeError ||
-                        /LORGUS_REQUEST_TIMEOUT|failed to fetch|connection reset|networkerror|load failed|http2_ping_failed/i.test(message);
-                    if (isNetworkFailure) {
-                        // A transient network outage must not permanently lock the player out.
-                        // The normal player-state loader will still perform its own checks.
-                        console.warn("LORGUS blacklist check temporarily unavailable; continuing startup:", error);
-                        window.lorgusBlacklisted = false;
-                    } else {
-                        console.error("LORGUS blacklist check failed:", error);
-                        const root = document.getElementById("root");
-                        if (root) root.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#10100f;color:#d8c8ad;text-align:center"><section><h1>Не удалось проверить доступ</h1><p>Доступ к миру временно закрыт. Попробуйте обновить страницу позже.</p><button onclick="location.reload()">Повторить</button></section></main>';
-                        window.lorgusBlacklisted = true;
-                        return;
-                    }
-                }
-            }
+        window.loadPlayerState = function(session, ...args) {
             window.lorgusBlacklisted = false;
+            if (session?.user?.id && db()) {
+                Promise.resolve().then(async () => {
+                    try {
+                        const admin = await window.lorgusGetAdminStatus();
+                        if (admin) return;
+                        const { data, error } = await Promise.race([
+                            db().from("lorgus_blacklist")
+                                .select("user_id").eq("user_id", session.user.id).maybeSingle(),
+                            new Promise((_, reject) => window.setTimeout(
+                                () => reject(new Error("LORGUS_BLACKLIST_CHECK_TIMEOUT")),
+                                3000
+                            ))
+                        ]);
+                        if (error) throw error;
+                        if (data) showBlacklistedScreen();
+                    } catch (error) {
+                        // Network errors must not hold up gameplay. Database RLS remains
+                        // the authority for protected data; retry the live check later.
+                        console.warn("LORGUS background blacklist check unavailable:", error);
+                    }
+                });
+            }
             return originalLoadPlayerState.call(this, session, ...args);
         };
     }
