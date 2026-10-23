@@ -1,5 +1,5 @@
 -- Admin-only lookup of the login associated with each character application.
--- The browser must not receive direct access to auth.users.
+-- Uses public.players.username; never expose auth.users directly to the browser.
 create or replace function public.admin_list_character_application_usernames()
 returns table (
     application_id text,
@@ -8,20 +8,20 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = pg_catalog, public, auth
+set search_path = ''
 as $$
 begin
-    if not coalesce(public.is_admin(), false) then
-        raise exception 'Недостаточно прав';
+    if auth.uid() is null or not coalesce(public.is_admin(), false) then
+        raise exception 'ADMIN_REQUIRED';
     end if;
 
     return query
     select
         ca.id::text,
         ca.player_id,
-        coalesce(nullif(u.raw_user_meta_data ->> 'username', ''), 'Логин не указан')
+        coalesce(nullif(trim(pl.username), ''), 'Логин не указан')
     from public.character_applications as ca
-    left join auth.users as u on u.id = ca.player_id
+    left join public.players as pl on pl.id = ca.player_id
     order by ca.id desc;
 end;
 $$;
