@@ -13,7 +13,22 @@ stable
 security definer
 set search_path = ''
 as $function$
-    select c.photo_path, c.name, c.race, c.occupation, c.kingdom
+    select
+        coalesce(
+            c.photo_path,
+            (
+                select a.photo_path
+                from public.character_applications a
+                where a.character_id = c.id
+                  and a.status = 'approved'
+                  and a.photo_path is not null
+                limit 1
+            )
+        ) as photo_path,
+        c.name,
+        c.race,
+        c.occupation,
+        c.kingdom
     from public.characters c
     where c.id = p_character_id
       and (
