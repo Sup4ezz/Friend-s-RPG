@@ -1177,45 +1177,49 @@ async function getRpCharacterPhoto(characterId) {
         return window.rpCharacterPhotoCache[key];
     }
 
-    const { data: character } = await window.supabaseClient
-        .from("characters")
-        .select("photo_path,name,race,occupation,kingdom")
-        .eq("id", characterId)
-        .maybeSingle();
-
-    let photoPath = character?.photo_path || null;
-    if (!photoPath) {
-        const { data: application } = await window.supabaseClient
-            .from("character_applications")
-            .select("photo_path")
-            .eq("character_id", characterId)
-            .eq("status", "approved")
-            .limit(1)
-            .maybeSingle();
-        photoPath = application?.photo_path || null;
+    let character = null;
+    let photoPath = null;
+    try {
+        // Ordinary players cannot SELECT arbitrary rows from characters or
+        // character_applications. This narrowly-scoped RPC exposes only portrait
+        // metadata for approved/publicly visible characters.
+        const { data, error } = await window.supabaseClient.rpc(
+            "get_lorgus_character_portrait",
+            { p_character_id: characterId }
+        );
+        if (error) {
+            console.warn("LORGUS: не удалось получить портрет персонажа:", error.message);
+        } else {
+            character = Array.isArray(data) ? (data[0] || null) : (data || null);
+            photoPath = character?.photo_path || null;
+        }
+    } catch (error) {
+        console.warn("LORGUS: ошибка получения портрета персонажа:", error?.message || error);
     }
 
     if (photoPath) {
-        const { data: photoData, error: photoError } = await window.supabaseClient
-            .storage
-            .from("character-applications")
-            .createSignedUrl(photoPath, 60 * 60);
-        if (!photoError && photoData?.signedUrl) {
-            window.rpCharacterPhotoCache[key] = photoData.signedUrl;
-            return photoData.signedUrl;
+        try {
+            const { data: photoData, error: photoError } = await window.supabaseClient
+                .storage
+                .from("character-applications")
+                .createSignedUrl(photoPath, 60 * 60);
+            if (!photoError && photoData?.signedUrl) {
+                window.rpCharacterPhotoCache[key] = photoData.signedUrl;
+                return photoData.signedUrl;
+            }
+            if (photoError) {
+                console.warn("LORGUS: ссылка на портрет недоступна:", photoError.message);
+            }
+        } catch (error) {
+            console.warn("LORGUS: ошибка ссылки на портрет:", error?.message || error);
         }
     }
 
-    // Seeded RP actors have no uploaded image yet. Give them a distinct
-    // illustrated portrait instead of an empty star; a real upload always wins.
-    // The RP actor registry is admin-only, so do not depend on reading it
-    // from a player's browser. Every character without an uploaded image gets
-    // a distinct generated fantasy portrait; uploaded photos take precedence.
+    // For characters without an uploaded image, keep the illustrated fallback.
     const fallback = character ? buildRpFallbackPortrait(character) : null;
     window.rpCharacterPhotoCache[key] = fallback;
     return fallback;
 }
-
 async function openRpCharacterQuickCard(characterId, anchorElement = null) {
     const id = String(characterId || "").trim();
     if (!id || !window.supabaseClient) return;
