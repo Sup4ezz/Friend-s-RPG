@@ -68,6 +68,14 @@ async function loadAdminPanel(container) {
         return;
     }
 
+    // Логины получаем через admin-only RPC; auth.users нельзя читать напрямую из браузера.
+    const { data: playerLogins, error: loginError } = await window.supabaseClient.rpc("admin_list_character_application_usernames");
+    if (loginError) console.warn("Не удалось загрузить логины владельцев анкет:", loginError);
+    const loginByApplication = new Map((playerLogins || []).map(row => [String(row.application_id), row.username || "Логин не указан"]));
+    (applications || []).forEach(application => {
+        application.player_username = loginByApplication.get(String(application.id)) || "Не удалось определить";
+    });
+
     window.renderAdminApplications(
         container,
         applications || []
@@ -379,6 +387,10 @@ function renderAdminApplication(application) {
 
                 <div class="admin-application-info">
                     <span>
+                        <strong>ЛОГИН ИГРОКА:</strong>
+                        ${window.escapeHtml(application.player_username || 'Не удалось определить')}
+                    </span>
+                    <span>
                         <strong>Раса:</strong>
                         ${window.escapeHtml(application.race)}
                     </span>
@@ -495,6 +507,7 @@ function renderAdminCharacterManagement(application) {
                     <div><small>РОДИНА</small><strong>${esc(application.homeland)}</strong></div>
                     <div><small>ЗАНЯТИЕ</small><strong>${esc(application.occupation)}</strong></div>
                     <div><small>ОРУЖИЕ</small><strong>${esc(application.preferred_weapon)}</strong></div>
+                    <div><small>ЛОГИН ИГРОКА</small><strong>${esc(application.player_username || "Не удалось определить")}</strong></div>
                     <div><small>ID ПЕРСОНАЖА</small><strong>${esc(application.character_id)}</strong></div>
                 </div>
                 <div class="admin-character-accordion-lore">
