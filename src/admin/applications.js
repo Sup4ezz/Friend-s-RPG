@@ -507,7 +507,7 @@ function renderAdminCharacterManagement(application) {
                     <button class="admin-character-details-button admin-character-titles-button" type="button" data-character-title-id="${esc(application.id)}">Титулы</button>
                     <button class="admin-character-details-button admin-character-abilities-button" type="button" data-character-ability-id="${esc(application.id)}">Способности</button>
                     <button class="admin-character-details-button admin-character-inventory-button" type="button" data-character-inventory-id="${esc(application.id)}">Инвентарь</button>
-                    <button class="admin-reject-button admin-delete-character-button" data-character-id="${esc(application.character_id || "")}" data-character-name="${esc(application.name || "персонажа")}">Удалить персонажа</button>
+                    <button class="admin-reject-button admin-delete-character-button" data-character-id="${esc(application.character_id || "")}" data-application-id="${esc(application.id)}" data-character-name="${esc(application.name || "персонажа")}">${application.character_id ? "Удалить персонажа" : "Удалить запись без персонажа"}</button>
                 </div>
             </div>
         </details>
