@@ -28,7 +28,12 @@
                     if (attempt < 2) await new Promise(resolve => window.setTimeout(resolve, 350 * (attempt + 1)));
                 }
             }
-            throw lastError;
+            // Fail closed for privilege elevation: a network outage must never
+            // grant admin rights. Cache false briefly so startup does not repeat
+            // the same failing RPC immediately in the cabinet loader.
+            console.warn("LORGUS: is_admin unavailable after retries; temporarily treating session as non-admin.", lastError);
+            window.__lorgusAdminStatusCache = { value: false, checkedAt: Date.now() };
+            return false;
         })().finally(() => { adminCheckPromise = null; });
         return adminCheckPromise;
     };
