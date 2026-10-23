@@ -1377,3 +1377,14 @@ Commits:
 - [ ] Verify the latest Cloudflare deployment after the final admin mini-app copy change.
 - [ ] Resolve pre-existing Supabase migration-history drift: production reports remote versions `20261016072146`, `20261016083914`, `20261021064040`, `20261021065722`, `20261021065809` missing from the local migration directory. The new SQL was applied directly and verified in production; do not blindly repair/revert remote history.
 - [ ] Browser-test one joint post, exact-text deletion request, admin approve/reject, archived character hiding, and slot reopening.
+
+
+# 14. STATIC HOSTING MIGRATION — 2026-10-23
+
+- [x] Diagnosed static-hosting startup failure: frontend requested `/api/config`, a route served by the Cloudflare Worker; a static host may return HTML for that path, causing JSON parsing to fail.
+- [x] On branch `fix/static-host-config`, frontend now requests `/config.json` with cache disabled and reports a clearer error if the response is not JSON.
+- [x] Added `config.json` with the existing Supabase project URL and publishable client key. This is public client configuration, not a service-role secret.
+- [ ] Verify `/config.json` is published by the selected static host and the app can register/login and load existing characters.
+- [ ] Keep Cloudflare production deployment available as rollback until the replacement host is tested.
+- [ ] After the static host is verified, decide whether any remaining Worker functionality needs a replacement. Supabase/database/auth/storage remain unchanged.
+- [ ] Build and test Android APK only after the replacement HTTPS origin is stable.

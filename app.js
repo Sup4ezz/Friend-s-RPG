@@ -56,13 +56,21 @@ if (window.matchMedia("(max-width: 900px)").matches) {
 
 async function initialize() {
     try {
-        const response = await fetch("/api/config");
+        // A static host cannot execute the Cloudflare Worker route /api/config.
+        // Keep the public Supabase client config in a static JSON file so the same
+        // frontend works on Cloudflare and static hosting providers.
+        const response = await fetch("/config.json", { cache: "no-store" });
 
         if (!response.ok) {
-            throw new Error("Не удалось получить конфигурацию Supabase.");
+            throw new Error("Не удалось получить конфигурацию Supabase (/config.json).");
         }
 
-        const config = await response.json();
+        let config;
+        try {
+            config = await response.json();
+        } catch {
+            throw new Error("Вместо JSON настроек получен другой ответ. Проверьте публикацию config.json.");
+        }
 
         if (!config.supabaseUrl || !config.supabasePublishableKey) {
             throw new Error("Конфигурация Supabase отсутствует.");
