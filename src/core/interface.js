@@ -631,7 +631,7 @@ async function appendRpMessage(message) {
 
     // Текст появляется сразу. Портреты, титулы и использованные предметы догружаются параллельно.
     const photoAndTitle = (adminPost ? Promise.resolve([null, null]) : Promise.all([
-        getRpCharacterPhoto(message.character_id),
+        window.getRpCharacterPhoto?.(message.character_id) || Promise.resolve(null),
         getRpCharacterActiveTitle(message.character_id)
     ])).then(([photo, activeTitle]) => {
         if (!article.isConnected) return;
@@ -661,6 +661,20 @@ async function appendRpMessage(message) {
                     event.stopPropagation();
                     openLorgusRpPhotoViewer(photo, author || "Портрет персонажа");
                 });
+                const portraitImage = hydratedButton.querySelector("img");
+                if (portraitImage) {
+                    portraitImage.addEventListener("error", async () => {
+                        if (portraitImage.dataset.lorgusRetried === "1") return;
+                        portraitImage.dataset.lorgusRetried = "1";
+                        delete window.rpCharacterPhotoCache?.[String(message.character_id)];
+                        try {
+                            const refreshed = await window.getRpCharacterPhoto?.(message.character_id);
+                            if (refreshed && portraitImage.isConnected) portraitImage.src = refreshed;
+                        } catch (error) {
+                            console.warn("LORGUS: не удалось обновить ссылку на портрет:", error);
+                        }
+                    }, { once: true });
+                }
             }
         }
     }).catch(error => console.warn("Не удалось оформить сообщение RP:", error));
