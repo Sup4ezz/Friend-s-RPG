@@ -76,22 +76,10 @@ async function loadAdminPanel(container) {
         return;
     }
 
-    // Логины — дополнительное поле: при сетевом сбое RPC не должен блокировать показ заявок.
-    window.lorgusBootStage = "админка: RPC admin_list_character_application_usernames";
-    let playerLogins = [];
-    try {
-        const loginResult = await Promise.race([
-            window.supabaseClient.rpc("admin_list_character_application_usernames"),
-            new Promise((_, reject) => setTimeout(() => reject(new Error("RPC логинов не ответил за 7 секунд")), 7000))
-        ]);
-        if (loginResult.error) console.warn("Не удалось загрузить логины владельцев анкет:", loginResult.error);
-        else playerLogins = loginResult.data || [];
-    } catch (loginRequestError) {
-        console.warn("Не удалось загрузить логины владельцев анкет:", loginRequestError);
-    }
-    const loginByApplication = new Map((playerLogins || []).map(row => [String(row.application_id), row.username || "Логин не указан"]));
+    // RPC логинов — вспомогательный запрос. Не ждём его перед показом админки:
+    // при проблемах с API Gateway очередь заявок должна открываться независимо.
     (applications || []).forEach(application => {
-        application.player_username = loginByApplication.get(String(application.id)) || "Не удалось определить";
+        application.player_username = "Загрузка логина…";
     });
 
     window.lorgusBootStage = "админка: отрисовка списка анкет";
@@ -99,6 +87,43 @@ async function loadAdminPanel(container) {
         container,
         applications || []
     );
+
+    // Получаем логины в фоне и обновляем только подписи карточек, не перерисовывая
+    // всю админку и не сбрасывая поиск/фильтры, выбранные администратором.
+    void Promise.race([
+        window.supabaseClient.rpc("admin_list_character_application_usernames"),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("RPC логинов не ответил за 7 секунд")), 7000))
+    ]).then(loginResult => {
+        if (loginResult.error) throw loginResult.error;
+        const loginByApplication = new Map((loginResult.data || []).map(row => [
+            String(row.application_id),
+            row.username || "Логин не указан"
+        ]));
+        (applications || []).forEach(application => {
+            application.player_username = loginByApplication.get(String(application.id)) || "Не удалось определить";
+            const article = container.querySelector(`.admin-application[data-application-id="${CSS.escape(String(application.id))}"]`);
+            const loginLabel = article?.querySelector(".admin-application-info span");
+            if (loginLabel) {
+                const strong = loginLabel.querySelector("strong");
+                loginLabel.textContent = "";
+                if (strong) {
+                    loginLabel.appendChild(strong);
+                    loginLabel.appendChild(document.createTextNode(" "));
+                } else {
+                    loginLabel.appendChild(document.createTextNode("ЛОГИН ИГРОКА: "));
+                }
+                loginLabel.appendChild(document.createTextNode(application.player_username));
+            }
+        });
+    }).catch(loginRequestError => {
+        console.warn("Не удалось загрузить логины владельцев анкет (админка продолжает работу):", loginRequestError);
+        (applications || []).forEach(application => {
+            application.player_username = "Не удалось определить";
+            const article = container.querySelector(`.admin-application[data-application-id="${CSS.escape(String(application.id))}"]`);
+            const loginLabel = article?.querySelector(".admin-application-info span");
+            if (loginLabel) loginLabel.textContent = "ЛОГИН ИГРОКА: Не удалось определить";
+        });
+    });
 
     // Обновлять очередь анкет в открытой админке сразу после INSERT/UPDATE,
     // не полагаясь на ручную кнопку «Обновить».
