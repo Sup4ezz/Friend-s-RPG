@@ -203,12 +203,15 @@ Deno.serve(async (req: Request) => {
   if (rowError || !row) return new Response("Event not found", { status: 404 });
   if (row.sent_at) return Response.json({ ok: true, duplicate: true });
 
+  const type = clean(event.event_type, 80);
+  const topicId = type === "character_application" ? 5 : null;
   const response = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       chat_id: chatId,
-      text: formatEvent(clean(event.event_type, 80), event.payload),
+      ...(topicId !== null ? { message_thread_id: topicId } : {}),
+      text: formatEvent(type, event.payload),
       parse_mode: "HTML",
       disable_web_page_preview: true,
     }),
