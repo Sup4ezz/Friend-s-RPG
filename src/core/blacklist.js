@@ -1,6 +1,37 @@
 /* LORGUS global blacklist gate and administrator controls */
 (() => {
     const db = () => window.supabaseClient;
+    // Share one short-lived admin check across startup gates to avoid duplicate RPCs.
+    let adminCheckPromise = null;
+    window.lorgusGetAdminStatus = window.lorgusGetAdminStatus || async function() {
+        const now = Date.now();
+        const cached = window.__lorgusAdminStatusCache;
+        if (cached && now - cached.checkedAt < 10000) return cached.value;
+        if (adminCheckPromise) return adminCheckPromise;
+        adminCheckPromise = (async () => {
+            let lastError;
+            for (let attempt = 0; attempt < 3; attempt++) {
+                try {
+                    const result = await Promise.race([
+                        db().rpc("is_admin"),
+                        new Promise((_, reject) => window.setTimeout(
+                            () => reject(new Error("LORGUS_REQUEST_TIMEOUT")),
+                            5000
+                        ))
+                    ]);
+                    if (result.error) throw result.error;
+                    const value = result.data === true;
+                    window.__lorgusAdminStatusCache = { value, checkedAt: Date.now() };
+                    return value;
+                } catch (error) {
+                    lastError = error;
+                    if (attempt < 2) await new Promise(resolve => window.setTimeout(resolve, 350 * (attempt + 1)));
+                }
+            }
+            throw lastError;
+        })().finally(() => { adminCheckPromise = null; });
+        return adminCheckPromise;
+    };
     const esc = value => window.escapeHtml
         ? window.escapeHtml(String(value ?? ""))
         : String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -35,8 +66,7 @@
                             8000
                         ))
                     ]);
-                    const { data: admin, error: adminError } = await timeout(db().rpc("is_admin"));
-                    if (adminError) throw adminError;
+                    const admin = await window.lorgusGetAdminStatus();
                     if (!admin) {
                         window.lorgusBootStage = "проверка чёрного списка игрока";
                         const { data, error } = await timeout(db().from("lorgus_blacklist")
@@ -81,8 +111,7 @@
             if (sessionError) throw sessionError;
             const userId = sessionData?.session?.user?.id;
             if (!userId) return;
-            const { data: admin, error: adminError } = await db().rpc("is_admin");
-            if (adminError) throw adminError;
+            const admin = await window.lorgusGetAdminStatus();
             if (admin) return;
             const { data, error } = await db().from("lorgus_blacklist")
                 .select("user_id").eq("user_id", userId).maybeSingle();
