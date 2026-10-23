@@ -4,6 +4,42 @@ export default {
         const url = new URL(request.url);
 
 
+        // Proxy signed Storage images through the Worker when direct browser-to-Supabase
+        // connections are reset. Only signed URLs for this project's image bucket are allowed.
+        if (url.pathname === "/api/storage-proxy") {
+            if (request.method !== "GET" && request.method !== "HEAD") {
+                return new Response("Method not allowed", { status: 405, headers: { "Allow": "GET, HEAD" } });
+            }
+            let target;
+            try {
+                target = new URL(url.searchParams.get("url") || "");
+            } catch (_) {
+                return new Response("Invalid image URL", { status: 400 });
+            }
+            const supabaseOrigin = new URL(env.SUPABASE_URL).origin;
+            if (
+                target.origin !== supabaseOrigin ||
+                !target.pathname.startsWith("/storage/v1/object/sign/character-applications/") ||
+                !target.searchParams.has("token")
+            ) {
+                return new Response("Forbidden", { status: 403 });
+            }
+            const upstream = await fetch(target.toString(), {
+                method: request.method,
+                headers: request.headers.get("Range") ? { "Range": request.headers.get("Range") } : undefined,
+                redirect: "error"
+            });
+            const responseHeaders = new Headers(upstream.headers);
+            responseHeaders.set("X-Content-Type-Options", "nosniff");
+            responseHeaders.set("Cache-Control", "private, max-age=60");
+            responseHeaders.delete("set-cookie");
+            return new Response(upstream.body, {
+                status: upstream.status,
+                statusText: upstream.statusText,
+                headers: responseHeaders
+            });
+        }
+
         /*
             API CONFIG
             Клиент получает только публичные данные Supabase.
