@@ -300,31 +300,43 @@ window.lorgusMapReset = lorgusMapReset;
 async function getRpCharacterActiveTitle(characterId) {
     if (!characterId || !window.supabaseClient) return null;
     window.rpCharacterTitleCache = window.rpCharacterTitleCache || {};
+    window.rpCharacterTitlePending = window.rpCharacterTitlePending || {};
     const key = String(characterId);
     if (Object.prototype.hasOwnProperty.call(window.rpCharacterTitleCache, key)) {
         return window.rpCharacterTitleCache[key];
     }
+    // Several messages from one character can render together. Share the
+    // in-flight lookup instead of sending duplicate character/title queries.
+    if (window.rpCharacterTitlePending[key]) return window.rpCharacterTitlePending[key];
 
-    const { data: character, error: characterError } = await window.supabaseClient
-        .from("characters")
-        .select("active_title_id")
-        .eq("id", characterId)
-        .maybeSingle();
+    const pending = (async () => {
+        const { data: character, error: characterError } = await window.supabaseClient
+            .from("characters")
+            .select("active_title_id")
+            .eq("id", characterId)
+            .maybeSingle();
 
-    if (characterError || !character?.active_title_id) {
-        window.rpCharacterTitleCache[key] = null;
-        return null;
+        if (characterError || !character?.active_title_id) {
+            window.rpCharacterTitleCache[key] = null;
+            return null;
+        }
+
+        const { data: title, error: titleError } = await window.supabaseClient
+            .from("titles")
+            .select("id,name,icon,color,rarity")
+            .eq("id", character.active_title_id)
+            .maybeSingle();
+
+        const result = titleError ? null : (title || null);
+        window.rpCharacterTitleCache[key] = result;
+        return result;
+    })();
+    window.rpCharacterTitlePending[key] = pending;
+    try {
+        return await pending;
+    } finally {
+        delete window.rpCharacterTitlePending[key];
     }
-
-    const { data: title, error: titleError } = await window.supabaseClient
-        .from("titles")
-        .select("id,name,icon,color,rarity")
-        .eq("id", character.active_title_id)
-        .maybeSingle();
-
-    const result = titleError ? null : (title || null);
-    window.rpCharacterTitleCache[key] = result;
-    return result;
 }
 
 function openLorgusRpPhotoViewer(src, caption = "Портрет персонажа") {
