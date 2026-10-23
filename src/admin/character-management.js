@@ -152,8 +152,28 @@ function bindAdminButtons(container) {
             const characterId = button.dataset.characterId;
             const characterName = button.dataset.characterName || "этого персонажа";
 
+            const applicationId = button.dataset.applicationId;
+
             if (!characterId) {
-                alert("У персонажа отсутствует ID.");
+                if (!applicationId) {
+                    alert("Не найден ID ни персонажа, ни записи заявки.");
+                    return;
+                }
+                if (!confirm(`У записи «${characterName}» нет связанного персонажа. Удалить только ошибочную одобренную заявку?`)) return;
+
+                button.disabled = true;
+                button.textContent = "Удаление...";
+                const { error } = await window.supabaseClient.rpc("admin_delete_orphan_character_application", {
+                    p_application_id: applicationId
+                });
+                if (error) {
+                    console.error(error);
+                    alert("Не удалось удалить запись без персонажа:\\n\\n" + error.message);
+                    button.disabled = false;
+                    button.textContent = "Удалить запись без персонажа";
+                    return;
+                }
+                await window.loadAdminPanel(container);
                 return;
             }
 
