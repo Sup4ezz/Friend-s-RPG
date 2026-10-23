@@ -42,15 +42,21 @@ if (!window.lorgusGetSignedPhotoUrl) {
 /* LORGUS admin applications */
 async function loadAdminPanel(container) {
     window.lorgusBootStage = "админка: запрос списка анкет character_applications";
-    const {
-        data: applications,
-        error
-    } = await window.supabaseClient
-        .from("character_applications")
-        .select("*")
-        .order("id", {
-            ascending: false
-        });
+    let applications = null;
+    let error = null;
+    try {
+        const result = await Promise.race([
+            window.supabaseClient
+                .from("character_applications")
+                .select("*")
+                .order("id", { ascending: false }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Supabase не ответил за 7 секунд. Проверь соединение с Supabase и повтори загрузку.")), 7000))
+        ]);
+        applications = result.data;
+        error = result.error;
+    } catch (requestError) {
+        error = requestError;
+    }
 
     if (error) {
         console.error(
@@ -63,16 +69,26 @@ async function loadAdminPanel(container) {
         container.innerHTML = `
             <div class="welcome-symbol">!</div>
             <h1>Ошибка загрузки</h1>
-            <p>${window.escapeHtml(error.message)}</p>
+            <p>${window.escapeHtml(error.message || "Не удалось загрузить заявки.")}</p><button type="button" id="admin-retry-load">Повторить загрузку</button>
         `;
 
+        container.querySelector("#admin-retry-load")?.addEventListener("click", () => loadAdminPanel(container));
         return;
     }
 
-    // Логины получаем через admin-only RPC; auth.users нельзя читать напрямую из браузера.
+    // Логины — дополнительное поле: при сетевом сбое RPC не должен блокировать показ заявок.
     window.lorgusBootStage = "админка: RPC admin_list_character_application_usernames";
-    const { data: playerLogins, error: loginError } = await window.supabaseClient.rpc("admin_list_character_application_usernames");
-    if (loginError) console.warn("Не удалось загрузить логины владельцев анкет:", loginError);
+    let playerLogins = [];
+    try {
+        const loginResult = await Promise.race([
+            window.supabaseClient.rpc("admin_list_character_application_usernames"),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("RPC логинов не ответил за 7 секунд")), 7000))
+        ]);
+        if (loginResult.error) console.warn("Не удалось загрузить логины владельцев анкет:", loginResult.error);
+        else playerLogins = loginResult.data || [];
+    } catch (loginRequestError) {
+        console.warn("Не удалось загрузить логины владельцев анкет:", loginRequestError);
+    }
     const loginByApplication = new Map((playerLogins || []).map(row => [String(row.application_id), row.username || "Логин не указан"]));
     (applications || []).forEach(application => {
         application.player_username = loginByApplication.get(String(application.id)) || "Не удалось определить";
