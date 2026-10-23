@@ -131,18 +131,16 @@ async function loadPlayerState(session, forceCharacterSelection = false) {
     if (!container) return;
 
     window.lorgusBootStage = "проверка прав администратора (Supabase RPC is_admin)";
-    window.lorgusBootStage = "проверка прав администратора (Supabase RPC is_admin)";
-    const adminCheck = await Promise.race([
-        window.supabaseClient.rpc("is_admin"),
-        new Promise((_, reject) => window.setTimeout(
-            () => reject(new Error("Тайм-аут проверки прав администратора (is_admin).")),
-            8000
-        ))
-    ]);
-    const {
-        data: isAdmin,
-        error: adminError
-    } = adminCheck;
+    const adminCheck = window.lorgusGetAdminStatus
+        ? await window.lorgusGetAdminStatus().then(data => ({ data, error: null }))
+        : await Promise.race([
+            window.supabaseClient.rpc("is_admin"),
+            new Promise((_, reject) => window.setTimeout(
+                () => reject(new Error("Тайм-аут проверки прав администратора (is_admin).")),
+                8000
+            ))
+        ]);
+    const { data: isAdmin, error: adminError } = adminCheck;
 
     if (adminError) {
         console.error(
