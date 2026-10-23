@@ -16,7 +16,7 @@
                         db().rpc("is_admin"),
                         new Promise((_, reject) => window.setTimeout(
                             () => reject(new Error("LORGUS_REQUEST_TIMEOUT")),
-                            1500
+                            2500
                         ))
                     ]);
                     if (result.error) throw result.error;
