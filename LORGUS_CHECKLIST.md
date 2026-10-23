@@ -1388,3 +1388,12 @@ Commits:
 - [ ] Keep Cloudflare production deployment available as rollback until the replacement host is tested.
 - [ ] After the static host is verified, decide whether any remaining Worker functionality needs a replacement. Supabase/database/auth/storage remain unchanged.
 - [ ] Build and test Android APK only after the replacement HTTPS origin is stable.
+
+
+# 15. RP HISTORY PERFORMANCE — 2026-10-23
+
+- [x] Found a burst-query bottleneck in RP history rendering: every message requests its author's portrait and active title; repeated messages from the same character could start duplicate Supabase lookups before the first lookup completed.
+- [x] Added in-flight promise deduplication for character portrait lookups in `src/pages/rp-system.js` and active-title lookups in `src/core/interface.js`. Existing resolved-value caches and portrait/title behavior remain in place.
+- [x] Bumped script query versions in `index.html` so static hosting browsers fetch the optimized files.
+- [ ] Verify on Layero that opening an RP chat with a long history no longer triggers repeated portrait/title requests per message and that portraits, titles, and messages still render correctly.
+- [ ] Verify browser responsiveness on the map, character, lorebook, mail, and RP screens. A browser-based performance trace could not be run from this environment; do not treat the fix as measured or production-verified until manually tested.
