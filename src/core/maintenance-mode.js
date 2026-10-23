@@ -61,10 +61,20 @@
                 if (lastEnabled) showMaintenance(settings.maintenance_message);
                 else window.lorgusMaintenanceActive = false;
             } catch (error) {
-                console.error("LORGUS maintenance check failed:", error);
-                const root = document.getElementById("root");
-                if (root) root.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#10100f;color:#d8c8ad;text-align:center"><section><h1>Мир временно недоступен</h1><p>Не удалось проверить состояние мира. Попробуй обновить страницу.</p><button onclick="location.reload()">Повторить</button></section></main>';
-                window.lorgusMaintenanceActive = true;
+                const message = String(error?.message || error || "");
+                const isNetworkFailure = error instanceof TypeError ||
+                    /failed to fetch|connection reset|networkerror|load failed|http2_ping_failed/i.test(message);
+                if (isNetworkFailure) {
+                    // If Supabase is temporarily unreachable, don't replace a successfully rendered
+                    // game/admin screen with a fatal overlay. The next poll will retry the check.
+                    console.warn("LORGUS maintenance check temporarily unavailable:", error);
+                    window.lorgusMaintenanceActive = false;
+                } else {
+                    console.error("LORGUS maintenance check failed:", error);
+                    const root = document.getElementById("root");
+                    if (root) root.innerHTML = '<main style="min-height:100vh;display:grid;place-items:center;padding:24px;background:#10100f;color:#d8c8ad;text-align:center"><section><h1>Мир временно недоступен</h1><p>Не удалось проверить состояние мира. Попробуй обновить страницу.</p><button onclick="location.reload()">Повторить</button></section></main>';
+                    window.lorgusMaintenanceActive = true;
+                }
             }
             return result;
         };
