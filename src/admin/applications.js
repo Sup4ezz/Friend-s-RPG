@@ -47,7 +47,7 @@ async function loadAdminPanel(container) {
     // QUIC/HTTP3 transport failures can leave a PostgREST request unresolved
     // even when DevTools reports a 200 response. Retry the read-only queue query
     // with a fresh builder; never modify application data during recovery.
-    for (let attempt = 1; attempt <= 3; attempt++) {
+    for (let attempt = 1; attempt <= 2; attempt++) {
         try {
             const result = await Promise.race([
                 window.supabaseClient
@@ -55,8 +55,8 @@ async function loadAdminPanel(container) {
                     .select("*")
                     .order("id", { ascending: false }),
                 new Promise((_, reject) => setTimeout(
-                    () => reject(new Error("Supabase не ответил за 7 секунд.")),
-                    7000
+                    () => reject(new Error("Supabase не ответил за 4 секунды.")),
+                    4000
                 ))
             ]);
             if (result.error) throw result.error;
@@ -65,9 +65,9 @@ async function loadAdminPanel(container) {
             break;
         } catch (requestError) {
             error = requestError;
-            console.warn(`LORGUS: запрос анкет не удался (попытка ${attempt}/3):`, requestError);
-            if (attempt < 3) {
-                window.lorgusBootStage = `админка: повтор запроса анкет (${attempt + 1}/3)`;
+            console.warn(`LORGUS: запрос анкет не удался (попытка ${attempt}/2):`, requestError);
+            if (attempt < 2) {
+                window.lorgusBootStage = `админка: повтор запроса анкет (${attempt + 1}/2)`;
                 await new Promise(resolve => setTimeout(resolve, attempt * 500));
             }
         }
