@@ -41,6 +41,7 @@ if (!window.lorgusGetSignedPhotoUrl) {
 
 /* LORGUS admin applications */
 async function loadAdminPanel(container) {
+    window.lorgusBootStage = "админка: запрос списка анкет character_applications";
     const {
         data: applications,
         error
@@ -69,6 +70,7 @@ async function loadAdminPanel(container) {
     }
 
     // Логины получаем через admin-only RPC; auth.users нельзя читать напрямую из браузера.
+    window.lorgusBootStage = "админка: RPC admin_list_character_application_usernames";
     const { data: playerLogins, error: loginError } = await window.supabaseClient.rpc("admin_list_character_application_usernames");
     if (loginError) console.warn("Не удалось загрузить логины владельцев анкет:", loginError);
     const loginByApplication = new Map((playerLogins || []).map(row => [String(row.application_id), row.username || "Логин не указан"]));
@@ -76,6 +78,7 @@ async function loadAdminPanel(container) {
         application.player_username = loginByApplication.get(String(application.id)) || "Не удалось определить";
     });
 
+    window.lorgusBootStage = "админка: отрисовка списка анкет";
     window.renderAdminApplications(
         container,
         applications || []
