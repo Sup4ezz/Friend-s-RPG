@@ -44,18 +44,33 @@ async function loadAdminPanel(container) {
     window.lorgusBootStage = "админка: запрос списка анкет character_applications";
     let applications = null;
     let error = null;
-    try {
-        const result = await Promise.race([
-            window.supabaseClient
-                .from("character_applications")
-                .select("*")
-                .order("id", { ascending: false }),
-            new Promise((_, reject) => setTimeout(() => reject(new Error("Supabase не ответил за 7 секунд. Проверь соединение с Supabase и повтори загрузку.")), 7000))
-        ]);
-        applications = result.data;
-        error = result.error;
-    } catch (requestError) {
-        error = requestError;
+    // QUIC/HTTP3 transport failures can leave a PostgREST request unresolved
+    // even when DevTools reports a 200 response. Retry the read-only queue query
+    // with a fresh builder; never modify application data during recovery.
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            const result = await Promise.race([
+                window.supabaseClient
+                    .from("character_applications")
+                    .select("*")
+                    .order("id", { ascending: false }),
+                new Promise((_, reject) => setTimeout(
+                    () => reject(new Error("Supabase не ответил за 7 секунд.")),
+                    7000
+                ))
+            ]);
+            if (result.error) throw result.error;
+            applications = result.data || [];
+            error = null;
+            break;
+        } catch (requestError) {
+            error = requestError;
+            console.warn(`LORGUS: запрос анкет не удался (попытка ${attempt}/3):`, requestError);
+            if (attempt < 3) {
+                window.lorgusBootStage = `админка: повтор запроса анкет (${attempt + 1}/3)`;
+                await new Promise(resolve => setTimeout(resolve, attempt * 500));
+            }
+        }
     }
 
     if (error) {
