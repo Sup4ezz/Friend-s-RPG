@@ -65,6 +65,34 @@
                     }
                     return originalSetAttribute.call(this, name, value);
                 };
+                // HTML parsed from innerHTML does not call the src setter or setAttribute
+                // override. Watch DOM insertions and src changes as well, and rewrite those
+                // images once they exist.
+                const rewriteImageElement = image => {
+                    if (!(image instanceof HTMLImageElement)) return;
+                    const current = image.getAttribute("src");
+                    if (!current) return;
+                    const rewritten = rewriteImageUrl(current);
+                    if (rewritten !== current) originalSetAttribute.call(image, "src", rewritten);
+                };
+                const rewriteImagesIn = node => {
+                    if (!(node instanceof Element)) return;
+                    if (node instanceof HTMLImageElement) rewriteImageElement(node);
+                    node.querySelectorAll?.("img[src]").forEach(rewriteImageElement);
+                };
+                const imageObserver = new MutationObserver(records => {
+                    for (const record of records) {
+                        if (record.type === "attributes") rewriteImageElement(record.target);
+                        else record.addedNodes.forEach(rewriteImagesIn);
+                    }
+                });
+                imageObserver.observe(document.documentElement, {
+                    subtree: true,
+                    childList: true,
+                    attributes: true,
+                    attributeFilter: ["src"]
+                });
+                document.querySelectorAll("img[src]").forEach(rewriteImageElement);
                 window.__lorgusImageProxyInstalled = true;
             }
         })();
