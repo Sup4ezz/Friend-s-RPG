@@ -27,11 +27,20 @@
         window.loadPlayerState = async function(session, ...args) {
             if (session?.user?.id && db()) {
                 try {
-                    const { data: admin, error: adminError } = await db().rpc("is_admin");
+                    window.lorgusBootStage = "проверка прав и чёрного списка";
+                    const timeout = promise => Promise.race([
+                        promise,
+                        new Promise((_, reject) => window.setTimeout(
+                            () => reject(new Error("LORGUS_REQUEST_TIMEOUT")),
+                            8000
+                        ))
+                    ]);
+                    const { data: admin, error: adminError } = await timeout(db().rpc("is_admin"));
                     if (adminError) throw adminError;
                     if (!admin) {
-                        const { data, error } = await db().from("lorgus_blacklist")
-                            .select("user_id").eq("user_id", session.user.id).maybeSingle();
+                        window.lorgusBootStage = "проверка чёрного списка игрока";
+                        const { data, error } = await timeout(db().from("lorgus_blacklist")
+                            .select("user_id").eq("user_id", session.user.id).maybeSingle());
                         if (error) throw error;
                         if (data) {
                             showBlacklistedScreen();
@@ -41,7 +50,7 @@
                 } catch (error) {
                     const message = String(error?.message || error || "");
                     const isNetworkFailure = error instanceof TypeError ||
-                        /failed to fetch|connection reset|networkerror|load failed|http2_ping_failed/i.test(message);
+                        /LORGUS_REQUEST_TIMEOUT|failed to fetch|connection reset|networkerror|load failed|http2_ping_failed/i.test(message);
                     if (isNetworkFailure) {
                         // A transient network outage must not permanently lock the player out.
                         // The normal player-state loader will still perform its own checks.
