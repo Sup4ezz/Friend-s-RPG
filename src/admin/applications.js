@@ -80,6 +80,28 @@ async function loadAdminPanel(container) {
         container,
         applications || []
     );
+
+    // Обновлять очередь анкет в открытой админке сразу после INSERT/UPDATE,
+    // не полагаясь на ручную кнопку «Обновить».
+    if (!window.lorgusApplicationsRealtimeChannel && window.supabaseClient?.channel) {
+        window.lorgusApplicationsRealtimeChannel = window.supabaseClient
+            .channel("admin-character-applications-live")
+            .on("postgres_changes", {
+                event: "*",
+                schema: "public",
+                table: "character_applications"
+            }, payload => {
+                if (!window.lorgusIsAdmin || window.lorgusApplicationsRealtimeRefreshQueued) return;
+                if (!["INSERT", "UPDATE", "DELETE"].includes(payload?.eventType)) return;
+                window.lorgusApplicationsRealtimeRefreshQueued = true;
+                Promise.resolve()
+                    .then(() => new Promise(resolve => setTimeout(resolve, 250)))
+                    .then(() => loadAdminPanel(container))
+                    .catch(error => console.error("Не удалось обновить очередь анкет:", error))
+                    .finally(() => { window.lorgusApplicationsRealtimeRefreshQueued = false; });
+            })
+            .subscribe();
+    }
 }
 
 /* =========================================================
