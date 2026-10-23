@@ -24,7 +24,7 @@ async function openAdminCharacterRecord(application, container) {
                 <div><small>ВОЗРАСТ</small><strong>${esc(application.age ? application.age + " лет" : null)}</strong></div>
                 <div><small>РОД ЗАНЯТИЙ</small><strong>${esc(application.occupation)}</strong></div>
                 <div><small>ОРУЖИЕ</small><strong>${esc(application.preferred_weapon)}</strong></div>
-                <div><small>CHARACTER ID</small><strong>${esc(application.character_id)}</strong></div>
+                <div><small>${application.character_id ? "CHARACTER ID" : "ID ЗАПИСИ (ПЕРСОНАЖ НЕ СОЗДАН)"}</small><strong>${esc(application.character_id || application.id)}</strong></div>
             </div>
             <div class="admin-character-record-story">
                 <section><small>ХАРАКТЕР</small><p>${esc(application.personality)}</p></section>
