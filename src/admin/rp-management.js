@@ -119,7 +119,7 @@ if (!window.lorgusGetSignedPhotoUrl) {
         for (let offset = 0; ; offset += pageSize) {
             const page = await window.supabaseClient
                 .from("rp_messages")
-                .select("id,character_id,body,created_at,status,reverted_at,revert_reason,presence_type,region,location,from_region,from_location,to_region,to_location,characters(id,name,race,photo_path)")
+                .select("id,character_id,body,created_at,status,reverted_at,revert_reason,presence_type,region,location,from_region,from_location,to_region,to_location,characters!rp_messages_character_id_fkey(id,name,race,photo_path)")
                 .order("created_at", { ascending: false })
                 .range(offset, offset + pageSize - 1);
             if (page.error) throw page.error;
