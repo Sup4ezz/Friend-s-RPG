@@ -138,6 +138,14 @@ Deno.serve(async (req: Request) => {
     return responseJson({ ok: true, linked: true, preferences: { ...DEFAULTS, ...(existing?.preferences || {}) } }, 200, origin);
   }
 
+  // Unlinking only removes the mapping for the authenticated LORGUS account.
+  // It is allowed even when the current Telegram differs from the old linked chat.
+  if (action === "unlink") {
+    const { error } = await db.from("lorgus_telegram_player_links").delete().eq("user_id", userId);
+    if (error) return responseJson({ error: "UNLINK_FAILED" }, 500, origin);
+    return responseJson({ ok: true, linked: false }, 200, origin);
+  }
+
   if (!existing || String(existing.telegram_user_id) !== telegram.id) {
     return responseJson({ error: "TELEGRAM_NOT_LINKED" }, 403, origin);
   }
@@ -165,10 +173,5 @@ Deno.serve(async (req: Request) => {
     return responseJson({ ok: true, preferences }, 200, origin);
   }
 
-  if (action === "unlink") {
-    const { error } = await db.from("lorgus_telegram_player_links").delete().eq("user_id", userId);
-    if (error) return responseJson({ error: "UNLINK_FAILED" }, 500, origin);
-    return responseJson({ ok: true, linked: false }, 200, origin);
-  }
   return responseJson({ error: "UNKNOWN_ACTION" }, 400, origin);
 });
