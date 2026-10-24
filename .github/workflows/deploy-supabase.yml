@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - ".github/workflows/deploy-supabase.yml"
       - "supabase/migrations/**"
       - "supabase/config.toml"
       - "supabase/functions/**"
@@ -43,6 +44,11 @@ jobs:
 
       - name: Link production project
         run: supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
+
+      # Deploy the Telegram Mini App independently, before migrations. A migration-history
+      # mismatch must not prevent the bot's Edge Function from receiving code updates.
+      - name: Deploy Telegram player function
+        run: supabase functions deploy lorgus-telegram-player --project-ref "$SUPABASE_PROJECT_ID"
 
       - name: Apply production migrations
         run: supabase db push --linked --include-all
