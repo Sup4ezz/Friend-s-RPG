@@ -316,7 +316,7 @@
    const cleaned=source.replace(/^---[\s\S]*?---\s*/,"")
     .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,"$2")
     .replace(/\[\[([^\]]+)\]\]/g,"$1")
-    .replace(/\*\*(.+?)\*\*/g,"$1").replace(/\*(.+?)\*/g,"$1");
+    ;
    renderMarkdown(body,cleaned);
    section.replaceChildren(make("h3","","Полная летопись персонажа"),body);
   } catch(error) {
