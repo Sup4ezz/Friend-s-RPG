@@ -1,3 +1,9 @@
+# LORGUS — продолжение аудита на 2026-10-25
+
+Черновая миграция для blacklist gate валютного перевода подготовлена в review-ветке `audit/currency-transfer-blacklist-guard`: [открыть SQL](https://github.com/Sup4ezz/Friend-s-RPG/blob/audit/currency-transfer-blacklist-guard/supabase/migrations/20261025100000_currency_transfer_blacklist_gate.sql). Добавляет `lorgus_is_access_blocked()` в существующий `lorgus_transfer_character_currency_in_chat`, остальная логика функции сохранена. Статическая проверка пройдена; runtime/SQL тесты не выполнялись. Миграция не в main и не применена к production.
+
+---
+
 # LORGUS — актуальное состояние на 2026-10-25 (дополнение)
 
 ## Последняя проверка
