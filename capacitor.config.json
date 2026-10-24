@@ -1,0 +1,11 @@
+{
+  "appId": "app.lorgus.admin",
+  "appName": "LORGUS — Канцелярия",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
