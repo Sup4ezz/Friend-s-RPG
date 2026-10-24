@@ -236,28 +236,62 @@
  }
  function renderMarkdown(parent,source,baseUrl=""){
   parent.replaceChildren();
-  const lines=String(source||"").replace(/\r/g,"").replace(/\\([\\`*_{}\[\]()#+.!|>~-])/g,"$1").split("\n");
-  const inline=(el,s)=>{
-   const re=/(\*\*[^*]+\*\*|__[^_]+__|(?<!\*)\*[^*\n]+\*|~~[^~]+~~|\x60[^\x60]+\x60|\[[^\]]+\]\([^)]+\))/g;let last=0,m;
-   while((m=re.exec(s))){if(m.index>last)el.append(document.createTextNode(s.slice(last,m.index)));const x=m[0];let n;
-    if(x.startsWith("**")||x.startsWith("__")){n=document.createElement("strong");inline(n,x.slice(2,-2));}
-    else if(x.startsWith("~~")){n=document.createElement("del");inline(n,x.slice(2,-2));}
-    else if(x.startsWith("*")){n=document.createElement("em");inline(n,x.slice(1,-1));}
-    else if(x.charCodeAt(0)===96){n=document.createElement("code");n.textContent=x.slice(1,-1);}
-    else{const q=x.match(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)$/);if(q){n=document.createElement("a");n.textContent=q[1];n.href=q[2];n.target="_blank";n.rel="noopener noreferrer";}else n=document.createTextNode(x);}
-    el.append(n);last=re.lastIndex;
-   }if(last<s.length)el.append(document.createTextNode(s.slice(last)));
-  };
-  let i=0;
-  while(i<lines.length){const s=lines[i].trim();if(!s){i++;continue;}
-   if(s.charCodeAt(0)===96&&s.startsWith("\x60\x60\x60")||s.startsWith("~~~")){const fence=s.slice(0,3),v=[];i++;while(i<lines.length&&!lines[i].trim().startsWith(fence))v.push(lines[i++]);if(i<lines.length)i++;const pre=document.createElement("pre"),code=document.createElement("code");code.textContent=v.join("\n");pre.append(code);parent.append(pre);continue;}
-   const h=s.match(/^(#{1,6})\s+(.+)$/);if(h){const n=document.createElement("h"+Math.min(h[1].length+1,6));inline(n,h[2]);parent.append(n);i++;continue;}
-   if(/^([-*_])(?:\s*\1){2,}$/.test(s)){parent.append(document.createElement("hr"));i++;continue;}
-   if(/^>\s?/.test(s)){const q=document.createElement("blockquote");while(i<lines.length&&/^\s*>/.test(lines[i])){const v=lines[i++].replace(/^\s*>\s?/,"");if(v){const p=document.createElement("p");inline(p,v);q.append(p);}}parent.append(q);continue;}
-   const ul=s.match(/^[-*+]\s+(.+)$/),ol=s.match(/^\d+[.)]\s+(.+)$/);
-   if(ul||ol){const list=document.createElement(ul?"ul":"ol"),pat=ul?/^[-*+]\s+/:/^\d+[.)]\s+/;while(i<lines.length&&pat.test(lines[i].trim())){const li=document.createElement("li");inline(li,lines[i++].trim().replace(pat,""));list.append(li);}parent.append(list);continue;}
-   const p=document.createElement("p"),parts=[s];i++;while(i<lines.length&&lines[i].trim()&&!/^(#{1,6})\s+/.test(lines[i].trim())&&!/^\s*>/.test(lines[i].trim())&&!/^[-*+]\s+/.test(lines[i].trim())&&!/^\d+[.)]\s+/.test(lines[i].trim())&&!lines[i].trim().startsWith("~~~")&&!(lines[i].trim().charCodeAt(0)===96&&lines[i].trim().startsWith("\x60\x60\x60")))parts.push(lines[i++].trim());inline(p,parts.join(" "));parent.append(p);
+  const lines=String(source||"").replace(/\r\n?/g,"\n").split("\n");
+  const el=(tag,cls)=>{const n=document.createElement(tag);if(cls)n.className=cls;return n;};
+  const safeHref=href=>{try{const u=new URL(href,baseUrl||location.href);return /^(https?:|mailto:)$/.test(u.protocol)?u.href:null;}catch(_){return null;}};
+  function inline(target,text){
+   const s=String(text||"");let i=0,m;
+   const token=/(!?\[[^\]]*\]\([^)]+\)|\[\[[^\]]+\]\]|\x60[^\x60]+\x60|\*\*[\s\S]+?\*\*|__[\s\S]+?__|~~[\s\S]+?~~|\*[^*\n]+\*|_[^_\n]+_)/g;
+   while((m=token.exec(s))){
+    if(m.index>i)target.append(document.createTextNode(s.slice(i,m.index)));
+    const x=m[0];let node=null;
+    if(x.startsWith("![")||x.startsWith("[")){
+     const image=x.startsWith("!"),q=x.match(/^(!?)\[([^\]]*)\]\(([^)]+)\)$/);
+     if(q){const href=safeHref(q[3].trim());if(image&&href){node=el("img","lorgus-markdown-image");node.src=href;node.alt=q[2];node.loading="lazy";}else if(!image&&href){node=el("a");node.href=href;node.target="_blank";node.rel="noopener noreferrer";inline(node,q[2]);}}
+     if(!node)node=document.createTextNode(x);
+    }else if(x.startsWith("[[")){const q=x.slice(2,-2).split("|");node=el("span","lorgus-wikilink");node.textContent=(q[1]||q[0]).split("#")[0];}
+    else if(x.charCodeAt(0)===96){node=el("code");node.textContent=x.slice(1,-1);}
+    else if(x.startsWith("**")||x.startsWith("__")){node=el("strong");inline(node,x.slice(2,-2));}
+    else if(x.startsWith("~~")){node=el("del");inline(node,x.slice(2,-2));}
+    else{node=el("em");inline(node,x.slice(1,-1));}
+    target.append(node);i=token.lastIndex;
+   }
+   if(i<s.length)target.append(document.createTextNode(s.slice(i)));
   }
+  const startsBlock=s=>/^(#{1,6}\s|>\s?|[-*+]\s+|\d+[.)]\s+|(?:[-*_]\s*){3,}$|~~~|\x60{3}|\|.*\|$)/.test(s.trim());
+  function parseBlocks(container,from,to){
+   let i=from;
+   while(i<to){
+    const s=lines[i].trim();if(!s){i++;continue;}
+    if(/^---\s*$/.test(s)&&i===0){i++;while(i<to&&!/^---\s*$/.test(lines[i].trim()))i++;i++;continue;}
+    if(s.startsWith("~~~")||s.charCodeAt(0)===96&&s.startsWith(String.fromCharCode(96).repeat(3))){
+     const fence=s.slice(0,3),lang=s.slice(3).trim(),pre=el("pre"),code=el("code",lang?"language-"+lang.replace(/[^\w+-]/g,""):"");i++;const body=[];
+     while(i<to&&!lines[i].trim().startsWith(fence))body.push(lines[i++]);if(i<to)i++;code.textContent=body.join("\n");pre.append(code);container.append(pre);continue;
+    }
+    const h=s.match(/^(#{1,6})\s+(.+?)\s*#*$/);
+    if(h){const n=el("h"+h[1].length);inline(n,h[2]);container.append(n);i++;continue;}
+    if(/^([-*_])(?:\s*\1){2,}$/.test(s)){container.append(el("hr"));i++;continue;}
+    if(/^>\s?/.test(s)){
+     const quote=el("blockquote"),body=[];while(i<to&&/^\s*>/.test(lines[i]))body.push(lines[i++].replace(/^\s*>\s?/,""));
+     body.forEach(v=>{if(v.trim()){const p=el("p");inline(p,v);quote.append(p);}});container.append(quote);continue;
+    }
+    if(s.includes("|")&&i+1<to&&/^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(lines[i+1].trim())){
+     const cells=line=>line.trim().replace(/^\|/,"").replace(/\|$/,"").split("|").map(v=>v.trim());
+     const head=cells(s),align=cells(lines[i+1].trim()).map(v=>v.startsWith(":")&&v.endsWith(":")?"center":v.endsWith(":")?"right":v.startsWith(":")?"left":""),table=el("table"),thead=el("thead"),tr=el("tr");
+     head.forEach((v,k)=>{const th=el("th");if(align[k])th.style.textAlign=align[k];inline(th,v);tr.append(th);});thead.append(tr);table.append(thead);i+=2;const tbody=el("tbody");
+     while(i<to&&lines[i].trim().includes("|")&&lines[i].trim()){const row=el("tr");cells(lines[i++]).forEach((v,k)=>{const td=el("td");if(align[k])td.style.textAlign=align[k];inline(td,v);row.append(td);});tbody.append(row);}table.append(tbody);container.append(table);continue;
+    }
+    const ul=s.match(/^[-*+]\s+(.+)$/),ol=s.match(/^(\d+)[.)]\s+(.+)$/);
+    if(ul||ol){
+     const ordered=!!ol,list=el(ordered?"ol":"ul");if(ol)list.start=Number(ol[1])||1;const pattern=ordered?/^\d+[.)]\s+/:/^[-*+]\s+/;
+     while(i<to&&pattern.test(lines[i].trim())){const text=lines[i++].trim().replace(pattern,""),li=el("li"),task=text.match(/^\[([ xX])\]\s+(.*)$/);
+      if(task){const box=el("input");box.type="checkbox";box.disabled=true;box.checked=task[1].toLowerCase()==="x";li.append(box,document.createTextNode(" "));inline(li,task[2]);}else inline(li,text);list.append(li);
+     }container.append(list);continue;
+    }
+    const p=el("p"),parts=[s];i++;while(i<to&&lines[i].trim()&&!startsBlock(lines[i].trim()))parts.push(lines[i++].trim());inline(p,parts.join(" "));container.append(p);
+   }
+  }
+  parseBlocks(parent,0,lines.length);
  }
  window.LORGUS_CODEX_SECTIONS=sections; window.LORGUS_CODEX_DOCS=docs; window.LORGUS_CODEX_REMOTE={base:remoteBase,vault};
  async function render(startId){
