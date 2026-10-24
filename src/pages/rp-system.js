@@ -546,6 +546,46 @@ async function useRoadBypass(fromLocation, fromRegion, toLocation, toRegion) {
     }
 }
 
+async function cancelLorgusTravel() {
+    const presence = await getRpPresence();
+    if (!presence || presence.type !== "road") {
+        alert("Активная поездка не найдена.");
+        return;
+    }
+    const origin = { location: presence.fromLocation, region: presence.fromRegion };
+    if (!window.confirm("Отменить поездку и вернуться в «" + origin.location + "»? Опубликованные дорожные сообщения останутся в летописи.")) return;
+
+    const characterId = window.activeCharacterId || window.activeCharacter?.id;
+    if (!characterId || !window.supabaseClient) {
+        alert("Не удалось проверить персонажа. Обнови страницу и попробуй снова.");
+        return;
+    }
+
+    try {
+        const { data, error } = await window.supabaseClient.rpc("cancel_lorgus_rp_travel", {
+            p_character_id: characterId
+        });
+        if (error) throw error;
+        const row = Array.isArray(data) ? data[0] : data;
+        const destination = mapServerPresence(row);
+        if (!destination || destination.type !== "location") {
+            throw new Error("Сервер не подтвердил отмену поездки.");
+        }
+        window.activeRpPresence = destination;
+        window.activeRpChatSpace = destination;
+        if (window.lorgusNavigateChat) {
+            window.lorgusNavigateChat(destination.region, destination.location, { replace: true });
+        } else {
+            await renderLocationChats(destination.location, destination.region, true, true);
+        }
+    } catch (error) {
+        console.error("[LORGUS] Не удалось отменить поездку:", error);
+        alert("Не удалось отменить поездку: " + String(error?.message || error));
+    }
+}
+
+window.cancelLorgusTravel = cancelLorgusTravel;
+
 async function arriveAtDestination() {
     const presence = await getRpPresence();
     if (!presence || presence.type !== "road") return;
@@ -837,6 +877,7 @@ async function renderRoadChat(presence, fromRoute = false) {
 
                 <footer class="lorgus-messenger-footer">
                     <span>RP · ДОРОГА</span>
+                    <button class="character-secondary-button lorgus-road-cancel-button" type="button" onclick="cancelLorgusTravel()">Отменить поездку</button>
                     <button class="gold-button lorgus-road-arrival-button" type="button" onclick="arriveAtDestination()">Прибыть в ${escapeHtml(presence.toLocation)}</button>
                 </footer>
             </main>
