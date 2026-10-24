@@ -27,7 +27,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}@media(m
 <div id="notice" class="status">Проверяем связь с Telegram…</div>
 <section id="login" class="panel hidden">
 <h2>Войти в LORGUS</h2><p class="muted">Используй тот же аккаунт, что и на сайте игры. Пароль вводится только в защищённую форму авторизации LORGUS.</p>
-<label for="email">Email</label><input id="email" type="email" autocomplete="username" inputmode="email">
+<label for="username">Логин LORGUS</label><input id="username" type="text" autocomplete="username" placeholder="Твой игровой логин" minlength="3" maxlength="32" required>
 <label for="password">Пароль</label><input id="password" type="password" autocomplete="current-password">
 <div class="actions"><button id="loginBtn">Войти</button></div>
 </section>
@@ -60,6 +60,7 @@ const $=id=>document.getElementById(id);
 const tg=window.Telegram?.WebApp;
 tg?.ready();tg?.expand();
 function note(msg,type=''){const n=$('notice');n.textContent=msg;n.className='status '+type}
+function getAuthEmail(username){const encoded=btoa(encodeURIComponent(username)).replaceAll('+','-').replaceAll('/','_').replaceAll('=','');return `u_${encoded}@auth.lorgus.local`}
 function showOnly(id){for(const key of ['login','connect','settings'])$(key).classList.toggle('hidden',key!==id)}
 function initData(){return tg?.initData||''}
 function friendly(code){return ({
@@ -80,7 +81,7 @@ function setPrefs(prefs){document.querySelectorAll('[data-pref]').forEach(el=>el
 async function refresh(){const {data:{session}}=await db.auth.getSession();if(!initData()){note('Открой это приложение через кнопку в личном чате @LorgusAdminBot.','error');showOnly(session?'connect':'login');$('linkBtn').disabled=true;return}
 if(!session){note('Войди в свой аккаунт LORGUS.','');showOnly('login');return}
 try{const state=await api('status');if(state.linked){setPrefs(state.preferences);showOnly('settings');note('Аккаунт LORGUS связан с Telegram.','ok')}else if(state.linkedToAnotherTelegram){showOnly('connect');$('linkBtn').disabled=true;$('switchTelegramBtn').classList.remove('hidden');note('Аккаунт уже связан с другим Telegram. Можно безопасно заменить привязку.','error')}else{showOnly('connect');$('linkBtn').disabled=false;$('switchTelegramBtn').classList.add('hidden');note('Аккаунт LORGUS найден. Подтверди привязку к этому Telegram.','ok')}}catch(e){note(friendly(e.message),'error');showOnly('connect')}}
-$('loginBtn').onclick=async()=>{const b=$('loginBtn');b.disabled=true;note('Проверяем учётные данные…');try{const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await refresh()}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
+$('loginBtn').onclick=async()=>{const b=$('loginBtn');b.disabled=true;note('Проверяем учётные данные…');try{const username=$('username').value.trim();if(!username)throw new Error('Введи логин LORGUS.');const {error}=await db.auth.signInWithPassword({email:getAuthEmail(username),password:$('password').value});if(error)throw error;await refresh()}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
 $('linkBtn').onclick=async()=>{const b=$('linkBtn');b.disabled=true;note('Подтверждаем привязку…');try{await api('link');await refresh()}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
 $('switchTelegramBtn').onclick=async()=>{if(!confirm('Отвязать старый Telegram и привязать этот чат?'))return;const b=$('switchTelegramBtn');b.disabled=true;try{await api('unlink');await api('link');await refresh()}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
 $('saveBtn').onclick=async()=>{const b=$('saveBtn');b.disabled=true;note('Сохраняем настройки…');try{const result=await api('save',{preferences:readPrefs()});setPrefs(result.preferences);note('Настройки сохранены.','ok')}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
