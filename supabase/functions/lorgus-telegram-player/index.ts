@@ -49,15 +49,14 @@ async function verifyTelegramInitData(initData: string, botToken: string) {
   if (!receivedHash || !Number.isFinite(authDate) || authDate <= 0) throw new Error("TELEGRAM_INIT_DATA_INVALID");
   const now = Date.now() / 1000;
   if (now - authDate > 24 * 60 * 60 || authDate - now > 60) throw new Error("TELEGRAM_INIT_DATA_EXPIRED");
+  // For bot-token HMAC validation, exclude only hash; signature remains part of the received fields.
   params.delete("hash");
-  params.delete("signature");
   const dataCheckString = [...params.entries()].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
     .map(([key, value]) => key + "=" + value).join("\n");
   const encoder = new TextEncoder();
-  // Telegram WebApp validation: secret_key = HMAC_SHA256(key="WebAppData", data=bot_token).
-  // Telegram requires the literal "WebAppData" as the HMAC key and the bot token as the message.
-  const baseKey = await crypto.subtle.importKey("raw", encoder.encode("WebAppData"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const secret = await crypto.subtle.sign("HMAC", baseKey, encoder.encode(botToken));
+  // Telegram WebApp validation: secret_key = HMAC_SHA256(key=bot_token, data="WebAppData").
+  const baseKey = await crypto.subtle.importKey("raw", encoder.encode(botToken), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const secret = await crypto.subtle.sign("HMAC", baseKey, encoder.encode("WebAppData"));
   const signingKey = await crypto.subtle.importKey("raw", secret, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const calculated = hex(await crypto.subtle.sign("HMAC", signingKey, encoder.encode(dataCheckString)));
   if (!constantTimeEqual(calculated, receivedHash.toLowerCase())) throw new Error("TELEGRAM_INIT_DATA_INVALID");
