@@ -962,12 +962,6 @@ function renderFloodChat() {
             input.style.height = "auto";
             input.style.height = Math.min(input.scrollHeight, 180) + "px";
         });
-        input.addEventListener("keydown", event => {
-            if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                sendLocalFloodMessage();
-            }
-        });
     }
 }
 function renderLocationEntryLock(locationName, regionName) {
@@ -1614,12 +1608,6 @@ async function renderLocationChats(locationName, regionName, alreadyPresent = fa
         input.addEventListener("input", () => {
             input.style.height = "auto";
             input.style.height = Math.min(input.scrollHeight, 180) + "px";
-        });
-        input.addEventListener("keydown", event => {
-            if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                sendLocalRpMessage();
-            }
         });
     }
 
