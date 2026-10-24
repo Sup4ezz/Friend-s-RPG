@@ -21,7 +21,7 @@ async function initializeLorgusWebGL() {
     try {
         renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !lowPower, powerPreference: lowPower ? "low-power" : "high-performance" });
         renderer.shadowMap.enabled = !lowPower;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        renderer.shadowMap.type = THREE.PCFShadowMap;
     } catch (error) {
         console.warn("LORGUS WebGL unavailable:", error);
         return;
@@ -918,12 +918,13 @@ const openingShape = new THREE.Shape();
         camera.updateProjectionMatrix();
     };
 
-    const clock = new THREE.Clock();
+    // Use the browser monotonic clock directly; THREE.Clock is deprecated in current Three.js.
+    const animationStartedAt = performance.now();
 
     const frame = () => {
         if (disposed || document.hidden) { raf = 0; return; }
         raf = requestAnimationFrame(frame);
-        const time = clock.getElapsedTime();
+        const time = (performance.now() - animationStartedAt) / 1000;
 
         pointer.x += (pointer.tx - pointer.x) * 0.035;
         pointer.y += (pointer.ty - pointer.y) * 0.035;
