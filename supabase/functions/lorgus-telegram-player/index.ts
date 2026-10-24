@@ -51,7 +51,7 @@ async function verifyTelegramInitData(initData: string, botToken: string) {
   if (now - authDate > 24 * 60 * 60 || authDate - now > 60) throw new Error("TELEGRAM_INIT_DATA_EXPIRED");
   params.delete("hash");
   params.delete("signature");
-  const dataCheckString = [...params.entries()].sort(([a], [b]) => a.localeCompare(b))
+  const dataCheckString = [...params.entries()].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
     .map(([key, value]) => key + "=" + value).join("\n");
   const encoder = new TextEncoder();
   // Telegram WebApp validation: secret_key = HMAC_SHA256(key=bot_token, data="WebAppData").
