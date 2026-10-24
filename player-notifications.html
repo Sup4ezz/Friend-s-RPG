@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#100d09">
+<title>LORGUS · Вестник</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{color-scheme:dark;--bg:#100d09;--panel:#1b1711;--line:#54452b;--gold:#d7b66d;--text:#eadfc8;--muted:#aa9a7d;--red:#b95749;--green:#bde1a5}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#292014,var(--bg) 65%);color:var(--text);font:16px/1.5 Georgia,serif;min-height:100vh}
+header{padding:22px 18px 16px;border-bottom:1px solid var(--line);background:#100d09ed;position:sticky;top:0;z-index:2}
+h1{margin:0;color:var(--gold);font-size:23px;letter-spacing:.12em}header p{margin:4px 0 0;color:var(--muted);font-size:12px;letter-spacing:.1em}
+main{width:min(720px,100%);margin:auto;padding:16px;display:grid;gap:14px}.panel{background:linear-gradient(145deg,#211b12,#17130f);border:1px solid var(--line);border-radius:12px;padding:17px}
+h2{font-size:17px;color:var(--gold);margin:0 0 10px}.muted{color:var(--muted);font-size:13px}.status{padding:11px 12px;border:1px solid var(--line);border-radius:8px;background:#15110d;margin-bottom:10px;overflow-wrap:anywhere}.status.error{border-color:var(--red);color:#ffb7a9}.status.ok{color:var(--green)}
+label{display:block;color:var(--muted);font-size:13px;margin:12px 0 5px}input{width:100%;border:1px solid #655235;border-radius:8px;padding:12px;background:#100d09;color:var(--text);font:inherit}
+button{border:1px solid #94743c;background:linear-gradient(#d9bb76,#a9853f);color:#171108;padding:12px 15px;border-radius:8px;font-weight:bold;font-size:14px;cursor:pointer;min-height:44px}button.secondary{background:#272016;color:var(--text);border-color:#59472c}button.danger{background:#48211c;color:#ffe5d9;border-color:#9a5143}button:disabled{opacity:.5}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}.hidden{display:none!important}
+.pref{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid #403523}.pref:last-child{border-bottom:0}.pref strong{display:block;font-size:15px;font-weight:600}.pref small{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.switch{position:relative;flex:0 0 48px;width:48px;height:28px;margin:0}.switch input{position:absolute;opacity:0;width:1px;height:1px}.slider{position:absolute;inset:0;border-radius:30px;background:#40382a;border:1px solid #76603b;transition:.15s}.slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;border-radius:50%;background:#d2c4a5;transition:.15s}.switch input:checked+.slider{background:#84682f}.switch input:checked+.slider:before{transform:translateX(20px);background:#fff0c1}.switch input:focus-visible+.slider{outline:2px solid var(--gold);outline-offset:3px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}@media(min-width:600px){main{padding:24px}}
+</style>
+</head>
+<body>
+<header><h1>𓆩 LORGUS 𓆪</h1><p>ЛИЧНЫЙ ВЕСТНИК · НАСТРОЙКИ УВЕДОМЛЕНИЙ</p></header>
+<main>
+<div id="notice" class="status">Проверяем связь с Telegram…</div>
+<section id="login" class="panel hidden">
+<h2>Войти в LORGUS</h2><p class="muted">Используй тот же аккаунт, что и на сайте игры. Пароль вводится только в защищённую форму авторизации LORGUS.</p>
+<label for="email">Email</label><input id="email" type="email" autocomplete="username" inputmode="email">
+<label for="password">Пароль</label><input id="password" type="password" autocomplete="current-password">
+<div class="actions"><button id="loginBtn">Войти</button></div>
+</section>
+<section id="connect" class="panel hidden">
+<h2>Связать аккаунт с Telegram</h2><p>После привязки бот сможет присылать выбранные уведомления в этот личный чат.</p>
+<p class="muted">Связь подтверждается одновременно твоим входом в LORGUS и проверенными данными Telegram Mini App.</p>
+<div class="actions"><button id="linkBtn">Привязать аккаунт</button></div>
+</section>
+<section id="settings" class="panel hidden">
+<h2>Какие вести присылать?</h2><p class="muted">Изменения сохраняются в LORGUS и действуют для всех твоих персонажей.</p>
+<div id="preferences">
+<div class="pref"><div><strong>Решения по анкете</strong><small>Одобрение, отказ или просьба исправить анкету</small></div><label class="switch"><input type="checkbox" data-pref="application_status" checked><span class="slider"></span></label></div>
+<div class="pref"><div><strong>Предметы и награды</strong><small>Переданные предметы и награды сундуков</small></div><label class="switch"><input type="checkbox" data-pref="items" checked><span class="slider"></span></label></div>
+<div class="pref"><div><strong>Получение валюты</strong><small>Входящие передачи монет и средств</small></div><label class="switch"><input type="checkbox" data-pref="currency" checked><span class="slider"></span></label></div>
+<div class="pref"><div><strong>Ответы на мои записи</strong><small>Когда другой игрок отвечает на твой пост</small></div><label class="switch"><input type="checkbox" data-pref="rp_replies" checked><span class="slider"></span></label></div>
+<div class="pref"><div><strong>Обновления LORGUS</strong><small>Новые опубликованные обновления игры</small></div><label class="switch"><input type="checkbox" data-pref="updates" checked><span class="slider"></span></label></div>
+<div class="pref"><div><strong>Системные сообщения</strong><small>Приветствие и важные сообщения мира</small></div><label class="switch"><input type="checkbox" data-pref="system" checked><span class="slider"></span></label></div>
+<div class="pref"><div><strong>Все новые записи в летописи</strong><small>Может присылать много сообщений; по умолчанию выключено</small></div><label class="switch"><input type="checkbox" data-pref="rp_posts"><span class="slider"></span></label></div>
+</div>
+<div class="actions"><button id="saveBtn">Сохранить настройки</button><button id="testBtn" class="secondary">Проверить связь</button><button id="unlinkBtn" class="danger">Отвязать Telegram</button><button id="logoutBtn" class="secondary">Выйти из аккаунта</button></div>
+</section>
+</main><footer>LORGUS · Вестник личных событий</footer>
+<script type="module">
+import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const URL='https://dxdxnttpznoekaiecrlv.supabase.co';
+const KEY='sb_publishable_LlRg71tECimoRn2zuzxqlQ_OeCupPLe';
+const API=URL+'/functions/v1/lorgus-telegram-player';
+const db=createClient(URL,KEY);
+const $=id=>document.getElementById(id);
+const tg=window.Telegram?.WebApp;
+tg?.ready();tg?.expand();
+function note(msg,type=''){const n=$('notice');n.textContent=msg;n.className='status '+type}
+function showOnly(id){for(const key of ['login','connect','settings'])$(key).classList.toggle('hidden',key!==id)}
+function initData(){return tg?.initData||''}
+function friendly(code){return ({
+OPEN_FROM_TELEGRAM:'Открой мини-приложение из личного чата с @LorgusAdminBot.',
+LORGUS_LOGIN_REQUIRED:'Сначала войди в аккаунт LORGUS.',
+LORGUS_SESSION_INVALID:'Сессия LORGUS устарела. Войди ещё раз.',
+TELEGRAM_INIT_DATA_INVALID:'Не удалось подтвердить Telegram. Закрой мини-приложение и открой его из бота.',
+TELEGRAM_INIT_DATA_EXPIRED:'Данные Telegram устарели. Закрой и заново открой мини-приложение.',
+ACCOUNT_ALREADY_LINKED_ELSEWHERE:'Этот аккаунт LORGUS уже связан с другим Telegram. Сначала отвяжи его.',
+TELEGRAM_ALREADY_LINKED:'Этот Telegram уже связан с другим аккаунтом LORGUS.',
+TELEGRAM_NOT_LINKED:'Сначала привяжи Telegram.',
+LINK_SAVE_FAILED:'Не удалось сохранить привязку.',
+PREFERENCES_SAVE_FAILED:'Не удалось сохранить настройки.'
+})[code]||code||'Неизвестная ошибка'}
+async function api(action,extra={}){const {data:{session}}=await db.auth.getSession();if(!session?.access_token)throw new Error('LORGUS_LOGIN_REQUIRED');const response=await fetch(API,{method:'POST',headers:{'content-type':'application/json','apikey':KEY,'authorization':'Bearer '+session.access_token},body:JSON.stringify({action,initData:initData(),...extra})});const result=await response.json().catch(()=>({}));if(!response.ok||result.error)throw new Error(result.error||'REQUEST_FAILED');return result}
+function readPrefs(){const result={};document.querySelectorAll('[data-pref]').forEach(el=>result[el.dataset.pref]=el.checked);return result}
+function setPrefs(prefs){document.querySelectorAll('[data-pref]').forEach(el=>el.checked=typeof prefs?.[el.dataset.pref]==='boolean'?prefs[el.dataset.pref]:el.hasAttribute('checked'))}
+async function refresh(){const {data:{session}}=await db.auth.getSession();if(!initData()){note('Открой это приложение через кнопку в личном чате @LorgusAdminBot.','error');showOnly(session?'connect':'login');$('linkBtn').disabled=true;return}
+if(!session){note('Войди в свой аккаунт LORGUS.','');showOnly('login');return}
+try{const state=await api('status');if(state.linked){setPrefs(state.preferences);showOnly('settings');note('Аккаунт LORGUS связан с Telegram.','ok')}else if(state.linkedToAnotherTelegram){showOnly('connect');$('linkBtn').disabled=true;note('Аккаунт связан с другим Telegram. Сначала отвяжи прежнюю связь.','error')}else{showOnly('connect');$('linkBtn').disabled=false;note('Аккаунт LORGUS найден. Подтверди привязку к этому Telegram.','ok')}}catch(e){note(friendly(e.message),'error');showOnly('connect')}}
+$('loginBtn').onclick=async()=>{const b=$('loginBtn');b.disabled=true;note('Проверяем учётные данные…');try{const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await refresh()}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
+$('linkBtn').onclick=async()=>{const b=$('linkBtn');b.disabled=true;note('Подтверждаем привязку…');try{await api('link');await refresh()}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
+$('saveBtn').onclick=async()=>{const b=$('saveBtn');b.disabled=true;note('Сохраняем настройки…');try{const result=await api('save',{preferences:readPrefs()});setPrefs(result.preferences);note('Настройки сохранены.','ok')}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
+$('testBtn').onclick=async()=>{try{await api('link');note('Связь подтверждена. Бот отправил проверочное сообщение в этот чат.','ok')}catch(e){note(friendly(e.message),'error')}};
+$('unlinkBtn').onclick=async()=>{if(!confirm('Отвязать Telegram от аккаунта LORGUS? Уведомления перестанут приходить.'))return;try{await api('unlink');showOnly('connect');note('Telegram отвязан.','ok')}catch(e){note(friendly(e.message),'error')}};
+$('logoutBtn').onclick=async()=>{await db.auth.signOut();await refresh()};
+refresh();
+</script></body></html>
