@@ -52,19 +52,14 @@ async function loadAdminPanel(container) {
             let timeoutId;
             const controller = new AbortController();
             try {
+                // Use a narrowly scoped, admin-only RPC instead of a broad PostgREST
+                // table scan. The RPC verifies admin rights server-side and avoids the
+                // slow RLS/table-read path that was leaving the cabinet stuck at startup.
                 const result = await Promise.race([
-                    window.supabaseClient
-                        .from("character_applications")
-                        .select("*")
-                        .order("id", { ascending: false })
-                        .abortSignal(controller.signal),
+                    window.supabaseClient.rpc("admin_list_character_applications"),
                     new Promise((_, reject) => {
                         timeoutId = window.setTimeout(() => {
-                            // Reject the UI wait first, then cancel the underlying GET.
-                            // Without abortSignal the timed-out request keeps running
-                            // while the retry starts another identical query.
-                            reject(new Error("Supabase не ответил за 12 секунд."));
-                            controller.abort();
+                            reject(new Error("Список анкет не ответил за 12 секунд."));
                         }, 12000);
                     })
                 ]);
