@@ -66,6 +66,7 @@ Deno.serve(async (req: Request) => {
   const dbUrl = Deno.env.get("SUPABASE_URL") || "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   if (!token || !adminChatId || !dbUrl || !serviceKey) return new Response("Not configured", { status: 503 });
+  const archiveDb = createClient(dbUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   let update: any;
   try { update = await req.json(); } catch { return new Response("Bad JSON", { status: 400 }); }
   const message = update?.message;
@@ -99,12 +100,12 @@ Deno.serve(async (req: Request) => {
         else messageText = "[Сообщение без текста]";
       }
       const title = safeText(chat.title || [chat.first_name, chat.last_name].filter(Boolean).join(" ") || chat.username || String(chat.id), 250);
-      const { error: chatError } = await db.from("lorgus_telegram_chats").upsert({
+      const { error: chatError } = await archiveDb.from("lorgus_telegram_chats").upsert({
         chat_id: String(chat.id), title, chat_type: safeText(chat.type, 30),
         username: safeText(chat.username || "", 100) || null, last_message_at: sentAt, updated_at: new Date().toISOString()
       }, { onConflict: "chat_id" });
       if (chatError) console.error("Telegram chat archive: chat upsert failed");
-      const { error: messageError } = await db.from("lorgus_telegram_messages").upsert({
+      const { error: messageError } = await archiveDb.from("lorgus_telegram_messages").upsert({
         chat_id: String(chat.id), message_id: Number(message.message_id), thread_id: threadId,
         topic_title: topicTitle, sender_id: String(sender.id || ""), sender_name: senderName,
         text: messageText, sent_at: sentAt, is_outgoing: false
