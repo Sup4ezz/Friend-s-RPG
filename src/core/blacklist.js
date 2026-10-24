@@ -53,7 +53,8 @@
 
             const previousAdmin = readSessionCache();
             if (previousAdmin) {
-                window.__lorgusAdminStatusCache = previousAdmin;
+                // Start a short runtime cooldown so parallel page gates do not immediately retry the same failing RPC.
+                window.__lorgusAdminStatusCache = { value: true, checkedAt: Date.now() };
                 console.warn("LORGUS: is_admin временно недоступен; используется ранее подтверждённый статус администратора.", lastError);
                 return true;
             }
