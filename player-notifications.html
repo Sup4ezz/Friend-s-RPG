@@ -83,7 +83,7 @@ try{const state=await api('status');if(state.linked){setPrefs(state.preferences)
 $('loginBtn').onclick=async()=>{const b=$('loginBtn');b.disabled=true;note('Проверяем учётные данные…');try{const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await refresh()}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
 $('linkBtn').onclick=async()=>{const b=$('linkBtn');b.disabled=true;note('Подтверждаем привязку…');try{await api('link');await refresh()}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
 $('saveBtn').onclick=async()=>{const b=$('saveBtn');b.disabled=true;note('Сохраняем настройки…');try{const result=await api('save',{preferences:readPrefs()});setPrefs(result.preferences);note('Настройки сохранены.','ok')}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
-$('testBtn').onclick=async()=>{try{await api('link');note('Связь подтверждена. Бот отправил проверочное сообщение в этот чат.','ok')}catch(e){note(friendly(e.message),'error')}};
+$('testBtn').onclick=async()=>{try{await api('test');note('Проверочное сообщение отправлено в этот чат.','ok')}catch(e){note(friendly(e.message),'error')}};
 $('unlinkBtn').onclick=async()=>{if(!confirm('Отвязать Telegram от аккаунта LORGUS? Уведомления перестанут приходить.'))return;try{await api('unlink');showOnly('connect');note('Telegram отвязан.','ok')}catch(e){note(friendly(e.message),'error')}};
 $('logoutBtn').onclick=async()=>{await db.auth.signOut();await refresh()};
 refresh();
