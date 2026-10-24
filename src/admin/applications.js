@@ -44,33 +44,53 @@ async function loadAdminPanel(container) {
     window.lorgusBootStage = "админка: запрос списка анкет character_applications";
     let applications = null;
     let error = null;
-    // A slow or reset connection must not replace the entire admin experience
-    // with a dead-end error. Give the read more time, retry once, and preserve
-    // a usable retry screen if Supabase is genuinely unreachable.
-    for (let attempt = 1; attempt <= 2; attempt++) {
-        try {
-            const result = await Promise.race([
-                window.supabaseClient
-                    .from("character_applications")
-                    .select("*")
-                    .order("id", { ascending: false }),
-                new Promise((_, reject) => setTimeout(
-                    () => reject(new Error("Supabase не ответил за 12 секунд.")),
-                    12000
-                ))
-            ]);
-            if (result.error) throw result.error;
-            applications = result.data || [];
-            error = null;
-            break;
-        } catch (requestError) {
-            error = requestError;
-            console.warn(`LORGUS: запрос анкет не удался (попытка ${attempt}/2):`, requestError);
-            if (attempt < 2) {
-                window.lorgusBootStage = `админка: повтор запроса анкет (${attempt + 1}/2)`;
+
+    // Several startup paths can render the cabinet/router at once. Share one
+    // read across those calls so they don't create parallel Supabase requests.
+    const fetchApplications = async () => {
+        for (let attempt = 1; attempt <= 2; attempt++) {
+            let timeoutId;
+            try {
+                const result = await Promise.race([
+                    window.supabaseClient
+                        .from("character_applications")
+                        .select("*")
+                        .order("id", { ascending: false }),
+                    new Promise((_, reject) => {
+                        timeoutId = window.setTimeout(
+                            () => reject(new Error("Supabase не ответил за 12 секунд.")),
+                            12000
+                        );
+                    })
+                ]);
+                if (result.error) throw result.error;
+                return result.data || [];
+            } catch (requestError) {
+                console.warn(`LORGUS: запрос анкет не удался (попытка ${attempt}/2):`, requestError);
+                if (attempt === 2) throw requestError;
+                window.lorgusBootStage = "админка: повтор запроса анкет (2/2)";
                 await new Promise(resolve => setTimeout(resolve, 800));
+            } finally {
+                if (timeoutId) window.clearTimeout(timeoutId);
             }
         }
+        return [];
+    };
+
+    try {
+        if (!window.__lorgusApplicationsFetchPromise) {
+            const sharedRequest = fetchApplications();
+            window.__lorgusApplicationsFetchPromise = sharedRequest;
+            sharedRequest.finally(() => {
+                if (window.__lorgusApplicationsFetchPromise === sharedRequest) {
+                    window.__lorgusApplicationsFetchPromise = null;
+                }
+            }).catch(() => {});
+        }
+        applications = await window.__lorgusApplicationsFetchPromise;
+        error = null;
+    } catch (requestError) {
+        error = requestError;
     }
 
     if (error) {
