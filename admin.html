@@ -149,13 +149,7 @@ function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&l
 function place(m){return m.presence_type==='road'?[m.from_region,m.from_location,'→',m.to_region,m.to_location].filter(Boolean).join(' '):[m.region,m.location].filter(Boolean).join(' · ')}
 function matches(text){return !searchTerm||String(text??'').toLocaleLowerCase('ru-RU').includes(searchTerm)}
 async function adminCheck(){const {data,error}=await db.rpc('is_admin');if(error)throw error;if(data!==true)throw new Error('Этот аккаунт не является администратором LORGUS.')}
-function switchPage(page){activePage=page;document.querySelectorAll('[data-page]').forEach(el=>el.classList.toggle('hidden',el.dataset.page!==page));const menuToggle=$('menuToggle'),drawerScrim=$('drawerScrim');
-function closeDrawer(){document.body.classList.remove('menu-open');menuToggle?.setAttribute('aria-expanded','false');menuToggle?.setAttribute('aria-label','Открыть меню')}
-function openDrawer(){document.body.classList.add('menu-open');menuToggle?.setAttribute('aria-expanded','true');menuToggle?.setAttribute('aria-label','Закрыть меню')}
-menuToggle?.addEventListener('click',()=>document.body.classList.contains('menu-open')?closeDrawer():openDrawer());
-drawerScrim?.addEventListener('click',closeDrawer);
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
-document.querySelectorAll('[data-section]').forEach(b=>b.classList.toggle('active',b.dataset.section===page));window.scrollTo({top:0,behavior:'smooth'})}
+function switchPage(page){activePage=page;document.querySelectorAll('[data-page]').forEach(el=>el.classList.toggle('hidden',el.dataset.page!==page));document.querySelectorAll('[data-section]').forEach(b=>b.classList.toggle('active',b.dataset.section===page));window.scrollTo({top:0,behavior:'smooth'})}
 async function show(){const {data:{session}}=await db.auth.getSession();$('login').classList.toggle('hidden',!!session);$('workspace').classList.add('hidden');$('nav').classList.add('hidden');$('globalSearch').classList.add('hidden');if(!session){note('Войди в аккаунт LORGUS.');return}try{await adminCheck();$('workspace').classList.remove('hidden');$('nav').classList.remove('hidden');$('globalSearch').classList.remove('hidden');note('Доступ подтверждён · Администратор','ok');await Promise.all([loadCharacters(),loadItems(),loadPosts(),loadUses(),loadApps(),loadDeletionRequests()]);switchPage(activePage)}catch(e){note(e.message||'Нет доступа','error')}}
 
 
@@ -211,6 +205,12 @@ $('refreshDeletions').onclick=async()=>{try{await loadDeletionRequests();note('�
 $('refreshRpChats').onclick=()=>loadRpChats().catch(e=>note('Не удалось загрузить РП-чаты: '+e.message,'error'));
 $('rpChatSearch').oninput=renderRpChatList;
 $('sendRpChatPost').onclick=sendRpChatPost;
+const menuToggle=$('menuToggle'),drawerScrim=$('drawerScrim');
+function closeDrawer(){document.body.classList.remove('menu-open');menuToggle?.setAttribute('aria-expanded','false');menuToggle?.setAttribute('aria-label','Открыть меню')}
+function openDrawer(){document.body.classList.add('menu-open');menuToggle?.setAttribute('aria-expanded','true');menuToggle?.setAttribute('aria-label','Закрыть меню')}
+menuToggle?.addEventListener('click',()=>document.body.classList.contains('menu-open')?closeDrawer():openDrawer());
+drawerScrim?.addEventListener('click',closeDrawer);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer()});
 $('logout').onclick=async()=>{await db.auth.signOut();await show()};
 document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{switchPage(b.dataset.section);closeDrawer();if(b.dataset.section==='rpchats')loadRpChats().catch(e=>note('Не удалось загрузить РП-чаты: '+e.message,'error'))});
 $('search').addEventListener('input',()=>{searchTerm=$('search').value.trim().toLocaleLowerCase('ru-RU');renderPosts();renderApps();renderUses()});
