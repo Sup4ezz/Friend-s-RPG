@@ -266,6 +266,8 @@
  {id:"chronicle",title:"Летопись мира",icon:"⌛",desc:"События, которые меняют ход истории",entries:[]},
  {id:"archive",title:"Архив летописца",icon:"▤",desc:"Исходные документы мира",remote:true,entries:[]}
  ];
+ // Dynastic/private NPC dossiers are not part of the player-facing lorebook.
+ for(let i=sections.length-1;i>=0;i--) if(sections[i].id==="dynasties") sections.splice(i,1);
  const make=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
  const norm=s=>String(s||"").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
  const encodePath=s=>s.split("/").map(encodeURIComponent).join("/");
@@ -300,6 +302,8 @@
  };
  const characterNoteKey = value => norm(value).replace(/[«»"]/g,"").replace(/\s+/g," ").trim();
  async function appendCharacterNote(content,node) {
+  // Do not fetch or render full royal-family/NPC dossiers in the public codex.
+  return;
   const file=characterNotes[characterNoteKey(node[0])];
   if(!file)return;
   const section=make("section","lorgus-codex-character-note");
