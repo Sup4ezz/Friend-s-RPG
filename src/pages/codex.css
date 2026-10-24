@@ -546,3 +546,26 @@ html body #root #cabinet-content .codex-cosmos-detail .codex-detail-body > img.c
 .lorgus-codex-markdown a{color:#e2c17d;text-decoration:underline;text-underline-offset:3px}
 .lorgus-codex-remote-article{min-width:0}
 @media(max-width:650px){.lorgus-codex-markdown{font-size:14px;line-height:1.85}.lorgus-codex-markdown h2{font-size:25px;margin-top:24px}.lorgus-codex-markdown h3{font-size:22px}.lorgus-codex-markdown blockquote{padding:11px 13px;margin:14px 0}}
+
+
+/* Complete Markdown presentation for the public LORGUS lorebook. */
+.lorgus-codex-markdown{min-width:0;overflow-wrap:anywhere;word-break:normal}
+.lorgus-codex-markdown h1,.lorgus-codex-markdown h2,.lorgus-codex-markdown h3,.lorgus-codex-markdown h4,.lorgus-codex-markdown h5,.lorgus-codex-markdown h6{line-height:1.2;margin:1.35em 0 .55em;color:#ecd7a9}
+.lorgus-codex-markdown h1{font-size:2.25em}.lorgus-codex-markdown h2{font-size:1.9em}.lorgus-codex-markdown h3{font-size:1.55em}.lorgus-codex-markdown h4{font-size:1.3em}
+.lorgus-codex-markdown p{margin:.65em 0;line-height:1.85;white-space:normal}
+.lorgus-codex-markdown ul,.lorgus-codex-markdown ol{padding-left:1.65em;margin:.65em 0 1em}
+.lorgus-codex-markdown li{padding-left:.15em;margin:.35em 0;line-height:1.75}
+.lorgus-codex-markdown li input[type=checkbox]{accent-color:#c9a45f}
+.lorgus-codex-markdown hr{border:0;border-top:1px solid rgba(201,164,95,.32);margin:1.5em 0}
+.lorgus-codex-markdown table{display:block;width:100%;max-width:100%;overflow-x:auto;border-collapse:collapse;margin:1.1em 0;font-size:.95em}
+.lorgus-codex-markdown th,.lorgus-codex-markdown td{padding:9px 12px;border:1px solid rgba(201,164,95,.24);vertical-align:top;text-align:left;min-width:90px}
+.lorgus-codex-markdown th{color:#ecd7a9;background:rgba(201,164,95,.08);font-weight:600}
+.lorgus-codex-markdown tr:nth-child(even) td{background:rgba(255,255,255,.018)}
+.lorgus-codex-markdown pre{max-width:100%;overflow:auto;padding:14px 16px;border:1px solid rgba(201,164,95,.2);background:rgba(0,0,0,.28);white-space:pre}
+.lorgus-codex-markdown code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9em;color:#e7c98d}
+.lorgus-codex-markdown p code,.lorgus-codex-markdown li code{padding:.12em .35em;background:rgba(201,164,95,.09);border-radius:3px}
+.lorgus-codex-markdown a{color:#e8c47d;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.lorgus-codex-markdown .lorgus-markdown-image{display:block;max-width:100%;height:auto;max-height:560px;object-fit:contain;margin:1em auto;border:1px solid rgba(201,164,95,.2)}
+.lorgus-codex-markdown .lorgus-wikilink{color:#e8c47d;border-bottom:1px dotted rgba(232,196,125,.5)}
+.lorgus-codex-markdown blockquote{line-height:1.8}
+@media(max-width:650px){.lorgus-codex-markdown{font-size:14px}.lorgus-codex-markdown table{font-size:12px}.lorgus-codex-markdown th,.lorgus-codex-markdown td{padding:7px 9px;min-width:82px}.lorgus-codex-markdown h1{font-size:1.8em}.lorgus-codex-markdown h2{font-size:1.6em}}
