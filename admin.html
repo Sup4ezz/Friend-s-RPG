@@ -46,12 +46,12 @@ let rpChatMessages=[],rpChats=[],rpCharacters=[],activeRpChatKey='';
 function rpChatKey(m){return m.presence_type==='road'?['road',m.from_region||'',m.from_location||'',m.to_region||'',m.to_location||''].join('|'):['location',m.region||'',m.location||''].join('|')}
 function rpChatLabel(m){return m.presence_type==='road'?'Дорога · '+(m.from_region||'—')+' / '+(m.from_location||'—')+' → '+(m.to_region||'—')+' / '+(m.to_location||'—'):(m.location||'Без локации')+' · '+(m.region||'Без региона')}
 function rpChatDescriptor(m){return m.presence_type==='road'?{type:'road',region:null,location:null,from_region:m.from_region,from_location:m.from_location,to_region:m.to_region,to_location:m.to_location}:{type:'location',region:m.region,location:m.location,from_region:null,from_location:null,to_region:null,to_location:null}}
-async function loadRpChats(){const [mr,pr,nr]=await Promise.all([
-db.from('rp_messages').select('id,character_id,body,created_at,status,reverted_at,revert_reason,presence_type,region,location,from_region,from_location,to_region,to_location,is_admin_post,characters!rp_messages_character_id_fkey(id,name,race)').order('created_at',{ascending:false}).limit(2000),
+async function loadRpChats(){const [pr,nr]=await Promise.all([
 db.from('rp_presence').select('presence_type,region,location,from_region,from_location,to_region,to_location,updated_at').eq('visibility','public'),
 db.from('lorgus_nrp_characters').select('character_id,is_active,characters(id,name,race,kingdom)').eq('is_active',true).order('created_at',{ascending:false})
-]);if(mr.error)throw mr.error;if(pr.error)throw pr.error;if(nr.error)throw nr.error;
-rpChatMessages=mr.data||[];rpCharacters=nr.data||[];const map=new Map();
+]);if(pr.error)throw pr.error;if(nr.error)throw nr.error;
+const allMessages=[];for(let offset=0;;offset+=1000){const page=await db.from('rp_messages').select('id,character_id,body,created_at,status,reverted_at,revert_reason,presence_type,region,location,from_region,from_location,to_region,to_location,is_admin_post,characters!rp_messages_character_id_fkey(id,name,race)').order('created_at',{ascending:false}).range(offset,offset+999);if(page.error)throw page.error;allMessages.push(...(page.data||[]));if(!page.data||page.data.length<1000)break}
+rpChatMessages=allMessages;rpCharacters=nr.data||[];const map=new Map();
 for(const m of [...rpChatMessages,...(pr.data||[]).map(p=>({...p,created_at:p.updated_at}))]){const key=rpChatKey(m);if(!map.has(key))map.set(key,{key,label:rpChatLabel(m),descriptor:rpChatDescriptor(m),lastMessageAt:m.created_at||m.updated_at||'1970-01-01'});else if(new Date(m.created_at||m.updated_at||0)>new Date(map.get(key).lastMessageAt))map.get(key).lastMessageAt=m.created_at||m.updated_at}
 rpChats=[...map.values()].sort((a,b)=>new Date(b.lastMessageAt)-new Date(a.lastMessageAt));if(!rpChats.some(c=>c.key===activeRpChatKey))activeRpChatKey=rpChats[0]?.key||'';
 $('rpChatCharacter').innerHTML='<option value="">Выбери RP-персонажа…</option>'+rpCharacters.map(r=>'<option value="'+esc(r.character_id)+'">'+esc(r.characters?.name||'Без имени')+'</option>').join('');
