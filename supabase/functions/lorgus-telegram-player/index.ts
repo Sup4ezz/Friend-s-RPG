@@ -54,10 +54,10 @@ async function verifyTelegramInitData(initData: string, botToken: string) {
   const dataCheckString = [...params.entries()].sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0)
     .map(([key, value]) => key + "=" + value).join("\n");
   const encoder = new TextEncoder();
-  // Telegram WebApp validation: secret_key = HMAC_SHA256(key=bot_token, data="WebAppData").
-  // The bot token must be the HMAC key; reversing key and message rejects valid initData.
-  const baseKey = await crypto.subtle.importKey("raw", encoder.encode(botToken), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
-  const secret = await crypto.subtle.sign("HMAC", baseKey, encoder.encode("WebAppData"));
+  // Telegram WebApp validation: secret_key = HMAC_SHA256(key="WebAppData", data=bot_token).
+  // Telegram requires the literal "WebAppData" as the HMAC key and the bot token as the message.
+  const baseKey = await crypto.subtle.importKey("raw", encoder.encode("WebAppData"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const secret = await crypto.subtle.sign("HMAC", baseKey, encoder.encode(botToken));
   const signingKey = await crypto.subtle.importKey("raw", secret, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const calculated = hex(await crypto.subtle.sign("HMAC", signingKey, encoder.encode(dataCheckString)));
   if (!constantTimeEqual(calculated, receivedHash.toLowerCase())) throw new Error("TELEGRAM_INIT_DATA_INVALID");
