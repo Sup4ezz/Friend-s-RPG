@@ -324,19 +324,30 @@
    if(content.isConnected)section.replaceChildren(make("h3","","Полная летопись персонажа"),make("p","lorgus-codex-empty","Подробная запись временно недоступна. Краткая запись выше остаётся доступной."));
   }
  }
- function renderMarkdown(parent,source){
-  parent.replaceChildren();let p=[],list=null;
-  const fp=()=>{if(p.length){parent.append(make("p","",p.join(" ")));p=[];}};
-  const fl=()=>{if(list){parent.append(list);list=null;}};
-  for(const raw of String(source||"").replace(/\r/g,"").split("\n")){
-   const s=raw.trim();if(!s){fp();fl();continue;}
-   const h=s.match(/^(#{1,4})\s+(.+)$/);
-   if(h){fp();fl();parent.append(make("h"+Math.min(h[1].length+1,5),"",h[2]));continue;}
-   if(/^---+$/.test(s)){fp();fl();parent.append(document.createElement("hr"));continue;}
-   if(/^>\s?/.test(s)){fp();fl();parent.append(make("blockquote","",s.replace(/^>\s?/,"")));continue;}
-   if(/^[-*+]\s+/.test(s)){fp();if(!list)list=document.createElement("ul");list.append(make("li","",s.replace(/^[-*+]\s+/,"")));continue;}
-   fl();p.push(s);
-  }fp();fl();
+ function renderMarkdown(parent,source,baseUrl=""){
+  parent.replaceChildren();
+  const lines=String(source||"").replace(/\r/g,"").split("\n");
+  const inline=(el,s)=>{
+   const re=/(\*\*[^*]+\*\*|__[^_]+__|(?<!\*)\*[^*\n]+\*|~~[^~]+~~|\x60[^\x60]+\x60|\[[^\]]+\]\([^)]+\))/g;let last=0,m;
+   while((m=re.exec(s))){if(m.index>last)el.append(document.createTextNode(s.slice(last,m.index)));const x=m[0];let n;
+    if(x.startsWith("**")||x.startsWith("__")){n=document.createElement("strong");inline(n,x.slice(2,-2));}
+    else if(x.startsWith("~~")){n=document.createElement("del");inline(n,x.slice(2,-2));}
+    else if(x.startsWith("*")){n=document.createElement("em");inline(n,x.slice(1,-1));}
+    else if(x.charCodeAt(0)===96){n=document.createElement("code");n.textContent=x.slice(1,-1);}
+    else{const q=x.match(/^\[([^\]]+)\]\((https?:\/\/[^)]+)\)$/);if(q){n=document.createElement("a");n.textContent=q[1];n.href=q[2];n.target="_blank";n.rel="noopener noreferrer";}else n=document.createTextNode(x);}
+    el.append(n);last=re.lastIndex;
+   }if(last<s.length)el.append(document.createTextNode(s.slice(last)));
+  };
+  let i=0;
+  while(i<lines.length){const s=lines[i].trim();if(!s){i++;continue;}
+   if(s.charCodeAt(0)===96&&s.startsWith("\x60\x60\x60")||s.startsWith("~~~")){const fence=s.slice(0,3),v=[];i++;while(i<lines.length&&!lines[i].trim().startsWith(fence))v.push(lines[i++]);if(i<lines.length)i++;const pre=document.createElement("pre"),code=document.createElement("code");code.textContent=v.join("\n");pre.append(code);parent.append(pre);continue;}
+   const h=s.match(/^(#{1,6})\s+(.+)$/);if(h){const n=document.createElement("h"+Math.min(h[1].length+1,6));inline(n,h[2]);parent.append(n);i++;continue;}
+   if(/^([-*_])(?:\s*\1){2,}$/.test(s)){parent.append(document.createElement("hr"));i++;continue;}
+   if(/^>\s?/.test(s)){const q=document.createElement("blockquote");while(i<lines.length&&/^\s*>/.test(lines[i])){const v=lines[i++].replace(/^\s*>\s?/,"");if(v){const p=document.createElement("p");inline(p,v);q.append(p);}}parent.append(q);continue;}
+   const ul=s.match(/^[-*+]\s+(.+)$/),ol=s.match(/^\d+[.)]\s+(.+)$/);
+   if(ul||ol){const list=document.createElement(ul?"ul":"ol"),pat=ul?/^[-*+]\s+/:/^\d+[.)]\s+/;while(i<lines.length&&pat.test(lines[i].trim())){const li=document.createElement("li");inline(li,lines[i++].trim().replace(pat,""));list.append(li);}parent.append(list);continue;}
+   const p=document.createElement("p"),parts=[s];i++;while(i<lines.length&&lines[i].trim()&&!/^(#{1,6})\s+/.test(lines[i].trim())&&!/^\s*>/.test(lines[i].trim())&&!/^[-*+]\s+/.test(lines[i].trim())&&!/^\d+[.)]\s+/.test(lines[i].trim())&&!lines[i].trim().startsWith("~~~")&&!(lines[i].trim().charCodeAt(0)===96&&lines[i].trim().startsWith("\x60\x60\x60")))parts.push(lines[i++].trim());inline(p,parts.join(" "));parent.append(p);
+  }
  }
  window.LORGUS_CODEX_SECTIONS=sections; window.LORGUS_CODEX_DOCS=docs; window.LORGUS_CODEX_REMOTE={base:remoteBase,vault};
  async function render(startId){
