@@ -526,3 +526,23 @@ html body #root #cabinet-content .codex-cosmos-detail .codex-detail-body > img.c
  .lorgus-codex-markdown pre{max-width:100%;overflow-x:auto;white-space:pre}
  .lorgus-codex-markdown img,.lorgus-codex-remote-article img{max-width:100%;height:auto}
 }
+
+
+/* Archive article typography: readable Markdown, no raw escaped syntax. */
+.lorgus-codex-markdown{max-width:900px;font-size:clamp(14px,1.05vw,16px);line-height:1.9;overflow-wrap:anywhere;word-break:normal}
+.lorgus-codex-markdown h2{margin:30px 0 12px;padding-bottom:9px;border-bottom:1px solid rgba(201,164,95,.22);font-size:clamp(26px,3vw,34px);line-height:1.2}
+.lorgus-codex-markdown h3{margin:25px 0 10px;font-size:clamp(21px,2.4vw,27px);line-height:1.3}
+.lorgus-codex-markdown h4,.lorgus-codex-markdown h5,.lorgus-codex-markdown h6{margin:20px 0 8px;color:#e5c98e;font-family:"Cormorant Garamond",Georgia,serif}
+.lorgus-codex-markdown p{margin:0 0 15px;line-height:1.9}
+.lorgus-codex-markdown strong{color:#f0dfbb;font-weight:700}
+.lorgus-codex-markdown em{color:#d9c69e}
+.lorgus-codex-markdown ul,.lorgus-codex-markdown ol{padding-left:1.6em;margin:10px 0 18px}
+.lorgus-codex-markdown li{padding-left:3px;margin:7px 0;line-height:1.8}
+.lorgus-codex-markdown blockquote{margin:18px 0;padding:13px 17px;border-left:3px solid #b9914e;background:rgba(201,164,95,.055);color:#d4c6a9}
+.lorgus-codex-markdown blockquote p:last-child{margin-bottom:0}
+.lorgus-codex-markdown hr{height:1px;margin:24px 0;border:0;background:linear-gradient(90deg,rgba(201,164,95,.45),transparent)}
+.lorgus-codex-markdown code{padding:2px 5px;border:1px solid rgba(201,164,95,.18);background:rgba(0,0,0,.25);color:#e7c987;font-size:.92em}
+.lorgus-codex-markdown pre{max-width:100%;overflow:auto;padding:14px;border:1px solid rgba(201,164,95,.2);background:rgba(0,0,0,.35);white-space:pre-wrap}
+.lorgus-codex-markdown a{color:#e2c17d;text-decoration:underline;text-underline-offset:3px}
+.lorgus-codex-remote-article{min-width:0}
+@media(max-width:650px){.lorgus-codex-markdown{font-size:14px;line-height:1.85}.lorgus-codex-markdown h2{font-size:25px;margin-top:24px}.lorgus-codex-markdown h3{font-size:22px}.lorgus-codex-markdown blockquote{padding:11px 13px;margin:14px 0}}
