@@ -1,37 +1,63 @@
 /* LORGUS global blacklist gate and administrator controls */
 (() => {
     const db = () => window.supabaseClient;
-    // Share one short-lived admin check across startup gates to avoid duplicate RPCs.
+    // Share one short-lived admin check across startup gates. If Supabase is
+    // temporarily unreachable, reuse a recently confirmed admin UI status for
+    // this browser session; protected database operations still rely on RLS/RPC.
     let adminCheckPromise = null;
     window.lorgusGetAdminStatus = window.lorgusGetAdminStatus || async function() {
         const now = Date.now();
         const cached = window.__lorgusAdminStatusCache;
         if (cached && now - cached.checkedAt < 10000) return cached.value;
         if (adminCheckPromise) return adminCheckPromise;
+
+        const sessionKey = "lorgus_admin_status_cache_v1";
+        const readSessionCache = () => {
+            try {
+                const value = JSON.parse(sessionStorage.getItem(sessionKey) || "null");
+                if (value && value.value === true && Number.isFinite(value.checkedAt) &&
+                    Date.now() - value.checkedAt < 30 * 60 * 1000) return value;
+            } catch (_) {}
+            return null;
+        };
         adminCheckPromise = (async () => {
             let lastError;
-            for (let attempt = 0; attempt < 3; attempt++) {
+            for (let attempt = 0; attempt < 2; attempt++) {
+                let timeoutId;
                 try {
                     const result = await Promise.race([
                         db().rpc("is_admin"),
-                        new Promise((_, reject) => window.setTimeout(
-                            () => reject(new Error("LORGUS_REQUEST_TIMEOUT")),
-                            2500
-                        ))
+                        new Promise((_, reject) => {
+                            timeoutId = window.setTimeout(
+                                () => reject(new Error("LORGUS_REQUEST_TIMEOUT")),
+                                2200
+                            );
+                        })
                     ]);
                     if (result.error) throw result.error;
                     const value = result.data === true;
-                    window.__lorgusAdminStatusCache = { value, checkedAt: Date.now() };
+                    const status = { value, checkedAt: Date.now() };
+                    window.__lorgusAdminStatusCache = status;
+                    try {
+                        if (value) sessionStorage.setItem(sessionKey, JSON.stringify(status));
+                        else sessionStorage.removeItem(sessionKey);
+                    } catch (_) {}
                     return value;
                 } catch (error) {
                     lastError = error;
-                    if (attempt < 2) await new Promise(resolve => window.setTimeout(resolve, 350 * (attempt + 1)));
+                    if (attempt === 0) await new Promise(resolve => window.setTimeout(resolve, 250));
+                } finally {
+                    if (timeoutId) window.clearTimeout(timeoutId);
                 }
             }
-            // Fail closed for privilege elevation: a network outage must never
-            // grant admin rights. Cache false briefly so startup does not repeat
-            // the same failing RPC immediately in the cabinet loader.
-            console.warn("LORGUS: is_admin unavailable after retries; temporarily treating session as non-admin.", lastError);
+
+            const previousAdmin = readSessionCache();
+            if (previousAdmin) {
+                window.__lorgusAdminStatusCache = previousAdmin;
+                console.warn("LORGUS: is_admin временно недоступен; используется ранее подтверждённый статус администратора.", lastError);
+                return true;
+            }
+            console.warn("LORGUS: is_admin недоступен после двух попыток; права администратора не предоставлены.", lastError);
             window.__lorgusAdminStatusCache = { value: false, checkedAt: Date.now() };
             return false;
         })().finally(() => { adminCheckPromise = null; });
