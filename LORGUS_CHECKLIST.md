@@ -1415,3 +1415,13 @@ Commits:
 - В этом проходе не выполнялись INSERT/UPDATE/DELETE игровых данных, миграции, изменения прав или deploy.
 - Не считать аудит завершённым до фикса currency blacklist gate, согласования канонических endpoint-ов и browser QA.
 - Следующий шаг: подготовить изолированную миграцию currency blacklist gate, проверить её содержимое и тест-план, не применять в production.
+
+
+### Дополнение — черновик исправления blacklist gate (2026-10-25)
+- [x] Создана review-ветка `audit/currency-transfer-blacklist-guard` и черновая миграция `supabase/migrations/20261025100000_currency_transfer_blacklist_gate.sql`.
+- [x] Статически проверено: функция валютного перевода взята из актуальной миграции, существующие проверки сохранены, `lorgus_is_access_blocked()` добавлен перед `auth.uid()`.
+- [ ] Выполнить изолированные SQL-тесты: обычный перевод в одном публичном чате; заблокированный пользователь получает `ACCESS_BLOCKED`; недостаточный баланс всё ещё отклоняется; сверить сохранение grants.
+- [ ] Проверить Supabase workflow и миграционный diff в review-ветке; только после этого рассматривать merge в main.
+- Ветка: https://github.com/Sup4ezz/Friend-s-RPG/tree/audit/currency-transfer-blacklist-guard
+- Миграция: https://github.com/Sup4ezz/Friend-s-RPG/blob/audit/currency-transfer-blacklist-guard/supabase/migrations/20261025100000_currency_transfer_blacklist_gate.sql
+- Production не менялся; миграция не применена.
