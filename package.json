@@ -1,0 +1,18 @@
+{
+  "name": "lorgus-admin-android",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Android package for the LORGUS administration office",
+  "scripts": {
+    "android:prepare": "node scripts/prepare-android-admin.mjs",
+    "android:sync": "npx cap sync android",
+    "android:build": "npx cap sync android && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3"
+  }
+}
