@@ -95,6 +95,7 @@ Deno.serve(async (req: Request) => {
   try { telegram = await verifyTelegramInitData(initData, botToken); }
   catch (error) {
     const code = safeText((error as Error)?.message || "", 80);
+    console.error("LORGUS Telegram verification rejected:", code || "TELEGRAM_VERIFICATION_FAILED");
     return responseJson({ error: code || "TELEGRAM_VERIFICATION_FAILED" }, 401, origin);
   }
 
