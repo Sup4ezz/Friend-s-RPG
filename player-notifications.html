@@ -47,7 +47,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}@media(m
 <div class="pref"><div><strong>Системные сообщения</strong><small>Приветствие и важные сообщения мира</small></div><label class="switch"><input type="checkbox" data-pref="system" checked><span class="slider"></span></label></div>
 <div class="pref"><div><strong>Все новые записи в летописи</strong><small>Может присылать много сообщений; по умолчанию выключено</small></div><label class="switch"><input type="checkbox" data-pref="rp_posts"><span class="slider"></span></label></div>
 </div>
-<div class="actions"><button id="saveBtn">Сохранить настройки</button><button id="testBtn" class="secondary">Проверить связь</button><button id="unlinkBtn" class="danger">Отвязать Telegram</button><button id="logoutBtn" class="secondary">Выйти из аккаунта</button></div>
+<div class="actions"><button id="saveBtn">Сохранить настройки</button><button id="testBtn" class="secondary">Проверить связь</button><button id="unlinkBtn" class="danger">Отвязать Telegram</button><button id="switchUserBtn" class="secondary">Сменить пользователя</button><button id="logoutBtn" class="secondary">Выйти из аккаунта</button></div>
 </section>
 </main><footer>LORGUS · Вестник личных событий</footer>
 <script type="module">
@@ -87,6 +87,7 @@ $('switchTelegramBtn').onclick=async()=>{if(!confirm('Отвязать стар�
 $('saveBtn').onclick=async()=>{const b=$('saveBtn');b.disabled=true;note('Сохраняем настройки…');try{const result=await api('save',{preferences:readPrefs()});setPrefs(result.preferences);note('Настройки сохранены.','ok')}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
 $('testBtn').onclick=async()=>{try{await api('test');note('Проверочное сообщение отправлено в этот чат.','ok')}catch(e){note(friendly(e.message),'error')}};
 $('unlinkBtn').onclick=async()=>{if(!confirm('Отвязать Telegram от аккаунта LORGUS? Уведомления перестанут приходить.'))return;try{await api('unlink');showOnly('connect');note('Telegram отвязан.','ok')}catch(e){note(friendly(e.message),'error')}};
+$('switchUserBtn').onclick=async()=>{if(!confirm('Сменить аккаунт LORGUS? Привязка этого Telegram к текущему аккаунту будет снята, чтобы можно было выбрать другой аккаунт.'))return;const b=$('switchUserBtn');b.disabled=true;note('Освобождаем привязку и переключаем аккаунт…');try{await api('unlink');await db.auth.signOut();$('username').value='';$('password').value='';showOnly('login');note('Введи логин и пароль другого аккаунта LORGUS.','ok')}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
 $('logoutBtn').onclick=async()=>{await db.auth.signOut();await refresh()};
 refresh();
 </script></body></html>
