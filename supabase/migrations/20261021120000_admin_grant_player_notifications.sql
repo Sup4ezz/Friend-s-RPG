@@ -20,9 +20,6 @@ declare
     v_body text;
     v_amount_text text;
     v_currency_label text;
-    v_gold integer;
-    v_silver integer;
-    v_copper integer;
 begin
     if auth.uid() is null or not coalesce(public.is_admin(), false) then
         raise exception 'ADMIN_REQUIRED';
@@ -57,14 +54,7 @@ begin
             when 'dorn' then 'Дорн'
             when 'fin' then 'Фин'
         end;
-        v_gold := p_amount / 10000;
-        v_silver := (p_amount % 10000) / 100;
-        v_copper := p_amount % 100;
-        v_amount_text := trim(both ' ' from
-            case when v_gold > 0 then v_gold || ' золот. ' else '' end ||
-            case when v_silver > 0 then v_silver || ' серебр. ' else '' end ||
-            case when v_copper > 0 then v_copper || ' мед.' else '' end
-        );
+        v_amount_text := p_amount::text;
         v_title := 'Получена валюта';
         v_body := 'Администрация выдала персонажу «' || coalesce(v_character_name, 'Персонаж') ||
             '» ' || v_amount_text || ' (' || v_currency_label || ').';
