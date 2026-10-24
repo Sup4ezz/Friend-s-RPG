@@ -27,7 +27,7 @@ export default {
             const upstream = await fetch(target.toString(), {
                 method: request.method,
                 headers: request.headers.get("Range") ? { "Range": request.headers.get("Range") } : undefined,
-                redirect: "error"
+                redirect: "follow"
             });
             const responseHeaders = new Headers(upstream.headers);
             responseHeaders.set("X-Content-Type-Options", "nosniff");
