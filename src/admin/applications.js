@@ -341,7 +341,12 @@ async function renderAdminApplications(container, applications) {
             ? await window.lorgusGetSignedPhotoUrl(application.photo_path)
             : null;
     })).then(() => {
-        if (container.isConnected) renderList();
+        // Do not let an older, slower request overwrite a newer admin refresh.
+        // Re-render both lists: the approved-character directory is built before
+        // signed photo URLs resolve, so without this it permanently shows blanks.
+        if (!container.isConnected || window.adminApplications !== applications) return;
+        renderList();
+        if (typeof renderCharacterDirectory === "function") renderCharacterDirectory(true);
     }).catch(error => {
         console.warn("Не удалось загрузить фотографии заявок:", error);
     });
@@ -552,6 +557,8 @@ function renderAdminApplication(application) {
                                 ? `
                                     <img
                                         class="admin-application-photo"
+                                        loading="lazy"
+                                        decoding="async"
                                         src="${window.escapeHtml(application.photo_url)}"
                                         alt="Изображение персонажа"
                                     >
@@ -596,7 +603,7 @@ function renderAdminCharacterManagement(application) {
     return `
         <details class="admin-character-accordion" data-character-id="${esc(application.character_id || "")}">
             <summary class="admin-character-accordion-summary">
-                <span class="admin-character-accordion-portrait">${application.photo_url ? `<img src="${esc(application.photo_url)}" alt="">` : "✦"}</span>
+                <span class="admin-character-accordion-portrait">${application.photo_url ? `<img src="${esc(application.photo_url)}" alt="" loading="lazy" decoding="async">` : "✦"}</span>
                 <span class="admin-character-accordion-main">
                     <strong>${esc(application.name || "Без имени")}</strong>
                     <span>${esc(application.race || "Раса не указана")} · ${esc(application.homeland || "Родина не указана")}</span>
