@@ -46,3 +46,11 @@ Production-функция `public.lorgus_transfer_character_currency_in_chat(...
 
 ### Актуальность миграции валют
 Production migration history уже содержит `20261024150000 currency_single_amount`. Поэтому старое примечание в master checklist «миграцию нужно применить» устарело относительно текущей истории миграций. Это подтверждает регистрацию миграции, но не заменяет UI smoke test кошелька/переводов/админской выдачи/лутбокса.
+
+
+## Черновик точечного исправления currency blacklist gate — 2026-10-25
+- Создана ветка review: `audit/currency-transfer-blacklist-guard`.
+- Черновая миграция: [20261025100000_currency_transfer_blacklist_gate.sql](https://github.com/Sup4ezz/Friend-s-RPG/blob/audit/currency-transfer-blacklist-guard/supabase/migrations/20261025100000_currency_transfer_blacklist_gate.sql).
+- Из актуального определения `lorgus_transfer_character_currency_in_chat` сохранена существующая логика; перед проверкой auth добавлен `lorgus_is_access_blocked()` с ошибкой `ACCESS_BLOCKED`.
+- Статическая проверка источника/патча пройдена: функция извлечена из миграции `20261024150000_currency_single_amount`, auth guard сохранён, blacklist guard присутствует. CI checks отсутствуют; полноценный SQL/runtime тест ещё не выполнялся.
+- Миграция находится только в review-ветке. Production Supabase не менялся. Не переносить файл в main до SQL smoke test и проверки ветки deployment.
