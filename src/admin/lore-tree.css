@@ -226,3 +226,32 @@
         max-height: 82px !important;
     }
 }
+
+
+/* Markdown rendering for the admin Lore Archive. */
+.lorgus-lore-document-body{min-width:0;overflow-wrap:anywhere;line-height:1.8}
+.lorgus-lore-document-body h1,.lorgus-lore-document-body h2,.lorgus-lore-document-body h3,.lorgus-lore-document-body h4,.lorgus-lore-document-body h5,.lorgus-lore-document-body h6{color:#e5c98d;line-height:1.22;margin:1.45em 0 .55em;font-family:"Cormorant Garamond",Georgia,serif;font-weight:600}
+.lorgus-lore-document-body h1{font-size:clamp(28px,3vw,40px);margin-top:.2em}
+.lorgus-lore-document-body h2{font-size:clamp(23px,2.4vw,32px);padding-bottom:.3em;border-bottom:1px solid rgba(203,169,100,.22)}
+.lorgus-lore-document-body h3{font-size:clamp(20px,2vw,27px)}
+.lorgus-lore-document-body p{margin:.7em 0;line-height:1.85;white-space:normal}
+.lorgus-lore-document-body ul,.lorgus-lore-document-body ol{padding-left:1.7em;margin:.7em 0 1em}
+.lorgus-lore-document-body li{margin:.32em 0;padding-left:.15em;line-height:1.75}
+.lorgus-lore-document-body li input[type=checkbox]{accent-color:#c8a45f;vertical-align:middle}
+.lorgus-lore-document-body hr{border:0;border-top:1px solid rgba(203,169,100,.28);margin:1.6em 0}
+.lorgus-lore-document-body blockquote{margin:1em 0;padding:.75em 1.1em;border-left:3px solid #b89552;background:rgba(203,169,100,.065);color:rgba(237,225,200,.86)}
+.lorgus-lore-document-body blockquote p:first-child{margin-top:0}.lorgus-lore-document-body blockquote p:last-child{margin-bottom:0}
+.lorgus-lore-document-body table{display:block;width:100%;max-width:100%;overflow-x:auto;border-collapse:collapse;margin:1.2em 0;font-size:.94em}
+.lorgus-lore-document-body th,.lorgus-lore-document-body td{border:1px solid rgba(203,169,100,.25);padding:9px 12px;text-align:left;vertical-align:top;min-width:90px}
+.lorgus-lore-document-body th{color:#e5c98d;background:rgba(203,169,100,.09);font-weight:600}
+.lorgus-lore-document-body tr:nth-child(even) td{background:rgba(255,255,255,.018)}
+.lorgus-lore-document-body pre{max-width:100%;overflow:auto;padding:14px 16px;border:1px solid rgba(203,169,100,.22);background:rgba(0,0,0,.3);white-space:pre}
+.lorgus-lore-document-body code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.9em;color:#e8ca8d}
+.lorgus-lore-document-body p code,.lorgus-lore-document-body li code{padding:.12em .35em;background:rgba(203,169,100,.1);border-radius:3px}
+.lorgus-lore-document-body a{color:#e7c57f;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.lorgus-lore-document-body .lorgus-lore-inline-image{display:block;max-width:100%;max-height:560px;height:auto;object-fit:contain;margin:1em auto;border:1px solid rgba(203,169,100,.2)}
+.lorgus-lore-document-body .lorgus-wikilink{color:#e7c57f;border-bottom:1px dotted rgba(231,197,127,.55)}
+.lorgus-lore-document-body .lorgus-lore-callout{margin:1.1em 0;padding:1em 1.15em;border:1px solid rgba(203,169,100,.26);border-left:3px solid #b89552;background:rgba(203,169,100,.055)}
+.lorgus-lore-document-body .lorgus-lore-callout h3{margin:0 0 .55em;font:600 12px/1.5 "Lora",Georgia,serif;text-transform:uppercase;letter-spacing:.1em}
+.lorgus-lore-document-body .lorgus-lore-callout p:last-child{margin-bottom:0}
+@media(max-width:700px){.lorgus-lore-document-body{font-size:14px}.lorgus-lore-document-body table{font-size:12px}.lorgus-lore-document-body th,.lorgus-lore-document-body td{padding:7px 9px;min-width:80px}.lorgus-lore-document-body h1{font-size:28px}.lorgus-lore-document-body h2{font-size:24px}}
