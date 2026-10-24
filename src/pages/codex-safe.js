@@ -293,6 +293,8 @@
   }
   parseBlocks(parent,0,lines.length);
  }
+ // Shared DOM-based Markdown renderer for the constellation archive view.
+ window.LORGUS_CODEX_RENDER_MARKDOWN = source => { const host = document.createElement("div"); renderMarkdown(host, source); return host.innerHTML; };
  window.LORGUS_CODEX_SECTIONS=sections; window.LORGUS_CODEX_DOCS=docs; window.LORGUS_CODEX_REMOTE={base:remoteBase,vault};
  async function render(startId){
   const root=document.getElementById("cabinet-content");if(!root)return;
