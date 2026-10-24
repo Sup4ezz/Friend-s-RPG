@@ -299,110 +299,179 @@
     }
 
     function renderInline(value) {
-        let html = esc(value);
-        html = html.replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g, '<span class="lorgus-wikilink">$2</span>');
-        html = html.replace(/\[\[([^\]]+)\]\]/g, '<span class="lorgus-wikilink">$1</span>');
-        html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
-        html = html.replace(/__(.+?)__/g, "<strong>$1</strong>");
-        html = html.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g, "$1<em>$2</em>");
-        html = html.replace(/(^|[^_])_([^_\n]+)_(?!_)/g, "$1<em>$2</em>");
-        html = html.replace(/~~(.+?)~~/g, "<del>$1</del>");
-        return html;
+        const source = String(value ?? "");
+        const output = [];
+        const pattern = /(!?\[[^\]]*\]\([^)]+\)|\[\[[^\]]+\]\]|\x60[^\x60]+\x60|\*\*[\s\S]+?\*\*|__[\s\S]+?__|~~[\s\S]+?~~|\*[^*\n]+\*|_[^_\n]+_)/g;
+        let cursor = 0;
+        let match;
+        const safeUrl = raw => {
+            try {
+                const url = new URL(raw, window.location.href);
+                return /^(https?:|mailto:)$/.test(url.protocol) ? url.href : "";
+            } catch (_) { return ""; }
+        };
+        while ((match = pattern.exec(source))) {
+            if (match.index > cursor) output.push(esc(source.slice(cursor, match.index)));
+            const token = match[0];
+            if (token.startsWith("[[")) {
+                const parts = token.slice(2, -2).split("|");
+                output.push('<span class="lorgus-wikilink">' + esc(parts[1] || parts[0]) + '</span>');
+            } else if (token.startsWith("![") || token.startsWith("[")) {
+                const link = token.match(/^(!?)\[([^\]]*)\]\(([^)]+)\)$/);
+                const href = link && safeUrl(link[3].trim());
+                if (link && href && link[1]) {
+                    output.push('<img class="lorgus-lore-inline-image" src="' + esc(href) + '" alt="' + esc(link[2]) + '" loading="lazy">');
+                } else if (link && href) {
+                    output.push('<a href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">' + renderInline(link[2]) + '</a>');
+                } else output.push(esc(token));
+            } else if (token.charCodeAt(0) === 96) {
+                output.push("<code>" + esc(token.slice(1, -1)) + "</code>");
+            } else if (token.startsWith("**") || token.startsWith("__")) {
+                output.push("<strong>" + renderInline(token.slice(2, -2)) + "</strong>");
+            } else if (token.startsWith("~~")) {
+                output.push("<del>" + renderInline(token.slice(2, -2)) + "</del>");
+            } else {
+                output.push("<em>" + renderInline(token.slice(1, -1)) + "</em>");
+            }
+            cursor = pattern.lastIndex;
+        }
+        if (cursor < source.length) output.push(esc(source.slice(cursor)));
+        return output.join("");
     }
 
     function renderMarkdown(source) {
-        const lines = String(source || "").replace(/\r/g, "").split("\n");
+        const lines = String(source ?? "").replace(/\r\n?/g, "\n").split("\n");
         const blocks = [];
-        let paragraph = [];
-        let list = [];
-        let code = [];
-        let inCode = false;
-        const fence = String.fromCharCode(96).repeat(3);
-        const flushParagraph = () => {
-            if (paragraph.length) {
-                blocks.push("<p>" + paragraph.map(renderInline).join("<br>") + "</p>");
-                paragraph = [];
-            }
+        const tag = (name, content, attrs = "") => "<" + name + attrs + ">" + content + "</" + name + ">";
+        const isFence = line => /^(\x60{3,}|~{3,})/.test(line.trim());
+        const startsBlock = line => {
+            const s = line.trim();
+            return /^(#{1,6}\s|>\s?|[-*+]\s+|\d+[.)]\s+|(?:[-*_]\s*){3,}$|\|.*\|$)/.test(s) || isFence(s);
         };
-        const flushList = () => {
-            if (list.length) {
-                blocks.push("<ul>" + list.map(item => "<li>" + renderInline(item) + "</li>").join("") + "</ul>");
-                list = [];
-            }
-        };
-        const flushCode = () => {
-            blocks.push("<pre><code>" + esc(code.join("\n")) + "</code></pre>");
-            code = [];
-        };
-        for (let i = 0; i < lines.length; i++) {
-            const trimmed = lines[i].trim();
-            if (trimmed.startsWith(fence)) {
-                flushParagraph(); flushList();
-                if (inCode) { flushCode(); inCode = false; }
-                else { inCode = true; }
-                continue;
-            }
-            if (inCode) { code.push(lines[i]); continue; }
-            if (!trimmed) { flushParagraph(); flushList(); continue; }
-
-            const heading = trimmed.match(/^(#{1,4})\s+(.+)$/);
-            if (heading) {
-                flushParagraph(); flushList();
-                const level = heading[1].length;
-                blocks.push("<h" + level + ">" + renderInline(heading[2]) + "</h" + level + ">");
-                continue;
-            }
-            if (/^>\s?/.test(trimmed)) {
-                flushParagraph(); flushList();
-                const quoteLines = [];
-                while (i < lines.length && /^\s*>/.test(lines[i])) {
-                    quoteLines.push(lines[i].trim().replace(/^>\s?/, ""));
+        const splitTableRow = line => line.trim().replace(/^\|/, "").replace(/\|$/, "").split("|").map(cell => cell.trim().replace(/\\\|/g, "|"));
+        const renderList = (from, ordered, depth = 0) => {
+            const listTag = ordered ? "ol" : "ul";
+            const first = lines[from].trim().match(ordered ? /^(\d+)[.)]\s+/ : /^[-*+]\s+/);
+            let i = from;
+            const items = [];
+            while (i < lines.length) {
+                const s = lines[i].trim();
+                const itemMatch = s.match(ordered ? /^(\d+)[.)]\s+(.+)$/ : /^[-*+]\s+(.+)$/);
+                if (!itemMatch) break;
+                const itemText = itemMatch[2];
+                const task = itemText.match(/^\[([ xX])\]\s+(.*)$/);
+                let content;
+                if (task) {
+                    content = '<input type="checkbox" disabled' + (task[1].toLowerCase() === "x" ? " checked" : "") + '> ' + renderInline(task[2]);
+                } else content = renderInline(itemText);
+                const nested = [];
+                i++;
+                while (i < lines.length && (/^\s{2,}([-*+]|\d+[.)])\s+/.test(lines[i]) || /^\s*$/.test(lines[i]))) {
+                    if (/^\s*$/.test(lines[i])) {
+                        if (i + 1 < lines.length && /^\s{2,}([-*+]|\d+[.)])\s+/.test(lines[i + 1])) { nested.push(""); i++; continue; }
+                        break;
+                    }
+                    nested.push(lines[i].replace(/^\s{2,}/, ""));
                     i++;
                 }
-                i--;
+                if (nested.some(line => line.trim())) {
+                    const nestedHtml = renderMarkdown(nested.join("\n"));
+                    content += nestedHtml;
+                }
+                items.push(tag("li", content));
+                if (i < lines.length && !/^\s*$/.test(lines[i]) && (ordered ? /^\d+[.)]\s+/.test(lines[i].trim()) : /^[-*+]\s+/.test(lines[i].trim()))) continue;
+                break;
+            }
+            const attrs = ordered && first ? ' start="' + Number(first[1]) + '"' : "";
+            return { html: tag(listTag, items.join(""), attrs), next: i };
+        };
+        let i = 0;
+        while (i < lines.length) {
+            const raw = lines[i];
+            const s = raw.trim();
+            if (!s) { i++; continue; }
+
+            if (isFence(s)) {
+                const fence = s.match(/^(\x60{3,}|~{3,})/)[1];
+                const language = s.slice(fence.length).trim().split(/\s+/)[0].replace(/[^\w+-]/g, "");
+                const body = [];
+                i++;
+                while (i < lines.length && !lines[i].trim().startsWith(fence)) body.push(lines[i++]);
+                if (i < lines.length) i++;
+                blocks.push('<pre><code' + (language ? ' class="language-' + esc(language) + '"' : "") + '>' + esc(body.join("\n")) + "</code></pre>");
+                continue;
+            }
+
+            const heading = s.match(/^(#{1,6})\s+(.+?)\s*#*$/);
+            if (heading) {
+                const level = heading[1].length;
+                blocks.push(tag("h" + level, renderInline(heading[2])));
+                i++;
+                continue;
+            }
+
+            if (/^(---+|\*\s*\*\s*\*|_\s*_\s*_)$/.test(s)) {
+                blocks.push("<hr>");
+                i++;
+                continue;
+            }
+
+            if (/^>\s?/.test(s)) {
+                const quoteLines = [];
+                while (i < lines.length && /^\s*>/.test(lines[i])) quoteLines.push(lines[i++].trim().replace(/^>\s?/, ""));
                 const callout = quoteLines[0]?.match(/^\[!([\w-]+)\]([+-])?\s*(.*)$/);
                 if (callout) {
-                    const kind = callout[1].toLowerCase();
-                    const title = callout[3] || "Запись";
+                    const kind = callout[1].toLowerCase().replace(/[^\w-]/g, "");
+                    const title = callout[3] || callout[1].replace(/-/g, " ");
                     const bodyLines = quoteLines.slice(1);
-                    const body = [];
-                    let quoteList = [];
-                    const flushQuoteList = () => {
-                        if (quoteList.length) {
-                            body.push("<ul>" + quoteList.map(item => "<li>" + renderInline(item) + "</li>").join("") + "</ul>");
-                            quoteList = [];
-                        }
-                    };
-                    for (const bodyLine of bodyLines) {
-                        const item = bodyLine.match(/^[-*+]\s+(.+)$/);
-                        if (item) quoteList.push(item[1]);
-                        else {
-                            flushQuoteList();
-                            if (bodyLine.trim()) body.push("<p>" + renderInline(bodyLine) + "</p>");
-                        }
-                    }
-                    flushQuoteList();
-                    blocks.push('<section class="lorgus-lore-callout lorgus-lore-callout-' + esc(kind) + '"><h3>' + renderInline(title) + '</h3><div>' + body.join("") + '</div></section>');
+                    const bodyHtml = renderMarkdown(bodyLines.join("\n"));
+                    blocks.push('<aside class="lorgus-lore-callout lorgus-lore-callout-' + esc(kind) + '"><h3>' + renderInline(title) + '</h3><div>' + bodyHtml + '</div></aside>');
                 } else {
-                    blocks.push("<blockquote>" + quoteLines.map(renderInline).join("<br>") + "</blockquote>");
+                    blocks.push(tag("blockquote", renderMarkdown(quoteLines.join("\n"))));
                 }
                 continue;
             }
-            if (/^[-*+]\s+/.test(trimmed)) {
-                flushParagraph();
-                list.push(trimmed.replace(/^[-*+]\s+/, ""));
+
+            const ordered = /^\d+[.)]\s+/.test(s);
+            const unordered = /^[-*+]\s+/.test(s);
+            if (ordered || unordered) {
+                const result = renderList(i, ordered);
+                blocks.push(result.html);
+                i = Math.max(i + 1, result.next);
                 continue;
             }
-            if (/^---+$/.test(trimmed)) {
-                flushParagraph(); flushList(); blocks.push("<hr>");
+
+            if (s.includes("|") && i + 1 < lines.length && /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(lines[i + 1].trim())) {
+                const headers = splitTableRow(s);
+                const alignments = splitTableRow(lines[i + 1]).map(cell => cell.startsWith(":") && cell.endsWith(":") ? "center" : cell.endsWith(":") ? "right" : cell.startsWith(":") ? "left" : "");
+                let table = "<table><thead><tr>";
+                headers.forEach((cell, index) => {
+                    table += "<th" + (alignments[index] ? ' style="text-align:' + alignments[index] + '"' : "") + ">" + renderInline(cell) + "</th>";
+                });
+                table += "</tr></thead><tbody>";
+                i += 2;
+                while (i < lines.length && lines[i].trim() && lines[i].includes("|")) {
+                    const cells = splitTableRow(lines[i++]);
+                    table += "<tr>";
+                    headers.forEach((_, index) => {
+                        table += "<td" + (alignments[index] ? ' style="text-align:' + alignments[index] + '"' : "") + ">" + renderInline(cells[index] || "") + "</td>";
+                    });
+                    table += "</tr>";
+                }
+                table += "</tbody></table>";
+                blocks.push(table);
                 continue;
             }
-            flushList();
-            paragraph.push(trimmed.replace(/\\\s*$/, ""));
+
+            const paragraph = [s.replace(/\\\s*$/, "")];
+            i++;
+            while (i < lines.length && lines[i].trim() && !startsBlock(lines[i])) {
+                paragraph.push(lines[i].trim().replace(/\\\s*$/, ""));
+                i++;
+            }
+            blocks.push(tag("p", paragraph.map(renderInline).join(" ")));
         }
-        flushParagraph(); flushList();
-        if (inCode) flushCode();
-        return blocks.join("");
+        return blocks.join("\n");
     }
     function nodeMarkup(node, depth = 0) {
         const hasChildren = Array.isArray(node.children) && node.children.length;
