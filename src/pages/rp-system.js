@@ -608,7 +608,7 @@ async function arriveAtDestination() {
         const left = requiredPosts - Number(roadPosts || 0);
         alert(canBypassRoad
             ? "Привилегия не распознана системой. Обратись к администрации."
-            : hasHorse
+            : hasMount
                 ? "Чтобы въехать в город с конём, нужно опубликовать ещё " + left + (left === 1 ? " сообщение на дороге." : " сообщения на дороге.")
                 : "Путь ещё не завершён: нужно опубликовать ещё " + left + (left === 1 ? " сообщение на дороге." : " сообщения на дороге."));
         return;
