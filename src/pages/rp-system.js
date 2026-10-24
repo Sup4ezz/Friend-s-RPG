@@ -474,14 +474,18 @@ async function enterLocationRp(locationName, regionName) {
     await renderLocationChats(locationName, regionName, false);
 }
 
-function openLorgusTravelPicker() {
-    const presence = window.activeRpChatSpace || window.activeRpPresence;
+async function openLorgusTravelPicker() {
+    // Always read the persisted server state. activeRpChatSpace can point to
+    // an old road chat after cancellation/navigation and send the player back
+    // to a trip they already cancelled.
+    const presence = await getRpPresence();
+    window.activeRpChatSpace = presence;
     if (presence?.type === "location") {
-        renderTravelScreen(presence.location, presence.region);
+        await renderTravelScreen(presence.location, presence.region);
         return;
     }
     if (presence?.type === "road") {
-        renderRoadChat(presence);
+        await renderRoadChat(presence);
         return;
     }
     alert("Сначала войди в RP-локацию.");
@@ -751,7 +755,7 @@ async function renderTravelScreen(fromLocation, fromRegion, toLocation, toRegion
                         return `
                         <div class="lorgus-road-destination-wrap">
                           <button class="lorgus-road-destination ${item.location === toLocation && item.region === toRegion ? "selected" : ""}" type="button"
-                              onclick="startTravel('${escapeHtml(fromLocation)}','${escapeHtml(fromRegion)}','${escapeHtml(item.location)}','${escapeHtml(item.region)}')">
+                              onclick="renderTravelScreen('${escapeHtml(fromLocation)}','${escapeHtml(fromRegion)}','${escapeHtml(item.location)}','${escapeHtml(item.region)}')">
                               <span class="lorgus-road-destination-art"${art ? ` style="background-image:url('${art}')"` : ""}></span>
                               <span class="lorgus-road-destination-content">
                                   <span class="lorgus-road-destination-kicker">${escapeHtml(item.travelType === "sea" ? "МОРСКОЙ ПУТЬ" : "СУХОПУТНЫЙ ПУТЬ")}</span>
