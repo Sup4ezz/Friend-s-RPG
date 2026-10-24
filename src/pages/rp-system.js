@@ -1958,11 +1958,11 @@ async function sendLocalRpMessage() {
    ========================================================= */
 
 const lorgusCurrencies = {
-    aur: { name: "Аур", kingdom: "Атэрон", icon: "◈", goldRate: "1,00" },
-    lira: { name: "Лира", kingdom: "Лирэн", icon: "✿", goldRate: "0,90" },
-    kald: { name: "Кальд", kingdom: "Ксандр", icon: "◆", goldRate: "1,10" },
-    dorn: { name: "Дорн", kingdom: "Каэлор", icon: "⬢", goldRate: "1,20" },
-    fin: { name: "Фин", kingdom: "Морвейн", icon: "✧", goldRate: "0,80" }
+    aur: { name: "Аур", kingdom: "Атэрон", icon: "◈" },
+    lira: { name: "Лира", kingdom: "Лирэн", icon: "✿" },
+    kald: { name: "Кальд", kingdom: "Ксандр", icon: "◆" },
+    dorn: { name: "Дорн", kingdom: "Каэлор", icon: "⬢" },
+    fin: { name: "Фин", kingdom: "Морвейн", icon: "✧" }
 };
 
 function updateRpItemUseButton() {
@@ -2244,7 +2244,7 @@ async function openAdminCharacterInventory(application, container) {
                 '<label class="lorgus-lootbox-description-field">Описание<textarea class="lorgus-admin-lootbox-description" rows="2" maxlength="500" placeholder="Что именно получает игрок?"></textarea></label>' +
                 '<label class="lorgus-lootbox-rarity-field">Редкость<select class="lorgus-admin-lootbox-rarity"><option value="common">Обычная</option><option value="uncommon">Необычная</option><option value="rare">Редкая</option><option value="epic">Эпическая</option><option value="legendary">Легендарная</option><option value="mythic">Мифическая</option><option value="unique">Уникальная</option></select></label>' +
                 '<label class="lorgus-lootbox-currency-field">Валюта<select class="lorgus-admin-lootbox-currency">' + Object.entries(lorgusCurrencies).map(([code,c]) => '<option value="' + code + '">' + escapeHtml(c.name) + '</option>').join("") + '</select></label>' +
-                '<label class="lorgus-lootbox-amount-field">Сумма в медных монетах<input class="lorgus-admin-lootbox-amount" type="number" min="1" step="1" value="100"></label>' +
+                '<label class="lorgus-lootbox-amount-field">Количество валюты<input class="lorgus-admin-lootbox-amount" type="number" min="1" step="1" value="100"></label>' +
                 '<button type="button" class="lorgus-admin-lootbox-add-btn">Добавить награду</button>' +
             '</div>' +
             '<div class="lorgus-admin-lootbox-pool"><p>Выбери лутбокс, чтобы увидеть его содержимое.</p></div>' +
@@ -2254,11 +2254,7 @@ async function openAdminCharacterInventory(application, container) {
             '<select class="lorgus-admin-currency-code">' +
                 Object.entries(lorgusCurrencies).map(([code,c]) => '<option value="' + code + '">' + c.name + ' · ' + c.kingdom + '</option>').join("") +
             '</select>' +
-            '<div class="lorgus-admin-currency-denominations">' +
-                '<label>Золотые<input class="lorgus-admin-currency-gold" type="number" min="0" step="1" value="0"></label>' +
-                '<label>Серебряные<input class="lorgus-admin-currency-silver" type="number" min="0" step="1" value="0"></label>' +
-                '<label>Бронзовые<input class="lorgus-admin-currency-bronze" type="number" min="0" step="1" value="100"></label>' +
-            '</div>' +
+            '<label class="lorgus-admin-currency-amount-label">Количество<input class="lorgus-admin-currency-amount" type="number" min="1" step="1" value="100"></label>' +
             '<button type="button" class="lorgus-admin-currency-btn">Выдать валюту</button>' +
         '</div>' +
         '<div class="lorgus-admin-currency-list"></div>' +
@@ -2271,15 +2267,13 @@ async function openAdminCharacterInventory(application, container) {
 
         const currencies = Object.entries(lorgusCurrencies).map(([code,c]) => {
             const row=(data||[]).find(x=>x.currency_code===code);
-            const copper = Math.max(0, Number(row?.amount) || 0);
+            const amount = Math.max(0, Number(row?.amount) || 0);
             return {
                 code,
                 name: c.name,
                 kingdom: c.kingdom,
                 icon: c.icon,
-                gold: Math.floor(copper / 10000),
-                silver: Math.floor((copper % 10000) / 100),
-                bronze: copper % 100
+                amount
             };
         });
 
@@ -2289,17 +2283,9 @@ async function openAdminCharacterInventory(application, container) {
                     '<div class="lorgus-admin-currency-label"></div>' +
                     currencies.map(c => '<div class="lorgus-admin-currency-name"><span>' + escapeHtml(c.icon) + '</span><strong>' + escapeHtml(c.name) + '</strong><small>' + escapeHtml(c.kingdom) + '</small></div>').join('') +
                 '</div>' +
-                '<div class="lorgus-admin-currency-line gold">' +
-                    '<strong>Золото</strong>' +
-                    currencies.map(c => '<div>' + c.gold + '</div>').join('') +
-                '</div>' +
-                '<div class="lorgus-admin-currency-line silver">' +
-                    '<strong>Серебро</strong>' +
-                    currencies.map(c => '<div>' + c.silver + '</div>').join('') +
-                '</div>' +
-                '<div class="lorgus-admin-currency-line bronze">' +
-                    '<strong>Медь</strong>' +
-                    currencies.map(c => '<div>' + c.bronze + '</div>').join('') +
+                '<div class="lorgus-admin-currency-line">' +
+                    '<strong>Количество</strong>' +
+                    currencies.map(c => '<div>' + c.amount + '</div>').join('') +
                 '</div>' +
             '</div>';
     };
@@ -2405,7 +2391,7 @@ async function openAdminCharacterInventory(application, container) {
         const typeNames = {title:"Титул",privilege:"Привилегия",currency:"Деньги",special:"Особая награда"};
         lootboxPool.innerHTML = rows.length ? rows.map(row => {
             const chance = total ? (getLootboxRewardWeight(row) / total * 100) : 0;
-            const extra = row.reward_type === "currency" ? " · " + escapeHtml(row.amount + " медных монет") : "";
+            const extra = row.reward_type === "currency" ? " · " + escapeHtml(row.amount + " единиц валюты") : "";
             return '<article class="lorgus-admin-lootbox-row">' +
                 '<span class="lorgus-admin-lootbox-icon" style="--item-color:' + escapeHtml(row.color || "#d7b56d") + '">' + escapeHtml(row.icon || (row.reward_type === "privilege" ? "♛" : row.reward_type === "currency" ? "◈" : "✦")) + '</span>' +
                 '<span class="lorgus-admin-lootbox-name"><strong>' + escapeHtml(row.name || "Награда") + '</strong><small>' + escapeHtml(typeNames[row.reward_type] || "Награда") + ' · ' + escapeHtml(rarityNames[row.rarity] || row.rarity || "—") + extra + '</small><small>' + escapeHtml(row.description || "") + '</small></span>' +
@@ -2449,7 +2435,7 @@ async function openAdminCharacterInventory(application, container) {
         if (!lootboxId) { alert("Сначала создай лутбокс и выбери его."); return; }
         if (type === "title" && !titleId) { alert("Выбери титул."); return; }
         if (type !== "title" && !name) { alert("Укажи название награды."); return; }
-        if (type === "currency" && (!Number.isInteger(amount) || amount < 1)) { alert("Сумма должна быть положительным целым числом медных монет."); return; }
+        if (type === "currency" && (!Number.isInteger(amount) || amount < 1)) { alert("Количество должно быть положительным целым числом."); return; }
         const { error } = await window.supabaseClient.rpc("admin_set_lootbox_reward", {
             p_lootbox_item_id: lootboxId,
             p_reward_type: type,
@@ -2470,11 +2456,8 @@ async function openAdminCharacterInventory(application, container) {
 
     panel.querySelector(".lorgus-admin-currency-btn").addEventListener("click", async () => {
         const code=panel.querySelector(".lorgus-admin-currency-code").value;
-        const gold=Number.parseInt(panel.querySelector(".lorgus-admin-currency-gold").value,10) || 0;
-        const silver=Number.parseInt(panel.querySelector(".lorgus-admin-currency-silver").value,10) || 0;
-        const bronze=Number.parseInt(panel.querySelector(".lorgus-admin-currency-bronze").value,10) || 0;
-        if(gold<0 || silver<0 || bronze<0 || (gold===0 && silver===0 && bronze===0)){ alert("Укажи хотя бы одну ненулевую монету."); return; }
-        const amount=(gold*10000)+(silver*100)+bronze;
+        const amount=Number.parseInt(panel.querySelector(".lorgus-admin-currency-amount").value,10) || 0;
+        if(!Number.isInteger(amount) || amount < 1){ alert("Укажи положительное количество валюты."); return; }
         const { error }=await window.supabaseClient.rpc("admin_grant_character_currency",{p_character_id:characterId,p_currency_code:code,p_amount:amount});
         if(error){ alert("Не удалось изменить валюту:\n\n"+error.message); return; }
         const notifyResult = await window.supabaseClient.rpc("admin_notify_character_grant", {
@@ -2487,9 +2470,7 @@ async function openAdminCharacterInventory(application, container) {
         });
         if (notifyResult.error) console.error("Валюта выдана, но уведомление игроку не создано:", notifyResult.error);
         await refreshCurrency();
-        panel.querySelector(".lorgus-admin-currency-gold").value="0";
-        panel.querySelector(".lorgus-admin-currency-silver").value="0";
-        panel.querySelector(".lorgus-admin-currency-bronze").value="0";
+        panel.querySelector(".lorgus-admin-currency-amount").value="0";
     });
 
     panel.querySelector(".lorgus-admin-inventory-grant-btn").addEventListener("click", async () => {
