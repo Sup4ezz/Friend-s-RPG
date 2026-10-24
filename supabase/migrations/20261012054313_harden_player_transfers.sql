@@ -137,9 +137,6 @@ declare
     sender_name text;
     currency_label text;
     amount_text text;
-    gold integer;
-    silver integer;
-    copper integer;
 begin
     if auth.uid() is null then raise exception 'AUTH_REQUIRED'; end if;
     if p_sender_character_id = p_recipient_character_id then raise exception 'TRANSFER_SELF'; end if;
@@ -212,14 +209,7 @@ begin
     currency_label := case p_currency_code
         when 'aur' then 'Аур' when 'lira' then 'Лира' when 'kald' then 'Кальд'
         when 'dorn' then 'Дорн' when 'fin' then 'Фин' end;
-    gold := p_amount / 10000;
-    silver := (p_amount % 10000) / 100;
-    copper := p_amount % 100;
-    amount_text := trim(both ' ' from
-        case when gold > 0 then gold || ' золот. ' else '' end ||
-        case when silver > 0 then silver || ' серебр. ' else '' end ||
-        case when copper > 0 then copper || ' мед.' else '' end
-    );
+    amount_text := p_amount::text;
 
     insert into public.character_currency(character_id, currency_code, amount)
     values (p_recipient_character_id, p_currency_code, p_amount)
