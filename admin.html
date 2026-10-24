@@ -47,7 +47,7 @@ function rpChatKey(m){return m.presence_type==='road'?['road',m.from_region||'',
 function rpChatLabel(m){return m.presence_type==='road'?'Дорога · '+(m.from_region||'—')+' / '+(m.from_location||'—')+' → '+(m.to_region||'—')+' / '+(m.to_location||'—'):(m.location||'Без локации')+' · '+(m.region||'Без региона')}
 function rpChatDescriptor(m){return m.presence_type==='road'?{type:'road',region:null,location:null,from_region:m.from_region,from_location:m.from_location,to_region:m.to_region,to_location:m.to_location}:{type:'location',region:m.region,location:m.location,from_region:null,from_location:null,to_region:null,to_location:null}}
 async function loadRpChats(){const [mr,pr,nr]=await Promise.all([
-db.from('rp_messages').select('id,character_id,body,created_at,status,reverted_at,revert_reason,presence_type,region,location,from_region,from_location,to_region,to_location,is_admin_post,characters(id,name,race)').order('created_at',{ascending:false}).limit(2000),
+db.from('rp_messages').select('id,character_id,body,created_at,status,reverted_at,revert_reason,presence_type,region,location,from_region,from_location,to_region,to_location,is_admin_post,characters!rp_messages_character_id_fkey(id,name,race)').order('created_at',{ascending:false}).limit(2000),
 db.from('rp_presence').select('presence_type,region,location,from_region,from_location,to_region,to_location,updated_at').eq('visibility','public'),
 db.from('lorgus_nrp_characters').select('character_id,is_active,characters(id,name,race,kingdom)').eq('is_active',true).order('created_at',{ascending:false})
 ]);if(mr.error)throw mr.error;if(pr.error)throw pr.error;if(nr.error)throw nr.error;
@@ -94,11 +94,6 @@ $('refreshDeletions').onclick=async()=>{try{await loadDeletionRequests();note('�
 $('refreshRpChats').onclick=()=>loadRpChats().catch(e=>note('Не удалось загрузить РП-чаты: '+e.message,'error'));
 $('rpChatSearch').oninput=renderRpChatList;
 $('sendRpChatPost').onclick=sendRpChatPost;
-$('refreshChats').onclick=()=>loadTelegramChats().catch(e=>note(e.message,'error'));
-$('loadChatMessages').onclick=()=>loadTelegramMessages().catch(e=>note(e.message,'error'));
-$('chatSelect').onchange=()=>loadTelegramMessages().catch(e=>note(e.message,'error'));
-$('threadSelect').onchange=renderTelegramMessages;
-$('sendChatMessage').onclick=sendTelegramMessage;
 $('logout').onclick=async()=>{await db.auth.signOut();await show()};
 document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{switchPage(b.dataset.section);if(b.dataset.section==='rpchats')loadRpChats().catch(e=>note('Не удалось загрузить РП-чаты: '+e.message,'error'))});
 $('search').addEventListener('input',()=>{searchTerm=$('search').value.trim().toLocaleLowerCase('ru-RU');renderPosts();renderApps();renderUses()});
