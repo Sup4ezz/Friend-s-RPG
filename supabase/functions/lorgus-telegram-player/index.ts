@@ -95,7 +95,14 @@ Deno.serve(async (req: Request) => {
   try { telegram = await verifyTelegramInitData(initData, botToken); }
   catch (error) {
     const code = safeText((error as Error)?.message || "", 80);
-    console.error("LORGUS Telegram verification rejected:", code || "TELEGRAM_VERIFICATION_FAILED");
+    let botIdentity = "getMe_failed";
+    try {
+      const meResponse = await fetch("https://api.telegram.org/bot" + botToken + "/getMe");
+      const me = await meResponse.json().catch(() => ({}));
+      botIdentity = me?.ok && me?.result?.username ? "@" + safeText(me.result.username, 64) : "getMe_rejected";
+    } catch (_) {}
+    const initKeys = [...new URLSearchParams(initData).keys()].sort().join(",");
+    console.error("LORGUS Telegram verification rejected:", JSON.stringify({ code: code || "TELEGRAM_VERIFICATION_FAILED", botIdentity, initKeys }));
     return responseJson({ error: code || "TELEGRAM_VERIFICATION_FAILED" }, 401, origin);
   }
 
