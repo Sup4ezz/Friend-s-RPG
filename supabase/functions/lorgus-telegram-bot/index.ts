@@ -66,56 +66,10 @@ Deno.serve(async (req: Request) => {
   const dbUrl = Deno.env.get("SUPABASE_URL") || "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   if (!token || !adminChatId || !dbUrl || !serviceKey) return new Response("Not configured", { status: 503 });
-  const archiveDb = createClient(dbUrl, serviceKey, { auth: { persistSession: false, autoRefreshToken: false } });
   let update: any;
   try { update = await req.json(); } catch { return new Response("Bad JSON", { status: 400 }); }
   const message = update?.message;
   if (!message?.chat) return Response.json({ ok: true });
-
-  // Archive messages from groups/supergroups (including forum topics) for the admin console.
-  // Private player conversations are deliberately not archived.
-  const chat = message.chat;
-  const archiveThisChat = chat.type === "group" || chat.type === "supergroup" || String(chat.id) === adminChatId;
-  if (archiveThisChat) {
-    try {
-      const sentAt = new Date(Number(message.date || Math.floor(Date.now() / 1000)) * 1000).toISOString();
-      const topicTitle = safeText(message.forum_topic_created?.name || message.forum_topic_edited?.name || "", 200) || null;
-      const threadId = Number.isSafeInteger(Number(message.message_thread_id)) && Number(message.message_thread_id) > 0
-        ? Number(message.message_thread_id) : null;
-      const sender = message.from || message.sender_chat || {};
-      const senderName = safeText(
-        [sender.first_name, sender.last_name].filter(Boolean).join(" ") ||
-        (sender.username ? "@" + sender.username : "") || sender.title || "Неизвестно", 160
-      );
-      let messageText = safeText(message.text || message.caption || "", 4096);
-      if (!messageText) {
-        if (message.photo) messageText = "[Фото]";
-        else if (message.video) messageText = "[Видео]";
-        else if (message.document) messageText = "[Документ: " + safeText(message.document.file_name || "файл", 120) + "]";
-        else if (message.sticker) messageText = "[Стикер]";
-        else if (message.voice) messageText = "[Голосовое сообщение]";
-        else if (message.audio) messageText = "[Аудио]";
-        else if (message.forum_topic_created) messageText = "[Создана тема: " + safeText(message.forum_topic_created.name, 200) + "]";
-        else if (message.forum_topic_edited) messageText = "[Изменена тема: " + safeText(message.forum_topic_edited.name || "без названия", 200) + "]";
-        else messageText = "[Сообщение без текста]";
-      }
-      const title = safeText(chat.title || [chat.first_name, chat.last_name].filter(Boolean).join(" ") || chat.username || String(chat.id), 250);
-      const { error: chatError } = await archiveDb.from("lorgus_telegram_chats").upsert({
-        chat_id: String(chat.id), title, chat_type: safeText(chat.type, 30),
-        username: safeText(chat.username || "", 100) || null, last_message_at: sentAt, updated_at: new Date().toISOString()
-      }, { onConflict: "chat_id" });
-      if (chatError) console.error("Telegram chat archive: chat upsert failed");
-      const { error: messageError } = await archiveDb.from("lorgus_telegram_messages").upsert({
-        chat_id: String(chat.id), message_id: Number(message.message_id), thread_id: threadId,
-        topic_title: topicTitle, sender_id: String(sender.id || ""), sender_name: senderName,
-        text: messageText, sent_at: sentAt, is_outgoing: false
-      }, { onConflict: "chat_id,message_id", ignoreDuplicates: true });
-      if (messageError) console.error("Telegram chat archive: message insert failed");
-    } catch {
-      // Archiving must never interrupt existing bot commands or player notifications.
-      console.error("Telegram chat archive failed");
-    }
-  }
 
   const incoming = safeText(message.text, 1000);
   if (!incoming.startsWith("/")) return Response.json({ ok: true });
