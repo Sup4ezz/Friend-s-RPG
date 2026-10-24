@@ -1391,3 +1391,27 @@ Commits:
 - [ ] Keep Cloudflare production deployment available as rollback until the replacement host is tested.
 - [ ] After the static host is verified, decide whether any remaining Worker functionality needs a replacement. Supabase/database/auth/storage remain unchanged.
 - [ ] Build and test Android APK only after the replacement HTTPS origin is stable.
+
+
+---
+
+## Актуальное продолжение технического аудита — 2026-10-25
+
+### Выполнено (только чтение)
+- Проверены production определения `set_lorgus_rp_presence`, `send_lorgus_rp_message`, `get_lorgus_rp_messages`, связанные RLS и grants. Подтверждены серверные проверки одобренного персонажа, текущего RP-пространства, прямых маршрутов и требований к дорожным постам.
+- Проверены grants и определения SECURITY DEFINER RPC. Административные RPC проверяются по `is_admin()`; не отзывать EXECUTE массово.
+- Подробный отчёт: `.agent/RP_PRESENCE_AUDIT_20261025.md`.
+- Подтверждено, что migration history production содержит `20261024150000 currency_single_amount`; прежняя запись о неприменённой миграции устарела. Нужна UI-регрессия валютных сценариев.
+
+### Найдено / осталось
+- [ ] **P1/P2:** добавить проверку `lorgus_is_access_blocked()` в `lorgus_transfer_character_currency_in_chat`. Сейчас SECURITY DEFINER RPC проверяет владельца, баланс и общий публичный чат, но не проверяет blacklist/access gate. Подготовить отдельную миграцию и SQL-тесты; не применять к production без отдельного подтверждения.
+- [ ] **Функциональный блокер:** серверный allowlist не содержит локаций Спорных Земель, хотя канонический граф имеет маршруты туда. Сначала сверить лор и клиентскую карту, не выдумывать локации.
+- [ ] Browser QA RP: первый пост, закрепление присутствия, запрет смены чата, дороги, количество постов 2/1/0, расход одноразового bypass, сообщения/ответы и чтение истории.
+- [ ] Проверить кошелёк, передачу валюты, админскую выдачу и валютные награды лутбоксов в UI.
+- [ ] Оптимизировать повторяющиеся RLS policies на 11 таблицах только после сравнения семантики; проверить 10 «unused indexes» по статистике и реальным запросам, не удалять автоматически.
+- [ ] Рассмотреть рекомендацию Advisor для RLS `client_error_reports`: вынести `auth.*` вызовы в scalar SELECT.
+
+### Безопасность работ
+- В этом проходе не выполнялись INSERT/UPDATE/DELETE игровых данных, миграции, изменения прав или deploy.
+- Не считать аудит завершённым до фикса currency blacklist gate, согласования канонических endpoint-ов и browser QA.
+- Следующий шаг: подготовить изолированную миграцию currency blacklist gate, проверить её содержимое и тест-план, не применять в production.
