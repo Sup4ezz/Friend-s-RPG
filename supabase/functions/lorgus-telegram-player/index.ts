@@ -47,7 +47,8 @@ async function verifyTelegramInitData(initData: string, botToken: string) {
   const receivedHash = params.get("hash") || "";
   const authDate = Number(params.get("auth_date") || 0);
   if (!receivedHash || !Number.isFinite(authDate) || authDate <= 0) throw new Error("TELEGRAM_INIT_DATA_INVALID");
-  const now = Date.now() / 1000;\n  if (now - authDate > 24 * 60 * 60 || authDate - now > 60) throw new Error("TELEGRAM_INIT_DATA_EXPIRED");
+  const now = Date.now() / 1000;
+  if (now - authDate > 24 * 60 * 60 || authDate - now > 60) throw new Error("TELEGRAM_INIT_DATA_EXPIRED");
   params.delete("hash");
   params.delete("signature");
   const dataCheckString = [...params.entries()].sort(([a], [b]) => a.localeCompare(b))
