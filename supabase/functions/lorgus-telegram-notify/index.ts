@@ -282,7 +282,7 @@ Deno.serve(async (req: Request) => {
     const preferenceKey = (eventType: string, p: Record<string, any>) => {
       if (eventType === "application_review") return "application_status";
       if (eventType === "currency_transfer") return "currency";
-      if (eventType === "item_transfer" || eventType === "lootbox_reward" || eventType === "item_used") return "items";
+      if (eventType === "item_transfer" || eventType === "lootbox_reward") return "items";
       if (eventType === "rp_reply_notification") return "rp_replies";
       if (eventType === "character_mention_notification") return "mentions";
       if (eventType === "rp_message") return "rp_posts";
@@ -320,7 +320,7 @@ Deno.serve(async (req: Request) => {
         userId = await getUserForCharacter(payload.target_character_id);
       } else if (type === "character_mention_notification") {
         userId = payload.target_user_id ? String(payload.target_user_id) : await getUserForCharacter(payload.target_character_id);
-      } else if (payload.character_id) {
+      } else if (type !== "item_used" && payload.character_id) {
         userId = await getUserForCharacter(payload.character_id);
       }
       if (userId) {
