@@ -34,7 +34,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}@media(m
 <section id="connect" class="panel hidden">
 <h2>Связать аккаунт с Telegram</h2><p>После привязки бот сможет присылать выбранные уведомления в этот личный чат.</p>
 <p class="muted">Связь подтверждается одновременно твоим входом в LORGUS и проверенными данными Telegram Mini App.</p>
-<div class="actions"><button id="linkBtn">Привязать аккаунт</button></div>
+<div class="actions"><button id="linkBtn">Привязать аккаунт</button><button id="switchTelegramBtn" class="secondary hidden">Заменить привязанный Telegram</button></div>
 </section>
 <section id="settings" class="panel hidden">
 <h2>Какие вести присылать?</h2><p class="muted">Изменения сохраняются в LORGUS и действуют для всех твоих персонажей.</p>
@@ -79,9 +79,10 @@ function readPrefs(){const result={};document.querySelectorAll('[data-pref]').fo
 function setPrefs(prefs){document.querySelectorAll('[data-pref]').forEach(el=>el.checked=typeof prefs?.[el.dataset.pref]==='boolean'?prefs[el.dataset.pref]:el.hasAttribute('checked'))}
 async function refresh(){const {data:{session}}=await db.auth.getSession();if(!initData()){note('Открой это приложение через кнопку в личном чате @LorgusAdminBot.','error');showOnly(session?'connect':'login');$('linkBtn').disabled=true;return}
 if(!session){note('Войди в свой аккаунт LORGUS.','');showOnly('login');return}
-try{const state=await api('status');if(state.linked){setPrefs(state.preferences);showOnly('settings');note('Аккаунт LORGUS связан с Telegram.','ok')}else if(state.linkedToAnotherTelegram){showOnly('connect');$('linkBtn').disabled=true;note('Аккаунт связан с другим Telegram. Сначала отвяжи прежнюю связь.','error')}else{showOnly('connect');$('linkBtn').disabled=false;note('Аккаунт LORGUS найден. Подтверди привязку к этому Telegram.','ok')}}catch(e){note(friendly(e.message),'error');showOnly('connect')}}
+try{const state=await api('status');if(state.linked){setPrefs(state.preferences);showOnly('settings');note('Аккаунт LORGUS связан с Telegram.','ok')}else if(state.linkedToAnotherTelegram){showOnly('connect');$('linkBtn').disabled=true;$('switchTelegramBtn').classList.remove('hidden');note('Аккаунт уже связан с другим Telegram. Можно безопасно заменить привязку.','error')}else{showOnly('connect');$('linkBtn').disabled=false;$('switchTelegramBtn').classList.add('hidden');note('Аккаунт LORGUS найден. Подтверди привязку к этому Telegram.','ok')}}catch(e){note(friendly(e.message),'error');showOnly('connect')}}
 $('loginBtn').onclick=async()=>{const b=$('loginBtn');b.disabled=true;note('Проверяем учётные данные…');try{const {error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)throw error;await refresh()}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
 $('linkBtn').onclick=async()=>{const b=$('linkBtn');b.disabled=true;note('Подтверждаем привязку…');try{await api('link');await refresh()}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
+$('switchTelegramBtn').onclick=async()=>{if(!confirm('Отвязать старый Telegram и привязать этот чат?'))return;const b=$('switchTelegramBtn');b.disabled=true;try{await api('unlink');await api('link');await refresh()}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
 $('saveBtn').onclick=async()=>{const b=$('saveBtn');b.disabled=true;note('Сохраняем настройки…');try{const result=await api('save',{preferences:readPrefs()});setPrefs(result.preferences);note('Настройки сохранены.','ok')}catch(e){note(friendly(e.message),'error')}finally{b.disabled=false}};
 $('testBtn').onclick=async()=>{try{await api('test');note('Проверочное сообщение отправлено в этот чат.','ok')}catch(e){note(friendly(e.message),'error')}};
 $('unlinkBtn').onclick=async()=>{if(!confirm('Отвязать Telegram от аккаунта LORGUS? Уведомления перестанут приходить.'))return;try{await api('unlink');showOnly('connect');note('Telegram отвязан.','ok')}catch(e){note(friendly(e.message),'error')}};
