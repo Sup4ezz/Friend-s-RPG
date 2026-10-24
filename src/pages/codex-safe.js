@@ -271,62 +271,8 @@
  const make=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=text;return n;};
  const norm=s=>String(s||"").toLocaleLowerCase("ru-RU").normalize("NFD").replace(/[\u0300-\u036f]/g,"");
  const encodePath=s=>s.split("/").map(encodeURIComponent).join("/");
- const characterNotes = {
-  "дом аркейн":"Дом Аркейн (Атэрон)/Дом Аркейн.md",
-  "дом фалькрейн":"Дом Фалькрейн (Каэлор)/Дом Фалькрейн (Каэлор).md",
-  "дом гринвельд":"Дом Гринвельд (Лирэн)/Дом Гринвельд.md",
-  "дом кальери":"Дом Кальери (Ксандр)/Дом Кальери.md",
-  "дом вальмонт":"Дом Вальмонт (Морвейн)/Дом Вальмонт (Морвейн).md",
-  "эдмунд iv":"Дом Аркейн (Атэрон)/Эдмунд Аркейн IV.md",
-  "королева лиандра":"Дом Аркейн (Атэрон)/Лиандра Аркейн.md",
-  "кассиан":"Дом Аркейн (Атэрон)/Кассиан Аркейн.md",
-  "адриан":"Дом Аркейн (Атэрон)/Адриан Аркейн.md",
-  "селена":"Дом Аркейн (Атэрон)/Селена Аркейн.md",
-  "леонард i фалькрейн":"Дом Фалькрейн (Каэлор)/Леонард I Фалькрейн.md",
-  "изольда фалькрейн":"Дом Фалькрейн (Каэлор)/Изольда Фалькрейн.md",
-  "рейнар фалькрейн":"Дом Фалькрейн (Каэлор)/Рейнар Фалькрейн.md",
-  "селестра i гринвельд":"Дом Гринвельд (Лирэн)/Селестра I Гринвельд.md",
-  "эдгар гринвельд":"Дом Гринвельд (Лирэн)/Эдгар Гринвельд.md",
-  "эвелина гринвельд":"Дом Гринвельд (Лирэн)/Эвелина Гринвельд.md",
-  "кайрен гринвельд":"Дом Гринвельд (Лирэн)/Кайрен Гринвельд.md",
-  "леон гринвельд":"Дом Гринвельд (Лирэн)/Леон Гринвельд.md",
-  "лиара гринвельд":"Дом Гринвельд (Лирэн)/Лиара Гринвельд.md",
-  "мариэль гринвельд":"Дом Гринвельд (Лирэн)/Мариэль Гринвельд.md",
-  "элиан гринвельд":"Дом Гринвельд (Лирэн)/Элиан Гринвельд.md",
-  "марцелл кальери i собиратель":"Дом Кальери (Ксандр)/Марцелл Кальери I «Собиратель».md",
-  "лукреция кальери":"Дом Кальери (Ксандр)/Лукреция Кальери.md",
-  "виолетта кальери":"Дом Кальери (Ксандр)/Виолетта Кальери.md",
-  "дамиан кальери":"Дом Кальери (Ксандр)/Дамиан Кальери.md",
-  "альдрен iv вальмонт":"Дом Вальмонт (Морвейн)/Альдрен IV Вальмонт.md",
-  "элеонора вальмонт":"Дом Вальмонт (Морвейн)/Элеонора Вальмонт.md"
- };
- const characterNoteKey = value => norm(value).replace(/[«»"]/g,"").replace(/\s+/g," ").trim();
  async function appendCharacterNote(content,node) {
-  // Do not fetch or render full royal-family/NPC dossiers in the public codex.
-  return;
-  const file=characterNotes[characterNoteKey(node[0])];
-  if(!file)return;
-  const section=make("section","lorgus-codex-character-note");
-  section.append(make("h3","","Полная летопись персонажа"),make("p","lorgus-codex-loading","Читаем актуальную запись…"));
-  content.append(section);
-  try {
-   const url=remoteBase+encodePath("Obsidian Vault/Obsidian Vault/НПС/Королевские семьи/"+file);
-   const response=await fetch(url,{cache:"no-store"});
-   if(!response.ok)throw new Error("HTTP "+response.status);
-   const source=await response.text();
-   if(/^\s*<!doctype html|^\s*<html[\s>]/i.test(source.slice(0,500)))throw new Error("HTML вместо Markdown");
-   if(!content.isConnected)return;
-   const body=make("div","lorgus-codex-markdown");
-   const cleaned=source.replace(/^---[\s\S]*?---\s*/,"")
-    .replace(/\[\[([^\]|]+)\|([^\]]+)\]\]/g,"$2")
-    .replace(/\[\[([^\]]+)\]\]/g,"$1")
-    ;
-   renderMarkdown(body,cleaned);
-   section.replaceChildren(make("h3","","Полная летопись персонажа"),body);
-  } catch(error) {
-   console.warn("[LORGUS] Не удалось загрузить полную летопись:",error);
-   if(content.isConnected)section.replaceChildren(make("h3","","Полная летопись персонажа"),make("p","lorgus-codex-empty","Подробная запись временно недоступна. Краткая запись выше остаётся доступной."));
-  }
+  // Private royal-family and NPC dossiers are intentionally not fetched in the public codex.
  }
  function renderMarkdown(parent,source,baseUrl=""){
   parent.replaceChildren();
