@@ -56,6 +56,16 @@ function formatEvent(type: string, payload: Record<string, unknown>): string {
       footer("LORGUS · Канцелярия");
       break;
 
+    case "rp_reply_notification":
+      heading("💬", "ОТВЕТ НА ПОСТ", clean(payload.target_character_name || "Персонаж", 120));
+      field("Ответил:", payload.character_name || "Неизвестный персонаж", 120);
+      if (place) field("Место:", place, 220);
+      if (payload.message_id) field("Ответ:", "#" + clean(payload.message_id, 40));
+      if (payload.reply_to_id) field("Исходный пост:", "#" + clean(payload.reply_to_id, 40));
+      if (payload.body) lines.push("", "<blockquote>" + escapeHtml(payload.body, 1200) + "</blockquote>");
+      footer("LORGUS · Звонилка");
+      break;
+
     case "rp_message":
       heading("🕯️", "НОВАЯ ЗАПИСЬ В ЛЕТОПИСИ", name);
       if (place) field("Место:", place, 220);
@@ -136,6 +146,28 @@ function formatEvent(type: string, payload: Record<string, unknown>): string {
       break;
     }
 
+    case "rp_reply_notification":
+      heading("↪️", "ТЕБЕ ОТВЕТИЛИ", name);
+      if (place) field("Место:", place, 220);
+      lines.push("", "<blockquote>" + escapeHtml(payload.body, 1800) + "</blockquote>");
+      field("Ответ на запись:", "#" + clean(payload.reply_to_id, 40));
+      footer("LORGUS · Ответ в летописи");
+      break;
+
+    case "player_notification":
+      heading("🔔", escapeHtml(payload.title || "НОВАЯ ВЕСТЬ", 120), name);
+      lines.push("", escapeHtml(payload.body || "В LORGUS появилось новое уведомление.", 1800));
+      footer("LORGUS · Личное уведомление");
+      break;
+
+    case "lorgus_update":
+      heading("📜", "ОБНОВЛЕНИЕ LORGUS", "Новая запись в летописи проекта");
+      if (payload.version) field("Версия:", payload.version, 60);
+      field("Заголовок:", payload.title || "Обновление", 180);
+      lines.push("", escapeHtml(payload.body || "", 2300));
+      footer("LORGUS · Хроника обновлений");
+      break;
+
     case "client_error_report": {
       heading("🚨", "ОШИБКА ПРИЛОЖЕНИЯ", clean(payload.route || "Неизвестный раздел", 160));
       field("Игрок:", payload.username || "Неизвестен", 120);
@@ -187,10 +219,11 @@ Deno.serve(async (req: Request) => {
   }
 
   const token = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
-  const chatId = Deno.env.get("TELEGRAM_CHAT_ID") || "";
+  const primaryChatId = "-1003979865821";
+  const adminChatId = "-1003769316441";
   const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-  if (!token || !chatId || !supabaseUrl || !serviceKey) {
+  if (!token || !primaryChatId || !adminChatId || !supabaseUrl || !serviceKey) {
     return new Response("Telegram notifier secrets are not configured", { status: 503 });
   }
 
@@ -204,29 +237,126 @@ Deno.serve(async (req: Request) => {
   if (row.sent_at) return Response.json({ ok: true, duplicate: true });
 
   const type = clean(event.event_type, 80);
-  const topicId = type === "character_application" ? 5 : null;
-  const response = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      chat_id: chatId,
-      ...(topicId !== null ? { message_thread_id: topicId } : {}),
-      text: formatEvent(type, event.payload),
-      parse_mode: "HTML",
-      disable_web_page_preview: true,
-    }),
-  });
-  const telegramResult = await response.json().catch(() => ({}));
-  if (!response.ok || telegramResult?.ok !== true) {
-    const reason = clean(telegramResult?.description || "Telegram API error: " + response.status, 500);
-    await db.from("lorgus_telegram_outbox").update({ last_error: reason }).eq("id", event.id).is("sent_at", null);
-    return new Response("Telegram delivery failed: " + reason, { status: 502 });
+  // Existing group feed remains unchanged. Some event types are personal-only.
+  const deliveredTypes = new Set([
+    "rp_reply_notification", "character_mention_notification", "character_application",
+    "rp_message", "item_used", "item_transfer", "lootbox_reward"
+  ]);
+  const personalOnlyTypes = new Set(["application_review", "currency_transfer", "player_notification", "lorgus_update"]);
+  if (!deliveredTypes.has(type) && !personalOnlyTypes.has(type)) {
+    const { error: suppressedUpdateError } = await db.from("lorgus_telegram_outbox").update({
+      sent_at: new Date().toISOString(), last_error: null,
+    }).eq("id", event.id).is("sent_at", null);
+    if (suppressedUpdateError) return new Response("Suppressed event status update failed", { status: 500 });
+    return Response.json({ ok: true, suppressed: true });
+  }
+
+  // Deliver the established admin-group feed only for its existing event types.
+  if (deliveredTypes.has(type)) {
+    const isApplication = type === "character_application";
+    const isItemEvent = type === "item_used" || type === "item_transfer" || type === "lootbox_reward";
+    const threadId: number | null = isApplication ? 5 : isItemEvent ? 3 : 1;
+    const response = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        chat_id: adminChatId,
+        ...(threadId !== null ? { message_thread_id: threadId } : {}),
+        text: formatEvent(type, event.payload),
+        parse_mode: "HTML",
+        disable_web_page_preview: true,
+      }),
+    });
+    const telegramResult = await response.json().catch(() => ({}));
+    if (!response.ok || telegramResult?.ok !== true) {
+      const reason = clean(telegramResult?.description || "Telegram API error: " + response.status, 500);
+      await db.from("lorgus_telegram_outbox").update({ last_error: reason }).eq("id", event.id).is("sent_at", null);
+      return new Response("Telegram delivery failed: " + reason, { status: 502 });
+    }
+  }
+
+  // Personal DMs are opt-in by event category. A failed DM never blocks gameplay
+  // or the established admin group feed.
+  try {
+    const payload = event.payload || {};
+    const preferenceKey = (eventType: string, p: Record<string, any>) => {
+      if (eventType === "application_review") return "application_status";
+      if (eventType === "currency_transfer") return "currency";
+      if (eventType === "item_transfer" || eventType === "lootbox_reward" || eventType === "item_used") return "items";
+      if (eventType === "rp_reply_notification") return "rp_replies";
+      if (eventType === "character_mention_notification") return "mentions";
+      if (eventType === "rp_message") return "rp_posts";
+      if (eventType === "lorgus_update") return "updates";
+      if (eventType === "player_notification") {
+        if (p.notification_type === "system") return "system";
+        if (p.data?.reward_kind === "currency") return "currency";
+        return "items";
+      }
+      return "";
+    };
+    const getUserForCharacter = async (characterId: unknown) => {
+      if (!characterId) return null;
+      const result = await db.from("character_applications").select("player_id")
+        .eq("character_id", String(characterId)).eq("status", "approved")
+        .order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (result.error) throw result.error;
+      return result.data?.player_id || null;
+    };
+    let targets: any[] = [];
+    if (type === "lorgus_update") {
+      const result = await db.from("lorgus_telegram_player_links")
+        .select("user_id,telegram_user_id,preferences");
+      if (result.error) throw result.error;
+      targets = (result.data || []).filter((row: any) => row.preferences?.updates === true);
+    } else {
+      let userId: string | null = null;
+      if (type === "player_notification" && payload.user_id) userId = String(payload.user_id);
+      else if (type === "application_review" && payload.application_id) {
+        const result = await db.from("character_applications").select("player_id")
+          .eq("id", String(payload.application_id)).maybeSingle();
+        if (result.error) throw result.error;
+        userId = result.data?.player_id || null;
+      } else if (type === "rp_reply_notification") {
+        userId = await getUserForCharacter(payload.target_character_id);
+      } else if (type === "character_mention_notification") {
+        userId = payload.target_user_id ? String(payload.target_user_id) : await getUserForCharacter(payload.target_character_id);
+      } else if (payload.character_id) {
+        userId = await getUserForCharacter(payload.character_id);
+      }
+      if (userId) {
+        const result = await db.from("lorgus_telegram_player_links")
+          .select("user_id,telegram_user_id,preferences").eq("user_id", userId).maybeSingle();
+        if (result.error) throw result.error;
+        if (result.data) targets = [result.data];
+      }
+    }
+    const pref = preferenceKey(type, payload);
+    for (const target of targets) {
+      if (type !== "lorgus_update" && (!pref || target.preferences?.[pref] !== true)) continue;
+      const dmText = formatEvent(type, payload);
+      const dmResponse = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          chat_id: String(target.telegram_user_id),
+          text: dmText,
+          parse_mode: "HTML",
+          disable_web_page_preview: true,
+        }),
+      });
+      const dmResult = await dmResponse.json().catch(() => ({}));
+      if (!dmResponse.ok || dmResult?.ok !== true) {
+        console.warn("LORGUS personal Telegram delivery failed for event", event.id, clean(dmResult?.description || dmResponse.status, 200));
+      }
+    }
+  } catch (personalError) {
+    console.warn("LORGUS personal notification processing failed for event", event.id, personalError);
   }
 
   const { error: updateError } = await db.from("lorgus_telegram_outbox").update({
-    sent_at: new Date().toISOString(),
-    last_error: null,
+    sent_at: new Date().toISOString(), last_error: null,
   }).eq("id", event.id).is("sent_at", null);
   if (updateError) return new Response("Message sent but outbox status update failed", { status: 500 });
   return Response.json({ ok: true });
+
 });
