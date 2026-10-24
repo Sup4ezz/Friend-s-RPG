@@ -11,3 +11,10 @@ not_found_handling = "single-page-application"
 [vars]
 SUPABASE_URL = "https://dxdxnttpznoekaiecrlv.supabase.co"
 SUPABASE_KEY = "sb_publishable_LlRg71tECimoRn2zuzxqlQ_OeCupPLe"
+
+# Wrangler's preview command requires a dedicated previews.vars block.
+# These are the public Supabase URL and publishable key; database access
+# remains governed by Supabase Auth and RLS policies.
+[previews.vars]
+SUPABASE_URL = "https://dxdxnttpznoekaiecrlv.supabase.co"
+SUPABASE_KEY = "sb_publishable_LlRg71tECimoRn2zuzxqlQ_OeCupPLe"
