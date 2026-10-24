@@ -171,7 +171,25 @@
             const status = section.querySelector("#lorgus-blacklist-status");
             const list = section.querySelector("#lorgus-blacklist-list");
             const refresh = async () => {
-                const { data, error } = await db().rpc("admin_list_lorgus_blacklist");
+                let result;
+                let timeoutId;
+                try {
+                    result = await Promise.race([
+                        db().rpc("admin_list_lorgus_blacklist"),
+                        new Promise((_, reject) => {
+                            timeoutId = window.setTimeout(
+                                () => reject(new Error("Список чёрного списка не ответил за 4 секунды.")),
+                                4000
+                            );
+                        })
+                    ]);
+                } catch (requestError) {
+                    list.textContent = "Не удалось загрузить список: " + (requestError.message || "Supabase временно недоступен.");
+                    return;
+                } finally {
+                    if (timeoutId) window.clearTimeout(timeoutId);
+                }
+                const { data, error } = result;
                 if (error) { list.textContent = "Не удалось загрузить список: " + error.message; return; }
                 if (!data?.length) { list.innerHTML = "<p>Чёрный список пуст.</p>"; return; }
                 list.innerHTML = data.map(row => `
@@ -215,7 +233,8 @@
                 status.textContent = "Блокировка снята.";
                 await refresh();
             });
-            await refresh();
+            // Loading the optional blacklist list must never hold up login or admin-panel rendering.
+            void refresh();
         };
     }
 })();
