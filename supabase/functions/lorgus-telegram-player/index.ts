@@ -47,7 +47,7 @@ async function verifyTelegramInitData(initData: string, botToken: string) {
   const receivedHash = params.get("hash") || "";
   const authDate = Number(params.get("auth_date") || 0);
   if (!receivedHash || !Number.isFinite(authDate) || authDate <= 0) throw new Error("TELEGRAM_INIT_DATA_INVALID");
-  if (Math.abs(Date.now() / 1000 - authDate) > 24 * 60 * 60) throw new Error("TELEGRAM_INIT_DATA_EXPIRED");
+  const now = Date.now() / 1000;\n  if (now - authDate > 24 * 60 * 60 || authDate - now > 60) throw new Error("TELEGRAM_INIT_DATA_EXPIRED");
   params.delete("hash");
   params.delete("signature");
   const dataCheckString = [...params.entries()].sort(([a], [b]) => a.localeCompare(b))
@@ -67,7 +67,7 @@ async function verifyTelegramInitData(initData: string, botToken: string) {
 
 Deno.serve(async (req: Request) => {
   const origin = req.headers.get("origin") || "";
-  if (req.method === "OPTIONS") return responseJson({}, 204, origin);
+  if (req.method === "OPTIONS") { const headers = new Headers({ "cache-control": "no-store", "vary": "Origin" }); if (ALLOWED_ORIGINS.has(origin)) { headers.set("access-control-allow-origin", origin); headers.set("access-control-allow-headers", "authorization, apikey, content-type"); headers.set("access-control-allow-methods", "POST, OPTIONS"); } return new Response(null, { status: 204, headers }); }
   if (req.method !== "POST") return responseJson({ error: "METHOD_NOT_ALLOWED" }, 405, origin);
 
   const botToken = Deno.env.get("TELEGRAM_BOT_TOKEN") || "";
