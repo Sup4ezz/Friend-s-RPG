@@ -1182,44 +1182,65 @@ async function getRpCharacterPhoto(characterId) {
 
     let character = null;
     let photoPath = null;
-    try {
-        // Ordinary players cannot SELECT arbitrary rows from characters or
-        // character_applications. This narrowly-scoped RPC exposes only portrait
-        // metadata for approved/publicly visible characters.
-        const { data, error } = await window.supabaseClient.rpc(
-            "get_lorgus_character_portrait",
-            { p_character_id: characterId }
-        );
-        if (error) {
-            console.warn("LORGUS: не удалось получить портрет персонажа:", error.message);
-        } else {
+    let metadataLoaded = false;
+
+    // Retry transient RPC/network failures. Do not cache a null result from a
+    // failed request: otherwise one brief connection reset hides the portrait
+    // until the page is refreshed.
+    for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+            const { data, error } = await Promise.race([
+                window.supabaseClient.rpc("get_lorgus_character_portrait", {
+                    p_character_id: characterId
+                }),
+                new Promise((_, reject) => window.setTimeout(
+                    () => reject(new Error("Тайм-аут получения портрета")),
+                    5000
+                ))
+            ]);
+            if (error) throw error;
             character = Array.isArray(data) ? (data[0] || null) : (data || null);
             photoPath = character?.photo_path || null;
+            metadataLoaded = true;
+            break;
+        } catch (error) {
+            console.warn("LORGUS: не удалось получить данные портрета (попытка " + (attempt + 1) + "/2):", error?.message || error);
+            if (attempt === 0) await new Promise(resolve => window.setTimeout(resolve, 300));
         }
-    } catch (error) {
-        console.warn("LORGUS: ошибка получения портрета персонажа:", error?.message || error);
     }
+
+    // On transport/RPC failure, leave the cache empty so the next render can retry.
+    if (!metadataLoaded) return null;
 
     if (photoPath) {
-        try {
-            const { data: photoData, error: photoError } = await window.supabaseClient
-                .storage
-                .from("character-applications")
-                .createSignedUrl(photoPath, 60 * 60);
-            if (!photoError && photoData?.signedUrl) {
-                window.rpCharacterPhotoCache[key] = photoData.signedUrl;
-                return photoData.signedUrl;
+        for (let attempt = 0; attempt < 2; attempt++) {
+            try {
+                const { data, error } = await Promise.race([
+                    window.supabaseClient.storage
+                        .from("character-applications")
+                        .createSignedUrl(photoPath, 60 * 60),
+                    new Promise((_, reject) => window.setTimeout(
+                        () => reject(new Error("Тайм-аут создания ссылки на портрет")),
+                        5000
+                    ))
+                ]);
+                if (error) throw error;
+                if (data?.signedUrl) {
+                    window.rpCharacterPhotoCache[key] = data.signedUrl;
+                    return data.signedUrl;
+                }
+            } catch (error) {
+                console.warn("LORGUS: ссылка на портрет не получена (попытка " + (attempt + 1) + "/2):", error?.message || error);
+                if (attempt === 0) await new Promise(resolve => window.setTimeout(resolve, 300));
             }
-            if (photoError) {
-                console.warn("LORGUS: ссылка на портрет недоступна:", photoError.message);
-            }
-        } catch (error) {
-            console.warn("LORGUS: ошибка ссылки на портрет:", error?.message || error);
         }
+        // Keep the fallback visible, but do not cache it when a real photo exists
+        // and signing failed: a later render can retry the signed URL.
+        return buildRpFallbackPortrait(character);
     }
 
-    // For characters without an uploaded image, keep the illustrated fallback.
-    const fallback = character ? buildRpFallbackPortrait(character) : null;
+    // No uploaded image is a legitimate state, so cache the illustrated fallback.
+    const fallback = buildRpFallbackPortrait(character);
     window.rpCharacterPhotoCache[key] = fallback;
     return fallback;
 }
