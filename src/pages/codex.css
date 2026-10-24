@@ -474,3 +474,20 @@ html body #root #cabinet-content .codex-cosmos-detail .codex-detail-body > img.c
  .lorgus-codex-entry-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:24px; }
 }
 @media (min-width: 3000px) { .lorgus-codex-page { padding-inline:clamp(80px,4vw,140px); } }
+
+
+/* Consistent Markdown typography for all lorebook documents. */
+.lorgus-codex-markdown{font-size:15px;line-height:1.85;overflow-wrap:anywhere}
+.lorgus-codex-markdown h2,.lorgus-codex-markdown h3,.lorgus-codex-markdown h4,.lorgus-codex-markdown h5{margin:1.5em 0 .55em;color:#ead5a8;font-family:"Cormorant Garamond",Georgia,serif;line-height:1.2}
+.lorgus-codex-markdown h2{padding-bottom:.35em;border-bottom:1px solid rgba(201,164,95,.24);font-size:clamp(25px,3vw,34px)}
+.lorgus-codex-markdown h3{font-size:clamp(22px,2.5vw,28px)}
+.lorgus-codex-markdown p{margin:.75em 0;line-height:1.85}
+.lorgus-codex-markdown strong{color:#f2e3c5;font-weight:700}
+.lorgus-codex-markdown em{color:#d9c7a5}
+.lorgus-codex-markdown a{color:#e0bf76;text-decoration:underline;text-underline-offset:3px}
+.lorgus-codex-markdown ul,.lorgus-codex-markdown ol{padding-left:1.5rem;margin:1em 0}
+.lorgus-codex-markdown li{padding-left:.25rem;margin:.45em 0;line-height:1.75}
+.lorgus-codex-markdown li::marker{color:#c9a45f}
+.lorgus-codex-markdown blockquote{margin:1.2em 0;padding:14px 18px;border-left:3px solid #b9914e;background:rgba(201,164,95,.055);color:#d2c4a8}
+.lorgus-codex-markdown pre{max-width:100%;overflow:auto;padding:15px;border:1px solid rgba(201,164,95,.2);background:rgba(0,0,0,.3);white-space:pre-wrap}
+.lorgus-codex-markdown code{padding:.1em .3em;background:rgba(0,0,0,.2);font-size:.92em}
