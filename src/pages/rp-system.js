@@ -1,4 +1,18 @@
 /* LORGUS RP, travel, presence and local chat */
+
+// Enter must never submit an RP/Flood message. Keep the textarea's native
+// newline behavior, but stop any stale/duplicate key handlers from treating
+// Enter as Send. The send buttons call the send functions explicitly.
+if (!window.__lorgusEnterSendGuardInstalled) {
+    window.addEventListener("keydown", event => {
+        if (event.key !== "Enter" || event.isComposing) return;
+        const target = event.target;
+        if (target?.matches?.("#lorgus-rp-input, #lorgus-flood-input")) {
+            event.stopImmediatePropagation();
+        }
+    }, true);
+    window.__lorgusEnterSendGuardInstalled = true;
+}
 async function renderWorldCharacterTracker() {
     const container = document.getElementById("cabinet-content");
     if (!container) return;
