@@ -50,17 +50,22 @@ async function loadAdminPanel(container) {
     const fetchApplications = async () => {
         for (let attempt = 1; attempt <= 2; attempt++) {
             let timeoutId;
+            const controller = new AbortController();
             try {
                 const result = await Promise.race([
                     window.supabaseClient
                         .from("character_applications")
                         .select("*")
-                        .order("id", { ascending: false }),
+                        .order("id", { ascending: false })
+                        .abortSignal(controller.signal),
                     new Promise((_, reject) => {
-                        timeoutId = window.setTimeout(
-                            () => reject(new Error("Supabase не ответил за 12 секунд.")),
-                            12000
-                        );
+                        timeoutId = window.setTimeout(() => {
+                            // Reject the UI wait first, then cancel the underlying GET.
+                            // Without abortSignal the timed-out request keeps running
+                            // while the retry starts another identical query.
+                            reject(new Error("Supabase не ответил за 12 секунд."));
+                            controller.abort();
+                        }, 12000);
                     })
                 ]);
                 if (result.error) throw result.error;
