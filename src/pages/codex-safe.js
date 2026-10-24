@@ -245,7 +245,7 @@
    while((m=token.exec(s))){
     if(m.index>i)target.append(document.createTextNode(s.slice(i,m.index)));
     const x=m[0];let node=null;
-    if(x.startsWith("![")||x.startsWith("[")){
+    if(x.startsWith("![")||(x.startsWith("[")&&!x.startsWith("[["))){
      const image=x.startsWith("!"),q=x.match(/^(!?)\[([^\]]*)\]\(([^)]+)\)$/);
      if(q){const href=safeHref(q[3].trim());if(image&&href){node=el("img","lorgus-markdown-image");node.src=href;node.alt=q[2];node.loading="lazy";}else if(!image&&href){node=el("a");node.href=href;node.target="_blank";node.rel="noopener noreferrer";inline(node,q[2]);}}
      if(!node)node=document.createTextNode(x);
