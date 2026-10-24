@@ -836,12 +836,7 @@ async function renderRoadChat(presence, fromRoute = false) {
             input.style.height = "auto";
             input.style.height = Math.min(input.scrollHeight, 180) + "px";
         });
-        input.addEventListener("keydown", event => {
-            if (event.key === "Enter" && !event.shiftKey) {
-                event.preventDefault();
-                sendLocalRpMessage();
-            }
-        });
+        // Enter inserts a newline. Sending is available only through the explicit send button.
     }
 
     const participants = await loadRpChatParticipants(presence);
