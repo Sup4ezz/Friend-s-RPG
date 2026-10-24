@@ -40,6 +40,11 @@
 
     async function isAdmin() {
         if (!db()) return false;
+        // Reuse the shared startup check so cabinet, blacklist and maintenance
+        // gates do not fire independent is_admin RPCs at the same time.
+        if (typeof window.lorgusGetAdminStatus === "function") {
+            return await window.lorgusGetAdminStatus();
+        }
         const { data, error } = await db().rpc("is_admin");
         if (error) throw error;
         return data === true;
