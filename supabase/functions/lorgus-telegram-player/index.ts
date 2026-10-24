@@ -142,6 +142,17 @@ Deno.serve(async (req: Request) => {
     return responseJson({ error: "TELEGRAM_NOT_LINKED" }, 403, origin);
   }
 
+  if (action === "test") {
+    const testText = "𓆩 <b>L O R G U S</b> 𓆪\\n\\n🕯️ <b>ПРОВЕРКА СВЯЗИ</b>\\nЛичный вестник работает. Здесь будут появляться выбранные тобой уведомления.";
+    const result = await fetch("https://api.telegram.org/bot" + botToken + "/sendMessage", {
+      method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ chat_id: telegram.id, text: testText, parse_mode: "HTML", disable_web_page_preview: true }),
+    });
+    const telegramResult = await result.json().catch(() => ({}));
+    if (!result.ok || telegramResult?.ok !== true) return responseJson({ error: "TELEGRAM_SEND_FAILED" }, 502, origin);
+    return responseJson({ ok: true }, 200, origin);
+  }
+
   if (action === "save") {
     const incoming = body?.preferences;
     if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) return responseJson({ error: "INVALID_PREFERENCES" }, 400, origin);
