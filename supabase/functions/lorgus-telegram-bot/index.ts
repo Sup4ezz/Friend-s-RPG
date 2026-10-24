@@ -169,7 +169,7 @@ Deno.serve(async (req: Request) => {
     if (!telegramUserId || !message.from || message.from.is_bot) {
       reply = "Не удалось определить пользователя Telegram.";
     } else {
-      const miniAppUrl = "https://friend-s-rpg.staskarr23.workers.dev/admin.html";
+      const miniAppUrl = "https://friend-s-rpg.layero.app/admin.html";
       const response = await fetch("https://api.telegram.org/bot" + token + "/setChatMenuButton", {
         method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({
