@@ -5,62 +5,79 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
   <meta name="color-scheme" content="dark">
-  <title>ЛОРГУС — За пределами карты</title>
+  <title>ЛОРГУС</title>
   <link rel="stylesheet" href="./styles.css">
   <script defer src="./app.js"></script>
 </head>
 <body>
-  <div class="world-art" aria-hidden="true">
-    <div class="moon"></div><div class="mountain mountain-back"></div><div class="mountain mountain-front"></div>
-    <div class="gate"><i></i><b></b></div><div class="fog fog-a"></div><div class="fog fog-b"></div>
-    <div class="grain"></div>
+  <div class="scene" aria-hidden="true">
+    <div class="sky"></div><div class="moon"></div>
+    <div class="far-ridge"></div><div class="castle"><i></i><b></b><em></em></div>
+    <div class="sea"><span class="sea-glimmer"></span></div>
+    <div class="forest forest-back"></div><div class="forest forest-front"></div>
+    <div class="shore"></div><div class="mist mist-one"></div><div class="mist mist-two"></div><div class="mist mist-three"></div>
+    <div class="vignette"></div><div class="grain"></div>
   </div>
-  <header class="topbar">
-    <a class="wordmark" href="#" aria-label="Лоргус — главное меню"><span class="sigil">✦</span> ЛОРГУС</a>
-    <div class="topmeta"><span class="status-dot"></span> ИГРОВОЙ КЛИЕНТ <span class="meta-divider">/</span> ПРОТОТИП 0.1</div>
-    <button class="icon-button" id="settings-open" aria-label="Открыть настройки" title="Настройки">⚙</button>
-  </header>
 
-  <main class="layout">
-    <section class="intro">
-      <div class="eyebrow"><span></span> ХРОНИКИ МИРА</div>
-      <h1>За пределами<br><em>карты.</em></h1>
-      <p class="lead">Есть земли, которых нет на картах.<br>Есть истории, которые ещё не рассказаны.</p>
-      <div class="ornament"><span>✧</span><i></i><span>✧</span></div>
-      <p class="lore">Семь земель. Бесчисленные судьбы.<br>Один мир, который живёт благодаря тем, кто в нём остаётся.</p>
-      <div class="world-stamp"><span>МИР</span><strong>LORGUS</strong><small>ПУТЬ НАЧИНАЕТСЯ ЗДЕСЬ</small></div>
-    </section>
+  <section class="splash" id="splash" aria-label="Заставка LORGUS">
+    <div class="studio-logos"><span class="young-logo">Young<span>7</span>eat</span><span class="logo-divider"></span><span class="gpt-logo"><span class="gpt-mark">✺</span> GPT</span></div>
+    <p class="splash-caption">ИСТОРИЯ НАЧИНАЕТСЯ В ТУМАНЕ</p>
+    <button class="skip-intro" id="skip-intro" type="button">ПРОПУСТИТЬ ЗАСТАВКУ <span>↗</span></button>
+  </section>
 
-    <section class="menu-panel" aria-label="Главное меню">
-      <div class="panel-top"><span>ВОРОТА ЛОРГУСА</span><span>✦</span></div>
-      <p class="panel-caption">ТВОЯ ИСТОРИЯ ПРОДОЛЖАЕТСЯ</p>
-      <h2>Куда ведёт твой путь?</h2>
-      <nav class="menu-list" aria-label="Игровое меню">
-        <button class="menu-item primary" data-action="continue"><span class="item-mark">Ⅰ</span><span><b>Продолжить путь</b><small>Войти в мир и к своим персонажам</small></span><i>↗</i></button>
-        <button class="menu-item" data-action="world"><span class="item-mark">Ⅱ</span><span><b>Атлас земель</b><small>Королевства и неизведанные края</small></span><i>↗</i></button>
-        <button class="menu-item" data-action="chronicles"><span class="item-mark">Ⅲ</span><span><b>Архив летописца</b><small>Истории, легенды и существа</small></span><i>↗</i></button>
-        <button class="menu-item" data-action="settings"><span class="item-mark">Ⅳ</span><span><b>Настройки</b><small>Изображение, звук и управление</small></span><i>↗</i></button>
-      </nav>
-      <div class="panel-bottom"><span>✧</span><span>МИР ЖДЁТ СВОЕГО ЛЕТОПИСЦА</span><span>✧</span></div>
-    </section>
+  <main class="login-screen" id="login-screen">
+    <header class="brand"><span class="brand-sigil">✦</span><span>LORGUS</span><small>ЗА ПРЕДЕЛАМИ КАРТЫ</small></header>
+    <div class="login-card" id="login-card">
+      <p class="eyebrow"><span></span> ВОРОТА ЛОРГУСА <span></span></p>
+      <h1>Возвращение <em>домой</em></h1>
+      <p class="login-copy">Мир помнит тех, кто однажды ступил на его землю.</p>
+      <form id="login-form" autocomplete="on">
+        <label for="username">ИМЯ ИЛИ ЭЛЕКТРОННАЯ ПОЧТА</label>
+        <input id="username" name="username" autocomplete="username" placeholder="Имя путешественника" required>
+        <label for="password">ПАРОЛЬ</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Тайна, известная лишь тебе" required>
+        <p class="login-error" id="login-error" role="status">Вход пока не подключён к игровым аккаунтам.</p>
+        <button class="enter-button" type="submit"><span>ВОЙТИ В ЛОРГУС</span><b>⟶</b></button>
+      </form>
+      <div class="login-foot"><span>✧</span> ТВОЯ ИСТОРИЯ ЖДЁТ ПРОДОЛЖЕНИЯ <span>✧</span></div>
+    </div>
+    <div class="scene-caption"><span>НЕРОВНОЕ МОРЕ · СЕВЕРНЫЙ БЕРЕГ</span><span>© LORGUS</span></div>
   </main>
 
-  <footer class="footer"><span>© ЛОРГУС</span><span class="footer-quote">Там, где заканчивается карта, начинается история.</span><span id="build-label">ЛОКАЛЬНЫЙ ПРОТОТИП</span></footer>
+  <div class="messenger" id="messenger" aria-hidden="true">
+    <div class="pigeon-shadow"></div>
+    <svg class="pigeon" viewBox="0 0 320 230" role="img" aria-label="">
+      <defs><linearGradient id="wing" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f4f0e5"/><stop offset=".55" stop-color="#aeb8bb"/><stop offset="1" stop-color="#5b6a70"/></linearGradient><linearGradient id="body" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f5f1e5"/><stop offset=".6" stop-color="#9eabb0"/><stop offset="1" stop-color="#43545c"/></linearGradient></defs>
+      <path class="tail" d="M95 128 Q48 104 22 119 Q53 139 88 145Z" fill="#9ba9ad"/>
+      <path d="M96 122 Q61 81 31 63 Q66 69 111 103 Q140 63 181 51 Q166 92 146 125Z" fill="url(#wing)" stroke="#d5d9d5" stroke-width="2"/>
+      <path d="M106 121 Q80 91 56 80 M124 113 Q104 82 91 76 M139 103 Q127 76 123 69 M147 100 Q151 76 163 64" fill="none" stroke="#788b91" stroke-width="3" stroke-linecap="round"/>
+      <ellipse cx="153" cy="140" rx="67" ry="39" transform="rotate(-13 153 140)" fill="url(#body)"/>
+      <path d="M185 127 Q199 87 224 87 Q246 90 246 112 L229 135 Q210 143 185 127Z" fill="#c7d0ce"/>
+      <path d="M228 99 Q245 85 256 95 L249 107 L231 109Z" fill="#d5b779"/>
+      <circle cx="232" cy="96" r="3.5" fill="#171b1b"/><circle cx="233" cy="95" r="1" fill="#fff"/>
+      <path d="M111 146 Q150 160 186 135" fill="none" stroke="#607980" stroke-width="5" opacity=".6"/>
+      <path d="M137 168 L129 194 M160 169 L157 195" stroke="#b77e54" stroke-width="4" stroke-linecap="round"/>
+      <path d="M119 196 L137 196 M147 197 L167 197" stroke="#d1a16a" stroke-width="4" stroke-linecap="round"/>
+      <g class="letter"><path d="M182 132 L225 121 L236 151 L192 164Z" fill="#bda16b" stroke="#ead9ae" stroke-width="2"/><path d="M184 134 L208 148 L234 123" fill="none" stroke="#f0dfb7" stroke-width="2"/><circle cx="209" cy="147" r="4" fill="#842f28"/></g>
+    </svg>
+  </div>
+  <div class="feather-wipe" id="feather-wipe" aria-hidden="true">
+    <svg viewBox="0 0 180 620"><defs><linearGradient id="feather-shade" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffdf2"/><stop offset=".45" stop-color="#c5d0d1"/><stop offset="1" stop-color="#63767d"/></linearGradient></defs><path d="M89 599 Q104 435 78 291 Q38 92 95 18 Q154 97 128 253 Q112 375 89 599Z" fill="url(#feather-shade)"/><path d="M89 599 Q100 348 95 18" fill="none" stroke="#f7f4e9" stroke-width="4"/><g stroke="#82969b" stroke-width="1.5" opacity=".8"><path d="M94 82 L58 58 M95 105 L48 88 M96 130 L43 119 M96 158 L40 150 M97 185 L42 181 M98 214 L45 214 M98 244 L49 248 M98 275 L54 284 M98 308 L60 320 M99 340 L66 354 M99 371 L72 387 M99 402 L77 419 M99 434 L81 450 M99 467 L84 483"/></g></svg>
+  </div>
 
-  <dialog id="notice" class="dialog">
-    <button class="dialog-close" data-close aria-label="Закрыть">×</button>
-    <div class="dialog-sigil">✧</div><p class="eyebrow" id="notice-kicker">ЛЕТОПИСЬ ПРОДОЛЖАЕТСЯ</p>
-    <h2 id="notice-title">Путь ещё впереди</h2><p id="notice-body"></p>
-    <button class="gold-button" data-close>ПОНЯТНО</button>
-  </dialog>
-  <dialog id="settings" class="dialog settings-dialog">
-    <button class="dialog-close" data-close aria-label="Закрыть">×</button>
-    <div class="dialog-sigil">✧</div><p class="eyebrow">НАСТРОЙКИ КЛИЕНТА</p>
-    <h2>Тишина перед дорогой</h2>
-    <label class="setting-row"><span><b>Уменьшить движение</b><small>Отключить декоративные эффекты</small></span><input id="reduced-motion" type="checkbox"></label>
-    <label class="setting-row"><span><b>Увеличенный текст</b><small>Повысить читаемость интерфейса</small></span><input id="large-text" type="checkbox"></label>
-    <p class="settings-note">Настройки пока действуют только в этом окне. Сохранение профиля появится в следующих версиях.</p>
-    <button class="gold-button" data-close>СОХРАНИТЬ И ЗАКРЫТЬ</button>
-  </dialog>
+  <main class="cabinet" id="cabinet" aria-label="Игровой кабинет" aria-hidden="true">
+    <div class="cabinet-haze"></div>
+    <header class="cabinet-header"><div class="cabinet-brand"><span>✦</span> LORGUS</div><div class="cabinet-status">КАБИНЕТ ЛЕТОПИСЦА</div><button id="cabinet-settings" type="button" aria-label="Настройки">⚙</button></header>
+    <section class="cabinet-welcome"><p class="eyebrow">ТВОЯ ИСТОРИЯ ПРОДОЛЖАЕТСЯ</p><h2>С возвращением,<br><em>путешественник.</em></h2><p>За туманом всё ещё ждут неизведанные земли.</p></section>
+    <section class="cabinet-grid">
+      <button class="cabinet-tile featured" data-cabinet="characters"><span class="tile-mark">Ⅰ</span><b>Мои персонажи</b><small>Судьбы, которые ты вписал в летопись</small><i>ОТКРЫТЬ →</i></button>
+      <button class="cabinet-tile" data-cabinet="atlas"><span class="tile-mark">Ⅱ</span><b>Атлас земель</b><small>Королевства и дальние берега</small><i>ИЗУЧИТЬ →</i></button>
+      <button class="cabinet-tile" data-cabinet="chronicles"><span class="tile-mark">Ⅲ</span><b>Архив летописца</b><small>Легенды, существа и забытые эпохи</small><i>ЧИТАТЬ →</i></button>
+    </section>
+    <footer class="cabinet-footer"><span>МИР ЖДЁТ СВОЕГО ЛЕТОПИСЦА</span><span>ПРОТОТИП · ИГРОВЫЕ ДАННЫЕ НЕ ПОДКЛЮЧЕНЫ</span></footer>
+  </main>
+
+  <dialog id="notice" class="dialog"><button class="dialog-close" data-close aria-label="Закрыть">×</button><div class="dialog-sigil">✧</div><p class="eyebrow">ЛЕТОПИСЬ ПРОДОЛЖАЕТСЯ</p><h2 id="notice-title">Путь ещё впереди</h2><p id="notice-body"></p><button class="enter-button" data-close type="button"><span>ПОНЯТНО</span><b>✧</b></button></dialog>
+  <script></script>
 </body>
 </html>
