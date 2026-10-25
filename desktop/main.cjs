@@ -1,5 +1,8 @@
 const { app, BrowserWindow, shell } = require("electron");
 const path = require("node:path");
+const { fileURLToPath } = require("node:url");
+
+const entryPath = path.resolve(__dirname, "renderer", "index.html");
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -19,19 +22,28 @@ function createWindow() {
   });
 
   win.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith("https://")) shell.openExternal(url);
+    // Never let a renderer-created window gain local or privileged access.
+    if (url.startsWith("https://")) void shell.openExternal(url);
     return { action: "deny" };
   });
 
-  // The app is a local, self-contained prototype. Keep navigation inside its entry document.
   win.webContents.on("will-navigate", (event, url) => {
-    if (!url.startsWith("file://") || !url.endsWith("/renderer/index.html")) {
+    let destination;
+    try {
+      if (!url.startsWith("file://")) {
+        event.preventDefault();
+        return;
+      }
+      destination = path.resolve(fileURLToPath(url));
+    } catch {
       event.preventDefault();
+      return;
     }
+    if (destination !== entryPath) event.preventDefault();
   });
 
   win.once("ready-to-show", () => win.show());
-  win.loadFile(path.join(__dirname, "renderer", "index.html"));
+  void win.loadFile(entryPath);
 }
 
 app.whenReady().then(() => {
