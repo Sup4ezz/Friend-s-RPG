@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+  <meta name="color-scheme" content="dark">
+  <title>ЛОРГУС — За пределами карты</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <div class="world-art" aria-hidden="true">
+    <div class="moon"></div><div class="mountain mountain-back"></div><div class="mountain mountain-front"></div>
+    <div class="gate"><i></i><b></b></div><div class="fog fog-a"></div><div class="fog fog-b"></div>
+    <div class="grain"></div>
+  </div>
+  <header class="topbar">
+    <a class="wordmark" href="#" aria-label="Лоргус — главное меню"><span class="sigil">✦</span> ЛОРГУС</a>
+    <div class="topmeta"><span class="status-dot"></span> ИГРОВОЙ КЛИЕНТ <span class="meta-divider">/</span> ПРОТОТИП 0.1</div>
+    <button class="icon-button" id="settings-open" aria-label="Открыть настройки" title="Настройки">⚙</button>
+  </header>
+
+  <main class="layout">
+    <section class="intro">
+      <div class="eyebrow"><span></span> ХРОНИКИ МИРА</div>
+      <h1>За пределами<br><em>карты.</em></h1>
+      <p class="lead">Есть земли, которых нет на картах.<br>Есть истории, которые ещё не рассказаны.</p>
+      <div class="ornament"><span>✧</span><i></i><span>✧</span></div>
+      <p class="lore">Семь земель. Бесчисленные судьбы.<br>Один мир, который живёт благодаря тем, кто в нём остаётся.</p>
+      <div class="world-stamp"><span>МИР</span><strong>LORGUS</strong><small>ПУТЬ НАЧИНАЕТСЯ ЗДЕСЬ</small></div>
+    </section>
+
+    <section class="menu-panel" aria-label="Главное меню">
+      <div class="panel-top"><span>ВОРОТА ЛОРГУСА</span><span>✦</span></div>
+      <p class="panel-caption">ТВОЯ ИСТОРИЯ ПРОДОЛЖАЕТСЯ</p>
+      <h2>Куда ведёт твой путь?</h2>
+      <nav class="menu-list" aria-label="Игровое меню">
+        <button class="menu-item primary" data-action="continue"><span class="item-mark">Ⅰ</span><span><b>Продолжить путь</b><small>Войти в мир и к своим персонажам</small></span><i>↗</i></button>
+        <button class="menu-item" data-action="world"><span class="item-mark">Ⅱ</span><span><b>Атлас земель</b><small>Королевства и неизведанные края</small></span><i>↗</i></button>
+        <button class="menu-item" data-action="chronicles"><span class="item-mark">Ⅲ</span><span><b>Архив летописца</b><small>Истории, легенды и существа</small></span><i>↗</i></button>
+        <button class="menu-item" data-action="settings"><span class="item-mark">Ⅳ</span><span><b>Настройки</b><small>Изображение, звук и управление</small></span><i>↗</i></button>
+      </nav>
+      <div class="panel-bottom"><span>✧</span><span>МИР ЖДЁТ СВОЕГО ЛЕТОПИСЦА</span><span>✧</span></div>
+    </section>
+  </main>
+
+  <footer class="footer"><span>© ЛОРГУС</span><span class="footer-quote">Там, где заканчивается карта, начинается история.</span><span id="build-label">ЛОКАЛЬНЫЙ ПРОТОТИП</span></footer>
+
+  <dialog id="notice" class="dialog">
+    <button class="dialog-close" data-close aria-label="Закрыть">×</button>
+    <div class="dialog-sigil">✧</div><p class="eyebrow" id="notice-kicker">ЛЕТОПИСЬ ПРОДОЛЖАЕТСЯ</p>
+    <h2 id="notice-title">Путь ещё впереди</h2><p id="notice-body"></p>
+    <button class="gold-button" data-close>ПОНЯТНО</button>
+  </dialog>
+  <dialog id="settings" class="dialog settings-dialog">
+    <button class="dialog-close" data-close aria-label="Закрыть">×</button>
+    <div class="dialog-sigil">✧</div><p class="eyebrow">НАСТРОЙКИ КЛИЕНТА</p>
+    <h2>Тишина перед дорогой</h2>
+    <label class="setting-row"><span><b>Уменьшить движение</b><small>Отключить декоративные эффекты</small></span><input id="reduced-motion" type="checkbox"></label>
+    <label class="setting-row"><span><b>Увеличенный текст</b><small>Повысить читаемость интерфейса</small></span><input id="large-text" type="checkbox"></label>
+    <p class="settings-note">Настройки пока действуют только в этом окне. Сохранение профиля появится в следующих версиях.</p>
+    <button class="gold-button" data-close>СОХРАНИТЬ И ЗАКРЫТЬ</button>
+  </dialog>
+</body>
+</html>
