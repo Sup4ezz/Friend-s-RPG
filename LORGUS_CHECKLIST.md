@@ -1472,3 +1472,18 @@ Commits:
 - [x] Документ ссылается на этот мастер-чеклист и требует сверять исторические сведения с текущей веткой/production.
 - [x] Production, Supabase, миграции, Telegram outbox и игровые данные в рамках добавления документа не изменялись.
 - Следующий шаг: новый агент должен выполнить read-only аудит по `docs/HANDOFF_CLAUDE.md`, сверить актуальный commit/workflows/деплой и продолжить с незакрытых пунктов выше.
+
+
+## 2026-10-26 — координированный read-only аудит, раунд 1
+
+- [x] Проверены параллельными рабочими потоками: release workflow/архитектура, security RPC/миграции, Telegram notifier, актуальная техническая память.
+- [x] Создан отчёт с выводами и безопасным планом: [docs/AGENT_AUDIT_20261026.md](docs/AGENT_AUDIT_20261026.md).
+- [x] Установлено по исходнику: `.github/workflows/deploy-lorgus.yml` запускает Cloudflare Wrangler deploy на push в `main`, тогда как пользователь недавно сообщал о Layero. Фактический production host/commit нужно подтвердить перед изменением workflow.
+- [x] Подтверждено статически: currency transfer blacklist-gate draft остаётся только в review-ветке; runtime SQL-тестов нет.
+- [x] Подтверждено статически: review-ветка Telegram подавляет общий `rp_message`, но ответы и упоминания пока направляются в topic ID 1; в `formatEvent()` есть повторный `case "rp_reply_notification"`, а отдельного formatter case для `character_mention_notification` нет.
+- [x] Зафиксирован потенциальный лишний EXECUTE grant на SECURITY DEFINER trigger function `lorgus_telegram_client_error_event()`; требуется сверка фактических ACL и отдельный тестируемый patch.
+- [ ] Следующий шаг P0: read-only сверить свежие GitHub Actions, production host и commit SHA.
+- [ ] Следующий шаг P1: проверить currency gate и trigger ACL в изолированной Supabase-среде.
+- [ ] Следующий шаг P1: после подтверждения Telegram topic IDs подготовить review-only исправление маршрутизации/форматирования и согласовать подавление 35 старых `rp_message` событий.
+- [ ] Browser QA админки, производительности, портретов и Markdown не выполнен.
+- Безопасность: в этом раунде не изменялись frontend/backend runtime, production Supabase, права, игровые данные, Telegram outbox или deploy. Только документация добавлена в GitHub.
