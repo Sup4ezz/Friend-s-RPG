@@ -1,0 +1,59 @@
+/* LORGUS — art direction pass: restrained, editorial dark fantasy.
+   Additive overrides only; no gameplay, routing, or data logic is changed. */
+:root{
+  --bg:#080a0a;
+  --bg-soft:#0d100f;
+  --panel:#111512;
+  --panel-light:#191c17;
+  --gold:#c9a568;
+  --gold-light:#ead7aa;
+  --gold-dark:#76582e;
+  --text:#e8e0d0;
+  --text-soft:#b8b09f;
+  --text-muted:#817b6e;
+  --border:rgba(201,165,104,.25);
+  --border-soft:rgba(201,165,104,.12);
+  --border-strong:rgba(222,190,128,.58);
+  --shadow:0 24px 70px rgba(0,0,0,.48);
+  --inner-shadow:inset 0 1px rgba(255,255,255,.018);
+}
+html{background:#080a0a}
+body{
+  background:
+    radial-gradient(ellipse at 50% -18%,rgba(139,105,55,.13),transparent 54%),
+    linear-gradient(180deg,#0b0e0d 0%,#080a0a 62%,#090a09 100%);
+  color:var(--text);
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:rgba(201,165,104,.32);color:#fff5df}
+button,a,[role=button]{transition:color .18s ease,border-color .18s ease,background-color .18s ease,box-shadow .18s ease,transform .18s ease}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid rgba(234,215,170,.82);outline-offset:3px
+}
+.lorgus-panel{
+  background:linear-gradient(145deg,rgba(24,27,23,.97),rgba(12,15,14,.99));
+  border-color:rgba(201,165,104,.22);
+  box-shadow:0 20px 55px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.025)
+}
+.lorgus-panel::before,.lorgus-panel::after{width:23px;height:23px;opacity:.62}
+button:hover:not(:disabled),[role=button]:hover{
+  filter:brightness(1.08)
+}
+input,select,textarea{
+  color:var(--text);
+  background:rgba(7,10,9,.78);
+  border-color:rgba(201,165,104,.25)
+}
+input:focus,select:focus,textarea:focus{
+  border-color:rgba(222,190,128,.62);
+  box-shadow:0 0 0 3px rgba(201,165,104,.08)
+}
+hr{border:0;border-top:1px solid var(--border-soft)}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+@media(max-width:720px){
+  body{background:linear-gradient(180deg,#0b0e0d,#080a0a)}
+  .lorgus-panel{box-shadow:0 10px 28px rgba(0,0,0,.24)}
+}
