@@ -3,13 +3,11 @@ const path = require("node:path");
 
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1440,
-    height: 900,
-    minWidth: 980,
-    minHeight: 650,
-    backgroundColor: "#090806",
+    fullscreen: true,
+    backgroundColor: "#080d10",
     title: "ЛОРГУС",
     autoHideMenuBar: true,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
       nodeIntegration: false,
@@ -25,12 +23,14 @@ function createWindow() {
     return { action: "deny" };
   });
 
+  // The app is a local, self-contained prototype. Keep navigation inside its entry document.
   win.webContents.on("will-navigate", (event, url) => {
-    if (url !== `file://${path.join(__dirname, "renderer", "index.html").replace(/\\/g, "/")}`) {
+    if (!url.startsWith("file://") || !url.endsWith("/renderer/index.html")) {
       event.preventDefault();
     }
   });
 
+  win.once("ready-to-show", () => win.show());
   win.loadFile(path.join(__dirname, "renderer", "index.html"));
 }
 
