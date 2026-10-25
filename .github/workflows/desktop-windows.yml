@@ -1,0 +1,52 @@
+name: LORGUS Desktop Windows build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - desktop-client-prototype
+    paths:
+      - "desktop/**"
+      - ".github/workflows/desktop-windows.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - name: Checkout prototype branch
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package.json
+
+      - name: Install desktop dependencies
+        run: npm install
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check main.cjs
+          node --check preload.cjs
+          node --check renderer/app.js
+
+      - name: Build Windows x64 installer
+        run: npm run dist:win
+
+      - name: Upload installer and unpacked app
+        uses: actions/upload-artifact@v4
+        with:
+          name: LORGUS-Desktop-Windows-x64
+          path: |
+            desktop/dist/*.exe
+            desktop/dist/*.blockmap
+          if-no-files-found: error
+          retention-days: 14
