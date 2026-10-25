@@ -240,7 +240,7 @@ Deno.serve(async (req: Request) => {
   // Existing group feed remains unchanged. Some event types are personal-only.
   const deliveredTypes = new Set([
     "rp_reply_notification", "character_mention_notification", "character_application",
-    "rp_message", "item_used", "item_transfer", "lootbox_reward"
+    "item_used", "item_transfer", "lootbox_reward"
   ]);
   const personalOnlyTypes = new Set(["application_review", "currency_transfer", "player_notification", "lorgus_update"]);
   if (!deliveredTypes.has(type) && !personalOnlyTypes.has(type)) {
@@ -285,7 +285,6 @@ Deno.serve(async (req: Request) => {
       if (eventType === "item_transfer" || eventType === "lootbox_reward") return "items";
       if (eventType === "rp_reply_notification") return "rp_replies";
       if (eventType === "character_mention_notification") return "mentions";
-      if (eventType === "rp_message") return "rp_posts";
       if (eventType === "lorgus_update") return "updates";
       if (eventType === "player_notification") {
         if (p.notification_type === "system") return "system";
