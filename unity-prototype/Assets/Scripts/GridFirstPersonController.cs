@@ -110,6 +110,17 @@ namespace Lorgus.Prototype
             if (interactionUI != null) interactionUI.ShowText("Тишина", "Вы не замечаете ничего, с чем можно было бы взаимодействовать.");
         }
 
+        public void SetCameraRestHeight(float height)
+        {
+            cameraRestPosition.y = height;
+            if (playerCamera != null)
+            {
+                Vector3 position = playerCamera.transform.localPosition;
+                position.y = height;
+                playerCamera.transform.localPosition = position;
+            }
+        }
+
         public void SetInputEnabled(bool enabled)
         {
             inputEnabled = enabled;
