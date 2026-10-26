@@ -5,6 +5,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace Lorgus.Prototype.Editor
 {
@@ -16,6 +17,13 @@ namespace Lorgus.Prototype.Editor
 
         public static void BuildWindows()
         {
+            // Use the native Windows graphics backend explicitly. This avoids inheriting
+            // graphics API defaults from the Linux CI host used by earlier builds.
+            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.StandaloneWindows64, false);
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.StandaloneWindows64,
+                new[] { GraphicsDeviceType.Direct3D11 });
+            PlayerSettings.graphicsJobs = false;
+
             // The prototype uses UnityEngine.Input, not the new Input System.
             // Set legacy input mode reflectively to remain compatible across Unity 6 patch releases.
             try
