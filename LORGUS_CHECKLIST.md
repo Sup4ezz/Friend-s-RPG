@@ -1628,3 +1628,12 @@ Commits:
 - Регистрация также использует логин, сохраняет username в user metadata и просит повторить пароль. Никаких изменений в Supabase, production-аккаунтах, RLS или данных не делалось.
 - Космический фон заменён на процедурное панорамное небо: тёмная звёздная глубина, цветные туманности и более естественный фон за планетами. UI входа переработан в спокойную тёмную карточку с золотым акцентом, полями единого стиля и переключением «Войти / Создать аккаунт».
 - Изменения только в ветке `unity/lorgus-windows-prototype`; требуется проверить структурный CI, Unity-компиляцию и новый Windows build. Визуальный результат нужно оценить на реальном запуске: автоматическая сборка не заменяет проверку оформления.
+
+
+## 2026-10-27 — Unity Windows crash follow-up
+
+- The Windows prototype build crashed at startup in UnityPlayer.dll (0xC0000005) after repeated Internal-ErrorShader resource warnings on the user's Windows PC. Direct3D 11 detected the GTX 1660 SUPER; forcing OpenGL Core failed because that backend was not included in the player.
+- Updated `unity-prototype/Assets/Editor/BuildScript.cs` on `unity/lorgus-windows-prototype` to explicitly select Direct3D 11 for StandaloneWindows64 and disable Unity graphics jobs for a diagnostic rebuild.
+- Updated `.github/workflows/build-windows.yml` to build on `windows-latest` rather than cross-building a Windows player on Ubuntu, and switched packaging to PowerShell with checks for the complete Windows player files.
+- This is a targeted build-pipeline fix attempt, not yet confirmed as a runtime fix. Wait for the new GitHub Actions run and have the user test the newly produced artifact. Do not merge to `main`; do not change production web app or Supabase.
+- Next: inspect the workflow run outcome, ensure the archive is complete, provide the new artifact, and only then decide further diagnosis based on its startup result.
