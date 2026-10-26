@@ -1,6 +1,11 @@
 name: Import Quaternius Fantasy Props
 
 on:
+  push:
+    branches:
+      - unity/lorgus-windows-prototype
+    paths:
+      - .github/workflows/import-quaternius-fantasy-props.yml
   workflow_dispatch:
     inputs:
       drive_file_id:
@@ -23,7 +28,7 @@ jobs:
 
       - name: Download public archive from Google Drive
         env:
-          DRIVE_FILE_ID: ${{ inputs.drive_file_id }}
+          DRIVE_FILE_ID: ${{ inputs.drive_file_id || '1tgaWnz0q_76GUM10bDOpJ2SVAfw8O9wp' }}
         run: |
           python -m pip install --user gdown
           mkdir -p /tmp/lorgus-assets
