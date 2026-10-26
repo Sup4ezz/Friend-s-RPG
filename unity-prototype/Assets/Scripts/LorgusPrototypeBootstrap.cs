@@ -28,6 +28,7 @@ namespace Lorgus.Prototype
             BuildRoom();
             BuildPlayer();
             BuildLighting();
+            gameObject.AddComponent<RoomAtmosphere>();
             BuildUI();
         }
 
