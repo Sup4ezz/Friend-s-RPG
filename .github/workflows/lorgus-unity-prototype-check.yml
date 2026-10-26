@@ -96,6 +96,8 @@ jobs:
           for region in ("Каэлор", "Морвейн", "Атэрон", "Ксандр", "Лирэн", "Святые Земли", "Спорные Земли", "Геена"):
               assert region in window_view, f"Window view is missing a region theme: {region}"
           assert "WaitForSecondsRealtime(30f)" in window_view, "Window view should refresh the character's RP location while playing"
+          assert "RefreshActiveSession" in login and "rememberSession" in login, "Long-running session must rotate refresh tokens without storing passwords"
+          assert "45f * 60f" in window_view and "CurrentAccessToken" in login, "Window polling must refresh its access token before expiry"
           assert 'CreateBlock("Back wall below window"' in bootstrap, "Back wall must have a real window opening"
           assert "BuildRoom();" not in bootstrap[bootstrap.find("private void Awake()"):bootstrap.find("public void EnterRoomAfterApproval(")], "Room must not be built before login/approval"
           print("Scaffold, C# structure, FBX catalogue, controls, required room fixtures, and scope boundaries passed.")
