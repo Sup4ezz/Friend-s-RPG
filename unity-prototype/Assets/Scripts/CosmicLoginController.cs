@@ -25,7 +25,9 @@ namespace Lorgus.Prototype
         private LorgusPrototypeBootstrap bootstrap;
         private GameObject cosmicRoot;
         private GameObject uiRoot;
-        private InputField emailField;
+        private InputField usernameField;
+        private InputField confirmPasswordField;
+        private bool registering;
         private InputField passwordField;
         private Toggle rememberToggle;
         private Text statusText;
@@ -112,8 +114,9 @@ namespace Lorgus.Prototype
             camera.fieldOfView = 58f;
             camera.nearClipPlane = 0.1f;
             camera.farClipPlane = 180f;
-            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.clearFlags = CameraClearFlags.Skybox;
             camera.backgroundColor = new Color(0.004f, 0.006f, 0.022f);
+            CreateNebulaSkybox();
             cameraObject.AddComponent<AudioListener>();
 
             var starObject = new GameObject("Distant stars");
@@ -169,6 +172,67 @@ namespace Lorgus.Prototype
             });
         }
 
+        private void CreateNebulaSkybox()
+        {
+            const int width = 1024;
+            const int height = 512;
+            var texture = new Texture2D(width, height, TextureFormat.RGB24, false, true);
+            texture.wrapMode = TextureWrapMode.Repeat;
+            texture.filterMode = FilterMode.Bilinear;
+            var clouds = new Vector4[] {
+                new Vector4(0.18f, 0.34f, 0.16f, 0.13f),
+                new Vector4(0.38f, 0.63f, 0.20f, 0.18f),
+                new Vector4(0.57f, 0.42f, 0.17f, 0.13f),
+                new Vector4(0.79f, 0.70f, 0.21f, 0.16f),
+                new Vector4(0.88f, 0.24f, 0.14f, 0.11f)
+            };
+            var pixels = new Color[width * height];
+            for (int y = 0; y < height; y++)
+            for (int x = 0; x < width; x++)
+            {
+                float u = (float)x / width;
+                float v = (float)y / height;
+                float n = Mathf.PerlinNoise(u * 9.0f + 3.1f, v * 6.0f + 8.7f) * 0.55f +
+                          Mathf.PerlinNoise(u * 21.0f, v * 13.0f) * 0.25f;
+                Color col = new Color(0.006f, 0.009f, 0.028f);
+                float cloud = 0f;
+                for (int i = 0; i < clouds.Length; i++)
+                {
+                    float dx = Mathf.Abs(u - clouds[i].x);
+                    dx = Mathf.Min(dx, 1f - dx);
+                    float dy = (v - clouds[i].y) / clouds[i].w;
+                    float d = Mathf.Sqrt(dx * dx / (clouds[i].z * clouds[i].z) + dy * dy);
+                    cloud += Mathf.Exp(-d * d * 1.5f) * n;
+                }
+                col += new Color(0.07f, 0.035f, 0.16f) * cloud * 0.85f;
+                col += new Color(0.025f, 0.13f, 0.19f) * cloud * Mathf.Clamp01(n - 0.35f) * 0.75f;
+                float glow = Mathf.Clamp01((n - 0.54f) * 1.6f) * cloud;
+                col += new Color(0.24f, 0.12f, 0.22f) * glow * 0.35f;
+                pixels[y * width + x] = col;
+            }
+            var random = new System.Random(73021);
+            for (int i = 0; i < 1150; i++)
+            {
+                int x = random.Next(width), y = random.Next(height);
+                Color star = random.NextDouble() > 0.92
+                    ? new Color(0.95f, 0.72f, 0.45f)
+                    : new Color(0.62f, 0.75f, 1f);
+                pixels[y * width + x] = Color.Lerp(pixels[y * width + x], star, (float)(0.45 + random.NextDouble() * 0.55));
+            }
+            texture.SetPixels(pixels);
+            texture.Apply(false, true);
+            var shader = Shader.Find("Skybox/Panoramic");
+            if (shader != null)
+            {
+                var sky = new Material(shader);
+                sky.SetTexture("_MainTex", texture);
+                sky.SetColor("_Tint", Color.white);
+                sky.SetFloat("_Exposure", 0.8f);
+                sky.SetFloat("_Rotation", 0f);
+                RenderSettings.skybox = sky;
+            }
+        }
+
         private void CreatePlanet(string objectName, Vector3 position, float size, Color color)
         {
             var planet = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -211,13 +275,13 @@ namespace Lorgus.Prototype
 
         private void BuildLoginUI()
         {
-            // The same EventSystem serves the cosmic form and later room-overlay buttons.
             if (FindObjectOfType<EventSystem>() == null)
             {
                 var eventSystemObject = new GameObject("LORGUS EventSystem");
                 eventSystemObject.AddComponent<EventSystem>();
                 eventSystemObject.AddComponent<StandaloneInputModule>();
             }
+
             uiRoot = new GameObject("Cosmic Login UI");
             var canvas = uiRoot.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -225,44 +289,103 @@ namespace Lorgus.Prototype
             var scaler = uiRoot.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.matchWidthOrHeight = 0.5f;
             uiRoot.AddComponent<GraphicRaycaster>();
 
-            MakeLabel(canvas.transform, "LORGUS", 52, FontStyle.Bold, new Vector2(0, 275), new Vector2(720, 80));
-            MakeLabel(canvas.transform, "МЕЖДУ ЗВЁЗДАМИ НЕТ ДОРОГ — ТОЛЬКО ПУТЬ", 18, FontStyle.Normal,
-                new Vector2(0, 225), new Vector2(720, 42));
+            // Quiet, premium fantasy title card; the animated sky remains visible around it.
+            var card = new GameObject("Obsidian glass card");
+            card.transform.SetParent(canvas.transform, false);
+            var cardRect = card.AddComponent<RectTransform>();
+            cardRect.anchorMin = cardRect.anchorMax = new Vector2(0.5f, 0.5f);
+            cardRect.anchoredPosition = new Vector2(0, -8);
+            cardRect.sizeDelta = new Vector2(590, 610);
+            var cardImage = card.AddComponent<Image>();
+            cardImage.color = new Color(0.018f, 0.022f, 0.042f, 0.91f);
 
-            emailField = MakeInput(canvas.transform, "Электронная почта", new Vector2(0, 105), false);
-            passwordField = MakeInput(canvas.transform, "Пароль", new Vector2(0, 35), true);
-            rememberToggle = MakeToggle(canvas.transform, new Vector2(0, -20), "ЗАПОМНИТЬ ДАННЫЕ");
-            loginButton = MakeButton(canvas.transform, "ВОЙТИ", new Vector2(-105, -88), new Vector2(200, 54), Login);
-            registerButton = MakeButton(canvas.transform, "СОЗДАТЬ АККАУНТ", new Vector2(120, -88), new Vector2(245, 54), Register);
-            statusText = MakeLabel(canvas.transform, "", 17, FontStyle.Normal, new Vector2(0, -175), new Vector2(850, 76));
+            MakeLabel(card.transform, "L O R G U S", 38, FontStyle.Bold, new Vector2(0, 245), new Vector2(500, 64));
+            MakeLabel(card.transform, "МИР ЗА ПРЕДЕЛАМИ ИЗВЕСТНОГО", 13, FontStyle.Normal,
+                new Vector2(0, 205), new Vector2(500, 30));
+            var divider = new GameObject("Gold divider");
+            divider.transform.SetParent(card.transform, false);
+            var dividerRect = divider.AddComponent<RectTransform>();
+            dividerRect.anchorMin = dividerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            dividerRect.anchoredPosition = new Vector2(0, 178);
+            dividerRect.sizeDelta = new Vector2(92, 2);
+            divider.AddComponent<Image>().color = new Color(0.76f, 0.57f, 0.29f, 0.95f);
+
+            MakeLabel(card.transform, "ВОЗВРАЩЕНИЕ", 20, FontStyle.Bold, new Vector2(0, 135), new Vector2(470, 40));
+            MakeLabel(card.transform, "Войдите, чтобы продолжить свой путь.", 15, FontStyle.Normal,
+                new Vector2(0, 101), new Vector2(470, 28));
+
+            usernameField = MakeInput(card.transform, "Логин", new Vector2(0, 45), false);
+            passwordField = MakeInput(card.transform, "Пароль", new Vector2(0, -29), true);
+            confirmPasswordField = MakeInput(card.transform, "Повторите пароль", new Vector2(0, -103), true);
+            confirmPasswordField.gameObject.SetActive(false);
+
+            rememberToggle = MakeToggle(card.transform, new Vector2(0, -82), "ЗАПОМНИТЬ ДАННЫЕ");
+            loginButton = MakeButton(card.transform, "ВОЙТИ В МИР", new Vector2(0, -145), new Vector2(460, 54), Login);
+            registerButton = MakeButton(card.transform, "СОЗДАТЬ АККАУНТ", new Vector2(0, -145), new Vector2(460, 54), Register);
+            registerButton.gameObject.SetActive(false);
+
+            var modeButton = MakeButton(card.transform, "Нет аккаунта? Создать", new Vector2(0, -204),
+                new Vector2(460, 38), ToggleAuthMode);
+            modeButton.GetComponent<Image>().color = new Color(0.07f, 0.075f, 0.10f, 0.98f);
+            statusText = MakeLabel(card.transform, "", 14, FontStyle.Normal, new Vector2(0, -252), new Vector2(500, 54));
             statusText.alignment = TextAnchor.MiddleCenter;
+            SetAuthFieldLayout(false);
+        }
+
+        private void ToggleAuthMode()
+        {
+            registering = !registering;
+            SetAuthFieldLayout(registering);
+            SetStatus(registering ? "Создайте аккаунт LORGUS." : "Войдите в свой аккаунт LORGUS.");
+            // The mode button label is the only button whose caption changes.
+            foreach (Transform child in uiRoot.transform.GetChild(0).GetChild(0))
+            {
+                if (child.name.Contains("Нет аккаунта?") || child.name.Contains("Уже есть аккаунт?"))
+                {
+                    Text label = child.GetComponentInChildren<Text>();
+                    if (label != null) label.text = registering ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Создать";
+                }
+            }
+        }
+
+        private void SetAuthFieldLayout(bool registerMode)
+        {
+            confirmPasswordField.gameObject.SetActive(registerMode);
+            rememberToggle.gameObject.SetActive(!registerMode);
+            loginButton.gameObject.SetActive(!registerMode);
+            registerButton.gameObject.SetActive(registerMode);
+            usernameField.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, registerMode ? 75 : 45);
+            passwordField.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, registerMode ? 1 : -29);
+            confirmPasswordField.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -73);
+            rememberToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -82);
         }
 
         private InputField MakeInput(Transform parent, string placeholder, Vector2 position, bool password)
         {
-            var root = new GameObject(password ? "Password input" : "Email input");
+            var root = new GameObject(password ? placeholder + " input" : "Username input");
             root.transform.SetParent(parent, false);
             var rect = root.AddComponent<RectTransform>();
             rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
             rect.anchoredPosition = position;
-            rect.sizeDelta = new Vector2(450, 52);
+            rect.sizeDelta = new Vector2(460, 56);
             var image = root.AddComponent<Image>();
-            image.color = new Color(0.035f, 0.04f, 0.075f, 0.92f);
+            image.color = new Color(0.045f, 0.052f, 0.078f, 1f);
             var input = root.AddComponent<InputField>();
-            var text = MakeLabel(root.transform, "", 20, FontStyle.Normal, Vector2.zero, new Vector2(410, 44));
+            var text = MakeLabel(root.transform, "", 18, FontStyle.Normal, new Vector2(0, 0), new Vector2(420, 48));
             text.alignment = TextAnchor.MiddleLeft;
-            text.color = new Color(0.92f, 0.88f, 0.8f);
+            text.color = new Color(0.94f, 0.91f, 0.84f);
             input.textComponent = text;
-            var hint = MakeLabel(root.transform, placeholder, 18, FontStyle.Italic, Vector2.zero, new Vector2(410, 44));
+            var hint = MakeLabel(root.transform, placeholder, 16, FontStyle.Normal, new Vector2(0, 0), new Vector2(420, 48));
             hint.alignment = TextAnchor.MiddleLeft;
-            hint.color = new Color(0.55f, 0.58f, 0.68f);
+            hint.color = new Color(0.56f, 0.58f, 0.65f);
             input.placeholder = hint;
-            input.contentType = password ? InputField.ContentType.Password : InputField.ContentType.EmailAddress;
+            input.contentType = password ? InputField.ContentType.Password : InputField.ContentType.Standard;
             input.lineType = InputField.LineType.SingleLine;
             input.targetGraphic = image;
-            input.characterLimit = password ? 256 : 320;
+            input.characterLimit = password ? 256 : 32;
             return input;
         }
 
@@ -341,24 +464,29 @@ namespace Lorgus.Prototype
         private void Login()
         {
             if (requestInProgress) return;
-            string email = emailField.text.Trim();
+            string username = usernameField.text.Trim();
             string password = passwordField.text;
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (!ValidUsername(username))
             {
-                SetStatus("Введите электронную почту и пароль.");
+                SetStatus("Логин: от 3 до 32 символов.");
                 return;
             }
-            StartCoroutine(Authenticate(email, password, false));
+            if (string.IsNullOrEmpty(password))
+            {
+                SetStatus("Введите пароль.");
+                return;
+            }
+            StartCoroutine(Authenticate(username, password, false));
         }
 
         private void Register()
         {
             if (requestInProgress) return;
-            string email = emailField.text.Trim();
+            string username = usernameField.text.Trim();
             string password = passwordField.text;
-            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
+            if (!ValidUsername(username))
             {
-                SetStatus("Для регистрации заполните почту и пароль.");
+                SetStatus("Логин: от 3 до 32 символов.");
                 return;
             }
             if (password.Length < 6)
@@ -366,16 +494,47 @@ namespace Lorgus.Prototype
                 SetStatus("Пароль должен содержать не менее 6 символов.");
                 return;
             }
-            StartCoroutine(Authenticate(email, password, true));
+            if (password != confirmPasswordField.text)
+            {
+                SetStatus("Пароли не совпадают.");
+                return;
+            }
+            StartCoroutine(Authenticate(username, password, true));
         }
 
-        private IEnumerator Authenticate(string email, string password, bool register)
+        private bool ValidUsername(string username)
+        {
+            return !string.IsNullOrWhiteSpace(username) && username.Length >= 3 && username.Length <= 32;
+        }
+
+        // Must match src/core/auth-forms.js: getAuthEmail(username).
+        // The website uses btoa(encodeURIComponent(username)), then URL-safe Base64 without padding.
+        private string UsernameToAuthEmail(string username)
+        {
+            var encoded = new StringBuilder();
+            foreach (byte b in Encoding.UTF8.GetBytes(username))
+            {
+                char c = (char)b;
+                bool safe = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                    (c >= '0' && c <= '9') || "-_.!~*'()".IndexOf(c) >= 0;
+                if (safe) encoded.Append(c);
+                else encoded.Append('%').Append(b.ToString("X2"));
+            }
+            string base64 = Convert.ToBase64String(Encoding.ASCII.GetBytes(encoded.ToString()));
+            base64 = base64.TrimEnd('=').Replace('+', '-').Replace('/', '_');
+            return "u_" + base64 + "@auth.lorgus.local";
+        }
+
+        private IEnumerator Authenticate(string username, string password, bool register)
         {
             requestInProgress = true;
             SetButtonsEnabled(false);
             SetStatus(register ? "Создаём аккаунт…" : "Проверяем учётные данные…");
             string endpoint = register ? "/auth/v1/signup" : "/auth/v1/token?grant_type=password";
-            string payload = JsonUtility.ToJson(new Credentials { email = email, password = password });
+            string authEmail = UsernameToAuthEmail(username);
+            string payload = register
+                ? JsonUtility.ToJson(new SignupCredentials { email = authEmail, password = password, data = new UserMetadata { username = username } })
+                : JsonUtility.ToJson(new Credentials { email = authEmail, password = password });
             AuthResponse auth = null;
             string error = null;
             yield return SendJson("POST", SupabaseUrl + endpoint, payload, null, response =>
@@ -396,7 +555,7 @@ namespace Lorgus.Prototype
                 }
                 else if (auth != null && auth.user != null)
                 {
-                    SetStatus("Аккаунт создан. Подтвердите электронную почту, затем войдите.");
+                    SetStatus("Аккаунт создан. Войдите после завершения регистрации.");
                 }
                 else SetStatus("Не удалось создать аккаунт: " + (error ?? "неизвестный ответ сервера"));
             }
@@ -412,6 +571,8 @@ namespace Lorgus.Prototype
         }
 
         [Serializable] private sealed class Credentials { public string email; public string password; }
+        [Serializable] private sealed class SignupCredentials { public string email; public string password; public UserMetadata data; }
+        [Serializable] private sealed class UserMetadata { public string username; }
 
         private void AcceptSession(AuthResponse auth)
         {
