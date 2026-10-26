@@ -77,6 +77,16 @@ namespace Lorgus.Prototype
             SetStatus("Войдите в ЛОРГУС или создайте аккаунт.");
         }
 
+        private void Update()
+        {
+            if (cosmicRoot == null || requestInProgress) return;
+            // The starfield responds subtly to the pointer without stealing clicks from the form.
+            float nx = Screen.width > 0 ? (Input.mousePosition.x / Screen.width - 0.5f) : 0f;
+            float ny = Screen.height > 0 ? (Input.mousePosition.y / Screen.height - 0.5f) : 0f;
+            Quaternion target = Quaternion.Euler(-ny * 3.5f, nx * 6f, 0f);
+            cosmicRoot.transform.rotation = Quaternion.Slerp(cosmicRoot.transform.rotation, target, Time.unscaledDeltaTime * 1.4f);
+        }
+
         private void BuildCosmos()
         {
             cosmicRoot = new GameObject("LORGUS Cosmic Entry");
@@ -124,6 +134,14 @@ namespace Lorgus.Prototype
             }
             particles.SetParticles(stars, stars.Length);
             particles.Play();
+
+            var keyLightObject = new GameObject("Cosmic soft light");
+            keyLightObject.transform.SetParent(cosmicRoot.transform, false);
+            keyLightObject.transform.rotation = Quaternion.Euler(28f, -32f, 0f);
+            var keyLight = keyLightObject.AddComponent<Light>();
+            keyLight.type = LightType.Directional;
+            keyLight.intensity = 0.9f;
+            keyLight.color = new Color(0.62f, 0.7f, 1f);
 
             CreatePlanet("The distant amber world", new Vector3(-12f, 5f, 48f), 5.2f, new Color(0.35f, 0.18f, 0.1f));
             CreatePlanet("The blue world", new Vector3(13f, -3f, 64f), 8.2f, new Color(0.075f, 0.14f, 0.32f));
