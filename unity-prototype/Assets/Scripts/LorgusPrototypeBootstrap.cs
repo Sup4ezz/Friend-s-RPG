@@ -200,13 +200,14 @@ namespace Lorgus.Prototype
             target.Configure(title, description, role, movable);
         }
 
-        private static void CreateBlock(string name, Vector3 position, Vector3 scale, Material material)
+        private static GameObject CreateBlock(string name, Vector3 position, Vector3 scale, Material material)
         {
             var block = GameObject.CreatePrimitive(PrimitiveType.Cube);
             block.name = name;
             block.transform.position = position;
             block.transform.localScale = scale;
             block.GetComponent<Renderer>().sharedMaterial = material;
+            return block;
         }
     }
 }
