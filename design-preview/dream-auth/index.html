@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LORGUS — Сон перед пробуждением</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Manrope:wght@300;400;500;600&display=swap');
+:root{--ink:#d8cfbb;--dim:#9c927e;--gold:#bca477;--line:#bca47745;--night:#0b0a09}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--night);color:var(--ink);font-family:Manrope, sans-serif}
+.scene{position:relative;width:100%;height:100%;isolation:isolate;background:radial-gradient(ellipse at 72% 44%,#5c4830 0,#29251c 19%,#14130f 48%,#080807 83%);overflow:hidden}
+.scene:before{content:"";position:absolute;inset:0;z-index:-2;background:linear-gradient(90deg,#090908 0%,#090908e8 24%,#09090860 54%,#09090825 100%),linear-gradient(0deg,#080807 0%,transparent 25%,#08080760 100%);pointer-events:none}
+.window{position:absolute;right:14%;top:10%;width:24%;height:54%;border:12px solid #191711;background:linear-gradient(180deg,#18212a,#6b6048 65%,#c0a174);box-shadow:0 0 0 2px #8d7954,0 0 90px #bda47730;clip-path:polygon(0 0,100% 0,100% 100%,0 100%)}
+.window:before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 48%,#181710 48%,#181710 51%,transparent 51%),linear-gradient(0deg,transparent 48%,#181710 48%,#181710 51%,transparent 51%)}
+.window:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,#0a1019a8,transparent 50%,#d9b77c45)}
+.moon{position:absolute;right:23%;top:21%;width:38px;height:38px;border-radius:50%;background:#d8c7a0;box-shadow:0 0 40px #e5d0a277}
+.wallline{position:absolute;inset:0;z-index:-1;opacity:.28;background:repeating-linear-gradient(90deg,transparent 0 12.4%,#bca47714 12.5%,transparent 12.7% 25%),linear-gradient(180deg,transparent 0 70%,#a48a5c22 70.2%,transparent 70.6%)}
+.floor{position:absolute;bottom:-13%;left:18%;width:76%;height:49%;transform:perspective(480px) rotateX(62deg);transform-origin:bottom;background:repeating-linear-gradient(90deg,transparent 0 10%,#bca47724 10.1% 10.3%,transparent 10.4% 20%),repeating-linear-gradient(0deg,#211d16 0 12%,#8e75451c 12.1% 12.4%,#211d16 12.5% 24%);border-top:2px solid #a88e5c35}
+.bed{position:absolute;right:25%;bottom:7%;width:31%;height:26%;transform:skewY(-5deg);background:linear-gradient(160deg,#3a2d20,#17130f 72%);border:2px solid #78603b;box-shadow:0 18px 45px #000a}
+.bed:before{content:"";position:absolute;left:7%;right:7%;top:-20%;height:30%;background:linear-gradient(120deg,#75664a,#33291d 55%,#211b13);border:1px solid #9b8050}
+.bed:after{content:"";position:absolute;left:16%;right:16%;top:0;height:74%;background:linear-gradient(135deg,#4c4231,#201b14);clip-path:polygon(0 0,100% 0,88% 100%,10% 100%)}
+.desk{position:absolute;right:9%;bottom:19%;width:13%;height:15%;background:linear-gradient(90deg,#302317,#59432a,#1a140e);border-top:5px solid #7e623d;box-shadow:0 12px 20px #0008}
+.candle{position:absolute;right:14%;bottom:35%;height:9%;width:5px;background:#d6bd80;box-shadow:0 0 20px 8px #c6a05a38}
+.candle:before{content:"";position:absolute;width:8px;height:15px;top:-13px;left:-1px;border-radius:50% 50% 45% 45%;background:#f2ce7c;box-shadow:0 0 16px #edc16d}
+.drape{position:absolute;right:11%;top:7%;height:62%;width:4%;background:linear-gradient(90deg,#211b15,#4a3527,#18130f);opacity:.9}
+.brand{position:absolute;left:clamp(24px,6vw,96px);top:clamp(24px,5vh,54px);display:flex;gap:12px;align-items:center;letter-spacing:.32em;font-size:10px;color:#e4dac4}.sigil{width:27px;height:34px;border:1px solid var(--gold);clip-path:polygon(50% 0,100% 22%,83% 78%,50% 100%,17% 78%,0 22%);display:grid;place-items:center;color:var(--gold);font:17px Georgia}
+.panel{position:absolute;left:clamp(24px,8vw,130px);top:50%;transform:translateY(-45%);width:min(420px,calc(100% - 48px));z-index:3}
+.eyebrow{font-size:9px;letter-spacing:.32em;text-transform:uppercase;color:var(--gold);margin-bottom:23px;display:flex;align-items:center;gap:12px}.eyebrow:before{content:"";width:26px;height:1px;background:var(--gold)}
+h1{font:500 clamp(48px,6vw,79px)/.84 'Cormorant Garamond',serif;letter-spacing:-.035em;margin:0 0 22px;color:#eee4cf}h1 span{display:block;font-size:.52em;line-height:1.6;letter-spacing:.13em;color:#b9a47b;margin-top:10px}
+.lead{font:400 20px/1.25 'Cormorant Garamond',serif;color:#d9ceb8;max-width:330px;margin:0 0 29px}
+.tabs{display:flex;gap:25px;border-bottom:1px solid var(--line);margin-bottom:24px}.tab{border:0;background:none;color:#8e8574;font:500 10px Manrope;letter-spacing:.18em;text-transform:uppercase;padding:0 0 13px;cursor:pointer;position:relative}.tab.active{color:#e2d3b5}.tab.active:after{content:"";position:absolute;bottom:-1px;left:0;right:0;height:2px;background:var(--gold)}
+.field{display:block;margin:0 0 16px}.field span{display:block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:#a69a83;margin-bottom:8px}.field input{width:100%;border:0;border-bottom:1px solid #bca47766;background:#100f0ce0;color:#f1e7d2;padding:12px 2px;font:300 13px Manrope;outline:none;border-radius:0}.field input:focus{border-color:#e0c38d}.field input::placeholder{color:#6f6759}
+.submit{width:100%;margin-top:9px;padding:16px 18px;background:#bda477;color:#17130d;border:1px solid #d5bd8b;display:flex;justify-content:space-between;align-items:center;font:600 9px Manrope;letter-spacing:.2em;text-transform:uppercase;cursor:pointer}.submit:hover{background:#d0b887}.note{font-size:10px;line-height:1.7;color:#817765;margin-top:16px;max-width:350px}
+.foot{position:absolute;bottom:25px;left:clamp(24px,6vw,96px);right:clamp(24px,6vw,96px);display:flex;justify-content:space-between;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#8e8472;z-index:2}.foot span:last-child{color:#b4a17d}
+.eye{position:absolute;inset:0;z-index:10;background:#000;pointer-events:none;opacity:0;transition:opacity 1.5s ease}
+.toast{font-size:11px;line-height:1.6;color:#d2b985;min-height:18px;margin-top:10px}
+@media(max-width:700px){.window{right:-3%;top:13%;width:54%;height:39%;opacity:.7}.bed{right:2%;bottom:10%;width:54%;height:18%;opacity:.65}.desk{right:3%;bottom:23%;width:20%}.panel{top:53%;transform:translateY(-45%);background:linear-gradient(90deg,#0a0908e8,#0a0908aa 75%,transparent);padding:20px 15px 20px 0}.brand{top:20px}.foot{bottom:14px;font-size:7px}.lead{font-size:18px}h1{font-size:60px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="scene" id="scene">
+<div class="wallline"></div><div class="window"></div><div class="moon"></div><div class="drape"></div><div class="floor"></div><div class="bed"></div><div class="desk"></div><div class="candle"></div>
+<div class="brand"><div class="sigil">✦</div><span>L O R G U S</span></div>
+<section class="panel">
+<div class="eyebrow" id="eyebrow">Прежде чем ты проснёшься</div>
+<h1 id="title">Ты ещё<br>не здесь<span>СОН ПЕРЕД ПРОБУЖДЕНИЕМ</span></h1>
+<p class="lead" id="lead">Некоторые двери открываются только изнутри.</p>
+<div class="tabs"><button class="tab active" id="loginTab" type="button">Войти</button><button class="tab" id="registerTab" type="button">Создать запись</button></div>
+<form id="authForm">
+<label class="field"><span>Имя в летописи</span><input id="email" type="email" autocomplete="email" placeholder="почта" required></label>
+<label class="field"><span>Ключ от сна</span><input id="password" type="password" autocomplete="current-password" placeholder="пароль" minlength="6" required></label>
+<button class="submit" type="submit"><span id="submitText">Продолжить</span><b>↗</b></button>
+<div class="toast" id="toast" aria-live="polite"></div>
+</form>
+<p class="note" id="note">Это визуальный прототип. Авторизация пока не подключена к настоящим аккаунтам LORGUS.</p>
+</section>
+<footer class="foot"><span>Летопись начинается во сне</span><span>Нажми — и закрой глаза</span></footer>
+<div class="eye" id="eye"></div>
+</div>
+<script>
+let mode='login',busy=false;
+const $=id=>document.getElementById(id);
+function setMode(next){mode=next;$('loginTab').classList.toggle('active',mode==='login');$('registerTab').classList.toggle('active',mode==='register');$('submitText').textContent=mode==='login'?'Продолжить':'Записать имя';$('password').autocomplete=mode==='login'?'current-password':'new-password';$('toast').textContent='';$('eyebrow').textContent=mode==='login'?'Прежде чем ты проснёшься':'Оставь своё имя в летописи';$('title').innerHTML=mode==='login'?'Ты ещё<br>не здесь<span>СОН ПЕРЕД ПРОБУЖДЕНИЕМ</span>':'Впиши себя<br>в историю<span>ПЕРВАЯ СТРАНИЦА</span>';$('lead').textContent=mode==='login'?'Некоторые двери открываются только изнутри.':'Мир не знает твоего имени. Пока.';$('note').textContent='Это визуальный прототип. Настоящие аккаунты LORGUS здесь пока не используются.'}
+$('loginTab').onclick=()=>setMode('login');$('registerTab').onclick=()=>setMode('register');
+$('authForm').addEventListener('submit',e=>{e.preventDefault();if(busy)return;busy=true;$('toast').textContent='В демоверсии вход отключён: реальные аккаунты не затрагиваются.';const eye=$('eye');eye.style.opacity='1';setTimeout(()=>{eye.style.opacity='0';busy=false},1300)});
+</script>
+</body></html>
