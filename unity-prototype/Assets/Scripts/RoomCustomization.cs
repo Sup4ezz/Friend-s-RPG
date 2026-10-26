@@ -104,7 +104,7 @@ namespace Lorgus.Prototype
             label.horizontalOverflow = HorizontalWrapMode.Wrap;
             label.verticalOverflow = VerticalWrapMode.Overflow;
             label.rectTransform.sizeDelta = new Vector2(610, 210);
-            label.text = "КАСТОМИЗАЦИЯ LORGUS\n\nРамки: папка Frames в каталоге сохранений игры. Положите туда PNG/JPG с именем frame.png и перезапустите игру.\n\nМузыка: папка Music. Файлы: room.ogg, room.wav или room.mp3.\n\nВ режиме настройки наведитесь на рамку: зажмите ЛКМ и двигайте изображение; колесо мыши меняет масштаб.\n\nC — закрыть это окно";
+            label.text = "КАСТОМИЗАЦИЯ LORGUS\n\nИзображение: " + framesPath + "/frame.png (или frame.jpg).\nМузыка: " + musicPath + "/room.ogg, room.wav или room.mp3.\n\nПоложите файл в указанную папку и перезапустите игру. Наведитесь на рамку: зажмите ЛКМ и двигайте изображение; колесо мыши меняет масштаб.\n\nC — закрыть это окно";
             panel.SetActive(false);
             statusText = label;
         }
