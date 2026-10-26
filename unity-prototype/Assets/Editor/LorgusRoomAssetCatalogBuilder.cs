@@ -19,7 +19,7 @@ namespace Lorgus.Prototype.Editor
 
         static LorgusRoomAssetCatalogBuilder()
         {
-            EditorApplication.delayCall += EnsureCatalog;
+            EditorApplication.delayCall += () => EnsureCatalog();
         }
 
         public int callbackOrder => -1000;
