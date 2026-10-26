@@ -8,14 +8,14 @@ An isolated Unity project scaffold for a future Windows desktop game. It does no
 - First-person wake-up sequence: black overlay fades while the camera rises from bed height.
 - Low-poly room dressing: bed and rumpled bedding, rug, bedside table and candle, wardrobe, chest, writing desk with a book, dark window, wall shelf and a locked door.
 - Movement: **W** one tile forward, **S** one tile backward, **A/D** rotate 90 degrees.
-- **E** inspects an object when it is in front of the player; an in-world text description appears.
+- **E** interacts with room stations: desk (RP), wardrobe (inventory), bookcase (Lorebook), wall map (travel), blank mirror (character card/stats), trophy stand, and the guest door.\n- **F** picks up or places supported movable props; carry them with W/S and turn with A/D.
 - Basic collision against walls and furniture.
 - Ambient audio and dust are decorative atmosphere only; there are no extra rooms, exits, or scripted scare events.
 - Deliberately restrained lighting and geometry for the target desktop hardware.
 - Procedural ambient sound: soft air through the window and subtle old-timber creaks, generated locally with no external audio files.
 - Gentle candlelight fluctuation and sparse drifting dust motes to add life without expensive effects.
 
-The door is scenery only. It does not lead anywhere. Inspectable objects currently provide narrative text, not inventory or quest progression.
+The guest door currently exposes the intended visit interaction, but real visits to other players require online room data, identity/permissions and a network-backed guest list; that integration is not implemented in this local prototype yet. Room station panels are prototype interaction stubs, not live web-app screens. Movable props currently use a simple carry/place mechanic.
 
 ## Open locally
 
