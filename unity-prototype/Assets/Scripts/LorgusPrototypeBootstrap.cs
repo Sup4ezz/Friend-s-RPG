@@ -297,12 +297,13 @@ namespace Lorgus.Prototype
                     Vector3 sourceSize = bounds.size;
                     if (sourceSize.x > 0.001f && sourceSize.y > 0.001f && sourceSize.z > 0.001f)
                     {
-                        instance.transform.localScale = new Vector3(
-                            scale.x / sourceSize.x,
-                            scale.y / sourceSize.y,
-                            scale.z / sourceSize.z);
-                        // Keep the imported object's feet on the same floor as the primitive it replaces.
-                        float bottom = position.y - scale.y * 0.5f;
+                        // Preserve the FBX proportions; fit its footprint rather than flattening a
+                        // complete bed/table/cabinet into the dimensions of the old cube placeholder.
+                        float fit = Mathf.Min(scale.x / sourceSize.x, scale.z / sourceSize.z);
+                        instance.transform.localScale = Vector3.one * fit;
+                        // Most props sit on the old placeholder's base. The desk placeholder represented
+                        // only its tabletop, while the imported FBX represents the complete table.
+                        float bottom = name == "Writing desk top" ? 0f : position.y - scale.y * 0.5f;
                         var scaledRenderers = instance.GetComponentsInChildren<Renderer>(true);
                         Bounds scaledBounds = scaledRenderers[0].bounds;
                         for (int i = 1; i < scaledRenderers.Length; i++) scaledBounds.Encapsulate(scaledRenderers[i].bounds);
