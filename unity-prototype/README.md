@@ -7,7 +7,7 @@ An isolated Unity project scaffold for a future Windows desktop game. It does no
 - Exactly **one bedroom**; no corridor, second room, or scene transition.
 - First-person wake-up sequence: black overlay fades while the camera rises from bed height.
 - Low-poly room dressing: bed and rumpled bedding, rug, bedside table and candle, wardrobe, chest, writing desk with a book, dark window, wall shelf and a locked door.
-- Movement: **W** one tile forward, **S** one tile backward, **A/D** rotate 90 degrees.
+- Movement: smooth first-person **WASD** movement with mouse look, gravity and a CharacterController capsule for wall/furniture collisions.
 - **E** interacts with room stations: desk (RP), wardrobe (inventory), bookcase (Lorebook), wall map (travel), blank mirror (character card/stats), trophy stand, and the guest door.
 - **F** picks up or places supported movable props; carry them with W/S and turn with A/D.
 - Basic collision against walls and furniture.
@@ -20,7 +20,7 @@ An isolated Unity project scaffold for a future Windows desktop game. It does no
 
 ## Player customization
 
-Press **C** to open customization help. The game creates a writable `LORGUS` folder under Unity `Application.persistentDataPath`, with `Frames` and `Music` subfolders. Put an image named `frame.png` or `frame.jpg` in `Frames`; restart the game to load it. In customization mode, look directly at the wall frame, hold the left mouse button and drag to reposition the image; use the mouse wheel to zoom.
+Press **C** to open customization help. Use **WASD** to walk, the mouse to look around, **E** to interact, **F** to pick up/place supported props, and **Esc** to release the cursor. The game creates a writable `LORGUS` folder under Unity `Application.persistentDataPath`, with `Frames` and `Music` subfolders. Put an image named `frame.png` or `frame.jpg` in `Frames`; restart the game to load it. In customization mode, look directly at the wall frame, hold the left mouse button and drag to reposition the image; use the mouse wheel to zoom.
 
 Put one replacement soundtrack in `Music` and name it `room.ogg`, `room.wav`, or `room.mp3`. Restart the game. If no supported track exists, a quiet original procedural fantasy-room music bed plays instead. Ambient room sounds continue separately. The actual save path varies by OS/user and is shown in the in-game help panel. Image files and music stay on the player computer.
 
