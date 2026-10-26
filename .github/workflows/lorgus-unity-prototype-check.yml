@@ -37,6 +37,7 @@ jobs:
           test -f unity-prototype/Assets/Scripts/RoomInteractable.cs
           test -f unity-prototype/Assets/Scripts/RoomInteractionUI.cs
           test -f unity-prototype/Assets/Scripts/RoomAtmosphere.cs
+          test -f unity-prototype/Assets/Scripts/RoomCustomization.cs
           python3 - <<'PY'
           import json
           from pathlib import Path
