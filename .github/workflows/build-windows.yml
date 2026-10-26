@@ -50,16 +50,22 @@ jobs:
           buildsPath: Builds
           buildName: LORGUS
 
-      - name: Package the executable
+      - name: Package the complete Windows player
         shell: bash
         run: |
           set -euo pipefail
-          test -f unity-prototype/Builds/Windows/LORGUS.exe
-          test -d unity-prototype/Builds/Windows/LORGUS_Data
+          BUILD_DIR="unity-prototype/Builds/Windows"
+          test -f "$BUILD_DIR/LORGUS.exe"
+          test -f "$BUILD_DIR/UnityPlayer.dll"
+          test -d "$BUILD_DIR/LORGUS_Data"
           mkdir -p dist
-          cd unity-prototype/Builds/Windows
-          zip -r ../../../dist/LORGUS-Windows.zip LORGUS.exe LORGUS_Data
+          cd "$BUILD_DIR"
+          # Unity players require runtime DLLs and support folders alongside the EXE.
+          # Archive the entire build directory, not only the executable and Data folder.
+          zip -r ../../../dist/LORGUS-Windows.zip .
           test -s ../../../dist/LORGUS-Windows.zip
+          unzip -l ../../../dist/LORGUS-Windows.zip | grep -E 'UnityPlayer\.dll$'
+          unzip -l ../../../dist/LORGUS-Windows.zip | grep -E 'LORGUS_Data/globalgamemanagers$'
 
       - name: Upload downloadable build
         uses: actions/upload-artifact@v4
