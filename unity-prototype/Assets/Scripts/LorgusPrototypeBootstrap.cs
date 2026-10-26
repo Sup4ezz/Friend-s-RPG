@@ -87,37 +87,50 @@ namespace Lorgus.Prototype
             CreateBlock("Door crossbar", new Vector3(0, 1.25f, -3.84f), new Vector3(1.3f, 0.08f, 0.035f), brass);
             CreateBlock("Door handle", new Vector3(0.55f, 1.15f, -3.79f), new Vector3(0.07f, 0.07f, 0.07f), brass);
 
-            // Bed and bedding.
+            // The asset catalogue is generated from the FBX files already committed to this branch.
+            // If Unity has not generated it yet, the primitive fallback keeps the prototype playable.
             CreateBlock("Bed frame", new Vector3(-1.65f, 0.28f, 1.1f), new Vector3(2.25f, 0.38f, 1.55f), wood);
-            CreateBlock("Bed mattress", new Vector3(-1.65f, 0.52f, 1.1f), new Vector3(2.12f, 0.18f, 1.43f), linen);
-            CreateBlock("Rumpled blanket", new Vector3(-1.65f, 0.64f, 1.42f), new Vector3(2.08f, 0.08f, 0.72f), cloth);
-            CreateBlock("Pillow", new Vector3(-1.65f, 0.65f, 0.63f), new Vector3(0.7f, 0.12f, 0.35f), linen);
+            if (!HasModel("Bed frame"))
+            {
+                CreateBlock("Bed mattress", new Vector3(-1.65f, 0.52f, 1.1f), new Vector3(2.12f, 0.18f, 1.43f), linen);
+                CreateBlock("Rumpled blanket", new Vector3(-1.65f, 0.64f, 1.42f), new Vector3(2.08f, 0.08f, 0.72f), cloth);
+                CreateBlock("Pillow", new Vector3(-1.65f, 0.65f, 0.63f), new Vector3(0.7f, 0.12f, 0.35f), linen);
+            }
             AddInteractable("Bed inspection", "Постель", "Простыни сбились в складки. Похоже, вы провели здесь немало времени — или проснулись резко.", new Vector3(-1.65f, 0.74f, 1.1f), new Vector3(2.1f, 0.16f, 1.4f), linen);
 
             // Rug, bedside table and candle.
             CreateBlock("Woven rug", new Vector3(0.15f, 0.015f, 0.35f), new Vector3(2.15f, 0.025f, 2.7f), cloth);
             CreateBlock("Rug central pattern", new Vector3(0.15f, 0.032f, 0.35f), new Vector3(0.12f, 0.01f, 2.35f), brass);
             CreateBlock("Bedside table", new Vector3(0.05f, 0.42f, 1.55f), new Vector3(0.58f, 0.78f, 0.58f), wood);
-            CreateBlock("Table drawer", new Vector3(0.05f, 0.48f, 1.245f), new Vector3(0.42f, 0.18f, 0.035f), brass);
+            if (!HasModel("Bedside table"))
+                CreateBlock("Table drawer", new Vector3(0.05f, 0.48f, 1.245f), new Vector3(0.42f, 0.18f, 0.035f), brass);
             CreateBlock("Candle", new Vector3(0.05f, 0.88f, 1.55f), new Vector3(0.08f, 0.18f, 0.08f), linen);
-            CreateBlock("Candle flame", new Vector3(0.05f, 1.005f, 1.55f), new Vector3(0.035f, 0.07f, 0.035f), brass);
+            if (!HasModel("Candle"))
+                CreateBlock("Candle flame", new Vector3(0.05f, 1.005f, 1.55f), new Vector3(0.035f, 0.07f, 0.035f), brass);
             AddInteractable("Table inspection", "Письменный стол", "Здесь персонаж сможет читать и писать RP-сообщения.", new Vector3(-2.8f, 0.95f, -2.6f), new Vector3(1.65f, 0.12f, 0.8f), wood, RoomObjectRole.RpMessages, true);
 
             // Wardrobe and chest.
             CreateBlock("Wardrobe body", new Vector3(3.05f, 1.05f, 1.45f), new Vector3(1.2f, 2.1f, 0.75f), wood);
-            CreateBlock("Wardrobe left panel", new Vector3(2.76f, 1.05f, 1.05f), new Vector3(0.5f, 1.8f, 0.04f), brass);
-            CreateBlock("Wardrobe right panel", new Vector3(3.34f, 1.05f, 1.05f), new Vector3(0.5f, 1.8f, 0.04f), brass);
-            CreateBlock("Wardrobe handles", new Vector3(3.05f, 1.0f, 1.015f), new Vector3(0.06f, 0.22f, 0.05f), brass);
+            if (!HasModel("Wardrobe body"))
+            {
+                CreateBlock("Wardrobe left panel", new Vector3(2.76f, 1.05f, 1.05f), new Vector3(0.5f, 1.8f, 0.04f), brass);
+                CreateBlock("Wardrobe right panel", new Vector3(3.34f, 1.05f, 1.05f), new Vector3(0.5f, 1.8f, 0.04f), brass);
+                CreateBlock("Wardrobe handles", new Vector3(3.05f, 1.0f, 1.015f), new Vector3(0.06f, 0.22f, 0.05f), brass);
+            }
             AddInteractable("Wardrobe inspection", "Шкаф — инвентарь", "Здесь хранится инвентарь персонажа.", new Vector3(3.05f, 1.05f, 1.45f), new Vector3(1.2f, 2.1f, 0.75f), wood, RoomObjectRole.Inventory, false);
 
             CreateBlock("Storage chest", new Vector3(2.95f, 0.38f, -0.2f), new Vector3(1.15f, 0.72f, 0.75f), wood);
-            CreateBlock("Chest lid", new Vector3(2.95f, 0.77f, -0.2f), new Vector3(1.18f, 0.1f, 0.78f), brass);
+            if (!HasModel("Storage chest"))
+                CreateBlock("Chest lid", new Vector3(2.95f, 0.77f, -0.2f), new Vector3(1.18f, 0.1f, 0.78f), brass);
             AddInteractable("Chest inspection", "Сундук", "Замок сорван, но крышка не поддаётся. В щели застрял клочок бумаги.", new Vector3(2.95f, 0.42f, -0.2f), new Vector3(1.15f, 0.8f, 0.75f), wood);
 
             // Writing desk, book and the dark window.
             CreateBlock("Writing desk top", new Vector3(-2.8f, 0.95f, -2.6f), new Vector3(1.65f, 0.12f, 0.8f), wood);
-            CreateBlock("Desk left leg", new Vector3(-3.45f, 0.45f, -2.6f), new Vector3(0.12f, 0.9f, 0.12f), wood);
-            CreateBlock("Desk right leg", new Vector3(-2.15f, 0.45f, -2.6f), new Vector3(0.12f, 0.9f, 0.12f), wood);
+            if (!HasModel("Writing desk top"))
+            {
+                CreateBlock("Desk left leg", new Vector3(-3.45f, 0.45f, -2.6f), new Vector3(0.12f, 0.9f, 0.12f), wood);
+                CreateBlock("Desk right leg", new Vector3(-2.15f, 0.45f, -2.6f), new Vector3(0.12f, 0.9f, 0.12f), wood);
+            }
             AddInteractable("Open book", "Книжный шкаф — Лорбук", "Летописи, легенды и сведения о мире собраны в одном месте.", new Vector3(2.8f, 2.15f, 3.62f), new Vector3(1.45f, 0.1f, 0.38f), wood, RoomObjectRole.Lorebook, false);
             CreateBlock("Book spine", new Vector3(-2.8f, 1.065f, -2.58f), new Vector3(0.035f, 0.015f, 0.42f), brass);
 
@@ -227,8 +240,79 @@ namespace Lorgus.Prototype
             target.Configure(title, description, role, movable);
         }
 
+        private static LorgusRoomAssetCatalog _assetCatalog;
+
+        private static LorgusRoomAssetCatalog AssetCatalog
+        {
+            get
+            {
+                if (_assetCatalog == null)
+                    _assetCatalog = Resources.Load<LorgusRoomAssetCatalog>("LorgusRoomAssetCatalog");
+                return _assetCatalog;
+            }
+        }
+
+        private static bool HasModel(string objectName) => ResolveModel(objectName) != null;
+
+        private static GameObject ResolveModel(string objectName)
+        {
+            var assets = AssetCatalog;
+            if (assets == null) return null;
+            switch (objectName)
+            {
+                case "Bed frame": return assets.bed;
+                case "Bedside table": return assets.nightstand;
+                case "Candle": return assets.candle;
+                case "Wardrobe body": return assets.cabinet;
+                case "Storage chest": return assets.chest;
+                case "Writing desk top": return assets.desk;
+                case "Wall shelf": return assets.shelf;
+                case "Shelf book 0":
+                case "Shelf book 1":
+                case "Shelf book 2":
+                case "Shelf book 3":
+                case "Shelf book 4": return assets.book;
+                default: return null;
+            }
+        }
+
         private static GameObject CreateBlock(string name, Vector3 position, Vector3 scale, Material material)
         {
+            GameObject model = ResolveModel(name);
+            if (model != null)
+            {
+                var instance = Instantiate(model);
+                instance.name = name;
+                instance.transform.position = position;
+                instance.transform.rotation = Quaternion.identity;
+
+                // Fit props to the old block footprint while preserving their imported materials.
+                var renderers = instance.GetComponentsInChildren<Renderer>(true);
+                if (renderers.Length > 0)
+                {
+                    Bounds bounds = renderers[0].bounds;
+                    for (int i = 1; i < renderers.Length; i++) bounds.Encapsulate(renderers[i].bounds);
+                    Vector3 sourceSize = bounds.size;
+                    if (sourceSize.x > 0.001f && sourceSize.y > 0.001f && sourceSize.z > 0.001f)
+                    {
+                        instance.transform.localScale = new Vector3(
+                            scale.x / sourceSize.x,
+                            scale.y / sourceSize.y,
+                            scale.z / sourceSize.z);
+                        // Keep the imported object's feet on the same floor as the primitive it replaces.
+                        float bottom = position.y - scale.y * 0.5f;
+                        var scaledRenderers = instance.GetComponentsInChildren<Renderer>(true);
+                        Bounds scaledBounds = scaledRenderers[0].bounds;
+                        for (int i = 1; i < scaledRenderers.Length; i++) scaledBounds.Encapsulate(scaledRenderers[i].bounds);
+                        instance.transform.position += Vector3.up * (bottom - scaledBounds.min.y);
+                    }
+                }
+
+                if (instance.GetComponent<Collider>() == null)
+                    instance.AddComponent<BoxCollider>();
+                return instance;
+            }
+
             var block = GameObject.CreatePrimitive(PrimitiveType.Cube);
             block.name = name;
             block.transform.position = position;
