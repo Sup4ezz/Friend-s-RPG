@@ -557,7 +557,7 @@ namespace Lorgus.Prototype
             SetStatus("Анкета одобрена. Добро пожаловать.");
             if (uiRoot != null) Destroy(uiRoot);
             if (cosmicRoot != null) Destroy(cosmicRoot);
-            bootstrap.EnterRoomAfterApproval(character.character_id, character.name);
+            bootstrap.EnterRoomAfterApproval(character.character_id, character.name, accessToken);
         }
 
         private IEnumerator SendJson(string method, string url, string payload, string bearer, Action<UnityWebRequest> completed)
