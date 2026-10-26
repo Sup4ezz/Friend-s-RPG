@@ -18,6 +18,12 @@ An isolated Unity project scaffold for a future Windows desktop game. It does no
 - Personal wall picture frame: load a PNG/JPG into the game save folder and reposition/zoom it inside the frame.
 - Custom music: put a replacement track in the game save folder using the documented filename; local playback only, no uploads to a server.
 
+## Player customization
+
+Press **C** to open customization help. The game creates a writable `LORGUS` folder under Unity `Application.persistentDataPath`, with `Frames` and `Music` subfolders. Put an image named `frame.png` or `frame.jpg` in `Frames`; restart the game to load it. In customization mode, look directly at the wall frame, hold the left mouse button and drag to reposition the image; use the mouse wheel to zoom.
+
+Put one replacement soundtrack in `Music` and name it `room.ogg`, `room.wav`, or `room.mp3`. Restart the game. If no supported track exists, a quiet original procedural fantasy-room music bed plays instead. Ambient room sounds continue separately. The actual save path varies by OS/user and is shown in the in-game help panel. Image files and music stay on the player computer.
+
 The guest door currently exposes the intended visit interaction, but real visits to other players require online room data, identity/permissions and a network-backed guest list; that integration is not implemented in this local prototype yet. Room station panels are prototype interaction stubs, not live web-app screens. Movable props currently use a simple carry/place mechanic.
 
 ## Open locally
