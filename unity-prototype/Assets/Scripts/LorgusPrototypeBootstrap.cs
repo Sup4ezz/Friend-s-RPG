@@ -178,8 +178,20 @@ namespace Lorgus.Prototype
             light.type = LightType.Point;
             light.color = new Color(1f, 0.64f, 0.34f);
             light.intensity = 1.8f;
-            light.range = 6.5f;
-            light.shadows = LightShadows.None;
+            light.range = 8.5f;
+            light.shadows = LightShadows.Soft;
+            light.shadowStrength = 0.62f;
+            light.shadowBias = 0.06f;
+            light.shadowNormalBias = 0.35f;
+
+            var candleObject = new GameObject("Candle glow");
+            candleObject.transform.position = new Vector3(0.05f, 1.0f, 1.55f);
+            var candleLight = candleObject.AddComponent<Light>();
+            candleLight.type = LightType.Point;
+            candleLight.color = new Color(1f, 0.48f, 0.19f);
+            candleLight.intensity = 0.48f;
+            candleLight.range = 2.7f;
+            candleLight.shadows = LightShadows.None;
         }
 
         private void BuildUI()
