@@ -102,8 +102,17 @@ namespace Lorgus.Prototype
             velocity.z = new ParticleSystem.MinMaxCurve(-0.018f, 0.018f);
             var renderer = dust.GetComponent<ParticleSystemRenderer>();
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
-            renderer.material = new Material(Shader.Find("Sprites/Default"));
-            renderer.material.color = new Color(0.82f, 0.68f, 0.46f, 0.32f);
+
+            // Do not construct a Material from a shader that may have been stripped in a player build.
+            Shader particleShader = Shader.Find("Particles/Standard Unlit");
+            if (particleShader == null) particleShader = Shader.Find("Sprites/Default");
+            if (particleShader != null)
+            {
+                var particleMaterial = new Material(particleShader);
+                particleMaterial.color = new Color(0.82f, 0.68f, 0.46f, 0.32f);
+                renderer.material = particleMaterial;
+            }
+
             dust.Play();
         }
     }
