@@ -84,6 +84,10 @@ jobs:
           assert "PlayerPrefs.SetString(RefreshTokenKey, protectedToken)" in login, "Remember flow must persist only the protected refresh token"
           assert "PlayerPrefs.SetString(RefreshTokenKey, password)" not in login, "Plaintext password persistence is forbidden"
           assert "login.Initialize(this)" in bootstrap, "The game must start in the cosmic login scene"
+          assert "StandaloneInputModule" in login and "EventSystem" in login, "Login and overlay UI need an EventSystem"
+          wake = (root / "Assets/Scripts/WakeUpSequence.cs").read_text(encoding="utf-8")
+          assert "Vector3.Lerp(wakeStartPosition, wakeEndPosition, t)" in wake and "SetCameraRestHeight" in wake, "Wake-up must animate the player from the bed to standing"
+          assert "new Vector3(-1.65f, 0.72f, 1.1f)" in bootstrap, "Player spawn must be on the bed before waking up"
           assert "BuildRoom();" not in bootstrap[bootstrap.find("private void Awake()"):bootstrap.find("public void EnterRoomAfterApproval()")], "Room must not be built before login/approval"
           print("Scaffold, C# structure, FBX catalogue, controls, required room fixtures, and scope boundaries passed.")
           PY
