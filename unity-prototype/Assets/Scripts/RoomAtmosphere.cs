@@ -2,7 +2,10 @@ using UnityEngine;
 
 namespace Lorgus.Prototype
 {
-    /// <summary>Low-cost ambient sound and subtle motion to make the single room feel inhabited.</summary>
+    /// <summary>
+    /// Restrained candlelight and dust only. No generated music or ambient audio:
+    /// the project's music and sound direction belongs to the user.
+    /// </summary>
     public sealed class RoomAtmosphere : MonoBehaviour
     {
         private Light roomLight;
@@ -20,7 +23,6 @@ namespace Lorgus.Prototype
             candleLight = candleLightObject != null ? candleLightObject.GetComponent<Light>() : null;
             if (roomLight != null) baseIntensity = roomLight.intensity;
             if (candleLight != null) candleBaseIntensity = candleLight.intensity;
-            BuildAmbientAudio();
             BuildDust();
         }
 
@@ -29,61 +31,16 @@ namespace Lorgus.Prototype
             phase += Time.deltaTime;
             if (roomLight != null)
             {
-                // Gentle candle-like fluctuation; deliberately restrained, never a strobe.
-                float slow = Mathf.Sin(phase * 1.7f) * 0.045f;
-                float quick = Mathf.Sin(phase * 4.9f + 0.8f) * 0.018f;
+                float slow = Mathf.Sin(phase * 1.7f) * 0.035f;
+                float quick = Mathf.Sin(phase * 4.9f + 0.8f) * 0.012f;
                 roomLight.intensity = baseIntensity * (1f + slow + quick);
             }
             if (candleLight != null)
             {
-                float flame = Mathf.Sin(phase * 5.3f + 0.4f) * 0.09f
-                            + Mathf.Sin(phase * 8.1f + 1.7f) * 0.035f;
+                float flame = Mathf.Sin(phase * 5.3f + 0.4f) * 0.075f
+                            + Mathf.Sin(phase * 8.1f + 1.7f) * 0.025f;
                 candleLight.intensity = candleBaseIntensity * (1f + flame);
             }
-        }
-
-        private void BuildAmbientAudio()
-        {
-            const int sampleRate = 22050;
-            const int seconds = 12;
-            int count = sampleRate * seconds;
-            var samples = new float[count * 2];
-            uint random = 0xA341316Cu;
-            float low = 0f;
-            float slower = 0f;
-
-            for (int i = 0; i < count; i++)
-            {
-                random = 1664525u * random + 1013904223u;
-                float noise = ((random >> 8) / 8388608f) - 1f;
-                low += (noise - low) * 0.018f;
-                slower += (low - slower) * 0.025f;
-                float t = (float)i / sampleRate;
-
-                // Air through old window, distant timber settling, no loud jump scares.
-                float air = low * 0.42f + slower * 0.72f;
-                float roomTone = Mathf.Sin(t * 2f * Mathf.PI * 47f) * 0.012f
-                               + Mathf.Sin(t * 2f * Mathf.PI * 71f) * 0.006f;
-                float creakEnvelope = Mathf.Pow(Mathf.Clamp01(Mathf.Sin(t * 2f * Mathf.PI / 7.3f + 1.1f) * 0.5f + 0.5f), 10f);
-                float creak = Mathf.Sin(t * 2f * Mathf.PI * (115f + 14f * Mathf.Sin(t * 0.7f))) * creakEnvelope * 0.018f;
-                float value = Mathf.Clamp((air + roomTone + creak) * 0.72f, -0.12f, 0.12f);
-                samples[i * 2] = value;
-                samples[i * 2 + 1] = value * 0.96f;
-            }
-
-            AudioClip clip = AudioClip.Create("LORGUS - old room ambience", count, 2, sampleRate, false);
-            clip.SetData(samples, 0);
-            var sourceObject = new GameObject("Room ambience audio");
-            sourceObject.transform.SetParent(transform, false);
-            var source = sourceObject.AddComponent<AudioSource>();
-            source.clip = clip;
-            source.loop = true;
-            source.playOnAwake = true;
-            source.volume = 0.22f;
-            source.spatialBlend = 0f;
-            source.priority = 0;
-            source.dopplerLevel = 0f;
-            source.Play();
         }
 
         private void BuildDust()
@@ -101,7 +58,6 @@ namespace Lorgus.Prototype
             main.maxParticles = 36;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.gravityModifier = 0f;
-
             var emission = dust.emission;
             emission.rateOverTime = 4f;
             var shape = dust.shape;
@@ -114,8 +70,6 @@ namespace Lorgus.Prototype
             velocity.z = new ParticleSystem.MinMaxCurve(-0.018f, 0.018f);
             var renderer = dust.GetComponent<ParticleSystemRenderer>();
             renderer.renderMode = ParticleSystemRenderMode.Billboard;
-
-            // Do not construct a Material from a shader that may have been stripped in a player build.
             Shader particleShader = Shader.Find("Particles/Standard Unlit");
             if (particleShader == null) particleShader = Shader.Find("Sprites/Default");
             if (particleShader != null)
@@ -124,7 +78,6 @@ namespace Lorgus.Prototype
                 particleMaterial.color = new Color(0.82f, 0.68f, 0.46f, 0.32f);
                 renderer.material = particleMaterial;
             }
-
             dust.Play();
         }
     }
