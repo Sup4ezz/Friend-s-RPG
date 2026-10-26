@@ -77,6 +77,7 @@ jobs:
           assert "KeyCode.F" not in controller, "Unapproved prop-carry control remains"
           interaction = (root / "Assets/Scripts/RoomInteractionUI.cs").read_text(encoding="utf-8")
           assert "BuildCloseButton" in interaction and "Интеграция данных ещё не подключена." in interaction, "Overlay close control or honest integration stub is missing"
+          assert "OpenRpScreen()" in interaction and "сообщения не загружаются и не отправляются" in interaction, "RP must be a separate full-screen view, not an in-room overlay"
           login = (root / "Assets/Scripts/CosmicLoginController.cs").read_text(encoding="utf-8")
           for required in ("auth/v1/token?grant_type=password", "auth/v1/signup", "character_applications", "status == \"approved\"", "CryptProtectData", "ЗАПОМНИТЬ ДАННЫЕ"):
               assert required in login, f"Cosmic login flow is missing: {required}"
