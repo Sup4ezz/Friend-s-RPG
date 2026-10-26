@@ -54,8 +54,16 @@ namespace Lorgus.Prototype
             public string status;
             public string character_id;
             public string name;
+            public bool characterAvailable;
         }
         [Serializable] private sealed class ApplicationRows { public ApplicationRow[] items; }
+        [Serializable] private sealed class CharacterRow
+        {
+            public string id;
+            public string name;
+            public string status;
+        }
+        [Serializable] private sealed class CharacterRows { public CharacterRow[] items; }
 
         public void Initialize(LorgusPrototypeBootstrap owner) { bootstrap = owner; }
 
@@ -484,7 +492,7 @@ namespace Lorgus.Prototype
                 yield break;
             }
             SetStatus("Проверяем статус анкеты персонажа…");
-            string url = SupabaseUrl + "/rest/v1/character_applications?select=status,character_id,name&player_id=eq."
+            string url = SupabaseUrl + "/rest/v1/character_applications?select=status,character_id&player_id=eq."
                 + UnityWebRequest.EscapeURL(userId);
             string responseBody = null;
             string error = null;
@@ -517,15 +525,26 @@ namespace Lorgus.Prototype
                 if (row != null && row.status == "approved" && !string.IsNullOrEmpty(row.character_id))
                     approvedRows.Add(row);
             }
-            if (approvedRows.Count == 1)
+            if (approvedRows.Count > 0)
             {
-                EnterRoomFor(approvedRows[0]);
-                yield break;
-            }
-            if (approvedRows.Count > 1)
-            {
-                ShowCharacterSelection(approvedRows);
-                yield break;
+                bool charactersLoaded = false;
+                yield return LoadCharacterNames(approvedRows, ok => charactersLoaded = ok);
+                if (!charactersLoaded)
+                {
+                    SetStatus("Не удалось загрузить карточки персонажей. Вход в комнату запрещён.");
+                    yield break;
+                }
+                approvedRows.RemoveAll(row => !row.characterAvailable);
+                if (approvedRows.Count == 1)
+                {
+                    EnterRoomFor(approvedRows[0]);
+                    yield break;
+                }
+                if (approvedRows.Count > 1)
+                {
+                    ShowCharacterSelection(approvedRows);
+                    yield break;
+                }
             }
 
             bool pending = false;
@@ -542,6 +561,57 @@ namespace Lorgus.Prototype
             else if (revision) SetStatus("Анкета требует исправлений. Обновите её на сайте LORGUS.");
             else if (rejected) SetStatus("Анкета отклонена. Комната недоступна.");
             else SetStatus("Для этого аккаунта не найдена одобренная анкета персонажа. Комната недоступна.");
+        }
+
+        private IEnumerator LoadCharacterNames(List<ApplicationRow> applications, Action<bool> completed)
+        {
+            var ids = new List<string>();
+            foreach (ApplicationRow application in applications)
+                if (application != null && !string.IsNullOrEmpty(application.character_id))
+                    ids.Add(application.character_id);
+            if (ids.Count == 0)
+            {
+                completed?.Invoke(false);
+                yield break;
+            }
+
+            string url = SupabaseUrl + "/rest/v1/characters?select=id,name,status&id=in.(" + string.Join(",", ids) + ")";
+            string body = null;
+            yield return SendJson("GET", url, null, accessToken, response =>
+            {
+                if (response.result == UnityWebRequest.Result.Success)
+                    body = response.downloadHandler.text;
+            });
+            if (body == null)
+            {
+                completed?.Invoke(false);
+                yield break;
+            }
+
+            CharacterRows rows;
+            try { rows = JsonUtility.FromJson<CharacterRows>("{\"items\":" + body + "}"); }
+            catch { rows = null; }
+            if (rows == null || rows.items == null)
+            {
+                completed?.Invoke(false);
+                yield break;
+            }
+
+            foreach (ApplicationRow application in applications)
+            {
+                foreach (CharacterRow character in rows.items)
+                {
+                    if (character == null || application == null ||
+                        !string.Equals(character.id, application.character_id, StringComparison.OrdinalIgnoreCase))
+                        continue;
+                    if (string.Equals(character.status ?? "ACTIVE", "ARCHIVED", StringComparison.OrdinalIgnoreCase))
+                        break;
+                    application.name = character.name;
+                    application.characterAvailable = true;
+                    break;
+                }
+            }
+            completed?.Invoke(true);
         }
 
         private void ShowCharacterSelection(List<ApplicationRow> characters)
