@@ -308,6 +308,7 @@ namespace Lorgus.Prototype
                         Bounds scaledBounds = scaledRenderers[0].bounds;
                         for (int i = 1; i < scaledRenderers.Length; i++) scaledBounds.Encapsulate(scaledRenderers[i].bounds);
                         instance.transform.position += Vector3.up * (bottom - scaledBounds.min.y);
+                        scaledBounds.center += Vector3.up * (bottom - scaledBounds.min.y);
 
                         // Give the imported prop a collider that follows its real mesh bounds.
                         var box = instance.GetComponent<BoxCollider>();
