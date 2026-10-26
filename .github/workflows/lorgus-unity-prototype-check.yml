@@ -84,6 +84,9 @@ jobs:
               assert required in login, f"Cosmic login flow is missing: {required}"
           assert "PlayerPrefs.SetString(RefreshTokenKey, protectedToken)" in login, "Remember flow must persist only the protected refresh token"
           assert "PlayerPrefs.SetString(RefreshTokenKey, password)" not in login, "Plaintext password persistence is forbidden"
+          assert 'character_applications?select=status,character_id&player_id=eq.' in login, "Approval query must use known application columns only"
+          assert '/rest/v1/characters?select=id,name,status&id=in.(' in login, "Character names must be loaded from the characters table, not application columns"
+          assert "characterAvailable" in login and '"ARCHIVED"' in login, "Archived characters must not be offered for entry"
           assert "login.Initialize(this)" in bootstrap, "The game must start in the cosmic login scene"
           assert "StandaloneInputModule" in login and "EventSystem" in login, "Login and overlay UI need an EventSystem"
           wake = (root / "Assets/Scripts/WakeUpSequence.cs").read_text(encoding="utf-8")
