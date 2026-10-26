@@ -33,6 +33,7 @@ jobs:
           test -f unity-prototype/Assets/Scenes/LorgusPrototype.unity.meta
           test -f unity-prototype/Assets/Scripts/LorgusPrototypeBootstrap.cs
           test -f unity-prototype/Assets/Scripts/CosmicLoginController.cs
+          test -f unity-prototype/Assets/Scripts/WindowViewController.cs
           test -f unity-prototype/Assets/Scripts/GridFirstPersonController.cs
           test -f unity-prototype/Assets/Scripts/WakeUpSequence.cs
           test -f unity-prototype/Assets/Scripts/RoomInteractable.cs
@@ -54,7 +55,7 @@ jobs:
           assert match, "Scene .meta must contain a 32-character GUID"
           build_settings = (root / "ProjectSettings/EditorBuildSettings.asset").read_text(encoding="utf-8")
           assert match.group(1) in build_settings, "Build settings do not reference the prototype scene GUID"
-          for script in ("LorgusPrototypeBootstrap.cs", "CosmicLoginController.cs", "GridFirstPersonController.cs", "WakeUpSequence.cs", "RoomInteractable.cs", "RoomInteractionUI.cs", "LorgusRoomAssetCatalog.cs"):
+          for script in ("LorgusPrototypeBootstrap.cs", "CosmicLoginController.cs", "WindowViewController.cs", "GridFirstPersonController.cs", "WakeUpSequence.cs", "RoomInteractable.cs", "RoomInteractionUI.cs", "LorgusRoomAssetCatalog.cs"):
               text = (root / "Assets/Scripts" / script).read_text(encoding="utf-8")
               assert "class " in text, f"{script}: no class declaration found"
               assert text.count("{") == text.count("}"), f"{script}: unbalanced braces"
@@ -90,6 +91,12 @@ jobs:
           assert "new Vector3(-1.65f, 0.72f, 1.1f)" in bootstrap, "Player spawn must be on the bed before waking up"
           assert "ShowCharacterSelection" in login and "EnterRoomAfterApproval(character.character_id, character.name)" in login, "Multiple approved characters must be selectable"
           assert "ActiveCharacterId" in bootstrap and "ActiveCharacterName" in bootstrap, "Selected character must be retained for location-dependent context"
+          window_view = (root / "Assets/Scripts/WindowViewController.cs").read_text(encoding="utf-8")
+          assert '"/rest/v1/rp_presence?select=presence_type,region,location,from_region,from_location,to_region,to_location&character_id=eq."' in window_view, "Window must query the selected character's RP presence"
+          for region in ("Каэлор", "Морвейн", "Атэрон", "Ксандр", "Лирэн", "Святые Земли", "Спорные Земли", "Геена"):
+              assert region in window_view, f"Window view is missing a region theme: {region}"
+          assert "WaitForSecondsRealtime(30f)" in window_view, "Window view should refresh the character's RP location while playing"
+          assert 'CreateBlock("Back wall below window"' in bootstrap, "Back wall must have a real window opening"
           assert "BuildRoom();" not in bootstrap[bootstrap.find("private void Awake()"):bootstrap.find("public void EnterRoomAfterApproval(")], "Room must not be built before login/approval"
           print("Scaffold, C# structure, FBX catalogue, controls, required room fixtures, and scope boundaries passed.")
           PY
