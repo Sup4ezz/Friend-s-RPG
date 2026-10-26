@@ -13,6 +13,8 @@ namespace Lorgus.Prototype
         [SerializeField] private float startingEyeHeight = 0.72f;
         [SerializeField] private float standingEyeHeight = 1.65f;
 
+        public void SetOverlay(Image overlay) { eyelidOverlay = overlay; }
+
         private IEnumerator Start()
         {
             Camera cam = FindObjectOfType<Camera>();
