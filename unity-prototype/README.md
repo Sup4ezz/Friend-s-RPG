@@ -7,6 +7,7 @@ This is an isolated prototype scaffold. It does not change the existing web game
 - Windows x86-64 standalone build
 - First-person, tile-based movement: W forward, S backward, A/D rotate 90 degrees
 - Room geometry generated at runtime; no external assets required for the first test
+- Wake-up beat: black-screen fade and a smooth camera rise from bed height to standing height
 - Local movement only; no network call per step
 
 ## Open in Unity
