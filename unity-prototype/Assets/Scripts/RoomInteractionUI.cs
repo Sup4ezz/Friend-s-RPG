@@ -121,8 +121,6 @@ namespace Lorgus.Prototype
                 panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 0.5f);
                 panelRect.anchoredPosition = Vector2.zero;
                 panelRect.sizeDelta = new Vector2(760, 360);
-                panelRect.offsetMin = Vector2.zero;
-                panelRect.offsetMax = Vector2.zero;
             }
             isRpScreen = false;
             Cursor.lockState = previousLockState;
