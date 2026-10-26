@@ -20,11 +20,21 @@ namespace Lorgus.Prototype
             root.AddComponent<LorgusPrototypeBootstrap>();
         }
 
+        private bool roomBuilt;
+
         private void Awake()
         {
             Application.targetFrameRate = 60;
             QualitySettings.vSyncCount = 1;
             Screen.sleepTimeout = SleepTimeout.NeverSleep;
+            var login = gameObject.AddComponent<CosmicLoginController>();
+            login.Initialize(this);
+        }
+
+        public void EnterRoomAfterApproval()
+        {
+            if (roomBuilt) return;
+            roomBuilt = true;
             BuildRoom();
             BuildPlayer();
             BuildLighting();
