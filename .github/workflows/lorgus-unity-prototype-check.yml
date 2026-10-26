@@ -59,7 +59,7 @@ jobs:
               assert "class " in text, f"{script}: no class declaration found"
               assert text.count("{") == text.count("}"), f"{script}: unbalanced braces"
           builder = (root / "Assets/Editor/LorgusRoomAssetCatalogBuilder.cs").read_text(encoding="utf-8")
-          for model in ("Bed_Twin1.fbx", "Nightstand_Shelf.fbx", "Candle_1.fbx", "Cabinet.fbx", "Chest_Wooden.fbx", "Table_Large.fbx", "Shelf_Arch.fbx", "Book_5.fbx"):
+          for model in ("Bed_Twin1.fbx", "Nightstand_Shelf.fbx", "Candle_1.fbx", "Cabinet.fbx", "Chest_Wood.fbx", "Table_Large.fbx", "Shelf_Arch.fbx", "Book_5.fbx"):
               assert model in builder, f"FBX catalogue is missing mapping for {model}"
               assert (root / "Assets/Art/QuaterniusFantasyProps/Models/FBX" / model).is_file(), f"FBX asset is missing: {model}"
           print("Scaffold structure, JSON, scene reference, C# structure and FBX catalogue checks passed.")
