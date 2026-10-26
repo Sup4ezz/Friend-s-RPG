@@ -152,7 +152,7 @@ namespace Lorgus.Prototype
         private void BuildPlayer()
         {
             var player = new GameObject("Player");
-            player.transform.position = new Vector3(0.5f, 0, -1.5f);
+            player.transform.position = new Vector3(-1.65f, 0.72f, 1.1f);
             var character = player.AddComponent<CharacterController>();
             character.height = 1.8f;
             character.radius = 0.25f;
@@ -161,7 +161,7 @@ namespace Lorgus.Prototype
             character.slopeLimit = 45f;
             var cameraObject = new GameObject("First Person Camera");
             cameraObject.transform.SetParent(player.transform, false);
-            cameraObject.transform.localPosition = new Vector3(0, 1.65f, 0);
+            cameraObject.transform.localPosition = new Vector3(0, 0.38f, 0);
             var camera = cameraObject.AddComponent<Camera>();
             camera.fieldOfView = 68;
             camera.nearClipPlane = 0.08f;
