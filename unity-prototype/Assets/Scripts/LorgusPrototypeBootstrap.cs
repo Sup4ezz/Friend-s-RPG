@@ -21,6 +21,8 @@ namespace Lorgus.Prototype
         }
 
         private bool roomBuilt;
+        public string ActiveCharacterId { get; private set; }
+        public string ActiveCharacterName { get; private set; }
 
         private void Awake()
         {
@@ -31,9 +33,11 @@ namespace Lorgus.Prototype
             login.Initialize(this);
         }
 
-        public void EnterRoomAfterApproval()
+        public void EnterRoomAfterApproval(string characterId, string characterName)
         {
             if (roomBuilt) return;
+            ActiveCharacterId = characterId;
+            ActiveCharacterName = characterName;
             roomBuilt = true;
             BuildRoom();
             BuildPlayer();
