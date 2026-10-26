@@ -34,9 +34,36 @@ namespace Lorgus.Prototype
 
         private static Material MakeMaterial(Color color)
         {
-            Shader shader = Shader.Find("Universal Render Pipeline/Lit");
-            if (shader == null) shader = Shader.Find("Standard");
-            return new Material(shader) { color = color };
+            // Shader.Find can return null in a player build when the shader was stripped.
+            // Clone Unity's built-in default material first; its shader is included by the engine.
+            Material builtIn = Resources.GetBuiltinResource<Material>("Default-Material.mat");
+            if (builtIn != null)
+            {
+                Material material = new Material(builtIn);
+                material.color = color;
+                return material;
+            }
+
+            string[] shaderNames =
+            {
+                "Universal Render Pipeline/Lit",
+                "Standard",
+                "Unlit/Color",
+                "Sprites/Default",
+                "Hidden/Internal-Colored"
+            };
+
+            foreach (string shaderName in shaderNames)
+            {
+                Shader shader = Shader.Find(shaderName);
+                if (shader == null) continue;
+                Material material = new Material(shader);
+                material.color = color;
+                return material;
+            }
+
+            throw new System.InvalidOperationException(
+                "LORGUS could not create a room material: no usable built-in shader was available.");
         }
 
         private void BuildRoom()
