@@ -83,7 +83,7 @@ namespace Lorgus.Prototype
             CreateBlock("Front wall left", new Vector3(-2.5f, 1.5f, -4), new Vector3(3, 3, 0.25f), wall);
             CreateBlock("Front wall right", new Vector3(2.5f, 1.5f, -4), new Vector3(3, 3, 0.25f), wall);
             CreateBlock("Door lintel", new Vector3(0, 2.7f, -4), new Vector3(2, 0.6f, 0.25f), wood);
-            AddInteractable("Door leaf", "Дверь соседей", "Дубовая дверь ведёт во двор, откуда можно будет отправиться в гости к другим персонажам.", new Vector3(0, 1.15f, -3.91f), new Vector3(1.7f, 2.3f, 0.08f), wood, RoomObjectRole.VisitDoor, false);
+            AddInteractable("Door leaf", "Дверь на улицу", "Дверь закрыта. Её назначение — выход из комнаты; полноценный переход в мир будет подключён после реализации локаций.", new Vector3(0, 1.15f, -3.91f), new Vector3(1.7f, 2.3f, 0.08f), wood);
             CreateBlock("Door crossbar", new Vector3(0, 1.25f, -3.84f), new Vector3(1.3f, 0.08f, 0.035f), brass);
             CreateBlock("Door handle", new Vector3(0.55f, 1.15f, -3.79f), new Vector3(0.07f, 0.07f, 0.07f), brass);
 
@@ -122,7 +122,7 @@ namespace Lorgus.Prototype
             CreateBlock("Storage chest", new Vector3(2.95f, 0.38f, -0.2f), new Vector3(1.15f, 0.72f, 0.75f), wood);
             if (!HasModel("Storage chest"))
                 CreateBlock("Chest lid", new Vector3(2.95f, 0.77f, -0.2f), new Vector3(1.18f, 0.1f, 0.78f), brass);
-            AddInteractable("Chest inspection", "Сундук", "Замок сорван, но крышка не поддаётся. В щели застрял клочок бумаги.", new Vector3(2.95f, 0.42f, -0.2f), new Vector3(1.15f, 0.8f, 0.75f), wood, visible: false);
+            AddInteractable("Chest inspection", "Сундук — инвентарь", "Здесь должен открываться инвентарь персонажа.", new Vector3(2.95f, 0.42f, -0.2f), new Vector3(1.15f, 0.8f, 0.75f), wood, RoomObjectRole.Inventory, false, false);
 
             // Writing desk, book and the dark window.
             CreateBlock("Writing desk top", new Vector3(-2.8f, 0.95f, -2.6f), new Vector3(1.65f, 0.12f, 0.8f), wood);
@@ -131,24 +131,7 @@ namespace Lorgus.Prototype
                 CreateBlock("Desk left leg", new Vector3(-3.45f, 0.45f, -2.6f), new Vector3(0.12f, 0.9f, 0.12f), wood);
                 CreateBlock("Desk right leg", new Vector3(-2.15f, 0.45f, -2.6f), new Vector3(0.12f, 0.9f, 0.12f), wood);
             }
-            AddInteractable("Open book", "Книжный шкаф — Лорбук", "Летописи, легенды и сведения о мире собраны в одном месте.", new Vector3(2.8f, 2.15f, 3.62f), new Vector3(1.45f, 0.1f, 0.38f), wood, RoomObjectRole.Lorebook, false, false);
-            CreateBlock("Book spine", new Vector3(-2.8f, 1.065f, -2.58f), new Vector3(0.035f, 0.015f, 0.42f), brass);
-
-            CreateBlock("Window frame", new Vector3(0, 1.95f, 3.84f), new Vector3(1.7f, 1.35f, 0.12f), wood);
-            AddInteractable("Window inspection", "Окно", "За стеклом — непроглядная темнота. Ни огней, ни силуэтов, ни даже отражения комнаты.", new Vector3(0, 1.95f, 3.76f), new Vector3(1.45f, 1.1f, 0.04f), stone);
-            CreateBlock("Window vertical bar", new Vector3(0, 1.95f, 3.71f), new Vector3(0.06f, 1.12f, 0.04f), brass);
-            CreateBlock("Window horizontal bar", new Vector3(0, 1.95f, 3.71f), new Vector3(1.48f, 0.06f, 0.04f), brass);
-
-            CreateBlock("Wall shelf", new Vector3(2.8f, 2.15f, 3.62f), new Vector3(1.45f, 0.1f, 0.38f), wood);
-            for (int i = 0; i < 5; i++)
-                CreateBlock("Shelf book " + i, new Vector3(2.28f + i * 0.23f, 2.36f, 3.65f), new Vector3(0.18f, 0.34f + (i % 2) * 0.08f, 0.24f), i % 2 == 0 ? cloth : brass);
-            AddInteractable("World map", "Карта мира", "Карта на стене — точка выбора доступного места для перемещения.", new Vector3(-1.65f, 2.0f, 3.78f), new Vector3(1.1f, 1.25f, 0.05f), wood, RoomObjectRole.WorldMap, false);
             AddInteractable("Empty mirror", "Зеркало без отражения", "Зеркало не отражает ваше лицо. Здесь будут карточка персонажа и статистика.", new Vector3(1.65f, 1.95f, 3.78f), new Vector3(0.75f, 1.25f, 0.06f), brass, RoomObjectRole.CharacterMirror, false);
-            AddInteractable("Trophy stand", "Стенды для предметов", "Выставляйте предметы, которыми хотите похвастаться перед гостями.", new Vector3(-3.0f, 0.9f, 0.3f), new Vector3(0.8f, 0.9f, 0.6f), wood, RoomObjectRole.TrophyStand, true);
-            CreateBlock("Personal picture frame", new Vector3(-3.1f, 2.0f, 3.78f), new Vector3(0.9f, 0.9f, 0.06f), brass);
-            var picture = CreateBlock("Personal picture surface", new Vector3(-3.1f, 2.0f, 3.735f), new Vector3(0.78f, 0.78f, 0.025f), linen);
-            var customization = gameObject.AddComponent<RoomCustomization>();
-            customization.Initialize(picture.GetComponent<Renderer>());
             CreateBlock("Ceiling beam", new Vector3(0, 2.93f, 0.5f), new Vector3(7.5f, 0.12f, 0.16f), wood);
         }
 
@@ -223,7 +206,7 @@ namespace Lorgus.Prototype
 
             var hint = MakeText("Controls hint", canvas.transform, 16, new Vector2(0, 24), new Vector2(900, 44));
             hint.alignment = TextAnchor.LowerCenter;
-            hint.text = "WASD — движение     Мышь — обзор     E — взаимодействие     F — взять / поставить     C — настройка     Esc — курсор";
+            hint.text = "WASD — движение     Мышь — обзор     E — взаимодействие     Esc — курсор";
 
             var interaction = ui.AddComponent<RoomInteractionUI>();
             interaction.Build(canvas.transform);
