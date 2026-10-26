@@ -73,7 +73,7 @@ namespace Lorgus.Prototype
                 if (interactionUI != null) interactionUI.Show(target);
                 return;
             }
-            if (interactionUI != null) interactionUI.Show("Тишина", "Вы не замечаете ничего, с чем можно было бы взаимодействовать.");
+            if (interactionUI != null) interactionUI.ShowText("Тишина", "Вы не замечаете ничего, с чем можно было бы взаимодействовать.");
         }
 
         private void ToggleMoveObject()
