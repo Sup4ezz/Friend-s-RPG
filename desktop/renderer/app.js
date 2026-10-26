@@ -21,6 +21,8 @@ import { createClient } from "@supabase/supabase-js";
   let introDone = false;
   let transitioning = false;
 
+  let introTimer;
+
   function revealLogin() {
     if (introDone) return;
     introDone = true;
@@ -29,7 +31,7 @@ import { createClient } from "@supabase/supabase-js";
     document.body.classList.add("intro-complete");
     window.setTimeout(() => splash.remove(), reducedMotion ? 20 : 1500);
   }
-  window.setTimeout(revealLogin, reducedMotion ? 100 : 4800);
+  introTimer = window.setTimeout(revealLogin, reducedMotion ? 100 : 4800);
   $("#skip-intro").addEventListener("click", revealLogin);
 
   // Uses the exact username -> synthetic email mapping from the production web client.
@@ -107,6 +109,58 @@ import { createClient } from "@supabase/supabase-js";
     })();
   }
 
+
+  // Restore a valid session on this device; otherwise leave the login form available.
+  async function restoreSession() {
+    if (!supabase) return;
+    try {
+      const { data, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !data?.session) return;
+      await new Promise(resolve => {
+        const poll = () => introDone ? resolve() : window.setTimeout(poll, 80);
+        poll();
+      });
+      if (!transitioning && !cabinet.classList.contains("cabinet-reveal")) {
+        error.classList.remove("is-visible");
+        playMessengerTransition();
+      }
+    } catch {
+      // A session restore failure must never prevent a manual sign-in.
+    }
+  }
+  void restoreSession();
+
+  $("#logout-button").addEventListener("click", async () => {
+    if (!supabase || transitioning) return;
+    const button = $("#logout-button");
+    button.disabled = true;
+    try {
+      const { error: signOutError } = await supabase.auth.signOut();
+      if (signOutError) {
+        $("#notice .eyebrow").textContent = "СЕАНС СОХРАНЁН";
+        $("#notice-title").textContent = "Не удалось выйти";
+        $("#notice-body").textContent = "Связь с ЛОРГУСОМ прервалась. Проверь интернет и повтори попытку.";
+        if (!notice.open) notice.showModal();
+        return;
+      }
+      cabinet.classList.remove("cabinet-reveal");
+      cabinet.setAttribute("aria-hidden", "true");
+      login.hidden = false;
+      login.classList.remove("login-leaving");
+      login.classList.add("is-visible");
+      $("#password").value = "";
+      $("#username").value = "";
+      error.classList.remove("is-visible");
+      $("#username").focus();
+    } catch {
+      $("#notice .eyebrow").textContent = "СЕАНС СОХРАНЁН";
+      $("#notice-title").textContent = "Не удалось выйти";
+      $("#notice-body").textContent = "Проверь интернет и повтори попытку.";
+      if (!notice.open) notice.showModal();
+    } finally {
+      button.disabled = false;
+    }
+  });
 
   const messages = {
     characters: ["МОИ ПЕРСОНАЖИ", "Летопись ещё не открыта", "Подключение персонажей будет выполнено после безопасной интеграции с существующей авторизацией LORGUS. Сейчас запросы к игровым данным не выполняются."],
