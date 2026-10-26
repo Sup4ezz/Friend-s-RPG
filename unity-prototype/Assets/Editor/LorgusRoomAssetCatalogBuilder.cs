@@ -63,7 +63,7 @@ namespace Lorgus.Prototype.Editor
             catalog.nightstand = Load("Nightstand_Shelf.fbx");
             catalog.candle = Load("Candle_1.fbx");
             catalog.cabinet = Load("Cabinet.fbx");
-            catalog.chest = Load("Chest_Wooden.fbx");
+            catalog.chest = Load("Chest_Wood.fbx");
             catalog.desk = Load("Table_Large.fbx");
             catalog.shelf = Load("Shelf_Arch.fbx");
             catalog.book = Load("Book_5.fbx");
