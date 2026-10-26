@@ -96,7 +96,7 @@ namespace Lorgus.Prototype
                 CreateBlock("Rumpled blanket", new Vector3(-1.65f, 0.64f, 1.42f), new Vector3(2.08f, 0.08f, 0.72f), cloth);
                 CreateBlock("Pillow", new Vector3(-1.65f, 0.65f, 0.63f), new Vector3(0.7f, 0.12f, 0.35f), linen);
             }
-            AddInteractable("Bed inspection", "Постель", "Простыни сбились в складки. Похоже, вы провели здесь немало времени — или проснулись резко.", new Vector3(-1.65f, 0.74f, 1.1f), new Vector3(2.1f, 0.16f, 1.4f), linen);
+            AddInteractable("Bed inspection", "Постель", "Простыни сбились в складки. Похоже, вы провели здесь немало времени — или проснулись резко.", new Vector3(-1.65f, 0.74f, 1.1f), new Vector3(2.1f, 0.16f, 1.4f), linen, visible: false);
 
             // Rug, bedside table and candle.
             CreateBlock("Woven rug", new Vector3(0.15f, 0.015f, 0.35f), new Vector3(2.15f, 0.025f, 2.7f), cloth);
@@ -107,7 +107,7 @@ namespace Lorgus.Prototype
             CreateBlock("Candle", new Vector3(0.05f, 0.88f, 1.55f), new Vector3(0.08f, 0.18f, 0.08f), linen);
             if (!HasModel("Candle"))
                 CreateBlock("Candle flame", new Vector3(0.05f, 1.005f, 1.55f), new Vector3(0.035f, 0.07f, 0.035f), brass);
-            AddInteractable("Table inspection", "Письменный стол", "Здесь персонаж сможет читать и писать RP-сообщения.", new Vector3(-2.8f, 0.95f, -2.6f), new Vector3(1.65f, 0.12f, 0.8f), wood, RoomObjectRole.RpMessages, true);
+            AddInteractable("Table inspection", "Письменный стол", "Здесь персонаж сможет читать и писать RP-сообщения.", new Vector3(-2.8f, 0.95f, -2.6f), new Vector3(1.65f, 0.12f, 0.8f), wood, RoomObjectRole.RpMessages, true, false);
 
             // Wardrobe and chest.
             CreateBlock("Wardrobe body", new Vector3(3.05f, 1.05f, 1.45f), new Vector3(1.2f, 2.1f, 0.75f), wood);
@@ -117,12 +117,12 @@ namespace Lorgus.Prototype
                 CreateBlock("Wardrobe right panel", new Vector3(3.34f, 1.05f, 1.05f), new Vector3(0.5f, 1.8f, 0.04f), brass);
                 CreateBlock("Wardrobe handles", new Vector3(3.05f, 1.0f, 1.015f), new Vector3(0.06f, 0.22f, 0.05f), brass);
             }
-            AddInteractable("Wardrobe inspection", "Шкаф — инвентарь", "Здесь хранится инвентарь персонажа.", new Vector3(3.05f, 1.05f, 1.45f), new Vector3(1.2f, 2.1f, 0.75f), wood, RoomObjectRole.Inventory, false);
+            AddInteractable("Wardrobe inspection", "Шкаф — инвентарь", "Здесь хранится инвентарь персонажа.", new Vector3(3.05f, 1.05f, 1.45f), new Vector3(1.2f, 2.1f, 0.75f), wood, RoomObjectRole.Inventory, false, false);
 
             CreateBlock("Storage chest", new Vector3(2.95f, 0.38f, -0.2f), new Vector3(1.15f, 0.72f, 0.75f), wood);
             if (!HasModel("Storage chest"))
                 CreateBlock("Chest lid", new Vector3(2.95f, 0.77f, -0.2f), new Vector3(1.18f, 0.1f, 0.78f), brass);
-            AddInteractable("Chest inspection", "Сундук", "Замок сорван, но крышка не поддаётся. В щели застрял клочок бумаги.", new Vector3(2.95f, 0.42f, -0.2f), new Vector3(1.15f, 0.8f, 0.75f), wood);
+            AddInteractable("Chest inspection", "Сундук", "Замок сорван, но крышка не поддаётся. В щели застрял клочок бумаги.", new Vector3(2.95f, 0.42f, -0.2f), new Vector3(1.15f, 0.8f, 0.75f), wood, visible: false);
 
             // Writing desk, book and the dark window.
             CreateBlock("Writing desk top", new Vector3(-2.8f, 0.95f, -2.6f), new Vector3(1.65f, 0.12f, 0.8f), wood);
@@ -131,7 +131,7 @@ namespace Lorgus.Prototype
                 CreateBlock("Desk left leg", new Vector3(-3.45f, 0.45f, -2.6f), new Vector3(0.12f, 0.9f, 0.12f), wood);
                 CreateBlock("Desk right leg", new Vector3(-2.15f, 0.45f, -2.6f), new Vector3(0.12f, 0.9f, 0.12f), wood);
             }
-            AddInteractable("Open book", "Книжный шкаф — Лорбук", "Летописи, легенды и сведения о мире собраны в одном месте.", new Vector3(2.8f, 2.15f, 3.62f), new Vector3(1.45f, 0.1f, 0.38f), wood, RoomObjectRole.Lorebook, false);
+            AddInteractable("Open book", "Книжный шкаф — Лорбук", "Летописи, легенды и сведения о мире собраны в одном месте.", new Vector3(2.8f, 2.15f, 3.62f), new Vector3(1.45f, 0.1f, 0.38f), wood, RoomObjectRole.Lorebook, false, false);
             CreateBlock("Book spine", new Vector3(-2.8f, 1.065f, -2.58f), new Vector3(0.035f, 0.015f, 0.42f), brass);
 
             CreateBlock("Window frame", new Vector3(0, 1.95f, 3.84f), new Vector3(1.7f, 1.35f, 0.12f), wood);
@@ -229,13 +229,15 @@ namespace Lorgus.Prototype
             return text;
         }
 
-        private static void AddInteractable(string objectName, string title, string description, Vector3 position, Vector3 scale, Material material, RoomObjectRole role = RoomObjectRole.Inspect, bool movable = false)
+        private static void AddInteractable(string objectName, string title, string description, Vector3 position, Vector3 scale, Material material, RoomObjectRole role = RoomObjectRole.Inspect, bool movable = false, bool visible = true)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.name = objectName;
             go.transform.position = position;
             go.transform.localScale = scale;
-            go.GetComponent<Renderer>().sharedMaterial = material;
+            var renderer = go.GetComponent<Renderer>();
+            renderer.sharedMaterial = material;
+            renderer.enabled = visible;
             var target = go.AddComponent<RoomInteractable>();
             target.Configure(title, description, role, movable);
         }
