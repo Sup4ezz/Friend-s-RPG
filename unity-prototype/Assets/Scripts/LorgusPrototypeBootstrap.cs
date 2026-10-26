@@ -156,6 +156,12 @@ namespace Lorgus.Prototype
         {
             var player = new GameObject("Player");
             player.transform.position = new Vector3(0.5f, 0, -1.5f);
+            var character = player.AddComponent<CharacterController>();
+            character.height = 1.8f;
+            character.radius = 0.25f;
+            character.center = new Vector3(0f, 0.9f, 0f);
+            character.stepOffset = 0.25f;
+            character.slopeLimit = 45f;
             var cameraObject = new GameObject("First Person Camera");
             cameraObject.transform.SetParent(player.transform, false);
             cameraObject.transform.localPosition = new Vector3(0, 1.65f, 0);
@@ -217,7 +223,7 @@ namespace Lorgus.Prototype
 
             var hint = MakeText("Controls hint", canvas.transform, 16, new Vector2(0, 24), new Vector2(900, 44));
             hint.alignment = TextAnchor.LowerCenter;
-            hint.text = "W / S — шаг     A / D — поворот     E — взаимодействие     F — взять / поставить     C — настройка     Esc — курсор";
+            hint.text = "WASD — движение     Мышь — обзор     E — взаимодействие     F — взять / поставить     C — настройка     Esc — курсор";
 
             var interaction = ui.AddComponent<RoomInteractionUI>();
             interaction.Build(canvas.transform);
