@@ -32,11 +32,17 @@ jobs:
       - name: Install desktop dependencies
         run: npm install
 
+      - name: Bundle renderer with local Supabase SDK
+        run: npm run build:renderer
+
       - name: Check JavaScript syntax
         run: |
           node --check main.cjs
           node --check preload.cjs
+          node --check scripts/build-renderer.cjs
           node --check renderer/app.js
+          node --check renderer/config.generated.js
+          node --check renderer/app.bundle.js
 
       - name: Build Windows x64 installer
         run: npm run dist:win
