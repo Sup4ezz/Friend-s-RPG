@@ -89,7 +89,7 @@ jobs:
           wake = (root / "Assets/Scripts/WakeUpSequence.cs").read_text(encoding="utf-8")
           assert "Vector3.Lerp(wakeStartPosition, wakeEndPosition, t)" in wake and "SetCameraRestHeight" in wake, "Wake-up must animate the player from the bed to standing"
           assert "new Vector3(-1.65f, 0.72f, 1.1f)" in bootstrap, "Player spawn must be on the bed before waking up"
-          assert "ShowCharacterSelection" in login and "EnterRoomAfterApproval(character.character_id, character.name)" in login, "Multiple approved characters must be selectable"
+          assert "ShowCharacterSelection" in login and "EnterRoomAfterApproval(character.character_id, character.name, accessToken)" in login, "Multiple approved characters must be selectable"
           assert "ActiveCharacterId" in bootstrap and "ActiveCharacterName" in bootstrap, "Selected character must be retained for location-dependent context"
           window_view = (root / "Assets/Scripts/WindowViewController.cs").read_text(encoding="utf-8")
           assert '"/rest/v1/rp_presence?select=presence_type,region,location,from_region,from_location,to_region,to_location&character_id=eq."' in window_view, "Window must query the selected character's RP presence"
