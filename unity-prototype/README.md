@@ -10,7 +10,10 @@ An isolated Unity project scaffold for a future Windows desktop game. It does no
 - Movement: **W** one tile forward, **S** one tile backward, **A/D** rotate 90 degrees.
 - **E** inspects an object when it is in front of the player; an in-world text description appears.
 - Basic collision against walls and furniture.
+- Ambient audio and dust are decorative atmosphere only; there are no extra rooms, exits, or scripted scare events.
 - Deliberately restrained lighting and geometry for the target desktop hardware.
+- Procedural ambient sound: soft air through the window and subtle old-timber creaks, generated locally with no external audio files.
+- Gentle candlelight fluctuation and sparse drifting dust motes to add life without expensive effects.
 
 The door is scenery only. It does not lead anywhere. Inspectable objects currently provide narrative text, not inventory or quest progression.
 
