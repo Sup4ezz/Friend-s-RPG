@@ -49,7 +49,6 @@ jobs:
           buildMethod: Lorgus.Prototype.Editor.BuildScript.BuildWindows
           buildsPath: Builds
           buildName: LORGUS
-          versioning: None
 
       - name: Package the executable
         shell: bash
