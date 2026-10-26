@@ -95,7 +95,11 @@ namespace Lorgus.Prototype
             Material stone = MakeMaterial(new Color(0.025f, 0.02f, 0.018f));
 
             CreateBlock("Stone floor", new Vector3(0, -0.15f, 0), new Vector3(8, 0.3f, 8), floor);
-            CreateBlock("Back wall", new Vector3(0, 1.5f, 4), new Vector3(8, 3, 0.25f), wall);
+            // Leave a real aperture in the back wall so the contextual exterior can be seen.
+            CreateBlock("Back wall left", new Vector3(-2.475f, 1.5f, 4), new Vector3(3.05f, 3f, 0.25f), wall);
+            CreateBlock("Back wall right", new Vector3(2.475f, 1.5f, 4), new Vector3(3.05f, 3f, 0.25f), wall);
+            CreateBlock("Back wall below window", new Vector3(0, 0.5875f, 4), new Vector3(1.9f, 1.175f, 0.25f), wall);
+            CreateBlock("Back wall above window", new Vector3(0, 2.8625f, 4), new Vector3(1.9f, 0.275f, 0.25f), wall);
             CreateBlock("Left wall", new Vector3(-4, 1.5f, 0), new Vector3(0.25f, 3, 8), wall);
             CreateBlock("Right wall", new Vector3(4, 1.5f, 0), new Vector3(0.25f, 3, 8), wall);
             CreateBlock("Front wall left", new Vector3(-2.5f, 1.5f, -4), new Vector3(3, 3, 0.25f), wall);
