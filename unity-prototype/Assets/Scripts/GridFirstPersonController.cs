@@ -48,7 +48,7 @@ namespace Lorgus.Prototype
                 Cursor.visible = false;
             }
 
-            if (!inputEnabled || Cursor.lockState != CursorLockMode.Locked) return;
+            if (!inputEnabled || (interactionUI != null && interactionUI.IsOpen) || Cursor.lockState != CursorLockMode.Locked) return;
 
             Look();
             MovePlayer();
