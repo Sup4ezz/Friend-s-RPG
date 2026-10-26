@@ -155,7 +155,7 @@ namespace Lorgus.Prototype
             var wakeSequence = ui.AddComponent<WakeUpSequence>();
             wakeSequence.SetOverlay(overlay);
 
-            var hint = MakeText("Controls hint", canvas.transform, 16, new Vector2(0, 24), new Vector2(-40, 44));
+            var hint = MakeText("Controls hint", canvas.transform, 16, new Vector2(0, 24), new Vector2(900, 44));
             hint.alignment = TextAnchor.LowerCenter;
             hint.text = "W / S — шаг     A / D — поворот     E — осмотреть     Esc — курсор";
 
