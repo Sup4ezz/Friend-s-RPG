@@ -158,6 +158,40 @@ namespace Lorgus.Prototype
                     yield break;
                 }
             }
+            musicSource.clip = BuildDefaultMusic();
+            musicSource.volume = 0.12f;
+            musicSource.Play();
+        }
+
+        // A quiet, original procedural fantasy-room music bed used until the player supplies room.ogg/wav/mp3.
+        private static AudioClip BuildDefaultMusic()
+        {
+            const int rate = 22050;
+            const int seconds = 24;
+            int count = rate * seconds;
+            var samples = new float[count * 2];
+            float[] notes = { 110f, 146.83f, 164.81f, 220f, 164.81f, 146.83f, 123.47f, 164.81f };
+            for (int i = 0; i < count; i++)
+            {
+                float t = (float)i / rate;
+                int beat = Mathf.FloorToInt(t / 3f);
+                float local = t % 3f;
+                float fadeIn = Mathf.Clamp01(t / 1.8f);
+                float fadeOut = Mathf.Clamp01((seconds - t) / 1.8f);
+                float envelope = Mathf.Min(fadeIn, fadeOut);
+                float root = notes[beat % notes.Length];
+                float drone = Mathf.Sin(2f * Mathf.PI * root * t) * 0.022f
+                    + Mathf.Sin(2f * Mathf.PI * root * 1.5f * t) * 0.009f
+                    + Mathf.Sin(2f * Mathf.PI * root * 2f * t) * 0.004f;
+                float pluckEnvelope = Mathf.Exp(-local * 2.7f);
+                float pluck = Mathf.Sin(2f * Mathf.PI * root * 4f * local) * pluckEnvelope * 0.035f;
+                float note = (drone + pluck) * envelope;
+                samples[i * 2] = note;
+                samples[i * 2 + 1] = note * 0.97f;
+            }
+            var clip = AudioClip.Create("LORGUS - room music fallback", count, 2, rate, false);
+            clip.SetData(samples, 0);
+            return clip;
         }
 
         private void OnDestroy()
