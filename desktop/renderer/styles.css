@@ -66,3 +66,6 @@ button:disabled{opacity:.55;cursor:not-allowed}
   .pigeon-flight .pigeon,.pigeon-flight .letter,.feather-cover svg,.feather-fall svg{animation:none}
   .feather-cover svg{transform:scale(2.6)}
 }
+
+.cabinet-actions{display:flex;align-items:center;gap:10px}.cabinet-actions #logout-button{width:auto;padding:0 14px;font:8px Arial,sans-serif;letter-spacing:.15em}.cabinet-actions button:hover{border-color:rgba(228,204,151,.7);background:rgba(213,189,136,.08)}
+#login-form button[aria-busy="true"]{cursor:progress;filter:saturate(.65)}
