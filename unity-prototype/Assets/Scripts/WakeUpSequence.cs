@@ -10,7 +10,7 @@ namespace Lorgus.Prototype
         [SerializeField] private Image eyelidOverlay;
         [SerializeField] private float fadeDuration = 2.2f;
         [SerializeField] private float riseDuration = 1.8f;
-        [SerializeField] private float startingEyeHeight = 0.72f;
+        [SerializeField] private float startingEyeHeight = 0.38f;
         [SerializeField] private float standingEyeHeight = 1.65f;
 
         public void SetOverlay(Image overlay) { eyelidOverlay = overlay; }
@@ -20,6 +20,10 @@ namespace Lorgus.Prototype
             Camera cam = FindObjectOfType<Camera>();
             GridFirstPersonController controller = FindObjectOfType<GridFirstPersonController>();
             if (controller != null) controller.SetInputEnabled(false);
+            CharacterController body = controller != null ? controller.GetComponent<CharacterController>() : null;
+            Vector3 wakeStartPosition = controller != null ? controller.transform.position : Vector3.zero;
+            Vector3 wakeEndPosition = new Vector3(-0.4f, 0f, 0.4f);
+            if (body != null) body.enabled = false;
             if (cam != null)
             {
                 Vector3 p = cam.transform.localPosition;
@@ -45,6 +49,8 @@ namespace Lorgus.Prototype
                     Vector3 p = cam.transform.localPosition;
                     p.y = Mathf.Lerp(startingEyeHeight, standingEyeHeight, t);
                     cam.transform.localPosition = p;
+                    if (controller != null)
+                        controller.transform.position = Vector3.Lerp(wakeStartPosition, wakeEndPosition, t);
                 }
 
                 if (eyelidOverlay != null && elapsed <= fadeDuration)
@@ -64,7 +70,12 @@ namespace Lorgus.Prototype
                 eyelidOverlay.gameObject.SetActive(false);
             }
 
-            if (controller != null) controller.SetInputEnabled(true);
+            if (body != null) body.enabled = true;
+            if (controller != null)
+            {
+                controller.SetCameraRestHeight(standingEyeHeight);
+                controller.SetInputEnabled(true);
+            }
         }
     }
 }
