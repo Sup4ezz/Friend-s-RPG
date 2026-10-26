@@ -19,8 +19,6 @@ namespace Lorgus.Prototype
         private Vector3 cameraRestPosition;
         private readonly RaycastHit[] raycastBuffer = new RaycastHit[24];
         private RoomInteractionUI interactionUI;
-        private RoomInteractable heldObject;
-        private Vector3 heldOriginalPosition;
 
         private void Awake()
         {
@@ -56,7 +54,6 @@ namespace Lorgus.Prototype
             MovePlayer();
 
             if (Input.GetKeyDown(KeyCode.E)) Interact();
-            else if (Input.GetKeyDown(KeyCode.F)) ToggleMoveObject();
         }
 
         private void Look()
@@ -113,53 +110,17 @@ namespace Lorgus.Prototype
             if (interactionUI != null) interactionUI.ShowText("Тишина", "Вы не замечаете ничего, с чем можно было бы взаимодействовать.");
         }
 
-        private void ToggleMoveObject()
-        {
-            if (heldObject != null)
-            {
-                heldObject.transform.position = new Vector3(
-                    Mathf.Clamp(heldObject.transform.position.x, -3.2f, 3.2f),
-                    heldOriginalPosition.y,
-                    Mathf.Clamp(heldObject.transform.position.z, -3.2f, 3.2f));
-                heldObject = null;
-                if (interactionUI != null) interactionUI.ShowText("Предмет поставлен", "Предмет возвращён в комнату.");
-                return;
-            }
-            if (playerCamera == null) return;
-            Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-            if (!Physics.Raycast(ray, out RaycastHit hit, interactionDistance, ~0, QueryTriggerInteraction.Ignore)) return;
-            RoomInteractable target = hit.collider.GetComponentInParent<RoomInteractable>();
-            if (target == null || !target.Movable)
-            {
-                if (interactionUI != null) interactionUI.ShowText("Не сдвинуть", "Этот предмет закреплён или слишком тяжёлый.");
-                return;
-            }
-            heldObject = target;
-            heldOriginalPosition = target.transform.position;
-            if (interactionUI != null) interactionUI.ShowText("Предмет взят", "Перемещайтесь WASD и поворачивайтесь мышью. Нажмите F, чтобы поставить предмет.");
-        }
-
-        private void LateUpdate()
-        {
-            if (heldObject == null || playerCamera == null) return;
-            Vector3 target = transform.position + transform.forward * 1.2f;
-            target.y = heldOriginalPosition.y;
-            heldObject.transform.position = Vector3.Lerp(heldObject.transform.position, target, Time.deltaTime * 10f);
-        }
-
         public void SetInputEnabled(bool enabled)
         {
             inputEnabled = enabled;
             if (!enabled)
             {
                 verticalVelocity = 0f;
-                heldObject = null;
             }
         }
 
         private void OnDisable()
         {
-            heldObject = null;
         }
     }
 }
