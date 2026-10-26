@@ -18,6 +18,8 @@ namespace Lorgus.Prototype
         private IEnumerator Start()
         {
             Camera cam = FindObjectOfType<Camera>();
+            GridFirstPersonController controller = FindObjectOfType<GridFirstPersonController>();
+            if (controller != null) controller.SetInputEnabled(false);
             if (cam != null)
             {
                 Vector3 p = cam.transform.localPosition;
@@ -61,6 +63,8 @@ namespace Lorgus.Prototype
                 eyelidOverlay.color = c;
                 eyelidOverlay.gameObject.SetActive(false);
             }
+
+            if (controller != null) controller.SetInputEnabled(true);
         }
     }
 }
