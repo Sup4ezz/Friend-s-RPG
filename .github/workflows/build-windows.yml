@@ -1,0 +1,71 @@
+name: LORGUS Windows build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - unity/lorgus-windows-prototype
+    paths:
+      - "unity-prototype/**"
+      - ".github/workflows/build-windows.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lorgus-windows-build
+  cancel-in-progress: false
+
+jobs:
+  build-windows:
+    name: Compile LORGUS for Windows (Mono)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout prototype branch
+        uses: actions/checkout@v4
+        with:
+          ref: unity/lorgus-windows-prototype
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: unity-prototype/Library
+          key: Library-Windows-${{ hashFiles('unity-prototype/Assets/**', 'unity-prototype/Packages/**', 'unity-prototype/ProjectSettings/**') }}
+          restore-keys: |
+            Library-Windows-
+
+      - name: Build Windows player with Unity
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: unity-prototype
+          unityVersion: 6000.0.60f1
+          targetPlatform: StandaloneWindows64
+          buildMethod: Lorgus.Prototype.Editor.BuildScript.BuildWindows
+          buildsPath: Builds
+          buildName: LORGUS
+          versioning: None
+
+      - name: Package the executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f unity-prototype/Builds/Windows/LORGUS.exe
+          test -d unity-prototype/Builds/Windows/LORGUS_Data
+          mkdir -p dist
+          cd unity-prototype/Builds/Windows
+          zip -r ../../../dist/LORGUS-Windows.zip LORGUS.exe LORGUS_Data
+          test -s ../../../dist/LORGUS-Windows.zip
+
+      - name: Upload downloadable build
+        uses: actions/upload-artifact@v4
+        with:
+          name: LORGUS-Windows
+          path: dist/LORGUS-Windows.zip
+          if-no-files-found: error
+          retention-days: 14
