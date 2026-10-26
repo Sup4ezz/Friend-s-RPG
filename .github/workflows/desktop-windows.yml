@@ -12,6 +12,11 @@ on:
 permissions:
   contents: read
 
+# Avoid queuing one full Windows packaging job for every small commit.
+concurrency:
+  group: lorgus-desktop-windows-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-windows:
     runs-on: windows-latest
