@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src https://dxdxnttpznoekaiecrlv.supabase.co wss://dxdxnttpznoekaiecrlv.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'">
   <meta name="color-scheme" content="dark">
   <title>ЛОРГУС</title>
   <link rel="stylesheet" href="./styles.css">
-  <script defer src="./app.js"></script>
+  <script defer src="./config.generated.js"></script>
+  <script defer src="./app.bundle.js"></script>
 </head>
 <body>
   <div class="scene" aria-hidden="true">
@@ -32,7 +33,7 @@
       <h1>Возвращение <em>домой</em></h1>
       <p class="login-copy">Мир помнит тех, кто однажды ступил на его землю.</p>
       <form id="login-form" autocomplete="on">
-        <label for="username">ИМЯ ИЛИ ЭЛЕКТРОННАЯ ПОЧТА</label>
+        <label for="username">ЛОГИН</label>
         <input id="username" name="username" autocomplete="username" placeholder="Имя путешественника" required>
         <label for="password">ПАРОЛЬ</label>
         <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Тайна, известная лишь тебе" required>
@@ -74,7 +75,7 @@
       <button class="cabinet-tile" data-cabinet="atlas"><span class="tile-mark">Ⅱ</span><b>Атлас земель</b><small>Королевства и дальние берега</small><i>ИЗУЧИТЬ →</i></button>
       <button class="cabinet-tile" data-cabinet="chronicles"><span class="tile-mark">Ⅲ</span><b>Архив летописца</b><small>Легенды, существа и забытые эпохи</small><i>ЧИТАТЬ →</i></button>
     </section>
-    <footer class="cabinet-footer"><span>МИР ЖДЁТ СВОЕГО ЛЕТОПИСЦА</span><span>ПРОТОТИП · ИГРОВЫЕ ДАННЫЕ НЕ ПОДКЛЮЧЕНЫ</span></footer>
+    <footer class="cabinet-footer"><span>МИР ЖДЁТ СВОЕГО ЛЕТОПИСЦА</span><span>КЛИЕНТ LORGUS · ПЕРВЫЙ ЭТАП</span></footer>
   </main>
 
   <dialog id="notice" class="dialog"><button class="dialog-close" data-close aria-label="Закрыть">×</button><div class="dialog-sigil">✧</div><p class="eyebrow">ЛЕТОПИСЬ ПРОДОЛЖАЕТСЯ</p><h2 id="notice-title">Путь ещё впереди</h2><p id="notice-body"></p><button class="enter-button" data-close type="button"><span>ПОНЯТНО</span><b>✧</b></button></dialog>
