@@ -1,0 +1,100 @@
+name: Import Quaternius Fantasy Props
+
+on:
+  workflow_dispatch:
+    inputs:
+      drive_file_id:
+        description: "Public Google Drive file ID for Fantasy Props MegaKit ZIP"
+        required: true
+        default: "1tgaWnz0q_76GUM10bDOpJ2SVAfw8O9wp"
+
+permissions:
+  contents: write
+
+jobs:
+  import-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout prototype branch
+        uses: actions/checkout@v4
+        with:
+          ref: unity/lorgus-windows-prototype
+          fetch-depth: 0
+
+      - name: Download public archive from Google Drive
+        env:
+          DRIVE_FILE_ID: ${{ inputs.drive_file_id }}
+        run: |
+          python -m pip install --user gdown
+          mkdir -p /tmp/lorgus-assets
+          ~/.local/bin/gdown "https://drive.google.com/uc?id=${DRIVE_FILE_ID}" -O /tmp/lorgus-assets/fantasy-props.zip
+          python - <<'PY'
+          import zipfile, os
+          p='/tmp/lorgus-assets/fantasy-props.zip'
+          with zipfile.ZipFile(p) as z:
+              bad=z.testzip()
+              if bad: raise SystemExit(f'Archive failed CRC check at {bad}')
+              print(f'Archive OK: {len(z.namelist())} entries, {os.path.getsize(p)/1024/1024:.1f} MB')
+          PY
+
+      - name: Extract selected models and shared textures
+        run: |
+          python - <<'PY'
+          import zipfile, os, shutil
+          archive='/tmp/lorgus-assets/fantasy-props.zip'
+          root='unity-prototype/Assets/Art/QuaterniusFantasyProps'
+          model_names = {
+            'Bed_Twin1','Bed_Twin2','Bench','Bookcase_2',
+            'BookGroup_Medium_1','BookGroup_Medium_2','BookGroup_Small_1',
+            'BookStand','Book_5','Book_7','Book_Stack_1','Book_Stack_2',
+            'Cabinet','CandleStick','CandleStick_Stand','CandleStick_Triple',
+            'Candle_1','Candle_2','Chandelier','Chest_Wood','Chair_1',
+            'Lantern_Wall','Nightstand_Shelf','Shelf_Arch','Shelf_Simple',
+            'Shelf_Small_Bottles','Table_Large','Stool','Torch_Metal',
+            'Vase_2','Vase_4','Workbench','Workbench_Drawers',
+            'Barrel','Barrel_Apples','Crate_Wooden','Cauldron','Chalice',
+            'Mug','Pot_1','Potion_1','Potion_2','Potion_4','SmallBottle',
+            'SmallBottles_1','Scroll_1','Scroll_2','Banner_1','Banner_2',
+            'Shield_Wooden','WeaponStand','Sword_Bronze','Key_Metal','Bag',
+            'Peg_Rack','Rope_1','Rope_2','Rope_3'
+          }
+          os.makedirs(root+'/Models/FBX', exist_ok=True)
+          os.makedirs(root+'/Textures', exist_ok=True)
+          with zipfile.ZipFile(archive) as z:
+            available=set(z.namelist())
+            copied=[]
+            for name in sorted(model_names):
+              src=f'Exports/FBX/{name}.fbx'
+              if src in available:
+                dst=root+'/Models/FBX/'+name+'.fbx'
+                with z.open(src) as inp, open(dst,'wb') as out: shutil.copyfileobj(inp,out)
+                copied.append(name)
+            # The Quaternius glTF export uses these shared trim-sheet maps.
+            for src in sorted(available):
+              if src.startswith('Exports/glTF/') and src.lower().endswith(('.png','.jpg','.jpeg','.tga')):
+                dst=root+'/Textures/'+os.path.basename(src)
+                with z.open(src) as inp, open(dst,'wb') as out: shutil.copyfileobj(inp,out)
+            if len(copied) < 20:
+              raise SystemExit(f'Expected at least 20 selected models; got {len(copied)}. ZIP layout may have changed.')
+            with open(root+'/ASSET-SOURCE.md','w',encoding='utf-8') as f:
+              f.write('# Quaternius Fantasy Props MegaKit (Standard)\n\n')
+              f.write('Source archive: Fantasy Props MegaKit [Standard] by Quaternius.\n')
+              f.write('License: CC0 1.0 Universal (public domain dedication).\n')
+              f.write('License text: https://creativecommons.org/publicdomain/zero/1.0/\n')
+              f.write('Original creator/site: https://quaternius.com/\n\n')
+              f.write('Imported selected FBX props and shared glTF trim-sheet textures for the LORGUS Unity prototype.\n')
+              f.write('Models imported: '+', '.join(copied)+'\n')
+            print(f'Imported {len(copied)} FBX models and shared texture maps.')
+          PY
+
+      - name: Commit assets to prototype branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add unity-prototype/Assets/Art/QuaterniusFantasyProps
+          if git diff --cached --quiet; then
+            echo "No asset changes to commit."
+            exit 0
+          fi
+          git commit -m "Import selected Quaternius fantasy props"
+          git push origin HEAD:unity/lorgus-windows-prototype
