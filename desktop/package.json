@@ -7,7 +7,7 @@
   "scripts": {
     "build:renderer": "node scripts/build-renderer.cjs",
     "start": "npm run build:renderer && electron .",
-    "dist:win": "npm run build:renderer && electron-builder --win nsis --x64"
+    "dist:win": "npm run build:renderer && electron-builder --win portable --x64"
   },
   "devDependencies": {
     "electron": "^37.2.6",
@@ -31,18 +31,12 @@
     "win": {
       "target": [
         {
-          "target": "nsis",
+          "target": "portable",
           "arch": [
             "x64"
           ]
         }
       ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
     }
   },
   "dependencies": {
