@@ -109,16 +109,7 @@ namespace Lorgus.Prototype
                 CreateBlock("Candle flame", new Vector3(0.05f, 1.005f, 1.55f), new Vector3(0.035f, 0.07f, 0.035f), brass);
             AddInteractable("Table inspection", "Письменный стол", "Здесь персонаж сможет читать и писать RP-сообщения.", new Vector3(-2.8f, 0.95f, -2.6f), new Vector3(1.65f, 0.12f, 0.8f), wood, RoomObjectRole.RpMessages, true, false);
 
-            // Wardrobe and chest.
-            CreateBlock("Wardrobe body", new Vector3(3.05f, 1.05f, 1.45f), new Vector3(1.2f, 2.1f, 0.75f), wood);
-            if (!HasModel("Wardrobe body"))
-            {
-                CreateBlock("Wardrobe left panel", new Vector3(2.76f, 1.05f, 1.05f), new Vector3(0.5f, 1.8f, 0.04f), brass);
-                CreateBlock("Wardrobe right panel", new Vector3(3.34f, 1.05f, 1.05f), new Vector3(0.5f, 1.8f, 0.04f), brass);
-                CreateBlock("Wardrobe handles", new Vector3(3.05f, 1.0f, 1.015f), new Vector3(0.06f, 0.22f, 0.05f), brass);
-            }
-            AddInteractable("Wardrobe inspection", "Шкаф — инвентарь", "Здесь хранится инвентарь персонажа.", new Vector3(3.05f, 1.05f, 1.45f), new Vector3(1.2f, 2.1f, 0.75f), wood, RoomObjectRole.Inventory, false, false);
-
+            // Chest is the inventory entry point; no separate wardrobe is part of the confirmed room.
             CreateBlock("Storage chest", new Vector3(2.95f, 0.38f, -0.2f), new Vector3(1.15f, 0.72f, 0.75f), wood);
             if (!HasModel("Storage chest"))
                 CreateBlock("Chest lid", new Vector3(2.95f, 0.77f, -0.2f), new Vector3(1.18f, 0.1f, 0.78f), brass);
