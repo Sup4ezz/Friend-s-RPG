@@ -41,11 +41,9 @@ namespace Lorgus.Prototype
                 case RoomObjectRole.Lorebook: action = "Здесь открывается Лорбук."; break;
                 case RoomObjectRole.WorldMap: action = "Здесь выбирают доступное место для перемещения."; break;
                 case RoomObjectRole.CharacterMirror: action = "Здесь будут карточка персонажа и его статистика."; break;
-                case RoomObjectRole.TrophyStand: action = "Выставляйте здесь предметы, которыми хотите похвастаться."; break;
-                case RoomObjectRole.VisitDoor: action = "Дверь предназначена для визитов в дома других персонажей. Сетевой список домов подключим к игровому серверу."; break;
                 default: action = target.Description; break;
             }
-            ShowText(target.DisplayName, action + (target.Movable ? "\n\n[F] — взять / поставить предмет" : "") + "\n[E] — осмотреть");
+            ShowText(target.DisplayName, action + "\n\n[E] — взаимодействовать");
         }
 
         public void ShowText(string title, string body)
