@@ -98,10 +98,24 @@ namespace Lorgus.Prototype
             ui.AddComponent<UnityEngine.UI.CanvasScaler>();
             ui.AddComponent<UnityEngine.UI.GraphicRaycaster>();
 
+            var overlayObject = new GameObject("Eyes opening overlay");
+            overlayObject.transform.SetParent(canvas.transform, false);
+            var overlay = overlayObject.AddComponent<UnityEngine.UI.Image>();
+            overlay.color = Color.black;
+            overlay.raycastTarget = false;
+            var overlayRect = overlay.rectTransform;
+            overlayRect.anchorMin = Vector2.zero;
+            overlayRect.anchorMax = Vector2.one;
+            overlayRect.offsetMin = Vector2.zero;
+            overlayRect.offsetMax = Vector2.zero;
+            var wakeSequence = ui.AddComponent<WakeUpSequence>();
+            // Bind the overlay through a small public setter to keep the sequence self-contained.
+            wakeSequence.SetOverlay(overlay);
+
             var labelObject = new GameObject("Controls");
             labelObject.transform.SetParent(canvas.transform, false);
             var label = labelObject.AddComponent<UnityEngine.UI.Text>();
-            label.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             label.fontSize = 18;
             label.color = new Color(0.84f, 0.78f, 0.68f);
             label.alignment = TextAnchor.LowerLeft;
