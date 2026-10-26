@@ -38,6 +38,8 @@ jobs:
           test -f unity-prototype/Assets/Scripts/RoomInteractionUI.cs
           test -f unity-prototype/Assets/Scripts/RoomAtmosphere.cs
           test -f unity-prototype/Assets/Scripts/RoomCustomization.cs
+          test -f unity-prototype/Assets/Scripts/LorgusRoomAssetCatalog.cs
+          test -f unity-prototype/Assets/Editor/LorgusRoomAssetCatalogBuilder.cs
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -52,9 +54,13 @@ jobs:
           assert match, "Scene .meta must contain a 32-character GUID"
           build_settings = (root / "ProjectSettings/EditorBuildSettings.asset").read_text(encoding="utf-8")
           assert match.group(1) in build_settings, "Build settings do not reference the prototype scene GUID"
-          for script in ("LorgusPrototypeBootstrap.cs", "GridFirstPersonController.cs", "WakeUpSequence.cs", "RoomInteractable.cs", "RoomInteractionUI.cs"):
+          for script in ("LorgusPrototypeBootstrap.cs", "GridFirstPersonController.cs", "WakeUpSequence.cs", "RoomInteractable.cs", "RoomInteractionUI.cs", "LorgusRoomAssetCatalog.cs"):
               text = (root / "Assets/Scripts" / script).read_text(encoding="utf-8")
               assert "class " in text, f"{script}: no class declaration found"
               assert text.count("{") == text.count("}"), f"{script}: unbalanced braces"
-          print("Scaffold structure, JSON, scene reference and basic C# structure checks passed.")
+          builder = (root / "Assets/Editor/LorgusRoomAssetCatalogBuilder.cs").read_text(encoding="utf-8")
+          for model in ("Bed_Twin1.fbx", "Nightstand_Shelf.fbx", "Candle_1.fbx", "Cabinet.fbx", "Chest_Wooden.fbx", "Table_Large.fbx", "Shelf_Arch.fbx", "Book_5.fbx"):
+              assert model in builder, f"FBX catalogue is missing mapping for {model}"
+              assert (root / "Assets/Art/QuaterniusFantasyProps/Models/FBX" / model).is_file(), f"FBX asset is missing: {model}"
+          print("Scaffold structure, JSON, scene reference, C# structure and FBX catalogue checks passed.")
           PY
