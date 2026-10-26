@@ -116,6 +116,12 @@ import { createClient } from "@supabase/supabase-js";
     try {
       const { data, error: sessionError } = await supabase.auth.getSession();
       if (sessionError || !data?.session) return;
+
+      // getSession() reads local storage; getUser() asks Supabase to validate
+      // the saved access token with the Auth server before opening the cabinet.
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData?.user) return;
+
       await new Promise(resolve => {
         const poll = () => introDone ? resolve() : window.setTimeout(poll, 80);
         poll();
