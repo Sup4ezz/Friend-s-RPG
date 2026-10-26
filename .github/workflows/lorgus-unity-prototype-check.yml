@@ -34,6 +34,8 @@ jobs:
           test -f unity-prototype/Assets/Scripts/LorgusPrototypeBootstrap.cs
           test -f unity-prototype/Assets/Scripts/GridFirstPersonController.cs
           test -f unity-prototype/Assets/Scripts/WakeUpSequence.cs
+          test -f unity-prototype/Assets/Scripts/RoomInteractable.cs
+          test -f unity-prototype/Assets/Scripts/RoomInteractionUI.cs
           python3 - <<'PY'
           import json
           from pathlib import Path
@@ -48,7 +50,7 @@ jobs:
           assert match, "Scene .meta must contain a 32-character GUID"
           build_settings = (root / "ProjectSettings/EditorBuildSettings.asset").read_text(encoding="utf-8")
           assert match.group(1) in build_settings, "Build settings do not reference the prototype scene GUID"
-          for script in ("LorgusPrototypeBootstrap.cs", "GridFirstPersonController.cs", "WakeUpSequence.cs"):
+          for script in ("LorgusPrototypeBootstrap.cs", "GridFirstPersonController.cs", "WakeUpSequence.cs", "RoomInteractable.cs", "RoomInteractionUI.cs"):
               text = (root / "Assets/Scripts" / script).read_text(encoding="utf-8")
               assert "class " in text, f"{script}: no class declaration found"
               assert text.count("{") == text.count("}"), f"{script}: unbalanced braces"
