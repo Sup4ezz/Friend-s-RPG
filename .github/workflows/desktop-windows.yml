@@ -49,15 +49,14 @@ jobs:
           node --check renderer/config.generated.js
           node --check renderer/app.bundle.js
 
-      - name: Build Windows x64 installer
+      - name: Build portable Windows x64 app
         run: npm run dist:win
 
-      - name: Upload installer and unpacked app
+      - name: Upload portable Windows app
         uses: actions/upload-artifact@v4
         with:
-          name: LORGUS-Desktop-Windows-x64
+          name: LORGUS-Desktop-Portable-Windows-x64
           path: |
             desktop/dist/*.exe
-            desktop/dist/*.blockmap
           if-no-files-found: error
           retention-days: 14
