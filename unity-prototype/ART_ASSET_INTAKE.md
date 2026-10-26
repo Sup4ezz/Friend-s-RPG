@@ -96,3 +96,10 @@
 **Ограничение:** это ещё не готовый игровой вертикальный срез. Unity Editor/Play Mode/C# compilation/Windows build не проверены. Визуальные объекты пока частично построены примитивами. Авторизация, одобрение анкеты, запоминание учётных данных, реальные игровые панели, отдельный экран RP и смена вида окна по RP-локации не подключены.
 
 **Следующий этап:** проверить Unity compilation and Play Mode; validate real Supabase Auth and RLS against a test account without production mutations; then implement final wake-up, actual data-backed overlays, separate RP screen, and location-dependent window view. Password is not stored; only a DPAPI-protected refresh token is intended to persist on Windows.
+
+
+## Дополнение — вход и пробуждение (2026-10-27)
+
+Код стартового цикла теперь включает космический экран с параллаксом, UI EventSystem, Supabase Auth login/register, DPAPI-защиту refresh token, проверку статуса анкеты и создание комнаты только после одобрения. После допуска камера начинает на кровати и анимируется к стоячему положению. RP показывает отдельную полноэкранную заглушку, а не карточку поверх комнаты.
+
+Это всё ещё не считается проверенным в Unity. Требуется Unity compile/Play Mode и тест входа тестовым аккаунтом; если RLS не разрешает читать собственные анкеты, вход должен оставаться закрытым. Никаких изменений production не делалось.
