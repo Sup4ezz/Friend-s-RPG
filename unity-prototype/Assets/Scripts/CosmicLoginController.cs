@@ -487,16 +487,21 @@ namespace Lorgus.Prototype
                 yield break;
             }
 
+            var approvedRows = new List<ApplicationRow>();
             foreach (ApplicationRow row in rows.items)
             {
                 if (row != null && row.status == "approved" && !string.IsNullOrEmpty(row.character_id))
-                {
-                    SetStatus("Анкета одобрена. Добро пожаловать.");
-                    Destroy(uiRoot);
-                    if (cosmicRoot != null) Destroy(cosmicRoot);
-                    bootstrap.EnterRoomAfterApproval();
-                    yield break;
-                }
+                    approvedRows.Add(row);
+            }
+            if (approvedRows.Count == 1)
+            {
+                EnterRoomFor(approvedRows[0]);
+                yield break;
+            }
+            if (approvedRows.Count > 1)
+            {
+                ShowCharacterSelection(approvedRows);
+                yield break;
             }
 
             bool pending = false;
@@ -513,6 +518,46 @@ namespace Lorgus.Prototype
             else if (revision) SetStatus("Анкета требует исправлений. Обновите её на сайте LORGUS.");
             else if (rejected) SetStatus("Анкета отклонена. Комната недоступна.");
             else SetStatus("Для этого аккаунта не найдена одобренная анкета персонажа. Комната недоступна.");
+        }
+
+        private void ShowCharacterSelection(List<ApplicationRow> characters)
+        {
+            if (uiRoot == null) return;
+            SetStatus("Выберите персонажа, за которого будете входить в мир.");
+            var panel = new GameObject("Choose character");
+            panel.transform.SetParent(uiRoot.transform, false);
+            var rect = panel.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            var background = panel.AddComponent<Image>();
+            background.color = new Color(0.004f, 0.006f, 0.022f, 0.98f);
+            var title = MakeLabel(panel.transform, "ВЫБЕРИТЕ ПЕРСОНАЖА", 32, FontStyle.Bold,
+                new Vector2(0, 190), new Vector2(760, 60));
+            title.alignment = TextAnchor.MiddleCenter;
+            int count = Mathf.Min(characters.Count, 3);
+            for (int i = 0; i < count; i++)
+            {
+                ApplicationRow character = characters[i];
+                string caption = string.IsNullOrWhiteSpace(character.name) ? "Персонаж " + (i + 1) : character.name;
+                float y = 90f - i * 82f;
+                MakeButton(panel.transform, caption, new Vector2(0, y), new Vector2(420, 58),
+                    () => EnterRoomFor(character));
+            }
+        }
+
+        private void EnterRoomFor(ApplicationRow character)
+        {
+            if (character == null || string.IsNullOrEmpty(character.character_id))
+            {
+                SetStatus("Не удалось определить персонажа. Повторите вход.");
+                return;
+            }
+            SetStatus("Анкета одобрена. Добро пожаловать.");
+            if (uiRoot != null) Destroy(uiRoot);
+            if (cosmicRoot != null) Destroy(cosmicRoot);
+            bootstrap.EnterRoomAfterApproval(character.character_id, character.name);
         }
 
         private IEnumerator SendJson(string method, string url, string payload, string bearer, Action<UnityWebRequest> completed)
