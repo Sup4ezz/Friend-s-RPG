@@ -102,7 +102,16 @@ namespace Lorgus.Prototype
             CreateBlock("Wall shelf", new Vector3(2.8f, 2.15f, 3.62f), new Vector3(1.45f, 0.1f, 0.38f), wood);
             for (int i = 0; i < 5; i++)
                 CreateBlock("Shelf book " + i, new Vector3(2.28f + i * 0.23f, 2.36f, 3.65f), new Vector3(0.18f, 0.34f + (i % 2) * 0.08f, 0.24f), i % 2 == 0 ? cloth : brass);
-            AddInteractable("World map", "Карта мира", "Карта на стене — точка выбора доступного места для перемещения.", new Vector3(-1.65f, 2.0f, 3.78f), new Vector3(1.1f, 1.25f, 0.05f), wood, RoomObjectRole.WorldMap, false);\n            AddInteractable("Empty mirror", "Зеркало без отражения", "Зеркало не отражает ваше лицо. Здесь будут карточка персонажа и статистика.", new Vector3(1.65f, 1.95f, 3.78f), new Vector3(0.75f, 1.25f, 0.06f), brass, RoomObjectRole.CharacterMirror, false);\n            AddInteractable("Trophy stand", "Стенды для предметов", "Выставляйте предметы, которыми хотите похвастаться перед гостями.", new Vector3(-3.0f, 0.9f, 0.3f), new Vector3(0.8f, 0.9f, 0.6f), wood, RoomObjectRole.TrophyStand, true);\n            CreateBlock("Ceiling beam", new Vector3(0, 2.93f, 0.5f), new Vector3(7.5f, 0.12f, 0.16f), wood);
+                        AddInteractable("World map", "Карта мира", "Карта на стене — точка выбора доступного места для перемещения.", new Vector3(-1.65f, 2.0f, 3.78f), new Vector3(1.1f, 1.25f, 0.05f), wood, RoomObjectRole.WorldMap, false);
+            AddInteractable("Empty mirror", "Зеркало без отражения", "Зеркало не отражает ваше лицо. Здесь будут карточка персонажа и статистика.", new Vector3(1.65f, 1.95f, 3.78f), new Vector3(0.75f, 1.25f, 0.06f), brass, RoomObjectRole.CharacterMirror, false);
+            AddInteractable("Trophy stand", "Стенды для предметов", "Выставляйте предметы, которыми хотите похвастаться перед гостями.", new Vector3(-3.0f, 0.9f, 0.3f), new Vector3(0.8f, 0.9f, 0.6f), wood, RoomObjectRole.TrophyStand, true);
+            var pictureFrame = CreateBlock("Personal picture frame", new Vector3(-3.1f, 2.0f, 3.78f), new Vector3(0.9f, 0.9f, 0.06f), brass);
+            var picture = CreateBlock("Personal picture surface", new Vector3(-3.1f, 2.0f, 3.735f), new Vector3(0.78f, 0.78f, 0.025f), linen);
+            var customization = gameObject.AddComponent<RoomCustomization>();
+            customization.Initialize(picture.GetComponent<Renderer>());
+AddInteractable("Empty mirror", "Зеркало без отражения", "Зеркало не отражает ваше лицо. Здесь будут карточка персонажа и статистика.", new Vector3(1.65f, 1.95f, 3.78f), new Vector3(0.75f, 1.25f, 0.06f), brass, RoomObjectRole.CharacterMirror, false);
+AddInteractable("Trophy stand", "Стенды для предметов", "Выставляйте предметы, которыми хотите похвастаться перед гостями.", new Vector3(-3.0f, 0.9f, 0.3f), new Vector3(0.8f, 0.9f, 0.6f), wood, RoomObjectRole.TrophyStand, true);
+CreateBlock("Ceiling beam", new Vector3(0, 2.93f, 0.5f), new Vector3(7.5f, 0.12f, 0.16f), wood);
         }
 
         private void BuildPlayer()
