@@ -32,6 +32,7 @@ jobs:
           test -f unity-prototype/Assets/Scenes/LorgusPrototype.unity
           test -f unity-prototype/Assets/Scenes/LorgusPrototype.unity.meta
           test -f unity-prototype/Assets/Scripts/LorgusPrototypeBootstrap.cs
+          test -f unity-prototype/Assets/Scripts/CosmicLoginController.cs
           test -f unity-prototype/Assets/Scripts/GridFirstPersonController.cs
           test -f unity-prototype/Assets/Scripts/WakeUpSequence.cs
           test -f unity-prototype/Assets/Scripts/RoomInteractable.cs
@@ -53,7 +54,7 @@ jobs:
           assert match, "Scene .meta must contain a 32-character GUID"
           build_settings = (root / "ProjectSettings/EditorBuildSettings.asset").read_text(encoding="utf-8")
           assert match.group(1) in build_settings, "Build settings do not reference the prototype scene GUID"
-          for script in ("LorgusPrototypeBootstrap.cs", "GridFirstPersonController.cs", "WakeUpSequence.cs", "RoomInteractable.cs", "RoomInteractionUI.cs", "LorgusRoomAssetCatalog.cs"):
+          for script in ("LorgusPrototypeBootstrap.cs", "CosmicLoginController.cs", "GridFirstPersonController.cs", "WakeUpSequence.cs", "RoomInteractable.cs", "RoomInteractionUI.cs", "LorgusRoomAssetCatalog.cs"):
               text = (root / "Assets/Scripts" / script).read_text(encoding="utf-8")
               assert "class " in text, f"{script}: no class declaration found"
               assert text.count("{") == text.count("}"), f"{script}: unbalanced braces"
@@ -76,5 +77,12 @@ jobs:
           assert "KeyCode.F" not in controller, "Unapproved prop-carry control remains"
           interaction = (root / "Assets/Scripts/RoomInteractionUI.cs").read_text(encoding="utf-8")
           assert "BuildCloseButton" in interaction and "Интеграция данных ещё не подключена." in interaction, "Overlay close control or honest integration stub is missing"
+          login = (root / "Assets/Scripts/CosmicLoginController.cs").read_text(encoding="utf-8")
+          for required in ("auth/v1/token?grant_type=password", "auth/v1/signup", "character_applications", "status == \"approved\"", "CryptProtectData", "ЗАПОМНИТЬ ДАННЫЕ"):
+              assert required in login, f"Cosmic login flow is missing: {required}"
+          assert "PlayerPrefs.SetString(RefreshTokenKey, protectedToken)" in login, "Remember flow must persist only the protected refresh token"
+          assert "PlayerPrefs.SetString(RefreshTokenKey, password)" not in login, "Plaintext password persistence is forbidden"
+          assert "login.Initialize(this)" in bootstrap, "The game must start in the cosmic login scene"
+          assert "BuildRoom();" not in bootstrap[bootstrap.find("private void Awake()"):bootstrap.find("public void EnterRoomAfterApproval()")], "Room must not be built before login/approval"
           print("Scaffold, C# structure, FBX catalogue, controls, required room fixtures, and scope boundaries passed.")
           PY
