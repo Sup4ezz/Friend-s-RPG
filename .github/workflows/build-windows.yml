@@ -49,6 +49,9 @@ jobs:
           buildMethod: Lorgus.Prototype.Editor.BuildScript.BuildWindows
           buildsPath: Builds
           buildName: LORGUS
+          # Avoid semantic versioning: Unity creates Library/ during the build,
+          # which makes the checkout appear dirty to the action.
+          versioning: None
 
       - name: Package the complete Windows player
         shell: bash
