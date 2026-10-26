@@ -131,6 +131,19 @@ namespace Lorgus.Prototype
                 CreateBlock("Desk left leg", new Vector3(-3.45f, 0.45f, -2.6f), new Vector3(0.12f, 0.9f, 0.12f), wood);
                 CreateBlock("Desk right leg", new Vector3(-2.15f, 0.45f, -2.6f), new Vector3(0.12f, 0.9f, 0.12f), wood);
             }
+            // The hearth, cauldron and window are required parts of this one room.
+            CreateBlock("Hearth stone base", new Vector3(2.55f, 0.34f, 3.05f), new Vector3(1.35f, 0.68f, 1.05f), stone);
+            CreateBlock("Hearth opening", new Vector3(2.55f, 0.45f, 2.49f), new Vector3(0.68f, 0.42f, 0.06f), wood);
+            CreateBlock("Hearth top", new Vector3(2.55f, 0.72f, 3.05f), new Vector3(1.45f, 0.12f, 1.12f), brass);
+            CreateBlock("Cauldron bowl", new Vector3(2.55f, 1.03f, 3.05f), new Vector3(0.62f, 0.38f, 0.62f), stone);
+            CreateBlock("Cauldron rim", new Vector3(2.55f, 1.23f, 3.05f), new Vector3(0.7f, 0.08f, 0.7f), brass);
+            CreateBlock("Cauldron support", new Vector3(2.55f, 1.48f, 3.05f), new Vector3(0.045f, 0.52f, 0.045f), brass);
+
+            CreateBlock("Window frame", new Vector3(0, 1.95f, 3.84f), new Vector3(1.7f, 1.35f, 0.12f), wood);
+            AddInteractable("Window inspection", "Окно", "За стеклом пока нет подключённого вида региона. Контекстный вид будет загружаться по текущему RP-местоположению персонажа.", new Vector3(0, 1.95f, 3.76f), new Vector3(1.45f, 1.1f, 0.04f), stone);
+            CreateBlock("Window vertical bar", new Vector3(0, 1.95f, 3.71f), new Vector3(0.06f, 1.12f, 0.04f), brass);
+            CreateBlock("Window horizontal bar", new Vector3(0, 1.95f, 3.71f), new Vector3(1.48f, 0.06f, 0.04f), brass);
+
             AddInteractable("Empty mirror", "Зеркало без отражения", "Зеркало не отражает ваше лицо. Здесь будут карточка персонажа и статистика.", new Vector3(1.65f, 1.95f, 3.78f), new Vector3(0.75f, 1.25f, 0.06f), brass, RoomObjectRole.CharacterMirror, false);
             CreateBlock("Ceiling beam", new Vector3(0, 2.93f, 0.5f), new Vector3(7.5f, 0.12f, 0.16f), wood);
         }
