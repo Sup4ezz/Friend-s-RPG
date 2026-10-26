@@ -14,6 +14,9 @@ namespace Lorgus.Prototype
         private GameObject panel;
         private CursorLockMode previousLockState;
         private bool isOpen;
+        private bool isRpScreen;
+        private RectTransform panelRect;
+        private Image panelBackground;
 
         public bool IsOpen => isOpen;
 
@@ -22,12 +25,14 @@ namespace Lorgus.Prototype
             panel = new GameObject("LORGUS interaction overlay");
             panel.transform.SetParent(parent, false);
             var rect = panel.AddComponent<RectTransform>();
+            panelRect = rect;
             rect.anchorMin = new Vector2(0.5f, 0.5f);
             rect.anchorMax = new Vector2(0.5f, 0.5f);
             rect.pivot = new Vector2(0.5f, 0.5f);
             rect.anchoredPosition = Vector2.zero;
             rect.sizeDelta = new Vector2(760, 360);
             var background = panel.AddComponent<Image>();
+            panelBackground = background;
             background.color = new Color(0.035f, 0.027f, 0.02f, 0.97f);
             titleText = MakeText("Title", panel.transform, 27, FontStyle.Bold,
                 new Vector2(0, 115), new Vector2(690, 52));
@@ -49,9 +54,8 @@ namespace Lorgus.Prototype
             switch (target.Role)
             {
                 case RoomObjectRole.RpMessages:
-                    title = "ПИСЬМЕННЫЙ СТОЛ";
-                    body = "Здесь будет открываться существующая система писем LORGUS.\n\nИнтеграция данных ещё не подключена.";
-                    break;
+                    OpenRpScreen();
+                    return;
                 case RoomObjectRole.Inventory:
                     title = target.DisplayName.Contains("Сундук") ? "ИНВЕНТАРЬ" : target.DisplayName;
                     body = "Здесь будет открываться настоящий инвентарь персонажа из LORGUS.\n\nИнтеграция данных ещё не подключена.";
@@ -78,6 +82,29 @@ namespace Lorgus.Prototype
             if (!isOpen) previousLockState = Cursor.lockState;
             titleText.text = title;
             bodyText.text = body;
+            isRpScreen = false;
+            panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+            panelRect.anchoredPosition = Vector2.zero;
+            panelRect.sizeDelta = new Vector2(760, 360);
+            panelBackground.color = new Color(0.035f, 0.027f, 0.02f, 0.97f);
+            panel.SetActive(true);
+            isOpen = true;
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+
+        private void OpenRpScreen()
+        {
+            if (panel == null || titleText == null || bodyText == null) return;
+            if (!isOpen) previousLockState = Cursor.lockState;
+            isRpScreen = true;
+            titleText.text = "РОЛЕВАЯ ИГРА";
+            bodyText.text = "RP открывается отдельным экраном, не поверх комнаты.\n\nПодключение существующей ленты RP и отправки постов ещё предстоит реализовать.\n\nЭто временная экранная заглушка; сообщения не загружаются и не отправляются.";
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+            panelBackground.color = new Color(0.018f, 0.016f, 0.014f, 1f);
             panel.SetActive(true);
             isOpen = true;
             Cursor.lockState = CursorLockMode.None;
@@ -89,6 +116,15 @@ namespace Lorgus.Prototype
             if (!isOpen) return;
             isOpen = false;
             if (panel != null) panel.SetActive(false);
+            if (isRpScreen && panelRect != null)
+            {
+                panelRect.anchorMin = panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+                panelRect.anchoredPosition = Vector2.zero;
+                panelRect.sizeDelta = new Vector2(760, 360);
+                panelRect.offsetMin = Vector2.zero;
+                panelRect.offsetMax = Vector2.zero;
+            }
+            isRpScreen = false;
             Cursor.lockState = previousLockState;
             Cursor.visible = previousLockState != CursorLockMode.Locked;
         }
