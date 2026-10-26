@@ -28,7 +28,7 @@ Do not treat local interaction stubs as working live systems. Real Supabase auth
 
 The repository contains a Unity scaffold, cosmic login/register code using Supabase Auth, an approval gate, DPAPI-protected refresh-token persistence for Windows, a first-person controller, a bed-to-standing wake-up sequence, code for mapping existing FBX models and basic room lighting. This is not a finished game or a verified executable. Unity Editor/Play Mode, material import, C# compilation, real-account Supabase/RLS behavior and the Windows build have not yet been confirmed. The structural validation workflow does not compile Unity.
 
-The current environment pack contains props, not a confirmed humanoid rig and wake-up/walking animation set. Do not claim these are complete until the assets are found or created and tested.
+The current environment pack contains props, not a confirmed humanoid rig and wake-up/walking animation set. The window view is now built from read-only RP presence for the selected character, with region-specific procedural silhouettes; it is not yet visually verified in Unity. Do not claim these are complete until the assets are found or created and tested.
 
 ## Open locally
 
