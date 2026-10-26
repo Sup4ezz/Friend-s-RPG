@@ -15,6 +15,7 @@ namespace Lorgus.Prototype
         [SerializeField] private float collisionRadius = 0.22f;
 
         private bool busy;
+        private bool inputEnabled = true;
         private Camera playerCamera;
         private int facing; // 0 north, 1 east, 2 south, 3 west
         private readonly Collider[] overlapBuffer = new Collider[12];
@@ -38,7 +39,7 @@ namespace Lorgus.Prototype
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
-            if (busy) return;
+            if (!inputEnabled || busy) return;
 
             if (Input.GetKeyDown(KeyCode.A)) StartCoroutine(Turn(-1));
             else if (Input.GetKeyDown(KeyCode.D)) StartCoroutine(Turn(1));
@@ -99,6 +100,18 @@ namespace Lorgus.Prototype
                 return true;
             }
             return false;
+        }
+
+        public void SetInputEnabled(bool enabled)
+        {
+            inputEnabled = enabled;
+            if (!enabled) StopMovementAndResetBusy();
+        }
+
+        private void StopMovementAndResetBusy()
+        {
+            StopAllCoroutines();
+            busy = false;
         }
 
         private void OnDisable()
