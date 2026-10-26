@@ -21,7 +21,7 @@ const safeConfig = {
 };
 fs.writeFileSync(
   path.join(renderer, "config.generated.js"),
-  "window.LORGUS_CONFIG = Object.freeze(" + JSON.stringify(safeConfig) + ");\\n",
+  "window.LORGUS_CONFIG = Object.freeze(" + JSON.stringify(safeConfig) + ");\n",
   "utf8"
 );
 
