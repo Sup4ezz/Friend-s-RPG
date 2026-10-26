@@ -14,7 +14,7 @@ This is an isolated Unity Windows-game project for the LORGUS literary RP platfo
 - Approach an object and press E to interact.
 - Room objects: bed, chest, writing desk, mirror with no reflection, stove with a cauldron, outside door, and a window whose view reflects the character's current RP location.
 - Mirror opens the character screen; desk opens the existing mail system; chest opens the existing inventory.
-- Non-RP interfaces appear as overlays on the 3D scene. RP opens as a separate screen.
+- Non-RP interfaces appear as overlays on the 3D scene. RP has a separate full-screen placeholder; its real feed and posting are not integrated.
 - Art direction: stylized models combined with cinematic lighting, tuned to one coherent asset style.
 - The user owns the music direction and selection. Do not invent, generate or add a soundtrack independently.
 
@@ -26,7 +26,7 @@ Do not treat local interaction stubs as working live systems. Real Supabase auth
 
 ## Current prototype status
 
-The repository contains a Unity scaffold, a first-person controller, wake-up scaffolding, code for mapping existing FBX models and basic room lighting. This is not a finished game or a verified executable. Unity Editor/Play Mode, material import, C# compilation and the Windows build have not yet been confirmed. The structural validation workflow does not compile Unity.
+The repository contains a Unity scaffold, cosmic login/register code using Supabase Auth, an approval gate, DPAPI-protected refresh-token persistence for Windows, a first-person controller, a bed-to-standing wake-up sequence, code for mapping existing FBX models and basic room lighting. This is not a finished game or a verified executable. Unity Editor/Play Mode, material import, C# compilation, real-account Supabase/RLS behavior and the Windows build have not yet been confirmed. The structural validation workflow does not compile Unity.
 
 The current environment pack contains props, not a confirmed humanoid rig and wake-up/walking animation set. Do not claim these are complete until the assets are found or created and tested.
 
