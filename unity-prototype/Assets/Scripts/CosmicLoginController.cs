@@ -35,6 +35,9 @@ namespace Lorgus.Prototype
         private string accessToken;
         private string refreshToken;
         private string userId;
+        private bool rememberSession;
+
+        public string CurrentAccessToken => accessToken;
 
         [Serializable] private sealed class AuthUser { public string id; public string email; }
         [Serializable] private sealed class AuthResponse
@@ -61,6 +64,7 @@ namespace Lorgus.Prototype
             BuildCosmos();
             BuildLoginUI();
             bool remembered = PlayerPrefs.GetInt(RememberKey, 0) == 1;
+            rememberSession = remembered;
             rememberToggle.isOn = remembered;
             if (remembered)
             {
@@ -406,7 +410,8 @@ namespace Lorgus.Prototype
             accessToken = auth.access_token;
             refreshToken = auth.refresh_token;
             userId = auth.user != null ? auth.user.id : null;
-            if (rememberToggle.isOn)
+            if (rememberToggle != null) rememberSession = rememberToggle.isOn;
+            if (rememberSession)
             {
                 string protectedToken = ProtectToken(refreshToken);
                 if (!string.IsNullOrEmpty(protectedToken))
@@ -422,6 +427,25 @@ namespace Lorgus.Prototype
                 }
             }
             else ClearRememberedSession();
+        }
+
+        public IEnumerator RefreshActiveSession(Action<bool> completed)
+        {
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                completed?.Invoke(false);
+                yield break;
+            }
+            string payload = JsonUtility.ToJson(new RefreshRequest { refresh_token = refreshToken });
+            AuthResponse auth = null;
+            yield return SendJson("POST", SupabaseUrl + "/auth/v1/token?grant_type=refresh_token", payload, null, response =>
+            {
+                if (response.result == UnityWebRequest.Result.Success)
+                    auth = JsonUtility.FromJson<AuthResponse>(response.downloadHandler.text);
+            });
+            bool success = auth != null && !string.IsNullOrEmpty(auth.access_token);
+            if (success) AcceptSession(auth);
+            completed?.Invoke(success);
         }
 
         private IEnumerator RefreshSession(string savedToken)
@@ -610,6 +634,7 @@ namespace Lorgus.Prototype
 
         private void ClearRememberedSession()
         {
+            rememberSession = false;
             PlayerPrefs.DeleteKey(RememberKey);
             PlayerPrefs.DeleteKey(RefreshTokenKey);
             PlayerPrefs.Save();
