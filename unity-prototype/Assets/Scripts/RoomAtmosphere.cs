@@ -6,14 +6,20 @@ namespace Lorgus.Prototype
     public sealed class RoomAtmosphere : MonoBehaviour
     {
         private Light roomLight;
+        private Light candleLight;
         private float baseIntensity;
+        private float candleBaseIntensity;
         private float phase;
         private ParticleSystem dust;
 
         private void Awake()
         {
-            roomLight = FindObjectOfType<Light>();
+            var roomLightObject = GameObject.Find("Warm room light");
+            roomLight = roomLightObject != null ? roomLightObject.GetComponent<Light>() : null;
+            var candleLightObject = GameObject.Find("Candle glow");
+            candleLight = candleLightObject != null ? candleLightObject.GetComponent<Light>() : null;
             if (roomLight != null) baseIntensity = roomLight.intensity;
+            if (candleLight != null) candleBaseIntensity = candleLight.intensity;
             BuildAmbientAudio();
             BuildDust();
         }
@@ -27,6 +33,12 @@ namespace Lorgus.Prototype
                 float slow = Mathf.Sin(phase * 1.7f) * 0.045f;
                 float quick = Mathf.Sin(phase * 4.9f + 0.8f) * 0.018f;
                 roomLight.intensity = baseIntensity * (1f + slow + quick);
+            }
+            if (candleLight != null)
+            {
+                float flame = Mathf.Sin(phase * 5.3f + 0.4f) * 0.09f
+                            + Mathf.Sin(phase * 8.1f + 1.7f) * 0.035f;
+                candleLight.intensity = candleBaseIntensity * (1f + flame);
             }
         }
 
