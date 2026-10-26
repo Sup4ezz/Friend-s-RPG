@@ -167,7 +167,7 @@ CreateBlock("Ceiling beam", new Vector3(0, 2.93f, 0.5f), new Vector3(7.5f, 0.12f
 
             var hint = MakeText("Controls hint", canvas.transform, 16, new Vector2(0, 24), new Vector2(900, 44));
             hint.alignment = TextAnchor.LowerCenter;
-            hint.text = "W / S — шаг     A / D — поворот     E — взаимодействие     F — взять / поставить     Esc — курсор";
+            hint.text = "W / S — шаг     A / D — поворот     E — взаимодействие     F — взять / поставить     C — настройка     Esc — курсор";
 
             var interaction = ui.AddComponent<RoomInteractionUI>();
             interaction.Build(canvas.transform);
