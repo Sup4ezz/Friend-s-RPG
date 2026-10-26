@@ -29,21 +29,34 @@ namespace Lorgus.Prototype
 
         private string characterId;
         private string accessToken;
+        private CosmicLoginController sessionOwner;
+        private float lastTokenRefreshAt;
         private string lastViewKey;
         private GameObject viewRoot;
 
-        public void Initialize(string selectedCharacterId, string bearerToken)
+        public void Initialize(string selectedCharacterId, string bearerToken, CosmicLoginController owner)
         {
             characterId = selectedCharacterId;
             accessToken = bearerToken;
+            sessionOwner = owner;
         }
 
         private IEnumerator Start()
         {
+            lastTokenRefreshAt = Time.realtimeSinceStartup;
             BuildView("", "", "unknown");
             while (true)
             {
                 yield return RefreshPresence();
+                // Supabase access tokens are short-lived. Refresh before expiry so the
+                // location window keeps following RP presence during long sessions.
+                if (sessionOwner != null && Time.realtimeSinceStartup - lastTokenRefreshAt >= 45f * 60f)
+                {
+                    bool refreshed = false;
+                    yield return sessionOwner.RefreshActiveSession(ok => refreshed = ok);
+                    if (refreshed) accessToken = sessionOwner.CurrentAccessToken;
+                    lastTokenRefreshAt = Time.realtimeSinceStartup;
+                }
                 yield return new WaitForSecondsRealtime(30f);
             }
         }
