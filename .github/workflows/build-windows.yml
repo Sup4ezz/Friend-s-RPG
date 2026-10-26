@@ -6,7 +6,9 @@ on:
     branches:
       - unity/lorgus-windows-prototype
     paths:
-      - "unity-prototype/**"
+      - "unity-prototype/Assets/**"
+      - "unity-prototype/Packages/**"
+      - "unity-prototype/ProjectSettings/**"
       - ".github/workflows/build-windows.yml"
 
 permissions:
@@ -14,7 +16,7 @@ permissions:
 
 concurrency:
   group: lorgus-windows-build
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-windows:
