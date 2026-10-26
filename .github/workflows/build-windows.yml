@@ -21,7 +21,7 @@ concurrency:
 jobs:
   build-windows:
     name: Compile LORGUS for Windows (Mono)
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     timeout-minutes: 60
     steps:
       - name: Checkout prototype branch
@@ -56,21 +56,27 @@ jobs:
           versioning: None
 
       - name: Package the complete Windows player
-        shell: bash
+        shell: pwsh
         run: |
-          set -euo pipefail
-          BUILD_DIR="unity-prototype/Builds/Windows"
-          test -f "$BUILD_DIR/LORGUS.exe"
-          test -f "$BUILD_DIR/UnityPlayer.dll"
-          test -d "$BUILD_DIR/LORGUS_Data"
-          mkdir -p dist
-          cd "$BUILD_DIR"
-          # Unity players require runtime DLLs and support folders alongside the EXE.
-          # Archive the entire build directory, not only the executable and Data folder.
-          zip -r ../../../dist/LORGUS-Windows.zip .
-          test -s ../../../dist/LORGUS-Windows.zip
-          unzip -l ../../../dist/LORGUS-Windows.zip | grep -E 'UnityPlayer\.dll$'
-          unzip -l ../../../dist/LORGUS-Windows.zip | grep -E 'LORGUS_Data/globalgamemanagers$'
+          $ErrorActionPreference = 'Stop'
+          $buildDir = Join-Path $env:GITHUB_WORKSPACE 'unity-prototype/Builds/Windows'
+          $distDir = Join-Path $env:GITHUB_WORKSPACE 'dist'
+          $archive = Join-Path $distDir 'LORGUS-Windows.zip'
+          if (!(Test-Path (Join-Path $buildDir 'LORGUS.exe'))) { throw 'LORGUS.exe is missing' }
+          if (!(Test-Path (Join-Path $buildDir 'UnityPlayer.dll'))) { throw 'UnityPlayer.dll is missing' }
+          if (!(Test-Path (Join-Path $buildDir 'LORGUS_Data/globalgamemanagers'))) { throw 'Unity player data is incomplete' }
+          New-Item -ItemType Directory -Force -Path $distDir | Out-Null
+          Compress-Archive -Path (Join-Path $buildDir '*') -DestinationPath $archive -Force
+          if (!(Test-Path $archive) -or (Get-Item $archive).Length -eq 0) { throw 'Windows archive is empty' }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $zip = [System.IO.Compression.ZipFile]::OpenRead($archive)
+          try {
+            $names = $zip.Entries.FullName
+            if (!($names -contains 'UnityPlayer.dll')) { throw 'UnityPlayer.dll is missing from archive' }
+            if (!($names -contains 'LORGUS_Data/globalgamemanagers')) { throw 'globalgamemanagers is missing from archive' }
+          } finally {
+            $zip.Dispose()
+          }
 
       - name: Upload downloadable build
         uses: actions/upload-artifact@v4
