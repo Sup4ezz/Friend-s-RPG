@@ -43,7 +43,7 @@ namespace Lorgus.Prototype
             roomBuilt = true;
             BuildRoom();
             var windowView = gameObject.AddComponent<WindowViewController>();
-            windowView.Initialize(ActiveCharacterId, AccessToken);
+            windowView.Initialize(ActiveCharacterId, AccessToken, GetComponent<CosmicLoginController>());
             BuildPlayer();
             BuildLighting();
             gameObject.AddComponent<RoomAtmosphere>();
