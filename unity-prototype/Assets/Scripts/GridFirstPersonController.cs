@@ -3,26 +3,25 @@ using UnityEngine;
 
 namespace Lorgus.Prototype
 {
-    /// <summary>
-    /// Discrete grid movement: W/S move one cell, A/D rotate in place by 90 degrees.
-    /// Collision uses a small overlap query rather than a full character physics simulation.
-    /// </summary>
+    /// <summary>Discrete movement: W/S move one cell; A/D rotate in place by 90 degrees.</summary>
     public sealed class GridFirstPersonController : MonoBehaviour
     {
         [SerializeField] private float cellSize = 1f;
         [SerializeField] private float moveDuration = 0.16f;
         [SerializeField] private float turnDuration = 0.13f;
         [SerializeField] private float collisionRadius = 0.22f;
+        [SerializeField] private float interactionDistance = 2.2f;
 
         private bool busy;
         private bool inputEnabled = true;
         private Camera playerCamera;
-        private int facing; // 0 north, 1 east, 2 south, 3 west
-        private readonly Collider[] overlapBuffer = new Collider[12];
+        private readonly Collider[] overlapBuffer = new Collider[16];
+        private RoomInteractionUI interactionUI;
 
         private void Awake()
         {
             playerCamera = GetComponentInChildren<Camera>();
+            interactionUI = FindObjectOfType<RoomInteractionUI>();
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
@@ -41,10 +40,27 @@ namespace Lorgus.Prototype
             }
             if (!inputEnabled || busy) return;
 
-            if (Input.GetKeyDown(KeyCode.A)) StartCoroutine(Turn(-1));
+            if (Input.GetKeyDown(KeyCode.E)) Interact();
+            else if (Input.GetKeyDown(KeyCode.A)) StartCoroutine(Turn(-1));
             else if (Input.GetKeyDown(KeyCode.D)) StartCoroutine(Turn(1));
             else if (Input.GetKeyDown(KeyCode.W)) StartCoroutine(Move(1));
             else if (Input.GetKeyDown(KeyCode.S)) StartCoroutine(Move(-1));
+        }
+
+        private void Interact()
+        {
+            if (playerCamera == null) return;
+            Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
+            if (Physics.Raycast(ray, out RaycastHit hit, interactionDistance, ~0, QueryTriggerInteraction.Ignore))
+            {
+                RoomInteractable target = hit.collider.GetComponentInParent<RoomInteractable>();
+                if (target != null)
+                {
+                    if (interactionUI != null) interactionUI.Show(target.DisplayName, target.Description);
+                    return;
+                }
+            }
+            if (interactionUI != null) interactionUI.Show("Тишина", "Вы не замечаете ничего, с чем можно было бы взаимодействовать.");
         }
 
         private IEnumerator Turn(int direction)
@@ -60,7 +76,6 @@ namespace Lorgus.Prototype
                 yield return null;
             }
             transform.rotation = end;
-            facing = (facing + direction + 4) % 4;
             busy = false;
         }
 
@@ -91,7 +106,6 @@ namespace Lorgus.Prototype
                 overlapBuffer,
                 ~0,
                 QueryTriggerInteraction.Ignore);
-
             for (int i = 0; i < count; i++)
             {
                 Collider candidate = overlapBuffer[i];
@@ -105,13 +119,11 @@ namespace Lorgus.Prototype
         public void SetInputEnabled(bool enabled)
         {
             inputEnabled = enabled;
-            if (!enabled) StopMovementAndResetBusy();
-        }
-
-        private void StopMovementAndResetBusy()
-        {
-            StopAllCoroutines();
-            busy = false;
+            if (!enabled)
+            {
+                StopAllCoroutines();
+                busy = false;
+            }
         }
 
         private void OnDisable()
