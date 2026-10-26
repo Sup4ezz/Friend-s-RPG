@@ -7,7 +7,7 @@ This is an isolated Unity Windows-game project for the LORGUS literary RP platfo
 - Standalone Windows launch.
 - Interactive cosmic login scene with stars, planets and constellations.
 - Login form with “ЗАПОМНИТЬ ДАННЫЕ” (“Remember credentials”).
-- After sign-in, the client must verify that the player's character application is approved.
+- After sign-in, the client must verify that the player's character application is approved. If more than one character is approved, the player chooses which character to enter as.
 - Every successful entry with an approved character starts a fresh first-person wake-up sequence. Remembering credentials must not skip waking up.
 - Wake-up visuals are designed for the game; do not copy the website's eye-opening animation literally.
 - After waking, the player explores one spacious room in first person using WASD + mouse look.
