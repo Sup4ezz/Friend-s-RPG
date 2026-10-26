@@ -1,30 +1,30 @@
-# LORGUS — Windows Unity prototype
+# LORGUS Windows prototype (Unity)
 
-This is an isolated prototype scaffold. It does not change the existing web game, Supabase, or production deployment.
+This directory is an isolated Unity project scaffold for the future Windows desktop game. It does not replace the existing web RPG and does not connect to Supabase yet.
 
-## Target
-- Unity 6 LTS, C#
-- Windows x86-64 standalone build
-- First-person, tile-based movement: W forward, S backward, A/D rotate 90 degrees
-- Room geometry generated at runtime; no external assets required for the first test
-- Wake-up beat: black-screen fade and a smooth camera rise from bed height to standing height
-- Local movement only; no network call per step
+## Current prototype scope
 
-## Open in Unity
-1. In Unity Hub, choose **Add > Add project from disk** and select this `unity-prototype` folder.
-2. Open the project with the Unity 6 LTS editor version matching `ProjectSettings/ProjectVersion.txt`.
-3. Open the scene `Assets/Scenes/LorgusPrototype.unity` and press Play.
-4. Use W/S to move one tile and A/D to turn. Escape releases the cursor.
+- A simple first-person bedroom assembled from primitive geometry at runtime.
+- Grid-based movement: **W** one tile forward, **S** one tile backward, **A/D** rotate by 90 degrees.
+- Basic collision against room geometry.
+- A black-screen wake-up sequence that fades in as the camera rises from bed height.
+- A lightweight 60 FPS target and deliberately simple lighting.
 
-## Build a Windows EXE
-In Unity: **File > Build Profiles > Windows > Build**. Choose an output folder outside this project. Unity produces an EXE and companion data folder; both must be kept together.
+## Open locally
 
-## Current scope
-The first milestone is a self-contained performance baseline: a small room, grid movement, simple lighting, and animated turns/steps. It deliberately uses primitives and one lightweight material setup so performance can be measured before adding authored art. This is not yet connected to real authentication or Supabase, and it is not a finished game.
+1. Install Unity Hub and the Unity editor version specified in `ProjectSettings/ProjectVersion.txt`.
+2. In Unity Hub choose **Add → Add project from disk**, then select this `unity-prototype` folder.
+3. Open the project and let Unity import packages.
+4. Open `Assets/Scenes/LorgusPrototype.unity` and press **Play**.
 
-## Performance intent
-- No physics simulation for basic grid movement.
-- No runtime global illumination or heavy post-processing.
-- Minimal dynamic lighting and geometry.
-- Local input and collision checks; no request per movement.
-- Measure on target hardware before increasing visual complexity.
+If input does not respond, check Unity's **Active Input Handling** setting. The current controller uses Unity's legacy `Input.GetKeyDown` API.
+
+## Windows build
+
+After the project opens and runs without errors, use **File → Build Profiles** (or **Build Settings**, depending on the installed Unity version), select **Windows**, add the prototype scene to the build, and build to a separate output folder.
+
+## Verification status
+
+This is a prototype scaffold, not a finished game or a verified executable. GitHub Actions performs structural checks only; it does **not** compile Unity C# scripts or produce a Windows build. The project must still be opened in the Unity editor and tested before an EXE can honestly be called ready.
+
+The prototype is isolated on the `unity/lorgus-windows-prototype` branch and must not be merged into `main` until reviewed and explicitly approved.
