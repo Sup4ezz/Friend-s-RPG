@@ -44,3 +44,28 @@ The repository has a GitHub Actions workflow at .github/workflows/build-windows.
 ## Checklist
 
 See LORGUS_CHECKLIST.md and ART_ASSET_INTAKE.md for confirmed requirements, architecture constraints, remaining work, and verification criteria.
+
+
+## How to check the current prototype
+
+### Option 1 — Windows build from GitHub Actions
+
+1. Open [LORGUS Windows build](https://github.com/Sup4ezz/Friend-s-RPG/actions/workflows/build-windows.yml).
+2. Open the newest run for the Unity prototype branch. Wait until it says **Success**; while it is queued or running, no downloadable build is ready.
+3. In the successful run, find **Artifacts → LORGUS-Windows** and download `LORGUS-Windows.zip`. Artifacts are retained for 14 days.
+4. Extract the entire ZIP into a folder and run `LORGUS.exe`. Do not copy only the EXE; Unity needs `UnityPlayer.dll` and the complete `LORGUS_Data` folder.
+5. Sign in with a test account that has an approved character application. A pending/rejected application must not enter the room. Test the “ЗАПОМНИТЬ ДАННЫЕ” checkbox, character selection (if multiple approved characters), WASD + mouse, E interactions, Escape/Close, and the changing window view.
+
+### Option 2 — Unity Editor
+
+1. Clone/download branch `unity/lorgus-windows-prototype`.
+2. In Unity Hub choose **Add → Add project from disk** and select `unity-prototype`.
+3. Open `Assets/Scenes/LorgusPrototype.unity` and press **Play**.
+4. Check the Console for errors, then repeat the same gameplay checks. The current source still needs this visual/Play Mode verification.
+
+### Automated checks
+
+- [Structural validation](https://github.com/Sup4ezz/Friend-s-RPG/actions/workflows/lorgus-unity-prototype-check.yml) checks required files and implementation guardrails. It does **not** compile Unity.
+- [Windows build](https://github.com/Sup4ezz/Friend-s-RPG/actions/workflows/build-windows.yml) compiles the Unity project and packages a Windows player.
+- Use [PR #15](https://github.com/Sup4ezz/Friend-s-RPG/pull/15) to review all changes. Do not merge it until the Windows build succeeds and the game is tested.
+
