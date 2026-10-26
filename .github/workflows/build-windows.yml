@@ -68,3 +68,5 @@ jobs:
           path: dist/LORGUS-Windows.zip
           if-no-files-found: error
           retention-days: 14
+
+# Trigger a fresh build after repository secrets are configured.
