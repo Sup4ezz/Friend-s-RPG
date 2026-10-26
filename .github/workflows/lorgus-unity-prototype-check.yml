@@ -37,7 +37,6 @@ jobs:
           test -f unity-prototype/Assets/Scripts/RoomInteractable.cs
           test -f unity-prototype/Assets/Scripts/RoomInteractionUI.cs
           test -f unity-prototype/Assets/Scripts/RoomAtmosphere.cs
-          test -f unity-prototype/Assets/Scripts/RoomCustomization.cs
           test -f unity-prototype/Assets/Scripts/LorgusRoomAssetCatalog.cs
           test -f unity-prototype/Assets/Editor/LorgusRoomAssetCatalogBuilder.cs
           python3 - <<'PY'
@@ -68,5 +67,14 @@ jobs:
           assert 'new GameObject("Candle glow")' in bootstrap and "LightShadows.Soft" in bootstrap, "Room/candle lighting setup is missing"
           atmosphere = (root / "Assets/Scripts/RoomAtmosphere.cs").read_text(encoding="utf-8")
           assert "candleLight.intensity" in atmosphere, "Candlelight animation is missing"
-          print("Scaffold, C# structure, FBX catalogue, first-person controls and animated lighting checks passed.")
+          assert "AudioClip.Create" not in atmosphere and "AudioSource" not in atmosphere, "Prototype must not generate ambient audio; user owns sound direction"
+          assert 'CreateBlock("Hearth stone base"' in bootstrap and 'CreateBlock("Cauldron bowl"' in bootstrap, "Required stove/cauldron fixtures are missing"
+          assert 'CreateBlock("Window frame"' in bootstrap and 'AddInteractable("Empty mirror"' in bootstrap, "Required window or empty mirror is missing"
+          assert 'AddInteractable("Chest inspection", "Сундук — инвентарь"' in bootstrap, "Chest must be the inventory entry point"
+          assert 'AddInteractable("Table inspection", "Письменный стол"' in bootstrap, "Writing desk is missing"
+          assert 'CreateBlock("Wardrobe body"' not in bootstrap and 'Trophy stand' not in bootstrap and 'World map' not in bootstrap, "Unapproved room props remain"
+          assert "KeyCode.F" not in controller, "Unapproved prop-carry control remains"
+          interaction = (root / "Assets/Scripts/RoomInteractionUI.cs").read_text(encoding="utf-8")
+          assert "BuildCloseButton" in interaction and "Интеграция данных ещё не подключена." in interaction, "Overlay close control or honest integration stub is missing"
+          print("Scaffold, C# structure, FBX catalogue, controls, required room fixtures, and scope boundaries passed.")
           PY
