@@ -6,6 +6,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 namespace Lorgus.Prototype
 {
@@ -198,6 +199,13 @@ namespace Lorgus.Prototype
 
         private void BuildLoginUI()
         {
+            // The same EventSystem serves the cosmic form and later room-overlay buttons.
+            if (FindObjectOfType<EventSystem>() == null)
+            {
+                var eventSystemObject = new GameObject("LORGUS EventSystem");
+                eventSystemObject.AddComponent<EventSystem>();
+                eventSystemObject.AddComponent<StandaloneInputModule>();
+            }
             uiRoot = new GameObject("Cosmic Login UI");
             var canvas = uiRoot.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
