@@ -33,11 +33,38 @@ The guest door currently exposes the intended visit interaction, but real visits
 3. Open the project and allow Unity to import packages.
 4. Open `Assets/Scenes/LorgusPrototype.unity` and press **Play**.
 
-The controller uses Unity's legacy `Input.GetKeyDown` API. If keyboard input is disabled by project defaults, set **Active Input Handling** to **Input Manager (Old)** or **Both** in Player settings.
+## Automated Windows build
 
-## Windows build
+The repository now has a real Unity compilation workflow at `.github/workflows/build-windows.yml`. It uses GameCI to build a Windows x86-64 Mono player and publishes a downloadable artifact named `LORGUS-Windows` containing `LORGUS-Windows.zip`. The structural validation workflow is separate and **does not compile Unity**.
 
-Only after the project opens and runs without errors, use **File → Build Profiles** (or **Build Settings**, depending on Unity version), select Windows, include the prototype scene, and build to a separate output folder.
+### One-time Unity Personal license setup
+
+A repository maintainer must complete these steps once before the cloud build can activate Unity Personal:
+
+1. Install/open **Unity Hub** on a computer where you can sign in to your Unity account.
+2. In Unity Hub, sign in and open **Licenses**.
+3. Choose **Add license → Get a free Personal license**, accept the Personal terms, and activate it.
+4. Export/download the license file in `.ulf` format. Unity Hub versions differ; if no export option is shown, follow Unity's official manual activation instructions for a Personal license and save the generated `.ulf` file.
+5. Open the GitHub repository page: **Settings → Secrets and variables → Actions → New repository secret**.
+6. Create these three secrets exactly:
+   - `UNITY_LICENSE` — open the `.ulf` file in a plain-text editor, copy its complete contents, and paste them as the secret value.
+   - `UNITY_EMAIL` — the email address of the Unity account that owns the activated Personal license.
+   - `UNITY_PASSWORD` — that Unity account's password.
+7. Save each secret. **Never put the license, email/password, or secret values into source files, commits, screenshots, or chat.** If Unity refuses reactivation in CI, follow current GameCI/Unity license guidance rather than sharing credentials elsewhere.
+
+### Start the build and download the game
+
+1. Open the repository's **Actions** tab.
+2. Select **LORGUS Windows build**.
+3. Click **Run workflow**, choose branch `unity/lorgus-windows-prototype`, and run it.
+4. Open the newest run. A successful run must show the **Compile LORGUS for Windows (Mono)** job as successful and provide an artifact named **LORGUS-Windows**.
+5. Download and extract `LORGUS-Windows.zip`. Keep `LORGUS.exe` and the entire `LORGUS_Data` folder together in the same directory; launch `LORGUS.exe`.
+
+The workflow targets Unity `6000.0.60f1` and `StandaloneWindows64` using Mono, not IL2CPP. The official Unity release page lists Windows Mono build support for this editor version. If GameCI cannot resolve the image/module, use the actual error log to select a supported nearby Unity 6000.0.x version rather than guessing.
+
+### Custom image and music limitations
+
+The prototype attempts PNG/JPG image loading and OGG/WAV/MP3 audio loading from the user's local save directory. This code has not yet been verified in a Windows player. WAV and OGG are the preferred first formats to test; MP3 support may depend on codec/platform and must not be promised until verified. Current fallback music and ambience are generated procedurally and are not a separate soundtrack pack.
 
 ## Verification status
 
