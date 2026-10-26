@@ -158,7 +158,7 @@ namespace Lorgus.Prototype
 
             var hint = MakeText("Controls hint", canvas.transform, 16, new Vector2(0, 24), new Vector2(900, 44));
             hint.alignment = TextAnchor.LowerCenter;
-            hint.text = "W / S — шаг     A / D — поворот     E — осмотреть     Esc — курсор";
+            hint.text = "W / S — шаг     A / D — поворот     E — взаимодействие     F — взять / поставить     Esc — курсор";
 
             var interaction = ui.AddComponent<RoomInteractionUI>();
             interaction.Build(canvas.transform);
