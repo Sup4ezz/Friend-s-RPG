@@ -16,6 +16,7 @@ namespace Lorgus.Prototype
         private bool inputEnabled = true;
         private Camera playerCamera;
         private readonly Collider[] overlapBuffer = new Collider[16];
+        private readonly RaycastHit[] raycastBuffer = new RaycastHit[24];
         private RoomInteractionUI interactionUI;
 
         private void Awake()
@@ -51,14 +52,23 @@ namespace Lorgus.Prototype
         {
             if (playerCamera == null) return;
             Ray ray = new Ray(playerCamera.transform.position, playerCamera.transform.forward);
-            if (Physics.Raycast(ray, out RaycastHit hit, interactionDistance, ~0, QueryTriggerInteraction.Ignore))
+            int hitCount = Physics.RaycastNonAlloc(ray, raycastBuffer, interactionDistance, ~0, QueryTriggerInteraction.Ignore);
+            // Several decorative meshes can overlap an inspection target; inspect the nearest valid target, not just the first collider.
+            for (int i = 0; i < hitCount; i++)
             {
-                RoomInteractable target = hit.collider.GetComponentInParent<RoomInteractable>();
-                if (target != null)
+                for (int j = i + 1; j < hitCount; j++)
                 {
-                    if (interactionUI != null) interactionUI.Show(target.DisplayName, target.Description);
-                    return;
+                    if (raycastBuffer[j].distance < raycastBuffer[i].distance)
+                    {
+                        RaycastHit swap = raycastBuffer[i];
+                        raycastBuffer[i] = raycastBuffer[j];
+                        raycastBuffer[j] = swap;
+                    }
                 }
+                RoomInteractable target = raycastBuffer[i].collider.GetComponentInParent<RoomInteractable>();
+                if (target == null) continue;
+                if (interactionUI != null) interactionUI.Show(target.DisplayName, target.Description);
+                return;
             }
             if (interactionUI != null) interactionUI.Show("Тишина", "Вы не замечаете ничего, с чем можно было бы взаимодействовать.");
         }
