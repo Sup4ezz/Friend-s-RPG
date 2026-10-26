@@ -1,3 +1,5 @@
+import { createClient } from "@supabase/supabase-js";
+
 (() => {
   "use strict";
   const $ = (selector) => document.querySelector(selector);
@@ -10,6 +12,12 @@
   const error = $("#login-error");
   const notice = $("#notice");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const config = window.LORGUS_CONFIG;
+  const supabase = config?.supabaseUrl && config?.supabasePublishableKey
+    ? createClient(config.supabaseUrl, config.supabasePublishableKey, {
+        auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false }
+      })
+    : null;
   let introDone = false;
   let transitioning = false;
 
@@ -24,15 +32,57 @@
   window.setTimeout(revealLogin, reducedMotion ? 100 : 4800);
   $("#skip-intro").addEventListener("click", revealLogin);
 
-  // Never treat a click or locally entered credentials as a successful login.
-  // The cinematic transition is only called by a future verified auth-success handler.
-  form.addEventListener("submit", (event) => {
+  // Uses the exact username -> synthetic email mapping from the production web client.
+  function encodeUsername(username) {
+    return btoa(encodeURIComponent(username))
+      .replaceAll("+", "-")
+      .replaceAll("/", "_")
+      .replaceAll("=", "");
+  }
+  function getAuthEmail(username) {
+    return `u_${encodeUsername(username)}@auth.lorgus.local`;
+  }
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     if (transitioning) return;
-    error.textContent = "Авторизация пока не подключена. Вход не выполнен, игровые данные не загружены.";
-    error.classList.add("is-visible");
-    $("#password").setAttribute("aria-invalid", "true");
-    $("#password").focus();
+    const usernameInput = $("#username");
+    const passwordInput = $("#password");
+    const submitButton = form.querySelector('button[type="submit"]');
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
+    error.classList.remove("is-visible");
+    passwordInput.removeAttribute("aria-invalid");
+    if (!supabase) {
+      error.textContent = "Не удалось загрузить конфигурацию клиента. Обнови сборку или сообщи администратору.";
+      error.classList.add("is-visible");
+      return;
+    }
+    if (!username || !password) return;
+    submitButton.disabled = true;
+    submitButton.setAttribute("aria-busy", "true");
+    submitButton.querySelector("span").textContent = "ПРОВЕРЯЕМ ДОСТУП…";
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: getAuthEmail(username),
+        password
+      });
+      if (authError || !data?.session) {
+        error.textContent = "Не удалось войти. Проверь логин и пароль, затем попробуй ещё раз.";
+        error.classList.add("is-visible");
+        passwordInput.setAttribute("aria-invalid", "true");
+        passwordInput.focus();
+        return;
+      }
+      error.classList.remove("is-visible");
+      playMessengerTransition();
+    } catch {
+      error.textContent = "Не удалось связаться с ЛОРГУСОМ. Проверь подключение к интернету и повтори попытку.";
+      error.classList.add("is-visible");
+    } finally {
+      submitButton.disabled = false;
+      submitButton.removeAttribute("aria-busy");
+      submitButton.querySelector("span").textContent = "ВОЙТИ В ЛОРГУС";
+    }
   });
 
   function playMessengerTransition() {
@@ -56,8 +106,7 @@
       transitioning = false;
     })();
   }
-  // Kept private until real Supabase authentication is implemented.
-  void playMessengerTransition;
+
 
   const messages = {
     characters: ["МОИ ПЕРСОНАЖИ", "Летопись ещё не открыта", "Подключение персонажей будет выполнено после безопасной интеграции с существующей авторизацией LORGUS. Сейчас запросы к игровым данным не выполняются."],
