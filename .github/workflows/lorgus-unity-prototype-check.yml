@@ -62,5 +62,11 @@ jobs:
           for model in ("Bed_Twin1.fbx", "Nightstand_Shelf.fbx", "Candle_1.fbx", "Cabinet.fbx", "Chest_Wood.fbx", "Table_Large.fbx", "Shelf_Arch.fbx", "Book_5.fbx"):
               assert model in builder, f"FBX catalogue is missing mapping for {model}"
               assert (root / "Assets/Art/QuaterniusFantasyProps/Models/FBX" / model).is_file(), f"FBX asset is missing: {model}"
-          print("Scaffold structure, JSON, scene reference, C# structure and FBX catalogue checks passed.")
+          controller = (root / "Assets/Scripts/GridFirstPersonController.cs").read_text(encoding="utf-8")
+          assert "CharacterController" in controller and 'Input.GetAxis("Mouse X")' in controller, "Free first-person movement/mouse-look is missing"
+          bootstrap = (root / "Assets/Scripts/LorgusPrototypeBootstrap.cs").read_text(encoding="utf-8")
+          assert 'new GameObject("Candle glow")' in bootstrap and "LightShadows.Soft" in bootstrap, "Room/candle lighting setup is missing"
+          atmosphere = (root / "Assets/Scripts/RoomAtmosphere.cs").read_text(encoding="utf-8")
+          assert "candleLight.intensity" in atmosphere, "Candlelight animation is missing"
+          print("Scaffold, C# structure, FBX catalogue, first-person controls and animated lighting checks passed.")
           PY
