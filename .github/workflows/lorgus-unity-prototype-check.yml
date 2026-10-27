@@ -1,0 +1,107 @@
+name: LORGUS Unity prototype validation
+
+on:
+  pull_request:
+    paths:
+      - "unity-prototype/**"
+      - ".github/workflows/lorgus-unity-prototype-check.yml"
+  push:
+    branches:
+      - "unity/lorgus-windows-prototype"
+    paths:
+      - "unity-prototype/**"
+      - ".github/workflows/lorgus-unity-prototype-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-scaffold:
+    name: Validate Unity project scaffold
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Validate required files and JSON
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f unity-prototype/ProjectSettings/ProjectVersion.txt
+          test -f unity-prototype/ProjectSettings/EditorBuildSettings.asset
+          test -f unity-prototype/Packages/manifest.json
+          test -f unity-prototype/Assets/Scenes/LorgusPrototype.unity
+          test -f unity-prototype/Assets/Scenes/LorgusPrototype.unity.meta
+          test -f unity-prototype/Assets/Scripts/LorgusPrototypeBootstrap.cs
+          test -f unity-prototype/Assets/Scripts/CosmicLoginController.cs
+          test -f unity-prototype/Assets/Scripts/WindowViewController.cs
+          test -f unity-prototype/Assets/Scripts/GridFirstPersonController.cs
+          test -f unity-prototype/Assets/Scripts/WakeUpSequence.cs
+          test -f unity-prototype/Assets/Scripts/RoomInteractable.cs
+          test -f unity-prototype/Assets/Scripts/RoomInteractionUI.cs
+          test -f unity-prototype/Assets/Scripts/RoomAtmosphere.cs
+          test -f unity-prototype/Assets/Scripts/LorgusRoomAssetCatalog.cs
+          test -f unity-prototype/Assets/Editor/LorgusRoomAssetCatalogBuilder.cs
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path("unity-prototype")
+          manifest = json.loads((root / "Packages/manifest.json").read_text(encoding="utf-8"))
+          assert isinstance(manifest.get("dependencies"), dict), "manifest.json must contain dependencies"
+          version = (root / "ProjectSettings/ProjectVersion.txt").read_text(encoding="utf-8")
+          assert "m_EditorVersion:" in version, "Unity editor version is missing"
+          scene_meta = (root / "Assets/Scenes/LorgusPrototype.unity.meta").read_text(encoding="utf-8")
+          import re
+          match = re.search(r"^guid: ([0-9a-f]{32})$", scene_meta, re.M)
+          assert match, "Scene .meta must contain a 32-character GUID"
+          build_settings = (root / "ProjectSettings/EditorBuildSettings.asset").read_text(encoding="utf-8")
+          assert match.group(1) in build_settings, "Build settings do not reference the prototype scene GUID"
+          for script in ("LorgusPrototypeBootstrap.cs", "CosmicLoginController.cs", "WindowViewController.cs", "GridFirstPersonController.cs", "WakeUpSequence.cs", "RoomInteractable.cs", "RoomInteractionUI.cs", "LorgusRoomAssetCatalog.cs"):
+              text = (root / "Assets/Scripts" / script).read_text(encoding="utf-8")
+              assert "class " in text, f"{script}: no class declaration found"
+              assert text.count("{") == text.count("}"), f"{script}: unbalanced braces"
+          builder = (root / "Assets/Editor/LorgusRoomAssetCatalogBuilder.cs").read_text(encoding="utf-8")
+          for model in ("Bed_Twin1.fbx", "Nightstand_Shelf.fbx", "Candle_1.fbx", "Cabinet.fbx", "Chest_Wood.fbx", "Table_Large.fbx", "Shelf_Arch.fbx", "Book_5.fbx"):
+              assert model in builder, f"FBX catalogue is missing mapping for {model}"
+              assert (root / "Assets/Art/QuaterniusFantasyProps/Models/FBX" / model).is_file(), f"FBX asset is missing: {model}"
+          controller = (root / "Assets/Scripts/GridFirstPersonController.cs").read_text(encoding="utf-8")
+          assert "CharacterController" in controller and 'Input.GetAxis("Mouse X")' in controller, "Free first-person movement/mouse-look is missing"
+          bootstrap = (root / "Assets/Scripts/LorgusPrototypeBootstrap.cs").read_text(encoding="utf-8")
+          assert 'new GameObject("Candle glow")' in bootstrap and "LightShadows.Soft" in bootstrap, "Room/candle lighting setup is missing"
+          atmosphere = (root / "Assets/Scripts/RoomAtmosphere.cs").read_text(encoding="utf-8")
+          assert "candleLight.intensity" in atmosphere, "Candlelight animation is missing"
+          assert "AudioClip.Create" not in atmosphere and "AudioSource" not in atmosphere, "Prototype must not generate ambient audio; user owns sound direction"
+          assert 'CreateBlock("Hearth stone base"' in bootstrap and 'CreateBlock("Cauldron bowl"' in bootstrap, "Required stove/cauldron fixtures are missing"
+          assert 'CreateBlock("Window frame"' in bootstrap and 'AddInteractable("Empty mirror"' in bootstrap, "Required window or empty mirror is missing"
+          assert 'AddInteractable("Chest inspection", "Сундук — инвентарь"' in bootstrap, "Chest must be the inventory entry point"
+          assert 'AddInteractable("Table inspection", "Письменный стол"' in bootstrap, "Writing desk is missing"
+          assert 'CreateBlock("Wardrobe body"' not in bootstrap and 'Trophy stand' not in bootstrap and 'World map' not in bootstrap, "Unapproved room props remain"
+          assert "KeyCode.F" not in controller, "Unapproved prop-carry control remains"
+          interaction = (root / "Assets/Scripts/RoomInteractionUI.cs").read_text(encoding="utf-8")
+          assert "BuildCloseButton" in interaction and "Интеграция данных ещё не подключена." in interaction, "Overlay close control or honest integration stub is missing"
+          assert "OpenRpScreen()" in interaction and "сообщения не загружаются и не отправляются" in interaction, "RP must be a separate full-screen view, not an in-room overlay"
+          login = (root / "Assets/Scripts/CosmicLoginController.cs").read_text(encoding="utf-8")
+          for required in ("auth/v1/token?grant_type=password", "auth/v1/signup", "character_applications", "status == \"approved\"", "CryptProtectData", "ЗАПОМНИТЬ ДАННЫЕ"):
+              assert required in login, f"Cosmic login flow is missing: {required}"
+          assert "PlayerPrefs.SetString(RefreshTokenKey, protectedToken)" in login, "Remember flow must persist only the protected refresh token"
+          assert "PlayerPrefs.SetString(RefreshTokenKey, password)" not in login, "Plaintext password persistence is forbidden"
+          assert 'character_applications?select=status,character_id&player_id=eq.' in login, "Approval query must use known application columns only"
+          assert '/rest/v1/characters?select=id,name,status&id=in.(' in login, "Character names must be loaded from the characters table, not application columns"
+          assert "characterAvailable" in login and '"ARCHIVED"' in login, "Archived characters must not be offered for entry"
+          assert "login.Initialize(this)" in bootstrap, "The game must start in the cosmic login scene"
+          assert "StandaloneInputModule" in login and "EventSystem" in login, "Login and overlay UI need an EventSystem"
+          wake = (root / "Assets/Scripts/WakeUpSequence.cs").read_text(encoding="utf-8")
+          assert "Vector3.Lerp(wakeStartPosition, wakeEndPosition, t)" in wake and "SetCameraRestHeight" in wake, "Wake-up must animate the player from the bed to standing"
+          assert "new Vector3(-1.65f, 0.72f, 1.1f)" in bootstrap, "Player spawn must be on the bed before waking up"
+          assert "ShowCharacterSelection" in login and "EnterRoomAfterApproval(character.character_id, character.name, accessToken)" in login, "Multiple approved characters must be selectable"
+          assert "ActiveCharacterId" in bootstrap and "ActiveCharacterName" in bootstrap, "Selected character must be retained for location-dependent context"
+          window_view = (root / "Assets/Scripts/WindowViewController.cs").read_text(encoding="utf-8")
+          assert '"/rest/v1/rp_presence?select=presence_type,region,location,from_region,from_location,to_region,to_location&character_id=eq."' in window_view, "Window must query the selected character's RP presence"
+          for region in ("Каэлор", "Морвейн", "Атэрон", "Ксандр", "Лирэн", "Святые Земли", "Спорные Земли", "Геена"):
+              assert region in window_view, f"Window view is missing a region theme: {region}"
+          assert "WaitForSecondsRealtime(30f)" in window_view, "Window view should refresh the character's RP location while playing"
+          assert "RefreshActiveSession" in login and "rememberSession" in login, "Long-running session must rotate refresh tokens without storing passwords"
+          assert "45f * 60f" in window_view and "CurrentAccessToken" in login, "Window polling must refresh its access token before expiry"
+          assert 'CreateBlock("Back wall below window"' in bootstrap, "Back wall must have a real window opening"
+          assert "BuildRoom();" not in bootstrap[bootstrap.find("private void Awake()"):bootstrap.find("public void EnterRoomAfterApproval(")], "Room must not be built before login/approval"
+          print("Scaffold, C# structure, FBX catalogue, controls, required room fixtures, and scope boundaries passed.")
+          PY
